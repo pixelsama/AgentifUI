@@ -6,8 +6,8 @@ export interface DifyAppConfig {
 export const getDifyAppConfig = async (
   appId: string,
 ): Promise<DifyAppConfig | null> => {
-  const apiKeyEnvVar = `DIFY_API_${appId.toUpperCase()}_KEY`;
-  const apiUrlEnvVar = `DIFY_API_${appId.toUpperCase()}_URL`;
+  const apiKeyEnvVar = `DIFY_APP_${appId.toUpperCase()}_KEY`;
+  const apiUrlEnvVar = `DIFY_APP_${appId.toUpperCase()}_URL`;
 
   const apiKey = process.env[apiKeyEnvVar];
   const apiUrl = process.env[apiUrlEnvVar];
