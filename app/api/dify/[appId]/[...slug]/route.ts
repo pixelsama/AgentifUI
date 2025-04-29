@@ -1,4 +1,6 @@
 // app/api/dify/[appId]/[...slug]/route.ts
+export const dynamic = 'force-dynamic';
+
 import { type NextRequest, NextResponse } from 'next/server';
 import { getDifyAppConfig } from '@/(lib)/config/difyConfig';
 
@@ -62,19 +64,42 @@ async function proxyToDify(
     // 可以根据需要添加其他固定请求头
 
     // 5. 执行 fetch 请求转发
+    // 准备请求体和头部，处理特殊情况
+    let finalBody = req.method !== 'GET' && req.method !== 'HEAD' ? req.body : null;
+    const finalHeaders = new Headers(headers);
+    const originalContentType = req.headers.get('Content-Type');
+
+    // 特殊处理 multipart/form-data 请求（文件上传和语音转文本）
+    if ((slugPath === 'files/upload' || slugPath === 'audio-to-text') && 
+        originalContentType?.includes('multipart/form-data')) {
+      console.log(`[App: ${appId}] [${req.method}] Handling multipart/form-data for ${slugPath}`);
+      try {
+        // 解析表单数据
+        const formData = await req.formData();
+        finalBody = formData as unknown as ReadableStream<Uint8Array>;
+        // 重要：移除 Content-Type，让 fetch 自动设置包含正确 boundary 的 multipart/form-data
+        finalHeaders.delete('Content-Type');
+      } catch (formError) {
+        console.error(`[App: ${appId}] [${req.method}] Error parsing FormData:`, formError);
+        return NextResponse.json(
+          { error: 'Failed to parse multipart form data', details: (formError as Error).message },
+          { status: 400 }
+        );
+      }
+    }
+
     // 准备 fetch 选项
     const fetchOptions: RequestInit & { duplex: 'half' } = {
         method: req.method,
-        headers: headers,
-        // GET/HEAD 请求 body 为 null
-        body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : null,
+        headers: finalHeaders,
+        body: finalBody,
         redirect: 'manual',
         cache: 'no-store',
         // 【重要】添加 duplex 选项并使用类型断言解决 TS(2769)
         duplex: 'half'
     };
 
-    const response = await fetch(targetUrl, fetchOptions as any); // 使用 as any 简化，或者用上面的交叉类型
+    const response = await fetch(targetUrl, fetchOptions as any);
     console.log(`[App: ${appId}] [${req.method}] Dify response status: ${response.status}`);
 
     // 6. 处理并转发 Dify 的响应
@@ -84,36 +109,80 @@ async function proxyToDify(
     responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     responseHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-    // 处理流式响应
-    if (response.ok && response.body && response.headers.get('content-type')?.includes('text/event-stream')) {
-      console.log(`[App: ${appId}] [${req.method}] Streaming response detected.`);
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: responseHeaders,
-      });
-    } else {
-      // 处理非流式响应
-      const responseData = await response.text();
-      try {
-        const jsonData = JSON.parse(responseData);
-        return NextResponse.json(jsonData, {
+    if (response.ok && response.body) {
+      const responseContentType = response.headers.get('content-type');
+      
+      // 处理流式响应（SSE）
+      if (responseContentType?.includes('text/event-stream')) {
+        console.log(`[App: ${appId}] [${req.method}] Streaming response detected.`);
+        return new Response(response.body, {
           status: response.status,
           statusText: response.statusText,
           headers: responseHeaders,
         });
-      } catch (parseError) {
-         // 非 JSON，返回文本
-         const textResponseHeaders = new Headers(response.headers);
-         textResponseHeaders.set('Access-Control-Allow-Origin', '*');
-         if (!textResponseHeaders.has('Content-Type')) {
-            textResponseHeaders.set('Content-Type', 'text/plain');
-         }
-         return new Response(responseData, {
-             status: response.status,
-             statusText: response.statusText,
-             headers: textResponseHeaders,
-         });
+      } 
+      // 处理音频响应（文本转语音）
+      else if (responseContentType?.startsWith('audio/')) {
+        console.log(`[App: ${appId}] [${req.method}] Audio response detected.`);
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: responseHeaders,
+        });
+      }
+      // 处理常规响应
+      else {
+        // 处理非流式响应
+        const responseData = await response.text();
+        try {
+          const jsonData = JSON.parse(responseData);
+          return NextResponse.json(jsonData, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: responseHeaders,
+          });
+        } catch (parseError) {
+           // 非 JSON，返回文本
+           const textResponseHeaders = new Headers(response.headers);
+           textResponseHeaders.set('Access-Control-Allow-Origin', '*');
+           if (!textResponseHeaders.has('Content-Type')) {
+              textResponseHeaders.set('Content-Type', 'text/plain');
+           }
+           return new Response(responseData, {
+               status: response.status,
+               statusText: response.statusText,
+               headers: textResponseHeaders,
+           });
+        }
+      }
+    } else {
+      // 处理无响应体或失败的情况
+      if (!response.body) {
+        console.log(`[App: ${appId}] [${req.method}] Empty response body with status: ${response.status}`);
+      }
+      // 尝试读取错误信息
+      try {
+        const errorText = await response.text();
+        try {
+          const errorJson = JSON.parse(errorText);
+          return NextResponse.json(errorJson, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: responseHeaders,
+          });
+        } catch {
+          return new Response(errorText, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: responseHeaders,
+          });
+        }
+      } catch (readError) {
+        // 如果无法读取错误响应，返回状态码
+        return NextResponse.json(
+          { error: `Failed response from Dify with status ${response.status}` },
+          { status: response.status }
+        );
       }
     }
   } catch (error: any) {
