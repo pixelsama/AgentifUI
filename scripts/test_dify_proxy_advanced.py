@@ -154,6 +154,57 @@ def test_text_to_audio():
     except Exception as e:
         print(f"ERROR during text-to-audio test: {e}")
 
+def test_get_conversations():
+    """测试 GET /conversations (获取会话列表)"""
+    endpoint = "/conversations"
+    target_url = f"{PROXY_BASE_URL}/{APP_ID}{endpoint}"
+    print(f"\n--- Testing Get Conversations ---")
+    print(f"Target URL: {target_url}")
+
+    # 准备查询参数
+    params = {
+        'user': USER_ID,
+        'limit': 5 # 为了测试，请求少量数据
+        # 'last_id': 'some_last_id' # 如果需要测试分页
+    }
+
+    try:
+        # 发送 GET 请求，使用 params 参数传递查询字符串
+        with requests.get(target_url, params=params, timeout=30) as response:
+            print(f"Proxy Response Status Code: {response.status_code}")
+            print("Proxy Response Headers:")
+            for key, value in response.headers.items():
+                print(f"  {key}: {value}")
+
+            response.raise_for_status() # 检查 HTTP 错误
+
+            # 期望返回 JSON
+            response_json = response.json()
+            print("Response JSON:")
+            print(json.dumps(response_json, indent=2))
+
+            # 验证基本结构
+            if 'limit' in response_json and 'has_more' in response_json and 'data' in response_json and isinstance(response_json['data'], list):
+                print(f"SUCCESS: Get conversations seems successful. Received {len(response_json['data'])} conversations.")
+            else:
+                print("WARNING: Response JSON structure might be unexpected.")
+
+    except requests.exceptions.RequestException as e:
+        # 检查是否是 IncompleteRead，如果是，打印已接收内容（如果可能）
+        if isinstance(e.args[0], tuple) and len(e.args[0]) > 1 and 'IncompleteRead' in str(e.args[0][1]):
+            print(f"ERROR during request (IncompleteRead): {e}")
+            # 尝试打印部分接收到的内容
+            if hasattr(e, 'partial') and e.partial:
+                print(f"Partial content received: {e.partial}")
+            elif response and hasattr(response, 'content') and response.content:
+                print(f"Partial content received before error: {response.content}")
+        else:
+            print(f"ERROR during get conversations request: {e}")
+    except json.JSONDecodeError:
+        print(f"ERROR: Response was not valid JSON. Status: {response.status_code}. Response text: {response.text[:500]}...")
+    except Exception as e:
+        print(f"ERROR during get conversations test: {e}")
+
 
 # --- 主执行逻辑 ---
 if __name__ == "__main__":
@@ -167,5 +218,6 @@ if __name__ == "__main__":
     test_file_upload()
     # test_audio_to_text()
     # test_text_to_audio()
+    test_get_conversations()
 
     print("\n--- All Tests Finished ---")
