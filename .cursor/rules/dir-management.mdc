@@ -1,5 +1,118 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
+# Directory Structure Management
+
+This document outlines the directory structure of the LLM-EduHub project and provides guidelines for maintaining and updating the directory organization.
+
+## Project Overview
+
+LLM-EduHub is a Next.js application using the App Router pattern. The directory structure follows Next.js 13+ conventions with some custom organization patterns for better code separation.
+
+## Root Directory Structure
+
+```
+llm-eduhub/
+  ├── .cursor/            # Cursor IDE configuration files
+  │   └── rules/          # Project-specific rules and documentation
+  ├── .next/              # Next.js build output (auto-generated)
+  ├── app/                # Application source code (App Router pattern)
+  │   ├── (components)/   # Shared UI components (grouped)
+  │   ├── (lib)/          # Utilities, hooks, and helpers (grouped)
+  │   └── api/            # API routes
+  ├── public/             # Static assets
+  ├── scripts/            # Utility scripts for development, deployment, etc.
+  ├── .env.local          # Environment variables (not in version control)
+  ├── .gitignore          # Git ignore configuration
+  ├── eslint.config.mjs   # ESLint configuration
+  ├── next-env.d.ts       # Next.js TypeScript declarations
+  ├── next.config.ts      # Next.js configuration
+  ├── package.json        # Project dependencies and scripts
+  ├── postcss.config.mjs  # PostCSS configuration
+  ├── README.md           # Project documentation
+  └── tsconfig.json       # TypeScript configuration
+```
+
+## App Directory Structure
+
+The `app/` directory follows Next.js App Router conventions with added organizational grouping:
+
+```
+app/
+  ├── (components)/       # Reusable UI components (grouped)
+  │   ├── chat/           # Chat-related components
+  │   └── ui/             # Generic UI components
+  ├── (lib)/              # Utilities and shared code (grouped)
+  │   ├── config/         # Configuration settings and constants
+  │   ├── hooks/          # React hooks
+  │   ├── store/          # Global state management
+  │   └── utils/          # Utility functions
+  └── api/                # API routes
+      ├── dify/           # Dify API integration
+      │   └── [appId]/    # Dynamic routes for specific Dify apps
+      │       └── [...slug]/  # Catch-all route handler
+      └── llm/            # Other LLM-related API endpoints
+```
+
+## Naming Conventions
+
+1. **Directories**:
+   - Use kebab-case for multi-word directory names (e.g., `user-settings/`)
+   - Wrap grouping directories in parentheses (e.g., `(components)/`)
+   - Use square brackets for dynamic route segments (e.g., `[appId]/`)
+   - Use spread syntax for catch-all routes (e.g., `[...slug]/`)
+
+2. **Files**:
+   - Use camelCase for utility files (e.g., `difyConfig.ts`)
+   - Use PascalCase for React components (e.g., `Button.tsx`)
+   - Use kebab-case for static assets (e.g., `logo-dark.png`)
+   - Always include appropriate file extensions
+
+## Directory Management Guidelines
+
+When modifying the project structure, please follow these guidelines:
+
+1. **Adding New Directories**:
+   - Place components in the appropriate subdirectory under `(components)/`
+   - Place utilities, hooks, or configuration in the appropriate subdirectory under `(lib)/`
+   - For new features, consider creating a dedicated route directory
+
+2. **Adding New Files**:
+   - Follow the established naming conventions
+   - Place files in the appropriate directory based on their purpose
+   - Avoid deep nesting (more than 3-4 levels) when possible
+
+3. **Updating This Document**:
+   - When adding, removing, or reorganizing directories, update this document
+   - Include a brief explanation of the purpose of new directories
+   - Keep the directory tree representations up-to-date
+
+4. **Special Considerations**:
+   - Grouped directories (with parentheses) are not part of the URL path in Next.js
+   - API routes should be organized by service or functionality domain
+   - Keep layout components close to where they are used
+
+## Path Aliases
+
+The project uses TypeScript path aliases for cleaner imports:
+
+- `@/` - Points to the `app/` directory
+- `@/lib/*` - Points to the `app/(lib)/*` directory
+- `@/components/*` - Points to the `app/(components)/*` directory
+
+Always use path aliases instead of relative imports when crossing directory boundaries.
+
+## Update Process
+
+When making structural changes to the project:
+
+1. Plan your directory changes and discuss with the team if significant
+2. Implement the changes following the conventions above
+3. Update this document to reflect the new structure
+4. Commit the updated document along with your code changes
+
+By maintaining this document, we ensure that all team members understand the project structure and can contribute effectively.
+
+
