@@ -136,22 +136,38 @@ async function proxyToDify(
         const responseData = await response.text();
         try {
           const jsonData = JSON.parse(responseData);
-          return NextResponse.json(jsonData, {
+          // --- FINAL FIX: Use native Response with minimal headers for JSON --- 
+          console.log(`[App: ${appId}] [${req.method}] Returning native Response with minimal headers for success JSON.`);
+          const minimalHeaders = new Headers();
+          minimalHeaders.set('Content-Type', 'application/json');
+          minimalHeaders.set('Access-Control-Allow-Origin', '*');
+          return new Response(JSON.stringify(jsonData), {
             status: response.status,
             statusText: response.statusText,
-            headers: responseHeaders,
+            headers: minimalHeaders,
           });
+          // --- END FINAL FIX ---
+          // return NextResponse.json(jsonData, {
+          //   status: response.status,
+          //   statusText: response.statusText,
+          //   headers: responseHeaders, // Original headers caused issues
+          // });
         } catch (parseError) {
-           // 非 JSON，返回文本
-           const textResponseHeaders = new Headers(response.headers);
-           textResponseHeaders.set('Access-Control-Allow-Origin', '*');
-           if (!textResponseHeaders.has('Content-Type')) {
-              textResponseHeaders.set('Content-Type', 'text/plain');
+           // 非 JSON，返回文本 (也使用简化 Headers)
+           console.log(`[App: ${appId}] [${req.method}] JSON parse failed, returning plain text with minimal headers.`);
+           const minimalTextHeaders = new Headers();
+           minimalTextHeaders.set('Access-Control-Allow-Origin', '*');
+           // Try to determine original text content type if available, else default to text/plain
+           const originalDifyContentType = response.headers.get('content-type');
+           if (originalDifyContentType?.startsWith('text/')) {
+                minimalTextHeaders.set('Content-Type', originalDifyContentType);
+           } else {
+                minimalTextHeaders.set('Content-Type', 'text/plain');
            }
            return new Response(responseData, {
                status: response.status,
                statusText: response.statusText,
-               headers: textResponseHeaders,
+               headers: minimalTextHeaders,
            });
         }
       }
@@ -165,24 +181,53 @@ async function proxyToDify(
         const errorText = await response.text();
         try {
           const errorJson = JSON.parse(errorText);
-          return NextResponse.json(errorJson, {
+          // --- FINAL FIX: Use native Response with minimal headers for JSON errors --- 
+          console.log(`[App: ${appId}] [${req.method}] Returning native Response with minimal headers for error JSON.`);
+          const minimalErrorHeaders = new Headers();
+          minimalErrorHeaders.set('Content-Type', 'application/json');
+          minimalErrorHeaders.set('Access-Control-Allow-Origin', '*');
+          return new Response(JSON.stringify(errorJson), {
             status: response.status,
             statusText: response.statusText,
-            headers: responseHeaders,
+            headers: minimalErrorHeaders,
           });
+          // --- END FINAL FIX ---
+          // return NextResponse.json(errorJson, {
+          //   status: response.status,
+          //   statusText: response.statusText,
+          //   headers: responseHeaders, // Original headers caused issues
+          // });
         } catch {
+          // 错误响应不是 JSON，返回文本 (也使用简化 Headers)
+          console.log(`[App: ${appId}] [${req.method}] Error response is not JSON, returning plain text with minimal headers.`);
+          const minimalTextErrorHeaders = new Headers();
+          minimalTextErrorHeaders.set('Access-Control-Allow-Origin', '*');
+          const originalDifyErrorContentType = response.headers.get('content-type');
+          if (originalDifyErrorContentType?.startsWith('text/')) {
+               minimalTextErrorHeaders.set('Content-Type', originalDifyErrorContentType);
+          } else {
+               minimalTextErrorHeaders.set('Content-Type', 'text/plain');
+          }
           return new Response(errorText, {
             status: response.status,
             statusText: response.statusText,
-            headers: responseHeaders,
+            headers: minimalTextErrorHeaders,
           });
         }
       } catch (readError) {
-        // 如果无法读取错误响应，返回状态码
-        return NextResponse.json(
-          { error: `Failed response from Dify with status ${response.status}` },
-          { status: response.status }
-        );
+        // 如果连读取错误响应都失败了
+        console.error(`[App: ${appId}] [${req.method}] Failed to read Dify error response body:`, readError);
+        const finalErrorHeaders = new Headers();
+        finalErrorHeaders.set('Content-Type', 'application/json');
+        finalErrorHeaders.set('Access-Control-Allow-Origin', '*');
+        return new Response(JSON.stringify({ error: `Failed to read Dify error response body. Status: ${response.status}`}), {
+             status: 502,
+             headers: finalErrorHeaders
+        });
+        // return NextResponse.json(
+        //   { error: `Failed response from Dify with status ${response.status}` },
+        //   { status: response.status }
+        // );
       }
     }
   } catch (error: any) {
