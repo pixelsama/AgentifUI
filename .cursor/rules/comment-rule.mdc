@@ -1,0 +1,54 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Commenting Guidelines
+
+This document outlines the rules for writing comments in this project's codebase. Consistent commenting improves code readability and maintainability.
+
+## Language
+
+-   **All comments MUST be written in Simplified Chinese (中文).** This ensures consistency and clarity for all team members.
+
+## Format and Structure
+
+-   **Clarity is Key:** Write comments that explain the *why* behind the code, not just *what* the code does (unless the 'what' is particularly complex or non-obvious).
+-   **Keep it Concise:** Be brief and to the point. Avoid overly long or rambling comments.
+
+## Adding or Modifying Comments
+
+-   **Use Separators for Significant Changes:** When adding a new block of comments or making substantial modifications to existing ones, use triple hyphens (`---`) before and after the comment block to clearly delineate the change. This helps during code reviews to identify where comments have been added or altered significantly.
+
+    Example of adding a new comment block:
+
+    ```typescript
+    // --- BEGIN COMMENT ---
+    // 这里是一段重要的中文注释，解释了下面复杂逻辑的原因。
+    // 它涵盖了边界情况 X 和 Y。
+    // --- END COMMENT ---
+    function complexCalculation(a, b) {
+      // ... implementation ...
+    }
+    ```
+
+    Example of modifying an existing comment:
+
+    ```typescript
+    // --- BEGIN MODIFIED COMMENT ---
+    // 原注释已被更新，以反映新的需求 Z。
+    // --- END MODIFIED COMMENT ---
+    // ~~ 原来的旧注释 ~~
+    ```
+
+-   **Minor Fixes:** For simple typo corrections or very minor clarifications within an existing comment, the `---` separators are not strictly required, but use your judgment.
+
+## Placement
+
+-   Place comments on the line *before* the code they refer to, or sometimes at the end of a line for very short explanations.
+-   Comment functions, complex logic blocks, and non-obvious parts of the code.
+
+## Goal
+
+The primary goal of these commenting guidelines is to make the codebase easier to understand and maintain for everyone involved. Use comments thoughtfully to enhance code clarity.
+
