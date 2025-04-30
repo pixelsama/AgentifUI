@@ -102,6 +102,33 @@ async function proxyToDify(
     const response = await fetch(targetUrl, fetchOptions as any);
     console.log(`[App: ${appId}] [${req.method}] Dify response status: ${response.status}`);
 
+    // --- BEGIN MODIFICATION / 开始修改 ---
+    // 直接处理成功的 204 No Content 响应
+    if (response.status === 204) {
+      console.log(`[App: ${appId}] [${req.method}] 收到 204 No Content，直接转发响应.`);
+      // 转发 204 状态和必要的响应头, 确保 body 为 null
+      // 克隆需要转发的响应头
+      const headersToForward = new Headers();
+      response.headers.forEach((value, key) => {
+         // 避免转发对 204 无意义或无效的头，如 content-length, content-type
+         if (!['content-length', 'content-type', 'transfer-encoding'].includes(key.toLowerCase())) {
+            headersToForward.set(key, value);
+         }
+      });
+      // 添加 CORS 响应头 (根据需要调整源)
+      headersToForward.set('Access-Control-Allow-Origin', '*'); 
+      headersToForward.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      headersToForward.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+      // 返回 204 响应，body 必须为 null
+      return new Response(null, {
+        status: 204,
+        statusText: 'No Content',
+        headers: headersToForward
+      });
+    }
+    // --- END MODIFICATION / 结束修改 ---
+
     // 6. 处理并转发 Dify 的响应
     const responseHeaders = new Headers(response.headers);
     // 设置 CORS 头 (生产环境应更严格)
