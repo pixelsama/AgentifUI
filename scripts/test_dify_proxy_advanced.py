@@ -3,12 +3,18 @@
 import requests
 import json
 import os
+from dataclasses import dataclass
+from typing import List, Dict, Any, Optional, Set, Union # 添加 typing
 
 # --- 配置 ---
 # !! 修改为你本地代理的地址和要测试的 appId !!
-PROXY_BASE_URL = "http://localhost:3000/api/dify"
-APP_ID = "default" # 使用你配置了环境变量的那个 appId
-USER_ID = "python-advanced-test" # 自定义用户标识
+@dataclass
+class Config:
+    proxy_base_url: str = "http://localhost:3000/api/dify"
+    app_id: str = "default"
+    user_id: str = "python-test-script"
+
+config = Config()
 
 # --- 测试文件路径 (相对于脚本位置) ---
 # !! 确保这些文件存在于脚本同级目录或修改为正确路径 !!
@@ -20,7 +26,7 @@ AUDIO_FILE_PATH = os.path.join(os.path.dirname(__file__), '../files/dummy_audio.
 def test_file_upload():
     """测试 /files/upload (multipart/form-data)"""
     endpoint = "/files/upload"
-    target_url = f"{PROXY_BASE_URL}/{APP_ID}{endpoint}"
+    target_url = f"{config.proxy_base_url}/{config.app_id}{endpoint}"
     print(f"\n--- Testing File Upload ---")
     print(f"Target URL: {target_url}")
 
@@ -35,7 +41,7 @@ def test_file_upload():
         'file': (os.path.basename(TEXT_FILE_PATH), open(TEXT_FILE_PATH, 'rb'), 'text/plain')
     }
     data_payload = {
-        'user': USER_ID
+        'user': config.user_id
     }
 
     try:
@@ -70,7 +76,7 @@ def test_file_upload():
 def test_audio_to_text():
     """测试 /audio-to-text (multipart/form-data)"""
     endpoint = "/audio-to-text"
-    target_url = f"{PROXY_BASE_URL}/{APP_ID}{endpoint}"
+    target_url = f"{config.proxy_base_url}/{config.app_id}{endpoint}"
     print(f"\n--- Testing Audio to Text ---")
     print(f"Target URL: {target_url}")
 
@@ -83,7 +89,7 @@ def test_audio_to_text():
         'file': (os.path.basename(AUDIO_FILE_PATH), open(AUDIO_FILE_PATH, 'rb'), 'audio/mpeg') # 假设是 mp3
     }
     data_payload = {
-        'user': USER_ID
+        'user': config.user_id
     }
 
     try:
@@ -114,7 +120,7 @@ def test_audio_to_text():
 def test_text_to_audio():
     """测试 /text-to-audio (接收 audio/* 响应)"""
     endpoint = "/text-to-audio"
-    target_url = f"{PROXY_BASE_URL}/{APP_ID}{endpoint}"
+    target_url = f"{config.proxy_base_url}/{config.app_id}{endpoint}"
     print(f"\n--- Testing Text to Audio ---")
     print(f"Target URL: {target_url}")
 
@@ -124,7 +130,7 @@ def test_text_to_audio():
     }
     payload = {
         "text": "Hello from the Next.js proxy test.",
-        "user": USER_ID
+        "user": config.user_id
         # "message_id": "..." # 如果需要基于特定消息生成，则提供 message_id
     }
     output_audio_file = "output_audio.mp3" # 保存音频的文件名
@@ -154,17 +160,21 @@ def test_text_to_audio():
     except Exception as e:
         print(f"ERROR during text-to-audio test: {e}")
 
-def test_get_conversations():
-    """测试 GET /conversations (获取会话列表)"""
+def test_get_conversations(limit: int = 5) -> Optional[List[Dict[str, Any]]]:
+    """测试 GET /conversations (获取会话列表)
+    limit: 请求的会话数量
+    Returns:
+        成功时返回包含会话对象的列表，失败时返回 None
+    """
     endpoint = "/conversations"
-    target_url = f"{PROXY_BASE_URL}/{APP_ID}{endpoint}"
+    target_url = f"{config.proxy_base_url}/{config.app_id}{endpoint}"
     print(f"\n--- Testing Get Conversations ---")
     print(f"Target URL: {target_url}")
 
     # 准备查询参数
     params = {
-        'user': USER_ID,
-        'limit': 5 # 为了测试，请求少量数据
+        'user': config.user_id,
+        'limit': limit # 为了测试，请求少量数据
         # 'last_id': 'some_last_id' # 如果需要测试分页
     }
 
@@ -186,9 +196,9 @@ def test_get_conversations():
             # 验证基本结构
             if 'limit' in response_json and 'has_more' in response_json and 'data' in response_json and isinstance(response_json['data'], list):
                 print(f"SUCCESS: Get conversations seems successful. Received {len(response_json['data'])} conversations.")
+                return response_json['data']
             else:
                 print("WARNING: Response JSON structure might be unexpected.")
-
     except requests.exceptions.RequestException as e:
         # 检查是否是 IncompleteRead，如果是，打印已接收内容（如果可能）
         if isinstance(e.args[0], tuple) and len(e.args[0]) > 1 and 'IncompleteRead' in str(e.args[0][1]):
@@ -204,6 +214,94 @@ def test_get_conversations():
         print(f"ERROR: Response was not valid JSON. Status: {response.status_code}. Response text: {response.text[:500]}...")
     except Exception as e:
         print(f"ERROR during get conversations test: {e}")
+    return None # 返回 None 表示失败
+
+def _perform_delete(conversation_id: str):
+    """执行单个会话的删除请求"""
+    endpoint = f"/conversations/{conversation_id}"
+    target_url = f"{config.proxy_base_url}/{config.app_id}{endpoint}"
+    print(f"--- Deleting Conversation ID: {conversation_id} ---")
+    print(f"Target URL: {target_url}")
+
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    payload = {
+        'user': config.user_id
+    }
+
+    try:
+        with requests.delete(target_url, headers=headers, json=payload, timeout=30) as response:
+            print(f"  Status Code: {response.status_code}")
+
+            # 检查非成功状态码 (4xx, 5xx)
+            response.raise_for_status()
+
+            # 优先处理 Dify 删除成功时最常见的 204 No Content
+            if response.status_code == 204:
+                print(f"  SUCCESS: Conversation {conversation_id} deleted (Status 204 No Content).")
+            else:
+                # 处理其他可能的成功状态码 (例如 200 OK)
+                # 仅在可能有内容时尝试解析 JSON
+                try:
+                    # 尝试读取响应文本，避免 response.json() 对空body报错
+                    content = response.text
+                    if content:
+                        response_json = json.loads(content)
+                        # 检查 Dify 可能返回的特定成功结构 (虽然删除通常是204)
+                        if response_json.get("result") == "success":
+                             print(f"  SUCCESS: Conversation {conversation_id} deleted (Status {response.status_code}, received JSON: {response_json}).")
+                        else:
+                            print(f"  WARNING: Delete request successful (Status {response.status_code}) but response JSON unexpected: {response_json}")
+                    else:
+                         # 例如 200 OK 但 body 为空
+                         print(f"  SUCCESS: Conversation {conversation_id} deleted (Status {response.status_code}, empty body).")
+                except json.JSONDecodeError:
+                    # 如果状态码成功但响应体不是有效 JSON
+                    print(f"  WARNING: Delete request successful (Status {response.status_code}) but response body was not valid JSON: {response.text[:100]}...")
+
+    except requests.exceptions.HTTPError as e: # 明确捕获 HTTP 错误
+        print(f"  ERROR deleting conversation {conversation_id}: HTTP Error {e.response.status_code} - {e}")
+        if hasattr(e, 'response') and e.response is not None:
+            print(f"    Error Response Text: {e.response.text[:200]}...")
+    except requests.exceptions.RequestException as e: # 捕获连接错误、超时等
+        print(f"  ERROR deleting conversation {conversation_id}: Request Exception - {e}")
+    except Exception as e: # 捕获其他意外错误
+        print(f"  ERROR during delete operation for {conversation_id}: Unexpected error - {e}")
+
+def test_delete_conversation(conversation_id_or_set: Union[str, Set[str]]):
+    """测试 DELETE /conversations/{conversation_id} (删除指定会话或一组会话)
+
+    Args:
+        conversation_id_or_set: 单个会话 ID (str) 或一组会话 ID (set).
+    """
+    if not conversation_id_or_set:
+        print("\n--- Skipping Delete Conversation Test: No conversation ID(s) provided ---")
+        return
+
+    print(f"\n--- Testing Delete Conversation(s) ---")
+
+    if isinstance(conversation_id_or_set, str):
+        # 处理单个 ID
+        if not conversation_id_or_set.strip(): # 检查是否为空或仅空格
+             print("ERROR: Provided single conversation ID is empty.")
+             return
+        print(f"Attempting to delete single conversation ID: {conversation_id_or_set}")
+        _perform_delete(conversation_id_or_set)
+    elif isinstance(conversation_id_or_set, set):
+        # 处理 ID 集合
+        if not conversation_id_or_set:
+            print("INFO: Provided conversation ID set is empty. Nothing to delete.")
+            return
+        print(f"Attempting to delete {len(conversation_id_or_set)} conversations:")
+        for conv_id in conversation_id_or_set:
+             if isinstance(conv_id, str) and conv_id.strip():
+                _perform_delete(conv_id)
+             else:
+                 print(f"  WARNING: Skipping invalid or empty ID in the set: {conv_id}")
+    else:
+        print(f"ERROR: Invalid type for conversation_id_or_set. Expected str or set, got {type(conversation_id_or_set)}.")
+
 
 
 # --- 主执行逻辑 ---
@@ -218,6 +316,28 @@ if __name__ == "__main__":
     test_file_upload()
     # test_audio_to_text()
     # test_text_to_audio()
-    test_get_conversations()
+    conversations_list = test_get_conversations(limit=5) # 获取最近5个会话
+
+    # --- 测试删除会话 ---
+    ids_to_delete: Set[str] = set()
+    if conversations_list:
+        print(f"\n--- Preparing for Delete Conversation Test --- Fecthed {len(conversations_list)} conversations.")
+        # 提取所有获取到的会话 ID
+        ids_to_delete = {conv['id'] for conv in conversations_list if isinstance(conv, dict) and 'id' in conv}
+        # TODO: 在这里可以添加根据名称或其他条件过滤 ids_to_delete 的逻辑
+        # 例如: ids_to_delete = {conv['id'] for conv in conversations_list if 'id' in conv and 'iPhone' in conv.get('name', '')}
+        if ids_to_delete:
+            print(f"Identified {len(ids_to_delete)} conversation IDs to delete: {ids_to_delete}")
+        else:
+             print("No valid conversation IDs found in the fetched list.")
+    else:
+        print("\n--- Preparing for Delete Conversation Test --- Failed to fetch conversations.")
+
+    # 执行删除操作 (如果找到了 ID)
+    if ids_to_delete:
+        test_delete_conversation(ids_to_delete)
+    else:
+        print("INFO: No conversation IDs specified for deletion. Skipping delete test.")
+
 
     print("\n--- All Tests Finished ---")
