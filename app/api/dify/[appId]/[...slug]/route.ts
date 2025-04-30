@@ -157,33 +157,104 @@ async function proxyToDify(
     // 6. 处理并转发 Dify 的响应
     if (response.ok && response.body) {
       const responseContentType = response.headers.get('content-type');
-      
-      // 处理流式响应（SSE）- SSE 需要保留原始头信息，包括 CORS
+
+      // --- BEGIN SSE Robust Handling ---
+      // 处理流式响应（SSE）- 使用手动读取/写入以增强健壮性
       if (responseContentType?.includes('text/event-stream')) {
-        console.log(`[App: ${appId}] [${req.method}] Streaming response detected.`);
+        console.log(`[App: ${appId}] [${req.method}] Streaming response detected. Applying robust handling.`);
+
         // 保留 Dify 返回的 SSE 相关头，并补充我们标准的 CORS 头
-        const sseHeaders = new Headers(response.headers); // 从原始响应复制
-        sseHeaders.set('Access-Control-Allow-Origin', '*');
-        sseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-        sseHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        return new Response(response.body, {
+        const sseHeaders = createMinimalHeaders(); // Start with minimal CORS headers
+        response.headers.forEach((value, key) => {
+          // Copy essential SSE headers from Dify response
+          if (key.toLowerCase() === 'content-type' || key.toLowerCase() === 'cache-control' || key.toLowerCase() === 'connection') {
+             sseHeaders.set(key, value);
+          }
+        });
+
+
+        // 创建一个新的可读流，用于手动将数据块推送给客户端
+        const stream = new ReadableStream({
+          async start(controller) {
+            console.log(`[App: ${appId}] [${req.method}] SSE Stream: Starting to read from Dify.`);
+            const reader = response.body!.getReader(); // 确定 response.body 存在
+            const decoder = new TextDecoder(); // 用于调试日志输出
+
+            // 处理客户端断开连接
+            req.signal.addEventListener('abort', () => {
+              console.log(`[App: ${appId}] [${req.method}] SSE Stream: Client disconnected, cancelling Dify read.`);
+              reader.cancel('Client disconnected');
+              // 注意：controller 可能已经 close，这里尝试 close 可能会报错，但通常无害
+              try { controller.close(); } catch { /* Ignore */ }
+            });
+
+            try {
+              while (true) {
+                 // 检查客户端是否已断开
+                 if (req.signal.aborted) {
+                   console.log(`[App: ${appId}] [${req.method}] SSE Stream: Abort signal detected before read, stopping.`);
+                   // 无需手动取消 reader，addEventListener 中的 cancel 会处理
+                   break;
+                 }
+
+                const { done, value } = await reader.read();
+
+                if (done) {
+                  console.log(`[App: ${appId}] [${req.method}] SSE Stream: Dify stream finished.`);
+                  break; // Dify 流结束，退出循环
+                }
+
+                // 将从 Dify 读取到的数据块推送到我们创建的流中
+                controller.enqueue(value);
+                // 可选：打印解码后的数据块用于调试
+                // console.log(`[App: ${appId}] [${req.method}] SSE Chunk:`, decoder.decode(value, { stream: true }));
+
+              }
+            } catch (error) {
+              // 如果读取 Dify 流时发生错误（例如 Dify 服务器断开）
+              console.error(`[App: ${appId}] [${req.method}] SSE Stream: Error reading from Dify stream:`, error);
+              // 在我们创建的流上触发错误，通知下游消费者
+              controller.error(error);
+            } finally {
+              console.log(`[App: ${appId}] [${req.method}] SSE Stream: Finalizing stream controller.`);
+              // 确保无论如何都关闭控制器 (如果尚未关闭或出错)
+              try { controller.close(); } catch { /* Ignore if already closed or errored */ }
+              // 确保 reader 被释放 (cancel 也会释放锁，这里是双重保险)
+              // reader.releaseLock(); // reader 在 done=true 或 error 后会自动释放
+            }
+          },
+          cancel(reason) {
+            console.log(`[App: ${appId}] [${req.method}] SSE Stream: Our stream was cancelled. Reason:`, reason);
+            // 如果我们创建的流被取消（例如 Response 对象的 cancel() 被调用），
+            // 理论上 reader 应该已经在 abort 事件监听中被 cancel 了。
+            // 如果需要，这里可以添加额外的清理逻辑。
+          }
+        });
+
+        // 返回包含我们手动创建的流的响应
+        return new Response(stream, {
           status: response.status,
           statusText: response.statusText,
-          headers: sseHeaders, // 使用包含原始 SSE 头的 Headers
+          headers: sseHeaders, // 使用包含必要 SSE 头和 CORS 头的 Headers
         });
-      } 
-      // 处理音频响应（文本转语音）- 通常也需要保留原始头
+      }
+      // --- END SSE Robust Handling ---
+
+      // 处理音频响应（文本转语音）- 保留简单的直接管道方式
       else if (responseContentType?.startsWith('audio/')) {
         console.log(`[App: ${appId}] [${req.method}] Audio response detected.`);
-        // 保留 Dify 返回的音频相关头，并补充 CORS 头
-        const audioHeaders = new Headers(response.headers);
-        audioHeaders.set('Access-Control-Allow-Origin', '*'); 
-        audioHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-        audioHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        const audioHeaders = createMinimalHeaders(); // Start with minimal CORS
+         response.headers.forEach((value, key) => {
+           // Copy essential audio headers
+           if (key.toLowerCase().startsWith('content-') || key.toLowerCase() === 'accept-ranges' || key.toLowerCase() === 'vary') {
+              audioHeaders.set(key, value);
+           }
+         });
+        // 对于一次性流，直接管道通常是高效且足够稳定的
         return new Response(response.body, {
           status: response.status,
           statusText: response.statusText,
-          headers: audioHeaders, // 使用包含原始音频头的 Headers
+          headers: audioHeaders,
         });
       }
       // 处理常规响应 (主要是 JSON 或 Text)
