@@ -10,15 +10,40 @@ interface DifyApiParams {
   slug: string[];
 }
 
+// --- 辅助函数：创建带有基本 CORS 和 Content-Type 的最小化响应头 ---
+function createMinimalHeaders(contentType?: string): Headers {
+  const headers = new Headers();
+  // 设置基础的 CORS 头 (生产环境应配置更严格的源)
+  headers.set('Access-Control-Allow-Origin', '*'); 
+  headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // 如果提供了 Content-Type，则设置它
+  if (contentType) {
+    headers.set('Content-Type', contentType);
+  }
+  return headers;
+}
+
 // --- 核心辅助函数：执行到 Dify 的代理请求 ---
 async function proxyToDify(
   req: NextRequest, // 原始 Next.js 请求对象
-  context: { params: DifyApiParams } // 解构出路由参数
+  { params }: { params: DifyApiParams } // 直接解构 params
 ) {
   // 等待 params 解析完成后再访问其属性
-  const params = await context.params;
   const appId = params.appId;
   const slug = params.slug;
+
+  // --- BEGIN OPTIMIZATION: Validate slug --- 
+  // 检查 slug 是否有效，防止构造无效的目标 URL
+  if (!slug || slug.length === 0) {
+    console.error(`[App: ${appId}] [${req.method}] Invalid request: Slug path is missing.`);
+    return new Response(JSON.stringify({ error: 'Invalid request: slug path is missing.' }), {
+      status: 400,
+      headers: createMinimalHeaders('application/json') // 使用辅助函数
+    });
+  }
+  // --- END OPTIMIZATION ---
 
   // 1. 获取特定 Dify 应用的配置
   console.log(`[App: ${appId}] [${req.method}] Attempting to get configuration...`);
@@ -65,7 +90,7 @@ async function proxyToDify(
 
     // 5. 执行 fetch 请求转发
     // 准备请求体和头部，处理特殊情况
-    let finalBody = req.method !== 'GET' && req.method !== 'HEAD' ? req.body : null;
+    let finalBody: BodyInit | null = req.method !== 'GET' && req.method !== 'HEAD' ? req.body : null;
     const finalHeaders = new Headers(headers);
     const originalContentType = req.headers.get('Content-Type');
 
@@ -76,7 +101,7 @@ async function proxyToDify(
       try {
         // 解析表单数据
         const formData = await req.formData();
-        finalBody = formData as unknown as ReadableStream<Uint8Array>;
+        finalBody = formData;
         // 重要：移除 Content-Type，让 fetch 自动设置包含正确 boundary 的 multipart/form-data
         finalHeaders.delete('Content-Type');
       } catch (formError) {
@@ -130,72 +155,62 @@ async function proxyToDify(
     // --- END MODIFICATION / 结束修改 ---
 
     // 6. 处理并转发 Dify 的响应
-    const responseHeaders = new Headers(response.headers);
-    // 设置 CORS 头 (生产环境应更严格)
-    responseHeaders.set('Access-Control-Allow-Origin', '*');
-    responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    responseHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
     if (response.ok && response.body) {
       const responseContentType = response.headers.get('content-type');
       
-      // 处理流式响应（SSE）
+      // 处理流式响应（SSE）- SSE 需要保留原始头信息，包括 CORS
       if (responseContentType?.includes('text/event-stream')) {
         console.log(`[App: ${appId}] [${req.method}] Streaming response detected.`);
+        // 保留 Dify 返回的 SSE 相关头，并补充我们标准的 CORS 头
+        const sseHeaders = new Headers(response.headers); // 从原始响应复制
+        sseHeaders.set('Access-Control-Allow-Origin', '*');
+        sseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+        sseHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         return new Response(response.body, {
           status: response.status,
           statusText: response.statusText,
-          headers: responseHeaders,
+          headers: sseHeaders, // 使用包含原始 SSE 头的 Headers
         });
       } 
-      // 处理音频响应（文本转语音）
+      // 处理音频响应（文本转语音）- 通常也需要保留原始头
       else if (responseContentType?.startsWith('audio/')) {
         console.log(`[App: ${appId}] [${req.method}] Audio response detected.`);
+        // 保留 Dify 返回的音频相关头，并补充 CORS 头
+        const audioHeaders = new Headers(response.headers);
+        audioHeaders.set('Access-Control-Allow-Origin', '*'); 
+        audioHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+        audioHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         return new Response(response.body, {
           status: response.status,
           statusText: response.statusText,
-          headers: responseHeaders,
+          headers: audioHeaders, // 使用包含原始音频头的 Headers
         });
       }
-      // 处理常规响应
+      // 处理常规响应 (主要是 JSON 或 Text)
       else {
         // 处理非流式响应
         const responseData = await response.text();
         try {
           const jsonData = JSON.parse(responseData);
-          // --- FINAL FIX: Use native Response with minimal headers for JSON --- 
           console.log(`[App: ${appId}] [${req.method}] Returning native Response with minimal headers for success JSON.`);
-          const minimalHeaders = new Headers();
-          minimalHeaders.set('Content-Type', 'application/json');
-          minimalHeaders.set('Access-Control-Allow-Origin', '*');
+          // --- REFACTOR: Use minimal header helper --- 
           return new Response(JSON.stringify(jsonData), {
             status: response.status,
             statusText: response.statusText,
-            headers: minimalHeaders,
+            headers: createMinimalHeaders('application/json'), // 使用辅助函数
           });
-          // --- END FINAL FIX ---
-          // return NextResponse.json(jsonData, {
-          //   status: response.status,
-          //   statusText: response.statusText,
-          //   headers: responseHeaders, // Original headers caused issues
-          // });
+          // --- END REFACTOR ---
         } catch (parseError) {
-           // 非 JSON，返回文本 (也使用简化 Headers)
+           // 非 JSON，返回文本
            console.log(`[App: ${appId}] [${req.method}] JSON parse failed, returning plain text with minimal headers.`);
-           const minimalTextHeaders = new Headers();
-           minimalTextHeaders.set('Access-Control-Allow-Origin', '*');
-           // Try to determine original text content type if available, else default to text/plain
-           const originalDifyContentType = response.headers.get('content-type');
-           if (originalDifyContentType?.startsWith('text/')) {
-                minimalTextHeaders.set('Content-Type', originalDifyContentType);
-           } else {
-                minimalTextHeaders.set('Content-Type', 'text/plain');
-           }
+           // --- REFACTOR: Use minimal header helper --- 
+           const originalDifyContentType = response.headers.get('content-type') || 'text/plain';
            return new Response(responseData, {
                status: response.status,
                statusText: response.statusText,
-               headers: minimalTextHeaders,
+               headers: createMinimalHeaders(originalDifyContentType), // 使用辅助函数，并传递原始类型
            });
+           // --- END REFACTOR ---
         }
       }
     } else {
@@ -208,53 +223,34 @@ async function proxyToDify(
         const errorText = await response.text();
         try {
           const errorJson = JSON.parse(errorText);
-          // --- FINAL FIX: Use native Response with minimal headers for JSON errors --- 
           console.log(`[App: ${appId}] [${req.method}] Returning native Response with minimal headers for error JSON.`);
-          const minimalErrorHeaders = new Headers();
-          minimalErrorHeaders.set('Content-Type', 'application/json');
-          minimalErrorHeaders.set('Access-Control-Allow-Origin', '*');
+          // --- REFACTOR: Use minimal header helper --- 
           return new Response(JSON.stringify(errorJson), {
             status: response.status,
             statusText: response.statusText,
-            headers: minimalErrorHeaders,
+            headers: createMinimalHeaders('application/json'), // 使用辅助函数
           });
-          // --- END FINAL FIX ---
-          // return NextResponse.json(errorJson, {
-          //   status: response.status,
-          //   statusText: response.statusText,
-          //   headers: responseHeaders, // Original headers caused issues
-          // });
+          // --- END REFACTOR ---
         } catch {
-          // 错误响应不是 JSON，返回文本 (也使用简化 Headers)
+          // 错误响应不是 JSON，返回文本
           console.log(`[App: ${appId}] [${req.method}] Error response is not JSON, returning plain text with minimal headers.`);
-          const minimalTextErrorHeaders = new Headers();
-          minimalTextErrorHeaders.set('Access-Control-Allow-Origin', '*');
-          const originalDifyErrorContentType = response.headers.get('content-type');
-          if (originalDifyErrorContentType?.startsWith('text/')) {
-               minimalTextErrorHeaders.set('Content-Type', originalDifyErrorContentType);
-          } else {
-               minimalTextErrorHeaders.set('Content-Type', 'text/plain');
-          }
+          // --- REFACTOR: Use minimal header helper --- 
+          const originalDifyErrorContentType = response.headers.get('content-type') || 'text/plain';
           return new Response(errorText, {
             status: response.status,
             statusText: response.statusText,
-            headers: minimalTextErrorHeaders,
+            headers: createMinimalHeaders(originalDifyErrorContentType), // 使用辅助函数
           });
+          // --- END REFACTOR ---
         }
       } catch (readError) {
         // 如果连读取错误响应都失败了
         console.error(`[App: ${appId}] [${req.method}] Failed to read Dify error response body:`, readError);
-        const finalErrorHeaders = new Headers();
-        finalErrorHeaders.set('Content-Type', 'application/json');
-        finalErrorHeaders.set('Access-Control-Allow-Origin', '*');
+        const finalErrorHeaders = createMinimalHeaders('application/json'); // 使用辅助函数
         return new Response(JSON.stringify({ error: `Failed to read Dify error response body. Status: ${response.status}`}), {
              status: 502,
              headers: finalErrorHeaders
         });
-        // return NextResponse.json(
-        //   { error: `Failed response from Dify with status ${response.status}` },
-        //   { status: response.status }
-        // );
       }
     }
   } catch (error: any) {
@@ -278,3 +274,14 @@ export {
     proxyToDify as PATCH
     // OPTIONS 通常由 Next.js 或 Vercel 自动处理 CORS 预检，但如果需要自定义可以添加
 };
+
+// --- BEGIN OPTIMIZATION: Explicit OPTIONS handler --- 
+// 添加明确的 OPTIONS 请求处理函数，以确保 CORS 预检请求在各种部署环境下都能正确响应
+export async function OPTIONS() {
+  console.log('[OPTIONS Request] Responding to preflight request.');
+  return new Response(null, {
+    status: 204, // No Content for preflight
+    headers: createMinimalHeaders() // 使用辅助函数设置 CORS 头
+  });
+}
+// --- END OPTIMIZATION --- 
