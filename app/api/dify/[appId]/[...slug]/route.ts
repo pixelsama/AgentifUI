@@ -28,9 +28,12 @@ function createMinimalHeaders(contentType?: string): Headers {
 // --- 核心辅助函数：执行到 Dify 的代理请求 ---
 async function proxyToDify(
   req: NextRequest, // 原始 Next.js 请求对象
-  { params }: { params: DifyApiParams } // 直接解构 params
+  // 修改点 1：接收包含 params 的 context 对象
+  context: { params: Promise<DifyApiParams> | DifyApiParams } // 允许 Promise 或直接对象以兼容不同 Next.js 版本或场景
 ) {
-  // 等待 params 解析完成后再访问其属性
+
+  // 修改点 2：使用 await 获取 params 的值
+  const params = await context.params;
   const appId = params.appId;
   const slug = params.slug;
 
@@ -140,7 +143,7 @@ async function proxyToDify(
             headersToForward.set(key, value);
          }
       });
-      // 添加 CORS 响应头 (根据需要调整源)
+      // 添加 CORS 响应头 (生产环境应配置更严格的源)
       headersToForward.set('Access-Control-Allow-Origin', '*'); 
       headersToForward.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
       headersToForward.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
