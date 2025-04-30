@@ -307,13 +307,13 @@ def test_delete_conversation(conversation_id_or_set: Union[str, Set[str]]):
 # --- 主执行逻辑 ---
 if __name__ == "__main__":
     # 确保测试文件存在（至少是文本文件）
-    if not os.path.exists(TEXT_FILE_PATH):
-         print(f"Creating dummy text file at {TEXT_FILE_PATH} for testing...")
-         with open(TEXT_FILE_PATH, "w") as f:
-             f.write("This is a dummy file for upload testing.")
+    # if not os.path.exists(TEXT_FILE_PATH):
+    #      print(f"Creating dummy text file at {TEXT_FILE_PATH} for testing...")
+    #      with open(TEXT_FILE_PATH, "w") as f:
+    #          f.write("This is a dummy file for upload testing.")
 
     # 按顺序执行测试
-    test_file_upload()
+    # test_file_upload()
     # test_audio_to_text()
     # test_text_to_audio()
     conversations_list = test_get_conversations(limit=5) # 获取最近5个会话
