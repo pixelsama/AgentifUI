@@ -24,30 +24,53 @@ LLM-EduHub采用现代化的四层架构设计，结合Next.js App Router的最�
 
 ### 目录结构设计
 ```
-app/
-  ├── (components)/             # 组件目录（建议添加）
-  │   ├── ui/                   # 通用UI组件
+llm-eduhub/
+  ├── .cursor/            # Cursor IDE配置文件
+  │   └── rules/          # 项目特定规则和文档
+  ├── .next/              # Next.js构建输出
+  ├── .vscode/            # VSCode配置文件
+  ├── app/                # 应用源代码（App Router模式）
+  │   ├── api/            # API路由
+  │   ├── about/          # About页面路由
+  │   ├── chat/           # 聊天页面路由
+  │   ├── login/          # 登录页面路由
+  │   ├── register/       # 注册页面路由
+  │   └── page.tsx        # 首页路由
+  ├── components/         # 组件目录
+  │   ├── ui/             # 通用UI组件
   │   │   ├── Button.tsx
   │   │   ├── Input.tsx
   │   │   └── ...
-  │   ├── layout/               # 布局组件
+  │   ├── layouts/        # 布局组件
   │   │   ├── Header.tsx
   │   │   ├── Sidebar.tsx
   │   │   └── ...
-  │   └── features/             # 功能组件
-  │       ├── chat/             # 聊天相关组件
-  │       ├── auth/             # 认证相关组件
-  │       └── ...
-  ├── (lib)/                    # 工具和配置
-  ├── (hooks)/                  # 自定义React Hooks（建议添加）
-  ├── (store)/                  # 全局状态管理（建议添加）
-  ├── (types)/                  # 类型定义（建议添加）
-  ├── [feature-page]/           # 功能页面
-  │   └── page.tsx
-  └── ...
+  │   ├── auth/           # 认证相关组件
+  │   ├── chat/           # 聊天相关组件
+  │   ├── home/           # 首页相关组件
+  │   └── sidebar/        # 侧边栏组件
+  ├── lib/                # 工具和配置
+  │   ├── config/         # 配置文件
+  │   ├── stores/         # 状态管理
+  │   └── utils/          # 工具函数
+  ├── public/             # 静态资源
+  ├── scripts/            # 开发、部署等实用脚本
+  ├── supabase/           # Supabase配置和迁移
+  ├── .env.local          # 本地环境变量
+  ├── .gitignore          # Git忽略配置
+  ├── CONTRIBUTING.md     # 贡献指南
+  ├── eslint.config.mjs   # ESLint配置
+  ├── middleware.ts       # Next.js中间件
+  ├── next-env.d.ts       # Next.js TypeScript声明
+  ├── next.config.ts      # Next.js配置
+  ├── package-lock.json   # 依赖锁定文件
+  ├── package.json        # 项目依赖和脚本
+  ├── postcss.config.mjs  # PostCSS配置
+  ├── README.md           # 项目文档
+  └── tsconfig.json       # TypeScript配置
 ```
 
-> **注意**：目录名称周围的括号 `()` 是Next.js App Router的特殊约定，表示这些目录不会被视为路由段。这样做可以将共享代码和组件放在`app/`目录下，而不会影响路由结构。
+> **注意**：新的目录结构中，`components`和`lib`目录已移至项目根目录，不再使用括号命名法，这样可以更好地组织代码并简化导入路径。
 
 ### 状态管理
 - **本地状态**: React useState/useReducer
@@ -58,18 +81,20 @@ app/
 
 ### API路由结构
 ```
-app/api/
-  ├── auth/                     # 认证相关API
-  │   ├── identify/             # 用户身份识别
-  │   ├── profile/              # 用户资料管理（建议添加）
-  │   └── sso/                  # 单点登录
-  ├── chat/                     # 聊天相关API（建议添加）
-  │   ├── history/              # 聊天历史记录
-  │   └── message/              # 消息处理
-  ├── dify/                     # Dify API集成
-  │   └── [appId]/[...slug]/    # 动态路由处理
-  └── models/                   # 模型管理API（建议添加）
-      └── [provider]/           # 按提供商分类
+app/
+  ├── api/
+  │   ├── auth/                     # 认证相关API
+  │   │   ├── identify/             # 用户身份识别
+  │   │   ├── profile/              # 用户资料管理（建议添加）
+  │   │   └── sso/                  # 单点登录
+  │   ├── chat/                     # 聊天相关API（建议添加）
+  │   │   ├── history/              # 聊天历史记录
+  │   │   └── message/              # 消息处理
+  │   ├── dify/                     # Dify API集成
+  │   │   └── [appId]/[...slug]/    # 动态路由处理
+  │   └── models/                   # 模型管理API（建议添加）
+  │       └── [provider]/           # 按提供商分类
+  └── ...
 ```
 
 ### 中间件设计

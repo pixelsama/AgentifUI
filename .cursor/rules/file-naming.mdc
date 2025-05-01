@@ -37,7 +37,7 @@ alwaysApply: false
 
 - **特例组件目录**：对于复杂的响应式组件，可以创建专门的目录
   ```
-  app/(components)/navigation/
+  components/navigation/
   ├── NavBar.tsx         # 主入口组件
   ├── MobileNav.tsx      # 移动端导航
   ├── DesktopNav.tsx     # 桌面端导航
@@ -102,6 +102,7 @@ alwaysApply: false
 - 动态路由段使用方括号：`[id]`, `[userId]`
 - 通配动态路由使用扩展语法：`[...slug]`
 - 路由分组使用圆括号：`(auth)`, `(dashboard)`
+- 注意：根目录下的components和lib不使用圆括号，只有app目录下的路由分组才使用
 
 ## 实例对照表
 
