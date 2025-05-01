@@ -32,8 +32,8 @@ export function LoginForm() {
       // 模拟登录请求
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // 登录成功后跳转到仪表板页面
-      router.push('/dashboard');
+      // 登录成功后跳转到聊天页面
+      router.push('/chat');
     } catch (err) {
       setError('登录失败，请检查您的邮箱和密码');
     } finally {

@@ -229,6 +229,69 @@ app/
 4. **Directory Grouping**:
    - Use parentheses `()` to group related code without affecting the URL structure (e.g., `(components)`, `(lib)`).
 
+5. **响应式开发规范**:
+   - 所有组件必须使用Tailwind CSS进行响应式设计
+   - 遵循移动优先(Mobile-First)的开发方法
+   - 组织结构应支持不同屏幕尺寸下的组件复用
+
+## 响应式开发指南
+
+为确保项目在各种设备上具有良好的用户体验，所有前端组件必须遵循以下响应式开发规范：
+
+### Tailwind CSS断点使用
+
+```
+sm: 640px   - 小型设备（如手机横屏）
+md: 768px   - 中型设备（如平板）
+lg: 1024px  - 大型设备（如笔记本）
+xl: 1280px  - 特大型设备（如台式机）
+2xl: 1536px - 超大型设备
+```
+
+### 响应式开发原则
+
+1. **移动优先设计**:
+   - 始终先为移动设备设计界面，然后通过媒体查询扩展到更大屏幕
+   - 示例: `className="text-sm md:text-base lg:text-lg"`
+
+2. **弹性布局**:
+   - 使用Flexbox和Grid进行页面布局
+   - 适当使用`flex-col`和`flex-row`在不同屏幕尺寸间切换
+   - 示例: `className="flex flex-col md:flex-row"`
+
+3. **响应式间距和尺寸**:
+   - 使用响应式间距和尺寸类
+   - 示例: `className="p-4 md:p-6 lg:p-8"`
+
+4. **内容适应**:
+   - 长文本在小屏幕上应适当截断或重排
+   - 图片应适当缩放并保持比例
+   - 示例: `className="w-full max-w-md lg:max-w-lg"`
+
+5. **组件组织**:
+   - 复杂组件应拆分为子组件，便于在不同屏幕尺寸下重组
+   - 使用条件渲染为不同屏幕尺寸提供不同UI方案
+
+### 响应式组件示例
+
+在`(components)`目录下的组件应当遵循响应式设计原则:
+
+```tsx
+// app/(components)/ui/Card.tsx 示例
+export function Card({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-white rounded-lg shadow-md 
+                    p-4 md:p-6 lg:p-8 
+                    w-full max-w-sm md:max-w-md lg:max-w-lg
+                    mx-auto">
+      {children}
+    </div>
+  );
+}
+```
+
+遵循这些响应式开发规范可确保应用在各种设备上都有一致且良好的用户体验。
+
 Following these guidelines ensures code consistency and maintainability. Please refer to this document when adding new files or modifying directory structure.
 
 
