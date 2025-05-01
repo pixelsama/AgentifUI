@@ -24,15 +24,12 @@ export function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // 注意：这里是简化的登录逻辑，后续需要添加真实的用户认证
     setIsLoading(true);
-    setError('');
-
+    
     try {
-      // 这里添加实际的登录逻辑
-      // 模拟登录请求
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 登录成功后跳转到聊天页面
+      // 简化逻辑：直接跳转到聊天页面
+      // 注意：后续需要替换为实际的登录API调用和认证逻辑
       router.push('/chat');
     } catch (err) {
       setError('登录失败，请检查您的邮箱和密码');

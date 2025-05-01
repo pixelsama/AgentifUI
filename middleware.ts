@@ -50,7 +50,9 @@ export async function middleware(request: NextRequest) {
   const isPublicRoute = url.pathname === '/' || 
                          url.pathname === '/login' || 
                          url.pathname === '/about' || 
-                         url.pathname.startsWith('/register')
+                         url.pathname.startsWith('/register') ||
+                         // 注意：临时将chat页面设为公开路由，后续实现认证后需要移除这一行
+                         url.pathname.startsWith('/chat')
   
   // 如果用户未登录且不是认证路由或公开API或公开页面，重定向到登录页
   if (!user && !isAuthRoute && !isApiRoute && !isPublicRoute) {
