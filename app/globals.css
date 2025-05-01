@@ -24,3 +24,22 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 自定义主内容区域过渡效果 */
+.main-transition {
+  transition-property: transform, opacity, margin;
+  transition-duration: 150ms, 150ms, 300ms;
+  transition-timing-function: ease-out, ease-out, ease-in-out;
+}
+
+.main-collapsed {
+  opacity: 0.7;
+  transform: translateX(-4px) scale(0.99);
+  transition-delay: 0ms, 0ms, 50ms;
+}
+
+.main-expanded {
+  opacity: 1;
+  transform: none;
+  transition-delay: 100ms, 100ms, 0ms;
+}
