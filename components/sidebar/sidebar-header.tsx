@@ -17,9 +17,9 @@ export function SidebarHeader() {
           ? <ChevronLeft className="h-5 w-5 transition-transform duration-200 group-hover:-translate-x-0.5" /> 
           : <ChevronRight className="h-5 w-5 transition-transform duration-200 group-hover:translate-x-0.5" />
         }
-        text="折叠"
+        text="收起"
         onClick={toggleSidebar}
-        aria-label={isExpanded ? "折叠" : "展开"}
+        aria-label={isExpanded ? "收起" : "展开"}
         className="group"
       />
       <SidebarButton

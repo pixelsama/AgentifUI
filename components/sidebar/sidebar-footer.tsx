@@ -1,11 +1,11 @@
 "use client"
 import { Settings, Sun, Moon, HelpCircle } from "lucide-react"
 import { SidebarButton } from "./sidebar-button"
-import { useThemeStore } from "@lib/stores/theme-store"
+import { useTheme } from "@lib/hooks/use-theme"
 import { cn } from "@lib/utils"
 
 export function SidebarFooter() {
-  const { theme, toggleTheme } = useThemeStore()
+  const { isDark, toggleTheme } = useTheme()
 
   return (
     <div className={cn(
@@ -24,13 +24,13 @@ export function SidebarFooter() {
         className="group"
       />
       <SidebarButton
-        icon={theme === "light" 
-          ? <Moon className="h-5 w-5 transition-all duration-300 group-hover:scale-110" /> 
-          : <Sun className="h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:text-yellow-400" />
+        icon={isDark
+          ? <Sun className="h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:text-yellow-400" />
+          : <Moon className="h-5 w-5 transition-all duration-300 group-hover:scale-110" />
         }
-        text={theme === "light" ? "暗色模式" : "亮色模式"}
+        text={isDark ? "亮色模式" : "暗色模式"}
         onClick={toggleTheme}
-        aria-label={theme === "light" ? "切换到暗色模式" : "切换到亮色模式"}
+        aria-label={isDark ? "切换到亮色模式" : "切换到暗色模式"}
         className="group"
       />
       <SidebarButton

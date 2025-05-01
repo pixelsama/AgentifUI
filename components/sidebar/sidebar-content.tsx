@@ -67,7 +67,14 @@ export function SidebarContent() {
                 key={chat.id}
                 icon={chat.icon}
                 text={chat.title}
-                className="w-full group text-foreground/70 hover:text-foreground hover:shadow-[0_2px_4px_rgba(0,0,0,0.1)]"
+                active={chat.id === 1}
+                className={cn(
+                  "w-full group",
+                  "hover:bg-accent hover:text-foreground hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]",
+                  chat.id === 1
+                    ? "bg-accent text-foreground shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
+                    : "text-foreground/70"
+                )}
               />
             ))}
             {chatHistory.length > 3 && (
@@ -77,7 +84,7 @@ export function SidebarContent() {
                   : <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5" />
                 }
                 text={showAllChats ? "收起" : "更多"}
-                className="w-full text-xs text-muted-foreground hover:text-foreground/90 group hover:shadow-[0_2px_4px_rgba(0,0,0,0.05)]"
+                className="w-full text-xs text-muted-foreground hover:text-foreground/90 group"
                 onClick={toggleShowAllChats}
               />
             )}
@@ -98,8 +105,15 @@ export function SidebarContent() {
               <SidebarButton 
                 key={app.id} 
                 icon={app.icon} 
-                text={app.title} 
-                className="w-full group text-foreground/70 hover:text-foreground hover:shadow-[0_2px_4px_rgba(0,0,0,0.1)]" 
+                text={app.title}
+                active={app.id === 1}
+                className={cn(
+                  "w-full group",
+                  "hover:bg-accent hover:text-foreground hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]",
+                  app.id === 1
+                    ? "bg-accent text-foreground shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
+                    : "text-foreground/70"
+                )}
               />
             ))}
             {applications.length > 2 && (
@@ -109,7 +123,7 @@ export function SidebarContent() {
                   : <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5" />
                 }
                 text={showAllApps ? "收起" : "更多"}
-                className="w-full text-xs text-muted-foreground hover:text-foreground/90 group hover:shadow-[0_2px_4px_rgba(0,0,0,0.05)]"
+                className="w-full text-xs text-muted-foreground hover:text-foreground/90 group"
                 onClick={toggleShowAllApps}
               />
             )}

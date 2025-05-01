@@ -12,8 +12,15 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* 明确的暗色主题类 */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+/* 系统偏好设置（仅作为初始值） */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light):not(.dark) {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
