@@ -17,7 +17,7 @@
 
 ```bash
 # 克隆代码库
-git clone https://github.com/your-username/llm-eduhub.git
+git clone https://github.com/lyzno1/llm-eduhub.git
 cd llm-eduhub
 
 # 安装依赖
