@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { initiateSSOLogin } from '@/lib/utils/supabaseSSO'
+import { initiateSSOLogin } from '@lib/utils/supabaseSSO'
 
 export async function POST(request: NextRequest) {
   try {
