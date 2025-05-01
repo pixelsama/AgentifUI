@@ -78,13 +78,10 @@ export function SidebarButton({ icon, text, active = false, className, onClick, 
 
       {/* 文本内容 */}
       {isExpanded && (
-        <span
-          className={cn(
-            "ml-2 whitespace-nowrap",
-            "transition-all duration-200 ease-in-out",
-            isDark && active && "text-blue-300",
-          )}
-        >
+        <span className={cn(
+          "ml-2 whitespace-nowrap",
+          isDark && active && "text-blue-300"
+        )}>
           {text}
         </span>
       )}

@@ -29,8 +29,19 @@ export function SidebarContent() {
   const { isDark } = useTheme()
   const [showAllChats, setShowAllChats] = React.useState(false)
   const [showAllApps, setShowAllApps] = React.useState(false)
+  const [contentVisible, setContentVisible] = React.useState(false)
 
-  // 确定显示项目数量
+  React.useEffect(() => {
+    if (isExpanded) {
+      const timer = setTimeout(() => {
+        setContentVisible(true)
+      }, 50)
+      return () => clearTimeout(timer)
+    } else {
+      setContentVisible(false)
+    }
+  }, [isExpanded])
+
   const visibleChats = showAllChats ? chatHistory : chatHistory.slice(0, 3)
   const visibleApps = showAllApps ? applications : applications.slice(0, 2)
 
@@ -46,12 +57,11 @@ export function SidebarContent() {
 
   return (
     <div className="relative flex-1 overflow-hidden">
-      {/* 上边界线 - 只在展开时显示 */}
       <div className={cn(
         "absolute top-0 left-0 right-0 h-px z-10",
-        "transition-all duration-300 ease-in-out",
+        "transition-all duration-150 ease-in-out",
         isDark ? "bg-gray-700/60" : "bg-gray-200/50",
-        isExpanded ? "opacity-100" : "opacity-0"
+        contentVisible ? "opacity-100 transform-none" : "opacity-0 scale-90"
       )} />
       
       <div
@@ -62,10 +72,11 @@ export function SidebarContent() {
             ? "scrollbar-thumb-gray-600" 
             : "scrollbar-thumb-accent",
           "transition-all duration-300 ease-in-out",
-          isExpanded ? "opacity-100 transform-none" : "opacity-0 -translate-x-2 pointer-events-none",
+          contentVisible
+            ? "opacity-100 transform-none" 
+            : "opacity-0 scale-95 -translate-x-4 pointer-events-none"
         )}
       >
-        {/* 聊天历史部分 */}
         <div className="space-y-3 px-3">
           <div className={cn(
             "px-3 text-xs font-semibold flex items-center gap-2",
@@ -101,12 +112,10 @@ export function SidebarContent() {
           </div>
         </div>
 
-        {/* 分隔线 - 中间 (仅亮色模式显示) */}
         {!isDark && (
           <div className="h-px mx-4 bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
         )}
 
-        {/* 应用部分 */}
         <div className="space-y-3 px-3">
           <div className={cn(
             "px-3 text-xs font-semibold flex items-center gap-2",
@@ -143,15 +152,13 @@ export function SidebarContent() {
         </div>
       </div>
 
-      {/* 下边界线 - 只在展开时显示 */}
       <div className={cn(
         "absolute bottom-0 left-0 right-0 h-px z-10",
-        "transition-all duration-300 ease-in-out",
+        "transition-all duration-150 ease-in-out",
         isDark ? "bg-gray-700/60" : "bg-gray-200/50",
-        isExpanded ? "opacity-100" : "opacity-0"
+        contentVisible ? "opacity-100 transform-none" : "opacity-0 scale-90"
       )} />
 
-      {/* 折叠状态 - 保持空白 */}
       <div
         className={cn(
           "absolute inset-0 transition-all duration-300 ease-in-out",
