@@ -12,8 +12,15 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* 明确的暗色主题类 */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+/* 系统偏好设置（仅作为初始值） */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light):not(.dark) {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
@@ -23,4 +30,23 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* 自定义主内容区域过渡效果 */
+.main-transition {
+  transition-property: transform, opacity, margin;
+  transition-duration: 150ms, 150ms, 300ms;
+  transition-timing-function: ease-out, ease-out, ease-in-out;
+}
+
+.main-collapsed {
+  opacity: 0.7;
+  transform: translateX(-4px) scale(0.99);
+  transition-delay: 0ms, 0ms, 50ms;
+}
+
+.main-expanded {
+  opacity: 1;
+  transform: none;
+  transition-delay: 100ms, 100ms, 0ms;
 }

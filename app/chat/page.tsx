@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@components/ui/button';
+import { MessageSquare } from 'lucide-react';
 
 export default function ChatPage() {
   const router = useRouter();
@@ -11,30 +12,27 @@ export default function ChatPage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex-shrink-0">
-              <span className="text-xl font-bold text-blue-600">LLM-EduHub</span>
-            </div>
-            <div className="flex items-center">
-              <Button variant="outline" size="sm" onClick={handleBackToHome}>
-                返回首页
-              </Button>
-            </div>
+    <div className="flex flex-col h-full">
+      <header className="border-b bg-card">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-primary" />
+            <h1 className="text-lg font-medium">聊天界面</h1>
           </div>
+          <Button variant="outline" size="sm" onClick={handleBackToHome}>
+            返回首页
+          </Button>
         </div>
       </header>
       
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="flex-1 flex items-center justify-center">
         <div className="text-center max-w-md">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">聊天页面</h1>
-          <p className="text-gray-600">
-            这里是聊天功能页面占位符。后续将添加聊天相关组件和功能。
+          <h2 className="text-xl font-bold text-primary mb-4">聊天功能</h2>
+          <p className="text-muted-foreground">
+            这里是聊天功能页面占位符。侧边栏功能已集成，支持展开/折叠和暗色/亮色模式切换。
           </p>
         </div>
       </div>
-    </main>
+    </div>
   );
 } 
