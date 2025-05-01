@@ -13,21 +13,28 @@ export function SidebarContainer() {
   return (
     <aside
       className={cn(
-        "flex h-screen flex-col",
-        // 背景和阴影效果
-        isDark 
-          ? "bg-background/95 shadow-[0_0_15px_rgba(0,0,0,0.3)]"
-          : "bg-background shadow-lg shadow-primary/5",
-        // 过渡动画
+        "flex h-screen flex-col border-r border-transparent",
         "transition-all duration-300 ease-in-out",
         "overflow-hidden",
         isExpanded ? "w-64" : "w-16",
-        // 响应式布局
         "z-20 fixed md:relative",
-        // 渐变背景
-        isDark
-          ? "bg-gradient-to-b from-background via-background/98 to-background/95"
-          : "bg-gradient-to-b from-background to-background/95",
+        
+        // 亮色模式下的样式
+        !isDark && [
+          "bg-white/95",
+          "shadow-lg shadow-primary/5",
+          "bg-gradient-to-b from-background to-background/95",
+          "border-r-gray-100/30",
+        ],
+        
+        // 暗色模式下的样式
+        isDark && [
+          "bg-gray-900/90",
+          "shadow-[0_0_20px_rgba(0,0,0,0.4)]",
+          "bg-gradient-to-b from-gray-900 via-gray-900/95 to-gray-900/90",
+          "border-r-gray-800/50",
+          "text-gray-200",
+        ],
       )}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
