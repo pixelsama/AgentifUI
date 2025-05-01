@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Directory Structure Management
 
@@ -17,17 +17,24 @@ LLM-EduHub is a Next.js application using the App Router pattern. The directory 
 llm-eduhub/
   ├── .cursor/            # Cursor IDE configuration files
   │   └── rules/          # Project-specific rules and documentation
+  ├── .next/              # Next.js build output
+  ├── .vscode/            # VSCode configuration files
   ├── app/                # Application source code (App Router pattern)
-  │   ├── (components)/   # Shared UI components (grouped)
   │   ├── (lib)/          # Utilities, hooks, and helpers (grouped)
   │   └── api/            # API routes
   ├── public/             # Static assets
   ├── scripts/            # Utility scripts for development, deployment, etc.
   │   ├── test_dify_proxy_advanced.py # Advanced Dify proxy test script
   │   └── test_dify_proxy_streaming.py # Dify streaming proxy test script
+  ├── supabase/           # Supabase configuration and migrations
+  ├── .env.local          # Local environment variables
   ├── .gitignore          # Git ignore configuration
+  ├── CONTRIBUTING.md     # Contribution guidelines
   ├── eslint.config.mjs   # ESLint configuration
+  ├── middleware.ts       # Next.js middleware
+  ├── next-env.d.ts       # Next.js TypeScript declarations
   ├── next.config.ts      # Next.js configuration
+  ├── package-lock.json   # Dependency lock file
   ├── package.json        # Project dependencies and scripts
   ├── postcss.config.mjs  # PostCSS configuration
   ├── README.md           # Project documentation
@@ -40,21 +47,23 @@ The `app/` directory follows Next.js App Router conventions with added organizat
 
 ```
 app/
-  ├── (components)/       # Reusable UI components (grouped)
-  │   ├── chat/           # Chat-related components
-  │   └── ui/             # Generic UI components
   ├── (lib)/              # Utilities and shared code (grouped)
   │   ├── config/         # Configuration settings and constants
-  │   │   └── difyConfig.ts  # Dify API configuration settings
-  │   ├── hooks/          # React hooks
-  │   ├── store/          # Global state management
+  │   │   ├── difyConfig.ts      # Dify API configuration settings
+  │   │   └── supabaseConfig.ts  # Supabase configuration settings
   │   └── utils/          # Utility functions
+  │       ├── supabaseAuth.ts    # Supabase authentication utilities
+  │       ├── supabaseDB.ts      # Supabase database utilities
+  │       └── supabaseSSO.ts     # Supabase SSO utilities
   ├── api/                # API routes
-  │   ├── dify/           # Dify API integration
-  │   │   └── [appId]/    # Dynamic routes for specific Dify apps
-  │   │       └── [...slug]/  # Catch-all route handler
-  │   │           └── route.ts  # Route implementation for Dify proxy
-  │   └── llm/            # Other LLM-related API endpoints
+  │   ├── auth/           # Authentication-related API routes
+  │   │   ├── identify/   # User identification routes
+  │   │   └── sso/        # Single Sign-On routes
+  │   │       └── initiate/  # SSO initiation endpoints
+  │   └── dify/           # Dify API integration
+  │       └── [appId]/    # Dynamic routes for specific Dify apps
+  │           └── [...slug]/  # Catch-all route handler
+  │               └── route.ts  # Route implementation for Dify proxy
   ├── layout.tsx          # Root layout component
   ├── page.tsx            # Homepage component
   ├── globals.css         # Global CSS styles
