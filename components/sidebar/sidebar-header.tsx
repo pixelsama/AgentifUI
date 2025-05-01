@@ -17,16 +17,16 @@ export function SidebarHeader() {
           ? <ChevronLeft className="h-5 w-5 transition-transform duration-200 group-hover:-translate-x-0.5" /> 
           : <ChevronRight className="h-5 w-5 transition-transform duration-200 group-hover:translate-x-0.5" />
         }
-        text="折叠侧边栏"
+        text="折叠"
         onClick={toggleSidebar}
-        aria-label={isExpanded ? "折叠侧边栏" : "展开侧边栏"}
+        aria-label={isExpanded ? "折叠" : "展开"}
         className="group"
       />
       <SidebarButton
         icon={<Plus className="h-5 w-5 transition-transform duration-200 group-hover:rotate-90" />}
-        text="新建聊天"
+        text="发起新对话"
         onClick={() => console.log("New chat")}
-        aria-label="新建聊天"
+        aria-label="发起新对话"
         className="group"
       />
     </div>

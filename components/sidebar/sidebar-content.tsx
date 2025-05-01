@@ -43,21 +43,23 @@ export function SidebarContent() {
   }
 
   return (
-    <div className="relative flex-1 overflow-hidden px-3">
-      {/* 展开状态内容 */}
+    <div className="relative flex-1 overflow-hidden">
       <div
         className={cn(
-          "absolute inset-0 flex flex-col gap-6 overflow-y-auto pb-4 px-3",
-          "scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent",
+          "absolute inset-0 flex flex-col gap-6 overflow-y-auto pb-4",
+          "scrollbar-thin scrollbar-thumb-accent scrollbar-track-transparent",
           "transition-all duration-300 ease-in-out",
           isExpanded ? "opacity-100 transform-none" : "opacity-0 -translate-x-2 pointer-events-none",
         )}
       >
+        {/* 分隔线 - 顶部 */}
+        <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent mx-4" />
+
         {/* 聊天历史部分 */}
-        <div className="space-y-3 pt-2">
-          <div className="px-3 text-xs font-medium text-muted-foreground flex items-center gap-2">
+        <div className="space-y-3 px-3">
+          <div className="px-3 text-xs font-semibold text-primary/90 flex items-center gap-2">
             <MessageSquare className="h-3.5 w-3.5" />
-            <span>最近聊天</span>
+            <span>对话列表</span>
           </div>
           <div className="space-y-1.5">
             {visibleChats.map((chat) => (
@@ -65,7 +67,7 @@ export function SidebarContent() {
                 key={chat.id}
                 icon={chat.icon}
                 text={chat.title}
-                className="w-full group"
+                className="w-full group text-foreground/70 hover:text-foreground hover:shadow-[0_2px_4px_rgba(0,0,0,0.1)]"
               />
             ))}
             {chatHistory.length > 3 && (
@@ -74,19 +76,22 @@ export function SidebarContent() {
                   ? <ChevronUp className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" /> 
                   : <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5" />
                 }
-                text={showAllChats ? "显示更少" : "显示更多"}
-                className="w-full text-xs text-muted-foreground hover:text-muted-foreground/90 group"
+                text={showAllChats ? "收起" : "更多"}
+                className="w-full text-xs text-muted-foreground hover:text-foreground/90 group hover:shadow-[0_2px_4px_rgba(0,0,0,0.05)]"
                 onClick={toggleShowAllChats}
               />
             )}
           </div>
         </div>
 
+        {/* 分隔线 - 中间 */}
+        <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent mx-4" />
+
         {/* 应用部分 */}
-        <div className="space-y-3">
-          <div className="px-3 text-xs font-medium text-muted-foreground flex items-center gap-2">
+        <div className="space-y-3 px-3">
+          <div className="px-3 text-xs font-semibold text-primary/90 flex items-center gap-2">
             <Grid className="h-3.5 w-3.5" />
-            <span>应用功能</span>
+            <span>应用列表</span>
           </div>
           <div className="space-y-1.5">
             {visibleApps.map((app) => (
@@ -94,7 +99,7 @@ export function SidebarContent() {
                 key={app.id} 
                 icon={app.icon} 
                 text={app.title} 
-                className="w-full group" 
+                className="w-full group text-foreground/70 hover:text-foreground hover:shadow-[0_2px_4px_rgba(0,0,0,0.1)]" 
               />
             ))}
             {applications.length > 2 && (
@@ -103,29 +108,25 @@ export function SidebarContent() {
                   ? <ChevronUp className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" /> 
                   : <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5" />
                 }
-                text={showAllApps ? "显示更少" : "显示更多"}
-                className="w-full text-xs text-muted-foreground hover:text-muted-foreground/90 group"
+                text={showAllApps ? "收起" : "更多"}
+                className="w-full text-xs text-muted-foreground hover:text-foreground/90 group hover:shadow-[0_2px_4px_rgba(0,0,0,0.05)]"
                 onClick={toggleShowAllApps}
               />
             )}
           </div>
         </div>
+
+        {/* 分隔线 - 底部 */}
+        <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent mx-4" />
       </div>
 
-      {/* 折叠状态图标视图 */}
+      {/* 折叠状态 - 保持空白 */}
       <div
         className={cn(
-          "absolute inset-0 flex flex-col items-center gap-6 py-4",
-          "transition-all duration-300 ease-in-out",
+          "absolute inset-0 transition-all duration-300 ease-in-out",
           isExpanded ? "opacity-0 translate-x-2 pointer-events-none" : "opacity-100 transform-none",
         )}
-      >
-        {/* 添加折叠状态下的图标指示 */}
-        <div className="flex flex-col items-center gap-3">
-          <MessageSquare className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
-          <Grid className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
-        </div>
-      </div>
+      />
     </div>
   )
 } 

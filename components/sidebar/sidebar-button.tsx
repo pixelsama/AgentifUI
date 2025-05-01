@@ -23,7 +23,8 @@ export function SidebarButton({ icon, text, active = false, className, onClick, 
       className={cn(
         "relative flex items-center rounded-lg px-3 py-2.5 text-sm font-medium",
         "transition-all duration-200 ease-in-out",
-        "hover:bg-accent/70 hover:scale-[1.02] hover:shadow-sm",
+        "hover:bg-accent/70 hover:scale-[1.02]",
+        "hover:shadow-[0_0_0.5rem_0_rgba(var(--primary),.1)]",
         isExpanded ? "w-full" : "w-10",
         active 
           ? "bg-primary/10 text-primary shadow-inner" 
