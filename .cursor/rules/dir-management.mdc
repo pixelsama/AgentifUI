@@ -22,7 +22,12 @@ llm-eduhub/
   ├── app/                # Application source code (App Router pattern)
   │   ├── (components)/   # Component directory (grouped)
   │   ├── (lib)/          # Utilities, hooks, and configuration (grouped)
-  │   └── api/            # API routes
+  │   ├── api/            # API routes
+  │   ├── about/          # About page route
+  │   ├── dashboard/      # Dashboard page route
+  │   ├── login/          # Login page route
+  │   ├── register/       # Register page route
+  │   └── page.tsx        # Home page route
   ├── public/             # Static assets
   ├── scripts/            # Utility scripts for development, deployment, etc.
   │   ├── test_dify_proxy_advanced.py # Advanced Dify proxy test script
@@ -49,84 +54,98 @@ The `app/` directory follows Next.js App Router conventions with added organizat
 ```
 app/
   ├── (components)/
-  │   ├── ui/            # Generic UI components
-  │   │   ├── Button.tsx
-  │   │   └── ...
-  │   ├── layout/        # Layout components
-  │   │   ├── Header.tsx
-  │   │   └── ...
-  │   └── features/      # Feature components
-  │       ├── auth/
-  │       └── ...
-  └── ...
+  │   ├── ui/            # Generic UI components (e.g., Button.tsx)
+  │   ├── auth/          # Authentication related components (e.g., LoginForm.tsx, RegisterForm.tsx)
+  │   ├── dashboard/     # Dashboard related components (e.g., DashboardContent.tsx)
+  │   ├── home/          # Home page related components (e.g., Home.tsx)
+  │   └── ...
+  ├── (lib)/
+  │   ├── config/        # Configuration files
+  │   ├── utils/         # Utility functions
+  │   └── ...
+  ├── api/
+  │   ├── auth/          # Authentication-related API routes
+  │   └── ...
+  ├── about/
+  │   └── page.tsx       # Route for /about
+  ├── dashboard/
+  │   └── page.tsx       # Route for /dashboard (protected)
+  ├── login/
+  │   └── page.tsx       # Route for /login
+  ├── register/
+  │   └── page.tsx       # Route for /register
+  └── page.tsx           # Route for / (home)
 ```
 
 ## Naming Conventions
 
 1. **Directories**:
    - Use kebab-case for multi-word directory names (e.g., `user-settings/`)
-   - Wrap grouping directories in parentheses (e.g., `(components)/`)
+   - Wrap grouping directories in parentheses (e.g., `(components)/`, `(lib)/`)
+   - Route directories should match the URL path (e.g., `login/`)
    - Use square brackets for dynamic route segments (e.g., `[appId]/`)
    - Use spread syntax for catch-all routes (e.g., `[...slug]/`)
 
 2. **Files**:
-   - Use camelCase for utility files (e.g., `difyConfig.ts`)
-   - Use PascalCase for React components (e.g., `Button.tsx`)
-   - Use kebab-case for static assets (e.g., `logo-dark.png`)
-   - Always include appropriate file extensions
+   - Route entry points MUST be named `page.tsx`.
+   - Use PascalCase for React components (e.g., `Button.tsx`, `LoginForm.tsx`).
+   - Use camelCase for utility files (e.g., `difyConfig.ts`, `utils.ts`).
+   - Use kebab-case for static assets (e.g., `logo-dark.png`).
+   - Always include appropriate file extensions.
 
 ## Directory Management Guidelines
 
 When modifying the project structure, please follow these guidelines:
 
 1. **Adding New Directories**:
-   - Place components in the appropriate subdirectory under `(components)/`
-   - Place utilities, hooks, or configuration in the appropriate subdirectory under `(lib)/`
-   - For new features, consider creating a dedicated route directory
+   - Components go under `(components)/`, organized by feature/type (e.g., `(components)/auth/`).
+   - Utilities go under `(lib)/`, organized by type (e.g., `(lib)/utils/`).
+   - New page routes are created directly under `app/` (e.g., `app/settings/page.tsx` for `/settings`).
 
 2. **Adding New Files**:
-   - Follow the established naming conventions
-   - Place files in the appropriate directory based on their purpose
-   - Avoid deep nesting (more than 3-4 levels) when possible
+   - Follow the established naming conventions.
+   - Place files in the appropriate directory based on their purpose.
+   - Components related to a specific feature should reside in a dedicated subdirectory within `(components)/`.
 
 3. **Updating This Document**:
-   - When adding, removing, or reorganizing directories, update this document
-   - Include a brief explanation of the purpose of new directories
-   - Keep the directory tree representations up-to-date
+   - When adding, removing, or reorganizing directories or routes, update this document.
+   - Include a brief explanation of the purpose of new directories/routes.
+   - Keep the directory tree representations up-to-date.
 
 4. **Special Considerations**:
-   - Grouped directories (with parentheses) are not part of the URL path in Next.js
-   - API routes should be organized by service or functionality domain
-   - Keep layout components close to where they are used
+   - Grouped directories (with parentheses) do not affect the URL path.
+   - `middleware.ts` controls access to routes (public vs. protected). Ensure public routes are correctly listed.
+   - API routes should be organized by service or functionality domain within `app/api/`.
 
 ## Path Aliases
 
-The project uses TypeScript path aliases for cleaner imports:
+The project uses TypeScript path aliases defined in `tsconfig.json` for cleaner imports:
 
 - `@/` - Points to the `app/` directory
-- `@/lib/*` - Points to the `app/(lib)/*` directory
-- `@/components/*` - Points to the `app/(components)/*` directory
+- `@lib/*` - Points to the `app/(lib)/*` directory
+- `@components/*` - Points to the `app/(components)/*` directory
 
-Always use path aliases instead of relative imports when crossing directory boundaries.
+Always use path aliases instead of relative imports when crossing major directory boundaries (e.g., importing from `(lib)` into `(components)`).
 
 ## Update Process
 
 When making structural changes to the project:
 
-1. Plan your directory changes and discuss with the team if significant
-2. Implement the changes following the conventions above
-3. Update this document to reflect the new structure
-4. Commit the updated document along with your code changes
+1. Plan your directory/route changes.
+2. Implement the changes following the conventions above.
+3. Update `middleware.ts` if route accessibility changes (public/protected).
+4. Update this document (`dir-management.mdc`) to reflect the new structure.
+5. Commit the updated document along with your code changes using the standard commit format.
 
 By maintaining this document, we ensure that all team members understand the project structure and can contribute effectively.
 
 ## Directory Naming
 
 1. **Special Directories**:
-   - `(components)`: UI components
-   - `(lib)`: Utility functions and configuration
-   - `api`: API routes
-   - `public`: Static assets
+   - `(components)`: Contains all React components, organized by feature/type. Not part of the route.
+   - `(lib)`: Contains utility functions, configuration, hooks, etc. Not part of the route.
+   - `api`: Contains backend API routes. Part of the route (`/api/...`).
+   - `public`: Contains static assets served directly.
 
 ## Import Path
 
@@ -143,35 +162,36 @@ By maintaining this document, we ensure that all team members understand the pro
    ```
 
 2. **Import Rules**:
-   - Use path aliases instead of relative paths
-   - Component imports use `@components/`
-   - Utility imports use `@lib/`
-   - Other app directory files use `@/`
+   - Use path aliases instead of relative paths for cross-directory imports.
+   - Component imports use `@components/` (e.g., `@components/ui/Button`, `@components/auth/LoginForm`).
+   - Utility imports use `@lib/` (e.g., `@lib/utils`).
+   - Importing files within the same top-level directory (e.g., two components within `(components)/auth/`) can use relative paths if preferred, but aliases are generally recommended for clarity.
 
    Example:
    ```typescript
    // ✅ Correct import method
-   import Button from '@components/ui/Button';
+   import { Button } from '@components/ui/Button';
    import { cn } from '@lib/utils';
-   import { Hero } from '@components/home/Hero';
+   import { Home } from '@components/home/Home';
+   import { LoginForm } from '@components/auth/LoginForm';
 
-   // ❌ Avoid using relative paths
-   import Button from '../../components/ui/Button';
-   import { cn } from '../lib/utils';
+   // ❌ Avoid using deep relative paths like this
+   // import Button from '../../../../(components)/ui/Button';
    ```
 
 3. **Import Order**:
-   - Third-party library imports
-   - Path aliases imports
+   - Third-party library imports (e.g., `react`, `next`, `framer-motion`)
+   - Path aliases imports (`@components/`, `@lib/`)
    - Relative imports (if necessary)
-   - Style imports
+   - Style imports (if applicable)
 
 ## API Directory Structure
 
 ```
 app/
   ├── api/
-  │   ├── auth/          # Authentication-related API routes
+  │   ├── auth/          # Authentication-related API routes (e.g., /api/auth/login)
+  │   │   └── route.ts   # Example API route file
   │   ├── chat/          # Chat-related API routes
   │   └── ...
   └── ...
@@ -182,8 +202,10 @@ app/
 ```
 app/
   ├── (lib)/
-  │   ├── config/        # Configuration files
-  │   ├── utils/         # Utility functions
+  │   ├── config/        # Configuration files (e.g., Supabase config)
+  │   ├── utils/         # Utility functions (e.g., cn function)
+  │   └── types/         # Shared TypeScript types
+  │   └── hooks/         # Custom React hooks
   │   └── ...
   └── ...
 ```
@@ -191,24 +213,21 @@ app/
 ## Best Practices
 
 1. **Component Organization**:
-   - Generic components go in `ui/` directory
-   - Layout components go in `layout/` directory
-   - Specific feature components go in `features/` directory
+   - Generic, reusable UI components go in `(components)/ui/`.
+   - Components specific to a feature/page go in dedicated subdirectories (e.g., `(components)/auth/`, `(components)/dashboard/`).
+   - Page components (like `Home.tsx`) reside in feature-specific directories (e.g., `(components)/home/`).
 
 2. **Import Practices**:
-   - Always use path aliases
-   - Keep import paths clear and consistent
-   - Avoid deep relative paths
+   - Prefer path aliases over relative paths for clarity and easier refactoring.
+   - Keep import paths consistent.
 
 3. **File Location**:
-   - Component-related type definitions go in component files
-   - Shared type definitions go in `(lib)/types/` directory
-   - Utility functions go in `(lib)/utils/` directory
+   - Component-related type definitions can reside within the component file or a nearby `types.ts` file if complex.
+   - Shared type definitions go in `(lib)/types/`.
+   - Utility functions go in `(lib)/utils/`.
 
 4. **Directory Grouping**:
-   - Use parentheses `()` to mark grouped directories
-   - Grouped directories do not affect routes
-   - Keep grouped directory structure clear
+   - Use parentheses `()` to group related code without affecting the URL structure (e.g., `(components)`, `(lib)`).
 
 Following these guidelines ensures code consistency and maintainability. Please refer to this document when adding new files or modifying directory structure.
 

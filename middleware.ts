@@ -47,10 +47,14 @@ export async function middleware(request: NextRequest) {
   const url = new URL(request.url)
   const isAuthRoute = url.pathname.startsWith('/auth')
   const isApiRoute = url.pathname.startsWith('/api')
+  const isPublicRoute = url.pathname === '/' || 
+                         url.pathname === '/login' || 
+                         url.pathname === '/about' || 
+                         url.pathname.startsWith('/register')
   
-  // 如果用户未登录且不是认证路由或公开API，重定向到登录页
-  if (!user && !isAuthRoute && !isApiRoute && url.pathname !== '/') {
-    return NextResponse.redirect(new URL('/auth/login', request.url))
+  // 如果用户未登录且不是认证路由或公开API或公开页面，重定向到登录页
+  if (!user && !isAuthRoute && !isApiRoute && !isPublicRoute) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   // 如果用户已登录且访问认证路由，重定向到首页
