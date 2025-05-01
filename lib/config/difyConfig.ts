@@ -1,4 +1,4 @@
-import { supabase } from './supabaseConfig';
+import { supabase } from '@lib/config/supabaseConfig';
 
 export interface DifyAppConfig {
   apiKey: string;
