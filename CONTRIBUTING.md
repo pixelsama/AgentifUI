@@ -197,6 +197,57 @@ git push origin feature/your-feature-name
 feat(auth): 添加Google Workspace SSO认证支持
 ```
 
+## Supabase 团队协作开发规范 (V1.0)
+
+本节概述了团队在使用 Supabase 进行协作开发时的关键流程和规范。
+
+### 1. 部署流程
+
+**开发与生产环境**:
+- **开发环境**: 使用 Supabase Cloud 作为共享开发环境
+- **最终环境**: 项目最终将私有化部署 (Self-Hosted)
+- **Staging 环境**: 项目后期搭建与最终生产环境一致的自建 Supabase 环境用于验证
+
+**部署准备**:
+- 在 Staging 环境中完整应用所有迁移 (`supabase migration up`)
+- 部署应用程序并进行充分测试，发现并解决云端与自建环境的差异
+
+### 2. Git 管理流程
+
+**核心原则**:
+- Git 是数据库结构定义 (`supabase/migrations/`) 和种子数据 (`supabase/seed.sql`) 的唯一真实来源
+- 所有 Supabase 结构变更必须通过迁移文件提交到 Git
+
+**工作流程**:
+1. 使用特性分支 (Feature Branch) 进行开发
+2. 频繁同步代码，减少冲突可能
+3. 数据库结构变更必须提交对应的迁移文件到 Git
+4. 通过 Pull Request 合并回主分支
+
+### 3. Supabase 团队开发流程
+
+**环境设置**:
+- 团队共享一个 Supabase Cloud 项目作为中心开发数据库
+- 开发者各自配置本地开发环境，并链接到共享项目 (`supabase link --project-ref <ID>`)
+- 妥善管理环境变量和访问凭证
+
+**数据库结构管理**:
+1. 需要修改数据库结构时，创建迁移文件 (`supabase migration new <名称>`)
+2. 编辑生成的 SQL 文件，实现结构变更
+3. 本地验证迁移脚本
+4. 提交到 Git 与相关代码一起
+5. 应用到云端 (`supabase migration up`)
+
+**严格禁止**:
+- 禁止直接通过 Supabase Studio UI 修改数据库结构而不生成迁移文件
+- 禁止修改已提交到 Git 的迁移文件
+
+**冲突处理**:
+- 迁移冲突时，创建新的迁移文件来修正，而不是修改已有迁移文件
+- 大型结构变更前，提前与团队沟通
+
+通过以上规范，我们确保了代码化、自动化和可追溯性，保证本地与云端（最终是自建环境）结构定义的严格一致性。
+
 ## 常见问题解答
 
 ### Q: Supabase启动失败怎么办？
