@@ -1,0 +1,190 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# TypeScript类型定义规范
+
+本文档提供LLM-EduHub项目中TypeScript类型定义的编写规范和最佳实践。遵循这些规范可以提高代码的可读性、可维护性和类型安全性。
+
+## 基本原则
+
+1. **严格类型化**：优先使用严格类型定义，避免`any`类型
+2. **描述性命名**：类型名称应当清晰描述其表示的数据结构或用途
+3. **组织一致性**：相关类型应当集中定义和管理
+4. **类型复用**：鼓励通过组合和扩展现有类型创建新类型
+
+## 类型命名约定
+
+1. **接口（Interface）**：
+   - 使用PascalCase（大驼峰）命名法
+   - 名称应描述其表示的实体
+   - 避免使用`I`前缀
+   - 例如：`User`, `ApiResponse`, `DatabaseConfig`
+
+2. **类型别名（Type Alias）**：
+   - 使用PascalCase命名法
+   - 对于复杂类型或联合类型特别有用
+   - 例如：`UserRole`, `ApiMethod`, `RequestStatus`
+
+3. **枚举（Enum）**：
+   - 使用PascalCase命名法
+   - 枚举值使用PascalCase或全大写常量风格（取决于项目约定）
+   - 例如：`UserStatus`, `HttpMethod`, `ErrorCode`
+
+4. **类型参数（泛型）**：
+   - 使用单个大写字母或具有描述性的PascalCase名称
+   - 常见约定：`T`表示通用类型, `K`表示键类型, `V`表示值类型
+   - 更复杂的泛型应使用描述性名称
+   - 例如：`Array<T>`, `Map<K, V>`, `ApiResponse<Data>`
+
+## 类型组织
+
+1. **类型文件**：
+   - 主要类型定义放在`types.ts`文件中
+   - 特定域的类型可放在`{domain}Types.ts`
+   - 组件专用类型可以直接定义在组件文件内
+
+2. **类型导出**：
+   - 公共类型应明确导出
+   - 特定组件的类型可保持在组件文件内
+   - 示例：`export type User = {...}`
+
+## 常见类型模式
+
+### API相关类型
+
+```typescript
+// API响应类型
+export type ApiResponse<T> = {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+  };
+};
+
+// API请求参数类型
+export type GetUserParams = {
+  userId: string;
+  includeProfile?: boolean;
+};
+```
+
+### 组件Props类型
+
+```typescript
+// React组件Props
+export type ButtonProps = {
+  text: string;
+  onClick: () => void;
+  variant?: 'primary' | 'secondary' | 'danger';
+  disabled?: boolean;
+  className?: string;
+};
+```
+
+### 状态管理类型
+
+```typescript
+// 状态类型
+export type UserState = {
+  currentUser: User | null;
+  isLoading: boolean;
+  error: string | null;
+};
+
+// 操作类型
+export type UserAction = 
+  | { type: 'LOGIN_REQUEST' }
+  | { type: 'LOGIN_SUCCESS', payload: User }
+  | { type: 'LOGIN_FAILURE', error: string }
+  | { type: 'LOGOUT' };
+```
+
+## 类型安全实践
+
+1. **索引签名谨慎使用**：
+   ```typescript
+   // 避免过度使用
+   type LooseObject = {
+     [key: string]: any; // 避免
+   };
+   
+   // 替代方案
+   type StrictObject = {
+     id: string;
+     name: string;
+     [key: string]: string; // 限制为字符串值
+   };
+   ```
+
+2. **联合类型区分**：
+   ```typescript
+   // 使用可区分的联合类型
+   type Result = 
+     | { status: 'success', data: User }
+     | { status: 'error', error: string };
+   
+   // 使用
+   if (result.status === 'success') {
+     // TypeScript知道这里可以安全访问result.data
+   }
+   ```
+
+3. **非空断言谨慎使用**：
+   ```typescript
+   // 避免过度使用非空断言
+   const name = user!.name; // 避免
+   
+   // 替代方案
+   const name = user ? user.name : undefined;
+   // 或
+   if (user) {
+     const name = user.name;
+   }
+   ```
+
+## 类型定义示例
+
+### 用户相关类型
+
+```typescript
+export type User = {
+  id: string;
+  username: string;
+  email: string;
+  displayName?: string;
+  avatarUrl?: string;
+  role: UserRole;
+  createdAt: string;
+};
+
+export enum UserRole {
+  Admin = 'admin',
+  User = 'user',
+  Guest = 'guest',
+}
+```
+
+### Supabase相关类型
+
+```typescript
+export type SupabaseAuthResponse = {
+  session: {
+    access_token: string;
+    expires_at: number;
+    refresh_token: string;
+  } | null;
+  user: {
+    id: string;
+    email: string;
+  } | null;
+  error: {
+    message: string;
+  } | null;
+};
+```
+
+遵循这些类型定义规范将帮助保持代码库的一致性，并提高整体代码质量和开发效率。
