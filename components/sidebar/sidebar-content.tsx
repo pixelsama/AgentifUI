@@ -16,21 +16,21 @@ export function SidebarContent() {
     if (isExpanded) {
       const timer = setTimeout(() => {
         setContentVisible(true)
-      }, 50) // Slightly delay content visibility for smoother transition
+      }, 50) // Delay for entrance animation trigger
       return () => clearTimeout(timer)
     } else {
-      setContentVisible(false)
+      setContentVisible(false) // Reset immediately on collapse
     }
   }, [isExpanded])
 
   return (
     <div className="relative flex-1 overflow-hidden">
-      {/* Top Divider */}
+      {/* Top Divider - Animates opacity based on contentVisible, add invisible for robust hiding */}
       <div className={cn(
         "absolute top-0 left-0 right-0 h-px z-10",
-        "transition-all duration-150 ease-in-out",
+        "transition-opacity duration-150 ease-in-out",
         isDark ? "bg-gray-700/60" : "bg-gray-200/50",
-        contentVisible ? "opacity-100 transform-none" : "opacity-0 scale-90"
+        contentVisible ? "opacity-100" : "opacity-0 invisible"
       )} />
       
       {/* Scrollable Content Area */}
@@ -38,20 +38,23 @@ export function SidebarContent() {
         className={cn(
           "absolute inset-0 flex flex-col gap-6 overflow-y-auto pb-4 pt-4",
           "scrollbar-thin scrollbar-track-transparent",
-          isDark 
-            ? "scrollbar-thumb-gray-600" 
-            : "scrollbar-thumb-accent",
-          "transition-all duration-300 ease-in-out",
-          contentVisible
-            ? "opacity-100 transform-none" 
-            : "opacity-0 scale-95 -translate-x-4 pointer-events-none"
+          isDark ? "scrollbar-thumb-gray-600" : "scrollbar-thumb-accent",
+          // Apply transition only when expanding to animate IN
+          isExpanded && "transition-[opacity,transform] duration-300 ease-in-out", 
+          // Control visibility and animation state
+          isExpanded 
+            ? (contentVisible 
+                ? "opacity-100 transform-none"          // Final state for entrance animation
+                : "opacity-0 scale-95 -translate-x-4 pointer-events-none" // Initial state for entrance animation
+              ) 
+            : "hidden" // Instantly hide when collapsed
         )}
       >
         {/* Chat List Section */}
         <SidebarChatList isDark={isDark} contentVisible={contentVisible} />
 
-        {/* Divider between sections (visible in light mode) */}
-        {!isDark && (
+        {/* Divider between sections (visible in light mode) - Hide instantly with content */}
+        {!isDark && isExpanded && (
           <div className="h-px mx-4 bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
         )}
 
@@ -59,22 +62,15 @@ export function SidebarContent() {
         <SidebarAppList isDark={isDark} contentVisible={contentVisible} />
       </div>
 
-      {/* Bottom Divider */}
+      {/* Bottom Divider - Animates opacity based on contentVisible, add invisible for robust hiding */}
       <div className={cn(
         "absolute bottom-0 left-0 right-0 h-px z-10",
-        "transition-all duration-150 ease-in-out",
+        "transition-opacity duration-150 ease-in-out",
         isDark ? "bg-gray-700/60" : "bg-gray-200/50",
-        contentVisible ? "opacity-100 transform-none" : "opacity-0 scale-90"
+        contentVisible ? "opacity-100" : "opacity-0 invisible"
       )} />
 
-      {/* Overlay when collapsed (optional, for visual effect) */}
-      <div
-        className={cn(
-          "absolute inset-0 transition-all duration-300 ease-in-out",
-          isExpanded ? "opacity-0 translate-x-2 pointer-events-none" : "opacity-100 transform-none",
-          // Add background or styles if needed for collapsed state visual
-        )}
-      />
+      {/* Optional Overlay removed */}
     </div>
   )
 } 

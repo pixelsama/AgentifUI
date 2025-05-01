@@ -24,7 +24,7 @@ export function SidebarButton({ icon, text, active = false, className, onClick, 
     <button
       className={cn(
         "relative flex items-center rounded-3xl px-3 py-2.5 text-sm font-medium",
-        "transition-all duration-200 ease-in-out",
+        "transition-[width,background-color,transform,box-shadow] duration-300 ease-in-out",
         
         // 通用悬停效果
         "hover:scale-[1.02]",
@@ -48,13 +48,13 @@ export function SidebarButton({ icon, text, active = false, className, onClick, 
         ],
         
         // 响应式宽度
-        isExpanded ? "w-full justify-start" : "w-10 justify-center",
+        isExpanded ? "w-full" : "w-10",
         className,
       )}
       onClick={handleClick}
       {...props}
     >
-      {/* 图标容器 */}
+      {/* 图标容器 - 固定在左侧 */}
       <span className={cn(
         "flex h-5 w-5 items-center justify-center",
         "transition-transform duration-200",
@@ -69,22 +69,20 @@ export function SidebarButton({ icon, text, active = false, className, onClick, 
           active ? "text-blue-400" : "text-gray-400",
         ],
         
-        // 尺寸与位置
+        // 图标在收缩状态下的缩放效果
         !isExpanded && "scale-110",
-        !isExpanded && "mx-auto"
       )}>
         {icon}
       </span>
 
-      {/* 文本内容 */}
-      {isExpanded && (
-        <span className={cn(
-          "ml-2 whitespace-nowrap",
-          isDark && active && "text-blue-300"
-        )}>
-          {text}
-        </span>
-      )}
+      {/* 文本内容 - 使用绝对定位，根据 isExpanded 瞬时显隐 */}
+      <span className={cn(
+        "absolute left-10 whitespace-nowrap",
+        isDark && active && "text-blue-300",
+        isExpanded ? "block" : "hidden"
+      )}>
+        {text}
+      </span>
     </button>
   )
 } 

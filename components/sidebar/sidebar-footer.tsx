@@ -15,13 +15,13 @@ export function SidebarFooter() {
         ? "bg-gradient-to-t from-gray-900 via-gray-900/98 to-transparent pt-8" 
         : "bg-gradient-to-t from-background via-background to-transparent pt-8"
     )}>
-      {/* 分隔线 - 使用渐变效果代替实线边框 */}
-      <div className={cn(
+      {/* 分隔线 - 已移除 */}
+      {/* <div className={cn(
         "absolute top-0 left-4 right-4 h-px",
         isDark 
           ? "bg-gradient-to-r from-transparent via-gray-700 to-transparent"
           : "bg-gradient-to-r from-transparent via-muted/40 to-transparent"
-      )}></div>
+      )}></div> */}
       
       <SidebarButton
         icon={<Settings className={cn(
