@@ -20,7 +20,8 @@ llm-eduhub/
   ├── .next/              # Next.js build output
   ├── .vscode/            # VSCode configuration files
   ├── app/                # Application source code (App Router pattern)
-  │   ├── (lib)/          # Utilities, hooks, and helpers (grouped)
+  │   ├── (components)/   # Component directory (grouped)
+  │   ├── (lib)/          # Utilities, hooks, and configuration (grouped)
   │   └── api/            # API routes
   ├── public/             # Static assets
   ├── scripts/            # Utility scripts for development, deployment, etc.
@@ -47,27 +48,17 @@ The `app/` directory follows Next.js App Router conventions with added organizat
 
 ```
 app/
-  ├── (lib)/              # Utilities and shared code (grouped)
-  │   ├── config/         # Configuration settings and constants
-  │   │   ├── difyConfig.ts      # Dify API configuration settings
-  │   │   └── supabaseConfig.ts  # Supabase configuration settings
-  │   └── utils/          # Utility functions
-  │       ├── supabaseAuth.ts    # Supabase authentication utilities
-  │       ├── supabaseDB.ts      # Supabase database utilities
-  │       └── supabaseSSO.ts     # Supabase SSO utilities
-  ├── api/                # API routes
-  │   ├── auth/           # Authentication-related API routes
-  │   │   ├── identify/   # User identification routes
-  │   │   └── sso/        # Single Sign-On routes
-  │   │       └── initiate/  # SSO initiation endpoints
-  │   └── dify/           # Dify API integration
-  │       └── [appId]/    # Dynamic routes for specific Dify apps
-  │           └── [...slug]/  # Catch-all route handler
-  │               └── route.ts  # Route implementation for Dify proxy
-  ├── layout.tsx          # Root layout component
-  ├── page.tsx            # Homepage component
-  ├── globals.css         # Global CSS styles
-  └── favicon.ico         # Website favicon
+  ├── (components)/
+  │   ├── ui/            # Generic UI components
+  │   │   ├── Button.tsx
+  │   │   └── ...
+  │   ├── layout/        # Layout components
+  │   │   ├── Header.tsx
+  │   │   └── ...
+  │   └── features/      # Feature components
+  │       ├── auth/
+  │       └── ...
+  └── ...
 ```
 
 ## Naming Conventions
@@ -128,5 +119,97 @@ When making structural changes to the project:
 4. Commit the updated document along with your code changes
 
 By maintaining this document, we ensure that all team members understand the project structure and can contribute effectively.
+
+## Directory Naming
+
+1. **Special Directories**:
+   - `(components)`: UI components
+   - `(lib)`: Utility functions and configuration
+   - `api`: API routes
+   - `public`: Static assets
+
+## Import Path
+
+1. **Path Aliases**:
+   - Project uses the following path aliases for cleaner imports:
+   ```json
+   {
+     "paths": {
+       "@/*": ["./app/*"],
+       "@lib/*": ["./app/(lib)/*"],
+       "@components/*": ["./app/(components)/*"]
+     }
+   }
+   ```
+
+2. **Import Rules**:
+   - Use path aliases instead of relative paths
+   - Component imports use `@components/`
+   - Utility imports use `@lib/`
+   - Other app directory files use `@/`
+
+   Example:
+   ```typescript
+   // ✅ Correct import method
+   import Button from '@components/ui/Button';
+   import { cn } from '@lib/utils';
+   import { Hero } from '@components/home/Hero';
+
+   // ❌ Avoid using relative paths
+   import Button from '../../components/ui/Button';
+   import { cn } from '../lib/utils';
+   ```
+
+3. **Import Order**:
+   - Third-party library imports
+   - Path aliases imports
+   - Relative imports (if necessary)
+   - Style imports
+
+## API Directory Structure
+
+```
+app/
+  ├── api/
+  │   ├── auth/          # Authentication-related API routes
+  │   ├── chat/          # Chat-related API routes
+  │   └── ...
+  └── ...
+```
+
+## Tool and Configuration Directory
+
+```
+app/
+  ├── (lib)/
+  │   ├── config/        # Configuration files
+  │   ├── utils/         # Utility functions
+  │   └── ...
+  └── ...
+```
+
+## Best Practices
+
+1. **Component Organization**:
+   - Generic components go in `ui/` directory
+   - Layout components go in `layout/` directory
+   - Specific feature components go in `features/` directory
+
+2. **Import Practices**:
+   - Always use path aliases
+   - Keep import paths clear and consistent
+   - Avoid deep relative paths
+
+3. **File Location**:
+   - Component-related type definitions go in component files
+   - Shared type definitions go in `(lib)/types/` directory
+   - Utility functions go in `(lib)/utils/` directory
+
+4. **Directory Grouping**:
+   - Use parentheses `()` to mark grouped directories
+   - Grouped directories do not affect routes
+   - Keep grouped directory structure clear
+
+Following these guidelines ensures code consistency and maintainability. Please refer to this document when adding new files or modifying directory structure.
 
 
