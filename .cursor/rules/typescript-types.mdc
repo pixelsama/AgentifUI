@@ -85,6 +85,62 @@ export type ButtonProps = {
 };
 ```
 
+### 响应式组件Props类型
+
+为支持使用Tailwind CSS进行响应式开发，组件Props类型应当遵循以下模式：
+
+```typescript
+// 响应式组件Props示例
+export type ResponsiveCardProps = {
+  // 内容相关
+  title: string;
+  children: React.ReactNode;
+  
+  // 响应式布局相关
+  className?: string;            // 允许传入自定义Tailwind类名
+  fullWidth?: boolean;           // 是否占满容器宽度
+  responsiveSize?: {             // 在不同断点下的尺寸
+    sm?: string;
+    md?: string;
+    lg?: string;
+    xl?: string;
+  };
+  hideOnMobile?: boolean;        // 在移动设备隐藏
+  mobileOnly?: boolean;          // 只在移动设备显示
+  desktopLayout?: 'horizontal' | 'vertical'; // 桌面布局方式
+};
+
+// 使用示例
+type TabLayoutProps = {
+  tabs: Array<{
+    id: string;
+    label: string;
+    content: React.ReactNode;
+  }>;
+  orientation: 'horizontal' | 'vertical'; // 桌面端方向
+  mobileOrientation?: 'horizontal' | 'vertical'; // 可选的移动端特定方向
+  tabsPosition?: 'top' | 'bottom' | 'left' | 'right'; // 标签位置
+};
+```
+
+在实现具有响应式设计的组件时，应考虑以下类型定义最佳实践：
+
+1. **明确的响应式属性**：
+   - 为不同屏幕尺寸的特定行为设置专用属性
+   - 使用可选属性处理默认情况
+
+2. **自定义类名支持**：
+   - 总是为组件提供`className`属性，允许使用者传入Tailwind类
+   - 使用工具函数合并内部类和外部类：`cn(defaultClasses, props.className)`
+
+3. **响应式样式类型**：
+   - 使用对象定义不同断点的样式选项
+   - 示例：`type ResponsiveSpacing = { base?: string; sm?: string; md?: string; lg?: string; }`
+
+4. **断点条件渲染类型**：
+   - 为不同屏幕尺寸下可能使用不同组件的情况定义类型
+   - 示例：`type ResponsiveComponent = { mobile: React.ReactNode; desktop: React.ReactNode; }`
+
 ### 状态管理类型
 
 ```typescript

@@ -1,5 +1,5 @@
 ---
-description: if I tell you commit to the git,you should follow this rules
+description: if I tell you commit to the git,you should follow this rule
 globs: 
 alwaysApply: false
 ---

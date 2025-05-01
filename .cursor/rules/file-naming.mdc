@@ -1,5 +1,5 @@
 ---
-description: 
+description: when you create file or folder,you should follow this rule
 globs: 
 alwaysApply: false
 ---
@@ -21,6 +21,30 @@ alwaysApply: false
 - 使用**PascalCase**（大驼峰式命名法）
 - 单文件组件使用`.tsx`扩展名
 - 例如：`Button.tsx`, `UserProfile.tsx`, `NavBar.tsx`
+
+### 响应式组件文件命名
+
+对于专门处理响应式布局的组件，推荐以下命名模式：
+
+- **带断点后缀的组件**：明确标明组件适用的屏幕尺寸
+  - 例如：`NavBarMobile.tsx`, `NavBarDesktop.tsx`
+
+- **响应式变体组件**：描述组件的响应式变体
+  - 例如：`CardVertical.tsx`, `CardHorizontal.tsx`
+
+- **通用响应式组件**：使用`Responsive`前缀
+  - 例如：`ResponsiveLayout.tsx`, `ResponsiveContainer.tsx`
+
+- **特例组件目录**：对于复杂的响应式组件，可以创建专门的目录
+  ```
+  app/(components)/navigation/
+  ├── NavBar.tsx         # 主入口组件
+  ├── MobileNav.tsx      # 移动端导航
+  ├── DesktopNav.tsx     # 桌面端导航
+  └── TabletNav.tsx      # 平板端导航（如需要）
+  ```
+
+当组件需要基于屏幕尺寸有显著不同的实现时，建议拆分为多个文件而不是在单个文件中使用条件渲染，这样可以提高代码的可维护性。
 
 ### 工具和辅助函数文件
 
