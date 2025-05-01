@@ -12,45 +12,45 @@ alwaysApply: false
 1. **简洁明确**：文件名应当简短明确，直观反映文件内容和用途
 2. **一致性**：同类文件应保持命名风格一致
 3. **避免特殊字符**：除了连字符（-）和点（.）外，避免使用特殊字符
-4. **避免大写字母**：除React组件外，一般文件名应使用小写字母
+4. **使用小写字母**：所有文件名应使用小写字母，包括React组件文件
 
 ## 文件类型命名规范
 
 ### React组件文件
 
-- 使用**PascalCase**（大驼峰式命名法）
+- 使用**kebab-case**（连字符命名法）
 - 单文件组件使用`.tsx`扩展名
-- 例如：`Button.tsx`, `UserProfile.tsx`, `NavBar.tsx`
+- 例如：`button.tsx`, `user-profile.tsx`, `nav-bar.tsx`
 
 ### 响应式组件文件命名
 
 对于专门处理响应式布局的组件，推荐以下命名模式：
 
 - **带断点后缀的组件**：明确标明组件适用的屏幕尺寸
-  - 例如：`NavBarMobile.tsx`, `NavBarDesktop.tsx`
+  - 例如：`nav-bar-mobile.tsx`, `nav-bar-desktop.tsx`
 
 - **响应式变体组件**：描述组件的响应式变体
-  - 例如：`CardVertical.tsx`, `CardHorizontal.tsx`
+  - 例如：`card-vertical.tsx`, `card-horizontal.tsx`
 
-- **通用响应式组件**：使用`Responsive`前缀
-  - 例如：`ResponsiveLayout.tsx`, `ResponsiveContainer.tsx`
+- **通用响应式组件**：使用`responsive`前缀
+  - 例如：`responsive-layout.tsx`, `responsive-container.tsx`
 
 - **特例组件目录**：对于复杂的响应式组件，可以创建专门的目录
   ```
   components/navigation/
-  ├── NavBar.tsx         # 主入口组件
-  ├── MobileNav.tsx      # 移动端导航
-  ├── DesktopNav.tsx     # 桌面端导航
-  └── TabletNav.tsx      # 平板端导航（如需要）
+  ├── nav-bar.tsx         # 主入口组件
+  ├── mobile-nav.tsx      # 移动端导航
+  ├── desktop-nav.tsx     # 桌面端导航
+  └── tablet-nav.tsx      # 平板端导航（如需要）
   ```
 
 当组件需要基于屏幕尺寸有显著不同的实现时，建议拆分为多个文件而不是在单个文件中使用条件渲染，这样可以提高代码的可维护性。
 
 ### 工具和辅助函数文件
 
-- 使用**camelCase**（小驼峰式命名法）
+- 使用**kebab-case**（连字符命名法）
 - 通常使用`.ts`扩展名
-- 例如：`supabaseAuth.ts`, `formatDate.ts`, `difyConfig.ts`
+- 例如：`supabase-auth.ts`, `format-date.ts`, `dify-config.ts`
 
 ### API路由文件
 
@@ -66,19 +66,19 @@ alwaysApply: false
 ### 类型定义文件
 
 - 主要类型定义文件使用`types.ts`
-- 特定领域的类型文件可使用`{domain}Types.ts`格式
-- 例如：`apiTypes.ts`, `authTypes.ts`
+- 特定领域的类型文件可使用`{domain}-types.ts`格式
+- 例如：`api-types.ts`, `auth-types.ts`
 
 ### 配置文件
 
 - 使用明确的描述性名称
-- 通常采用项目通用格式（如`.config.ts`后缀）
-- 例如：`supabaseConfig.ts`, `difyConfig.ts`
+- 通常采用项目通用格式（如`.config.ts`后缀或使用连字符）
+- 例如：`supabase-config.ts`, `dify-config.ts`
 
 ### 测试文件
 
 - 与被测试文件名对应，添加`.test.ts`或`.spec.ts`后缀
-- 例如：`Button.test.tsx`, `supabaseAuth.spec.ts`
+- 例如：`button.test.tsx`, `supabase-auth.spec.ts`
 
 ## 目录命名
 
@@ -99,7 +99,7 @@ alwaysApply: false
 
 ### 动态路由和分组
 
-- 动态路由段使用方括号：`[id]`, `[userId]`
+- 动态路由段使用方括号：`[id]`, `[user-id]`
 - 通配动态路由使用扩展语法：`[...slug]`
 - 路由分组使用圆括号：`(auth)`, `(dashboard)`
 - 注意：根目录下的components和lib不使用圆括号，只有app目录下的路由分组才使用
@@ -108,13 +108,13 @@ alwaysApply: false
 
 | 文件类型 | 命名风格 | 示例 |
 |---------|---------|------|
-| React组件 | PascalCase | `Button.tsx`, `UserCard.tsx` |
-| 工具函数 | camelCase | `formatDate.ts`, `supabaseAuth.ts` |
+| React组件 | kebab-case | `button.tsx`, `user-card.tsx` |
+| 工具函数 | kebab-case | `format-date.ts`, `supabase-auth.ts` |
 | API路由 | Next.js约定 | `route.ts` |
 | 静态资源 | kebab-case | `logo-dark.svg`, `icon-home.png` |
-| 类型定义 | 描述性+Types | `apiTypes.ts`, `userTypes.ts` |
-| 配置文件 | 描述性+Config | `difyConfig.ts` |
-| 测试文件 | 源文件名+test/spec | `Button.test.tsx` |
+| 类型定义 | 描述性-types | `api-types.ts`, `user-types.ts` |
+| 配置文件 | 描述性-config | `dify-config.ts` |
+| 测试文件 | 源文件名+test/spec | `button.test.tsx` |
 
 ## 建议与提醒
 

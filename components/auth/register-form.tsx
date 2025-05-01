@@ -2,14 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@components/ui/Button';
+import { Button } from '@components/ui/button';
 import Link from 'next/link';
 
-export function LoginForm() {
+export function RegisterForm() {
   const router = useRouter();
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
+    confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,15 +26,25 @@ export function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // 注意：这里是简化的登录逻辑，后续需要添加真实的用户认证
-    setIsLoading(true);
     
+    // 表单验证
+    if (formData.password !== formData.confirmPassword) {
+      setError('两次输入的密码不一致');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError('');
+
     try {
-      // 简化逻辑：直接跳转到聊天页面
-      // 注意：后续需要替换为实际的登录API调用和认证逻辑
-      router.push('/chat');
+      // 这里添加实际的注册逻辑
+      // 模拟注册请求
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 注册成功后跳转到登录页面
+      router.push('/login');
     } catch (err) {
-      setError('登录失败，请检查您的邮箱和密码');
+      setError('注册失败，请稍后再试');
     } finally {
       setIsLoading(false);
     }
@@ -41,9 +53,9 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900">登录</h2>
+        <h2 className="text-3xl font-bold text-gray-900">注册账号</h2>
         <p className="mt-2 text-sm text-gray-600">
-          继续探索 AI 教育的无限可能
+          加入我们，开始探索AI教育的无限可能
         </p>
       </div>
 
@@ -55,6 +67,23 @@ export function LoginForm() {
 
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
         <div className="space-y-4">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              姓名
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              required
+              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="您的姓名"
+              value={formData.name}
+              onChange={handleChange}
+            />
+          </div>
+          
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               邮箱
@@ -80,7 +109,7 @@ export function LoginForm() {
               id="password"
               name="password"
               type="password"
-              autoComplete="current-password"
+              autoComplete="new-password"
               required
               className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               placeholder="••••••••"
@@ -88,25 +117,22 @@ export function LoginForm() {
               onChange={handleChange}
             />
           </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="remember_me"
-              name="remember_me"
-              type="checkbox"
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="remember_me" className="ml-2 block text-sm text-gray-900">
-              记住我
+          
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              确认密码
             </label>
-          </div>
-
-          <div className="text-sm">
-            <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
-              忘记密码？
-            </Link>
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              required
+              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="••••••••"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
           </div>
         </div>
 
@@ -116,16 +142,16 @@ export function LoginForm() {
             isLoading={isLoading}
             className="w-full"
           >
-            登录
+            注册
           </Button>
         </div>
       </form>
 
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">
-          还没有账号？{' '}
-          <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
-            立即注册
+          已有账号？{' '}
+          <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+            立即登录
           </Link>
         </p>
       </div>

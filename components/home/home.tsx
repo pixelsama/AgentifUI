@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@components/ui/Button';
+import { Button } from '@components/ui/button';
 import { useRouter } from 'next/navigation';
 
 export function Home() {
