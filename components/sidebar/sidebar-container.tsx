@@ -6,9 +6,10 @@ import { SidebarFooter } from "./sidebar-footer"
 import { useTheme } from "@lib/hooks/use-theme"
 import { useMobile } from "@lib/hooks"
 import { cn } from "@lib/utils"
+import { useEffect, useState } from "react"
 
 export function SidebarContainer() {
-  const { setHovering, getSidebarWidth } = useSidebarStore()
+  const { isExpanded, setHovering, isMounted } = useSidebarStore()
   const { isDark } = useTheme()
   const isMobile = useMobile()
 
@@ -31,8 +32,17 @@ export function SidebarContainer() {
         "flex h-screen flex-col border-r border-transparent",
         "transition-all duration-300 ease-in-out",
         "overflow-hidden",
-        // 使用store中的方法动态计算宽度
-        getSidebarWidth(isMobile),
+        
+        // 使用媒体查询控制初始宽度:
+        // 桌面设备(md及以上)：直接应用宽度
+        isExpanded ? "md:w-64" : "md:w-16",
+        
+        // 移动设备(md以下)：
+        // - 初始宽度为0，避免闪烁
+        // - 仅当挂载完成且展开时才显示
+        "w-0",
+        isMobile && isMounted && isExpanded ? "w-64" : "w-0",
+        
         "z-20 fixed md:relative",
         
         // 亮色模式下的样式

@@ -29,32 +29,39 @@ export default function ChatLayout({ children }: ChatLayoutProps) {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* 移动端导航按钮 - 仅在客户端渲染 */}
-      {isMounted && <MobileNavButton />}
+      {/* 
+        移动端导航按钮 - 仅在客户端挂载后显示 
+        使用mobile类只在移动设备上显示
+      */}
+      <div className="md:hidden">
+        {isMounted && <MobileNavButton />}
+      </div>
       
-      {/* 侧边栏使用fixed定位，确保不随内容滚动 - 仅在客户端确认设备类型后渲染 */}
-      {isMounted && (
-        <div 
-          className={cn(
-            "fixed top-0 left-0 h-full z-30",
-            // 在移动端且侧边栏关闭时完全隐藏
-            isMobile && !isExpanded && "hidden"
-          )}
-        >
+      {/* 
+        侧边栏 - 使用CSS媒体查询控制初始显示:
+        - 在移动设备(md以下)：只有在isMounted且isExpanded时才显示
+        - 在桌面设备(md及以上)：始终显示
+      */}
+      <div className={cn(
+        // 桌面设备上始终显示
+        "md:block",
+        // 移动设备上根据状态控制显示
+        "hidden",
+        isMobile && isMounted && isExpanded ? "block" : "hidden"
+      )}>
+        <div className="fixed top-0 left-0 h-full z-30">
           <Sidebar />
         </div>
-      )}
+      </div>
       
       {/* 主内容区域，根据侧边栏状态调整margin */}
       <main
         className={cn(
           "flex-1 overflow-auto h-screen",
-          // 仅在客户端渲染后应用布局样式
-          isMounted ? [
-            isExpanded ? "md:ml-64" : "md:ml-16",
-            // 移动设备上的边距
-            isMobile && isExpanded ? "ml-0" : "ml-0"
-          ] : "",
+          // 桌面端根据侧边栏状态设置margin
+          isExpanded ? "md:ml-64" : "md:ml-16",
+          // 移动设备不设置margin
+          "ml-0",
           // 过渡效果
           "transition-all duration-300 ease-in-out"
         )}
