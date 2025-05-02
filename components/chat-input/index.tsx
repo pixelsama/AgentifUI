@@ -163,33 +163,41 @@ interface ChatContainerProps {
   widthClass: string
 }
 
-// 定义 ChatInput 容器的向上偏移，在这里修改垂直高度
-const INPUT_VERTICAL_SHIFT = "5rem"; // 示例偏移值（根据需要调整，可能与 WelcomeScreen 偏移匹配）
+// 定义欢迎界面时的向上偏移量
+const INPUT_VERTICAL_SHIFT = "5rem"; 
+// 定义对话界面距离底部的距离
+const INPUT_BOTTOM_MARGIN = "1.5rem";
 
 const ChatContainer = ({ children, isWelcomeScreen = false, isDark = false, className, widthClass }: ChatContainerProps) => {
-  // 基础定位类
+  
+  // 基本样式，包括绝对定位和宽度
   const baseClasses = cn(
-    "w-full absolute left-1/2 transform", // 保持水平居中变换
+    "w-full absolute left-1/2", // 定位和宽度
     widthClass,
-    "transition-[top,bottom] duration-200 ease-in-out", // 添加顶部/底部变换
+    // 应用过渡到所有变化的属性，特别是 transform, top, bottom
+    "transition-all duration-300 ease-in-out", 
     className,
   );
 
-  // 根据欢迎页状态确定动态样式
+  // 动态计算样式，优先使用 transform 实现动画
   const dynamicStyles: React.CSSProperties = isWelcomeScreen 
     ? { 
-        top: `calc(50% - ${INPUT_VERTICAL_SHIFT})`, // 应用向上偏移
-        transform: 'translate(-50%, -50%)' // 保持居中变换
+        // 欢迎界面：基于顶部定位，并通过 transform 居中和上移
+        top: `50%`, 
+        bottom: 'auto', // 确保 bottom 无效
+        transform: `translate(-50%, calc(-50% - ${INPUT_VERTICAL_SHIFT}))` 
       }
     : { 
-        bottom: '1.5rem', // 等同于 bottom-6
-        transform: 'translateX(-50%)' // 只水平居中
+        // 对话界面：基于底部定位，并通过 transform 水平居中
+        top: 'auto', // 确保 top 无效
+        bottom: INPUT_BOTTOM_MARGIN, 
+        transform: 'translateX(-50%)' 
       };
 
   return (
     <div
       className={baseClasses}
-      style={dynamicStyles} // 应用动态样式
+      style={dynamicStyles}
     >
       <div
         className={cn(
