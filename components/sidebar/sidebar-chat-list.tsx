@@ -7,6 +7,7 @@ import { SidebarChatIcon } from "./sidebar-chat-icon"
 import { cn } from "@lib/utils"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { MoreButton, DropdownMenu, PinButton } from "@components/ui"
+import { useMobile } from "@lib/hooks/use-mobile"
 
 // 示例数据 - 使用新的图标组件
 const chatHistory = [
@@ -39,6 +40,7 @@ export function SidebarChatList({
   onSelectChat 
 }: SidebarChatListProps) {
   const { lockExpanded } = useSidebarStore()
+  const isMobile = useMobile()
   const [showAllChats, setShowAllChats] = React.useState(false)
   const [pinnedChats, setPinnedChats] = React.useState(chatHistory.filter(chat => chat.isPinned));
   const [unpinnedChats, setUnpinnedChats] = React.useState(chatHistory.filter(chat => !chat.isPinned));
@@ -85,11 +87,18 @@ export function SidebarChatList({
         onClick={() => onSelectChat(chat.id)}
       />
       
-      {/* 更多按钮 - 悬停时显示 */}
-      <div className="absolute right-1 top-1/2 -translate-y-1/2">
+      {/* 更多按钮 - 确保在移动端也能正确显示 */}
+      <div className={cn(
+        "absolute right-1 top-1/2 -translate-y-1/2",
+        // 确保在移动端点击区域更大
+        isMobile && "w-8 h-8 flex items-center justify-center"
+      )}>
         <MoreButton 
           id={`chat-more-${chat.id}`}
-          className="opacity-0 group-hover:opacity-100" 
+          className={cn(
+            // 移除group-hover控制，由MoreButton内部处理
+            selectedId === chat.id && "opacity-100"
+          )}
           tooltipText="聊天选项"
         />
       </div>
