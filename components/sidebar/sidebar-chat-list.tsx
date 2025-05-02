@@ -20,9 +20,23 @@ const chatHistory = [
 interface SidebarChatListProps {
   isDark: boolean
   contentVisible: boolean
+  /** 当前选中的聊天ID */
+  selectedId: string | number | null
+  /** 选中聊天项的回调函数 */
+  onSelectChat: (chatId: string | number) => void
 }
 
-export function SidebarChatList({ isDark, contentVisible }: SidebarChatListProps) {
+/**
+ * 侧边栏聊天列表组件
+ * 
+ * 显示用户的聊天历史记录，支持折叠/展开和项目选择
+ */
+export function SidebarChatList({ 
+  isDark, 
+  contentVisible,
+  selectedId,
+  onSelectChat 
+}: SidebarChatListProps) {
   const { lockExpanded } = useSidebarStore()
   const [showAllChats, setShowAllChats] = React.useState(false)
   const visibleChats = showAllChats ? chatHistory : chatHistory.slice(0, 3)
@@ -47,8 +61,9 @@ export function SidebarChatList({ isDark, contentVisible }: SidebarChatListProps
             key={chat.id}
             icon={chat.icon}
             text={chat.title}
-            active={chat.id === 1} // Example active state
+            active={selectedId === chat.id}
             className="w-full group"
+            onClick={() => onSelectChat(chat.id)}
           />
         ))}
         {chatHistory.length > 3 && (

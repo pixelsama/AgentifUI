@@ -7,11 +7,23 @@ import { cn } from "@lib/utils"
 import { SidebarChatList } from "./sidebar-chat-list"
 import { SidebarAppList } from "./sidebar-app-list"
 
+/**
+ * 侧边栏内容组件
+ * 
+ * 管理侧边栏主要内容区域，包括聊天列表和应用列表
+ * 提供选中状态管理，并负责将状态传递给子组件
+ */
 export function SidebarContent() {
-  const { isExpanded } = useSidebarStore()
+  const { 
+    isExpanded, 
+    selectedType, 
+    selectedId, 
+    selectItem 
+  } = useSidebarStore()
   const { isDark } = useTheme()
   const [contentVisible, setContentVisible] = React.useState(false)
 
+  // 处理侧边栏展开/收起的内容显示动画
   React.useEffect(() => {
     if (isExpanded) {
       const timer = setTimeout(() => {
@@ -22,6 +34,24 @@ export function SidebarContent() {
       setContentVisible(false) // Reset immediately on collapse
     }
   }, [isExpanded])
+
+  /**
+   * 选择聊天项目的回调函数
+   * @param chatId 聊天项目的ID
+   */
+  const handleSelectChat = React.useCallback((chatId: number | string) => {
+    selectItem('chat', chatId)
+    // 这里可以添加额外的处理逻辑，如导航、记录历史等
+  }, [selectItem])
+
+  /**
+   * 选择应用项目的回调函数
+   * @param appId 应用项目的ID
+   */
+  const handleSelectApp = React.useCallback((appId: number | string) => {
+    selectItem('app', appId)
+    // 这里可以添加额外的处理逻辑，如打开应用等
+  }, [selectItem])
 
   return (
     <div className="relative flex-1 overflow-hidden">
@@ -51,7 +81,12 @@ export function SidebarContent() {
         )}
       >
         {/* Chat List Section */}
-        <SidebarChatList isDark={isDark} contentVisible={contentVisible} />
+        <SidebarChatList 
+          isDark={isDark} 
+          contentVisible={contentVisible}
+          selectedId={selectedType === 'chat' ? selectedId : null}
+          onSelectChat={handleSelectChat}
+        />
 
         {/* Divider between sections (visible in light mode) - Hide instantly with content */}
         {!isDark && isExpanded && (
@@ -59,7 +94,12 @@ export function SidebarContent() {
         )}
 
         {/* App List Section */}
-        <SidebarAppList isDark={isDark} contentVisible={contentVisible} />
+        <SidebarAppList 
+          isDark={isDark} 
+          contentVisible={contentVisible}
+          selectedId={selectedType === 'app' ? selectedId : null}
+          onSelectApp={handleSelectApp}
+        />
       </div>
 
       {/* Bottom Divider - Animates opacity based on contentVisible, add invisible for robust hiding */}
@@ -69,8 +109,6 @@ export function SidebarContent() {
         isDark ? "bg-gray-700/60" : "bg-gray-200/50",
         contentVisible ? "opacity-100" : "opacity-0 invisible"
       )} />
-
-      {/* Optional Overlay removed */}
     </div>
   )
 } 

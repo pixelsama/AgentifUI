@@ -16,9 +16,23 @@ const applications = [
 interface SidebarAppListProps {
   isDark: boolean
   contentVisible: boolean
+  /** 当前选中的应用ID */
+  selectedId: string | number | null
+  /** 选中应用项的回调函数 */
+  onSelectApp: (appId: string | number) => void
 }
 
-export function SidebarAppList({ isDark, contentVisible }: SidebarAppListProps) {
+/**
+ * 侧边栏应用列表组件
+ * 
+ * 显示可用的应用列表，支持折叠/展开和项目选择
+ */
+export function SidebarAppList({ 
+  isDark, 
+  contentVisible,
+  selectedId,
+  onSelectApp
+}: SidebarAppListProps) {
   const { lockExpanded } = useSidebarStore()
   const [showAllApps, setShowAllApps] = React.useState(false)
   const visibleApps = showAllApps ? applications : applications.slice(0, 2)
@@ -43,8 +57,9 @@ export function SidebarAppList({ isDark, contentVisible }: SidebarAppListProps) 
             key={app.id} 
             icon={app.icon} 
             text={app.title}
-            active={app.id === 1} // Example active state
+            active={selectedId === app.id}
             className="w-full group"
+            onClick={() => onSelectApp(app.id)}
           />
         ))}
         {applications.length > 2 && (

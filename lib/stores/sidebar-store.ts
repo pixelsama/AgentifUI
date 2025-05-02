@@ -1,13 +1,23 @@
 import { create } from "zustand"
 
+// 选中项目类型
+export type SelectedItemType = 'chat' | 'app' | null
+
 interface SidebarState {
   isExpanded: boolean
   isHovering: boolean
   hoverTimeoutId: number | null
   clickCooldown: boolean
+  // 选中状态管理
+  selectedType: SelectedItemType // 'chat' 或 'app' 或 null
+  selectedId: string | number | null // 选中项目的ID
+  // 方法
   toggleSidebar: () => void
   setHovering: (hovering: boolean) => void
   lockExpanded: () => void
+  // 选中状态管理方法
+  selectItem: (type: SelectedItemType, id: string | number | null) => void
+  clearSelection: () => void
 }
 
 export const useSidebarStore = create<SidebarState>((set, get) => ({
@@ -15,6 +25,9 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
   isHovering: false,
   hoverTimeoutId: null,
   clickCooldown: false, // Prevents hover from triggering right after a click
+  // 选中状态初始值
+  selectedType: null,
+  selectedId: null,
 
   toggleSidebar: () => {
     set((state) => {
@@ -91,5 +104,23 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
       clearTimeout(state.hoverTimeoutId)
     }
     set({ isHovering: false, hoverTimeoutId: null })
+  },
+
+  // 选中状态管理方法
+  selectItem: (type: SelectedItemType, id: string | number | null) => {
+    set({ 
+      selectedType: type, 
+      selectedId: id,
+      // 确保侧边栏保持展开状态
+      isExpanded: true,
+      isHovering: false 
+    })
+  },
+
+  clearSelection: () => {
+    set({ 
+      selectedType: null, 
+      selectedId: null 
+    })
   },
 })) 
