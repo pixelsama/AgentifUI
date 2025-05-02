@@ -1,7 +1,7 @@
 ---
-description: when you create file or folder,you should follow this rule
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # 文件命名规范
 

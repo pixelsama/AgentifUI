@@ -4,11 +4,44 @@ import { SidebarHeader } from "./sidebar-header"
 import { SidebarContent } from "./sidebar-content"
 import { SidebarFooter } from "./sidebar-footer"
 import { useTheme } from "@lib/hooks/use-theme"
+import { useMobile } from "@lib/hooks"
 import { cn } from "@lib/utils"
+import { useEffect, useState } from "react"
 
 export function SidebarContainer() {
   const { isExpanded, setHovering } = useSidebarStore()
   const { isDark } = useTheme()
+  const isMobile = useMobile()
+  // 添加挂载状态以防止闪烁
+  const [isMounted, setIsMounted] = useState(false)
+  
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // 在移动端上禁用悬停事件
+  const handleMouseEnter = () => {
+    if (!isMobile) {
+      setHovering(true)
+    }
+  }
+  
+  const handleMouseLeave = () => {
+    if (!isMobile) {
+      setHovering(false)
+    }
+  }
+
+  // 客户端确认设备类型前不设置宽度，防止闪烁
+  const getWidthClass = () => {
+    if (!isMounted) return "w-0" // 初始挂载前不显示
+    
+    if (isMobile) {
+      return isExpanded ? "w-64" : "w-0"
+    } else {
+      return isExpanded ? "w-64" : "w-16"
+    }
+  }
 
   return (
     <aside
@@ -16,7 +49,7 @@ export function SidebarContainer() {
         "flex h-screen flex-col border-r border-transparent",
         "transition-all duration-300 ease-in-out",
         "overflow-hidden",
-        isExpanded ? "w-64" : "w-16",
+        getWidthClass(),
         "z-20 fixed md:relative",
         
         // 亮色模式下的样式
@@ -36,8 +69,8 @@ export function SidebarContainer() {
           "text-gray-200",
         ],
       )}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="flex flex-col h-full">
         <SidebarHeader />

@@ -8,6 +8,8 @@ interface SidebarState {
   isHovering: boolean
   hoverTimeoutId: number | null
   clickCooldown: boolean
+  // 移动端状态管理
+  isMobileNavVisible: boolean
   // 选中状态管理
   selectedType: SelectedItemType // 'chat' 或 'app' 或 null
   selectedId: string | number | null // 选中项目的ID
@@ -15,6 +17,10 @@ interface SidebarState {
   toggleSidebar: () => void
   setHovering: (hovering: boolean) => void
   lockExpanded: () => void
+  // 移动端方法
+  showMobileNav: () => void
+  hideMobileNav: () => void
+  toggleMobileNav: () => void
   // 选中状态管理方法
   selectItem: (type: SelectedItemType, id: string | number | null) => void
   clearSelection: () => void
@@ -25,6 +31,8 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
   isHovering: false,
   hoverTimeoutId: null,
   clickCooldown: false, // Prevents hover from triggering right after a click
+  // 移动端状态
+  isMobileNavVisible: false,
   // 选中状态初始值
   selectedType: null,
   selectedId: null,
@@ -57,6 +65,11 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
 
   setHovering: (hovering) => {
     set((state) => {
+      // 如果是移动设备上，忽略悬停事件
+      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+        return { hoverTimeoutId: null }
+      }
+      
       // Clear any existing timeout
       if (state.hoverTimeoutId) {
         clearTimeout(state.hoverTimeoutId)
@@ -104,6 +117,23 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
       clearTimeout(state.hoverTimeoutId)
     }
     set({ isHovering: false, hoverTimeoutId: null })
+  },
+  
+  // 移动端方法
+  showMobileNav: () => {
+    set({ isExpanded: true, isMobileNavVisible: true })
+  },
+  
+  hideMobileNav: () => {
+    set({ isExpanded: false, isMobileNavVisible: false })
+  },
+  
+  toggleMobileNav: () => {
+    const { isMobileNavVisible } = get()
+    set({ 
+      isExpanded: !isMobileNavVisible,
+      isMobileNavVisible: !isMobileNavVisible
+    })
   },
 
   // 选中状态管理方法

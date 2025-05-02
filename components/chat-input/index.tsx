@@ -66,6 +66,8 @@ interface ChatTextInputProps {
   maxHeight?: number
   isDark?: boolean
   className?: string
+  onCompositionStart?: (e: React.CompositionEvent<HTMLTextAreaElement>) => void
+  onCompositionEnd?: (e: React.CompositionEvent<HTMLTextAreaElement>) => void
 }
 
 const ChatTextInput = ({
@@ -76,6 +78,8 @@ const ChatTextInput = ({
   maxHeight = 180,
   isDark = false,
   className,
+  onCompositionStart,
+  onCompositionEnd,
 }: ChatTextInputProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -107,6 +111,8 @@ const ChatTextInput = ({
         className,
       )}
       style={{ maxHeight: `${maxHeight}px` }}
+      onCompositionStart={onCompositionStart}
+      onCompositionEnd={onCompositionEnd}
     />
   )
 }
@@ -183,6 +189,8 @@ export const ChatInput = ({
 }: ChatInputProps) => {
   const [message, setMessage] = useState("")
   const { widthClass } = useChatWidth()
+  // 添加输入法组合状态
+  const [isComposing, setIsComposing] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value)
@@ -199,10 +207,21 @@ export const ChatInput = ({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    // 只有在不处于输入法组合状态时，按Enter才发送消息
+    if (e.key === "Enter" && !e.shiftKey && !isComposing) {
       e.preventDefault()
       handleSubmit()
     }
+  }
+
+  // 处理输入法组合开始事件
+  const handleCompositionStart = () => {
+    setIsComposing(true)
+  }
+
+  // 处理输入法组合结束事件
+  const handleCompositionEnd = () => {
+    setIsComposing(false)
   }
 
   return (
@@ -216,6 +235,8 @@ export const ChatInput = ({
           placeholder={placeholder}
           maxHeight={maxHeight}
           isDark={isDark}
+          onCompositionStart={handleCompositionStart}
+          onCompositionEnd={handleCompositionEnd}
         />
       </ChatTextArea>
 
