@@ -12,11 +12,11 @@ export const ChatContainer = ({ children, isWelcomeScreen = false, isDark = fals
   return (
     <div
       className={cn(
-        "w-full mx-auto px-4",
-        // 使用相对定位而不是固定定位，确保跟随主内容区
+        "w-full max-w-2xl mx-auto px-4",
+        // 欢迎界面保持居中，非欢迎界面使用absolute定位固定在容器底部
         isWelcomeScreen
           ? "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-          : "relative bottom-6 left-0 right-0 mb-6",
+          : "absolute bottom-4 left-0 right-0", // 使用absolute而不是fixed，确保相对于父容器定位
         className,
       )}
     >

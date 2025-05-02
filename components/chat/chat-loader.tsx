@@ -27,11 +27,11 @@ export const ChatLoader = ({ messages, isWelcomeScreen = false, className }: Cha
       className={cn(
         "w-full mx-auto",
         isMobile ? "max-w-full px-2" : "max-w-2xl px-4",
-        "overflow-y-auto",
+        "overflow-y-auto pb-32",
         className
       )}
     >
-      <div className="pb-28 pt-4 space-y-4">
+      <div className="pt-4 space-y-4">
         {messages.map((msg, index) => (
           <div key={index} className={`flex ${msg.isUser ? "justify-end" : "justify-start"} mb-4`}>
             <div
