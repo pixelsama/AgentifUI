@@ -11,26 +11,27 @@ interface Message {
 
 interface ChatLoaderProps {
   messages: Message[]
-  isDark?: boolean // 保留兼容性，但实际使用hooks
+  isWelcomeScreen?: boolean
   className?: string
 }
 
-export const ChatLoader = ({ messages, className }: ChatLoaderProps) => {
+export const ChatLoader = ({ messages, isWelcomeScreen = false, className }: ChatLoaderProps) => {
   const { isDark } = useTheme()
   const isMobile = useMobile()
   
-  if (messages.length === 0) return null
+  // 如果是欢迎界面或没有消息，不渲染
+  if (isWelcomeScreen || messages.length === 0) return null
 
   return (
     <div
       className={cn(
-        "w-full mx-auto px-4",
-        isMobile ? "max-w-full" : "max-w-2xl",
+        "w-full mx-auto",
+        isMobile ? "max-w-full px-2" : "max-w-2xl px-4",
         "overflow-y-auto",
         className
       )}
     >
-      <div className="pb-20 space-y-4">
+      <div className="pb-28 pt-4 space-y-4">
         {messages.map((msg, index) => (
           <div key={index} className={`flex ${msg.isUser ? "justify-end" : "justify-start"} mb-4`}>
             <div
