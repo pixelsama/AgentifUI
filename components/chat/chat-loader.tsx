@@ -2,6 +2,7 @@
 
 import React from "react"
 import { cn } from "@lib/utils"
+import { useTheme, useMobile } from "@lib/hooks"
 
 interface Message {
   text: string
@@ -10,17 +11,21 @@ interface Message {
 
 interface ChatLoaderProps {
   messages: Message[]
-  isDarkMode: boolean
+  isDark?: boolean // 保留兼容性，但实际使用hooks
   className?: string
 }
 
-export const ChatLoader = ({ messages, isDarkMode, className }: ChatLoaderProps) => {
+export const ChatLoader = ({ messages, className }: ChatLoaderProps) => {
+  const { isDark } = useTheme()
+  const isMobile = useMobile()
+  
   if (messages.length === 0) return null
 
   return (
     <div
       className={cn(
-        "w-full max-w-2xl mx-auto px-4",
+        "w-full mx-auto px-4",
+        isMobile ? "max-w-full" : "max-w-2xl",
         "overflow-y-auto",
         className
       )}
@@ -31,10 +36,10 @@ export const ChatLoader = ({ messages, isDarkMode, className }: ChatLoaderProps)
             <div
               className={`max-w-[80%] rounded-2xl px-4 py-2 ${
                 msg.isUser
-                  ? isDarkMode
+                  ? isDark
                     ? "bg-blue-600 text-white"
                     : "bg-blue-500 text-white"
-                  : isDarkMode
+                  : isDark
                     ? "bg-gray-800 text-white border border-gray-700"
                     : "bg-white text-gray-900 shadow-md"
               }`}

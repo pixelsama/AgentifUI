@@ -6,7 +6,7 @@ interface ChatState {
   setIsWelcomeScreen: (isWelcome: boolean) => void
 
   // 暗黑模式
-  isDarkMode: boolean
+  isDark: boolean
   toggleDarkMode: () => void
 }
 
@@ -16,6 +16,6 @@ export const useChatStore = create<ChatState>((set) => ({
   setIsWelcomeScreen: (isWelcome) => set({ isWelcomeScreen: isWelcome }),
 
   // 暗黑模式
-  isDarkMode: false,
-  toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
+  isDark: false,
+  toggleDarkMode: () => set((state) => ({ isDark: !state.isDark })),
 }))

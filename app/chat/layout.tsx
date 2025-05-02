@@ -5,7 +5,7 @@ import { cn } from "@lib/utils"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { useThemeStore } from "@lib/stores/theme-store"
 import { useEffect } from "react"
-import { useIsMobile } from "../../hooks/use-mobile"
+import { useMobile } from "@lib/hooks"
 
 interface ChatLayoutProps {
   children: React.ReactNode
@@ -14,7 +14,7 @@ interface ChatLayoutProps {
 export default function ChatLayout({ children }: ChatLayoutProps) {
   const { isExpanded } = useSidebarStore()
   const { theme } = useThemeStore()
-  const isMobile = useIsMobile()
+  const isMobile = useMobile()
   
   // 在客户端应用主题
   useEffect(() => {
