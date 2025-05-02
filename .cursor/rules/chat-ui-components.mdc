@@ -1,0 +1,92 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 聊天界面组件结构与交互指南
+
+本文档描述了LLM-EduHub项目中聊天界面的主要组件、它们的交互方式以及重要的布局与过渡效果。
+
+## 核心组件及路径
+
+- **页面布局**: [app/chat/page.tsx](mdc:app/chat/page.tsx) - 定义整体页面结构
+- **聊天输入框**: [components/chat-input/index.tsx](mdc:components/chat-input/index.tsx) - 处理用户输入
+- **欢迎屏幕**: [components/chat/welcome-screen.tsx](mdc:components/chat/welcome-screen.tsx) - 显示初始欢迎信息
+- **提示容器**: [components/chat/prompt-container.tsx](mdc:components/chat/prompt-container.tsx) - 显示提示模板按钮
+- **消息加载器**: [components/chat/chat-loader.tsx](mdc:components/chat/chat-loader.tsx) - 渲染消息列表
+
+## 页面状态管理
+
+聊天界面有两种主要状态，通过 `isWelcomeScreen` 状态变量控制：
+
+1. **欢迎页状态** (`isWelcomeScreen = true`):
+   - 显示欢迎文字 (WelcomeScreen)
+   - 输入框 (ChatInput) 垂直居中
+   - 提示容器 (PromptContainer) 显示在下方
+
+2. **对话状态** (`isWelcomeScreen = false`):
+   - 显示消息列表 (ChatLoader)
+   - 输入框 (ChatInput) 固定在底部
+   - 提示容器 (PromptContainer) 隐藏
+
+## 布局与定位
+
+### 页面结构 (app/chat/page.tsx)
+
+```jsx
+<div className="relative h-full flex flex-col">
+  {/* 消息区域 - 可滚动 */}
+  <div className="flex-1 overflow-auto">
+    {isWelcomeScreen && <WelcomeScreen />}
+    {messages.length > 0 && <ChatLoader messages={messages} />}
+  </div>
+  
+  <ChatInputBackdrop />
+  <ChatInput isWelcomeScreen={isWelcomeScreen} ... />
+  <PromptContainer />
+</div>
+```
+
+- 消息区域使用 `flex-1` 占据所有可用空间，`overflow-auto` 处理超出内容的滚动
+- `ChatInput` 和 `PromptContainer` 使用绝对定位，相对于父容器
+
+### 垂直布局与过渡
+
+1. **聊天输入框 (ChatInput)**:
+   - 欢迎页状态: 使用 `top: 50%` 和 `transform: translate(-50%, calc(-50% - 5rem))` 实现居中偏上定位
+   - 对话状态: 使用 `bottom: 1.5rem` 和 `transform: translateX(-50%)` 实现底部定位
+   - 过渡效果: `transition-all duration-300 ease-in-out` 实现丝滑过渡
+
+2. **欢迎屏幕 (WelcomeScreen)**:
+   - 基础位置: 内部内容使用 `mt-[30vh]` 设置顶部边距
+   - 动态调整: 使用 `transform: translateY(...)` 根据输入框高度变化动态调整位置
+
+3. **提示容器 (PromptContainer)**:
+   - 基础位置: 使用 `top: calc(50%...)` 相对定位
+   - 动态调整: 根据输入框高度变化调整垂直位置
+
+## 响应式高度调整
+
+当用户在输入框中输入多行文本时，输入框会动态扩展。为了保持界面协调:
+
+1. **高度管理**:
+   - 使用 Zustand store [lib/stores/chat-layout-store.ts](mdc:lib/stores/chat-layout-store.ts) 跟踪输入框高度变化
+   - 欢迎屏幕和提示容器监听这个 store 的变化并调整自己的位置
+
+2. **输入框扩展逻辑**:
+   - 输入框有最小高度 48px
+   - 当内容增加时，通过计算 `scrollHeight` 决定新高度
+   - 最大高度通过 `maxHeight` prop 控制 (默认 180px)
+
+## 滚动管理
+
+聊天消息区域的滚动由页面的主容器管理：
+
+```jsx
+<div className="flex-1 overflow-auto">
+  {/* 内容... */}
+</div>
+```
+
+- 滚动条仅在内容超出可见区域时出现 (`overflow-auto`)
+- 滚动条样式由浏览器和操作系统默认样式决定，没有特殊自定义
