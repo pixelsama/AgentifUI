@@ -1,38 +1,54 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { Button } from '@components/ui/button';
-import { MessageSquare } from 'lucide-react';
+import { useState } from 'react';
+import { ChatInput } from '@components/chat-input';
+import { ChatLoader, WelcomeScreen } from '@components/chat';
+import { useChatStore } from '@lib/stores/chat-input-store';
 
 export default function ChatPage() {
-  const router = useRouter();
-  
-  const handleBackToHome = () => {
-    router.push('/');
+  const { isWelcomeScreen, setIsWelcomeScreen, isDarkMode } = useChatStore();
+  const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([]);
+
+  const handleSubmit = (message: string) => {
+    // 添加用户消息
+    setMessages((prev) => [...prev, { text: message, isUser: true }]);
+
+    // 如果是欢迎界面，切换到聊天界面
+    if (isWelcomeScreen) {
+      setIsWelcomeScreen(false);
+    }
+
+    // 模拟AI回复
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          text: `你发送了: "${message}"`,
+          isUser: false,
+        },
+      ]);
+    }, 1000);
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-primary" />
-            <h1 className="text-lg font-medium">聊天界面</h1>
-          </div>
-          <Button variant="outline" size="sm" onClick={handleBackToHome}>
-            返回首页
-          </Button>
-        </div>
-      </header>
-      
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <h2 className="text-xl font-bold text-primary mb-4">聊天功能</h2>
-          <p className="text-muted-foreground">
-            这里是聊天功能页面占位符。侧边栏功能已集成，支持展开/折叠和暗色/亮色模式切换。
-          </p>
-        </div>
-      </div>
+    <div className={`min-h-screen flex flex-col ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
+      <main className="flex-1 relative overflow-hidden">
+        {/* 聊天内容区域 - 欢迎界面或消息列表 */}
+        {isWelcomeScreen && messages.length === 0 ? (
+          <WelcomeScreen isDarkMode={isDarkMode} />
+        ) : (
+          <ChatLoader messages={messages} isDarkMode={isDarkMode} />
+        )}
+
+        {/* 聊天输入组件 */}
+        <ChatInput
+          isWelcomeScreen={isWelcomeScreen && messages.length === 0}
+          onSubmit={handleSubmit}
+          isDark={isDarkMode}
+          placeholder="输入消息，按Enter发送..."
+          className="w-full max-w-full md:max-w-3xl lg:max-w-4xl"
+        />
+      </main>
     </div>
   );
 } 
