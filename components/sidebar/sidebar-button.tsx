@@ -25,6 +25,7 @@ export function SidebarButton({ icon, text, active = false, className, onClick, 
       className={cn(
         "relative flex items-center rounded-3xl px-3 py-2.5 text-sm font-medium",
         "transition-[width,background-color,transform,box-shadow] duration-300 ease-in-out",
+        "cursor-pointer",
         
         // 通用悬停效果
         "hover:scale-[1.02]",
