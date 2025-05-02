@@ -21,6 +21,8 @@ LLM-EduHub采用现代化的四层架构设计，结合Next.js App Router的最�
 - **类型系统**: TypeScript
 - **样式方案**: Tailwind CSS
 - **构建工具**: Next.js (App Router)
+- **状态管理**: Zustand
+- **工具库**: Lucide Icons, clsx/cn
 
 ### 目录结构设计
 ```
@@ -98,14 +100,87 @@ llm-eduhub/
 
 > **注意**：新的目录结构中，`components`和`lib`目录已移至项目根目录，不再使用括号命名法，这样可以更好地组织代码并简化导入路径。
 
-### 状态管理
-- **本地状态**: React useState/useReducer
-- **全局状态**: 使用Zustand实现轻量级状态管理
-  - `sidebar-store.ts`: 管理侧边栏展开/收起和选中状态
-  - `theme-store.ts`: 管理亮色/暗色主题切换
-- **服务器状态**: SWR或React Query用于数据获取和缓存
+### 组件架构
 
-## 3. API层设计
+#### 聊天模块组件结构
+```
+components/
+  ├── chat/              # 聊天相关组件
+  │   ├── chat-loader.tsx       # 消息列表渲染组件
+  │   ├── chat-input-backdrop.tsx # 输入框背景层
+  │   └── welcome-screen.tsx    # 欢迎界面组件
+  └── chat-input/        # 聊天输入组件
+      └── index.tsx      # 聊天输入框主组件
+```
+
+#### 聊天组件职责划分
+
+1. **ChatLoader**
+   - 负责渲染消息列表
+   - 处理消息布局和样式
+   - 支持用户/AI消息差异化展示
+   - 使用统一宽度类保持一致性
+
+2. **ChatInputBackdrop**
+   - 提供输入框背景遮罩
+   - 防止消息穿透到输入框
+   - 保持与其他组件统一宽度
+
+3. **WelcomeScreen**
+   - 展示初始欢迎界面
+   - 提供用户引导信息
+   - 支持暗色模式适配
+
+4. **ChatInput**
+   - 复合组件设计模式
+   - 包含子组件：
+     - ChatButton: 功能按钮
+     - ChatTextInput: 文本输入区
+     - ChatButtonArea: 按钮布局
+     - ChatTextArea: 文本区域
+     - ChatContainer: 容器组件
+
+### 响应式设计架构
+
+#### 宽度管理系统
+```typescript
+// lib/hooks/use-chat-width.ts
+export function useChatWidth() {
+  const isMobile = useMobile()
+  const widthClass = isMobile ? "max-w-full" : "max-w-3xl"
+  const paddingClass = isMobile ? "px-2" : "px-4"
+  return { widthClass, paddingClass, isMobile }
+}
+```
+
+#### 统一宽度应用
+- ChatLoader、ChatInput、ChatInputBackdrop 共用相同宽度类
+- 移动端自适应全宽
+- 桌面端最大宽度限制
+
+## 3. 状态管理
+
+### 聊天状态管理
+```typescript
+// lib/stores/chat-input-store.ts
+interface ChatState {
+  isWelcomeScreen: boolean
+  setIsWelcomeScreen: (isWelcome: boolean) => void
+  isDark: boolean
+  toggleDarkMode: () => void
+}
+```
+
+### 钩子函数设计
+```
+lib/hooks/
+  ├── use-chat-interface.ts  # 聊天界面逻辑封装
+  ├── use-chat-width.ts      # 统一宽度管理
+  ├── use-mobile.ts          # 移动设备检测
+  └── use-theme.ts           # 主题管理
+```
+
+## 4. API层设计
 
 ### API路由结构
 ```
@@ -136,7 +211,7 @@ app/
    - 详细请求日志
    - 错误处理和格式化
 
-## 4. 数据存储设计
+## 5. 数据存储设计
 
 ### Supabase表结构
 
@@ -182,7 +257,7 @@ app/
 - 大型数据（如聊天历史）考虑分页加载和增量同步
 - 实时功能（如聊天）利用Supabase的实时订阅功能
 
-## 5. 认证流程
+## 6. 认证流程
 
 ### 认证方式
 - Supabase内置认证（邮箱/密码）
@@ -196,7 +271,7 @@ app/
 保存令牌 → 客户端状态更新 → 受保护资源访问 → API中间件验证
 ```
 
-## 6. AI模型集成
+## 7. AI模型集成
 
 ### Dify API集成
 - 使用代理模式将前端请求安全地转发到Dify API
@@ -222,7 +297,7 @@ app/
 - 添加重试机制处理临时故障
 - 实现模型回退策略确保可用性
 
-## 7. 部署和扩展策略
+## 8. 部署和扩展策略
 
 ### 部署选项
 - **开发环境**: 本地开发服务器
@@ -234,7 +309,7 @@ app/
 - 实现细粒度缓存策略减少API调用
 - 考虑无服务器数据库连接池管理大量连接
 
-## 8. 安全性考虑
+## 9. 安全性考虑
 
 ### 数据安全
 - API密钥等敏感信息仅在服务器端处理
@@ -251,7 +326,7 @@ app/
   - 对模型输出进行后处理，检测并过滤不适当内容
 - 限制请求大小和频率
 
-## 9. 后续开发路线图
+## 10. 后续开发路线图
 
 ### 近期计划
 - 完善基础组件库
@@ -268,7 +343,7 @@ app/
 - 实现企业级权限管理
 - 支持自定义模型微调和部署
 
-## 10. 参考资源
+## 11. 参考资源
 
 - Next.js App Router文档
 - Supabase文档中的身份验证和数据库指南

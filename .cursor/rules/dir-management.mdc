@@ -85,13 +85,15 @@ app/
 ```
 components/
   ├── ui/               # Generic UI components (e.g., Button.tsx)
-  ├── auth/             # Authentication related components (e.g., LoginForm.tsx, RegisterForm.tsx)
-  ├── chat/             # Chat related components (e.g., ChatWindow.tsx, MessageBubble.tsx)
-  ├── home/             # Home page related components (e.g., Hero.tsx, FeatureList.tsx)
-  ├── layouts/          # Layout components (e.g., Header.tsx, Footer.tsx)
-  │   ├── Header.tsx
-  │   ├── Sidebar.tsx
-  │   └── ...
+  ├── auth/             # Authentication related components
+  ├── chat/             # Chat related components
+  │   ├── chat-loader.tsx       # Message list renderer
+  │   ├── chat-input-backdrop.tsx # Input background layer
+  │   └── welcome-screen.tsx    # Welcome screen component
+  ├── chat-input/       # Chat input components
+  │   └── index.tsx     # Main chat input component
+  ├── home/             # Home page related components
+  ├── layouts/          # Layout components
   └── sidebar/          # Sidebar components
 ```
 
@@ -99,9 +101,16 @@ components/
 
 ```
 lib/
-  ├── config/           # Configuration files (e.g., supabaseConfig.ts)
-  ├── utils/            # Utility functions (e.g., formatDate.ts)
-  └── stores/           # State management (e.g., userStore.ts)
+  ├── config/           # Configuration files
+  ├── hooks/            # Custom React hooks
+  │   ├── use-chat-interface.ts  # Chat interface logic
+  │   ├── use-chat-width.ts      # Unified width management
+  │   ├── use-mobile.ts          # Mobile device detection
+  │   └── use-theme.ts           # Theme management
+  ├── stores/           # State management
+  │   ├── chat-input-store.ts    # Chat state management
+  │   └── theme-store.ts         # Theme state management
+  └── utils/            # Utility functions
 ```
 
 ## Naming Conventions
@@ -252,6 +261,25 @@ app/
 
 为确保项目在各种设备上具有良好的用户体验，所有前端组件必须遵循以下响应式开发规范：
 
+### 统一宽度管理
+
+所有聊天相关组件应使用 `useChatWidth` Hook 来保持一致的宽度：
+
+```typescript
+// 使用示例
+const { widthClass, paddingClass } = useChatWidth()
+
+return (
+  <div className={cn(
+    "w-full mx-auto",
+    widthClass,
+    paddingClass
+  )}>
+    {/* 组件内容 */}
+  </div>
+)
+```
+
 ### Tailwind CSS断点使用
 
 ```
@@ -265,7 +293,8 @@ xl: 1280px  - 特大型设备（如台式机）
 ### 响应式开发原则
 
 1. **移动优先设计**:
-   - 始终先为移动设备设计界面，然后通过媒体查询扩展到更大屏幕
+   - 始终先为移动设备设计界面
+   - 使用媒体查询扩展到更大屏幕
    - 示例: `className="text-sm md:text-base lg:text-lg"`
 
 2. **弹性布局**:
@@ -286,21 +315,23 @@ xl: 1280px  - 特大型设备（如台式机）
    - 复杂组件应拆分为子组件，便于在不同屏幕尺寸下重组
    - 使用条件渲染为不同屏幕尺寸提供不同UI方案
 
-### 响应式组件示例
-
-在`components`目录下的组件应当遵循响应式设计原则:
+### 聊天组件响应式示例
 
 ```tsx
-// components/ui/Card.tsx 示例
-export function Card({ children }: { children: React.ReactNode }) {
+// components/chat/chat-loader.tsx
+export const ChatLoader = ({ messages }: ChatLoaderProps) => {
+  const { widthClass, paddingClass } = useChatWidth()
+  
   return (
-    <div className="bg-white rounded-lg shadow-md 
-                    p-4 md:p-6 lg:p-8 
-                    w-full max-w-sm md:max-w-md lg:max-w-lg
-                    mx-auto">
-      {children}
+    <div className={cn(
+      "w-full mx-auto",
+      widthClass,
+      paddingClass,
+      "overflow-y-auto pb-32"
+    )}>
+      {/* 消息列表 */}
     </div>
-  );
+  )
 }
 ```
 
