@@ -13,11 +13,23 @@ export const useDropdownStore = create<DropdownState>((set) => ({
   activeDropdownId: null,
   position: null,
   toggleDropdown: (id, position) => {
-    set((state) => ({
-      isOpen: state.activeDropdownId !== id || !state.isOpen,
-      activeDropdownId: state.activeDropdownId !== id || !state.isOpen ? id : null,
-      position: position || null
-    }))
+    set((state) => {
+      // 如果点击的是已经打开的下拉菜单，则关闭它
+      if (state.isOpen && state.activeDropdownId === id) {
+        return {
+          isOpen: false,
+          activeDropdownId: null,
+          position: null
+        }
+      }
+      
+      // 否则，打开新的下拉菜单
+      return {
+        isOpen: true,
+        activeDropdownId: id,
+        position: position || null
+      }
+    })
   },
   closeDropdown: () => {
     set({
