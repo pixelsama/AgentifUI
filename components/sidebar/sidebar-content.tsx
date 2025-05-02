@@ -88,9 +88,13 @@ export function SidebarContent() {
           onSelectChat={handleSelectChat}
         />
 
-        {/* Divider between sections (visible in light mode) - Hide instantly with content */}
-        {!isDark && isExpanded && (
-          <div className="h-px mx-4 bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+        {/* Divider between sections */}
+        {isExpanded && (
+          <div className={cn(
+            "h-px mx-4",
+            "bg-gradient-to-r from-transparent via-accent/30 to-transparent",
+            contentVisible ? "opacity-100" : "opacity-0"
+          )} />
         )}
 
         {/* App List Section */}
