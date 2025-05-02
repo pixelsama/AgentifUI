@@ -31,6 +31,11 @@ llm-eduhub/
   ├── .vscode/            # VSCode配置文件
   ├── app/                # 应用源代码（App Router模式）
   │   ├── api/            # API路由
+  │   │   ├── auth/       # 认证相关API
+  │   │   │   ├── identify/ # 用户身份识别
+  │   │   │   └── sso/    # 单点登录
+  │   │   └── dify/       # Dify API集成
+  │   │       └── [appId]/[...slug]/ # 动态路由处理
   │   ├── about/          # About页面路由
   │   ├── chat/           # 聊天页面路由
   │   ├── login/          # 登录页面路由
@@ -38,24 +43,44 @@ llm-eduhub/
   │   └── page.tsx        # 首页路由
   ├── components/         # 组件目录
   │   ├── ui/             # 通用UI组件
-  │   │   ├── Button.tsx
-  │   │   ├── Input.tsx
-  │   │   └── ...
-  │   ├── layouts/        # 布局组件
-  │   │   ├── Header.tsx
-  │   │   ├── Sidebar.tsx
-  │   │   └── ...
   │   ├── auth/           # 认证相关组件
   │   ├── chat/           # 聊天相关组件
   │   ├── home/           # 首页相关组件
+  │   ├── layouts/        # 布局组件
+  │   │   ├── Header.tsx
+  │   │   ├── Footer.tsx
+  │   │   └── ...
   │   └── sidebar/        # 侧边栏组件
+  │       ├── index.tsx        # 侧边栏主组件
+  │       ├── sidebar-container.tsx # 侧边栏容器
+  │       ├── sidebar-header.tsx # 侧边栏头部
+  │       ├── sidebar-content.tsx # 侧边栏内容
+  │       ├── sidebar-footer.tsx # 侧边栏底部
+  │       ├── sidebar-button.tsx # 侧边栏按钮
+  │       ├── sidebar-chat-list.tsx # 聊天列表
+  │       ├── sidebar-app-list.tsx # 应用列表
+  │       ├── sidebar-backdrop.tsx # 移动设备背景遮罩
+  │       ├── sidebar-chat-icon.tsx # 聊天图标
+  │       └── ... 
+  ├── hooks/              # 自定义React钩子
+  │   └── use-mobile.ts   # 移动设备检测
   ├── lib/                # 工具和配置
   │   ├── config/         # 配置文件
+  │   ├── hooks/          # 共享钩子函数
+  │   │   └── use-theme.ts # 主题钩子
   │   ├── stores/         # 状态管理
+  │   │   ├── sidebar-store.ts # 侧边栏状态
+  │   │   └── theme-store.ts   # 主题状态
   │   └── utils/          # 工具函数
   ├── public/             # 静态资源
   ├── scripts/            # 开发、部署等实用脚本
+  │   ├── test_dify_proxy_advanced.py # 高级Dify代理测试脚本
+  │   └── test_dify_proxy_streaming.py # Dify流式代理测试脚本
+  ├── styles/             # 全局样式
   ├── supabase/           # Supabase配置和迁移
+  │   ├── .branches/      # 分支管理
+  │   ├── .temp/          # 临时文件
+  │   └── migrations/     # 数据库迁移
   ├── .env.local          # 本地环境变量
   ├── .gitignore          # Git忽略配置
   ├── CONTRIBUTING.md     # 贡献指南
@@ -67,6 +92,7 @@ llm-eduhub/
   ├── package.json        # 项目依赖和脚本
   ├── postcss.config.mjs  # PostCSS配置
   ├── README.md           # 项目文档
+  ├── tailwind.config.js  # Tailwind配置
   └── tsconfig.json       # TypeScript配置
 ```
 
@@ -74,7 +100,9 @@ llm-eduhub/
 
 ### 状态管理
 - **本地状态**: React useState/useReducer
-- **全局状态**: React Context API或轻量级状态库（推荐Zustand或Jotai）
+- **全局状态**: 使用Zustand实现轻量级状态管理
+  - `sidebar-store.ts`: 管理侧边栏展开/收起和选中状态
+  - `theme-store.ts`: 管理亮色/暗色主题切换
 - **服务器状态**: SWR或React Query用于数据获取和缓存
 
 ## 3. API层设计
@@ -85,15 +113,10 @@ app/
   ├── api/
   │   ├── auth/                     # 认证相关API
   │   │   ├── identify/             # 用户身份识别
-  │   │   ├── profile/              # 用户资料管理（建议添加）
   │   │   └── sso/                  # 单点登录
-  │   ├── chat/                     # 聊天相关API（建议添加）
-  │   │   ├── history/              # 聊天历史记录
-  │   │   └── message/              # 消息处理
   │   ├── dify/                     # Dify API集成
   │   │   └── [appId]/[...slug]/    # 动态路由处理
-  │   └── models/                   # 模型管理API（建议添加）
-  │       └── [provider]/           # 按提供商分类
+  │   └── ...                       # 其他API路由
   └── ...
 ```
 
