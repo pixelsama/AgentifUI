@@ -1,23 +1,30 @@
 import { useState, useEffect } from 'react'
 
+// 定义移动设备断点（与Tailwind md断点一致）
+const MOBILE_BREAKPOINT = 768
+
 export function useMobile() {
-  const [isMobile, setIsMobile] = useState(false)
+  // 初始状态设为undefined，避免服务端渲染不匹配问题
+  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined)
 
   useEffect(() => {
-    // 初始检测
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768) // 常用的移动设备断点
+    // 使用MediaQueryList来监听屏幕尺寸变化
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
     
-    // 监听窗口大小变化
-    window.addEventListener('resize', checkMobile)
+    // 添加变化监听
+    mql.addEventListener("change", onChange)
     
-    // 首次运行
-    checkMobile()
+    // 立即检测当前状态
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     
     // 清理监听器
-    return () => window.removeEventListener('resize', checkMobile)
+    return () => mql.removeEventListener("change", onChange)
   }, [])
 
-  return isMobile
+  // 确保返回布尔值（即使初始状态是undefined）
+  return !!isMobile
 } 
