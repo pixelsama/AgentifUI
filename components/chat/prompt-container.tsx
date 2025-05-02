@@ -7,6 +7,7 @@ import { PromptButton } from "@components/ui/prompt-button"
 import { PromptPanel } from "@components/ui/prompt-panel"
 import { Sparkles } from "lucide-react"
 import { usePromptPanelStore } from "@lib/stores/ui/prompt-panel-store"
+import { useChatLayoutStore, INITIAL_INPUT_HEIGHT } from "@lib/stores/chat-layout-store"
 
 interface PromptContainerProps {
   className?: string
@@ -64,8 +65,8 @@ export const PromptContainer = ({ className }: PromptContainerProps) => {
   const { widthClass, paddingClass } = useChatWidth()
   const { isWelcomeScreen } = useWelcomeScreen()
   const containerRef = useRef<HTMLDivElement>(null)
-  
   const { expandedId, togglePanel, resetPanel } = usePromptPanelStore()
+  const { inputHeight } = useChatLayoutStore()
   
   const handlePromptClick = (prompt: string) => {
     console.log("选中提示:", prompt)
@@ -78,16 +79,32 @@ export const PromptContainer = ({ className }: PromptContainerProps) => {
 
   if (!isWelcomeScreen) return null
   
+  // Calculate HALF the offset needed based on input height increase
+  const offsetY = Math.max(0, (inputHeight - INITIAL_INPUT_HEIGHT) / 2)
+  const baseTopPercentage = 60
+
   return (
     <div 
       ref={containerRef}
       className={cn(
-        "w-full mx-auto relative",
+        "w-full mx-auto relative", // Keep relative here if needed for children, but positioning is absolute
         widthClass,
         paddingClass,
-        "absolute left-1/2 transform -translate-x-1/2 top-[60%]",
+        // Keep original absolute positioning and horizontal centering classes
+        "absolute left-1/2 transform -translate-x-1/2",
+        // Keep original base top class
+        "top-[60%]",
+        // Add transition for smooth movement of the top property
+        "transition-[top] duration-200 ease-in-out",
         className
       )}
+      // Dynamically adjust the top position using calc()
+      style={{ 
+        top: `calc(${baseTopPercentage}% + ${offsetY}px)`,
+        // Ensure transform only handles horizontal centering if needed, 
+        // or remove if translate-x-1/2 class handles it.
+        // transform: `translateX(-50%)` // Keep only horizontal if needed
+      }}
     >
       <div className="flex justify-center gap-3 relative">
         {PROMPT_BUTTONS.map(button => (
