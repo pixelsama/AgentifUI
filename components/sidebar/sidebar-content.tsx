@@ -18,7 +18,8 @@ export function SidebarContent() {
     isExpanded, 
     selectedType, 
     selectedId, 
-    selectItem 
+    selectItem,
+    lockExpanded  // 确保能够锁定展开状态，用于处理下拉菜单等交互
   } = useSidebarStore()
   const { isDark } = useTheme()
   const [contentVisible, setContentVisible] = React.useState(false)
@@ -41,8 +42,9 @@ export function SidebarContent() {
    */
   const handleSelectChat = React.useCallback((chatId: number | string) => {
     selectItem('chat', chatId)
+    lockExpanded() // 确保在选择聊天时保持侧边栏展开状态
     // 这里可以添加额外的处理逻辑，如导航、记录历史等
-  }, [selectItem])
+  }, [selectItem, lockExpanded])
 
   /**
    * 选择应用项目的回调函数
@@ -50,8 +52,9 @@ export function SidebarContent() {
    */
   const handleSelectApp = React.useCallback((appId: number | string) => {
     selectItem('app', appId)
+    lockExpanded() // 确保在选择应用时保持侧边栏展开状态
     // 这里可以添加额外的处理逻辑，如打开应用等
-  }, [selectItem])
+  }, [selectItem, lockExpanded])
 
   return (
     <div className="relative flex-1 overflow-hidden">
