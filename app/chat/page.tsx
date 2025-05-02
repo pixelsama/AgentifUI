@@ -1,37 +1,43 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { Button } from '@components/ui/button';
-import { MessageSquare } from 'lucide-react';
+import { ChatInput } from '@components/chat-input';
+import { ChatLoader, WelcomeScreen, ChatInputBackdrop } from '@components/chat';
+import { useTheme, useMobile, useChatInterface } from '@lib/hooks';
 
 export default function ChatPage() {
-  const router = useRouter();
-  
-  const handleBackToHome = () => {
-    router.push('/');
-  };
+  const { isDark } = useTheme();
+  const isMobile = useMobile();
+  const { 
+    messages, 
+    handleSubmit, 
+    shouldShowWelcome, 
+    shouldShowLoader,
+    isWelcomeScreen
+  } = useChatInterface();
 
   return (
-    <div className="flex flex-col h-full">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-primary" />
-            <h1 className="text-lg font-medium">聊天界面</h1>
-          </div>
-          <Button variant="outline" size="sm" onClick={handleBackToHome}>
-            返回首页
-          </Button>
+    <div className={`h-full flex flex-col ${isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
+      {/* 包装容器使用relative定位提供定位上下文，并且保持100%高度 */}
+      <div className="relative h-full flex flex-col">
+        {/* 消息区域可滚动且占据剩余空间 */}
+        <div className="flex-1 overflow-auto">
+          {/* 欢迎界面 */}
+          {shouldShowWelcome && <WelcomeScreen />}
+          
+          {/* 聊天消息区域 */}
+          {shouldShowLoader && <ChatLoader messages={messages} />}
         </div>
-      </header>
-      
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <h2 className="text-xl font-bold text-primary mb-4">聊天功能</h2>
-          <p className="text-muted-foreground">
-            这里是聊天功能页面占位符。侧边栏功能已集成，支持展开/折叠和暗色/亮色模式切换。
-          </p>
-        </div>
+
+        {/* 底部背景层 - 先放置backdrop确保它在消息上但在输入框下 */}
+        <ChatInputBackdrop />
+        
+        {/* ChatInput将相对于此容器定位，而不是视口 */}
+        <ChatInput
+          isWelcomeScreen={isWelcomeScreen && messages.length === 0}
+          onSubmit={handleSubmit}
+          isDark={isDark}
+          placeholder="输入消息，按Enter发送..."
+        />
       </div>
     </div>
   );
