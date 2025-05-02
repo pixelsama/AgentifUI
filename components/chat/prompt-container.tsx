@@ -7,6 +7,7 @@ import { PromptButton } from "@components/ui/prompt-button"
 import { PromptPanel } from "@components/ui/prompt-panel"
 import { Sparkles } from "lucide-react"
 import { usePromptPanelStore } from "@lib/stores/ui/prompt-panel-store"
+import { useChatLayoutStore, INITIAL_INPUT_HEIGHT } from "@lib/stores/chat-layout-store"
 
 interface PromptContainerProps {
   className?: string
@@ -64,8 +65,8 @@ export const PromptContainer = ({ className }: PromptContainerProps) => {
   const { widthClass, paddingClass } = useChatWidth()
   const { isWelcomeScreen } = useWelcomeScreen()
   const containerRef = useRef<HTMLDivElement>(null)
-  
   const { expandedId, togglePanel, resetPanel } = usePromptPanelStore()
+  const { inputHeight } = useChatLayoutStore()
   
   const handlePromptClick = (prompt: string) => {
     console.log("选中提示:", prompt)
@@ -78,6 +79,12 @@ export const PromptContainer = ({ className }: PromptContainerProps) => {
 
   if (!isWelcomeScreen) return null
   
+  // 计算基于输入框高度增加的半个偏移量
+  const offsetY = Math.max(0, (inputHeight - INITIAL_INPUT_HEIGHT) / 2)
+  
+  // 调整此值以更改初始垂直位置（例如，55 表示更高）
+  const baseTopPercentage = 50 
+
   return (
     <div 
       ref={containerRef}
@@ -85,9 +92,13 @@ export const PromptContainer = ({ className }: PromptContainerProps) => {
         "w-full mx-auto relative",
         widthClass,
         paddingClass,
-        "absolute left-1/2 transform -translate-x-1/2 top-[60%]",
+        "absolute left-1/2 transform -translate-x-1/2",
+        "transition-[top] duration-200 ease-in-out",
         className
       )}
+      style={{ 
+        top: `calc(${baseTopPercentage}% + ${offsetY}px)`, 
+      }}
     >
       <div className="flex justify-center gap-3 relative">
         {PROMPT_BUTTONS.map(button => (

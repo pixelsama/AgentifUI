@@ -1,11 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { PlusIcon, ArrowUpIcon } from "lucide-react"
 import { cn } from "@lib/utils"
 import { Button as UIButton } from "@components/ui/button"
 import { useChatWidth } from "@lib/hooks"
+import { useChatLayoutStore, INITIAL_INPUT_HEIGHT } from "@lib/stores/chat-layout-store"
 
 // 通用按钮组件 - 完全没有布局限制
 interface ChatButtonProps {
@@ -68,6 +69,7 @@ interface ChatTextInputProps {
   className?: string
   onCompositionStart?: (e: React.CompositionEvent<HTMLTextAreaElement>) => void
   onCompositionEnd?: (e: React.CompositionEvent<HTMLTextAreaElement>) => void
+  onHeightChange?: (height: number) => void
 }
 
 const ChatTextInput = ({
@@ -80,21 +82,36 @@ const ChatTextInput = ({
   className,
   onCompositionStart,
   onCompositionEnd,
+  onHeightChange,
 }: ChatTextInputProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // 根据内容调整高度
-  useEffect(() => {
+  // Memoize the height update logic
+  const updateHeight = useCallback(() => {
     const textarea = textareaRef.current
     if (!textarea) return
 
-    // 重置高度以获取正确的scrollHeight
-    textarea.style.height = "48px" // 设置最小高度
-
-    // 计算新高度，但不超过最大高度
-    const newHeight = Math.min(textarea.scrollHeight, maxHeight)
+    // Reset height temporarily to calculate scrollHeight accurately
+    textarea.style.height = "auto" // Use auto instead of fixed min-height for calculation
+    const scrollHeight = textarea.scrollHeight
+    
+    // Calculate new height, respecting maxHeight
+    const newHeight = Math.min(scrollHeight, maxHeight)
+    
+    // Apply the new height
     textarea.style.height = `${newHeight}px`
-  }, [value, maxHeight])
+    
+    // Notify parent component of the height change
+    if (onHeightChange) {
+        // Report the actual rendered height, ensuring it's at least the initial height
+        onHeightChange(Math.max(newHeight, INITIAL_INPUT_HEIGHT)) 
+    }
+  }, [maxHeight, onHeightChange])
+
+  // Adjust height based on value and initial mount
+  useEffect(() => {
+    updateHeight()
+  }, [value, updateHeight])
 
   return (
     <textarea
@@ -103,14 +120,14 @@ const ChatTextInput = ({
       onChange={onChange}
       onKeyDown={onKeyDown}
       placeholder={placeholder}
-      rows={1}
+      rows={1} // Start with one row
       className={cn(
         "w-full resize-none border-0 bg-transparent focus:ring-0 focus:outline-none",
-        "min-h-[48px] overflow-y-auto",
+        "min-h-[48px] overflow-y-auto", // Keep min-height for visual consistency
         isDark ? "text-white placeholder:text-gray-400" : "text-gray-900 placeholder:text-gray-500",
         className,
       )}
-      style={{ maxHeight: `${maxHeight}px` }}
+      style={{ maxHeight: `${maxHeight}px` }} // Control max height via style
       onCompositionStart={onCompositionStart}
       onCompositionEnd={onCompositionEnd}
     />
@@ -146,15 +163,41 @@ interface ChatContainerProps {
   widthClass: string
 }
 
+// 定义欢迎界面时的向上偏移量
+const INPUT_VERTICAL_SHIFT = "5rem"; 
+// 定义对话界面距离底部的距离
+const INPUT_BOTTOM_MARGIN = "1.5rem";
+
 const ChatContainer = ({ children, isWelcomeScreen = false, isDark = false, className, widthClass }: ChatContainerProps) => {
+  
+  // 基本样式，包括绝对定位和宽度
+  const baseClasses = cn(
+    "w-full absolute left-1/2", // 定位和宽度
+    widthClass,
+    // 应用过渡到所有变化的属性，特别是 transform, top, bottom
+    "transition-all duration-300 ease-in-out", 
+    className,
+  );
+
+  // 动态计算样式，优先使用 transform 实现动画
+  const dynamicStyles: React.CSSProperties = isWelcomeScreen 
+    ? { 
+        // 欢迎界面：基于顶部定位，并通过 transform 居中和上移
+        top: `50%`, 
+        bottom: 'auto', // 确保 bottom 无效
+        transform: `translate(-50%, calc(-50% - ${INPUT_VERTICAL_SHIFT}))` 
+      }
+    : { 
+        // 对话界面：基于底部定位，并通过 transform 水平居中
+        top: 'auto', // 确保 top 无效
+        bottom: INPUT_BOTTOM_MARGIN, 
+        transform: 'translateX(-50%)' 
+      };
+
   return (
     <div
-      className={cn(
-        "w-full absolute left-1/2 transform -translate-x-1/2",
-        widthClass,
-        isWelcomeScreen ? "top-1/2 -translate-y-1/2" : "bottom-6",
-        className,
-      )}
+      className={baseClasses}
+      style={dynamicStyles}
     >
       <div
         className={cn(
@@ -189,12 +232,29 @@ export const ChatInput = ({
 }: ChatInputProps) => {
   const [message, setMessage] = useState("")
   const { widthClass } = useChatWidth()
-  // 添加输入法组合状态
   const [isComposing, setIsComposing] = useState(false)
+  const { setInputHeight, resetInputHeight } = useChatLayoutStore()
+
+  // Effect to reset input height when isWelcomeScreen changes
+  useEffect(() => {
+      resetInputHeight();
+  }, [isWelcomeScreen, resetInputHeight]);
+
+  // Effect to reset input height on unmount
+  useEffect(() => {
+      return () => {
+          resetInputHeight();
+      };
+  }, [resetInputHeight]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value)
   }
+
+  // Callback for height changes from ChatTextInput
+  const handleHeightChange = useCallback((height: number) => {
+      setInputHeight(height);
+  }, [setInputHeight]);
 
   const handleSubmit = () => {
     if (!message.trim()) return
@@ -237,6 +297,7 @@ export const ChatInput = ({
           isDark={isDark}
           onCompositionStart={handleCompositionStart}
           onCompositionEnd={handleCompositionEnd}
+          onHeightChange={handleHeightChange}
         />
       </ChatTextArea>
 
