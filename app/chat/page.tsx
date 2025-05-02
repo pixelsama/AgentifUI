@@ -33,10 +33,13 @@ export default function ChatPage() {
           isDark={isDark}
           placeholder="输入消息，按Enter发送..."
         />
+        
+        {/* 提示容器组件 - 现在位于 ChatInput 之后，在同一个相对定位上下文中 */}
+        <PromptContainer />
       </div>
       
-      {/* 提示容器组件 - 内部自己判断是否为欢迎界面 */}
-      <PromptContainer />
+      {/* 提示容器组件 - 移除原来的位置 */}
+      {/* <PromptContainer /> */}
     </div>
   );
 } 

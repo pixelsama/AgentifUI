@@ -6,7 +6,7 @@ import { MoreButton } from './more-button'
 import { DropdownMenu } from './dropdown-menu'
 import { PinButton } from './pin-button'
 import { PromptButton } from './prompt-button'
-import { PromptModal } from './prompt-modal'
+import { PromptPanel } from './prompt-panel'
 
 export {
   Button,
@@ -18,5 +18,5 @@ export {
   DropdownMenu,
   PinButton,
   PromptButton,
-  PromptModal,
+  PromptPanel,
 } 
