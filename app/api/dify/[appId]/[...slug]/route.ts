@@ -2,7 +2,7 @@
 export const dynamic = 'force-dynamic';
 
 import { type NextRequest, NextResponse } from 'next/server';
-import { getDifyAppConfig } from '@lib/config/difyConfig';
+import { getDifyAppConfig } from '@lib/config/dify-config';
 
 // 定义路由参数的接口
 interface DifyApiParams {

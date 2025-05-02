@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { extractDomainFromEmail, getSSOProviderByDomain, getAuthSettings } from '../../../../lib/utils/supabaseSSO'
+import { extractDomainFromEmail, getSSOProviderByDomain, getAuthSettings } from '../../../../lib/utils/supabase-SSO'
 
 export async function POST(request: NextRequest) {
   try {

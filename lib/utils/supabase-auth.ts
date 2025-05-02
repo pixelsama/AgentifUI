@@ -1,4 +1,4 @@
-import { supabase } from '@lib/config/supabaseConfig'
+import { supabase } from '@lib/config/supabase-config'
 
 /**
  * 注册新用户

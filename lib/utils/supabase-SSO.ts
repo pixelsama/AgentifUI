@@ -1,4 +1,4 @@
-import { supabase } from '@lib/config/supabaseConfig'
+import { supabase } from '@lib/config/supabase-config'
 
 // 定义SSO提供商类型
 interface SSOProvider {
