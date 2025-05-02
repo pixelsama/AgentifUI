@@ -5,7 +5,7 @@ import { MobileNavButton } from "@components/mobile"
 import { cn } from "@lib/utils"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { useThemeStore } from "@lib/stores/theme-store"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useMobile } from "@lib/hooks"
 
 interface ChatLayoutProps {
@@ -13,16 +13,14 @@ interface ChatLayoutProps {
 }
 
 export default function ChatLayout({ children }: ChatLayoutProps) {
-  const { isExpanded, isMobileNavVisible } = useSidebarStore()
+  const { isExpanded, isMobileNavVisible, isMounted, setMounted } = useSidebarStore()
   const { theme } = useThemeStore()
   const isMobile = useMobile()
-  // 添加客户端挂载状态，防止闪烁
-  const [isMounted, setIsMounted] = useState(false)
   
   // 在组件挂载后设置状态
   useEffect(() => {
-    setIsMounted(true)
-  }, [])
+    setMounted()
+  }, [setMounted])
   
   // 在客户端应用主题
   useEffect(() => {

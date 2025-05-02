@@ -20,28 +20,27 @@ export function SidebarContent() {
     selectedType, 
     selectedId, 
     selectItem,
-    lockExpanded
+    lockExpanded,
+    contentVisible,
+    updateContentVisibility,
+    showContent
   } = useSidebarStore()
   const { isDark } = useTheme()
   const isMobile = useMobile()
-  const [contentVisible, setContentVisible] = React.useState(false)
 
-  // 处理侧边栏展开/收起的内容显示动画
+  // 处理侧边栏展开/收起的内容显示逻辑
   React.useEffect(() => {
-    if (isExpanded) {
-      // 在移动端上直接显示，不使用延迟
-      if (isMobile) {
-        setContentVisible(true)
-      } else {
-        const timer = setTimeout(() => {
-          setContentVisible(true)
-        }, 50) // 桌面端保留延迟动画
-        return () => clearTimeout(timer)
-      }
-    } else {
-      setContentVisible(false) // Reset immediately on collapse
+    // 首先通知store更新内容可见性的基本状态
+    updateContentVisibility(isMobile)
+    
+    // 只为桌面端添加延迟显示
+    if (isExpanded && !isMobile) {
+      const timer = setTimeout(() => {
+        showContent()
+      }, 50) // 桌面端保留延迟动画
+      return () => clearTimeout(timer)
     }
-  }, [isExpanded, isMobile])
+  }, [isExpanded, isMobile, updateContentVisibility, showContent])
 
   /**
    * 选择聊天项目的回调函数
@@ -95,7 +94,7 @@ export function SidebarContent() {
         {/* Chat List Section */}
         <SidebarChatList 
           isDark={isDark} 
-          contentVisible={isMobile ? true : contentVisible}
+          contentVisible={contentVisible}
           selectedId={selectedType === 'chat' ? selectedId : null}
           onSelectChat={handleSelectChat}
         />
@@ -105,14 +104,14 @@ export function SidebarContent() {
           <div className={cn(
             "h-px mx-4",
             "bg-gradient-to-r from-transparent via-accent/30 to-transparent",
-            contentVisible || isMobile ? "opacity-100" : "opacity-0"
+            contentVisible ? "opacity-100" : "opacity-0"
           )} />
         )}
 
         {/* App List Section */}
         <SidebarAppList 
           isDark={isDark} 
-          contentVisible={isMobile ? true : contentVisible}
+          contentVisible={contentVisible}
           selectedId={selectedType === 'app' ? selectedId : null}
           onSelectApp={handleSelectApp}
         />
