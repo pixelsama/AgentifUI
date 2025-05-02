@@ -17,6 +17,7 @@ export const ChatContainer = ({ children, isWelcomeScreen = false, isDark = fals
         isWelcomeScreen
           ? "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
           : "absolute bottom-4 left-0 right-0", // 使用absolute而不是fixed，确保相对于父容器定位
+        "z-20", // 添加较高的z-index确保在backdrop之上
         className,
       )}
     >

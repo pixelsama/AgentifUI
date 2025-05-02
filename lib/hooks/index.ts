@@ -1,3 +1,4 @@
 export { useTheme } from './use-theme'
 export { useMobile } from './use-mobile'
-export { useChatInterface } from './use-chat-interface' 
+export { useChatInterface } from './use-chat-interface'
+export { useChatWidth } from './use-chat-width' 

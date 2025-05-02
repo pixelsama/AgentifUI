@@ -1,7 +1,7 @@
 'use client';
 
 import { ChatInput } from '@components/chat-input';
-import { ChatLoader, WelcomeScreen } from '@components/chat';
+import { ChatLoader, WelcomeScreen, ChatInputBackdrop } from '@components/chat';
 import { useTheme, useMobile, useChatInterface } from '@lib/hooks';
 
 export default function ChatPage() {
@@ -28,13 +28,15 @@ export default function ChatPage() {
           {shouldShowLoader && <ChatLoader messages={messages} />}
         </div>
 
+        {/* 底部背景层 - 先放置backdrop确保它在消息上但在输入框下 */}
+        <ChatInputBackdrop />
+        
         {/* ChatInput将相对于此容器定位，而不是视口 */}
         <ChatInput
           isWelcomeScreen={isWelcomeScreen && messages.length === 0}
           onSubmit={handleSubmit}
           isDark={isDark}
           placeholder="输入消息，按Enter发送..."
-          className={`${isMobile ? 'max-w-full' : 'max-w-2xl'}`}
         />
       </div>
     </div>

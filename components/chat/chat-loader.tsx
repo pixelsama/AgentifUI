@@ -2,7 +2,7 @@
 
 import React from "react"
 import { cn } from "@lib/utils"
-import { useTheme, useMobile } from "@lib/hooks"
+import { useTheme, useChatWidth } from "@lib/hooks"
 
 interface Message {
   text: string
@@ -17,7 +17,7 @@ interface ChatLoaderProps {
 
 export const ChatLoader = ({ messages, isWelcomeScreen = false, className }: ChatLoaderProps) => {
   const { isDark } = useTheme()
-  const isMobile = useMobile()
+  const { widthClass, paddingClass } = useChatWidth()
   
   // 如果是欢迎界面或没有消息，不渲染
   if (isWelcomeScreen || messages.length === 0) return null
@@ -26,7 +26,7 @@ export const ChatLoader = ({ messages, isWelcomeScreen = false, className }: Cha
     <div
       className={cn(
         "w-full mx-auto",
-        isMobile ? "max-w-full px-2" : "max-w-2xl px-4",
+        `${widthClass} ${paddingClass}`,
         "overflow-y-auto pb-32",
         className
       )}

@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react"
 import { PlusIcon, ArrowUpIcon } from "lucide-react"
 import { cn } from "@lib/utils"
 import { Button as UIButton } from "@components/ui/button"
+import { useChatWidth } from "@lib/hooks"
 
 // 通用按钮组件 - 完全没有布局限制
 interface ChatButtonProps {
@@ -136,14 +137,15 @@ interface ChatContainerProps {
   isWelcomeScreen?: boolean
   isDark?: boolean
   className?: string
+  widthClass: string
 }
 
-const ChatContainer = ({ children, isWelcomeScreen = false, isDark = false, className }: ChatContainerProps) => {
+const ChatContainer = ({ children, isWelcomeScreen = false, isDark = false, className, widthClass }: ChatContainerProps) => {
   return (
     <div
       className={cn(
-        "w-full max-w-2xl absolute left-1/2 transform -translate-x-1/2",
-        // 修改定位方式，确保只有纵向变化，没有横向变化
+        "w-full absolute left-1/2 transform -translate-x-1/2",
+        widthClass,
         isWelcomeScreen ? "top-1/2 -translate-y-1/2" : "bottom-6",
         className,
       )}
@@ -180,6 +182,7 @@ export const ChatInput = ({
   isDark = false,
 }: ChatInputProps) => {
   const [message, setMessage] = useState("")
+  const { widthClass } = useChatWidth()
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value)
@@ -203,7 +206,7 @@ export const ChatInput = ({
   }
 
   return (
-    <ChatContainer isWelcomeScreen={isWelcomeScreen} isDark={isDark} className={className}>
+    <ChatContainer isWelcomeScreen={isWelcomeScreen} isDark={isDark} className={className} widthClass={widthClass}>
       {/* 文本区域 */}
       <ChatTextArea>
         <ChatTextInput
