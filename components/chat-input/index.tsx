@@ -14,7 +14,7 @@ interface ChatButtonProps {
   className?: string
   isDark?: boolean
   ariaLabel: string
-  variant?: "primary" | "secondary"
+  variant?: "function" | "submit"
 }
 
 const ChatButton = ({
@@ -24,18 +24,18 @@ const ChatButton = ({
   className,
   isDark = false,
   ariaLabel,
-  variant = "secondary",
+  variant = "function",
 }: ChatButtonProps) => {
   return (
     <UIButton
       type="button"
       size="sm"
-      variant={variant === "secondary" ? "ghost" : "default"}
+      variant={variant === "function" ? "ghost" : "default"}
       onClick={onClick}
       disabled={disabled}
       className={cn(
         "rounded-full h-8 w-8 flex items-center justify-center",
-        variant === "secondary"
+        variant === "function"
           ? isDark
             ? "border border-gray-700 text-gray-300 hover:bg-gray-800 bg-transparent"
             : "border border-gray-200 text-gray-600 hover:bg-gray-50 bg-transparent"
@@ -225,7 +225,7 @@ export const ChatInput = ({
           <div className="flex-none">
             <ChatButton
               icon={<ArrowUpIcon className="h-4 w-4" />}
-              variant="primary"
+              variant="submit"
               onClick={handleSubmit}
               disabled={!message.trim()}
               isDark={isDark}

@@ -9,7 +9,7 @@ interface ChatButtonProps {
   onClick?: () => void
   disabled?: boolean
   className?: string
-  variant?: "left" | "right"
+  variant?: "function" | "submit"
   isDark?: boolean
   ariaLabel: string
 }
@@ -19,12 +19,12 @@ export const ChatButton = ({
   onClick,
   disabled = false,
   className,
-  variant = "left",
+  variant = "function",
   isDark = false,
   ariaLabel,
 }: ChatButtonProps) => {
-  // 左侧按钮 - 带有渐变感觉的浅灰色边框
-  if (variant === "left") {
+  // 功能按钮 - 带有渐变感觉的浅灰色边框
+  if (variant === "function") {
     return (
       <UIButton
         type="button"
@@ -47,7 +47,7 @@ export const ChatButton = ({
     )
   }
 
-  // 右侧提交按钮 - 空状态为深灰色
+  // 提交/上传按钮 - 空状态为深灰色
   return (
     <UIButton
       type="button"
