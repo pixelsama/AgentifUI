@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { useTheme } from "@lib/hooks/use-theme"
+import { useMobile } from "@lib/hooks"
 import { cn } from "@lib/utils"
 import { SidebarChatList } from "./sidebar-chat-list"
 import { SidebarAppList } from "./sidebar-app-list"
@@ -19,22 +20,28 @@ export function SidebarContent() {
     selectedType, 
     selectedId, 
     selectItem,
-    lockExpanded  // 确保能够锁定展开状态，用于处理下拉菜单等交互
+    lockExpanded
   } = useSidebarStore()
   const { isDark } = useTheme()
+  const isMobile = useMobile()
   const [contentVisible, setContentVisible] = React.useState(false)
 
   // 处理侧边栏展开/收起的内容显示动画
   React.useEffect(() => {
     if (isExpanded) {
-      const timer = setTimeout(() => {
+      // 在移动端上直接显示，不使用延迟
+      if (isMobile) {
         setContentVisible(true)
-      }, 50) // Delay for entrance animation trigger
-      return () => clearTimeout(timer)
+      } else {
+        const timer = setTimeout(() => {
+          setContentVisible(true)
+        }, 50) // 桌面端保留延迟动画
+        return () => clearTimeout(timer)
+      }
     } else {
       setContentVisible(false) // Reset immediately on collapse
     }
-  }, [isExpanded])
+  }, [isExpanded, isMobile])
 
   /**
    * 选择聊天项目的回调函数
@@ -43,7 +50,6 @@ export function SidebarContent() {
   const handleSelectChat = React.useCallback((chatId: number | string) => {
     selectItem('chat', chatId)
     lockExpanded() // 确保在选择聊天时保持侧边栏展开状态
-    // 这里可以添加额外的处理逻辑，如导航、记录历史等
   }, [selectItem, lockExpanded])
 
   /**
@@ -53,7 +59,6 @@ export function SidebarContent() {
   const handleSelectApp = React.useCallback((appId: number | string) => {
     selectItem('app', appId)
     lockExpanded() // 确保在选择应用时保持侧边栏展开状态
-    // 这里可以添加额外的处理逻辑，如打开应用等
   }, [selectItem, lockExpanded])
 
   return (
@@ -72,21 +77,25 @@ export function SidebarContent() {
           "absolute inset-0 flex flex-col gap-6 overflow-y-auto pb-4 pt-4",
           "scrollbar-thin scrollbar-track-transparent",
           isDark ? "scrollbar-thumb-gray-600" : "scrollbar-thumb-accent",
-          // Apply transition only when expanding to animate IN
-          isExpanded && "transition-[opacity,transform] duration-300 ease-in-out", 
-          // Control visibility and animation state
+          // 在移动端上不应用动画效果，直接显示
+          !isMobile && isExpanded && "transition-[opacity,transform] duration-300 ease-in-out", 
+          // 控制可见性和动画状态
           isExpanded 
             ? (contentVisible 
-                ? "opacity-100 transform-none"          // Final state for entrance animation
-                : "opacity-0 scale-95 -translate-x-4 pointer-events-none" // Initial state for entrance animation
+                // 移动端上不应用动画，直接显示
+                ? "opacity-100 transform-none"
+                // 桌面端上保留动画效果
+                : (!isMobile 
+                    ? "opacity-0 scale-95 -translate-x-4 pointer-events-none" 
+                    : "opacity-100 transform-none")
               ) 
-            : "hidden" // Instantly hide when collapsed
+            : "hidden" // 折叠时直接隐藏
         )}
       >
         {/* Chat List Section */}
         <SidebarChatList 
           isDark={isDark} 
-          contentVisible={contentVisible}
+          contentVisible={isMobile ? true : contentVisible}
           selectedId={selectedType === 'chat' ? selectedId : null}
           onSelectChat={handleSelectChat}
         />
@@ -96,14 +105,14 @@ export function SidebarContent() {
           <div className={cn(
             "h-px mx-4",
             "bg-gradient-to-r from-transparent via-accent/30 to-transparent",
-            contentVisible ? "opacity-100" : "opacity-0"
+            contentVisible || isMobile ? "opacity-100" : "opacity-0"
           )} />
         )}
 
         {/* App List Section */}
         <SidebarAppList 
           isDark={isDark} 
-          contentVisible={contentVisible}
+          contentVisible={isMobile ? true : contentVisible}
           selectedId={selectedType === 'app' ? selectedId : null}
           onSelectApp={handleSelectApp}
         />

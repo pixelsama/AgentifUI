@@ -1,6 +1,7 @@
 "use client"
 
 import { Sidebar } from "@components/sidebar"
+import { MobileNavButton } from "@components/mobile"
 import { cn } from "@lib/utils"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { useThemeStore } from "@lib/stores/theme-store"
@@ -12,7 +13,7 @@ interface ChatLayoutProps {
 }
 
 export default function ChatLayout({ children }: ChatLayoutProps) {
-  const { isExpanded } = useSidebarStore()
+  const { isExpanded, isMobileNavVisible } = useSidebarStore()
   const { theme } = useThemeStore()
   const isMobile = useMobile()
   
@@ -23,8 +24,17 @@ export default function ChatLayout({ children }: ChatLayoutProps) {
 
   return (
     <div className="flex min-h-screen bg-background">
+      {/* 移动端导航按钮 */}
+      <MobileNavButton />
+      
       {/* 侧边栏使用fixed定位，确保不随内容滚动 */}
-      <div className="fixed top-0 left-0 h-full z-30">
+      <div 
+        className={cn(
+          "fixed top-0 left-0 h-full z-30",
+          // 在移动端且侧边栏关闭时完全隐藏
+          isMobile && !isExpanded && "hidden"
+        )}
+      >
         <Sidebar />
       </div>
       
@@ -34,7 +44,7 @@ export default function ChatLayout({ children }: ChatLayoutProps) {
           "flex-1 overflow-auto h-screen",
           isExpanded ? "md:ml-64" : "md:ml-16",
           // 移动设备上的边距
-          isMobile ? "ml-16" : "",
+          isMobile && isExpanded ? "ml-0" : "ml-0",
           // 过渡效果
           "transition-all duration-300 ease-in-out"
         )}

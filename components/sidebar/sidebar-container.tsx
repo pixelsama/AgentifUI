@@ -4,11 +4,26 @@ import { SidebarHeader } from "./sidebar-header"
 import { SidebarContent } from "./sidebar-content"
 import { SidebarFooter } from "./sidebar-footer"
 import { useTheme } from "@lib/hooks/use-theme"
+import { useMobile } from "@lib/hooks"
 import { cn } from "@lib/utils"
 
 export function SidebarContainer() {
   const { isExpanded, setHovering } = useSidebarStore()
   const { isDark } = useTheme()
+  const isMobile = useMobile()
+
+  // 在移动端上禁用悬停事件
+  const handleMouseEnter = () => {
+    if (!isMobile) {
+      setHovering(true)
+    }
+  }
+  
+  const handleMouseLeave = () => {
+    if (!isMobile) {
+      setHovering(false)
+    }
+  }
 
   return (
     <aside
@@ -36,8 +51,8 @@ export function SidebarContainer() {
           "text-gray-200",
         ],
       )}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="flex flex-col h-full">
         <SidebarHeader />
