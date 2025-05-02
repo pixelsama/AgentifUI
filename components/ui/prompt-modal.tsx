@@ -39,24 +39,32 @@ interface PromptCardProps {
   title: string
   prompt: string
   onClick: () => void
+  index: number
 }
 
-function PromptCard({ icon, title, prompt, onClick }: PromptCardProps) {
+function PromptCard({ icon, title, prompt, onClick, index }: PromptCardProps) {
   const { isDark } = useTheme()
   
   return (
     <button
       className={cn(
         "w-full text-left p-3 rounded-lg transition-all duration-200",
-        "border",
+        "border hover:shadow-md transform hover:-translate-y-1",
+        "animate-fadein",
         isDark
-          ? "border-gray-700 hover:bg-gray-800 text-gray-300"
-          : "border-gray-200 hover:bg-gray-50 text-gray-700",
+          ? "border-gray-700 hover:bg-gray-800 text-gray-300 hover:border-gray-600"
+          : "border-gray-200 hover:bg-gray-50 text-gray-700 hover:border-gray-300",
       )}
       onClick={onClick}
+      style={{ animationDelay: `${index * 0.1}s` }}
     >
       <div className="flex items-center gap-2 mb-2">
-        {icon}
+        <span className={cn(
+          "w-6 h-6 flex items-center justify-center rounded-full",
+          isDark ? "bg-blue-900/50 text-blue-300" : "bg-blue-100 text-blue-600"
+        )}>
+          {icon}
+        </span>
         <span className="font-medium">{title}</span>
       </div>
       <p className={cn(
@@ -131,31 +139,32 @@ export function PromptModal() {
   
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4">
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-fadein" />
       
       <div
         ref={modalRef}
         className={cn(
           "relative w-full max-w-lg max-h-[85vh] overflow-auto rounded-t-xl sm:rounded-xl",
           "animate-slide-in-down",
-          isDark ? "bg-gray-900" : "bg-white",
-          "shadow-xl"
+          isDark ? "bg-gray-900 border border-gray-700" : "bg-white",
+          "shadow-2xl"
         )}
       >
         {/* 头部 */}
         <div className={cn(
-          "flex items-center justify-between p-4 border-b",
-          isDark ? "border-gray-800" : "border-gray-200"
+          "sticky top-0 z-10 flex items-center justify-between p-4 border-b backdrop-blur-sm",
+          isDark ? "border-gray-800 bg-gray-900/90" : "border-gray-200 bg-white/90"
         )}>
           <h3 className={cn(
-            "font-medium",
+            "font-medium flex items-center gap-2",
             isDark ? "text-gray-200" : "text-gray-800"
           )}>
+            <Sparkles className="w-4 h-4 text-blue-500" />
             提示模板
           </h3>
           <button
             className={cn(
-              "p-1 rounded-full",
+              "p-1.5 rounded-full transition-all duration-200",
               isDark 
                 ? "hover:bg-gray-800 text-gray-400 hover:text-gray-200" 
                 : "hover:bg-gray-100 text-gray-500 hover:text-gray-700"
@@ -163,7 +172,7 @@ export function PromptModal() {
             onClick={closeModal}
             aria-label="关闭"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
         
@@ -173,18 +182,19 @@ export function PromptModal() {
             "p-3 mb-4 rounded-lg flex items-start gap-3 text-sm",
             isDark ? "bg-gray-800/50 text-gray-300" : "bg-gray-50 text-gray-700"
           )}>
-            <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <Info className="w-5 h-5 flex-shrink-0 mt-0.5 text-blue-500" />
             <p>提示模板可以帮助你快速构建有效的问题，点击模板将其添加到输入框。</p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {PROMPT_TEMPLATES.map(template => (
+            {PROMPT_TEMPLATES.map((template, index) => (
               <PromptCard
                 key={template.id}
                 icon={template.icon}
                 title={template.title}
                 prompt={template.prompt}
                 onClick={() => handlePromptClick(template.prompt)}
+                index={index}
               />
             ))}
           </div>

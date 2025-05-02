@@ -1,19 +1,14 @@
 'use client';
 
 import { ChatInput } from '@components/chat-input';
-import { ChatLoader, WelcomeScreen, ChatInputBackdrop } from '@components/chat';
-import { useTheme, useMobile, useChatInterface } from '@lib/hooks';
+import { ChatLoader, WelcomeScreen, ChatInputBackdrop, PromptContainer } from '@components/chat';
+import { useTheme, useMobile, useChatInterface, useWelcomeScreen } from '@lib/hooks';
 
 export default function ChatPage() {
   const { isDark } = useTheme();
   const isMobile = useMobile();
-  const { 
-    messages, 
-    handleSubmit, 
-    shouldShowWelcome, 
-    shouldShowLoader,
-    isWelcomeScreen
-  } = useChatInterface();
+  const { isWelcomeScreen } = useWelcomeScreen();
+  const { messages, handleSubmit } = useChatInterface();
 
   return (
     <div className={`h-full flex flex-col ${isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
@@ -22,10 +17,10 @@ export default function ChatPage() {
         {/* 消息区域可滚动且占据剩余空间 */}
         <div className="flex-1 overflow-auto">
           {/* 欢迎界面 */}
-          {shouldShowWelcome && <WelcomeScreen />}
+          {isWelcomeScreen && <WelcomeScreen />}
           
           {/* 聊天消息区域 */}
-          {shouldShowLoader && <ChatLoader messages={messages} />}
+          {messages.length > 0 && <ChatLoader messages={messages} />}
         </div>
 
         {/* 底部背景层 - 先放置backdrop确保它在消息上但在输入框下 */}
@@ -33,12 +28,15 @@ export default function ChatPage() {
         
         {/* ChatInput将相对于此容器定位，而不是视口 */}
         <ChatInput
-          isWelcomeScreen={isWelcomeScreen && messages.length === 0}
+          isWelcomeScreen={isWelcomeScreen}
           onSubmit={handleSubmit}
           isDark={isDark}
           placeholder="输入消息，按Enter发送..."
         />
       </div>
+      
+      {/* 提示容器组件 - 内部自己判断是否为欢迎界面 */}
+      <PromptContainer />
     </div>
   );
 } 

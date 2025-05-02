@@ -84,7 +84,6 @@ export function DropdownMenu({
   id, 
   className, 
   children,
-  placement = "bottom-left",
   minWidth = 180
 }: DropdownMenuProps) {
   const { isDark } = useTheme()
