@@ -8,6 +8,8 @@ interface ChatTextInputProps {
   value: string
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
+  onCompositionStart?: (e: React.CompositionEvent<HTMLTextAreaElement>) => void
+  onCompositionEnd?: (e: React.CompositionEvent<HTMLTextAreaElement>) => void
   placeholder?: string
   maxHeight?: number
   isDark?: boolean
@@ -18,6 +20,8 @@ export const ChatTextInput = ({
   value,
   onChange,
   onKeyDown,
+  onCompositionStart,
+  onCompositionEnd,
   placeholder = "输入消息...",
   maxHeight = 180,
   isDark = false,
@@ -44,6 +48,8 @@ export const ChatTextInput = ({
       value={value}
       onChange={onChange}
       onKeyDown={onKeyDown}
+      onCompositionStart={onCompositionStart}
+      onCompositionEnd={onCompositionEnd}
       placeholder={placeholder}
       rows={1}
       className={cn(
