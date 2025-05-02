@@ -163,15 +163,33 @@ interface ChatContainerProps {
   widthClass: string
 }
 
+// 定义 ChatInput 容器的向上偏移，在这里修改垂直高度
+const INPUT_VERTICAL_SHIFT = "5rem"; // 示例偏移值（根据需要调整，可能与 WelcomeScreen 偏移匹配）
+
 const ChatContainer = ({ children, isWelcomeScreen = false, isDark = false, className, widthClass }: ChatContainerProps) => {
+  // 基础定位类
+  const baseClasses = cn(
+    "w-full absolute left-1/2 transform", // 保持水平居中变换
+    widthClass,
+    "transition-[top,bottom] duration-200 ease-in-out", // 添加顶部/底部变换
+    className,
+  );
+
+  // 根据欢迎页状态确定动态样式
+  const dynamicStyles: React.CSSProperties = isWelcomeScreen 
+    ? { 
+        top: `calc(50% - ${INPUT_VERTICAL_SHIFT})`, // 应用向上偏移
+        transform: 'translate(-50%, -50%)' // 保持居中变换
+      }
+    : { 
+        bottom: '1.5rem', // 等同于 bottom-6
+        transform: 'translateX(-50%)' // 只水平居中
+      };
+
   return (
     <div
-      className={cn(
-        "w-full absolute left-1/2 transform -translate-x-1/2",
-        widthClass,
-        isWelcomeScreen ? "top-1/2 -translate-y-1/2" : "bottom-6",
-        className,
-      )}
+      className={baseClasses}
+      style={dynamicStyles} // 应用动态样式
     >
       <div
         className={cn(

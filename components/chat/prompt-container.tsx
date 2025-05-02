@@ -79,31 +79,25 @@ export const PromptContainer = ({ className }: PromptContainerProps) => {
 
   if (!isWelcomeScreen) return null
   
-  // Calculate HALF the offset needed based on input height increase
+  // 计算基于输入框高度增加的半个偏移量
   const offsetY = Math.max(0, (inputHeight - INITIAL_INPUT_HEIGHT) / 2)
-  const baseTopPercentage = 60
+  
+  // 调整此值以更改初始垂直位置（例如，55 表示更高）
+  const baseTopPercentage = 50 
 
   return (
     <div 
       ref={containerRef}
       className={cn(
-        "w-full mx-auto relative", // Keep relative here if needed for children, but positioning is absolute
+        "w-full mx-auto relative",
         widthClass,
         paddingClass,
-        // Keep original absolute positioning and horizontal centering classes
         "absolute left-1/2 transform -translate-x-1/2",
-        // Keep original base top class
-        "top-[60%]",
-        // Add transition for smooth movement of the top property
         "transition-[top] duration-200 ease-in-out",
         className
       )}
-      // Dynamically adjust the top position using calc()
       style={{ 
-        top: `calc(${baseTopPercentage}% + ${offsetY}px)`,
-        // Ensure transform only handles horizontal centering if needed, 
-        // or remove if translate-x-1/2 class handles it.
-        // transform: `translateX(-50%)` // Keep only horizontal if needed
+        top: `calc(${baseTopPercentage}% + ${offsetY}px)`, 
       }}
     >
       <div className="flex justify-center gap-3 relative">
