@@ -48,17 +48,17 @@ export function SidebarButton({ icon, text, active = false, className, onClick, 
             : "text-gray-300 hover:text-white",
         ],
         
-        // 响应式宽度
+        // 响应式宽度，保持原始定位布局
         isExpanded ? "w-full" : "w-10",
         className,
       )}
       onClick={handleClick}
       {...props}
     >
-      {/* 图标容器 - 固定在左侧 */}
+      {/* 图标容器 - 修正图标位置，确保在收缩模式下居中 */}
       <span className={cn(
         "flex h-5 w-5 items-center justify-center",
-        "transition-transform duration-200",
+        "transition-[margin,transform] duration-300 ease-in-out",
         
         // 亮色模式下的图标样式
         !isDark && [
@@ -72,6 +72,9 @@ export function SidebarButton({ icon, text, active = false, className, onClick, 
         
         // 图标在收缩状态下的缩放效果
         !isExpanded && "scale-110",
+        
+        // 关键修复：收缩状态下，给图标一个负的左边距，使它向左移动以实现居中
+        !isExpanded && "-ml-0.5",
       )}>
         {icon}
       </span>
@@ -86,4 +89,4 @@ export function SidebarButton({ icon, text, active = false, className, onClick, 
       </span>
     </button>
   )
-} 
+}

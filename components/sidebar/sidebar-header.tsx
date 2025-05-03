@@ -30,14 +30,16 @@ export function SidebarHeader() {
       <SidebarButton
         icon={<Plus className={cn(
           "h-5 w-5 transition-transform duration-200 group-hover:rotate-90",
-          isDark && "text-gray-400 group-hover:text-gray-200"
+          isDark && "text-gray-400 group-hover:text-blue-400"
         )} />}
         text="发起新对话"
         onClick={() => console.log("New chat")}
         aria-label="发起新对话"
         className={cn(
-          "group",
-          isDark && "hover:border-gray-700"
+          "group shadow-md",
+          isDark 
+            ? "bg-gray-800/80 hover:bg-gray-700/80 hover:border-gray-600 hover:shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
+            : "bg-gray-100"
         )}
       />
     </div>
