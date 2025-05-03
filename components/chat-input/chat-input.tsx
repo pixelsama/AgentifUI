@@ -43,7 +43,7 @@ export const ChatInput = ({
     setMessage(e.target.value)
   }
 
-  // Callback for height changes from ChatTextInput
+  // 回调函数，用于处理输入框高度变化
   const handleHeightChange = useCallback((height: number) => {
     setInputHeight(height)
   }, [setInputHeight])
