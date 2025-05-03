@@ -1,4 +1,4 @@
-import { useChatStore } from '@lib/stores/chat-input-store';
+import { useChatInputStore } from '@lib/stores/chat-input-store';
 import { useChatInterface } from './use-chat-interface';
 
 /**
@@ -7,7 +7,7 @@ import { useChatInterface } from './use-chat-interface';
  * 欢迎界面的条件：isWelcomeScreen状态为true，且messages数组为空
  */
 export function useWelcomeScreen() {
-  const { isWelcomeScreen } = useChatStore();
+  const { isWelcomeScreen } = useChatInputStore();
   const { messages } = useChatInterface();
   
   // 只有当isWelcomeScreen为true且没有消息时才认为是欢迎界面

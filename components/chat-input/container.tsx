@@ -1,25 +1,57 @@
-import type React from "react"
+"use client"
+
 import { cn } from "@lib/utils"
 
+// 容器组件
 interface ChatContainerProps {
   children: React.ReactNode
   isWelcomeScreen?: boolean
   isDark?: boolean
   className?: string
+  widthClass: string
 }
 
-export const ChatContainer = ({ children, isWelcomeScreen = false, isDark = false, className }: ChatContainerProps) => {
+// 定义欢迎界面时的向上偏移量
+const INPUT_VERTICAL_SHIFT = "5rem"; 
+// 定义对话界面距离底部的距离
+const INPUT_BOTTOM_MARGIN = "1.5rem";
+
+export const ChatContainer = ({ 
+  children, 
+  isWelcomeScreen = false, 
+  isDark = false, 
+  className, 
+  widthClass 
+}: ChatContainerProps) => {
+  
+  // 基本样式，包括绝对定位和宽度
+  const baseClasses = cn(
+    "w-full absolute left-1/2", // 定位和宽度
+    widthClass,
+    // 应用过渡到所有变化的属性，特别是 transform, top, bottom
+    "transition-all duration-300 ease-in-out", 
+    className,
+  );
+
+  // 动态计算样式，优先使用 transform 实现动画
+  const dynamicStyles: React.CSSProperties = isWelcomeScreen 
+    ? { 
+        // 欢迎界面：基于顶部定位，并通过 transform 居中和上移
+        top: `50%`, 
+        bottom: 'auto', // 确保 bottom 无效
+        transform: `translate(-50%, calc(-50% - ${INPUT_VERTICAL_SHIFT}))` 
+      }
+    : { 
+        // 对话界面：基于底部定位，并通过 transform 水平居中
+        top: 'auto', // 确保 top 无效
+        bottom: INPUT_BOTTOM_MARGIN, 
+        transform: 'translateX(-50%)' 
+      };
+
   return (
     <div
-      className={cn(
-        "w-full max-w-2xl mx-auto px-4",
-        // 欢迎界面保持居中，非欢迎界面使用absolute定位固定在容器底部
-        isWelcomeScreen
-          ? "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-          : "absolute bottom-4 left-0 right-0", // 使用absolute而不是fixed，确保相对于父容器定位
-        "z-20", // 添加较高的z-index确保在backdrop之上
-        className,
-      )}
+      className={baseClasses}
+      style={dynamicStyles}
     >
       <div
         className={cn(

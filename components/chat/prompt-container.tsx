@@ -5,60 +5,21 @@ import { cn } from "@lib/utils"
 import { useTheme, useChatWidth, useWelcomeScreen } from "@lib/hooks"
 import { PromptButton } from "@components/ui/prompt-button"
 import { PromptPanel } from "@components/ui/prompt-panel"
-import { Sparkles } from "lucide-react"
+import { Sparkles, HelpCircle, BookOpen } from "lucide-react"
 import { usePromptPanelStore } from "@lib/stores/ui/prompt-panel-store"
 import { useChatLayoutStore, INITIAL_INPUT_HEIGHT } from "@lib/stores/chat-layout-store"
+import { PROMPT_BUTTONS, PROMPT_TEMPLATES } from "../../templates/prompt.json"
 
 interface PromptContainerProps {
   className?: string
 }
 
-// 模拟提示模板数据
-const PROMPT_TEMPLATES = [
-  {
-    id: 1,
-    icon: <Sparkles className="w-3.5 h-3.5" />,
-    title: "解释概念",
-    prompt: "请详细解释[概念]的含义，包括其定义、应用场景和重要性。",
-  },
-  {
-    id: 2,
-    icon: <Sparkles className="w-3.5 h-3.5" />,
-    title: "总结要点",
-    prompt: "请总结[主题]的主要要点，并列出关键观点。",
-  },
-  {
-    id: 3,
-    icon: <Sparkles className="w-3.5 h-3.5" />,
-    title: "比较不同观点",
-    prompt: "请比较[主题]的不同观点，分析各自的优缺点和适用场景。",
-  },
-  {
-    id: 4,
-    icon: <Sparkles className="w-3.5 h-3.5" />,
-    title: "分析问题",
-    prompt: "请分析[问题]的原因、影响和可能的解决方案。",
-  },
-]
-
-// 推荐按钮数据
-const PROMPT_BUTTONS = [
-  {
-    id: 1,
-    title: "提示模板",
-    icon: <Sparkles className="w-4 h-4" />,
-  },
-  {
-    id: 2,
-    title: "常见问题",
-    icon: <Sparkles className="w-4 h-4" />,
-  },
-  {
-    id: 3,
-    title: "教学课件",
-    icon: <Sparkles className="w-4 h-4" />,
-  }
-]
+// 定义按钮图标映射
+const BUTTON_ICONS = {
+  1: Sparkles,
+  2: HelpCircle,
+  3: BookOpen
+}
 
 export const PromptContainer = ({ className }: PromptContainerProps) => {
   const { isDark } = useTheme()
@@ -82,7 +43,7 @@ export const PromptContainer = ({ className }: PromptContainerProps) => {
   // 计算基于输入框高度增加的半个偏移量
   const offsetY = Math.max(0, (inputHeight - INITIAL_INPUT_HEIGHT) / 2)
   
-  // 调整此值以更改初始垂直位置（例如，55 表示更高）
+  // 调整此值以更改初始垂直位置
   const baseTopPercentage = 50 
 
   return (
@@ -101,22 +62,28 @@ export const PromptContainer = ({ className }: PromptContainerProps) => {
       }}
     >
       <div className="flex justify-center gap-3 relative">
-        {PROMPT_BUTTONS.map(button => (
-          <PromptButton 
-            key={button.id}
-            className="animate-pulse-subtle hover:animate-none" 
-            onClick={() => togglePanel(button.id)} 
-            expanded={expandedId === button.id}
-            icon={button.icon}
-          >
-            {button.title}
-          </PromptButton>
-        ))}
+        {PROMPT_BUTTONS.map(button => {
+          const Icon = BUTTON_ICONS[button.id as keyof typeof BUTTON_ICONS]
+          return (
+            <PromptButton 
+              key={button.id}
+              className="animate-pulse-subtle hover:animate-none" 
+              onClick={() => togglePanel(button.id)} 
+              expanded={expandedId === button.id}
+              icon={<Sparkles className="h-4 w-4" />}
+            >
+              {button.title}
+            </PromptButton>
+          )
+        })}
       </div>
       
       {expandedId && (
         <PromptPanel
-          templates={PROMPT_TEMPLATES}
+          templates={PROMPT_TEMPLATES.map(template => ({
+            ...template,
+            icon: <Sparkles className="h-4 w-4" />
+          }))}
           title={PROMPT_BUTTONS.find(b => b.id === expandedId)?.title || "提示模板"}
           onClose={resetPanel}
           onSelect={handlePromptClick}
