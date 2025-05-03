@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { PlusIcon, ArrowUpIcon } from "lucide-react"
 import { useChatWidth, useInputHeightReset } from "@lib/hooks"
 import { useChatLayoutStore } from "@lib/stores/chat-layout-store"
@@ -9,6 +9,36 @@ import { ChatButton } from "./button"
 import { ChatTextInput } from "./text-input"
 import { ChatContainer } from "./container"
 import { ChatButtonArea, ChatTextArea } from "./layout"
+import { create } from "zustand"
+
+// 创建一个全局焦点管理器
+interface FocusManagerState {
+  inputRef: React.RefObject<HTMLTextAreaElement> | null;
+  registerRef: (ref: React.RefObject<HTMLTextAreaElement>) => void;
+  focusInput: () => void;
+}
+
+// 使用Zustand存储输入框引用，确保跨组件共享
+export const useFocusManager = create<FocusManagerState>((set, get) => ({
+  inputRef: null,
+  
+  // 注册输入框引用
+  registerRef: (ref) => {
+    set({ inputRef: ref });
+  },
+  
+  // 聚焦到输入框
+  focusInput: () => {
+    const { inputRef } = get();
+    if (inputRef?.current) {
+      inputRef.current.focus();
+      
+      // 将光标移到文本末尾
+      const length = inputRef.current.value.length;
+      inputRef.current.setSelectionRange(length, length);
+    }
+  }
+}));
 
 // 主 ChatInput 组件
 interface ChatInputProps {
@@ -38,6 +68,15 @@ export const ChatInput = ({
   
   // 使用高度重置钩子
   useInputHeightReset(isWelcomeScreen)
+  
+  // 创建输入框引用
+  const inputRef = useCallback((node: HTMLTextAreaElement | null) => {
+    if (node) {
+      // 将引用注册到全局焦点管理器
+      const ref = { current: node } as React.RefObject<HTMLTextAreaElement>;
+      useFocusManager.getState().registerRef(ref);
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value)
@@ -76,11 +115,19 @@ export const ChatInput = ({
     setIsComposing(false)
   }
 
+  // 消息变化时自动聚焦
+  useEffect(() => {
+    if (message) {
+      useFocusManager.getState().focusInput();
+    }
+  }, [message]);
+
   return (
     <ChatContainer isWelcomeScreen={isWelcomeScreen} isDark={isDark} className={className} widthClass={widthClass}>
       {/* 文本区域 */}
       <ChatTextArea>
         <ChatTextInput
+          ref={inputRef}
           value={message}
           onChange={handleChange}
           onKeyDown={handleKeyDown}

@@ -51,24 +51,24 @@ export function RegisterForm() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
+    <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg border border-gray-100 dark:bg-gray-900 dark:border-gray-800 transition-all">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900">注册账号</h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">注册账号</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
           加入我们，开始探索AI教育的无限可能
         </p>
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 text-red-700 rounded-md text-sm">
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg text-sm border-l-4 border-red-500 dark:bg-red-900/30 dark:text-red-400">
           {error}
         </div>
       )}
 
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               姓名
             </label>
             <input
@@ -77,7 +77,7 @@ export function RegisterForm() {
               type="text"
               autoComplete="name"
               required
-              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="您的姓名"
               value={formData.name}
               onChange={handleChange}
@@ -85,7 +85,7 @@ export function RegisterForm() {
           </div>
           
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               邮箱
             </label>
             <input
@@ -94,7 +94,7 @@ export function RegisterForm() {
               type="email"
               autoComplete="email"
               required
-              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="your@email.com"
               value={formData.email}
               onChange={handleChange}
@@ -102,7 +102,7 @@ export function RegisterForm() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               密码
             </label>
             <input
@@ -111,7 +111,7 @@ export function RegisterForm() {
               type="password"
               autoComplete="new-password"
               required
-              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
@@ -119,7 +119,7 @@ export function RegisterForm() {
           </div>
           
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               确认密码
             </label>
             <input
@@ -128,7 +128,7 @@ export function RegisterForm() {
               type="password"
               autoComplete="new-password"
               required
-              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="••••••••"
               value={formData.confirmPassword}
               onChange={handleChange}
@@ -140,7 +140,8 @@ export function RegisterForm() {
           <Button 
             type="submit" 
             isLoading={isLoading}
-            className="w-full"
+            className="w-full h-12 text-base"
+            variant="gradient"
           >
             注册
           </Button>
@@ -148,9 +149,9 @@ export function RegisterForm() {
       </form>
 
       <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           已有账号？{' '}
-          <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
             立即登录
           </Link>
         </p>

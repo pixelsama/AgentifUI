@@ -39,24 +39,24 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
+    <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg border border-gray-100 dark:bg-gray-900 dark:border-gray-800 transition-all">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900">登录</h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">登录</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
           继续探索 AI 教育的无限可能
         </p>
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 text-red-700 rounded-md text-sm">
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg text-sm border-l-4 border-red-500 dark:bg-red-900/30 dark:text-red-400">
           {error}
         </div>
       )}
 
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               邮箱
             </label>
             <input
@@ -65,7 +65,7 @@ export function LoginForm() {
               type="email"
               autoComplete="email"
               required
-              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="your@email.com"
               value={formData.email}
               onChange={handleChange}
@@ -73,7 +73,7 @@ export function LoginForm() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               密码
             </label>
             <input
@@ -82,7 +82,7 @@ export function LoginForm() {
               type="password"
               autoComplete="current-password"
               required
-              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
@@ -98,13 +98,13 @@ export function LoginForm() {
               type="checkbox"
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <label htmlFor="remember_me" className="ml-2 block text-sm text-gray-900">
+            <label htmlFor="remember_me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               记住我
             </label>
           </div>
 
           <div className="text-sm">
-            <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
               忘记密码？
             </Link>
           </div>
@@ -114,7 +114,8 @@ export function LoginForm() {
           <Button 
             type="submit" 
             isLoading={isLoading}
-            className="w-full"
+            className="w-full h-12 text-base"
+            variant="gradient"
           >
             登录
           </Button>
@@ -122,9 +123,9 @@ export function LoginForm() {
       </form>
 
       <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           还没有账号？{' '}
-          <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
             立即注册
           </Link>
         </p>

@@ -48,10 +48,20 @@ export function Home() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="mt-10 flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <Button size="lg" onClick={handleLoginClick}>
+          <Button 
+            size="lg" 
+            variant="gradient" 
+            className="px-8 py-6 h-auto text-base font-medium"
+            onClick={handleLoginClick}
+          >
             立即开始
           </Button>
-          <Button size="lg" variant="outline" onClick={handleLearnMoreClick}>
+          <Button 
+            size="lg" 
+            variant="outline" 
+            className="px-8 py-6 h-auto text-base font-medium"
+            onClick={handleLearnMoreClick}
+          >
             了解更多
           </Button>
         </motion.div>

@@ -4,4 +4,6 @@ export * from './use-chat-width';
 export * from './use-mobile';
 export * from './use-theme';
 export * from './use-input-height-reset';
-export * from './use-chat-state-sync'; 
+export * from './use-chat-state-sync';
+export * from './use-input-focus';
+export * from './use-prompt-template-interaction'; 
