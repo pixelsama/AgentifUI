@@ -10,6 +10,7 @@ import { ChatTextInput } from "./text-input"
 import { ChatContainer } from "./container"
 import { ChatButtonArea, ChatTextArea } from "./layout"
 import { create } from "zustand"
+import { Tooltip } from "@components/ui/tooltip"
 
 // 创建一个全局焦点管理器
 interface FocusManagerState {
@@ -121,6 +122,16 @@ export const ChatInput = ({
       useFocusManager.getState().focusInput();
     }
   }, [message]);
+  
+  // 添加处理附件上传的函数
+  const handleAttachmentClick = () => {
+    // 这里可以实现文件上传功能，例如打开文件选择器
+    console.log("添加附件按钮被点击")
+    // 后续可以实现：
+    // 1. 打开文件选择对话框
+    // 2. 处理文件上传到服务器
+    // 3. 将附件添加到消息中
+  }
 
   return (
     <ChatContainer isWelcomeScreen={isWelcomeScreen} isDark={isDark} className={className} widthClass={widthClass}>
@@ -144,7 +155,18 @@ export const ChatInput = ({
       <div className="px-4">
         <ChatButtonArea>
           <div className="flex-none">
-            <ChatButton icon={<PlusIcon className="h-4 w-4" />} isDark={isDark} ariaLabel="添加附件" />
+            <Tooltip 
+              content="添加附件" 
+              id="add-attachment-tooltip" 
+              placement="bottom"
+            >
+              <ChatButton 
+                icon={<PlusIcon className="h-4 w-4" />} 
+                isDark={isDark} 
+                ariaLabel="添加附件"
+                onClick={handleAttachmentClick}
+              />
+            </Tooltip>
           </div>
           <div className="flex-none">
             <ChatButton
