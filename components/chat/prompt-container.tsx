@@ -76,7 +76,7 @@ export const PromptContainer = ({ className }: PromptContainerProps) => {
         top: `calc(${baseTopPercentage}% + ${offsetY}px)`, 
       }}
     >
-      <div className="flex justify-center gap-3 relative">
+      <div className="flex flex-wrap justify-center gap-2 md:gap-3 relative">
         {PROMPT_CATEGORIES.map(category => {
           // 获取对应的图标组件
           const IconComponent = category.icon && ICON_MAP[category.icon] ? ICON_MAP[category.icon] : Sparkles
