@@ -13,11 +13,13 @@ export default function ChatPage() {
 
   return (
     <div className={`h-full flex flex-col ${isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
-      <div className="relative h-full flex flex-col">
-        {/* 消息区域 */}
-        <div className="flex-1 overflow-auto">
-          {isWelcomeScreen && <WelcomeScreen />}
-          {messages.length > 0 && <ChatLoader messages={messages} />}
+      <div className="relative h-full flex flex-col overflow-hidden">
+        {/* 消息区域 - 设置固定高度并限制在容器内滚动 */}
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto">
+            {isWelcomeScreen && <WelcomeScreen />}
+            {messages.length > 0 && <ChatLoader messages={messages} />}
+          </div>
         </div>
 
         {/* 输入框背景 */}
