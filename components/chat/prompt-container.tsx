@@ -1,24 +1,25 @@
 "use client"
 
-import React, { useRef, useEffect } from "react"
+import React, { useRef, useEffect, useState } from "react"
 import { cn } from "@lib/utils"
 import { useTheme, useChatWidth, useWelcomeScreen, usePromptTemplateInteraction } from "@lib/hooks"
 import { PromptButton } from "@components/ui/prompt-button"
 import { PromptPanel } from "@components/ui/prompt-panel"
-import { Sparkles, HelpCircle, BookOpen } from "lucide-react"
+import { Sparkles, HelpCircle, BookOpen, Building, LucideIcon } from "lucide-react"
 import { usePromptPanelStore } from "@lib/stores/ui/prompt-panel-store"
 import { useChatLayoutStore, INITIAL_INPUT_HEIGHT } from "@lib/stores/chat-layout-store"
-import { PROMPT_BUTTONS, PROMPT_TEMPLATES } from "../../templates/prompt.json"
+import { PROMPT_CATEGORIES } from "../../templates/prompt.json"
 
 interface PromptContainerProps {
   className?: string
 }
 
 // 定义按钮图标映射
-const BUTTON_ICONS = {
-  1: Sparkles,
-  2: HelpCircle,
-  3: BookOpen
+const ICON_MAP: Record<string, LucideIcon> = {
+  "Sparkles": Sparkles,
+  "HelpCircle": HelpCircle, 
+  "BookOpen": BookOpen,
+  "Building": Building
 }
 
 export const PromptContainer = ({ className }: PromptContainerProps) => {
@@ -29,8 +30,23 @@ export const PromptContainer = ({ className }: PromptContainerProps) => {
   const { expandedId, togglePanel, resetPanel } = usePromptPanelStore()
   const { inputHeight } = useChatLayoutStore()
   
+  // 当前选中分类的模板
+  const [currentTemplates, setCurrentTemplates] = useState<Array<any>>([])
+  
   // 使用模板交互hook处理模板选择和输入框交互
   const { handleTemplateSelect, handlePanelClose, isTemplateSelected } = usePromptTemplateInteraction()
+  
+  // 当展开的分类ID变化时，更新当前显示的模板列表
+  useEffect(() => {
+    if (expandedId) {
+      const category = PROMPT_CATEGORIES.find(cat => cat.id === expandedId)
+      if (category && category.templates) {
+        setCurrentTemplates(category.templates)
+      } else {
+        setCurrentTemplates([])
+      }
+    }
+  }, [expandedId])
   
   // 当组件卸载时重置面板状态
   useEffect(() => {
@@ -61,18 +77,19 @@ export const PromptContainer = ({ className }: PromptContainerProps) => {
       }}
     >
       <div className="flex justify-center gap-3 relative">
-        {PROMPT_BUTTONS.map(button => {
-          const Icon = BUTTON_ICONS[button.id as keyof typeof BUTTON_ICONS]
-          if (!Icon) return null
+        {PROMPT_CATEGORIES.map(category => {
+          // 获取对应的图标组件
+          const IconComponent = category.icon && ICON_MAP[category.icon] ? ICON_MAP[category.icon] : Sparkles
+          
           return (
             <PromptButton 
-              key={button.id}
+              key={category.id}
               className="animate-pulse-subtle hover:animate-none" 
-              onClick={() => togglePanel(button.id)} 
-              expanded={expandedId === button.id}
-              icon={<Icon className="h-4 w-4" />}
+              onClick={() => togglePanel(category.id)} 
+              expanded={expandedId === category.id}
+              icon={<IconComponent className="h-4 w-4" />}
             >
-              {button.title}
+              {category.title}
             </PromptButton>
           )
         })}
@@ -80,12 +97,12 @@ export const PromptContainer = ({ className }: PromptContainerProps) => {
       
       {expandedId && (
         <PromptPanel
-          templates={PROMPT_TEMPLATES.map(template => ({
+          templates={currentTemplates.map(template => ({
             ...template,
             icon: <Sparkles className="h-4 w-4" />,
             isSelected: isTemplateSelected(template.id)
           }))}
-          title={PROMPT_BUTTONS.find(b => b.id === expandedId)?.title || "提示模板"}
+          title={PROMPT_CATEGORIES.find(cat => cat.id === expandedId)?.title || "提示模板"}
           onClose={handlePanelClose}
           onSelect={handleTemplateSelect}
           className="absolute top-full mt-2 w-full left-0 right-0 z-10"
