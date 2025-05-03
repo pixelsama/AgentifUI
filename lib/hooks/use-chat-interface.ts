@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useChatStore } from '@lib/stores/chat-input-store';
+import { useChatInputStore } from '@lib/stores/chat-input-store';
 
 interface Message {
   text: string;
@@ -7,7 +7,7 @@ interface Message {
 }
 
 export function useChatInterface() {
-  const { isWelcomeScreen, setIsWelcomeScreen } = useChatStore();
+  const { isWelcomeScreen, setIsWelcomeScreen } = useChatInputStore();
   const [messages, setMessages] = useState<Message[]>([]);
 
   // 处理消息提交

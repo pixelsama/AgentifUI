@@ -1,5 +1,6 @@
-export { useTheme } from './use-theme'
-export { useMobile } from './use-mobile'
-export { useChatInterface } from './use-chat-interface'
-export { useChatWidth } from './use-chat-width'
-export { useWelcomeScreen } from './use-welcome-screen' 
+export * from './use-chat-interface';
+export * from './use-welcome-screen';
+export * from './use-chat-width';
+export * from './use-mobile';
+export * from './use-theme';
+export * from './use-input-height-reset'; 
