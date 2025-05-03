@@ -3,6 +3,7 @@
 import React from "react"
 import { cn } from "@lib/utils"
 import { useTheme, useChatWidth } from "@lib/hooks"
+import { UserMessage, AssistantMessage } from "./messages"
 
 interface Message {
   text: string
@@ -25,29 +26,24 @@ export const ChatLoader = ({ messages, isWelcomeScreen = false, className }: Cha
   return (
     <div
       className={cn(
-        "w-full mx-auto",
-        `${widthClass} ${paddingClass}`,
-        "overflow-y-auto pb-32",
+        "w-full mx-auto h-full",
+        widthClass, paddingClass,
         className
       )}
     >
-      <div className="pt-4 space-y-4">
+      <div className="pt-4 space-y-4 pb-32">
         {messages.map((msg, index) => (
-          <div key={index} className={`flex ${msg.isUser ? "justify-end" : "justify-start"} mb-4`}>
-            <div
-              className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                msg.isUser
-                  ? isDark
-                    ? "bg-blue-600 text-white"
-                    : "bg-blue-500 text-white"
-                  : isDark
-                    ? "bg-gray-800 text-white border border-gray-700"
-                    : "bg-white text-gray-900 shadow-md"
-              }`}
-            >
-              {msg.text}
-            </div>
-          </div>
+          msg.isUser ? (
+            <UserMessage 
+              key={index} 
+              content={msg.text} 
+            />
+          ) : (
+            <AssistantMessage 
+              key={index} 
+              content={msg.text} 
+            />
+          )
         ))}
       </div>
     </div>
