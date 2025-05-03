@@ -2,7 +2,7 @@
 
 import React from "react"
 import { cn } from "@lib/utils"
-import { useTheme, useChatWidth } from "@lib/hooks"
+import { useTheme, useChatWidth, useChatBottomSpacing } from "@lib/hooks"
 import { UserMessage, AssistantMessage } from "./messages"
 
 interface Message {
@@ -19,6 +19,7 @@ interface ChatLoaderProps {
 export const ChatLoader = ({ messages, isWelcomeScreen = false, className }: ChatLoaderProps) => {
   const { isDark } = useTheme()
   const { widthClass, paddingClass } = useChatWidth()
+  const { paddingBottomStyle } = useChatBottomSpacing()
   
   // 如果是欢迎界面或没有消息，不渲染
   if (isWelcomeScreen || messages.length === 0) return null
@@ -31,7 +32,10 @@ export const ChatLoader = ({ messages, isWelcomeScreen = false, className }: Cha
         className
       )}
     >
-      <div className="pt-4 space-y-4 pb-32">
+      <div 
+        className="pt-4 space-y-4"
+        style={paddingBottomStyle} // 使用动态计算的内联样式
+      >
         {messages.map((msg, index) => (
           msg.isUser ? (
             <UserMessage 

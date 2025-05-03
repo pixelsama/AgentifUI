@@ -82,7 +82,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ content, cla
     <div className="w-full mb-4">
       <div
         className={cn(
-          "w-full py-2 pb-20 markdown-body",
+          "w-full py-2 markdown-body",
           isDark 
             ? "text-white" 
             : "text-gray-900",
