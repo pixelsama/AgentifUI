@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useCallback, useEffect } from "react"
+import { useRef, useCallback, useEffect, forwardRef } from "react"
 import { cn } from "@lib/utils"
 import { INITIAL_INPUT_HEIGHT } from "@lib/stores/chat-layout-store"
 
@@ -17,7 +17,7 @@ interface ChatTextInputProps {
   onHeightChange?: (height: number) => void
 }
 
-export const ChatTextInput = ({
+export const ChatTextInput = forwardRef<HTMLTextAreaElement, ChatTextInputProps>(({
   value,
   onChange,
   onKeyDown,
@@ -28,8 +28,11 @@ export const ChatTextInput = ({
   onCompositionStart,
   onCompositionEnd,
   onHeightChange,
-}: ChatTextInputProps) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+}, ref) => {
+  const internalRef = useRef<HTMLTextAreaElement>(null)
+  
+  // 使用传入的ref，如果没有则使用内部ref
+  const textareaRef = (ref || internalRef) as React.RefObject<HTMLTextAreaElement>
 
   // Memoize the height update logic
   const updateHeight = useCallback(() => {
@@ -51,7 +54,7 @@ export const ChatTextInput = ({
         // Report the actual rendered height, ensuring it's at least the initial height
         onHeightChange(Math.max(newHeight, INITIAL_INPUT_HEIGHT)) 
     }
-  }, [maxHeight, onHeightChange])
+  }, [maxHeight, onHeightChange, textareaRef])
 
   // Adjust height based on value and initial mount
   useEffect(() => {
@@ -77,4 +80,4 @@ export const ChatTextInput = ({
       onCompositionEnd={onCompositionEnd}
     />
   )
-} 
+}) 
