@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useState, useEffect } from "react"
-import { PlusIcon, ArrowUpIcon } from "lucide-react"
+import { PlusIcon, ArrowUpIcon, Square, Loader2 } from "lucide-react"
 import { useChatWidth, useInputHeightReset } from "@lib/hooks"
 import { useChatLayoutStore } from "@lib/stores/chat-layout-store"
 import { useChatInputStore } from "@lib/stores/chat-input-store"
@@ -47,6 +47,9 @@ interface ChatInputProps {
   placeholder?: string
   maxHeight?: number
   onSubmit?: (message: string) => void
+  onStop?: () => void
+  isProcessing?: boolean
+  isWaitingForResponse?: boolean
 }
 
 export const ChatInput = ({
@@ -54,6 +57,9 @@ export const ChatInput = ({
   placeholder = "输入消息...",
   maxHeight = 180,
   onSubmit,
+  onStop,
+  isProcessing = false,
+  isWaitingForResponse = false,
 }: ChatInputProps) => {
   const { widthClass } = useChatWidth()
   const { setInputHeight } = useChatLayoutStore()
@@ -88,21 +94,20 @@ export const ChatInput = ({
     setInputHeight(height)
   }, [setInputHeight])
 
-  const handleSubmit = () => {
-    if (!message.trim()) return
-
+  const handleLocalSubmit = () => {
+    if (!message.trim()) return;
     if (onSubmit) {
-      onSubmit(message)
+      onSubmit(message);
     }
-
-    clearMessage()
+    clearMessage();
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // 只有在不处于输入法组合状态时，按Enter才发送消息
     if (e.key === "Enter" && !e.shiftKey && !isComposing) {
-      e.preventDefault()
-      handleSubmit()
+      e.preventDefault();
+      if (!isProcessing) {
+        handleLocalSubmit();
+      }
     }
   }
 
@@ -131,6 +136,29 @@ export const ChatInput = ({
     // 1. 打开文件选择对话框
     // 2. 处理文件上传到服务器
     // 3. 将附件添加到消息中
+  }
+
+  // 根据状态决定提交/停止按钮的属性
+  let submitButtonIcon: React.ReactNode;
+  let submitButtonOnClick: (() => void) | undefined;
+  let submitButtonAriaLabel: string;
+  let submitButtonDisabled: boolean;
+
+  if (isWaitingForResponse) {
+    submitButtonIcon = <Loader2 className="h-4 w-4 animate-spin" />;
+    submitButtonOnClick = undefined;
+    submitButtonAriaLabel = "正在发送...";
+    submitButtonDisabled = true;
+  } else if (isProcessing) {
+    submitButtonIcon = <Square className="h-4 w-4" />;
+    submitButtonOnClick = onStop;
+    submitButtonAriaLabel = "停止生成";
+    submitButtonDisabled = false;
+  } else {
+    submitButtonIcon = <ArrowUpIcon className="h-4 w-4" />;
+    submitButtonOnClick = handleLocalSubmit;
+    submitButtonAriaLabel = "发送消息";
+    submitButtonDisabled = !message.trim();
   }
 
   return (
@@ -165,17 +193,19 @@ export const ChatInput = ({
                 isDark={isDark} 
                 ariaLabel="添加附件"
                 onClick={handleAttachmentClick}
+                disabled={isProcessing || isWaitingForResponse}
               />
             </Tooltip>
           </div>
           <div className="flex-none">
             <ChatButton
-              icon={<ArrowUpIcon className="h-4 w-4" />}
+              icon={submitButtonIcon}
               variant="submit"
-              onClick={handleSubmit}
-              disabled={!message.trim()}
+              onClick={submitButtonOnClick}
+              disabled={submitButtonDisabled}
               isDark={isDark}
-              ariaLabel="发送消息"
+              ariaLabel={submitButtonAriaLabel}
+              forceActiveStyle={isWaitingForResponse}
             />
           </div>
         </ChatButtonArea>

@@ -48,7 +48,19 @@ async function proxyToDify(
   }
   // --- END OPTIMIZATION ---
 
-  // 1. 获取特定 Dify 应用的配置
+  // --- BEGIN COMMENT ---
+  // 1. 获取特定 Dify 应用的配置。
+  //    `getDifyAppConfig` 函数预期从配置源（目前是环境变量）查找 appId 对应的 apiKey 和 apiUrl。
+  //    后续如果配置移到数据库，此函数的内部实现会改变，但调用处的逻辑保持不变。
+  // --- END COMMENT ---
+  // --- BEGIN COMMENT ---
+  // TODO (数据库集成): 当前 getDifyAppConfig 实现可能基于 appId 从环境变量读取配置 (例如 appId='default' -> 读 DIFY_APP_DEFAULT_KEY)。
+  // 未来版本中，getDifyAppConfig 内部应修改为：
+  // 1. 连接数据库。
+  // 2. 根据传入的 appId (应用标识符) 查询 Dify 应用配置表。
+  // 3. 返回从数据库中获取的 apiKey 和 apiUrl。
+  // 这样可以集中管理多个 Dify 应用的凭据，而不是依赖大量环境变量。
+  // --- END COMMENT ---
   console.log(`[App: ${appId}] [${req.method}] Attempting to get configuration...`);
   const difyConfig = await getDifyAppConfig(appId);
 

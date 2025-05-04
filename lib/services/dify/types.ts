@@ -1,0 +1,248 @@
+// --- BEGIN COMMENT ---
+// lib/services/dify/types.ts
+// 定义与 Dify API (特别是 /chat-messages) 交互相关的数据结构
+// 基于官方文档: https://docs.dify.ai/api-reference/workflow-api/chat-message
+// --- END COMMENT ---
+
+// --- 请求体 Payload 类型 --- (用于 POST /chat-messages)
+
+/** Dify 文件对象结构 (用于请求体) */
+export interface DifyFile {
+  type: 'image' | 'document' | 'audio' | 'video' | 'custom';
+  transfer_method: 'remote_url' | 'local_file';
+  url?: string; // transfer_method 为 remote_url 时必需
+  upload_file_id?: string; // transfer_method 为 local_file 时必需
+}
+
+/** Dify 聊天消息请求体 */
+export interface DifyChatRequestPayload {
+  query: string; // 用户输入
+  inputs?: Record<string, any>; // App 输入变量, 默认为 {}
+  response_mode: 'streaming' | 'blocking'; // 响应模式
+  user: string; // 用户唯一标识符
+  conversation_id?: string | null; // 对话 ID (null 或空字符串表示新对话)
+  files?: DifyFile[]; // 文件列表
+  auto_generate_name?: boolean; // 是否自动生成标题, 默认 true
+}
+
+// --- 流式响应 (SSE) 事件类型 --- (用于 response_mode: 'streaming')
+
+// 基础 SSE 事件结构
+interface DifySseBaseEvent {
+  task_id: string; // 任务 ID
+  id?: string; // 事件或消息 ID (message 事件有)
+  conversation_id: string; // 对话 ID
+  event: string; // 事件类型
+}
+
+/** event: message (文本块) */
+export interface DifySseMessageEvent extends DifySseBaseEvent {
+  event: 'message';
+  id: string; // 消息 ID
+  answer: string; // LLM 返回的文本块内容
+  created_at: number;
+}
+
+/** event: message_file (文件) */
+export interface DifySseMessageFileEvent extends DifySseBaseEvent {
+  event: 'message_file';
+  id: string; // 文件 ID
+  type: string; // 文件类型 (例如 'image')
+  belongs_to: 'user' | 'assistant';
+  url: string; // 文件访问地址
+}
+
+/** event: message_end (消息结束) */
+export interface DifySseMessageEndEvent extends DifySseBaseEvent {
+  event: 'message_end';
+  id: string; // 消息 ID
+  metadata: Record<string, any>; // 元数据
+  usage: DifyUsage; // 模型用量信息
+  retriever_resources?: DifyRetrieverResource[]; // 引用和归属
+}
+
+/** event: tts_message (TTS 音频块) */
+export interface DifySseTtsMessageEvent extends DifySseBaseEvent {
+  event: 'tts_message';
+  id: string; // 消息 ID
+  audio: string; // Base64 编码的音频块
+  created_at: number;
+}
+
+/** event: tts_message_end (TTS 结束) */
+export interface DifySseTtsMessageEndEvent extends DifySseBaseEvent {
+  event: 'tts_message_end';
+  id: string; // 消息 ID
+  audio: string; // 空字符串
+  created_at: number;
+}
+
+/** event: message_replace (内容替换) */
+export interface DifySseMessageReplaceEvent extends DifySseBaseEvent {
+  event: 'message_replace';
+  id: string; // 消息 ID
+  answer: string; // 替换后的完整内容
+  created_at: number;
+}
+
+/** event: workflow_started (工作流开始) */
+export interface DifySseWorkflowStartedEvent extends DifySseBaseEvent {
+  event: 'workflow_started';
+  workflow_run_id: string;
+  data: { id: string; workflow_id: string; sequence_number: number; created_at: number; };
+}
+
+/** event: node_started (节点开始) */
+export interface DifySseNodeStartedEvent extends DifySseBaseEvent {
+  event: 'node_started';
+  workflow_run_id: string;
+  data: {
+    id: string;
+    node_id: string;
+    node_type: string;
+    title: string;
+    index: number;
+    predecessor_node_id?: string;
+    inputs: Record<string, any>;
+    created_at: number;
+  };
+}
+
+/** event: node_finished (节点结束) */
+export interface DifySseNodeFinishedEvent extends DifySseBaseEvent {
+  event: 'node_finished';
+  workflow_run_id: string;
+  data: {
+    id: string;
+    node_id: string;
+    index: number;
+    predecessor_node_id?: string;
+    inputs?: Record<string, any>;
+    process_data?: any;
+    outputs?: any;
+    status: 'running' | 'succeeded' | 'failed' | 'stopped';
+    error?: string;
+    elapsed_time?: number;
+    execution_metadata?: any;
+    total_tokens?: number;
+    total_price?: string;
+    currency?: string;
+    created_at: number;
+  };
+}
+
+/** event: workflow_finished (工作流结束) */
+export interface DifySseWorkflowFinishedEvent extends DifySseBaseEvent {
+  event: 'workflow_finished';
+  workflow_run_id: string;
+  data: {
+    id: string;
+    workflow_id: string;
+    status: 'running' | 'succeeded' | 'failed' | 'stopped';
+    outputs?: any;
+    error?: string;
+    elapsed_time?: number;
+    total_tokens?: number;
+    total_steps: number;
+    created_at: number;
+    finished_at: number;
+  };
+}
+
+/** event: error (流错误) */
+export interface DifySseErrorEvent extends DifySseBaseEvent {
+  event: 'error';
+  id?: string; // 消息 ID (可能没有)
+  status: number; // HTTP 状态码 (可能是 Dify 内部的)
+  code: string; // 错误码
+  message: string; // 错误消息
+}
+
+/** event: ping (保持连接) */
+export interface DifySsePingEvent extends DifySseBaseEvent {
+  event: 'ping';
+}
+
+/** event: agent_message (模型思考过程/中间步骤) */
+export interface DifySseAgentMessageEvent extends DifySseBaseEvent {
+  event: 'agent_message';
+  id?: string; // Agent 消息可能没有稳定 ID
+  answer: string; // 思考过程的文本块
+  created_at?: number; // 可能没有创建时间
+}
+
+/** Dify 模型用量信息 */
+export interface DifyUsage {
+  prompt_tokens?: number;
+  prompt_unit_price?: string;
+  prompt_price_unit?: string;
+  prompt_price?: string;
+  completion_tokens?: number;
+  completion_unit_price?: string;
+  completion_price_unit?: string;
+  completion_price?: string;
+  total_tokens: number;
+  total_price?: string;
+  currency?: string;
+  latency?: number;
+}
+
+/** Dify 引用和归属信息 */
+export interface DifyRetrieverResource {
+  segment_id: string;
+  document_id: string;
+  document_name: string;
+  position: number;
+  content: string;
+  score?: number;
+  // 其他可能的字段
+}
+
+// 所有可能的 SSE 事件联合类型
+export type DifySseEvent = 
+  | DifySseMessageEvent
+  | DifySseMessageFileEvent
+  | DifySseMessageEndEvent
+  | DifySseTtsMessageEvent
+  | DifySseTtsMessageEndEvent
+  | DifySseMessageReplaceEvent
+  | DifySseWorkflowStartedEvent
+  | DifySseNodeStartedEvent
+  | DifySseNodeFinishedEvent
+  | DifySseWorkflowFinishedEvent
+  | DifySseErrorEvent
+  | DifySsePingEvent
+  | DifySseAgentMessageEvent;
+
+
+// --- 服务函数返回类型 --- (供 Hook 使用)
+
+export interface DifyStreamResponse {
+  // --- BEGIN COMMENT ---
+  // 经过处理的文本块流，只包含 `event: message` 中的 `answer` 字段内容。
+  // 服务层负责解析 SSE 并过滤出文本。
+  // --- END COMMENT ---
+  answerStream: AsyncGenerator<string, void, undefined>; 
+  
+  // --- BEGIN COMMENT ---
+  // 提供方法以在流处理过程中或结束后获取 conversation_id。
+  // 该方法在流开始时返回 null，在流中捕获到 ID 后返回 ID。
+  // --- END COMMENT ---
+  getConversationId: () => string | null;
+
+  // --- BEGIN COMMENT ---
+  // 提供方法以在流处理过程中或结束后获取 task_id。
+  // --- END COMMENT ---
+  getTaskId: () => string | null;
+
+  // --- BEGIN COMMENT ---
+  // 可以添加一个 Promise，在 message_end 事件到达时 resolve，
+  // 并携带最终的 usage 和 metadata 等信息，供需要完整响应的场景使用。
+  // --- END COMMENT ---
+  completionPromise?: Promise<{ usage?: DifyUsage; metadata?: Record<string, any>; retrieverResources?: DifyRetrieverResource[] }>;
+
+  // --- BEGIN COMMENT ---
+  // 可能还需要传递其他从流中提取的非文本事件，如文件事件等，根据需求添加。
+  // fileEventsStream?: AsyncGenerator<DifySseMessageFileEvent, void, undefined>;
+  // --- END COMMENT ---
+} 
