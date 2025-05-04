@@ -21,8 +21,15 @@ llm-eduhub/
   ├── .vscode/            # VSCode configuration files
   ├── app/                # Application source code (App Router pattern)
   │   ├── api/            # API routes
+  │   │   ├── auth/       # Authentication-related API routes
+  │   │   │   ├── identify/ # User identification
+  │   │   │   └── sso/    # Single sign-on
+  │   │   │       └── initiate/ # SSO initiation
+  │   │   └── dify/       # Dify API integration
+  │   │       └── [appId]/[...slug]/ # Dynamic route handling
   │   ├── about/          # About page route
   │   ├── chat/           # Chat page route
+  │   │   └── [conversationId]/ # Specific conversation route
   │   ├── login/          # Login page route
   │   ├── register/       # Register page route
   │   └── page.tsx        # Home page route
@@ -30,18 +37,63 @@ llm-eduhub/
   │   ├── ui/             # Generic UI components
   │   ├── auth/           # Authentication related components
   │   ├── chat/           # Chat related components
+  │   │   └── messages/   # Message components
+  │   ├── chat-input/     # Chat input components
+  │   │   ├── index.tsx   # Main chat input component
+  │   │   └── button.tsx  # Chat button component
   │   ├── home/           # Home page related components
-  │   ├── layouts/        # Layout components
+  │   ├── mobile/         # Mobile-specific components
+  │   │   └── mobile-nav-button.tsx # Mobile navigation button
   │   └── sidebar/        # Sidebar components
+  │       ├── index.tsx   # Main sidebar component
+  │       ├── sidebar-container.tsx # Sidebar container
+  │       ├── sidebar-header.tsx # Sidebar header
+  │       ├── sidebar-content.tsx # Sidebar content
+  │       ├── sidebar-footer.tsx # Sidebar footer
+  │       ├── sidebar-button.tsx # Sidebar button
+  │       ├── sidebar-chat-list.tsx # Chat list
+  │       ├── sidebar-app-list.tsx # App list
+  │       ├── sidebar-backdrop.tsx # Mobile background mask
+  │       └── sidebar-chat-icon.tsx # Chat icon
   ├── lib/                # Utilities, hooks, and configuration
   │   ├── config/         # Configuration files
-  │   ├── utils/          # Utility functions
-  │   └── stores/         # State management
+  │   ├── hooks/          # Custom React hooks
+  │   │   ├── use-chat-interface.ts  # Chat interface logic
+  │   │   ├── use-chat-width.ts      # Unified width management
+  │   │   ├── use-chat-scroll.ts     # Chat scrolling management
+  │   │   ├── use-chat-bottom-spacing.ts # Bottom spacing management
+  │   │   ├── use-chat-state-sync.ts # State synchronization
+  │   │   ├── use-input-focus.ts     # Input focus management
+  │   │   ├── use-input-height-reset.ts # Input height reset
+  │   │   ├── use-mobile.ts          # Mobile device detection
+  │   │   ├── use-prompt-template-interaction.ts # Prompt template interaction
+  │   │   ├── use-theme.ts           # Theme management
+  │   │   └── use-welcome-screen.ts  # Welcome screen management
+  │   ├── services/       # Service integrations
+  │   │   └── dify/       # Dify service integration
+  │   ├── stores/         # State management
+  │   │   ├── chat-store.ts          # Chat state
+  │   │   ├── chat-input-store.ts    # Chat input state
+  │   │   ├── chat-scroll-store.ts   # Chat scroll state
+  │   │   ├── chat-layout-store.ts   # Chat layout state
+  │   │   ├── sidebar-store.ts       # Sidebar state
+  │   │   ├── theme-store.ts         # Theme state
+  │   │   └── ui/                    # UI-related state
+  │   │       ├── dropdown-store.ts      # Dropdown state
+  │   │       ├── prompt-panel-store.ts  # Prompt panel state
+  │   │       ├── prompt-template-store.ts # Prompt template state
+  │   │       └── tooltip-store.ts       # Tooltip state
+  │   └── utils/          # Utility functions
   ├── public/             # Static assets
   ├── scripts/            # Utility scripts for development, deployment, etc.
   │   ├── test_dify_proxy_advanced.py # Advanced Dify proxy test script
   │   └── test_dify_proxy_streaming.py # Dify streaming proxy test script
+  ├── styles/             # Global styles
   ├── supabase/           # Supabase configuration and migrations
+  │   ├── .branches/      # Branch management
+  │   ├── .temp/          # Temporary files
+  │   └── migrations/     # Database migrations
+  ├── templates/          # Template files
   ├── .env.local          # Local environment variables
   ├── .gitignore          # Git ignore configuration
   ├── CONTRIBUTING.md     # Contribution guidelines
@@ -53,6 +105,7 @@ llm-eduhub/
   ├── package.json        # Project dependencies and scripts
   ├── postcss.config.mjs  # PostCSS configuration
   ├── README.md           # Project documentation
+  ├── tailwind.config.js  # Tailwind configuration
   └── tsconfig.json       # TypeScript configuration
 ```
 
@@ -66,13 +119,16 @@ app/
   │   ├── auth/          # Authentication-related API routes
   │   │   ├── identify/  # User identification
   │   │   └── sso/       # Single sign-on
+  │   │       └── initiate/ # SSO initiation
   │   ├── dify/          # Dify API integration
   │   │   └── [appId]/[...slug]/ # Dynamic route handling
   │   └── ...
   ├── about/
   │   └── page.tsx       # Route for /about
   ├── chat/
-  │   └── page.tsx       # Route for /chat
+  │   ├── page.tsx       # Route for /chat
+  │   └── [conversationId]/ # Dynamic route for specific conversations
+  │       └── page.tsx   # Route for /chat/[conversationId]
   ├── login/
   │   └── page.tsx       # Route for /login
   ├── register/
@@ -89,12 +145,25 @@ components/
   ├── chat/             # Chat related components
   │   ├── chat-loader.tsx       # Message list renderer
   │   ├── chat-input-backdrop.tsx # Input background layer
-  │   └── welcome-screen.tsx    # Welcome screen component
+  │   ├── welcome-screen.tsx    # Welcome screen component
+  │   └── messages/            # Message components
   ├── chat-input/       # Chat input components
-  │   └── index.tsx     # Main chat input component
+  │   ├── index.tsx     # Main chat input component
+  │   └── button.tsx    # Chat button component
   ├── home/             # Home page related components
-  ├── layouts/          # Layout components
+  ├── mobile/           # Mobile-specific components
+  │   └── mobile-nav-button.tsx # Mobile navigation button
   └── sidebar/          # Sidebar components
+      ├── index.tsx             # Main sidebar component
+      ├── sidebar-container.tsx # Sidebar container
+      ├── sidebar-header.tsx    # Sidebar header
+      ├── sidebar-content.tsx   # Sidebar content
+      ├── sidebar-footer.tsx    # Sidebar footer
+      ├── sidebar-button.tsx    # Sidebar button
+      ├── sidebar-chat-list.tsx # Chat list
+      ├── sidebar-app-list.tsx  # App list
+      ├── sidebar-backdrop.tsx  # Mobile background mask
+      └── sidebar-chat-icon.tsx # Chat icon
 ```
 
 ## Lib Directory Structure
@@ -103,13 +172,31 @@ components/
 lib/
   ├── config/           # Configuration files
   ├── hooks/            # Custom React hooks
-  │   ├── use-chat-interface.ts  # Chat interface logic
-  │   ├── use-chat-width.ts      # Unified width management
-  │   ├── use-mobile.ts          # Mobile device detection
-  │   └── use-theme.ts           # Theme management
+  │   ├── use-chat-interface.ts       # Chat interface logic
+  │   ├── use-chat-width.ts           # Unified width management
+  │   ├── use-chat-scroll.ts          # Chat scrolling management
+  │   ├── use-chat-bottom-spacing.ts  # Bottom spacing management
+  │   ├── use-chat-state-sync.ts      # State synchronization
+  │   ├── use-input-focus.ts          # Input focus management
+  │   ├── use-input-height-reset.ts   # Input height reset
+  │   ├── use-mobile.ts               # Mobile device detection
+  │   ├── use-prompt-template-interaction.ts # Prompt template interaction
+  │   ├── use-theme.ts                # Theme management
+  │   └── use-welcome-screen.ts       # Welcome screen management
+  ├── services/         # Service integrations
+  │   └── dify/         # Dify service integration
   ├── stores/           # State management
-  │   ├── chat-input-store.ts    # Chat state management
-  │   └── theme-store.ts         # Theme state management
+  │   ├── chat-store.ts          # Chat state
+  │   ├── chat-input-store.ts    # Chat input state
+  │   ├── chat-scroll-store.ts   # Chat scroll state
+  │   ├── chat-layout-store.ts   # Chat layout state
+  │   ├── sidebar-store.ts       # Sidebar state
+  │   ├── theme-store.ts         # Theme state
+  │   └── ui/                    # UI-related state
+  │       ├── dropdown-store.ts      # Dropdown state
+  │       ├── prompt-panel-store.ts  # Prompt panel state
+  │       ├── prompt-template-store.ts # Prompt template state
+  │       └── tooltip-store.ts       # Tooltip state
   └── utils/            # Utility functions
 ```
 
@@ -124,7 +211,7 @@ lib/
 
 2. **Files**:
    - Route entry points MUST be named `page.tsx`.
-   - Use PascalCase for React components (e.g., `Button.tsx`, `LoginForm.tsx`).
+   - Use kebab-case for React components (e.g., `button.tsx`, `login-form.tsx`).
    - Use camelCase for utility files (e.g., `difyConfig.ts`, `utils.ts`).
    - Use kebab-case for static assets (e.g., `logo-dark.png`).
    - Always include appropriate file extensions.
@@ -199,20 +286,20 @@ By maintaining this document, we ensure that all team members understand the pro
 
 2. **Import Rules**:
    - Use path aliases instead of relative paths for cross-directory imports.
-   - Component imports use `@components/` (e.g., `@components/ui/Button`, `@components/auth/LoginForm`).
+   - Component imports use `@components/` (e.g., `@components/ui/button`, `@components/auth/login-form`).
    - Utility imports use `@lib/` (e.g., `@lib/utils`).
    - Importing files within the same top-level directory (e.g., two components within `components/auth/`) can use relative paths if preferred, but aliases are generally recommended for clarity.
 
    Example:
    ```typescript
    // ✅ Correct import method
-   import { Button } from '@components/ui/Button';
+   import { Button } from '@components/ui/button';
    import { cn } from '@lib/utils';
-   import { Home } from '@components/home/Home';
-   import { LoginForm } from '@components/auth/LoginForm';
+   import { Home } from '@components/home/home';
+   import { LoginForm } from '@components/auth/login-form';
 
    // ❌ Avoid using deep relative paths like this
-   // import Button from '../../../../components/ui/Button';
+   // import Button from '../../../../components/ui/button';
    ```
 
 3. **Import Order**:
@@ -226,9 +313,15 @@ By maintaining this document, we ensure that all team members understand the pro
 ```
 app/
   ├── api/
-  │   ├── auth/          # Authentication-related API routes (e.g., /api/auth/login)
-  │   │   └── route.ts   # Example API route file
-  │   ├── chat/          # Chat-related API routes
+  │   ├── auth/          # Authentication-related API routes
+  │   │   ├── identify/  # User identification API
+  │   │   │   └── route.ts # Route handler
+  │   │   └── sso/       # Single sign-on API
+  │   │       └── initiate/ # SSO initiation
+  │   │           └── route.ts # Route handler
+  │   ├── dify/          # Dify API integration
+  │   │   └── [appId]/[...slug]/ # Dynamic route handling
+  │   │       └── route.ts # Route handler
   │   └── ...
   └── ...
 ```

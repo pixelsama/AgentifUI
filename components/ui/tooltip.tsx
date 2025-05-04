@@ -1,11 +1,8 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from "react"
-import { createPortal } from "react-dom" 
-import { cn } from "@lib/utils"
-import { useTheme } from "@lib/hooks/use-theme"
-import { useMobile } from "@lib/hooks/use-mobile"
-import { useTooltipStore } from "@lib/stores/ui/tooltip-store"
+import type React from "react"
+import { useState, useRef, useEffect } from "react"
+import { createPortal } from "react-dom"
 
 type TooltipPlacement = "top" | "bottom" | "left" | "right"
 
@@ -19,18 +16,60 @@ interface TooltipProps {
   delayHide?: number
 }
 
-// TooltipContainer组件 - 用于渲染所有tooltip的容器
+// 工具函数，用于合并类名
+const cn = (...classes: (string | boolean | undefined)[]) => {
+  return classes.filter(Boolean).join(" ")
+}
+
+// 全局状态，确保在组件外部定义
+let activeTooltipId: string | null = null
+const listeners: ((id: string | null) => void)[] = []
+
+const tooltipState = {
+  showTooltip(id: string) {
+    activeTooltipId = id
+    listeners.forEach((listener) => listener(activeTooltipId))
+  },
+
+  hideTooltip() {
+    activeTooltipId = null
+    listeners.forEach((listener) => listener(activeTooltipId))
+  },
+
+  subscribe(listener: (id: string | null) => void) {
+    listeners.push(listener)
+    return () => {
+      const index = listeners.indexOf(listener)
+      if (index !== -1) {
+        listeners.splice(index, 1)
+      }
+    }
+  },
+
+  getActiveId() {
+    return activeTooltipId
+  },
+}
+
+// Tooltip容器组件
 export function TooltipContainer() {
-  const [isMounted, setIsMounted] = useState(false);
-  
+  const [isMounted, setIsMounted] = useState(false)
+
   useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
-  }, []);
-  
-  if (!isMounted) return null;
-  
-  return <div id="tooltip-root" className="fixed z-[9999] overflow-hidden pointer-events-none" />;
+    setIsMounted(true)
+
+    // 确保容器存在
+    if (!document.getElementById("tooltip-root")) {
+      const tooltipRoot = document.createElement("div")
+      tooltipRoot.id = "tooltip-root"
+      tooltipRoot.className = "fixed z-[9999] top-0 left-0 w-full h-0 overflow-visible pointer-events-none"
+      document.body.appendChild(tooltipRoot)
+    }
+
+    return () => setIsMounted(false)
+  }, [])
+
+  return null // 不需要渲染任何内容，因为我们已经在useEffect中创建了容器
 }
 
 export function Tooltip({
@@ -39,41 +78,63 @@ export function Tooltip({
   id,
   placement = "top",
   className,
-  delayShow = 200,
-  delayHide = 100
+  delayShow = 100, // 减少延迟，使响应更快
+  delayHide = 100,
 }: TooltipProps) {
-  const { isDark } = useTheme()
-  const isMobile = useMobile()
-  const { activeTooltipId, showTooltip, hideTooltip } = useTooltipStore()
+  const [isVisible, setIsVisible] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [tooltipRoot, setTooltipRoot] = useState<HTMLElement | null>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const showTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  
-  const isVisible = activeTooltipId === id
 
-  // 客户端挂载检测和获取tooltip容器
+  // 检测是否为暗色模式（简化版）
+  const isDark = false // 默认使用亮色模式
+
+  // 客户端挂载检测
   useEffect(() => {
     setMounted(true)
-    // 查找全局tooltip容器
-    setTooltipRoot(document.getElementById("tooltip-root"))
-    return () => setMounted(false)
-  }, [])
-  
+
+    // 订阅全局tooltip状态
+    const unsubscribe = tooltipState.subscribe((activeId) => {
+      setIsVisible(activeId === id)
+    })
+
+    return () => {
+      setMounted(false)
+      unsubscribe()
+    }
+  }, [id])
+
   const updatePosition = () => {
     if (!triggerRef.current || !tooltipRef.current) return
-    
+
+    const tooltipRoot = document.getElementById("tooltip-root")
+    if (!tooltipRoot) return
+
+    const tooltipEl = tooltipRef.current
     const triggerRect = triggerRef.current.getBoundingClientRect()
-    const tooltipRect = tooltipRef.current.getBoundingClientRect()
-    
-    // 计算基于视口的位置
+
+    // 先让tooltip可见但置于屏幕外以便测量尺寸
+    tooltipEl.style.visibility = "hidden"
+    tooltipEl.style.position = "fixed"
+    tooltipEl.style.top = "-9999px"
+    tooltipEl.style.left = "-9999px"
+
+    // 获取tooltip尺寸
+    const tooltipRect = tooltipEl.getBoundingClientRect()
+
+    if (tooltipRect.width === 0 || tooltipRect.height === 0) {
+      tooltipEl.style.visibility = "hidden"
+      return
+    }
+
+    // 计算位置
     let top: number
     let left: number
-    
-    const gap = 8 // 提示框与触发元素之间的间隙
-    
+    const gap = 8 // tooltip与触发元素之间的间隙
+    let effectivePlacement = placement
+
     switch (placement) {
       case "top":
         top = triggerRect.top - tooltipRect.height - gap
@@ -95,191 +156,189 @@ export function Tooltip({
         top = triggerRect.top - tooltipRect.height - gap
         left = triggerRect.left + (triggerRect.width - tooltipRect.width) / 2
     }
-    
-    // 边界检查，确保tooltip不会超出视窗
+
+    // 边界检查
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight
-    
-    // 左侧边界
-    if (left < 10) {
-      left = 10
+    const margin = 10 // 视口边缘的最小间距
+
+    // 水平边界检查
+    if (left < margin) {
+      left = margin
+    } else if (left + tooltipRect.width > viewportWidth - margin) {
+      left = viewportWidth - tooltipRect.width - margin
     }
-    
-    // 右侧边界
-    if (left + tooltipRect.width > viewportWidth - 10) {
-      left = viewportWidth - tooltipRect.width - 10
-    }
-    
-    // 上边界
-    if (top < 10) {
-      // 如果是顶部位置且超出了，尝试切换到底部位置
-      if (placement === "top") {
-        top = triggerRect.bottom + gap
+
+    // 垂直边界检查，包括翻转逻辑
+    if (placement === "top" && top < margin) {
+      // 尝试向下翻转
+      const newTop = triggerRect.bottom + gap
+      if (newTop + tooltipRect.height <= viewportHeight - margin) {
+        top = newTop
+        effectivePlacement = "bottom"
       } else {
-        top = 10
+        top = margin
+      }
+    } else if (placement === "bottom" && top + tooltipRect.height > viewportHeight - margin) {
+      // 尝试向上翻转
+      const newTop = triggerRect.top - tooltipRect.height - gap
+      if (newTop >= margin) {
+        top = newTop
+        effectivePlacement = "top"
+      } else {
+        top = viewportHeight - tooltipRect.height - margin
       }
     }
-    
-    // 下边界
-    if (top + tooltipRect.height > viewportHeight - 10) {
-      // 如果是底部位置且超出了，尝试切换到顶部位置
-      if (placement === "bottom") {
-        top = triggerRect.top - tooltipRect.height - gap
-      } else {
-        top = viewportHeight - tooltipRect.height - 10
-      }
-    }
-    
-    // 应用定位
-    if (tooltipRef.current) {
-      tooltipRef.current.style.top = `${top}px`
-      tooltipRef.current.style.left = `${left}px`
-    }
+
+    // 应用最终定位
+    tooltipEl.style.top = `${top}px`
+    tooltipEl.style.left = `${left}px`
+    tooltipEl.style.visibility = "visible"
+
+    // 更新箭头方向
+    tooltipEl.setAttribute("data-placement", effectivePlacement)
   }
-  
+
   const handleMouseEnter = () => {
-    // 在移动设备上不显示tooltip
+    // 检测是否为移动设备（简化版）
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768
     if (isMobile) return
-    
+
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current)
       hideTimeoutRef.current = null
     }
-    
+
+    // 添加调试信息
+    // console.log(`Mouse enter on tooltip ${id}, setting timeout to show`)
+
     showTimeoutRef.current = setTimeout(() => {
-      showTooltip(id)
+      // console.log(`Showing tooltip ${id}`)
+      tooltipState.showTooltip(id)
     }, delayShow)
   }
-  
+
   const handleMouseLeave = () => {
     if (showTimeoutRef.current) {
       clearTimeout(showTimeoutRef.current)
       showTimeoutRef.current = null
     }
-    
+
+    // 添加调试信息
+    // console.log(`Mouse leave on tooltip ${id}, setting timeout to hide`)
+
     hideTimeoutRef.current = setTimeout(() => {
-      hideTooltip()
+      // console.log(`Hiding tooltip ${id}`)
+      tooltipState.hideTooltip()
     }, delayHide)
   }
-  
-  // 在tooltip可见状态变化时更新位置
+
+  // 当tooltip可见性变化时，更新其位置
   useEffect(() => {
+    // console.log(`Tooltip ${id} visibility changed to: ${isVisible}`)
+
     if (isVisible) {
-      // 使用RAF确保DOM已经更新
-      requestAnimationFrame(() => {
-        updatePosition()
-      })
+      // console.log(`Updating position for tooltip ${id}`)
+      requestAnimationFrame(updatePosition)
     }
-  }, [isVisible])
-  
-  // 监听滚动和调整大小事件
+  }, [isVisible, id])
+
+  // 监听滚动和窗口大小调整事件
   useEffect(() => {
     if (!isVisible) return
-    
+
     const handleScroll = () => requestAnimationFrame(updatePosition)
     const handleResize = () => requestAnimationFrame(updatePosition)
-    
-    window.addEventListener('scroll', handleScroll, true)
-    window.addEventListener('resize', handleResize)
-    
+
+    window.addEventListener("scroll", handleScroll, true)
+    window.addEventListener("resize", handleResize)
+
     return () => {
-      window.removeEventListener('scroll', handleScroll, true)
-      window.removeEventListener('resize', handleResize)
+      window.removeEventListener("scroll", handleScroll, true)
+      window.removeEventListener("resize", handleResize)
     }
   }, [isVisible])
-  
-  // 在组件卸载时清除定时器
+
+  // 组件卸载时清理定时器
   useEffect(() => {
     return () => {
       if (showTimeoutRef.current) clearTimeout(showTimeoutRef.current)
       if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current)
     }
   }, [])
-  
-  // 计算箭头位置样式
-  const getArrowStyle = () => {
-    const arrowColor = isDark ? 'rgba(31, 41, 55, 0.95)' : 'rgba(55, 65, 81, 0.95)'; // gray-800 for dark, gray-700 for light
-    
-    switch (placement) {
-      case "top":
-        return {
-          bottom: "-4px",
-          left: "calc(50% - 4px)",
-          borderLeft: "4px solid transparent",
-          borderRight: "4px solid transparent",
-          borderTop: `4px solid ${arrowColor}`
-        }
-      case "bottom":
-        return {
-          top: "-4px",
-          left: "calc(50% - 4px)",
-          borderLeft: "4px solid transparent",
-          borderRight: "4px solid transparent",
-          borderBottom: `4px solid ${arrowColor}`
-        }
-      case "left":
-        return {
-          right: "-4px",
-          top: "calc(50% - 4px)",
-          borderTop: "4px solid transparent",
-          borderBottom: "4px solid transparent",
-          borderLeft: `4px solid ${arrowColor}`
-        }
-      case "right":
-        return {
-          left: "-4px",
-          top: "calc(50% - 4px)",
-          borderTop: "4px solid transparent",
-          borderBottom: "4px solid transparent",
-          borderRight: `4px solid ${arrowColor}`
-        }
-      default:
-        return {}
-    }
-  }
-  
-  // 移动设备上不渲染tooltip，只渲染子元素
+
+  // 检测是否为移动设备（简化版）
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768
+
+  // 在移动设备上不渲染tooltip
   if (isMobile) {
     return <>{children}</>
   }
-  
+
   return (
     <>
-      <div 
+      {/* 触发器元素 */}
+      <div
         ref={triggerRef}
         className="inline-block"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        data-tooltip-id={id} // 添加数据属性，便于调试
       >
         {children}
       </div>
-      
-      {mounted && isVisible && tooltipRoot && createPortal(
-        <div
-          ref={tooltipRef}
-          className="fixed z-[9999] animate-fade-in pointer-events-none"
-          style={{ top: 0, left: 0 }}
-        >
-          <div 
-            className={cn(
-              "relative px-2 py-1 rounded text-sm pointer-events-auto",
-              isDark 
-                ? "bg-gray-800/95 text-gray-200 shadow-lg" 
-                : "bg-gray-700/95 text-gray-100 shadow-md",
-              className
-            )}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+
+      {/* Tooltip内容 */}
+      {mounted &&
+        createPortal(
+          <div
+            ref={tooltipRef}
+            className={`fixed z-[9999] pointer-events-none transition-opacity duration-200 ${
+              isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+            style={{
+              visibility: isVisible ? "visible" : "hidden",
+              top: "-9999px",
+              left: "-9999px",
+            }}
+            data-placement={placement}
+            data-tooltip-content-id={id} // 添加数据属性，便于调试
           >
-            {content}
-            <div 
-              className="absolute h-0 w-0"
-              style={getArrowStyle()}
-            />
-          </div>
-        </div>,
-        tooltipRoot
-      )}
+            <div
+              className={cn(
+                "relative px-2.5 py-1.5 rounded-md text-sm pointer-events-auto max-w-xs",
+                "backdrop-blur-sm bg-opacity-95 shadow-lg border border-gray-200/10",
+                isDark ? "bg-gray-800 text-gray-100" : "bg-gray-800 text-gray-100",
+                className,
+              )}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              {content}
+              {/* 箭头元素 */}
+              <div
+                className={cn(
+                  "absolute w-2 h-2 rotate-45 bg-inherit border-inherit",
+                  placement === "top" && "bottom-[-4px] left-1/2 -translate-x-1/2 border-b border-r",
+                  placement === "bottom" && "top-[-4px] left-1/2 -translate-x-1/2 border-t border-l",
+                  placement === "left" && "right-[-4px] top-1/2 -translate-y-1/2 border-t border-r",
+                  placement === "right" && "left-[-4px] top-1/2 -translate-y-1/2 border-b border-l",
+                )}
+              />
+            </div>
+          </div>,
+          document.getElementById("tooltip-root") || document.body,
+        )}
     </>
   )
-} 
+}
+
+// 简化的TooltipProvider组件，只负责渲染TooltipContainer
+export function TooltipProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <TooltipContainer />
+      {children}
+    </>
+  )
+}

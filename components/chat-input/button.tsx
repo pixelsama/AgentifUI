@@ -40,6 +40,7 @@ export const ChatButton = ({
             ? "border border-gray-700 text-gray-300 hover:bg-gray-800"
             : "border border-gray-200 text-gray-600 hover:bg-gray-50",
           "bg-transparent",
+          "cursor-pointer",
           className,
         )}
         aria-label={ariaLabel}
