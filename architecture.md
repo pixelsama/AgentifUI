@@ -40,6 +40,7 @@ llm-eduhub/
   │   │       └── [appId]/[...slug]/ # 动态路由处理
   │   ├── about/          # About页面路由
   │   ├── chat/           # 聊天页面路由
+  │   │   └── [conversationId]/ # 特定会话路由
   │   ├── login/          # 登录页面路由
   │   ├── register/       # 注册页面路由
   │   └── page.tsx        # 首页路由
@@ -47,13 +48,13 @@ llm-eduhub/
   │   ├── ui/             # 通用UI组件
   │   ├── auth/           # 认证相关组件
   │   ├── chat/           # 聊天相关组件
+  │   │   └── messages/   # 消息组件
+  │   ├── chat-input/     # 聊天输入组件
   │   ├── home/           # 首页相关组件
-  │   ├── layouts/        # 布局组件
-  │   │   ├── Header.tsx
-  │   │   ├── Footer.tsx
-  │   │   └── ...
+  │   ├── mobile/         # 移动端特定组件
+  │   │   └── mobile-nav-button.tsx # 移动导航按钮
   │   └── sidebar/        # 侧边栏组件
-  │       ├── index.tsx        # 侧边栏主组件
+  │       ├── index.tsx   # 侧边栏主组件
   │       ├── sidebar-container.tsx # 侧边栏容器
   │       ├── sidebar-header.tsx # 侧边栏头部
   │       ├── sidebar-content.tsx # 侧边栏内容
@@ -62,17 +63,28 @@ llm-eduhub/
   │       ├── sidebar-chat-list.tsx # 聊天列表
   │       ├── sidebar-app-list.tsx # 应用列表
   │       ├── sidebar-backdrop.tsx # 移动设备背景遮罩
-  │       ├── sidebar-chat-icon.tsx # 聊天图标
-  │       └── ... 
-  ├── hooks/              # 自定义React钩子
-  │   └── use-mobile.ts   # 移动设备检测
+  │       └── sidebar-chat-icon.tsx # 聊天图标 
   ├── lib/                # 工具和配置
   │   ├── config/         # 配置文件
   │   ├── hooks/          # 共享钩子函数
-  │   │   └── use-theme.ts # 主题钩子
+  │   │   ├── use-chat-width.ts      # 统一宽度管理
+  │   │   ├── use-chat-interface.ts  # 聊天界面逻辑封装
+  │   │   ├── use-chat-scroll.ts     # 聊天滚动处理
+  │   │   ├── use-mobile.ts          # 移动设备检测
+  │   │   └── use-theme.ts           # 主题管理
+  │   ├── services/       # 服务集成
+  │   │   └── dify/       # Dify服务集成
   │   ├── stores/         # 状态管理
-  │   │   ├── sidebar-store.ts # 侧边栏状态
-  │   │   └── theme-store.ts   # 主题状态
+  │   │   ├── chat-store.ts       # 聊天状态
+  │   │   ├── chat-input-store.ts # 输入状态
+  │   │   ├── chat-scroll-store.ts # 滚动状态
+  │   │   ├── sidebar-store.ts    # 侧边栏状态
+  │   │   ├── theme-store.ts      # 主题状态
+  │   │   └── ui/                 # UI状态管理
+  │   │       ├── dropdown-store.ts   # 下拉菜单状态
+  │   │       ├── prompt-panel-store.ts # 提示面板状态
+  │   │       ├── prompt-template-store.ts # 提示模板状态
+  │   │       └── tooltip-store.ts   # 工具提示状态
   │   └── utils/          # 工具函数
   ├── public/             # 静态资源
   ├── scripts/            # 开发、部署等实用脚本
@@ -83,6 +95,7 @@ llm-eduhub/
   │   ├── .branches/      # 分支管理
   │   ├── .temp/          # 临时文件
   │   └── migrations/     # 数据库迁移
+  ├── templates/          # 模板文件目录
   ├── .env.local          # 本地环境变量
   ├── .gitignore          # Git忽略配置
   ├── CONTRIBUTING.md     # 贡献指南
@@ -98,7 +111,7 @@ llm-eduhub/
   └── tsconfig.json       # TypeScript配置
 ```
 
-> **注意**：新的目录结构中，`components`和`lib`目录已移至项目根目录，不再使用括号命名法，这样可以更好地组织代码并简化导入路径。
+> **注意**：项目目录结构已更新，`components`和`lib`目录位于项目根目录，便于代码组织与导入。
 
 ### 组件架构
 
@@ -109,8 +122,11 @@ components/
   │   ├── chat-loader.tsx       # 消息列表渲染组件
   │   ├── chat-input-backdrop.tsx # 输入框背景层
   │   └── welcome-screen.tsx    # 欢迎界面组件
-  └── chat-input/        # 聊天输入组件
-      └── index.tsx      # 聊天输入框主组件
+  ├── chat-input/        # 聊天输入组件
+  │   ├── index.tsx      # 聊天输入框主组件
+  │   └── button.tsx     # 聊天功能按钮组件
+  └── mobile/            # 移动端特定组件
+      └── mobile-nav-button.tsx # 移动导航按钮
 ```
 
 #### 聊天组件职责划分
@@ -140,6 +156,10 @@ components/
      - ChatTextArea: 文本区域
      - ChatContainer: 容器组件
 
+5. **移动端组件**
+   - MobileNavButton: 移动导航按钮
+   - 针对移动设备优化的导航和交互
+
 ### 响应式设计架构
 
 #### 宽度管理系统
@@ -147,9 +167,48 @@ components/
 // lib/hooks/use-chat-width.ts
 export function useChatWidth() {
   const isMobile = useMobile()
+  
+  // 桌面设备使用max-w-3xl (768px)，移动设备使用max-w-full
   const widthClass = isMobile ? "max-w-full" : "max-w-3xl"
+  
+  // 内边距配置
   const paddingClass = isMobile ? "px-2" : "px-4"
-  return { widthClass, paddingClass, isMobile }
+  
+  return {
+    widthClass,
+    paddingClass,
+    isMobile
+  }
+}
+```
+
+#### 移动设备检测
+```typescript
+// lib/hooks/use-mobile.ts
+export function useMobile() {
+  // 初始状态设为undefined，避免服务端渲染不匹配问题
+  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined)
+
+  useEffect(() => {
+    // 使用MediaQueryList来监听屏幕尺寸变化
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    }
+    
+    // 添加变化监听
+    mql.addEventListener("change", onChange)
+    
+    // 立即检测当前状态
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    
+    // 清理监听器
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+
+  // 确保返回布尔值（即使初始状态是undefined）
+  return !!isMobile
 }
 ```
 
@@ -157,18 +216,49 @@ export function useChatWidth() {
 - ChatLoader、ChatInput、ChatInputBackdrop 共用相同宽度类
 - 移动端自适应全宽
 - 桌面端最大宽度限制
+- 使用钩子函数确保各组件宽度一致性
 
 ## 3. 状态管理
 
+### 状态管理架构
+项目使用Zustand作为状态管理解决方案，将状态按功能域进行组织：
+
+```
+lib/stores/
+  ├── chat-store.ts       # 聊天消息和会话状态
+  ├── chat-input-store.ts # 聊天输入状态
+  ├── chat-scroll-store.ts # 聊天滚动状态
+  ├── chat-layout-store.ts # 聊天布局状态
+  ├── sidebar-store.ts    # 侧边栏状态
+  ├── theme-store.ts      # 主题状态
+  └── ui/                 # UI相关状态
+      ├── dropdown-store.ts   # 下拉菜单状态
+      ├── prompt-panel-store.ts # 提示面板状态
+      ├── prompt-template-store.ts # 提示模板状态
+      └── tooltip-store.ts   # 工具提示状态
+```
+
 ### 聊天状态管理
 ```typescript
-// lib/stores/chat-input-store.ts
-interface ChatState {
-  isWelcomeScreen: boolean
-  setIsWelcomeScreen: (isWelcome: boolean) => void
+// lib/stores/chat-input-store.ts示例
+interface ChatInputState {
+  inputText: string
+  setInputText: (text: string) => void
+  isSubmitting: boolean
+  setIsSubmitting: (isSubmitting: boolean) => void
   isDark: boolean
   toggleDarkMode: () => void
 }
+
+// 状态实现
+export const useChatInputStore = create<ChatInputState>((set) => ({
+  inputText: "",
+  setInputText: (text) => set({ inputText: text }),
+  isSubmitting: false,
+  setIsSubmitting: (isSubmitting) => set({ isSubmitting }),
+  isDark: false,
+  toggleDarkMode: () => set((state) => ({ isDark: !state.isDark })),
+}))
 ```
 
 ### 钩子函数设计
@@ -176,8 +266,15 @@ interface ChatState {
 lib/hooks/
   ├── use-chat-interface.ts  # 聊天界面逻辑封装
   ├── use-chat-width.ts      # 统一宽度管理
+  ├── use-chat-scroll.ts     # 聊天滚动处理
+  ├── use-chat-bottom-spacing.ts # 底部间距处理
+  ├── use-chat-state-sync.ts # 状态同步管理
+  ├── use-input-focus.ts     # 输入框焦点管理
+  ├── use-input-height-reset.ts # 输入框高度重置
   ├── use-mobile.ts          # 移动设备检测
-  └── use-theme.ts           # 主题管理
+  ├── use-prompt-template-interaction.ts # 提示模板交互
+  ├── use-theme.ts           # 主题管理
+  └── use-welcome-screen.ts  # 欢迎界面管理
 ```
 
 ## 4. API层设计
@@ -189,6 +286,7 @@ app/
   │   ├── auth/                     # 认证相关API
   │   │   ├── identify/             # 用户身份识别
   │   │   └── sso/                  # 单点登录
+  │   │       └── initiate/         # SSO初始化
   │   ├── dify/                     # Dify API集成
   │   │   └── [appId]/[...slug]/    # 动态路由处理
   │   └── ...                       # 其他API路由
