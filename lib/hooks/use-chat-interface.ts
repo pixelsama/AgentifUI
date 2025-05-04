@@ -106,6 +106,10 @@ export function useChatInterface() {
   const finalizeStreamingMessage = useChatStore(state => state.finalizeStreamingMessage);
   const setMessageError = useChatStore(state => state.setMessageError);
   const setIsWaitingForResponse = useChatStore(state => state.setIsWaitingForResponse);
+  // --- BEGIN COMMENT ---
+  // 获取 isWaitingForResponse 状态
+  // --- END COMMENT ---
+  const isWaitingForResponse = useChatStore(state => state.isWaitingForResponse);
   // --- 使用 Selector 获取组合状态 ---
   const isProcessing = useChatStore(selectIsProcessing);
 
@@ -260,5 +264,6 @@ export function useChatInterface() {
     shouldShowLoader,
     isWelcomeScreen,
     isProcessing, // 提供组合状态给 UI (isWaiting || isStreaming)
+    isWaitingForResponse, 
   };
 } 

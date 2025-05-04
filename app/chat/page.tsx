@@ -13,7 +13,8 @@ export default function ChatPage() {
     messages, 
     handleSubmit, 
     isProcessing,        // 获取处理状态
-    handleStopProcessing // 获取停止函数
+    handleStopProcessing, // 获取停止函数
+    isWaitingForResponse // 获取等待状态
   } = useChatInterface();
 
   return (
@@ -36,6 +37,7 @@ export default function ChatPage() {
           placeholder="输入消息，按Enter发送..."
           isProcessing={isProcessing}
           onStop={handleStopProcessing}
+          isWaitingForResponse={isWaitingForResponse}
         />
         
         {/* 提示容器 */}

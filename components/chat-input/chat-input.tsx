@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useState, useEffect } from "react"
-import { PlusIcon, ArrowUpIcon, Square } from "lucide-react"
+import { PlusIcon, ArrowUpIcon, Square, Loader2 } from "lucide-react"
 import { useChatWidth, useInputHeightReset } from "@lib/hooks"
 import { useChatLayoutStore } from "@lib/stores/chat-layout-store"
 import { useChatInputStore } from "@lib/stores/chat-input-store"
@@ -49,6 +49,7 @@ interface ChatInputProps {
   onSubmit?: (message: string) => void
   onStop?: () => void
   isProcessing?: boolean
+  isWaitingForResponse?: boolean
 }
 
 export const ChatInput = ({
@@ -58,6 +59,7 @@ export const ChatInput = ({
   onSubmit,
   onStop,
   isProcessing = false,
+  isWaitingForResponse = false,
 }: ChatInputProps) => {
   const { widthClass } = useChatWidth()
   const { setInputHeight } = useChatLayoutStore()
@@ -137,11 +139,27 @@ export const ChatInput = ({
   }
 
   // 根据状态决定提交/停止按钮的属性
-  const submitButtonIcon = isProcessing ? <Square className="h-4 w-4" /> : <ArrowUpIcon className="h-4 w-4" />;
-  const submitButtonOnClick = isProcessing ? onStop : handleLocalSubmit;
-  const submitButtonAriaLabel = isProcessing ? "停止生成" : "发送消息";
-  // 停止按钮始终可用，发送按钮在消息为空时禁用
-  const submitButtonDisabled = !isProcessing && !message.trim();
+  let submitButtonIcon: React.ReactNode;
+  let submitButtonOnClick: (() => void) | undefined;
+  let submitButtonAriaLabel: string;
+  let submitButtonDisabled: boolean;
+
+  if (isWaitingForResponse) {
+    submitButtonIcon = <Loader2 className="h-4 w-4 animate-spin" />;
+    submitButtonOnClick = undefined;
+    submitButtonAriaLabel = "正在发送...";
+    submitButtonDisabled = true;
+  } else if (isProcessing) {
+    submitButtonIcon = <Square className="h-4 w-4" />;
+    submitButtonOnClick = onStop;
+    submitButtonAriaLabel = "停止生成";
+    submitButtonDisabled = false;
+  } else {
+    submitButtonIcon = <ArrowUpIcon className="h-4 w-4" />;
+    submitButtonOnClick = handleLocalSubmit;
+    submitButtonAriaLabel = "发送消息";
+    submitButtonDisabled = !message.trim();
+  }
 
   return (
     <ChatContainer isWelcomeScreen={isWelcomeScreen} isDark={isDark} className={className} widthClass={widthClass}>
@@ -152,7 +170,7 @@ export const ChatInput = ({
           value={message}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder={isProcessing ? "正在处理中..." : placeholder}
+          placeholder={isWaitingForResponse ? "等待响应..." : isProcessing ? "正在处理中..." : placeholder}
           maxHeight={maxHeight}
           isDark={isDark}
           onCompositionStart={handleCompositionStart}
@@ -175,6 +193,7 @@ export const ChatInput = ({
                 isDark={isDark} 
                 ariaLabel="添加附件"
                 onClick={handleAttachmentClick}
+                disabled={isProcessing || isWaitingForResponse}
               />
             </Tooltip>
           </div>
@@ -186,6 +205,7 @@ export const ChatInput = ({
               disabled={submitButtonDisabled}
               isDark={isDark}
               ariaLabel={submitButtonAriaLabel}
+              forceActiveStyle={isWaitingForResponse}
             />
           </div>
         </ChatButtonArea>

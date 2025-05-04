@@ -12,6 +12,7 @@ interface ChatButtonProps {
   variant?: "function" | "submit"
   isDark?: boolean
   ariaLabel: string
+  forceActiveStyle?: boolean
 }
 
 export const ChatButton = ({
@@ -22,6 +23,7 @@ export const ChatButton = ({
   variant = "function",
   isDark = false,
   ariaLabel,
+  forceActiveStyle = false,
 }: ChatButtonProps) => {
   // 功能按钮 - 带有渐变感觉的浅灰色边框
   if (variant === "function") {
@@ -56,13 +58,13 @@ export const ChatButton = ({
       disabled={disabled}
       className={cn(
         "rounded-full h-8 w-8 flex items-center justify-center",
-        disabled
+        forceActiveStyle || !disabled
           ? isDark
-            ? "bg-gray-700 text-gray-500"
-            : "bg-gray-200 text-gray-400"
-          : isDark
             ? "bg-gray-900 text-white hover:bg-gray-800"
-            : "bg-black text-white hover:bg-gray-800",
+            : "bg-black text-white hover:bg-gray-800"
+          : isDark
+            ? "bg-gray-700 text-gray-500"
+            : "bg-gray-200 text-gray-400",
         "cursor-pointer shadow-sm",
         className,
       )}
