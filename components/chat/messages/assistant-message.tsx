@@ -3,6 +3,7 @@
 import React from "react"
 import { cn } from "@lib/utils"
 import { useTheme } from "@lib/hooks"
+import { useThinkParsing } from "@lib/hooks/use-think-parsing"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math"
@@ -10,15 +11,27 @@ import rehypeKatex from "rehype-katex"
 import rehypeRaw from "rehype-raw"
 import "katex/dist/katex.min.css"
 import type { Components } from "react-markdown"
+import { ThinkBlockHeader } from "@components/chat/markdown-block/think-block-header"
+import { ThinkBlockContent } from "@components/chat/markdown-block/think-block-content"
 
 interface AssistantMessageProps {
   content: string
+  isStreaming: boolean
   className?: string
 }
 
-export const AssistantMessage: React.FC<AssistantMessageProps> = ({ content, className }) => {
+export const AssistantMessage: React.FC<AssistantMessageProps> = ({ content, isStreaming, className }) => {
   const { isDark } = useTheme()
   
+  const {
+    hasThinkBlock,
+    thinkContent,
+    mainContent,
+    isThinking,
+    isOpen,
+    toggleOpen,
+  } = useThinkParsing(content, isStreaming)
+
   const markdownComponents: Components = {
     code({ className, children, ...props }: any) {
       const match = /language-(\w+)/.exec(className || '')
@@ -79,24 +92,43 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ content, cla
   }
   
   return (
-    <div className="w-full mb-4">
-      <div
-        className={cn(
-          "w-full py-2 markdown-body",
-          isDark 
-            ? "text-white" 
-            : "text-gray-900",
-          className
-        )}
-      >
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm, remarkMath]}
-          rehypePlugins={[rehypeKatex, rehypeRaw]}
-          components={markdownComponents}
-        >
-          {content}
-        </ReactMarkdown>
-      </div>
+    <div className={cn("w-full mb-4 assistant-message-container", className)}>
+      {hasThinkBlock && (
+        <ThinkBlockHeader 
+          isThinking={isThinking} 
+          isOpen={isOpen} 
+          onToggle={toggleOpen} 
+        />
+      )}
+
+      {hasThinkBlock && (
+         <ThinkBlockContent 
+           markdownContent={thinkContent}
+           isOpen={isOpen} 
+         />
+      )}
+
+      {mainContent && (
+        <div className={cn(
+          "w-full py-2 markdown-body main-content-area",
+          isDark ? "text-white" : "text-gray-900",
+          hasThinkBlock && "mt-2"
+        )}>
+          {isStreaming ? (
+            <div 
+              className="streaming-content break-words whitespace-pre-wrap" 
+              dangerouslySetInnerHTML={{ __html: mainContent }}
+            ></div>
+          ) : (
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm, remarkMath]}
+              rehypePlugins={[rehypeKatex, rehypeRaw]}
+              components={markdownComponents}
+              children={mainContent}
+            />
+          )}
+        </div>
+      )}
     </div>
   )
 } 

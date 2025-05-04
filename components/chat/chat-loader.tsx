@@ -40,6 +40,7 @@ export const ChatLoader = ({ messages, isWaitingForResponse = false, className }
             <AssistantMessage 
               key={msg.id} 
               content={msg.text} 
+              isStreaming={msg.isStreaming ?? false}
             />
           )
         ))}
