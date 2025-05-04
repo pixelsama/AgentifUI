@@ -2,76 +2,43 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useChatInputStore } from '@lib/stores/chat-input-store';
 import { useChatStore, selectIsProcessing, ChatMessage } from '@lib/stores/chat-store';
+import { streamDifyChat } from '@lib/services/dify/chat-service';
+import type { DifyChatRequestPayload } from '@lib/services/dify/types';
+
+// --- BEGIN COMMENT ---
+// TODO: 将 Dify App ID 移到环境变量或配置文件中
+// --- END COMMENT ---
+
+// --- BEGIN COMMENT ---
+// 定义前端使用的 Dify 应用标识符。
+// 这个标识符将传递给后端代理 (/api/dify/[identifier]/...)，
+// 后端代理再用这个标识符查找对应的 Dify API Key 和 URL。
+// 推荐使用环境变量配置，例如 NEXT_PUBLIC_DIFY_APP_IDENTIFIER=default
+// --- END COMMENT ---
+// --- BEGIN COMMENT ---
+// TODO (数据库/配置集成): 当前实现使用硬编码回退值 'default' 或单个环境变量作为应用标识符。
+// 未来版本中，此标识符应根据用户选择或上下文动态确定。
+// 例如：
+// 1. 用户在 UI (如下拉菜单或侧边栏) 中选择了一个 Dify 应用。
+// 2. 该选择更新了一个全局状态 (如 Zustand store)，存储当前激活的应用标识符 (如 '客服机器人')。
+// 3. 此 Hook 从全局状态读取该标识符: `const appIdentifier = useAppStore(state => state.currentAppIdentifier);`
+// 4. 或者，如果聊天会话已与特定应用关联，则基于 `currentConversationId` 从数据库查询关联的应用标识符。
+// 最终，动态获取到的 `appIdentifier` 将传递给 `streamDifyChat` 函数。
+// 届时，当前这种基于单一环境变量或硬编码值的逻辑将被移除。
+// 后端代理 (`route.ts` 中的 `getDifyAppConfig`) 也将相应修改，根据标识符从数据库查询应用的 API Key 和 URL。
+// --- END COMMENT ---
+const DIFY_APP_IDENTIFIER = process.env.NEXT_PUBLIC_DIFY_APP_IDENTIFIER || "default";
 
 // --- BEGIN COMMENT ---
 // 定义 API 响应流的接口结构 (占位符)
 // 真实的实现需要根据后端 API (如 Dify 或其他) 的流格式来解析
 // --- END COMMENT ---
-interface ChatApiResponse {
-  stream: AsyncGenerator<string, void, undefined>; // 文本块流
-  conversationId: string; // 从响应中提取的对话 ID (模拟中总是返回)
-  taskId?: string; // 模拟中可以省略或给个假值
-  // 可能还有其他元数据
-}
+// interface ChatApiResponse { ... }
 
 // --- BEGIN COMMENT ---
 // 恢复模拟 API 函数，使其返回 ChatApiResponse 结构
 // --- END COMMENT ---
-async function simulateStreamApiResponse(
-  prompt: string,
-  currentConversationId: string | null,
-  options: { user: string /* ...其他选项 */ }
-): Promise<ChatApiResponse> {
-  console.log("--- simulateStreamApiResponse Called ---", { prompt, currentConversationId, options });
-  await new Promise(resolve => setTimeout(resolve, 500)); // 模拟网络延迟
-
-  // --- BEGIN COMMENT ---
-  // 模拟 ID 生成：如果是 null (新对话)，生成一个新 ID；否则使用传入的 ID。
-  // 真实 API 可能在响应的特定事件/头中返回新 ID。
-  // --- END COMMENT ---
-  const conversationIdToReturn = currentConversationId ?? `sim-conv-${crypto.randomUUID().substring(0, 8)}`;
-  console.log(`[Simulate] Using/Returning Conversation ID: ${conversationIdToReturn}`);
-
-  // --- BEGIN COMMENT ---
-  // 创建一个立即 resolve 的 Promise 来模拟获取 ID (因为模拟中我们立即就知道ID了)
-  // 真实的场景下，这个 Promise 可能在解析流的早期才 resolve。
-  // --- END COMMENT ---
-  // const conversationIdPromise = Promise.resolve(conversationIdToReturn);
-
-  // --- BEGIN COMMENT ---
-  // 创建模拟文本流
-  // --- END COMMENT ---
-  async function* generateStream(): AsyncGenerator<string, void, undefined> {
-    const mockLongResponse = `[对话ID: ${conversationIdToReturn}] 这是模拟回复。
-
-Markdown: **加粗** *斜体*。
-
-\`\`\`python
-def hello():
-  print("Hello from stream!")
-\`\`\`
-`;
-    let index = 0;
-    try {
-      while (index < mockLongResponse.length) {
-        const chunkSize = Math.floor(Math.random() * 10) + 5; // 每次输出 5-14 字符
-        const nextIndex = Math.min(index + chunkSize, mockLongResponse.length);
-        const chunk = mockLongResponse.substring(index, nextIndex);
-        yield chunk;
-        index = nextIndex;
-        await new Promise(resolve => setTimeout(resolve, 50)); // 模拟块之间的延迟
-      }
-    } finally {
-      console.log(`[Simulate] Stream generation finished for ${conversationIdToReturn}.`);
-    }
-  }
-
-  return {
-    stream: generateStream(),
-    conversationId: conversationIdToReturn,
-    // taskId: `sim-task-${crypto.randomUUID().substring(0, 8)}` // 可以模拟 taskId
-  };
-}
+// async function simulateStreamApiResponse(...) { ... }
 
 export function useChatInterface() {
   const router = useRouter();
@@ -113,52 +80,52 @@ export function useChatInterface() {
 
     let assistantMessageId: string | null = null;
     // --- BEGIN COMMENT ---
-    // TODO: 需要追踪 taskId 以便实现真实的停止功能
-    // let taskId: string | null = null;
+    // TODO: 在 Store 中添加 currentTaskId: string | null 状态来存储 taskId
+    // let taskIdToStore: string | null = null;
     // --- END COMMENT ---
 
     try {
       // --- BEGIN COMMENT ---
-      // 调用恢复后的模拟 API 函数，传递当前对话 ID
+      // 构造符合 Dify API 的请求体
+      // 确保 'inputs' 字段总是存在，即使为空对象，因为 Dify API 要求它。
       // --- END COMMENT ---
-      console.log(`[handleSubmit] Calling API with currentConversationId: ${currentConversationId}`);
-      const response = await simulateStreamApiResponse(
-        message, 
-        currentConversationId, 
-        { user: currentUserIdentifier }
-      );
+      const payload: DifyChatRequestPayload = {
+        query: message,
+        user: currentUserIdentifier,
+        response_mode: 'streaming',
+        conversation_id: currentConversationId, // Store 中的 ID，可能为 null
+        inputs: {}, // --- BEGIN MODIFICATION --- 取消注释，确保 inputs 字段存在 --- END MODIFICATION ---
+        // files: [], // 如果需要传递文件
+      };
+      console.log("[handleSubmit] Calling Dify API proxy with identifier:", DIFY_APP_IDENTIFIER, " Payload:", payload);
 
       // --- BEGIN COMMENT ---
-      // 处理模拟 API 返回的 conversationId
-      // 仅当 Store 中的 ID 为 null (新对话) 时更新
+      // 调用 API 服务函数，传入 payload 和应用标识符
       // --- END COMMENT ---
-      const returnedConvId = response.conversationId;
-      console.log("[handleSubmit] Received simulated conversationId from API response:", returnedConvId);
-      if (currentConversationId === null && returnedConvId) {
-        console.log("[handleSubmit] Current conversation ID is null, updating store with received ID:", returnedConvId);
-        setCurrentConversationId(returnedConvId);
+      const response = await streamDifyChat(payload, DIFY_APP_IDENTIFIER); 
+
+      // --- BEGIN COMMENT ---
+      // 使用 getConversationId() 方法获取 ID
+      // 注意：此时调用 getConversationId() 可能返回 null，
+      // 因为流可能还没开始处理或还没收到包含 ID 的事件。
+      // 真实的 ID 需要在流处理过程中或结束后获取。
+      // --- END COMMENT ---
+      let finalConversationId: string | null = null;
+      let finalTaskId: string | null = null;
+
+      // --- BEGIN COMMENT ---
+      // 处理从 Service 返回的 answerStream (纯文本块流)
+      // --- END COMMENT ---
+      console.log("[handleSubmit] Starting to process answer stream...");
+      for await (const answerChunk of response.answerStream) { // 迭代 answerStream
         // --- BEGIN COMMENT ---
-        // 关键：在设置了新的对话 ID 到 Store 后，
-        // 使用 router.replace 更新浏览器 URL。
-        // 使用 replace 而不是 push 可以避免 "/chat/new" 出现在历史记录中。
-        // 这也确保了如果用户刷新页面，会加载到这个新的对话 ID。
+        // 在处理第一个 chunk 时，尝试获取 conversationId 和 taskId
+        // 因为服务层的 get 方法会在流处理过程中更新其内部变量
         // --- END COMMENT ---
-        console.log(`[handleSubmit] Replacing URL with /chat/${returnedConvId}`);
-        router.replace(`/chat/${returnedConvId}`, { scroll: false }); // scroll: false 避免页面滚动
-      } else if (currentConversationId !== returnedConvId) {
-          // --- BEGIN COMMENT ---
-          // 添加一个日志，用于检测模拟/API 是否返回了预期的 ID
-          // 正常情况下，对于已有对话，返回的 ID 应与发送的 ID 一致。
-          // --- END COMMENT ---
-          console.warn(`[handleSubmit] Mismatch: Sent ${currentConversationId}, but received ${returnedConvId}`);
-      }
-
-      // --- BEGIN COMMENT ---
-      // 开始处理模拟文本流
-      // --- END COMMENT ---
-      console.log("[handleSubmit] Starting to process stream...");
-      for await (const chunk of response.stream) {
         if (assistantMessageId === null) {
+          // --- BEGIN COMMENT ---
+          // 首次收到文本块时创建消息
+          // --- END COMMENT ---
           const assistantMessage = addMessage({
             text: '', 
             isUser: false,
@@ -166,28 +133,86 @@ export function useChatInterface() {
           });
           assistantMessageId = assistantMessage.id;
           useChatStore.setState({ isWaitingForResponse: false, streamingMessageId: assistantMessageId });
-          console.log("[handleSubmit] First chunk processed, assistant message created:", assistantMessageId);
+          console.log("[handleSubmit] First answer chunk processed, assistant message created:", assistantMessageId);
+
+          // --- BEGIN COMMENT ---
+          // 尝试在第一个 chunk 后获取 ID (可能已经有了)
+          // --- END COMMENT ---
+          finalConversationId = response.getConversationId();
+          finalTaskId = response.getTaskId();
+          console.log(`[handleSubmit] IDs after first chunk: ConvID=${finalConversationId}, TaskID=${finalTaskId}`);
+          
+          // --- BEGIN COMMENT ---
+          // 处理新对话的 ID 更新和 URL 跳转逻辑
+          // --- END COMMENT ---
+          if (currentConversationId === null && finalConversationId) {
+            console.log("[handleSubmit] New conversation, updating store with ID:", finalConversationId);
+            setCurrentConversationId(finalConversationId);
+            console.log(`[handleSubmit] Replacing URL with /chat/${finalConversationId}`);
+            router.replace(`/chat/${finalConversationId}`, { scroll: false });
+          } else if (currentConversationId !== finalConversationId && finalConversationId) {
+              console.warn(`[handleSubmit] Mismatch or unexpected ConvID: Sent ${currentConversationId}, received ${finalConversationId}`);
+          }
+          // --- BEGIN COMMENT ---
+          // TODO: 将 finalTaskId 存储到 Zustand store 中
+          // if (finalTaskId) { useChatStore.setState({ currentTaskId: finalTaskId }); }
+          // --- END COMMENT ---
         }
 
         if (assistantMessageId) {
           if (useChatStore.getState().streamingMessageId === assistantMessageId) {
-            appendMessageChunk(assistantMessageId, chunk);
+            // --- BEGIN COMMENT ---
+            // 追加 answerChunk
+            // --- END COMMENT ---
+            appendMessageChunk(assistantMessageId, answerChunk); 
           } else {
             console.log("[handleSubmit] Stream processing stopped externally by user.");
             break; 
           }
         }
       }
-      console.log("[handleSubmit] Finished processing stream.");
+      console.log("[handleSubmit] Finished processing answer stream.");
 
       // --- BEGIN COMMENT ---
-      // 流处理结束逻辑 (保持不变)
+      // 流结束后，再次确认获取最终的 ID (理论上此时应该肯定有值了)
+      // --- END COMMENT ---
+      finalConversationId = response.getConversationId();
+      finalTaskId = response.getTaskId();
+      console.log(`[handleSubmit] IDs after stream finished: ConvID=${finalConversationId}, TaskID=${finalTaskId}`);
+
+      // --- BEGIN COMMENT ---
+      // 确认对话 ID 是否按预期更新 (如果之前是 null)
+      // --- END COMMENT ---
+      if (useChatStore.getState().currentConversationId === null && finalConversationId) {
+        console.log("[handleSubmit] Updating store with final ConvID post-stream:", finalConversationId);
+        setCurrentConversationId(finalConversationId);
+        // URL 应该已经在第一个 chunk 后更新了，这里无需重复
+      }
+
+      // --- BEGIN COMMENT ---
+      // TODO: 存储最终的 Task ID
+      // if (finalTaskId && useChatStore.getState().currentTaskId !== finalTaskId) {
+      //   useChatStore.setState({ currentTaskId: finalTaskId }); 
+      // }
+      // --- END COMMENT ---
+
+      // --- BEGIN COMMENT ---
+      // TODO: 可以选择性地处理 completionPromise 来获取最终的 usage/metadata
+      // if (response.completionPromise) {
+      //   const finalData = await response.completionPromise;
+      //   console.log("[handleSubmit] Stream completed with final data:", finalData);
+      //   // 可以在这里更新消息的 metadata 或执行其他操作
+      // }
+      // --- END COMMENT ---
+
+      // --- BEGIN COMMENT ---
+      // 流处理结束逻辑 (需要确保 finalize 在 completionPromise 之后，如果使用的话)
       // --- END COMMENT ---
       if (assistantMessageId && useChatStore.getState().streamingMessageId === assistantMessageId) {
         console.log("[handleSubmit] Stream ended successfully, finalizing message:", assistantMessageId);
         finalizeStreamingMessage(assistantMessageId);
       } else if (!assistantMessageId) {
-        console.log("[handleSubmit] Stream ended but no chunks received. Resetting waiting state.");
+        console.log("[handleSubmit] Stream ended but no answer chunks received. Resetting waiting state.");
         setIsWaitingForResponse(false); 
       } else {
           console.log("[handleSubmit] Stream finalization skipped as it was stopped externally.");
@@ -227,9 +252,22 @@ export function useChatInterface() {
   // --- 停止处理 --- 
   const handleStopProcessing = useCallback(() => {
     const currentStreamingId = useChatStore.getState().streamingMessageId;
+    // --- BEGIN COMMENT ---
+    // TODO: 从 Store 获取 currentTaskId
+    // const currentTaskId = useChatStore.getState().currentTaskId;
+    // --- END COMMENT ---
     if (currentStreamingId) {
       console.log("[handleStopProcessing] Stopping stream for ID:", currentStreamingId);
+      // --- BEGIN COMMENT ---
       // TODO: 调用真实停止 API (需要 taskId)
+      // if (currentTaskId) {
+      //   stopDifyStreamingTask(currentTaskId, currentUserIdentifier)
+      //     .then(() => console.log("Stop request sent for task:", currentTaskId))
+      //     .catch(err => console.error("Error sending stop request:", err));
+      // } else {
+      //   console.warn("Cannot stop: Task ID not found in store.");
+      // }
+      // --- END COMMENT ---
       finalizeStreamingMessage(currentStreamingId); // 立即更新前端状态
     } else {
       console.log("[handleStopProcessing] No active stream to stop.");

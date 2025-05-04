@@ -57,15 +57,15 @@ export async function middleware(request: NextRequest) {
   // 检查用户路径访问权限
   const isAuthRoute = pathname.startsWith('/auth')
   const isApiRoute = pathname.startsWith('/api')
-  // 调整公开路由检查：
-  // - 移除笼统的 /chat 检查。
-  // - 只将 /chat/new 视为"类公开"（允许未登录访问以开始对话）。
-  // - 注意：真正的 /chat/[id] 应该在下面被 !user 检查拦截。
+  // TODO (恢复认证): 临时修改 - 为了方便开发和测试聊天功能，
+  // 暂时将所有 /chat/ 开头的路径视为公开路由，允许未登录访问。
+  // 在部署到生产环境或完成登录功能后，必须移除 `|| pathname.startsWith('/chat/')` 这部分，
+  // 恢复对聊天页面的访问控制，只允许 /chat/new 匿名访问。
   const isPublicRoute = pathname === '/' || 
                          pathname === '/login' || 
                          pathname === '/about' || 
                          pathname.startsWith('/register') ||
-                         pathname === '/chat/new' // 只有 /chat/new 是特殊的
+                         pathname.startsWith('/chat/'); // 临时允许所有 /chat/ 路径
   
   // 如果用户未登录且访问的不是 认证路由、API路由 或 公开路由，重定向到登录
   if (!user && !isAuthRoute && !isApiRoute && !isPublicRoute) {
