@@ -245,4 +245,19 @@ export interface DifyStreamResponse {
   // 可能还需要传递其他从流中提取的非文本事件，如文件事件等，根据需求添加。
   // fileEventsStream?: AsyncGenerator<DifySseMessageFileEvent, void, undefined>;
   // --- END COMMENT ---
+}
+
+// --- BEGIN COMMENT ---
+// Dify 停止流式任务 API 类型
+// POST /chat-messages/:task_id/stop
+// --- END COMMENT ---
+
+/** Dify 停止任务请求体 */
+export interface DifyStopTaskRequestPayload {
+  user: string; // 用户唯一标识符，必须和发送消息时一致
+}
+
+/** Dify 停止任务响应体 */
+export interface DifyStopTaskResponse {
+  result: 'success'; // 固定返回 success
 } 

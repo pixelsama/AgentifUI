@@ -197,4 +197,91 @@ export async function streamDifyChat(
 // --- BEGIN COMMENT ---
 // TODO: 添加 stopStreamingTask 函数
 // export async function stopDifyStreamingTask(taskId: string, user: string): Promise<void> { ... }
-// --- END COMMENT --- 
+// --- END COMMENT ---
+
+// --- BEGIN COMMENT ---
+// 实现停止 Dify 流式任务的函数。
+// 调用后端代理以安全地与 Dify API 交互。
+// 参考 Dify 文档: POST /chat-messages/:task_id/stop
+// --- END COMMENT ---
+import { DifyStopTaskRequestPayload, DifyStopTaskResponse } from './types'; // 引入新添加的类型
+
+/**
+ * 请求停止 Dify 的流式聊天任务。
+ * 
+ * @param appId - Dify 应用的 ID。
+ * @param taskId - 需要停止的任务 ID (从流式响应中获取)。
+ * @param user - 发起请求的用户标识符，必须与启动任务时相同。
+ * @returns 一个解析为 DifyStopTaskResponse 的 Promise (包含 { result: 'success' })。
+ * @throws 如果请求失败或 API 返回错误状态，则抛出错误。
+ */
+export async function stopDifyStreamingTask(
+  appId: string,
+  taskId: string,
+  user: string
+): Promise<DifyStopTaskResponse> {
+  console.log(`[Dify Service] Requesting to stop task ${taskId} for app ${appId} and user ${user}`);
+
+  // --- BEGIN COMMENT ---
+  // 构造指向后端代理的 URL，包含 task_id
+  // slug 部分是 chat-messages/{taskId}/stop
+  // --- END COMMENT ---
+  const slug = `chat-messages/${taskId}/stop`;
+  const apiUrl = `${DIFY_API_BASE_URL}/${appId}/${slug}`;
+
+  // --- BEGIN COMMENT ---
+  // 构造符合 Dify API 的请求体
+  // --- END COMMENT ---
+  const payload: DifyStopTaskRequestPayload = {
+    user: user,
+  };
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    console.log(`[Dify Service] Stop task response status for ${taskId}:`, response.status);
+
+    // --- BEGIN COMMENT ---
+    // 检查响应状态
+    // --- END COMMENT ---
+    if (!response.ok) {
+      let errorBody = 'Unknown error';
+      try {
+        errorBody = await response.text();
+      } catch (e) {
+        // 忽略读取错误
+      }
+      throw new Error(
+        `Failed to stop Dify task ${taskId}. Status: ${response.status} ${response.statusText}. Body: ${errorBody}`
+      );
+    }
+
+    // --- BEGIN COMMENT ---
+    // 解析成功的响应体 (预期为 { result: 'success' })
+    // --- END COMMENT ---
+    const result: DifyStopTaskResponse = await response.json();
+
+    // --- BEGIN COMMENT ---
+    // 简单验证一下返回结果是否符合预期
+    // --- END COMMENT ---
+    if (result.result !== 'success') {
+        console.warn(`[Dify Service] Stop task for ${taskId} returned success status but unexpected body:`, result);
+    }
+
+    console.log(`[Dify Service] Task ${taskId} stopped successfully.`);
+    return result;
+
+  } catch (error) {
+    console.error(`[Dify Service] Error stopping task ${taskId}:`, error);
+    // --- BEGIN COMMENT ---
+    // 重新抛出错误，以便上层调用者处理
+    // --- END COMMENT ---
+    throw error;
+  }
+} 
