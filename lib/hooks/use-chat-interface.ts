@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useChatInputStore } from '@lib/stores/chat-input-store';
 import { useChatStore, selectIsProcessing, ChatMessage } from '@lib/stores/chat-store';
 
@@ -73,6 +74,7 @@ def hello():
 }
 
 export function useChatInterface() {
+  const router = useRouter();
   const { isWelcomeScreen, setIsWelcomeScreen } = useChatInputStore();
 
   // --- 从 Store 获取状态和 Actions ---
@@ -135,6 +137,14 @@ export function useChatInterface() {
       if (currentConversationId === null && returnedConvId) {
         console.log("[handleSubmit] Current conversation ID is null, updating store with received ID:", returnedConvId);
         setCurrentConversationId(returnedConvId);
+        // --- BEGIN COMMENT ---
+        // 关键：在设置了新的对话 ID 到 Store 后，
+        // 使用 router.replace 更新浏览器 URL。
+        // 使用 replace 而不是 push 可以避免 "/chat/new" 出现在历史记录中。
+        // 这也确保了如果用户刷新页面，会加载到这个新的对话 ID。
+        // --- END COMMENT ---
+        console.log(`[handleSubmit] Replacing URL with /chat/${returnedConvId}`);
+        router.replace(`/chat/${returnedConvId}`, { scroll: false }); // scroll: false 避免页面滚动
       } else if (currentConversationId !== returnedConvId) {
           // --- BEGIN COMMENT ---
           // 添加一个日志，用于检测模拟/API 是否返回了预期的 ID
@@ -196,7 +206,23 @@ export function useChatInterface() {
       }
     }
 
-  }, [isProcessing, currentConversationId, currentUserIdentifier, addMessage, setIsWaitingForResponse, isWelcomeScreen, setIsWelcomeScreen, appendMessageChunk, finalizeStreamingMessage, setMessageError, setCurrentConversationId]); // 更新依赖项
+  }, [
+    // --- BEGIN COMMENT ---
+    // 添加 router 到依赖项数组
+    // --- END COMMENT ---
+    isProcessing, 
+    currentConversationId, 
+    currentUserIdentifier, 
+    addMessage, 
+    setIsWaitingForResponse, 
+    isWelcomeScreen, 
+    setIsWelcomeScreen, 
+    appendMessageChunk, 
+    finalizeStreamingMessage, 
+    setMessageError, 
+    setCurrentConversationId, 
+    router // 添加 router 依赖
+  ]);
 
   // --- 停止处理 --- 
   const handleStopProcessing = useCallback(() => {
