@@ -6,6 +6,7 @@ import { ChatInput } from '@components/chat-input';
 import { ChatLoader, WelcomeScreen, ChatInputBackdrop, PromptContainer } from '@components/chat';
 import { useChatInterface, useChatStateSync } from '@lib/hooks';
 import { useChatStore } from '@lib/stores/chat-store';
+import { useChatScroll } from '@lib/hooks/use-chat-scroll';
 
 export default function ChatPage() {
   const params = useParams();
@@ -22,6 +23,8 @@ export default function ChatPage() {
     handleStopProcessing, 
     isWaitingForResponse
   } = useChatInterface();
+
+  const scrollRef = useChatScroll<HTMLDivElement>(messages.length);
 
   useEffect(() => {
     const idToSet = (conversationIdFromUrl && conversationIdFromUrl !== 'new') ? conversationIdFromUrl : null;
@@ -41,7 +44,10 @@ export default function ChatPage() {
     <div className={`h-full flex flex-col ${isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
       <div className="relative h-full flex flex-col overflow-hidden">
         <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
+          <div 
+            ref={scrollRef} 
+            className="h-full overflow-y-auto scroll-smooth"
+          >
             {isWelcomeScreen && useChatStore.getState().currentConversationId === null && <WelcomeScreen />}
             {messages.length > 0 && <ChatLoader messages={messages} />}
           </div>
