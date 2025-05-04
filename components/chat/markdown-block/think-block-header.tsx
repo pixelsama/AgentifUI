@@ -7,12 +7,15 @@ import { Spinner } from '@components/ui/spinner';
 import { useTheme } from '@lib/hooks/use-theme';
 import { useMobile } from '@lib/hooks/use-mobile';
 
+// --- BEGIN COMMENT --- 定义状态类型 --- END COMMENT ---
+export type ThinkBlockStatus = 'thinking' | 'completed' | 'stopped'; 
+
 /**
  * ThinkBlock 标题栏属性接口
  */
 interface ThinkBlockHeaderProps {
-  // 当前是否处于思考中状态
-  isThinking: boolean;
+  // --- BEGIN COMMENT --- 使用 status 替代 isThinking --- END COMMENT ---
+  status: ThinkBlockStatus; 
   // 内容区域是否展开
   isOpen: boolean;
   // 点击时触发的回调函数
@@ -21,17 +24,34 @@ interface ThinkBlockHeaderProps {
 
 /**
  * ThinkBlock 的水平按钮样式标题栏组件
- * 显示展开/折叠图标、思考状态文本 ("正在深度思考" 或 "已深度思考") 和加载 Spinner。
+ * 显示展开/折叠图标、状态文本 ("正在深度思考", "已深度思考", "思考已停止") 和加载 Spinner。
  * --- 中文注释: 该组件负责渲染 ThinkBlock 的可交互标题栏，样式类似按钮 --- 
  */
 export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({ 
-  isThinking, 
+  // --- BEGIN COMMENT --- 使用 status --- END COMMENT ---
+  status, 
   isOpen, 
   onToggle 
 }) => {
   const { t } = useTranslation();
   const { isDark } = useTheme();
   const isMobile = useMobile();
+
+  // --- BEGIN COMMENT --- 根据 status 判断是否正在思考 (用于 Spinner 和样式) --- END COMMENT ---
+  const isThinking = status === 'thinking'; 
+
+  // --- BEGIN COMMENT --- 获取状态对应的显示文本 --- END COMMENT ---
+  const getStatusText = () => { 
+    switch (status) {
+      case 'thinking':
+        return t('正在深度思考');
+      case 'stopped':
+        return t('思考已停止');
+      case 'completed':
+      default:
+        return t('已深度思考');
+    }
+  };
 
   return (
     <button 
@@ -41,14 +61,16 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
         // --- 中文注释: 尺寸和样式：宽度占满，调整垂直内边距使其更矮，圆角，下边距，可点击 --- 
         isMobile ? "w-full" : "w-[22%]", // 移动端占满宽度，桌面端保持22%
         "px-3 py-1.5 rounded-md cursor-pointer mb-1 text-sm",
-        // --- 中文注释: 背景和边框颜色根据思考状态变化 --- 
+        // --- BEGIN COMMENT --- 背景和边框颜色根据 isThinking (即 status === 'thinking') --- END COMMENT ---
         isThinking
           ? isDark 
             ? "bg-blue-900/30 border border-blue-800/60" 
-            : "bg-blue-50 border border-blue-200" // 思考中
+            : "bg-blue-50 border border-blue-200" 
           : isDark 
             ? "bg-gray-800 border border-gray-700 hover:bg-gray-700" 
-            : "bg-gray-100 border border-gray-200 hover:bg-gray-200", // 非思考中
+            : "bg-gray-100 border border-gray-200 hover:bg-gray-200", 
+        // --- BEGIN COMMENT --- 可以为 stopped 状态添加特殊样式，例如不同的背景色或边框色 --- END COMMENT ---
+        // status === 'stopped' && (isDark ? "border-yellow-700" : "border-yellow-400"), 
         // --- 中文注释: 焦点样式和过渡效果 --- 
         "focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-600",
         "transition-all duration-200 ease-in-out"
@@ -64,6 +86,7 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
           className={cn(
             "h-4 w-4 mr-2 transition-transform duration-300 ease-in-out", // --- 中文注释: 图标大小，右边距，旋转过渡 --- 
             isOpen ? "rotate-90" : "rotate-0", // --- 中文注释: 根据展开状态旋转 --- 
+            // --- BEGIN COMMENT --- 图标颜色根据 isThinking --- END COMMENT ---
             isThinking ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400" // --- 中文注释: 图标颜色根据思考状态变化 --- 
           )}
           fill="none"
@@ -80,13 +103,12 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
         {/* --- 状态文本 --- */}
         <span className={cn(
           "font-medium whitespace-nowrap", // 添加 whitespace-nowrap 防止文本换行
-          isThinking ? "text-blue-700 dark:text-blue-300" : "text-gray-500 dark:text-gray-300" // --- 中文注释: 文本颜色根据思考状态变化 --- 
+          // --- BEGIN COMMENT --- 文本颜色根据 isThinking (可以为 stopped 添加不同颜色) --- END COMMENT ---
+          isThinking ? "text-blue-700 dark:text-blue-300" : "text-gray-500 dark:text-gray-300" 
+          // status === 'stopped' && (isDark ? "text-yellow-400" : "text-yellow-600"), 
         )}>
-          {/* --- 中文注释: 显示"正在深度思考"或"已完成思考" --- */}
-          {isThinking 
-            ? t('正在深度思考') 
-            : t('已深度思考')
-          }
+          {/* --- BEGIN COMMENT --- 显示对应状态的文本 --- END COMMENT --- */}
+          {getStatusText()} 
         </span>
       </div>
 

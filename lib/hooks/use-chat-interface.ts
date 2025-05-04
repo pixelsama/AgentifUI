@@ -49,6 +49,7 @@ export function useChatInterface() {
   const addMessage = useChatStore(state => state.addMessage);
   const appendMessageChunk = useChatStore(state => state.appendMessageChunk);
   const finalizeStreamingMessage = useChatStore(state => state.finalizeStreamingMessage);
+  const markAsManuallyStopped = useChatStore(state => state.markAsManuallyStopped);
   const setMessageError = useChatStore(state => state.setMessageError);
   const setIsWaitingForResponse = useChatStore(state => state.setIsWaitingForResponse);
   const isWaitingForResponse = useChatStore(state => state.isWaitingForResponse);
@@ -203,10 +204,7 @@ export function useChatInterface() {
       // --- END COMMENT ---
       if (assistantMessageId && useChatStore.getState().streamingMessageId === assistantMessageId) {
         console.log("[handleSubmit] Stream ended successfully, finalizing message:", assistantMessageId);
-        // --- BEGIN COMMENT --- 流正常结束后，清除 Task ID? (可选，取决于业务逻辑) --- END COMMENT ---
-        // finalizeStreamingMessage(assistantMessageId); // finalize 会清除 streamingMessageId
-        // setCurrentTaskId(null); // 可以在这里清除，或保留直到下次开始
-        finalizeStreamingMessage(assistantMessageId); 
+        finalizeStreamingMessage(assistantMessageId); // Natural end uses finalize
       } else if (!assistantMessageId) {
         console.log("[handleSubmit] Stream ended but no answer chunks received. Resetting waiting state.");
         setIsWaitingForResponse(false); 
@@ -241,7 +239,8 @@ export function useChatInterface() {
     isWelcomeScreen, 
     setIsWelcomeScreen, 
     appendMessageChunk, 
-    finalizeStreamingMessage, 
+    finalizeStreamingMessage,
+    markAsManuallyStopped,
     setMessageError, 
     setCurrentConversationId, 
     setCurrentTaskId, // --- BEGIN COMMENT --- 添加 setCurrentTaskId 到依赖 --- END COMMENT ---
@@ -249,16 +248,16 @@ export function useChatInterface() {
   ]);
 
   // --- 停止处理 --- 
-  const handleStopProcessing = useCallback(async () => { // --- BEGIN COMMENT --- 改为 async --- END COMMENT ---
+  const handleStopProcessing = useCallback(async () => {
     const state = useChatStore.getState();
     const currentStreamingId = state.streamingMessageId;
-    const currentTaskId = state.currentTaskId; // --- BEGIN COMMENT --- 从 store 获取 Task ID --- END COMMENT ---
+    const currentTaskId = state.currentTaskId;
     
     if (currentStreamingId) {
       console.log(`[handleStopProcessing] Stopping stream for message ID: ${currentStreamingId}, Task ID: ${currentTaskId}`);
       
-      // --- BEGIN COMMENT --- 1. 立即停止前端流 --- END COMMENT ---
-      finalizeStreamingMessage(currentStreamingId); 
+      // --- BEGIN COMMENT --- 1. 立即标记为手动停止 (不再调用 finalize) --- END COMMENT ---
+      markAsManuallyStopped(currentStreamingId); 
 
       // --- BEGIN COMMENT --- 2. 如果有 Task ID，尝试调用后端停止 API --- END COMMENT ---
       if (currentTaskId) {
@@ -273,10 +272,7 @@ export function useChatInterface() {
           // --- BEGIN COMMENT --- 停止成功后，清除 Task ID --- END COMMENT ---
           setCurrentTaskId(null); 
         } catch (error) {
-          // --- BEGIN COMMENT --- 处理停止 API 调用失败的情况 --- END COMMENT ---
           console.error(`[handleStopProcessing] Error calling stopDifyStreamingTask for Task ID ${currentTaskId}:`, error);
-          // 这里可以选择是否向用户显示错误，或者只是记录日志
-          // 注意：即使停止 API 失败，前端流也已经停止了
         }
       } else {
         console.warn("[handleStopProcessing] Cannot send stop request: Task ID not found in store.");
@@ -284,7 +280,7 @@ export function useChatInterface() {
     } else {
       console.log("[handleStopProcessing] No active stream to stop.");
     }
-  }, [finalizeStreamingMessage, currentUserIdentifier, setCurrentTaskId]); // --- BEGIN COMMENT --- 更新依赖项 --- END COMMENT ---
+  }, [markAsManuallyStopped, currentUserIdentifier, setCurrentTaskId]);
 
   // --- 判断 UI 状态 ---
   const shouldShowWelcome = isWelcomeScreen && messages.length === 0;

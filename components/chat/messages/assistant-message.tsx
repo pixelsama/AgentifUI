@@ -10,9 +10,8 @@ import rehypeKatex from "rehype-katex"
 import rehypeRaw from "rehype-raw"
 import "katex/dist/katex.min.css"
 import type { Components } from "react-markdown"
-import { ThinkBlockHeader } from "@components/chat/markdown-block/think-block-header"
+import { ThinkBlockHeader, ThinkBlockStatus } from "@components/chat/markdown-block/think-block-header"
 import { ThinkBlockContent } from "@components/chat/markdown-block/think-block-content"
-import { AnimatePresence } from "framer-motion"
 
 const extractThinkContent = (rawContent: string): {
   hasThinkBlock: boolean;
@@ -39,46 +38,61 @@ const extractThinkContent = (rawContent: string): {
 interface AssistantMessageProps {
   content: string
   isStreaming: boolean
+  wasManuallyStopped: boolean
   className?: string
 }
 
 export const AssistantMessage: React.FC<AssistantMessageProps> = ({ 
   content, 
   isStreaming,
+  wasManuallyStopped, 
   className 
 }) => {
   const { isDark } = useTheme();
 
-  const { hasThinkBlock, thinkContent, mainContent } = useMemo(() => 
+  const { hasThinkBlock, thinkContent, mainContent, thinkClosed } = useMemo(() => 
     extractThinkContent(content),
     [content]
   );
 
   const [isOpen, setIsOpen] = useState(true);
-  const [isThinking, setIsThinking] = useState(false);
-  const prevIsThinkingRef = useRef(isThinking);
-
-  useEffect(() => {
-    const shouldBeThinking = hasThinkBlock && !extractThinkContent(content).thinkClosed;
-    
-    if (shouldBeThinking !== isThinking) {
-      setIsThinking(shouldBeThinking);
-    }
-    
-    if (prevIsThinkingRef.current && !shouldBeThinking) {
-      setIsOpen(false);
-    }
-    else if (!prevIsThinkingRef.current && shouldBeThinking) {
-      setIsOpen(true);
-    }
-
-    prevIsThinkingRef.current = shouldBeThinking;
-    
-  }, [content, isThinking]);
 
   const toggleOpen = () => {
     setIsOpen((prev) => !prev);
   };
+
+  const calculateStatus = (): ThinkBlockStatus => {
+    if (hasThinkBlock && thinkClosed) {
+      return 'completed';
+    }
+    
+    if (wasManuallyStopped) {
+      return hasThinkBlock ? 'stopped' : 'completed';
+    }
+
+    if (isStreaming && hasThinkBlock && !thinkClosed) {
+      return 'thinking';
+    }
+
+    return 'completed';
+  };
+  const currentStatus = calculateStatus();
+
+  const prevStatusRef = useRef<ThinkBlockStatus>(currentStatus);
+
+  useEffect(() => {
+    const previousStatus = prevStatusRef.current;
+
+    if (previousStatus === 'thinking' && currentStatus === 'completed') {
+      setIsOpen(false);
+    }
+    else if (previousStatus !== 'thinking' && currentStatus === 'thinking') {
+      setIsOpen(true);
+    }
+
+    prevStatusRef.current = currentStatus;
+
+  }, [currentStatus]);
 
   const mainMarkdownComponents: Components = {
     code({ className, children, ...props }: any) {
@@ -142,25 +156,24 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
   return (
     <div className={cn("w-full mb-4 assistant-message-container", className)}>
       {hasThinkBlock && (
-        <ThinkBlockHeader 
-          isThinking={isThinking} 
-          isOpen={isOpen} 
-          onToggle={toggleOpen} 
-        />
-      )}
-
-      {hasThinkBlock && (
-        <ThinkBlockContent 
-          markdownContent={thinkContent}
-          isOpen={isOpen}
-        />
+        <>
+          <ThinkBlockHeader 
+            status={currentStatus} 
+            isOpen={isOpen} 
+            onToggle={toggleOpen} 
+          />
+          <ThinkBlockContent 
+            markdownContent={thinkContent}
+            isOpen={isOpen}
+          />
+        </>
       )}
 
       {mainContent && (
         <div className={cn(
           "w-full markdown-body main-content-area",
           isDark ? "text-white" : "text-gray-900",
-          hasThinkBlock ? (isOpen ? "mt-2" : "") : "py-2"
+          !hasThinkBlock ? "py-2" : ""
         )}>
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkMath]}

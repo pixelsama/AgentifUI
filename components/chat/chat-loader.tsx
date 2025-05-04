@@ -41,6 +41,7 @@ export const ChatLoader = ({ messages, isWaitingForResponse = false, className }
               key={msg.id} 
               content={msg.text} 
               isStreaming={msg.isStreaming ?? false}
+              wasManuallyStopped={msg.wasManuallyStopped ?? false}
             />
           )
         ))}

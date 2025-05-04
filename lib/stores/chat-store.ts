@@ -6,6 +6,7 @@ export interface ChatMessage {
   text: string; // 消息内容
   isUser: boolean; // 是否为用户消息
   isStreaming?: boolean; // 标记助手消息是否仍在流式传输中
+  wasManuallyStopped?: boolean; // 标记是否被用户手动停止
   error?: string | null; // 消息相关的错误信息
   // 可以添加时间戳等其他元数据
   // timestamp?: number;
@@ -49,6 +50,12 @@ interface ChatState {
    * @param id 消息ID
    */
   finalizeStreamingMessage: (id: string) => void;
+
+  /**
+   * 标记消息为手动停止
+   * @param id 消息ID
+   */
+  markAsManuallyStopped: (id: string) => void;
 
   /**
    * 设置指定ID消息的错误状态
@@ -96,6 +103,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       ...messageData,
       id: crypto.randomUUID(), // 使用内置 crypto 生成唯一 ID
       isStreaming: messageData.isStreaming ?? false, // 默认非流式
+      wasManuallyStopped: false,
       error: null,
     };
     set((state) => ({ messages: [...state.messages, newMessage] }));
@@ -116,27 +124,34 @@ export const useChatStore = create<ChatState>((set, get) => ({
   finalizeStreamingMessage: (id) => {
     set((state) => ({
       messages: state.messages.map((msg) =>
-        msg.id === id ? { ...msg, isStreaming: false } : msg
+        msg.id === id ? { ...msg, isStreaming: false, wasManuallyStopped: false } : msg
       ),
-      streamingMessageId: null,
-      isWaitingForResponse: false,
-      // --- BEGIN COMMENT ---
-      // 注意：结束流式处理不应重置当前对话 ID。
-      // --- END COMMENT ---
+      streamingMessageId: state.streamingMessageId === id ? null : state.streamingMessageId,
+      isWaitingForResponse: state.streamingMessageId === id ? false : state.isWaitingForResponse,
+      currentTaskId: state.streamingMessageId === id ? null : state.currentTaskId,
     }));
-    console.log(`finalizeStreamingMessage called for ${id}. State updated.`);
+    console.log(`finalizeStreamingMessage (natural end) called for ${id}. State updated.`);
+  },
+
+  markAsManuallyStopped: (id) => {
+    set((state) => ({
+      messages: state.messages.map((msg) =>
+        msg.id === id ? { ...msg, isStreaming: false, wasManuallyStopped: true } : msg
+      ),
+      streamingMessageId: state.streamingMessageId === id ? null : state.streamingMessageId,
+      isWaitingForResponse: state.streamingMessageId === id ? false : state.isWaitingForResponse,
+    }));
+    console.log(`markAsManuallyStopped called for ${id}. State updated.`);
   },
 
   setMessageError: (id, error) => {
     set((state) => ({
       messages: state.messages.map((msg) =>
-        msg.id === id ? { ...msg, error: error, isStreaming: false } : msg // 出错时也停止流式状态
+        msg.id === id ? { ...msg, error: error, isStreaming: false, wasManuallyStopped: false } : msg
       ),
-      // --- BEGIN COMMENT ---
-      // 如果出错的消息是当前流式消息，也需要清理全局流式状态
-      // --- END COMMENT ---
       streamingMessageId: state.streamingMessageId === id ? null : state.streamingMessageId,
       isWaitingForResponse: state.streamingMessageId === id ? false : state.isWaitingForResponse,
+      currentTaskId: state.streamingMessageId === id ? null : state.currentTaskId,
     }));
   },
 
