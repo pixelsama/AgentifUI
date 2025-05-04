@@ -215,7 +215,7 @@ export async function* parseSseStream(
       // --- END COMMENT ---
       // --- BEGIN MODIFICATION ---
       // console.log('[SSE Parser] Dispatching event:', parsedEvent); // 原来的完整日志
-      console.log(`[SSE Parser] Dispatching event type: ${parsedEvent.event}`); // 简化日志，只显示事件类型
+    //   console.log(`[SSE Parser] Dispatching event type: ${parsedEvent.event}`); // 简化日志，只显示事件类型
       // --- END MODIFICATION ---
       result = { type: 'event', event: parsedEvent };
 
