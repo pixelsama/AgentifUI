@@ -6,6 +6,7 @@ import { ChatInput } from '@components/chat-input';
 import { ChatLoader, WelcomeScreen, ChatInputBackdrop, PromptContainer } from '@components/chat';
 import { useChatInterface, useChatStateSync } from '@lib/hooks';
 import { useChatStore } from '@lib/stores/chat-store';
+import { useChatScroll } from '@lib/hooks/use-chat-scroll';
 
 export default function ChatPage() {
   const params = useParams();
@@ -20,8 +21,11 @@ export default function ChatPage() {
     handleSubmit, 
     isProcessing,        
     handleStopProcessing, 
-    isWaitingForResponse
   } = useChatInterface();
+
+  const scrollRef = useChatScroll<HTMLDivElement>(messages.length);
+
+  const isWaitingForResponse = useChatStore((state) => state.isWaitingForResponse);
 
   useEffect(() => {
     const idToSet = (conversationIdFromUrl && conversationIdFromUrl !== 'new') ? conversationIdFromUrl : null;
@@ -41,10 +45,19 @@ export default function ChatPage() {
     <div className={`h-full flex flex-col ${isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
       <div className="relative h-full flex flex-col overflow-hidden">
         <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            {isWelcomeScreen && useChatStore.getState().currentConversationId === null && <WelcomeScreen />}
-            {messages.length > 0 && <ChatLoader messages={messages} />}
-          </div>
+          {isWelcomeScreen && useChatStore.getState().currentConversationId === null ? (
+            <WelcomeScreen />
+          ) : (
+            <div 
+              ref={scrollRef}
+              className="h-full overflow-y-auto scroll-smooth"
+            >
+              <ChatLoader 
+                messages={messages} 
+                isWaitingForResponse={isWaitingForResponse}
+              />
+            </div>
+          )}
         </div>
 
         <ChatInputBackdrop />
@@ -53,8 +66,8 @@ export default function ChatPage() {
           onSubmit={handleSubmit}
           placeholder="输入消息，按Enter发送..."
           isProcessing={isProcessing}
+          isWaiting={isWaitingForResponse}
           onStop={handleStopProcessing}
-          isWaitingForResponse={isWaitingForResponse}
         />
         
         {useChatStore.getState().currentConversationId === null && <PromptContainer />}

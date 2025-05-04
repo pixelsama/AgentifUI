@@ -33,10 +33,6 @@ export const useFocusManager = create<FocusManagerState>((set, get) => ({
     const { inputRef } = get();
     if (inputRef?.current) {
       inputRef.current.focus();
-      
-      // 将光标移到文本末尾
-      const length = inputRef.current.value.length;
-      inputRef.current.setSelectionRange(length, length);
     }
   }
 }));
@@ -50,6 +46,7 @@ interface ChatInputProps {
   onStop?: () => void
   isProcessing?: boolean
   isWaitingForResponse?: boolean
+  isWaiting?: boolean
 }
 
 export const ChatInput = ({
@@ -60,6 +57,7 @@ export const ChatInput = ({
   onStop,
   isProcessing = false,
   isWaitingForResponse = false,
+  isWaiting = false
 }: ChatInputProps) => {
   const { widthClass } = useChatWidth()
   const { setInputHeight } = useChatLayoutStore()
@@ -138,29 +136,6 @@ export const ChatInput = ({
     // 3. 将附件添加到消息中
   }
 
-  // 根据状态决定提交/停止按钮的属性
-  let submitButtonIcon: React.ReactNode;
-  let submitButtonOnClick: (() => void) | undefined;
-  let submitButtonAriaLabel: string;
-  let submitButtonDisabled: boolean;
-
-  if (isWaitingForResponse) {
-    submitButtonIcon = <Loader2 className="h-4 w-4 animate-spin" />;
-    submitButtonOnClick = undefined;
-    submitButtonAriaLabel = "正在发送...";
-    submitButtonDisabled = true;
-  } else if (isProcessing) {
-    submitButtonIcon = <Square className="h-4 w-4" />;
-    submitButtonOnClick = onStop;
-    submitButtonAriaLabel = "停止生成";
-    submitButtonDisabled = false;
-  } else {
-    submitButtonIcon = <ArrowUpIcon className="h-4 w-4" />;
-    submitButtonOnClick = handleLocalSubmit;
-    submitButtonAriaLabel = "发送消息";
-    submitButtonDisabled = !message.trim();
-  }
-
   return (
     <ChatContainer isWelcomeScreen={isWelcomeScreen} isDark={isDark} className={className} widthClass={widthClass}>
       {/* 文本区域 */}
@@ -199,13 +174,21 @@ export const ChatInput = ({
           </div>
           <div className="flex-none">
             <ChatButton
-              icon={submitButtonIcon}
+              icon={
+                isWaiting ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : isProcessing ? (
+                  <Square className="h-5 w-5" />
+                ) : (
+                  <ArrowUpIcon className="h-5 w-5" />
+                )
+              }
               variant="submit"
-              onClick={submitButtonOnClick}
-              disabled={submitButtonDisabled}
+              onClick={isWaiting ? undefined : (isProcessing ? onStop : handleLocalSubmit)}
+              disabled={isWaiting}
               isDark={isDark}
-              ariaLabel={submitButtonAriaLabel}
-              forceActiveStyle={isWaitingForResponse}
+              ariaLabel="发送消息"
+              forceActiveStyle={isWaiting}
             />
           </div>
         </ChatButtonArea>

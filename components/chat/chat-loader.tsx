@@ -4,51 +4,51 @@ import React from "react"
 import { cn } from "@lib/utils"
 import { useTheme, useChatWidth, useChatBottomSpacing } from "@lib/hooks"
 import { UserMessage, AssistantMessage } from "./messages"
-
-interface Message {
-  text: string
-  isUser: boolean
-}
+import { ChatMessage } from '@lib/stores/chat-store';
+import { TypingDots } from "@components/ui/typing-dots";
 
 interface ChatLoaderProps {
-  messages: Message[]
-  isWelcomeScreen?: boolean
+  messages: ChatMessage[]
+  isWaitingForResponse?: boolean
   className?: string
 }
 
-export const ChatLoader = ({ messages, isWelcomeScreen = false, className }: ChatLoaderProps) => {
+export const ChatLoader = ({ messages, isWaitingForResponse = false, className }: ChatLoaderProps) => {
   const { isDark } = useTheme()
   const { widthClass, paddingClass } = useChatWidth()
   const { paddingBottomStyle } = useChatBottomSpacing()
   
-  // 如果是欢迎界面或没有消息，不渲染
-  if (isWelcomeScreen || messages.length === 0) return null
-
   return (
     <div
       className={cn(
-        "w-full mx-auto h-full",
+        "w-full mx-auto",
         widthClass, paddingClass,
         className
       )}
     >
       <div 
         className="pt-4 space-y-4"
-        style={paddingBottomStyle} // 使用动态计算的内联样式
+        style={paddingBottomStyle}
       >
-        {messages.map((msg, index) => (
+        {messages.map((msg) => (
           msg.isUser ? (
             <UserMessage 
-              key={index} 
+              key={msg.id} 
               content={msg.text} 
             />
           ) : (
             <AssistantMessage 
-              key={index} 
+              key={msg.id} 
               content={msg.text} 
             />
           )
         ))}
+
+        {isWaitingForResponse && (
+          <div className="flex justify-start py-2 my-2">
+            <TypingDots />
+          </div>
+        )}
       </div>
     </div>
   )
