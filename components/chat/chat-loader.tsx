@@ -40,13 +40,14 @@ export const ChatLoader = ({ messages, isWaitingForResponse = false, className }
             <AssistantMessage 
               key={msg.id} 
               content={msg.text} 
+              isStreaming={msg.isStreaming ?? false}
             />
           )
         ))}
 
         {isWaitingForResponse && (
           <div className="flex justify-start py-2 my-2">
-            <TypingDots />
+            <TypingDots size="lg" />
           </div>
         )}
       </div>
