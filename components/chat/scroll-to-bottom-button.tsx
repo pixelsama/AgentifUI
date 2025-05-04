@@ -11,27 +11,25 @@ import { cn } from '@lib/utils'
 // 样式已简化：白色背景，仅向下箭头，尺寸减小。
 // --- END COMMENT ---
 export const ScrollToBottomButton = () => {
-  const { isAtBottom } = useChatScrollStore();
+  const { isAtBottom, userScrolledUp } = useChatScrollStore();
   const { isDark } = useChatInputStore();
   const scrollToBottom = useChatScrollStore((state) => state.scrollToBottom);
+  const resetScrollState = useChatScrollStore((state) => state.resetScrollState);
   const { isWelcomeScreen: isOnWelcomeScreen } = useWelcomeScreen();
 
+  // 只有当不在欢迎屏幕且不在底部时才显示按钮
   const shouldRender = !isOnWelcomeScreen && !isAtBottom;
-  // const bottomOffset = '120px'; // 从 150px 下移 30px (约 8mm)
+  
   // --- BEGIN COMMENT ---
   // 恢复动态计算 bottom 偏移量
   // 基于输入框高度（CSS 变量 --chat-input-height）
   // 额外增加一些间距
-  // 注意：直接在 style 中使用 theme() 可能不可靠，稍后可能需要调整
   // --- END COMMENT ---
-  // const bottomOffset = `calc(var(--chat-input-height, 80px) + 1rem)`; // 使用 1rem (16px) 作为额外间距
-  // --- BEGIN MODIFIED COMMENT ---
-  // 调整间距，将按钮上移 1cm (约 2.5rem)
-  // --- END MODIFIED COMMENT ---
   const bottomOffset = `calc(var(--chat-input-height, 80px) + 4rem)`;
 
   const handleClick = () => {
-    scrollToBottom('smooth');
+    // 使用新增的重置滚动状态方法，确保完全重置状态并滚动到底部
+    resetScrollState();
   };
 
   if (!shouldRender) {

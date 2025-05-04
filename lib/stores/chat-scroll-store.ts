@@ -19,6 +19,8 @@ interface ChatScrollState {
   scrollRef: RefObject<HTMLElement> | null;
   setScrollRef: (ref: RefObject<HTMLElement>) => void;
   scrollToBottom: (behavior?: ScrollBehavior) => void;
+  // 添加重置滚动状态的方法
+  resetScrollState: () => void;
 }
 
 // --- BEGIN COMMENT ---
@@ -40,14 +42,33 @@ export const useChatScrollStore = create<ChatScrollState>((set, get) => ({
   },
   setIsAtBottom: (isBottom) => set({ isAtBottom: isBottom }),
   setScrollRef: (ref) => set({ scrollRef: ref }),
+  
+  // 增强版 scrollToBottom 方法，确保一定会滚动到底部
   scrollToBottom: (behavior = 'auto') => {
+    const { scrollRef } = get();
+    if (scrollRef?.current) {
+      // 加入setTimeout确保在DOM更新后执行
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({
+            top: scrollRef.current.scrollHeight,
+            behavior: behavior
+          });
+          set({ userScrolledUp: false, isAtBottom: true });
+        }
+      }, 0);
+    }
+  },
+  
+  // 添加一个新方法，用于关键事件后重置滚动状态
+  resetScrollState: () => {
+    set({ userScrolledUp: false, isAtBottom: true });
     const { scrollRef } = get();
     if (scrollRef?.current) {
       scrollRef.current.scrollTo({
         top: scrollRef.current.scrollHeight,
-        behavior: behavior
+        behavior: 'smooth'
       });
-      set({ userScrolledUp: false, isAtBottom: true });
     }
   }
 })); 

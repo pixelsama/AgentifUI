@@ -210,10 +210,10 @@ export function Tooltip({
     }
 
     // 添加调试信息
-    console.log(`Mouse enter on tooltip ${id}, setting timeout to show`)
+    // console.log(`Mouse enter on tooltip ${id}, setting timeout to show`)
 
     showTimeoutRef.current = setTimeout(() => {
-      console.log(`Showing tooltip ${id}`)
+      // console.log(`Showing tooltip ${id}`)
       tooltipState.showTooltip(id)
     }, delayShow)
   }
@@ -225,20 +225,20 @@ export function Tooltip({
     }
 
     // 添加调试信息
-    console.log(`Mouse leave on tooltip ${id}, setting timeout to hide`)
+    // console.log(`Mouse leave on tooltip ${id}, setting timeout to hide`)
 
     hideTimeoutRef.current = setTimeout(() => {
-      console.log(`Hiding tooltip ${id}`)
+      // console.log(`Hiding tooltip ${id}`)
       tooltipState.hideTooltip()
     }, delayHide)
   }
 
   // 当tooltip可见性变化时，更新其位置
   useEffect(() => {
-    console.log(`Tooltip ${id} visibility changed to: ${isVisible}`)
+    // console.log(`Tooltip ${id} visibility changed to: ${isVisible}`)
 
     if (isVisible) {
-      console.log(`Updating position for tooltip ${id}`)
+      // console.log(`Updating position for tooltip ${id}`)
       requestAnimationFrame(updatePosition)
     }
   }, [isVisible, id])

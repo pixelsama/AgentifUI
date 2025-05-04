@@ -5,6 +5,7 @@ import { PlusIcon, ArrowUpIcon, Square, Loader2 } from "lucide-react"
 import { useChatWidth, useInputHeightReset } from "@lib/hooks"
 import { useChatLayoutStore } from "@lib/stores/chat-layout-store"
 import { useChatInputStore } from "@lib/stores/chat-input-store"
+import { useChatScrollStore } from "@lib/stores/chat-scroll-store"
 import { ChatButton } from "./button"
 import { ChatTextInput } from "./text-input"
 import { ChatContainer } from "./container"
@@ -98,6 +99,9 @@ export const ChatInput = ({
       onSubmit(message);
     }
     clearMessage();
+    
+    // 添加强制滚动到底部逻辑，确保消息发送后滚动到底部
+    useChatScrollStore.getState().scrollToBottom('smooth');
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

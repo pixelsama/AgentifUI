@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import { useChatScrollStore } from '@lib/stores/chat-scroll-store';
 import throttle from 'lodash/throttle';
 
@@ -21,8 +21,21 @@ import throttle from 'lodash/throttle';
 // --- END COMMENT ---
 const SCROLL_THRESHOLD = 50;
 
+// 检查是否为流式响应的函数
+const isStreamingResponse = (dep: any): boolean => {
+  // 根据你的消息数据结构来判断是否为流式响应
+  // 这只是一个示例实现，需要根据你的实际数据结构调整
+  return dep?.isStreaming || 
+         (typeof dep === 'object' && 
+          dep?.messages?.length > 0 && 
+          dep.messages[dep.messages.length - 1]?.isStreaming);
+}
+
 export function useChatScroll<T extends HTMLElement>(dependency: any) {
   const scrollRef = useRef<T>(null); // Ref 附加到主滚动容器
+  const prevScrollHeightRef = useRef<number>(0); // 记录前一次的滚动高度
+  const animationFrameRef = useRef<number | null>(null); // 用于存储动画帧ID
+  
   const { 
     userScrolledUp, 
     setUserScrolledUp, 
@@ -37,16 +50,64 @@ export function useChatScroll<T extends HTMLElement>(dependency: any) {
   useEffect(() => {
     if (scrollRef.current) {
       setScrollRef(scrollRef as React.RefObject<HTMLElement>)
+      // 初始化高度记录
+      prevScrollHeightRef.current = scrollRef.current.scrollHeight;
     }
     // 确保在组件卸载时清除引用，虽然在这个场景下可能不是严格必需
     return () => {
       // 注意：这里直接 setScrollRef(null) 可能会在快速导航时出问题
       // 如果 store 的实例持续存在，但 ref 已失效。视情况决定是否需要清理。
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     }
   }, [setScrollRef])
 
   // --- BEGIN COMMENT ---
+  // 检查内容高度变化并更新isAtBottom状态
+  // 这个函数不依赖于滚动事件，而是主动检测内容变化
+  // --- END COMMENT ---
+  const checkContentHeightChange = useCallback(() => {
+    const element = scrollRef.current;
+    if (!element) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    const currentDistanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    
+    // 如果高度发生变化
+    if (scrollHeight !== prevScrollHeightRef.current) {
+      // 更新前一次高度记录
+      prevScrollHeightRef.current = scrollHeight;
+      
+      // 更新isAtBottom状态
+      const atBottom = currentDistanceFromBottom < SCROLL_THRESHOLD;
+      setIsAtBottom(atBottom);
+      
+      // 如果不在底部且没有设置userScrolledUp，则设置它
+      // 这确保当内容增加导致用户不再在底部时，滚动按钮会出现
+      if (!atBottom && !userScrolledUp) {
+        setUserScrolledUp(true);
+      }
+    }
+    
+    // 递归调用以持续监测高度变化
+    animationFrameRef.current = requestAnimationFrame(checkContentHeightChange);
+  }, [setIsAtBottom, setUserScrolledUp, userScrolledUp]);
+  
+  // 启动高度监测
+  useEffect(() => {
+    animationFrameRef.current = requestAnimationFrame(checkContentHeightChange);
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [checkContentHeightChange]);
+
+  // --- BEGIN COMMENT ---
   // 使用 useCallback 和 throttle 优化滚动事件处理函数
+  // 减少 throttle 时间从 100ms 到 50ms 使滚动更平滑
   // --- END COMMENT ---
   const handleScroll = useCallback(throttle(() => {
     const element = scrollRef.current
@@ -69,7 +130,7 @@ export function useChatScroll<T extends HTMLElement>(dependency: any) {
           setUserScrolledUp(scrolledUp)
       }
     }
-  }, 100), [setUserScrolledUp, setIsAtBottom]) // 依赖项包含 setIsAtBottom
+  }, 50), [setUserScrolledUp, setIsAtBottom]) // 依赖项包含 setIsAtBottom；将节流从100ms减少到50ms
 
   useEffect(() => {
     const element = scrollRef.current
@@ -123,6 +184,32 @@ export function useChatScroll<T extends HTMLElement>(dependency: any) {
       })
     }
   }, [dependency, userScrolledUp, setIsAtBottom]) // 依赖项包含 setIsAtBottom
+
+  // --- BEGIN COMMENT ---
+  // 增加对流式响应的特殊处理
+  // --- END COMMENT ---
+  useEffect(() => {
+    // 检测是否为流式响应
+    const streaming = isStreamingResponse(dependency);
+    
+    if (streaming && scrollRef.current) {
+      // 流式响应时，即使用户向上滚动，也考虑滚动（但要更智能）
+      const element = scrollRef.current;
+      const distanceFromBottom = element.scrollHeight - element.scrollTop - element.clientHeight;
+      
+      // 如果用户在接近底部，即使userScrolledUp=true也自动滚动
+      if (distanceFromBottom < SCROLL_THRESHOLD * 3) {
+        requestAnimationFrame(() => {
+          if (scrollRef.current) {
+            scrollRef.current.scrollTo({
+              top: scrollRef.current.scrollHeight,
+              behavior: 'smooth'
+            });
+          }
+        });
+      }
+    }
+  }, [dependency]) // 单独监听dependency变化
 
   return scrollRef; // 返回 ref
 } 
