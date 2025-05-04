@@ -3,9 +3,16 @@
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { ChatInput } from '@components/chat-input';
-import { ChatLoader, WelcomeScreen, ChatInputBackdrop, PromptContainer } from '@components/chat';
+import { 
+  ChatLoader, 
+  WelcomeScreen, 
+  ChatInputBackdrop, 
+  PromptContainer, 
+  ScrollToBottomButton
+} from '@components/chat';
 import { useChatInterface, useChatStateSync } from '@lib/hooks';
 import { useChatStore } from '@lib/stores/chat-store';
+import { useChatLayoutStore } from '@lib/stores/chat-layout-store';
 import { useChatScroll } from '@lib/hooks/use-chat-scroll';
 
 export default function ChatPage() {
@@ -13,6 +20,7 @@ export default function ChatPage() {
   const conversationIdFromUrl = params.conversationId as string | undefined;
   
   const setCurrentConversationId = useChatStore((state) => state.setCurrentConversationId);
+  const { inputHeight } = useChatLayoutStore();
 
   const { isDark, isWelcomeScreen } = useChatStateSync();
   
@@ -41,8 +49,13 @@ export default function ChatPage() {
     // --- END COMMENT ---
   }, [conversationIdFromUrl, setCurrentConversationId]);
 
+  const chatInputHeightVar = `${inputHeight || 80}px`;
+
   return (
-    <div className={`h-full flex flex-col ${isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
+    <div 
+      className={`h-full flex flex-col ${isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}
+      style={{ '--chat-input-height': chatInputHeightVar } as React.CSSProperties}
+    >
       <div className="relative h-full flex flex-col overflow-hidden">
         <div className="flex-1 overflow-hidden">
           {isWelcomeScreen && useChatStore.getState().currentConversationId === null ? (
@@ -59,6 +72,8 @@ export default function ChatPage() {
             </div>
           )}
         </div>
+
+        <ScrollToBottomButton />
 
         <ChatInputBackdrop />
         
