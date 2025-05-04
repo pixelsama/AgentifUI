@@ -47,7 +47,7 @@ export const ChatLoader = ({ messages, isWaitingForResponse = false, className }
 
         {isWaitingForResponse && (
           <div className="flex justify-start py-2 my-2">
-            <TypingDots />
+            <TypingDots size="lg" />
           </div>
         )}
       </div>

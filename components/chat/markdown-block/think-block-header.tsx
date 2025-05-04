@@ -4,6 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@lib/utils';
 import { Spinner } from '@components/ui/spinner';
+import { useTheme } from '@lib/hooks/use-theme';
 
 /**
  * ThinkBlock 标题栏属性接口
@@ -28,9 +29,7 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
   onToggle 
 }) => {
   const { t } = useTranslation();
-
-  // --- 中文注释: 根据展开状态确定按钮的提示文本 --- 
-  const buttonTitle = isOpen ? t('common.chat.hide_thought') : t('common.chat.show_thought');
+  const { isDark } = useTheme();
 
   return (
     <button 
@@ -41,8 +40,12 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
         "w-[22%] px-3 py-1.5 rounded-md cursor-pointer mb-1 text-sm", // 修改了宽度为22%
         // --- 中文注释: 背景和边框颜色根据思考状态变化 --- 
         isThinking
-          ? "bg-blue-50 border border-blue-200 dark:bg-blue-900/30 dark:border-blue-800/60" // 思考中
-          : "bg-gray-100 border border-gray-200 hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700", // 非思考中
+          ? isDark 
+            ? "bg-blue-900/30 border border-blue-800/60" 
+            : "bg-blue-50 border border-blue-200" // 思考中
+          : isDark 
+            ? "bg-gray-800 border border-gray-700 hover:bg-gray-700" 
+            : "bg-gray-100 border border-gray-200 hover:bg-gray-200", // 非思考中
         // --- 中文注释: 焦点样式和过渡效果 --- 
         "focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-600",
         "transition-all duration-200 ease-in-out"
@@ -50,7 +53,6 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
       onClick={onToggle} // --- 中文注释: 点击时调用切换函数 --- 
       aria-expanded={isOpen} // --- 中文注释: 无障碍属性，指示是否展开 --- 
       aria-controls="think-block-content" // --- 中文注释: 无障碍属性，关联内容区域 --- 
-      title={buttonTitle} // --- 中文注释: 鼠标悬停提示 --- 
     >
       {/* --- 左侧区域：图标和状态文本 --- */}
       <div className="flex items-center">
@@ -75,7 +77,7 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
         {/* --- 状态文本 --- */}
         <span className={cn(
           "font-medium", // --- 中文注释: 字体加粗 --- 
-          isThinking ? "text-blue-700 dark:text-blue-300" : "text-gray-700 dark:text-gray-300" // --- 中文注释: 文本颜色根据思考状态变化 --- 
+          isThinking ? "text-blue-700 dark:text-blue-300" : "text-gray-500 dark:text-gray-300" // --- 中文注释: 文本颜色根据思考状态变化 --- 
         )}>
           {/* --- 中文注释: 显示"正在深度思考"或"已完成思考" --- */}
           {isThinking 
