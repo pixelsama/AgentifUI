@@ -167,29 +167,42 @@ export function useChatInterface() {
         // 追加后续的 chunk 到已创建的助手消息
         // --- END COMMENT ---
         if (assistantMessageId) {
-           // --- BEGIN COMMENT ---
-           // 确保只对存在的 assistantMessageId 追加
-           // --- END COMMENT ---
-          appendMessageChunk(assistantMessageId, chunk);
+          // --- BEGIN COMMENT ---
+          // 在追加前检查流是否已被外部停止 (通过比较 Store 中的 ID)
+          // --- END COMMENT ---
+          if (useChatStore.getState().streamingMessageId === assistantMessageId) {
+            appendMessageChunk(assistantMessageId, chunk);
+          } else {
+            // --- BEGIN COMMENT ---
+            // 如果 Store 中的 streamingMessageId 已被重置 (用户点了停止)
+            // 则跳出循环，不再处理后续的 chunk
+            // --- END COMMENT ---
+            console.log("Stream processing stopped externally by user.");
+            break; 
+          }
         }
       }
 
       // --- BEGIN COMMENT ---
-      // 4. 流正常结束，最终确定消息状态
+      // 4. 流处理结束 (正常完成或被 break)
+      // 检查 assistantMessageId 是否存在，以及流是否 *没有* 被外部停止
+      // （如果被外部停止，finalizeStreamingMessage 已经被 handleStopProcessing 调用过了）
       // --- END COMMENT ---
-      if (assistantMessageId) {
+      if (assistantMessageId && useChatStore.getState().streamingMessageId === assistantMessageId) {
         console.log("Stream ended successfully, finalizing message:", assistantMessageId);
-        // --- BEGIN COMMENT ---
-        // finalizeStreamingMessage 会处理 isStreaming=false 和 streamingMessageId=null
-        // --- END COMMENT ---
         finalizeStreamingMessage(assistantMessageId);
-      } else {
+      } else if (!assistantMessageId) {
         // --- BEGIN COMMENT ---
-        // 如果流结束了但从未收到任何 chunk（即 assistantMessageId 仍为 null）
-        // 可能是API返回空流，此时只需清除等待状态
+        // 处理流结束但未收到任何 chunk 的情况
         // --- END COMMENT ---
         console.log("Stream ended but no chunks received. Resetting waiting state.");
         setIsWaitingForResponse(false);
+      } else {
+          // --- BEGIN COMMENT ---
+          // 如果 assistantMessageId 存在，但 Store 中的 ID 已经是 null
+          // 说明流是被用户中断的，状态已由 handleStopProcessing 处理，这里无需操作
+          // --- END COMMENT ---
+          console.log("Stream finalization skipped as it was stopped externally.");
       }
 
     } catch (error) {
@@ -213,6 +226,26 @@ export function useChatInterface() {
 
   }, [isProcessing, addMessage, setIsWaitingForResponse, isWelcomeScreen, setIsWelcomeScreen, appendMessageChunk, finalizeStreamingMessage, setMessageError]); // useCallback 依赖项
 
+  // --- BEGIN COMMENT ---
+  // 添加停止当前流式处理的函数
+  // --- END COMMENT ---
+  const handleStopProcessing = useCallback(() => {
+    // --- BEGIN COMMENT ---
+    // 从 Store 直接获取最新的 streamingMessageId
+    // --- END COMMENT ---
+    const currentStreamingId = useChatStore.getState().streamingMessageId;
+    if (currentStreamingId) {
+      console.log("handleStopProcessing called for ID:", currentStreamingId);
+      // --- BEGIN COMMENT ---
+      // 调用 finalize action 来重置流状态
+      // 这会将 isStreaming 设为 false 并将 streamingMessageId 设为 null
+      // 在真实API场景下，还需配合中断 fetch 请求
+      // --- END COMMENT ---
+      finalizeStreamingMessage(currentStreamingId);
+    } else {
+      console.log("handleStopProcessing called but no stream is active.");
+    }
+  }, [finalizeStreamingMessage]); // 依赖项是 Store action，是稳定的
 
   // --- 判断 UI 状态 ---
   const shouldShowWelcome = isWelcomeScreen && messages.length === 0;
@@ -222,6 +255,7 @@ export function useChatInterface() {
   return {
     messages, // 从 store 获取
     handleSubmit,
+    handleStopProcessing,
     shouldShowWelcome,
     shouldShowLoader,
     isWelcomeScreen,

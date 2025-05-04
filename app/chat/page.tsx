@@ -9,7 +9,12 @@ export default function ChatPage() {
   const { isDark, isWelcomeScreen } = useChatStateSync();
   
   // 获取聊天逻辑
-  const { messages, handleSubmit } = useChatInterface();
+  const { 
+    messages, 
+    handleSubmit, 
+    isProcessing,        // 获取处理状态
+    handleStopProcessing // 获取停止函数
+  } = useChatInterface();
 
   return (
     <div className={`h-full flex flex-col ${isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
@@ -29,6 +34,8 @@ export default function ChatPage() {
         <ChatInput
           onSubmit={handleSubmit}
           placeholder="输入消息，按Enter发送..."
+          isProcessing={isProcessing}
+          onStop={handleStopProcessing}
         />
         
         {/* 提示容器 */}

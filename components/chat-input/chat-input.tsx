@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useState, useEffect } from "react"
-import { PlusIcon, ArrowUpIcon } from "lucide-react"
+import { PlusIcon, ArrowUpIcon, Square } from "lucide-react"
 import { useChatWidth, useInputHeightReset } from "@lib/hooks"
 import { useChatLayoutStore } from "@lib/stores/chat-layout-store"
 import { useChatInputStore } from "@lib/stores/chat-input-store"
@@ -47,6 +47,8 @@ interface ChatInputProps {
   placeholder?: string
   maxHeight?: number
   onSubmit?: (message: string) => void
+  onStop?: () => void
+  isProcessing?: boolean
 }
 
 export const ChatInput = ({
@@ -54,6 +56,8 @@ export const ChatInput = ({
   placeholder = "输入消息...",
   maxHeight = 180,
   onSubmit,
+  onStop,
+  isProcessing = false,
 }: ChatInputProps) => {
   const { widthClass } = useChatWidth()
   const { setInputHeight } = useChatLayoutStore()
@@ -88,20 +92,20 @@ export const ChatInput = ({
     setInputHeight(height)
   }, [setInputHeight])
 
-  const handleSubmit = () => {
+  const handleLocalSubmit = () => {
     if (!message.trim()) return;
-
     if (onSubmit) {
-      onSubmit(message)
+      onSubmit(message);
     }
-
-    clearMessage()
+    clearMessage();
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey && !isComposing) {
-      e.preventDefault()
-      handleSubmit()
+      e.preventDefault();
+      if (!isProcessing) {
+        handleLocalSubmit();
+      }
     }
   }
 
@@ -132,6 +136,13 @@ export const ChatInput = ({
     // 3. 将附件添加到消息中
   }
 
+  // 根据状态决定提交/停止按钮的属性
+  const submitButtonIcon = isProcessing ? <Square className="h-4 w-4" /> : <ArrowUpIcon className="h-4 w-4" />;
+  const submitButtonOnClick = isProcessing ? onStop : handleLocalSubmit;
+  const submitButtonAriaLabel = isProcessing ? "停止生成" : "发送消息";
+  // 停止按钮始终可用，发送按钮在消息为空时禁用
+  const submitButtonDisabled = !isProcessing && !message.trim();
+
   return (
     <ChatContainer isWelcomeScreen={isWelcomeScreen} isDark={isDark} className={className} widthClass={widthClass}>
       {/* 文本区域 */}
@@ -141,7 +152,7 @@ export const ChatInput = ({
           value={message}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={isProcessing ? "正在处理中..." : placeholder}
           maxHeight={maxHeight}
           isDark={isDark}
           onCompositionStart={handleCompositionStart}
@@ -169,12 +180,12 @@ export const ChatInput = ({
           </div>
           <div className="flex-none">
             <ChatButton
-              icon={<ArrowUpIcon className="h-4 w-4" />}
+              icon={submitButtonIcon}
               variant="submit"
-              onClick={handleSubmit}
-              disabled={!message.trim()}
+              onClick={submitButtonOnClick}
+              disabled={submitButtonDisabled}
               isDark={isDark}
-              ariaLabel="发送消息"
+              ariaLabel={submitButtonAriaLabel}
             />
           </div>
         </ChatButtonArea>
