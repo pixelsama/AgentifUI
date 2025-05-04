@@ -7,6 +7,7 @@ import { ChatLoader, WelcomeScreen, ChatInputBackdrop, PromptContainer } from '@
 import { useChatInterface, useChatStateSync } from '@lib/hooks';
 import { useChatStore } from '@lib/stores/chat-store';
 import { useChatScroll } from '@lib/hooks/use-chat-scroll';
+import { TypingDots } from '@components/ui/typing-dots';
 
 export default function ChatPage() {
   const params = useParams();
@@ -45,16 +46,24 @@ export default function ChatPage() {
     <div className={`h-full flex flex-col ${isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
       <div className="relative h-full flex flex-col overflow-hidden">
         <div className="flex-1 overflow-hidden">
-          <div 
-            ref={scrollRef} 
-            className="h-full overflow-y-auto scroll-smooth"
-          >
-            {isWelcomeScreen && useChatStore.getState().currentConversationId === null && <WelcomeScreen />}
-            <ChatLoader 
-              messages={messages} 
-              isWaitingForResponse={isWaitingForResponse}
-            />
-          </div>
+          {isWelcomeScreen && useChatStore.getState().currentConversationId === null ? (
+            <WelcomeScreen />
+          ) : (
+            <div 
+              ref={scrollRef}
+              className="h-full overflow-y-auto scroll-smooth"
+            >
+              <ChatLoader 
+                messages={messages} 
+                isWaitingForResponse={isWaitingForResponse}
+              />
+              {isWaitingForResponse && (
+                <div className="flex justify-start py-2 my-2"> 
+                  <TypingDots />
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <ChatInputBackdrop />
