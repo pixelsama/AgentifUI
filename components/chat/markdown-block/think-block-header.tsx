@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@lib/utils';
 import { Spinner } from '@components/ui/spinner';
 import { useTheme } from '@lib/hooks/use-theme';
+import { useMobile } from '@lib/hooks/use-mobile';
 
 /**
  * ThinkBlock 标题栏属性接口
@@ -30,6 +31,7 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
 }) => {
   const { t } = useTranslation();
   const { isDark } = useTheme();
+  const isMobile = useMobile();
 
   return (
     <button 
@@ -37,7 +39,8 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
         // --- 中文注释: 基础布局：Flex, 垂直居中, 两端对齐 --- 
         "flex items-center justify-between", 
         // --- 中文注释: 尺寸和样式：宽度占满，调整垂直内边距使其更矮，圆角，下边距，可点击 --- 
-        "w-[22%] px-3 py-1.5 rounded-md cursor-pointer mb-1 text-sm", // 修改了宽度为22%
+        isMobile ? "w-full" : "w-[22%]", // 移动端占满宽度，桌面端保持22%
+        "px-3 py-1.5 rounded-md cursor-pointer mb-1 text-sm",
         // --- 中文注释: 背景和边框颜色根据思考状态变化 --- 
         isThinking
           ? isDark 
@@ -76,7 +79,7 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
         </svg>
         {/* --- 状态文本 --- */}
         <span className={cn(
-          "font-medium", // --- 中文注释: 字体加粗 --- 
+          "font-medium whitespace-nowrap", // 添加 whitespace-nowrap 防止文本换行
           isThinking ? "text-blue-700 dark:text-blue-300" : "text-gray-500 dark:text-gray-300" // --- 中文注释: 文本颜色根据思考状态变化 --- 
         )}>
           {/* --- 中文注释: 显示"正在深度思考"或"已完成思考" --- */}
@@ -88,7 +91,7 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
       </div>
 
       {/* --- 右侧区域：Spinner (仅在思考中显示) --- */}
-      <div className="h-4 w-4"> {/* --- 中文注释: 占位符，防止 Spinner 显示/隐藏时布局跳动 --- */} 
+      <div className="h-4 w-4 flex-shrink-0"> {/* 添加 flex-shrink-0 防止 Spinner 被压缩 --- */} 
         {isThinking && (
           <Spinner 
             size="md" 
