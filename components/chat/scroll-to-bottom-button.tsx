@@ -45,10 +45,12 @@ export const ScrollToBottomButton = () => {
         // 定位与层级
         'absolute bottom-0 left-1/2 -translate-x-1/2 z-10 mb-4',
         
-        // 基础样式 (圆形, 减小 padding)
-        'rounded-full p-1.5 shadow-md transition-all duration-300 ease-in-out',
+        // --- BEGIN MODIFIED COMMENT ---
+        // 基础样式 (移除 all transition, 添加 transform transition)
+        // --- END MODIFIED COMMENT ---
+        'rounded-full p-1.5 shadow-md transition-transform duration-150 ease-in-out', // 仅保留 transform 过渡
         
-        // 颜色主题
+        // 颜色主题 (可以按需添加 transition-colors)
         isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-white hover:bg-gray-100 text-gray-600',
         
         // 交互效果
