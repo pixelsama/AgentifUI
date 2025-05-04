@@ -9,7 +9,7 @@ import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import "katex/dist/katex.min.css";
 import type { Components } from "react-markdown";
-import { useTheme } from '@lib/hooks'; // 引入 useTheme
+import { useTheme } from '@lib/hooks';
 
 /**
  * ThinkBlock 内容容器的属性接口
@@ -28,101 +28,230 @@ interface ThinkBlockContentProps {
 export const ThinkBlockContent: React.FC<ThinkBlockContentProps> = ({ markdownContent, isOpen }) => {
   const { isDark } = useTheme(); // 获取主题状态
 
-  // --- Markdown 渲染器的组件配置 (与 AssistantMessage 保持一致) ---
-  // --- 中文注释: 定义 Markdown 中特定元素（如代码块、表格）的渲染方式 --- 
+  // --- Markdown 渲染器的组件配置 ---
   const markdownComponents: Components = {
     code({ className, children, ...props }: any) {
       const match = /language-(\w+)/.exec(className || '');
-      // --- 中文注释: 如果不是带有语言标识的代码块 (inline code)，则应用不同的背景和内边距 --- 
+      // 如果不是带有语言标识的代码块 (inline code)
       return !className?.includes('language-') ? (
-        <code className={cn("px-1 py-0.5 rounded", isDark ? "bg-gray-700" : "bg-gray-200")} {...props}> {/* 调整了暗色模式背景 */} 
+        <code className={cn(
+          "px-2 py-1 rounded font-mono", 
+          isDark ? "bg-gray-800 text-blue-300" : "bg-gray-100 text-blue-700"
+        )} {...props}>
           {children}
         </code>
       ) : (
-        // --- 中文注释: 如果是带有语言标识的代码块，则使用 pre 标签包裹，并应用代码块样式 --- 
-        <pre className={cn("rounded-md p-4 my-2 text-sm", isDark ? "bg-gray-800/80" : "bg-gray-100/80")}> {/* 调整了背景透明度和字体大小 */} 
-          <code className={cn(className, 'block whitespace-pre-wrap')} {...props}> {/* 确保长代码换行 */} 
+        // 如果是带有语言标识的代码块
+        <pre className={cn(
+          "rounded-md p-5 my-4 overflow-auto",
+          isDark ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900",
+          "border",
+          isDark ? "border-gray-700" : "border-gray-200"
+        )}>
+          <code className={cn(className, 'block whitespace-pre-wrap text-base')} {...props}>
             {children}
           </code>
         </pre>
       );
     },
-    // --- 中文注释: 表格渲染，添加外层 div 实现水平滚动 --- 
+    
+    // 表格渲染
     table({ className, children, ...props }: any) {
       return (
-        <div className="overflow-x-auto my-4 border rounded-md dark:border-gray-700"> 
-          <table className={cn("min-w-full divide-y", isDark ? "divide-gray-700" : "divide-gray-200")} {...props}>
+        <div className="overflow-x-auto my-5 border rounded-md w-full">
+          <table className={cn(
+            "min-w-full divide-y",
+            isDark ? "divide-gray-700 border-gray-700" : "divide-gray-200 border-gray-200"
+          )} {...props}>
             {children}
           </table>
         </div>
       );
     },
-    // --- 中文注释: 表头单元格样式 --- 
+    
+    // 表头单元格样式
     th({ className, children, ...props }: any) {
       return (
         <th 
-          className={cn("px-4 py-2 text-left font-medium", isDark ? "bg-gray-800" : "bg-gray-100")} 
+          className={cn(
+            "px-5 py-3 text-left font-medium text-base", 
+            isDark ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
+          )} 
           {...props}
         >
           {children}
         </th>
       );
     },
-    // --- 中文注释: 表格数据单元格样式 --- 
+    
+    // 表格数据单元格样式
     td({ className, children, ...props }: any) {
       return (
         <td 
-          className={cn("px-4 py-2 border-t", isDark ? "border-gray-700" : "border-gray-200")} 
+          className={cn(
+            "px-5 py-3 border-t text-base", 
+            isDark ? "border-gray-700 text-gray-200" : "border-gray-200 text-gray-800"
+          )} 
           {...props}
         >
           {children}
         </td>
       );
     },
-    // --- 中文注释: 引用块样式 --- 
+    
+    // 引用块样式
     blockquote({ className, children, ...props }: any) {
       return (
         <blockquote 
           className={cn(
-            "pl-4 border-l-4 my-4 py-1", // 添加垂直内边距
-            isDark ? "border-gray-600 bg-gray-800/50" : "border-gray-300 bg-gray-100/50"
+            "pl-5 border-l-4 my-5 py-3", 
+            isDark 
+              ? "border-blue-600 bg-gray-900 text-gray-200" 
+              : "border-blue-500 bg-gray-50 text-gray-800"
           )} 
           {...props}
         >
           {children}
         </blockquote>
       );
+    },
+    
+    // 段落样式
+    p({ className, children, ...props }: any) {
+      return (
+        <p 
+          className={cn(
+            "my-4 text-base leading-relaxed",
+            isDark ? "text-gray-200" : "text-gray-800"
+          )} 
+          {...props}
+        >
+          {children}
+        </p>
+      );
+    },
+    
+    // 标题样式
+    h1({ className, children, ...props }: any) {
+      return (
+        <h1 
+          className={cn(
+            "text-2xl font-bold my-5",
+            isDark ? "text-white" : "text-gray-900"
+          )} 
+          {...props}
+        >
+          {children}
+        </h1>
+      );
+    },
+    
+    h2({ className, children, ...props }: any) {
+      return (
+        <h2 
+          className={cn(
+            "text-xl font-bold my-4",
+            isDark ? "text-gray-100" : "text-gray-800"
+          )} 
+          {...props}
+        >
+          {children}
+        </h2>
+      );
+    },
+    
+    h3({ className, children, ...props }: any) {
+      return (
+        <h3 
+          className={cn(
+            "text-lg font-semibold my-3",
+            isDark ? "text-gray-200" : "text-gray-700"
+          )} 
+          {...props}
+        >
+          {children}
+        </h3>
+      );
+    },
+    
+    // 列表样式
+    ul({ className, children, ...props }: any) {
+      return (
+        <ul 
+          className={cn(
+            "my-4 pl-6 list-disc space-y-2 text-base",
+            isDark ? "text-gray-200" : "text-gray-800"
+          )} 
+          {...props}
+        >
+          {children}
+        </ul>
+      );
+    },
+    
+    ol({ className, children, ...props }: any) {
+      return (
+        <ol 
+          className={cn(
+            "my-4 pl-6 list-decimal space-y-2 text-base",
+            isDark ? "text-gray-200" : "text-gray-800"
+          )} 
+          {...props}
+        >
+          {children}
+        </ol>
+      );
+    },
+    
+    // 链接样式
+    a({ className, children, ...props }: any) {
+      return (
+        <a 
+          className={cn(
+            "underline",
+            isDark ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-800"
+          )} 
+          {...props}
+        >
+          {children}
+        </a>
+      );
     }
   };
 
-  // --- 如果未展开，则不渲染任何内容 --- 
+  // 如果未展开，则不渲染任何内容
   if (!isOpen) {
     return null; 
   }
 
-  // --- 渲染 Markdown 内容 --- 
+  // 渲染 Markdown 内容
   return (
     <div 
-      id="think-block-content" // 添加 ID 以便 aria-controls 关联
+      id="think-block-content"
       className={cn(
-        // --- 基础样式 ---
-        "think-block-content flex-1 overflow-hidden markdown-body", // 占据剩余空间，隐藏溢出, 应用 markdown 基础样式
-        "border rounded-md", // 边框和圆角
-        "bg-gray-50/50 dark:bg-gray-800/50", // 背景色
-        "p-3 text-sm", // 内边距和字体大小
-        // --- 颜色 ---
-        "border-gray-200 dark:border-gray-700",
-        isDark ? "text-gray-300" : "text-gray-700", // 根据主题调整文字颜色
-        // --- 确保可见性 ---
-        "block" 
+        // 基础样式
+        "think-block-content flex-1 overflow-hidden markdown-body w-full",
+        // 边框和圆角
+        "border rounded-md",
+        // 背景 - 确保黑暗模式足够深
+        isDark ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200",
+        // 内边距和文字颜色
+        "p-5",
+        isDark ? "text-gray-100" : "text-gray-900",
+        // 文字排版 - 增大字体
+        "font-sans text-base md:text-base lg:text-base",
+        // 响应式调整
+        "max-w-full md:max-w-full",
+        // 确保可见性
+        "block"
       )}
     >
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkMath]} // 支持 GFM 和数学公式
-        rehypePlugins={[rehypeKatex, rehypeRaw]} // 支持 Katex 和原始 HTML
-        components={markdownComponents} // 应用自定义组件渲染
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeKatex, rehypeRaw]}
+        components={markdownComponents}
         children={markdownContent}
       />
     </div>
   );
-}; 
+};
