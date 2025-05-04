@@ -6,7 +6,7 @@ import { createPortal } from "react-dom"
 
 type TooltipPlacement = "top" | "bottom" | "left" | "right"
 
-interface TooltipProps {
+export interface TooltipProps {
   children: React.ReactNode
   content: React.ReactNode
   id: string
@@ -342,3 +342,4 @@ export function TooltipProvider({ children }: { children: React.ReactNode }) {
     </>
   )
 }
+

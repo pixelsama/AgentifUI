@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState, useEffect } from "react"
+import { useCallback, useEffect } from "react"
 import { PlusIcon, ArrowUpIcon, Square, Loader2 } from "lucide-react"
 import { useChatWidth, useInputHeightReset } from "@lib/hooks"
 import { useChatLayoutStore } from "@lib/stores/chat-layout-store"
@@ -11,7 +11,7 @@ import { ChatTextInput } from "./text-input"
 import { ChatContainer } from "./container"
 import { ChatButtonArea, ChatTextArea } from "./layout"
 import { create } from "zustand"
-import { Tooltip } from "@components/ui/tooltip"
+import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
 
 // 创建一个全局焦点管理器
 interface FocusManagerState {
@@ -162,7 +162,8 @@ export const ChatInput = ({
       <div className="px-4">
         <ChatButtonArea>
           <div className="flex-none">
-            <Tooltip 
+            {/* 使用TooltipWrapper组件 - 自动处理服务器/客户端渲染差异 */}
+            <TooltipWrapper 
               content="添加附件" 
               id="add-attachment-tooltip" 
               placement="top"
@@ -174,7 +175,7 @@ export const ChatInput = ({
                 onClick={handleAttachmentClick}
                 disabled={isProcessing || isWaitingForResponse}
               />
-            </Tooltip>
+            </TooltipWrapper>
           </div>
           <div className="flex-none">
             <ChatButton
