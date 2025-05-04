@@ -21,10 +21,11 @@ export default function ChatPage() {
     handleSubmit, 
     isProcessing,        
     handleStopProcessing, 
-    isWaitingForResponse
   } = useChatInterface();
 
   const scrollRef = useChatScroll<HTMLDivElement>(messages.length);
+
+  const isWaitingForResponse = useChatStore((state) => state.isWaitingForResponse);
 
   useEffect(() => {
     const idToSet = (conversationIdFromUrl && conversationIdFromUrl !== 'new') ? conversationIdFromUrl : null;
@@ -49,7 +50,10 @@ export default function ChatPage() {
             className="h-full overflow-y-auto scroll-smooth"
           >
             {isWelcomeScreen && useChatStore.getState().currentConversationId === null && <WelcomeScreen />}
-            {messages.length > 0 && <ChatLoader messages={messages} />}
+            <ChatLoader 
+              messages={messages} 
+              isWaitingForResponse={isWaitingForResponse}
+            />
           </div>
         </div>
 
@@ -59,8 +63,8 @@ export default function ChatPage() {
           onSubmit={handleSubmit}
           placeholder="输入消息，按Enter发送..."
           isProcessing={isProcessing}
+          isWaiting={isWaitingForResponse}
           onStop={handleStopProcessing}
-          isWaitingForResponse={isWaitingForResponse}
         />
         
         {useChatStore.getState().currentConversationId === null && <PromptContainer />}
