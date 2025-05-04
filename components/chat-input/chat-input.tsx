@@ -33,10 +33,6 @@ export const useFocusManager = create<FocusManagerState>((set, get) => ({
     const { inputRef } = get();
     if (inputRef?.current) {
       inputRef.current.focus();
-      
-      // 将光标移到文本末尾
-      const length = inputRef.current.value.length;
-      inputRef.current.setSelectionRange(length, length);
     }
   }
 }));

@@ -7,7 +7,6 @@ import { ChatLoader, WelcomeScreen, ChatInputBackdrop, PromptContainer } from '@
 import { useChatInterface, useChatStateSync } from '@lib/hooks';
 import { useChatStore } from '@lib/stores/chat-store';
 import { useChatScroll } from '@lib/hooks/use-chat-scroll';
-import { TypingDots } from '@components/ui/typing-dots';
 
 export default function ChatPage() {
   const params = useParams();
@@ -57,11 +56,6 @@ export default function ChatPage() {
                 messages={messages} 
                 isWaitingForResponse={isWaitingForResponse}
               />
-              {isWaitingForResponse && (
-                <div className="flex justify-start py-2 my-2"> 
-                  <TypingDots />
-                </div>
-              )}
             </div>
           )}
         </div>
