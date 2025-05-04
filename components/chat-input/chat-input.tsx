@@ -161,7 +161,7 @@ export const ChatInput = ({
             <Tooltip 
               content="添加附件" 
               id="add-attachment-tooltip" 
-              placement="bottom"
+              placement="top"
             >
               <ChatButton 
                 icon={<PlusIcon className="h-4 w-4" />} 
