@@ -12,6 +12,7 @@ import "katex/dist/katex.min.css"
 import type { Components } from "react-markdown"
 import { ThinkBlockHeader } from "@components/chat/markdown-block/think-block-header"
 import { ThinkBlockContent } from "@components/chat/markdown-block/think-block-content"
+import { AnimatePresence } from "framer-motion"
 
 const extractThinkContent = (rawContent: string): {
   hasThinkBlock: boolean;
@@ -148,11 +149,11 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
         />
       )}
 
-      {hasThinkBlock && isOpen && (
-         <ThinkBlockContent 
-           markdownContent={thinkContent}
-           isOpen={isOpen}
-         />
+      {hasThinkBlock && (
+        <ThinkBlockContent 
+          markdownContent={thinkContent}
+          isOpen={isOpen}
+        />
       )}
 
       {mainContent && (

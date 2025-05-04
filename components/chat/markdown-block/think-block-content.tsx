@@ -10,6 +10,7 @@ import rehypeRaw from "rehype-raw";
 import "katex/dist/katex.min.css";
 import type { Components } from "react-markdown";
 import { useTheme } from '@lib/hooks';
+import { motion } from 'framer-motion'; // 仅导入 motion
 
 /**
  * ThinkBlock 内容容器的属性接口
@@ -17,15 +18,19 @@ import { useTheme } from '@lib/hooks';
 interface ThinkBlockContentProps {
   // 要显示的 Markdown 内容
   markdownContent: string;
-  // 内容区域是否可见
-  isOpen: boolean;
+  // 控制内容是否显示
+  isOpen: boolean; // 仍然需要这个属性，用于动画状态切换
 }
 
 /**
  * ThinkBlock 的内容显示容器
- * 根据 isOpen 状态显示或隐藏，并使用 ReactMarkdown 渲染内容。
+ * 使用 ReactMarkdown 渲染内容
+ * 针对打开和关闭提供丝滑的动画效果
  */
-export const ThinkBlockContent: React.FC<ThinkBlockContentProps> = ({ markdownContent, isOpen }) => {
+export const ThinkBlockContent: React.FC<ThinkBlockContentProps> = ({ 
+  markdownContent,
+  isOpen 
+}) => {
   const { isDark } = useTheme(); // 获取主题状态
 
   // --- Markdown 渲染器的组件配置 ---
@@ -219,39 +224,64 @@ export const ThinkBlockContent: React.FC<ThinkBlockContentProps> = ({ markdownCo
     }
   };
 
-  // 如果未展开，则不渲染任何内容
-  if (!isOpen) {
-    return null; 
-  }
+  // --- 优化后的动画变体 ---
+  const variants = {
+    open: { 
+      opacity: 1,
+      height: "auto",
+      scale: 1,
+      y: 0,
+      transition: {
+        type: "spring", // 使用弹簧动画
+        stiffness: 300, // 弹性系数
+        damping: 24, // 阻尼系数，值越大动画越快结束
+        mass: 0.8, // 质量，值越小动画越快
+        opacity: { duration: 0.2 }, // 透明度过渡单独控制
+        height: { type: "spring", stiffness: 100, damping: 30 }, // 高度使用更缓和的弹簧
+      }
+    },
+    closed: {
+      opacity: 0,
+      height: 0,
+      scale: 0.95,
+      y: -8,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 25, 
+        opacity: { duration: 0.15 }, // 关闭时，透明度渐变更快
+        height: { delay: 0.1, type: "spring", stiffness: 200, damping: 30 }, // 稍延迟高度变化
+      }
+    }
+  };
 
-  // 渲染 Markdown 内容
   return (
-    <div 
-      id="think-block-content"
-      className={cn(
-        // 基础样式
-        "think-block-content flex-1 overflow-hidden markdown-body w-full",
-        // 边框和圆角
-        "border rounded-md",
-        // 背景 - 确保黑暗模式足够深
-        isDark ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200",
-        // 内边距和文字颜色
-        "p-5",
-        isDark ? "text-gray-100" : "text-gray-900",
-        // 文字排版 - 增大字体
-        "font-sans text-base md:text-base lg:text-base",
-        // 响应式调整
-        "max-w-full md:max-w-full",
-        // 确保可见性
-        "block"
-      )}
+    <motion.div 
+      className="overflow-hidden origin-top mb-2" // 添加 origin-top 并将 margin-bottom 移到这里
+      initial={false} // 不使用 initial，避免首次渲染闪烁
+      animate={isOpen ? "open" : "closed"} // 根据 isOpen 切换状态
+      variants={variants}
     >
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeKatex, rehypeRaw]}
-        components={markdownComponents}
-        children={markdownContent}
-      />
-    </div>
+      <div
+        id="think-block-content"
+        className={cn(
+          "think-block-content flex-1 markdown-body w-full",
+          "border rounded-md", // 边框和圆角
+          isDark ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200", // 背景和边框颜色
+          "p-5", // 内边距
+          isDark ? "text-gray-100" : "text-gray-900", // 文字颜色
+          "font-sans text-base", // 字体
+          "max-w-full", // 最大宽度
+          "transform-gpu" // 启用GPU加速
+        )}
+      >
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex, rehypeRaw]}
+          components={markdownComponents}
+          children={markdownContent}
+        />
+      </div>
+    </motion.div>
   );
 };
