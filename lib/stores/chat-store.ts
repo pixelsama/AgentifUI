@@ -22,6 +22,13 @@ interface ChatState {
   // --- END COMMENT ---
   currentConversationId: string | null;
 
+  // --- BEGIN COMMENT ---
+  // 当前流式任务的 Task ID。
+  // 从 Dify 流式响应中获取，用于后续可能的操作（如停止任务）。
+  // null 表示当前没有活动的或已知的流式任务 ID。
+  // --- END COMMENT ---
+  currentTaskId: string | null;
+
   // --- 操作 Actions ---
   /**
    * 添加一条新消息到列表
@@ -67,6 +74,11 @@ interface ChatState {
    * @param id 对话 ID，或 null 表示新对话
    */
   setCurrentConversationId: (id: string | null) => void;
+
+  // --- BEGIN COMMENT ---
+  // 设置当前流式任务的 Task ID。
+  // --- END COMMENT ---
+  setCurrentTaskId: (taskId: string | null) => void;
 }
 
 // --- Store 实现 ---
@@ -76,6 +88,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   streamingMessageId: null,
   isWaitingForResponse: false,
   currentConversationId: null, // 初始为 null
+  currentTaskId: null, // --- BEGIN COMMENT --- 初始化 Task ID 为 null --- END COMMENT ---
 
   // --- Action 实现 ---
   addMessage: (messageData) => {
@@ -138,6 +151,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
     // --- END COMMENT ---
     set({ currentConversationId: id });
     console.log("Current conversation ID set to:", id);
+  },
+
+  // --- BEGIN COMMENT ---
+  // 实现设置 Task ID 的 Action
+  // --- END COMMENT ---
+  setCurrentTaskId: (taskId) => { 
+    set({ currentTaskId: taskId });
+    console.log("Current Task ID set to:", taskId);
   },
 
 }));

@@ -2,8 +2,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useChatInputStore } from '@lib/stores/chat-input-store';
 import { useChatStore, selectIsProcessing, ChatMessage } from '@lib/stores/chat-store';
-import { streamDifyChat } from '@lib/services/dify/chat-service';
-import type { DifyChatRequestPayload } from '@lib/services/dify/types';
+import { streamDifyChat, stopDifyStreamingTask } from '@lib/services/dify/chat-service';
+import type { DifyChatRequestPayload, DifyStopTaskResponse } from '@lib/services/dify/types';
 
 // --- BEGIN COMMENT ---
 // TODO: 将 Dify App ID 移到环境变量或配置文件中
@@ -58,6 +58,8 @@ export function useChatInterface() {
   const currentConversationId = useChatStore(state => state.currentConversationId);
   const setCurrentConversationId = useChatStore(state => state.setCurrentConversationId);
   const isProcessing = useChatStore(selectIsProcessing);
+  // --- BEGIN COMMENT --- 获取设置 Task ID 的 action --- END COMMENT ---
+  const setCurrentTaskId = useChatStore(state => state.setCurrentTaskId); 
 
   // --- BEGIN COMMENT ---
   // TODO: 获取真实的用户标识符，这里使用占位符
@@ -79,10 +81,8 @@ export function useChatInterface() {
     }
 
     let assistantMessageId: string | null = null;
-    // --- BEGIN COMMENT ---
-    // TODO: 在 Store 中添加 currentTaskId: string | null 状态来存储 taskId
-    // let taskIdToStore: string | null = null;
-    // --- END COMMENT ---
+    // --- BEGIN COMMENT --- 清除之前的 Task ID --- END COMMENT ---
+    setCurrentTaskId(null);
 
     try {
       // --- BEGIN COMMENT ---
@@ -142,6 +142,11 @@ export function useChatInterface() {
           finalTaskId = response.getTaskId();
           console.log(`[handleSubmit] IDs after first chunk: ConvID=${finalConversationId}, TaskID=${finalTaskId}`);
           
+          // --- BEGIN COMMENT --- 将获取到的 Task ID 存储到 Zustand --- END COMMENT ---
+          if (finalTaskId) { 
+            setCurrentTaskId(finalTaskId); 
+          }
+
           // --- BEGIN COMMENT ---
           // 处理新对话的 ID 更新和 URL 跳转逻辑
           // --- END COMMENT ---
@@ -153,10 +158,6 @@ export function useChatInterface() {
           } else if (currentConversationId !== finalConversationId && finalConversationId) {
               console.warn(`[handleSubmit] Mismatch or unexpected ConvID: Sent ${currentConversationId}, received ${finalConversationId}`);
           }
-          // --- BEGIN COMMENT ---
-          // TODO: 将 finalTaskId 存储到 Zustand store 中
-          // if (finalTaskId) { useChatStore.setState({ currentTaskId: finalTaskId }); }
-          // --- END COMMENT ---
         }
 
         if (assistantMessageId) {
@@ -173,28 +174,20 @@ export function useChatInterface() {
       }
       console.log("[handleSubmit] Finished processing answer stream.");
 
-      // --- BEGIN COMMENT ---
-      // 流结束后，再次确认获取最终的 ID (理论上此时应该肯定有值了)
-      // --- END COMMENT ---
-      finalConversationId = response.getConversationId();
-      finalTaskId = response.getTaskId();
-      console.log(`[handleSubmit] IDs after stream finished: ConvID=${finalConversationId}, TaskID=${finalTaskId}`);
+      // --- BEGIN COMMENT --- 流结束后再次确认 Task ID (如果之前没获取到) --- END COMMENT ---
+      finalTaskId = response.getTaskId(); 
+      console.log(`[handleSubmit] IDs after stream finished: ConvID=${response.getConversationId()}, TaskID=${finalTaskId}`);
+      if (finalTaskId && useChatStore.getState().currentTaskId !== finalTaskId) {
+        setCurrentTaskId(finalTaskId); 
+      }
 
       // --- BEGIN COMMENT ---
       // 确认对话 ID 是否按预期更新 (如果之前是 null)
       // --- END COMMENT ---
-      if (useChatStore.getState().currentConversationId === null && finalConversationId) {
-        console.log("[handleSubmit] Updating store with final ConvID post-stream:", finalConversationId);
-        setCurrentConversationId(finalConversationId);
-        // URL 应该已经在第一个 chunk 后更新了，这里无需重复
+      if (useChatStore.getState().currentConversationId === null && response.getConversationId()) {
+        console.log("[handleSubmit] Updating store with final ConvID post-stream:", response.getConversationId());
+        setCurrentConversationId(response.getConversationId());
       }
-
-      // --- BEGIN COMMENT ---
-      // TODO: 存储最终的 Task ID
-      // if (finalTaskId && useChatStore.getState().currentTaskId !== finalTaskId) {
-      //   useChatStore.setState({ currentTaskId: finalTaskId }); 
-      // }
-      // --- END COMMENT ---
 
       // --- BEGIN COMMENT ---
       // TODO: 可以选择性地处理 completionPromise 来获取最终的 usage/metadata
@@ -210,7 +203,10 @@ export function useChatInterface() {
       // --- END COMMENT ---
       if (assistantMessageId && useChatStore.getState().streamingMessageId === assistantMessageId) {
         console.log("[handleSubmit] Stream ended successfully, finalizing message:", assistantMessageId);
-        finalizeStreamingMessage(assistantMessageId);
+        // --- BEGIN COMMENT --- 流正常结束后，清除 Task ID? (可选，取决于业务逻辑) --- END COMMENT ---
+        // finalizeStreamingMessage(assistantMessageId); // finalize 会清除 streamingMessageId
+        // setCurrentTaskId(null); // 可以在这里清除，或保留直到下次开始
+        finalizeStreamingMessage(assistantMessageId); 
       } else if (!assistantMessageId) {
         console.log("[handleSubmit] Stream ended but no answer chunks received. Resetting waiting state.");
         setIsWaitingForResponse(false); 
@@ -229,6 +225,8 @@ export function useChatInterface() {
         // --- END COMMENT ---
         addMessage({ text: `抱歉，请求失败: ${(error as Error).message}`, isUser: false, error: "API 请求失败" });
       }
+      // --- BEGIN COMMENT --- 出错时也清除 Task ID --- END COMMENT ---
+      setCurrentTaskId(null); 
     }
 
   }, [
@@ -246,33 +244,47 @@ export function useChatInterface() {
     finalizeStreamingMessage, 
     setMessageError, 
     setCurrentConversationId, 
+    setCurrentTaskId, // --- BEGIN COMMENT --- 添加 setCurrentTaskId 到依赖 --- END COMMENT ---
     router // 添加 router 依赖
   ]);
 
   // --- 停止处理 --- 
-  const handleStopProcessing = useCallback(() => {
-    const currentStreamingId = useChatStore.getState().streamingMessageId;
-    // --- BEGIN COMMENT ---
-    // TODO: 从 Store 获取 currentTaskId
-    // const currentTaskId = useChatStore.getState().currentTaskId;
-    // --- END COMMENT ---
+  const handleStopProcessing = useCallback(async () => { // --- BEGIN COMMENT --- 改为 async --- END COMMENT ---
+    const state = useChatStore.getState();
+    const currentStreamingId = state.streamingMessageId;
+    const currentTaskId = state.currentTaskId; // --- BEGIN COMMENT --- 从 store 获取 Task ID --- END COMMENT ---
+    
     if (currentStreamingId) {
-      console.log("[handleStopProcessing] Stopping stream for ID:", currentStreamingId);
-      // --- BEGIN COMMENT ---
-      // TODO: 调用真实停止 API (需要 taskId)
-      // if (currentTaskId) {
-      //   stopDifyStreamingTask(currentTaskId, currentUserIdentifier)
-      //     .then(() => console.log("Stop request sent for task:", currentTaskId))
-      //     .catch(err => console.error("Error sending stop request:", err));
-      // } else {
-      //   console.warn("Cannot stop: Task ID not found in store.");
-      // }
-      // --- END COMMENT ---
-      finalizeStreamingMessage(currentStreamingId); // 立即更新前端状态
+      console.log(`[handleStopProcessing] Stopping stream for message ID: ${currentStreamingId}, Task ID: ${currentTaskId}`);
+      
+      // --- BEGIN COMMENT --- 1. 立即停止前端流 --- END COMMENT ---
+      finalizeStreamingMessage(currentStreamingId); 
+
+      // --- BEGIN COMMENT --- 2. 如果有 Task ID，尝试调用后端停止 API --- END COMMENT ---
+      if (currentTaskId) {
+        try {
+          console.log(`[handleStopProcessing] Calling stopDifyStreamingTask for Task ID: ${currentTaskId}`);
+          const stopResponse: DifyStopTaskResponse = await stopDifyStreamingTask(
+            DIFY_APP_IDENTIFIER,
+            currentTaskId,
+            currentUserIdentifier
+          );
+          console.log("[handleStopProcessing] Stop request successful:", stopResponse);
+          // --- BEGIN COMMENT --- 停止成功后，清除 Task ID --- END COMMENT ---
+          setCurrentTaskId(null); 
+        } catch (error) {
+          // --- BEGIN COMMENT --- 处理停止 API 调用失败的情况 --- END COMMENT ---
+          console.error(`[handleStopProcessing] Error calling stopDifyStreamingTask for Task ID ${currentTaskId}:`, error);
+          // 这里可以选择是否向用户显示错误，或者只是记录日志
+          // 注意：即使停止 API 失败，前端流也已经停止了
+        }
+      } else {
+        console.warn("[handleStopProcessing] Cannot send stop request: Task ID not found in store.");
+      }
     } else {
       console.log("[handleStopProcessing] No active stream to stop.");
     }
-  }, [finalizeStreamingMessage]);
+  }, [finalizeStreamingMessage, currentUserIdentifier, setCurrentTaskId]); // --- BEGIN COMMENT --- 更新依赖项 --- END COMMENT ---
 
   // --- 判断 UI 状态 ---
   const shouldShowWelcome = isWelcomeScreen && messages.length === 0;
