@@ -5,6 +5,7 @@ import { PlusIcon, ArrowUpIcon } from "lucide-react"
 import { useChatWidth, useInputHeightReset } from "@lib/hooks"
 import { useChatLayoutStore } from "@lib/stores/chat-layout-store"
 import { useChatInputStore } from "@lib/stores/chat-input-store"
+import { useChatStore, selectIsProcessing } from "@lib/stores/chat-store"
 import { ChatButton } from "./button"
 import { ChatTextInput } from "./text-input"
 import { ChatContainer } from "./container"
@@ -67,6 +68,9 @@ export const ChatInput = ({
     isDark
   } = useChatInputStore()
   
+  // 从 Store 获取处理状态，用于禁用输入
+  const isProcessing = useChatStore(selectIsProcessing)
+  
   // 使用高度重置钩子
   useInputHeightReset(isWelcomeScreen)
   
@@ -89,7 +93,8 @@ export const ChatInput = ({
   }, [setInputHeight])
 
   const handleSubmit = () => {
-    if (!message.trim()) return
+    // 如果正在处理，即使有文本也不提交
+    if (!message.trim() || isProcessing) return
 
     if (onSubmit) {
       onSubmit(message)
@@ -99,8 +104,8 @@ export const ChatInput = ({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // 只有在不处于输入法组合状态时，按Enter才发送消息
-    if (e.key === "Enter" && !e.shiftKey && !isComposing) {
+    // 在处理中时，即使按 Enter 也不提交
+    if (e.key === "Enter" && !e.shiftKey && !isComposing && !isProcessing) {
       e.preventDefault()
       handleSubmit()
     }
@@ -142,12 +147,14 @@ export const ChatInput = ({
           value={message}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={isProcessing ? "正在思考中..." : placeholder}
           maxHeight={maxHeight}
           isDark={isDark}
           onCompositionStart={handleCompositionStart}
           onCompositionEnd={handleCompositionEnd}
           onHeightChange={handleHeightChange}
+          disabled={isProcessing}
+          readOnly={isProcessing}
         />
       </ChatTextArea>
 
@@ -173,7 +180,7 @@ export const ChatInput = ({
               icon={<ArrowUpIcon className="h-4 w-4" />}
               variant="submit"
               onClick={handleSubmit}
-              disabled={!message.trim()}
+              disabled={!message.trim() || isProcessing}
               isDark={isDark}
               ariaLabel="发送消息"
             />

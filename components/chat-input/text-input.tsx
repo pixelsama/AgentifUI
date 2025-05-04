@@ -15,6 +15,8 @@ interface ChatTextInputProps {
   onCompositionStart?: (e: React.CompositionEvent<HTMLTextAreaElement>) => void
   onCompositionEnd?: (e: React.CompositionEvent<HTMLTextAreaElement>) => void
   onHeightChange?: (height: number) => void
+  disabled?: boolean
+  readOnly?: boolean
 }
 
 export const ChatTextInput = forwardRef<HTMLTextAreaElement, ChatTextInputProps>(({
@@ -28,6 +30,8 @@ export const ChatTextInput = forwardRef<HTMLTextAreaElement, ChatTextInputProps>
   onCompositionStart,
   onCompositionEnd,
   onHeightChange,
+  disabled,
+  readOnly,
 }, ref) => {
   // 内部引用，用于在没有外部ref时使用
   const internalRef = useRef<HTMLTextAreaElement>(null)
@@ -108,6 +112,8 @@ export const ChatTextInput = forwardRef<HTMLTextAreaElement, ChatTextInputProps>
         className,
       )}
       style={{ maxHeight: `${maxHeight}px` }}
+      disabled={disabled}
+      readOnly={readOnly}
       onCompositionStart={onCompositionStart}
       onCompositionEnd={onCompositionEnd}
     />
