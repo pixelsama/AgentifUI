@@ -16,6 +16,11 @@ interface ChatState {
   messages: ChatMessage[]; // 完整的消息列表
   streamingMessageId: string | null; // 当前正在流式传输的助手消息ID，null表示没有进行中的流
   isWaitingForResponse: boolean; // 是否正在等待API响应（流开始之前或非流式响应）
+  // --- BEGIN COMMENT ---
+  // 当前活跃对话的唯一标识符。
+  // null 表示当前是一个全新的对话，尚未从后端获取到 ID。
+  // --- END COMMENT ---
+  currentConversationId: string | null;
 
   // --- 操作 Actions ---
   /**
@@ -55,6 +60,13 @@ interface ChatState {
    * @param status 等待状态
    */
   setIsWaitingForResponse: (status: boolean) => void;
+
+  /**
+   * 设置当前活跃的对话 ID。
+   * 通常在开始新对话（设为 null）或从后端获取到 ID 后调用。
+   * @param id 对话 ID，或 null 表示新对话
+   */
+  setCurrentConversationId: (id: string | null) => void;
 }
 
 // --- Store 实现 ---
@@ -63,6 +75,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
   streamingMessageId: null,
   isWaitingForResponse: false,
+  currentConversationId: null, // 初始为 null
 
   // --- Action 实现 ---
   addMessage: (messageData) => {
@@ -90,12 +103,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
   finalizeStreamingMessage: (id) => {
     set((state) => ({
       messages: state.messages.map((msg) =>
-        msg.id === id ? { ...msg, isStreaming: false } : msg // 将指定消息的 isStreaming 设为 false
+        msg.id === id ? { ...msg, isStreaming: false } : msg
       ),
-      streamingMessageId: null, // 清除当前流式消息ID
-      isWaitingForResponse: false, // 确保等待状态也结束
+      streamingMessageId: null,
+      isWaitingForResponse: false,
+      // --- BEGIN COMMENT ---
+      // 注意：结束流式处理不应重置当前对话 ID。
+      // --- END COMMENT ---
     }));
-    console.log(`finalizeStreamingMessage called for ${id}. State updated.`); // 确认日志
+    console.log(`finalizeStreamingMessage called for ${id}. State updated.`);
   },
 
   setMessageError: (id, error) => {
@@ -114,6 +130,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
   clearMessages: () => set({ messages: [], streamingMessageId: null, isWaitingForResponse: false }),
 
   setIsWaitingForResponse: (status) => set({ isWaitingForResponse: status }),
+
+  setCurrentConversationId: (id) => {
+    // --- BEGIN COMMENT ---
+    // 设置对话 ID。这里可以根据需求决定是否在切换对话时清空消息列表。
+    // 暂时只设置 ID。
+    // --- END COMMENT ---
+    set({ currentConversationId: id });
+    console.log("Current conversation ID set to:", id);
+  },
 
 }));
 
