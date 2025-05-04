@@ -211,9 +211,12 @@ export async function* parseSseStream(
       } as DifySseEvent; // 使用类型断言，因为 jsonData 是 any
 
       // --- BEGIN COMMENT ---
-      // 构造要返回的事件对象
+      // 使用 yield 将解析出的事件对象传递出去
       // --- END COMMENT ---
-      console.log('[SSE Parser] Dispatching event:', parsedEvent);
+      // --- BEGIN MODIFICATION ---
+      // console.log('[SSE Parser] Dispatching event:', parsedEvent); // 原来的完整日志
+      console.log(`[SSE Parser] Dispatching event type: ${parsedEvent.event}`); // 简化日志，只显示事件类型
+      // --- END MODIFICATION ---
       result = { type: 'event', event: parsedEvent };
 
     } catch (jsonError) {

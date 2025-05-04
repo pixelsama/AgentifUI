@@ -91,7 +91,7 @@ export async function streamDifyChat(
         // 处理成功解析的事件
         // --- END COMMENT ---
         const event = result.event;
-        console.log('[Dify Service] Received SSE event:', event);
+        console.log(`[Dify Service] Received SSE event type: ${event.event}`);
 
         // --- BEGIN COMMENT ---
         // 提取 conversation_id 和 task_id (通常在 message_end 事件中)
