@@ -333,17 +333,11 @@ export const ChatInput = ({
       <div className="px-4">
         <ChatButtonArea>
           <div className="flex-none">
-            <TooltipWrapper 
-              content="添加附件" 
-              id="add-attachment-tooltip" 
-              placement="bottom"
-            >
-              <FileTypeSelector
-                onFileSelect={handleFileSelect}
-                disabled={isUploading || isProcessing}
-                ariaLabel="添加附件"
-              />
-            </TooltipWrapper>
+            <FileTypeSelector
+              onFileSelect={handleFileSelect}
+              disabled={isUploading || isProcessing}
+              ariaLabel="添加附件"
+            />
           </div>
           <div className="flex-none">
             <ChatButton

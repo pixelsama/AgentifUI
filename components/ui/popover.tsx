@@ -118,8 +118,8 @@ export function Popover({
 
     if (!isMobile) {
       // 仅在桌面端应用微调偏移量
-      adjustedTop = top - 12; // 上移 12px
-      adjustedLeft = left + 85; // 右移 85px 
+      adjustedTop = top + 2; // 上移 12px
+      adjustedLeft = left + 108; // 右移 85px 
     }
     // --- END: 条件偏移 --- 
 

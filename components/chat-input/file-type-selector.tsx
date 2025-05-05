@@ -3,6 +3,8 @@
 import { useState, useCallback } from "react"
 import { Paperclip, Loader2 } from "lucide-react"
 import { Popover, PopoverItem } from "@components/ui/popover"
+import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
+import { hideActiveTooltip } from "@components/ui/tooltip"
 import { useFileTypes } from "@lib/hooks/use-file-types"
 import { useTheme } from "@lib/hooks/use-theme"
 import { useMobile } from "@lib/hooks/use-mobile"
@@ -63,15 +65,21 @@ export const FileTypeSelector = ({
     setIsOpen(false)
   }
   
-  // 触发器按钮
+  // 创建触发器按钮，并用 Tooltip 包裹
   const triggerButton = (
-    <ChatButton
-      icon={<Paperclip className="h-4 w-4" />}
-      isDark={isDark}
-      ariaLabel={ariaLabel}
-      disabled={disabled}
-      className={className}
-    />
+    <TooltipWrapper 
+      content={ariaLabel}
+      id="file-type-selector-tooltip"
+      placement="top" 
+    >
+      <ChatButton
+        icon={<Paperclip className="h-4 w-4" />}
+        isDark={isDark}
+        ariaLabel={ariaLabel}
+        disabled={disabled}
+        className={className}
+      />
+    </TooltipWrapper>
   )
   
   return (
@@ -79,7 +87,12 @@ export const FileTypeSelector = ({
       trigger={triggerButton}
       placement="top"
       isOpen={isOpen}
-      onOpenChange={setIsOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open)
+        if (open) {
+          hideActiveTooltip();
+        }
+      }}
       minWidth={180}
     >
       <div className="px-1 py-1">

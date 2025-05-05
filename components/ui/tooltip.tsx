@@ -343,3 +343,7 @@ export function TooltipProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
+// --- BEGIN: 重新导出 hideTooltip --- 
+export const hideActiveTooltip = tooltipState.hideTooltip;
+// --- END: 重新导出 hideTooltip --- 
+

@@ -35,7 +35,7 @@ export const ChatButton = ({
         onClick={onClick}
         disabled={disabled}
         className={cn(
-          "rounded-full h-8 w-8 flex items-center justify-center",
+          "rounded-lg h-8 w-8 flex items-center justify-center",
           isDark
             ? "border border-gray-700 text-gray-300 hover:bg-gray-800"
             : "border border-gray-200 text-gray-600 hover:bg-gray-50",
