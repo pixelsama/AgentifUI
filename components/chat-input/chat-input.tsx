@@ -15,6 +15,10 @@ import { ChatContainer } from "./container"
 import { ChatButtonArea, ChatTextArea } from "./layout"
 import { create } from "zustand"
 import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
+import { uploadDifyFile } from "@lib/services/dify/file-service"
+import { DifyFileUploadResponse } from "@lib/services/dify/types"
+import { AttachmentFile } from "@lib/stores/attachment-store"
+import { useNotificationStore } from "@lib/stores/ui/notification-store"
 
 // 创建一个全局焦点管理器
 interface FocusManagerState {
@@ -46,7 +50,7 @@ interface ChatInputProps {
   className?: string
   placeholder?: string
   maxHeight?: number
-  onSubmit?: (message: string) => void
+  onSubmit?: (message: string, files?: { type: string; transfer_method: string; upload_file_id: string; name: string; size: number; mime_type: string; }[]) => void
   onStop?: () => void
   isProcessing?: boolean
   isWaitingForResponse?: boolean
@@ -76,7 +80,7 @@ export const ChatInput = ({
   } = useChatInputStore()
   
   // 附件状态
-  const { files: attachments, addFiles, clearFiles: clearAttachments } = useAttachmentStore()
+  const { files: attachments, addFiles, clearFiles: clearAttachments, updateFileStatus, updateFileUploadedId } = useAttachmentStore()
   // 本地状态，存储附件栏和文本框的各自高度
   const [attachmentBarHeight, setAttachmentBarHeight] = useState(0)
   const [textAreaHeight, setTextAreaHeight] = useState(INITIAL_INPUT_HEIGHT)
@@ -112,21 +116,95 @@ export const ChatInput = ({
     setInputHeight(textAreaHeight + height)
   }, [setInputHeight, textAreaHeight])
 
-  const handleLocalSubmit = () => {
-    if (!message.trim() && attachments.length === 0) return
-    if (onSubmit) {
-      onSubmit(message);
+  // TODO: 获取真实的 User ID 和 App ID - 占位符实现
+  const currentUserId = "userlyz"; // 实际应从认证状态获取
+  const currentAppId = "default"; // 实际应从应用上下文或 props 获取
+
+  // 提交消息（实现乐观 UI：先清空，失败再恢复）
+  const handleLocalSubmit = async () => {
+    // --- BEGIN 中文注释 --- 状态暂存与恢复逻辑 ---
+    let savedMessage = "";
+    let savedAttachments: AttachmentFile[] = [];
+    // --- END 中文注释 ---
+    try {
+      // 1. 暂存当前状态 (在清空和调用 onSubmit 前)
+      savedMessage = message;
+      savedAttachments = useAttachmentStore.getState().files;
+      console.log("[ChatInput] 暂存状态", { savedMessage, savedAttachments });
+
+      // 2. 过滤准备提交的文件 (使用暂存的状态)
+      const uploadedFiles = savedAttachments.filter(f => f.status === 'success' && f.uploadedId);
+      const files = uploadedFiles
+        .filter(f => typeof f.uploadedId === 'string')
+        .map(f => ({
+          type: getDifyFileType(f),
+          transfer_method: 'local_file',
+          upload_file_id: f.uploadedId as string, // 明确断言为 string
+          name: f.name,
+          size: f.size,
+          mime_type: f.type,
+        }));
+      const filesToSend = (Array.isArray(files) && files.length > 0) ? files : undefined;
+
+      // 3. 检查是否可以提交 (使用暂存的消息)
+      if (savedMessage.trim() && onSubmit) {
+        // --- BEGIN 中文注释 --- 乐观 UI：立即清空 ---
+        clearMessage();
+        clearAttachments();
+        useChatScrollStore.getState().scrollToBottom('smooth'); // 滚动到底部
+        // --- END 中文注释 ---
+        
+        // --- BEGIN 中文注释 --- 调用可能抛出错误的提交函数 (使用暂存的消息和组装好的文件)
+        await onSubmit(savedMessage, filesToSend);
+        // --- END 中文注释 ---
+        
+        // --- BEGIN 中文注释 --- 提交成功，无需额外操作，因为已提前清空 ---
+        console.log("[ChatInput] 提交成功 (已提前清空)");
+        // --- END 中文注释 ---
+      } else {
+        // 如果因为消息为空不能提交，理论上按钮已禁用，但以防万一
+        console.log("[ChatInput] 没有可提交的消息内容。");
+      }
+    } catch (error) {
+      // --- BEGIN 中文注释 --- 提交失败，恢复状态 ---
+      console.error("[ChatInput] 消息提交失败，执行回滚", error);
+      setMessage(savedMessage);
+      useAttachmentStore.getState().setFiles(savedAttachments);
+      // 调用通知 Store 显示错误消息
+      useNotificationStore.getState().showNotification(
+        `消息发送失败: ${(error as Error)?.message || '未知错误'}`,
+        'error',
+        3000 // 持续 3 秒
+      );
+      // --- END 中文注释 ---
     }
-    clearMessage();
-    clearAttachments();
-    
-    useChatScrollStore.getState().scrollToBottom('smooth');
+  };
+
+  // --- 辅助函数：根据文件类型推断 Dify 文件 type 字段 ---
+  function getDifyFileType(f: AttachmentFile): 'image' | 'document' | 'audio' | 'video' | 'custom' {
+    const mime = f.type.toLowerCase();
+    if (mime.startsWith('image/')) return 'image';
+    if (mime.startsWith('audio/')) return 'audio';
+    if (mime.startsWith('video/')) return 'video';
+    if (mime === 'application/pdf' || mime.includes('word') || mime.includes('excel') || mime.includes('csv') || mime.includes('text') || mime.includes('html') || mime.includes('xml') || mime.includes('epub') || mime.includes('powerpoint')) return 'document';
+    return 'custom';
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey && !isComposing) {
       e.preventDefault();
-      if (!isProcessing) {
+      
+      // --- BEGIN 中文注释 ---
+      // 在回车提交前，进行与按钮禁用逻辑完全一致的检查
+      const shouldBlockSubmit = 
+        isWaiting || // 正在等待响应
+        isProcessing || // 正在处理上一条消息
+        attachments.some(f => f.status === 'uploading') || // 有文件正在上传
+        attachments.some(f => f.status === 'error') || // 有文件上传失败
+        !message.trim(); // 消息为空
+      // --- END 中文注释 ---
+
+      if (!shouldBlockSubmit) {
         handleLocalSubmit();
       }
     }
@@ -158,37 +236,80 @@ export const ChatInput = ({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (files && files.length > 0) {
-      addFiles(Array.from(files)) // 将选中的文件添加到附件 Store
+      const filesArray = Array.from(files);
+      addFiles(filesArray) // 添加到 Store
 
-      // 模拟上传过程 (仅用于演示)
-      // 实际应用中应替换为真实的文件上传逻辑
-      const addedFiles = Array.from(files).map(f => `${f.name}-${f.lastModified}-${f.size}`);
-      addedFiles.forEach(fileId => {
-        // 获取 store 的 update 方法
-        const updateStatus = useAttachmentStore.getState().updateFileStatus;
-        updateStatus(fileId, "uploading", 0);
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += 10;
-          if (progress <= 100) {
-            updateStatus(fileId, "uploading", progress);
-          } else {
-            clearInterval(interval);
-            // 模拟成功或失败
-            const success = Math.random() > 0.2; // 80% 成功率
-            updateStatus(fileId, success ? "success" : "error", 100, success ? undefined : "上传失败示例");
-          }
-        }, 200);
+      // 对每个文件发起上传
+      filesArray.forEach((file) => {
+        const fileId = `${file.name}-${file.lastModified}-${file.size}`;
+        // updateFileStatus(fileId, 'pending'); // 可选：先设为pending? 还是直接uploading?
+        updateFileStatus(fileId, 'uploading', 0); // 立即标记为上传中
+
+        // 调用上传服务
+        uploadDifyFile(currentAppId, file, currentUserId, (progress) => {
+          // 更新进度
+          updateFileStatus(fileId, 'uploading', progress);
+        })
+        .then((response) => {
+          // 上传成功
+          updateFileUploadedId(fileId, response.id);
+          console.log(`[ChatInput] 文件上传成功: ${fileId} -> ${response.id}`);
+        })
+        .catch((error) => {
+          // 上传失败
+          updateFileStatus(fileId, 'error', undefined, error.message || '上传失败');
+          console.error(`[ChatInput] 文件上传失败: ${fileId}`, error);
+        });
       });
     }
-    // 清空文件输入元素的值，允许用户再次选择相同的文件
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   }
+  
+  // --- 新增：重试上传逻辑 ---
+  const handleRetryUpload = useCallback(async (fileId: string) => {
+    console.log(`[ChatInput] Retrying upload for file ID: ${fileId}`);
+    // 直接从 store state 获取文件
+    const attachment = useAttachmentStore.getState().files.find(f => f.id === fileId);
 
-  // 计算是否有任何附件正在上传中
+    if (!attachment) {
+      console.error(`[ChatInput] Cannot retry: Attachment with ID ${fileId} not found.`);
+      useNotificationStore.getState().showNotification(`无法重试：未找到文件 ${fileId}`, 'error');
+      return;
+    }
+
+    // 1. 重置状态为 uploading
+    updateFileStatus(fileId, 'uploading', 0); 
+
+    // 2. 重新调用上传服务
+    try {
+      const response = await uploadDifyFile(
+        currentAppId, 
+        attachment.file, // 使用原始 File 对象
+        currentUserId, 
+        (progress) => {
+          // 更新进度回调
+          updateFileStatus(fileId, 'uploading', progress);
+        }
+      );
+      // 重试成功
+      updateFileUploadedId(fileId, response.id);
+      console.log(`[ChatInput] 重试上传成功: ${fileId} -> ${response.id}`);
+    } catch (error) {
+      // 重试失败，再次标记为 error
+      updateFileStatus(fileId, 'error', undefined, (error as Error).message || '重试上传失败');
+      console.error(`[ChatInput] 重试上传失败: ${fileId}`, error);
+      useNotificationStore.getState().showNotification(
+        `文件 ${attachment.name} 重试上传失败: ${(error as Error)?.message || '未知错误'}`,
+        'error'
+      );
+    }
+  }, [currentAppId, currentUserId, updateFileStatus, updateFileUploadedId]);
+
+  // --- 计算按钮禁用状态 (依赖 store) ---
   const isUploading = attachments.some(f => f.status === 'uploading');
+  const hasError = attachments.some(f => f.status === 'error');
 
   return (
     <ChatContainer isWelcomeScreen={isWelcomeScreen} isDark={isDark} className={className} widthClass={widthClass}>
@@ -205,6 +326,7 @@ export const ChatInput = ({
       <AttachmentPreviewBar
         isDark={isDark}
         onHeightChange={handleAttachmentBarHeightChange}
+        onRetryUpload={handleRetryUpload}
       />
 
       {/* 文本区域 */}
@@ -237,6 +359,7 @@ export const ChatInput = ({
                 isDark={isDark} 
                 ariaLabel="添加附件"
                 onClick={handleAttachmentClick}
+                disabled={isUploading || isProcessing}
               />
             </TooltipWrapper>
           </div>
@@ -253,9 +376,14 @@ export const ChatInput = ({
               }
               variant="submit"
               onClick={isWaiting ? undefined : (isProcessing ? onStop : handleLocalSubmit)}
-              disabled={isWaiting || (!isProcessing && (isUploading || !message.trim()))}
+              disabled={
+                isWaiting ||
+                isUploading ||
+                hasError ||
+                (!isProcessing && !message.trim())
+              }
               isDark={isDark}
-              ariaLabel={isProcessing ? "停止生成" : "发送消息"}
+              ariaLabel={isProcessing ? "停止生成" : (isUploading ? "正在上传..." : (hasError ? "部分附件上传失败" : "发送消息"))}
               forceActiveStyle={isWaiting}
             />
           </div>

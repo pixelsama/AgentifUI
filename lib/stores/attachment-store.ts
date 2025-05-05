@@ -4,14 +4,15 @@ import { create } from "zustand"
 // 定义单个附件文件的状态接口
 // --- END COMMENT ---
 export interface AttachmentFile {
-  id: string // 使用文件对象和时间戳等生成的唯一ID
+  id: string // 本地生成的唯一ID
   file: File // 原始 File 对象
   name: string // 文件名
   size: number // 文件大小
-  type: string // 文件类型
+  type: string // 文件类型 (MIME type)
   status: "pending" | "uploading" | "success" | "error" // 上传状态
   progress: number // 上传进度 (0-100)
   error?: string // 错误信息
+  uploadedId?: string // 上传成功后 Dify 返回的文件 ID
 }
 
 // --- BEGIN COMMENT ---
@@ -22,7 +23,9 @@ interface AttachmentStoreState {
   addFiles: (files: File[]) => void
   removeFile: (id: string) => void
   updateFileStatus: (id: string, status: AttachmentFile["status"], progress?: number, error?: string) => void
+  updateFileUploadedId: (id: string, uploadedId: string) => void
   clearFiles: () => void
+  setFiles: (files: AttachmentFile[]) => void
 }
 
 // --- BEGIN COMMENT ---
@@ -70,16 +73,35 @@ export const useAttachmentStore = create<AttachmentStoreState>((set, get) => ({
     })
   },
 
-  // --- BEGIN COMMENT ---
-  // 更新指定文件的状态和进度
-  // --- END COMMENT ---
+  // --- BEGIN MODIFICATION ---
+  // 更新指定文件的状态和进度 (可能清除 uploadedId 和 error)
   updateFileStatus: (id, status, progress, error) => {
     set((state) => ({
       files: state.files.map((f) =>
-        f.id === id ? { ...f, status, progress: progress ?? f.progress, error: error ?? f.error } : f
+        f.id === id ? {
+          ...f,
+          status,
+          progress: progress ?? (status === 'uploading' ? 0 : f.progress), // 如果开始上传，重置进度
+          error: error ?? (status !== 'error' ? undefined : f.error), // 清除非错误状态的 error
+          uploadedId: status !== 'success' ? undefined : f.uploadedId // 清除非成功状态的 uploadedId
+         } : f
       ),
     }))
   },
+  // --- END MODIFICATION ---
+
+  // --- BEGIN ADDITION ---
+  // --- BEGIN COMMENT ---
+  // 更新指定文件的 uploadedId (通常在上传成功后调用)
+  // --- END COMMENT ---
+  updateFileUploadedId: (id, uploadedId) => {
+    set((state) => ({
+      files: state.files.map((f) =>
+        f.id === id ? { ...f, uploadedId: uploadedId, status: 'success', progress: 100 } : f
+      ),
+    }))
+  },
+  // --- END ADDITION ---
 
   // --- BEGIN COMMENT ---
   // 清空所有文件，并释放预览 URL
@@ -87,4 +109,10 @@ export const useAttachmentStore = create<AttachmentStoreState>((set, get) => ({
   clearFiles: () => {
     set({ files: [] });
   },
+
+  // --- BEGIN ADDITION --- 实现 setFiles ---
+  setFiles: (filesToRestore) => {
+    set({ files: filesToRestore });
+  }
+  // --- END ADDITION ---
 })) 

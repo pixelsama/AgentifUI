@@ -35,6 +35,7 @@ export const ChatLoader = ({ messages, isWaitingForResponse = false, className }
             <UserMessage 
               key={msg.id} 
               content={msg.text} 
+              attachments={msg.attachments} 
             />
           ) : (
             <AssistantMessage 

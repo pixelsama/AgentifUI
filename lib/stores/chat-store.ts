@@ -1,5 +1,14 @@
 import { create } from 'zustand';
 
+// --- 文件附件定义 ---
+export interface MessageAttachment {
+  id: string;            // 附件ID
+  name: string;          // 文件名
+  size: number;          // 文件大小
+  type: string;          // MIME类型
+  upload_file_id: string; // 上传后的文件ID
+}
+
 // --- 消息定义 ---
 export interface ChatMessage {
   id: string; // 唯一消息 ID
@@ -8,6 +17,7 @@ export interface ChatMessage {
   isStreaming?: boolean; // 标记助手消息是否仍在流式传输中
   wasManuallyStopped?: boolean; // 标记是否被用户手动停止
   error?: string | null; // 消息相关的错误信息
+  attachments?: MessageAttachment[]; // 消息附带的文件附件
   // 可以添加时间戳等其他元数据
   // timestamp?: number;
 }
@@ -75,16 +85,17 @@ interface ChatState {
    */
   setIsWaitingForResponse: (status: boolean) => void;
 
+  // --- 对话管理 ---
   /**
-   * 设置当前活跃的对话 ID。
-   * 通常在开始新对话（设为 null）或从后端获取到 ID 后调用。
-   * @param id 对话 ID，或 null 表示新对话
+   * 设置/更新当前对话ID
+   * @param conversationId 对话ID，null表示新对话
    */
-  setCurrentConversationId: (id: string | null) => void;
+  setCurrentConversationId: (conversationId: string | null) => void;
 
-  // --- BEGIN COMMENT ---
-  // 设置当前流式任务的 Task ID。
-  // --- END COMMENT ---
+  /**
+   * 设置/更新当前流式任务ID
+   * @param taskId 任务ID，null表示无进行中任务
+   */
   setCurrentTaskId: (taskId: string | null) => void;
 }
 
@@ -99,83 +110,75 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   // --- Action 实现 ---
   addMessage: (messageData) => {
-    const newMessage: ChatMessage = {
-      ...messageData,
-      id: crypto.randomUUID(), // 使用内置 crypto 生成唯一 ID
-      isStreaming: messageData.isStreaming ?? false, // 默认非流式
-      wasManuallyStopped: false,
-      error: null,
-    };
-    set((state) => ({ messages: [...state.messages, newMessage] }));
-    // --- BEGIN COMMENT ---
-    // 返回创建的消息对象，方便后续操作（如设置流式ID）
-    // --- END COMMENT ---
-    return newMessage;
+    const id = `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+    const newMessage = { id, ...messageData }
+    
+    set((state) => ({
+      messages: [...state.messages, newMessage],
+      streamingMessageId: messageData.isStreaming ? id : state.streamingMessageId,
+    }))
+    
+    return newMessage
   },
 
   appendMessageChunk: (id, chunk) => {
     set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.id === id ? { ...msg, text: msg.text + chunk } : msg
+      messages: state.messages.map((message) =>
+        message.id === id ? { ...message, text: message.text + chunk } : message
       ),
-    }));
+    }))
   },
 
   finalizeStreamingMessage: (id) => {
     set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.id === id ? { ...msg, isStreaming: false, wasManuallyStopped: false } : msg
+      messages: state.messages.map((message) =>
+        message.id === id ? { ...message, isStreaming: false } : message
       ),
       streamingMessageId: state.streamingMessageId === id ? null : state.streamingMessageId,
-      isWaitingForResponse: state.streamingMessageId === id ? false : state.isWaitingForResponse,
-      currentTaskId: state.streamingMessageId === id ? null : state.currentTaskId,
-    }));
-    console.log(`finalizeStreamingMessage (natural end) called for ${id}. State updated.`);
+    }))
   },
 
   markAsManuallyStopped: (id) => {
     set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.id === id ? { ...msg, isStreaming: false, wasManuallyStopped: true } : msg
+      messages: state.messages.map((message) =>
+        message.id === id ? { ...message, wasManuallyStopped: true, isStreaming: false } : message
       ),
       streamingMessageId: state.streamingMessageId === id ? null : state.streamingMessageId,
-      isWaitingForResponse: state.streamingMessageId === id ? false : state.isWaitingForResponse,
-    }));
-    console.log(`markAsManuallyStopped called for ${id}. State updated.`);
+    }))
   },
 
   setMessageError: (id, error) => {
     set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.id === id ? { ...msg, error: error, isStreaming: false, wasManuallyStopped: false } : msg
+      messages: state.messages.map((message) =>
+        message.id === id ? { ...message, error } : message
       ),
-      streamingMessageId: state.streamingMessageId === id ? null : state.streamingMessageId,
-      isWaitingForResponse: state.streamingMessageId === id ? false : state.isWaitingForResponse,
-      currentTaskId: state.streamingMessageId === id ? null : state.currentTaskId,
-    }));
+    }))
   },
 
-  clearMessages: () => set({ messages: [], streamingMessageId: null, isWaitingForResponse: false }),
-
-  setIsWaitingForResponse: (status) => set({ isWaitingForResponse: status }),
-
-  setCurrentConversationId: (id) => {
-    // --- BEGIN COMMENT ---
-    // 设置对话 ID。这里可以根据需求决定是否在切换对话时清空消息列表。
-    // 暂时只设置 ID。
-    // --- END COMMENT ---
-    set({ currentConversationId: id });
-    console.log("Current conversation ID set to:", id);
+  clearMessages: () => {
+    set(() => ({
+      messages: [],
+      streamingMessageId: null,
+    }))
   },
 
-  // --- BEGIN COMMENT ---
-  // 实现设置 Task ID 的 Action
-  // --- END COMMENT ---
-  setCurrentTaskId: (taskId) => { 
-    set({ currentTaskId: taskId });
-    console.log("Current Task ID set to:", taskId);
+  setIsWaitingForResponse: (status) => {
+    set(() => ({
+      isWaitingForResponse: status,
+    }))
   },
 
+  setCurrentConversationId: (conversationId) => {
+    set(() => ({
+      currentConversationId: conversationId
+    }))
+  },
+
+  setCurrentTaskId: (taskId) => {
+    set(() => ({
+      currentTaskId: taskId
+    }))
+  }
 }));
 
 // --- 导出常量 (如果需要) ---

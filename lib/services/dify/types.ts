@@ -260,4 +260,20 @@ export interface DifyStopTaskRequestPayload {
 /** Dify 停止任务响应体 */
 export interface DifyStopTaskResponse {
   result: 'success'; // 固定返回 success
-} 
+}
+
+// --- BEGIN ADDITION ---
+// --- BEGIN COMMENT ---
+// Dify 文件上传 API 响应体
+// POST /files/upload
+// --- END COMMENT ---
+export interface DifyFileUploadResponse {
+  id: string; // 文件 ID (UUID)
+  name: string;
+  size: number;
+  extension: string;
+  mime_type: string;
+  created_by: string | number; // 用户 ID (可能是数字或字符串)
+  created_at: number; // Unix 时间戳
+}
+// --- END ADDITION --- 
