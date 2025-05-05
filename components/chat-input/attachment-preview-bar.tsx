@@ -11,12 +11,13 @@ import { AttachmentPreviewItem } from "./attachment-preview-item"
 interface AttachmentPreviewBarProps {
   isDark?: boolean
   onHeightChange: (height: number) => void // 回调函数，通知父组件高度变化
+  onRetryUpload: (id: string) => void // 添加重试上传的回调
 }
 
 // --- BEGIN COMMENT ---
 // 附件预览栏组件
 // --- END COMMENT ---
-export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({ isDark = false, onHeightChange }) => {
+export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({ isDark = false, onHeightChange, onRetryUpload }) => {
   const files = useAttachmentStore((state) => state.files)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -90,7 +91,12 @@ export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({ isDa
       // --- END COMMENT ---*/}
       <div className="px-3 pt-3 pb-2 flex flex-wrap gap-2"> {/* 调整 padding */}
         {files.map((file) => (
-          <AttachmentPreviewItem key={file.id} attachment={file} isDark={isDark} />
+          <AttachmentPreviewItem 
+            key={file.id} 
+            attachment={file} 
+            isDark={isDark} 
+            onRetry={onRetryUpload} 
+          />
         ))}
       </div>
     </div>

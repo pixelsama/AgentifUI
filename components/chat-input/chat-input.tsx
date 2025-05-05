@@ -86,8 +86,6 @@ export const ChatInput = ({
   const [textAreaHeight, setTextAreaHeight] = useState(INITIAL_INPUT_HEIGHT)
   // 隐藏的文件输入元素引用
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [isUploadingFiles, setIsUploadingFiles] = useState(false)
-  const [uploadErrorOccurred, setUploadErrorOccurred] = useState(false)
   
   // 使用高度重置钩子
   useInputHeightReset(isWelcomeScreen)
@@ -238,38 +236,80 @@ export const ChatInput = ({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (files && files.length > 0) {
-      addFiles(Array.from(files)) // 将选中的文件添加到附件 Store
+      const filesArray = Array.from(files);
+      addFiles(filesArray) // 添加到 Store
 
-      // 遍历每个新文件，立即发起真实上传
-      Array.from(files).forEach((file) => {
+      // 对每个文件发起上传
+      filesArray.forEach((file) => {
         const fileId = `${file.name}-${file.lastModified}-${file.size}`;
-        // 1. 标记为 uploading，进度 0
-        updateFileStatus(fileId, 'uploading', 0);
-        // 2. 调用真实上传，传入进度回调
+        // updateFileStatus(fileId, 'pending'); // 可选：先设为pending? 还是直接uploading?
+        updateFileStatus(fileId, 'uploading', 0); // 立即标记为上传中
+
+        // 调用上传服务
         uploadDifyFile(currentAppId, file, currentUserId, (progress) => {
-          // 实时更新进度
+          // 更新进度
           updateFileStatus(fileId, 'uploading', progress);
         })
-          .then((response) => {
-            // 上传成功，记录 difyFileId，状态 success
-            updateFileUploadedId(fileId, response.id);
-            console.log(`[ChatInput] 文件上传成功: ${fileId} -> ${response.id}`);
-          })
-          .catch((error) => {
-            // 上传失败，状态 error，记录错误
-            updateFileStatus(fileId, 'error', undefined, error.message || '上传失败');
-            console.error(`[ChatInput] 文件上传失败: ${fileId}`, error);
-          });
+        .then((response) => {
+          // 上传成功
+          updateFileUploadedId(fileId, response.id);
+          console.log(`[ChatInput] 文件上传成功: ${fileId} -> ${response.id}`);
+        })
+        .catch((error) => {
+          // 上传失败
+          updateFileStatus(fileId, 'error', undefined, error.message || '上传失败');
+          console.error(`[ChatInput] 文件上传失败: ${fileId}`, error);
+        });
       });
     }
-    // 清空文件输入元素的值，允许用户再次选择相同的文件
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   }
+  
+  // --- 新增：重试上传逻辑 ---
+  const handleRetryUpload = useCallback(async (fileId: string) => {
+    console.log(`[ChatInput] Retrying upload for file ID: ${fileId}`);
+    // 直接从 store state 获取文件
+    const attachment = useAttachmentStore.getState().files.find(f => f.id === fileId);
 
-  // 计算是否有任何附件正在上传中
+    if (!attachment) {
+      console.error(`[ChatInput] Cannot retry: Attachment with ID ${fileId} not found.`);
+      useNotificationStore.getState().showNotification(`无法重试：未找到文件 ${fileId}`, 'error');
+      return;
+    }
+
+    // 1. 重置状态为 uploading
+    updateFileStatus(fileId, 'uploading', 0); 
+
+    // 2. 重新调用上传服务
+    try {
+      const response = await uploadDifyFile(
+        currentAppId, 
+        attachment.file, // 使用原始 File 对象
+        currentUserId, 
+        (progress) => {
+          // 更新进度回调
+          updateFileStatus(fileId, 'uploading', progress);
+        }
+      );
+      // 重试成功
+      updateFileUploadedId(fileId, response.id);
+      console.log(`[ChatInput] 重试上传成功: ${fileId} -> ${response.id}`);
+    } catch (error) {
+      // 重试失败，再次标记为 error
+      updateFileStatus(fileId, 'error', undefined, (error as Error).message || '重试上传失败');
+      console.error(`[ChatInput] 重试上传失败: ${fileId}`, error);
+      useNotificationStore.getState().showNotification(
+        `文件 ${attachment.name} 重试上传失败: ${(error as Error)?.message || '未知错误'}`,
+        'error'
+      );
+    }
+  }, [currentAppId, currentUserId, updateFileStatus, updateFileUploadedId]);
+
+  // --- 计算按钮禁用状态 (依赖 store) ---
   const isUploading = attachments.some(f => f.status === 'uploading');
+  const hasError = attachments.some(f => f.status === 'error');
 
   return (
     <ChatContainer isWelcomeScreen={isWelcomeScreen} isDark={isDark} className={className} widthClass={widthClass}>
@@ -286,6 +326,7 @@ export const ChatInput = ({
       <AttachmentPreviewBar
         isDark={isDark}
         onHeightChange={handleAttachmentBarHeightChange}
+        onRetryUpload={handleRetryUpload}
       />
 
       {/* 文本区域 */}
@@ -318,7 +359,7 @@ export const ChatInput = ({
                 isDark={isDark} 
                 ariaLabel="添加附件"
                 onClick={handleAttachmentClick}
-                disabled={isUploadingFiles || isProcessing}
+                disabled={isUploading || isProcessing}
               />
             </TooltipWrapper>
           </div>
@@ -336,19 +377,13 @@ export const ChatInput = ({
               variant="submit"
               onClick={isWaiting ? undefined : (isProcessing ? onStop : handleLocalSubmit)}
               disabled={
-                // --- BEGIN 中文注释 ---
-                // 1. 等待响应时禁用
                 isWaiting ||
-                // 2. 有文件正在上传时禁用
-                attachments.some(f => f.status === 'uploading') ||
-                // 3. 有文件上传失败时禁用
-                attachments.some(f => f.status === 'error') ||
-                // 4. 没有消息内容时禁用（去除多余判断）
+                isUploading ||
+                hasError ||
                 (!isProcessing && !message.trim())
-                // --- END 中文注释 ---
               }
               isDark={isDark}
-              ariaLabel={isProcessing ? "停止生成" : (isUploadingFiles ? "正在上传..." : (uploadErrorOccurred ? "处理附件错误" : "发送消息"))}
+              ariaLabel={isProcessing ? "停止生成" : (isUploading ? "正在上传..." : (hasError ? "部分附件上传失败" : "发送消息"))}
               forceActiveStyle={isWaiting}
             />
           </div>
