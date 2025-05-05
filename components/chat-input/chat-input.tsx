@@ -49,7 +49,7 @@ interface ChatInputProps {
   className?: string
   placeholder?: string
   maxHeight?: number
-  onSubmit?: (message: string) => void
+  onSubmit?: (message: string, files: { type: string; transfer_method: string; upload_file_id: string; name: string; size: number; mime_type: string; }[]) => void
   onStop?: () => void
   isProcessing?: boolean
   isWaitingForResponse?: boolean
@@ -121,62 +121,42 @@ export const ChatInput = ({
   const currentUserId = "userlyz"; // 实际应从认证状态获取
   const currentAppId = "default"; // 实际应从应用上下文或 props 获取
 
+  // 提交消息（只负责消息和已上传文件的组装与提交）
   const handleLocalSubmit = async () => {
-    const filesToUpload = attachments.filter(f => f.status === 'pending');
+    // 1. 过滤所有上传成功的文件，组装 Dify API 规范的 files 字段
+    const uploadedFiles = attachments.filter(f => f.status === 'success' && f.uploadedId);
+    // 组装 Dify 文件对象数组（upload_file_id 一定为 string）
+    const files = uploadedFiles
+      .filter(f => typeof f.uploadedId === 'string')
+      .map(f => ({
+        type: getDifyFileType(f),
+        transfer_method: 'local_file',
+        upload_file_id: f.uploadedId as string, // 明确断言为 string
+        name: f.name,
+        size: f.size,
+        mime_type: f.type,
+      }));
 
-    if (filesToUpload.length > 0) {
-      console.log(`[ChatInput] Found ${filesToUpload.length} files to upload.`);
-      setIsUploadingFiles(true);
-      setUploadErrorOccurred(false);
-
-      filesToUpload.forEach(f => updateFileStatus(f.id, 'uploading'));
-
-      const uploadPromises = filesToUpload.map(attachment =>
-        uploadDifyFile(currentAppId, attachment.file, currentUserId)
-          .then(response => ({ status: 'fulfilled' as const, value: response, localId: attachment.id }))
-          .catch(error => ({ status: 'rejected' as const, reason: error, localId: attachment.id }))
-      );
-      const results: PromiseSettledResult<{ status: 'fulfilled'; value: DifyFileUploadResponse; localId: string; } | { status: 'rejected'; reason: any; localId: string; }>[] = await Promise.allSettled(uploadPromises);
-
-      let hasError = false;
-      results.forEach(result => {
-        if (result.status === 'fulfilled') {
-          const fulfilledResult = result.value as { status: 'fulfilled'; value: DifyFileUploadResponse; localId: string; };
-          updateFileUploadedId(fulfilledResult.localId, fulfilledResult.value.id);
-          console.log(`[ChatInput] File upload success: ${fulfilledResult.localId} -> ${fulfilledResult.value.id}`);
-        } else {
-          hasError = true;
-          const rejectedResult = result as PromiseRejectedResult & { reason: { localId?: string, message?: string } };
-          const errorMessage = rejectedResult.reason?.message || 'Unknown upload error';
-          const localId = rejectedResult.reason?.localId || 'unknown-local-id';
-          updateFileStatus(localId, 'error', undefined, errorMessage);
-          console.error(`[ChatInput] File upload failed: ${localId}`, rejectedResult.reason);
-        }
-      });
-
-      setIsUploadingFiles(false);
-      setUploadErrorOccurred(hasError);
-
-      if (hasError) {
-        console.log("[ChatInput] Upload errors occurred. Aborting message submission.");
-        return;
-      }
-
-      console.log("[ChatInput] All files uploaded successfully. Ready to send message (logic should be externalized).");
-
-      if (message.trim() && onSubmit) {
-        clearMessage();
-      }
-
-    } else if (message.trim() && onSubmit) {
-      console.log("[ChatInput] No files to upload, submitting text message only (using prop).");
-      onSubmit(message);
+    // 2. 只有消息有内容时才允许提交
+    if (message.trim() && onSubmit) {
+      onSubmit(message, files);
       clearMessage();
+      clearAttachments();
       useChatScrollStore.getState().scrollToBottom('smooth');
     } else {
-        console.log("[ChatInput] Nothing to submit (no text and no pending files).");
+      console.log("[ChatInput] 没有可提交的消息内容。");
     }
   };
+
+  // --- 辅助函数：根据文件类型推断 Dify 文件 type 字段 ---
+  function getDifyFileType(f: AttachmentFile): 'image' | 'document' | 'audio' | 'video' | 'custom' {
+    const mime = f.type.toLowerCase();
+    if (mime.startsWith('image/')) return 'image';
+    if (mime.startsWith('audio/')) return 'audio';
+    if (mime.startsWith('video/')) return 'video';
+    if (mime === 'application/pdf' || mime.includes('word') || mime.includes('excel') || mime.includes('csv') || mime.includes('text') || mime.includes('html') || mime.includes('xml') || mime.includes('epub') || mime.includes('powerpoint')) return 'document';
+    return 'custom';
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey && !isComposing) {
