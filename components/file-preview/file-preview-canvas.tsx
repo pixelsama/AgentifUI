@@ -7,6 +7,7 @@ import { cn, formatBytes } from '@lib/utils'
 import { useFilePreviewStore } from '@lib/stores/ui/file-preview-store'
 import { useTheme } from '@lib/hooks'
 import type { MessageAttachment } from '@lib/stores/chat-store';
+import { FilePreviewBackdrop } from './file-preview-backdrop';
 
 // 简化版：文件内容预览组件 - 只显示基础信息
 const FileContentViewer: React.FC<{ file: MessageAttachment | null; isDark: boolean }> = ({ file, isDark }) => {
@@ -22,7 +23,7 @@ const FileContentViewer: React.FC<{ file: MessageAttachment | null; isDark: bool
         <p><strong>大小:</strong> {formatBytes(file.size)}</p>
       </div>
       <p className="mt-6 text-xs text-gray-500 dark:text-gray-400">
-        (文件内容预览功能需后端支持)
+        (文件内容预览功能暂不可用)
       </p>
     </div>
   );
@@ -45,27 +46,30 @@ export const FilePreviewCanvas = () => {
   };
 
   return (
-    <AnimatePresence>
-      {isPreviewOpen && (
-        <motion.div
-          className={cn(
-            "fixed top-0 right-0 h-full w-[90%] sm:w-[60%] md:w-[50%] lg:w-[40%] z-50 shadow-lg",
-            isDark ? "bg-gray-800 text-gray-100 border-l border-gray-700" : "bg-white text-gray-900 border-l border-gray-200"
-          )}
-          variants={panelVariants}
-          initial="hidden"
-          animate="visible"
-          exit="hidden"
-          transition={transitionConfig} // 应用更快的动画配置
-        >
-          <div className="flex flex-col h-full">
-            {/* 面板头部 */}
+    <>
+      <FilePreviewBackdrop />
+      
+      <AnimatePresence>
+        {isPreviewOpen && (
+          <motion.div
+            className={cn(
+              "fixed top-0 right-0 h-full z-50 shadow-lg",
+              "flex flex-col",
+              "w-[85%] md:w-[60%] lg:w-[50%] xl:w-[40%]",
+              isDark ? "bg-gray-800 text-gray-100 border-l border-gray-700" : "bg-white text-gray-900 border-l border-gray-200"
+            )}
+            variants={panelVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            transition={transitionConfig}
+          >
             <div className={cn(
-              "flex items-center justify-between p-4 border-b",
+              "flex items-center justify-between p-4 border-b flex-shrink-0",
               isDark ? "border-gray-700" : "border-gray-200"
             )}>
-              <h2 className="text-xl font-semibold truncate" title={currentPreviewFile?.name}>
-                {currentPreviewFile?.name || '文件信息'} {/* 标题也改为文件信息 */}
+              <h2 className="text-xl font-semibold truncate" title={currentPreviewFile?.name || '文件信息'}>
+                {currentPreviewFile?.name || '文件信息'}
               </h2>
               <button
                 onClick={closePreview}
@@ -78,14 +82,12 @@ export const FilePreviewCanvas = () => {
                 <XIcon className="w-5 h-5" />
               </button>
             </div>
-            {/* 面板内容区 */}
-            <div className="flex-1 overflow-y-auto p-4">
-              {/* 使用简化版的 FileContentViewer */}
+            <div className="flex-1 overflow-y-auto p-6">
               <FileContentViewer file={currentPreviewFile} isDark={isDark} />
             </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }; 
