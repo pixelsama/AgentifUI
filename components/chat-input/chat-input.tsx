@@ -161,7 +161,18 @@ export const ChatInput = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey && !isComposing) {
       e.preventDefault();
-      if (!isProcessing) {
+      
+      // --- BEGIN 中文注释 ---
+      // 在回车提交前，进行与按钮禁用逻辑完全一致的检查
+      const shouldBlockSubmit = 
+        isWaiting || // 正在等待响应
+        isProcessing || // 正在处理上一条消息
+        attachments.some(f => f.status === 'uploading') || // 有文件正在上传
+        attachments.some(f => f.status === 'error') || // 有文件上传失败
+        !message.trim(); // 消息为空
+      // --- END 中文注释 ---
+
+      if (!shouldBlockSubmit) {
         handleLocalSubmit();
       }
     }
