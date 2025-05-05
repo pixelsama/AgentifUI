@@ -83,7 +83,7 @@ export const FilePreviewCanvas = () => {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-6">
-              <FileContentViewer file={currentPreviewFile} isDark={isDark} />
+              <FileContentViewer file={currentPreviewFile} isDark={isDark ?? false} />
             </div>
           </motion.div>
         )}

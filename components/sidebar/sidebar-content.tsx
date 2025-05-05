@@ -93,7 +93,7 @@ export function SidebarContent() {
       >
         {/* Chat List Section */}
         <SidebarChatList 
-          isDark={isDark} 
+          isDark={isDark ?? false}
           contentVisible={contentVisible}
           selectedId={selectedType === 'chat' ? selectedId : null}
           onSelectChat={handleSelectChat}
@@ -110,7 +110,7 @@ export function SidebarContent() {
 
         {/* App List Section */}
         <SidebarAppList 
-          isDark={isDark} 
+          isDark={isDark ?? false}
           contentVisible={contentVisible}
           selectedId={selectedType === 'app' ? selectedId : null}
           onSelectApp={handleSelectApp}

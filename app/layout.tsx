@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipContainer } from "@components/ui/tooltip";
 import "./globals.css";
 import { NotificationBar } from '@components/ui/notification-bar';
+import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,12 +27,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-        <TooltipContainer />
-        <NotificationBar />
+      <head>
+        {/* Removed the manually added theme initialization script */}
+        {/* Let next-themes handle the initial theme setting */}
+      </head>
+      <body>
+        {/* Restore defaultTheme and enableSystem props for ThemeProvider */}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}>
+            {children}
+            <TooltipContainer />
+            <NotificationBar />
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

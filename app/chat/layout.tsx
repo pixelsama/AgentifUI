@@ -4,7 +4,6 @@ import { Sidebar } from "@components/sidebar"
 import { MobileNavButton } from "@components/mobile"
 import { cn } from "@lib/utils"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
-import { useThemeStore } from "@lib/stores/theme-store"
 import { useEffect } from "react"
 import { useMobile } from "@lib/hooks"
 
@@ -14,18 +13,12 @@ interface ChatLayoutProps {
 
 export default function ChatLayout({ children }: ChatLayoutProps) {
   const { isExpanded, isMobileNavVisible, isMounted, setMounted } = useSidebarStore()
-  const { theme } = useThemeStore()
   const isMobile = useMobile()
   
   // 在组件挂载后设置状态
   useEffect(() => {
     setMounted()
   }, [setMounted])
-  
-  // 在客户端应用主题
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark")
-  }, [theme])
 
   return (
     <div className="flex min-h-screen bg-background">
