@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { PlusIcon, ArrowUpIcon, Square, Loader2 } from "lucide-react"
+import { PlusIcon, ArrowUpIcon, Square, Loader2, Paperclip } from "lucide-react"
 import { useChatWidth, useInputHeightReset } from "@lib/hooks"
 import { useChatLayoutStore } from "@lib/stores/chat-layout-store"
 import { useChatInputStore } from "@lib/stores/chat-input-store"
@@ -355,7 +355,7 @@ export const ChatInput = ({
               placement="top"
             >
               <ChatButton 
-                icon={<PlusIcon className="h-4 w-4" />} 
+                icon={<Paperclip className="h-4 w-4" />}
                 isDark={isDark} 
                 ariaLabel="添加附件"
                 onClick={handleAttachmentClick}
