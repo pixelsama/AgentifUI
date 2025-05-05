@@ -158,7 +158,6 @@ export function useChatInterface() {
         setMessageError(assistantMessageId, `处理消息时发生错误: ${(error as Error).message}`);
       } else {
         setIsWaitingForResponse(false);
-        addMessage({ text: `抱歉，请求失败: ${(error as Error).message}`, isUser: false, error: "API 请求失败" });
       }
       setCurrentTaskId(null);
       throw error;
