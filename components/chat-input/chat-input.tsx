@@ -1,11 +1,14 @@
 "use client"
 
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { PlusIcon, ArrowUpIcon, Square, Loader2 } from "lucide-react"
 import { useChatWidth, useInputHeightReset } from "@lib/hooks"
 import { useChatLayoutStore } from "@lib/stores/chat-layout-store"
 import { useChatInputStore } from "@lib/stores/chat-input-store"
 import { useChatScrollStore } from "@lib/stores/chat-scroll-store"
+import { useAttachmentStore } from "@lib/stores/attachment-store"
+import { AttachmentPreviewBar } from "./attachment-preview-bar"
+import { INITIAL_INPUT_HEIGHT } from "@lib/stores/chat-layout-store"
 import { ChatButton } from "./button"
 import { ChatTextInput } from "./text-input"
 import { ChatContainer } from "./container"
@@ -72,6 +75,14 @@ export const ChatInput = ({
     isDark
   } = useChatInputStore()
   
+  // 附件状态
+  const { files: attachments, addFiles, clearFiles: clearAttachments } = useAttachmentStore()
+  // 本地状态，存储附件栏和文本框的各自高度
+  const [attachmentBarHeight, setAttachmentBarHeight] = useState(0)
+  const [textAreaHeight, setTextAreaHeight] = useState(INITIAL_INPUT_HEIGHT)
+  // 隐藏的文件输入元素引用
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  
   // 使用高度重置钩子
   useInputHeightReset(isWelcomeScreen)
   
@@ -88,19 +99,27 @@ export const ChatInput = ({
     setMessage(e.target.value)
   }
 
-  // 回调函数，用于处理输入框高度变化
-  const handleHeightChange = useCallback((height: number) => {
-    setInputHeight(height)
-  }, [setInputHeight])
+  // 回调函数，用于处理文本输入框高度变化
+  const handleTextHeightChange = useCallback((height: number) => {
+    const newTextAreaHeight = Math.max(height, INITIAL_INPUT_HEIGHT)
+    setTextAreaHeight(newTextAreaHeight) // 更新本地文本区域高度状态
+    setInputHeight(newTextAreaHeight + attachmentBarHeight)
+  }, [setInputHeight, attachmentBarHeight])
+
+  // 回调函数，用于处理附件预览栏高度变化
+  const handleAttachmentBarHeightChange = useCallback((height: number) => {
+    setAttachmentBarHeight(height) // 更新本地附件栏高度状态
+    setInputHeight(textAreaHeight + height)
+  }, [setInputHeight, textAreaHeight])
 
   const handleLocalSubmit = () => {
-    if (!message.trim()) return;
+    if (!message.trim() && attachments.length === 0) return
     if (onSubmit) {
       onSubmit(message);
     }
     clearMessage();
+    clearAttachments();
     
-    // 添加强制滚动到底部逻辑，确保消息发送后滚动到底部
     useChatScrollStore.getState().scrollToBottom('smooth');
   }
 
@@ -130,18 +149,64 @@ export const ChatInput = ({
     }
   }, [message]);
   
-  // 添加处理附件上传的函数
+  // 处理附件按钮点击
   const handleAttachmentClick = () => {
-    // 这里可以实现文件上传功能，例如打开文件选择器
-    console.log("添加附件按钮被点击")
-    // 后续可以实现：
-    // 1. 打开文件选择对话框
-    // 2. 处理文件上传到服务器
-    // 3. 将附件添加到消息中
+    fileInputRef.current?.click()
   }
+
+  // 处理文件选择变化
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (files && files.length > 0) {
+      addFiles(Array.from(files)) // 将选中的文件添加到附件 Store
+
+      // 模拟上传过程 (仅用于演示)
+      // 实际应用中应替换为真实的文件上传逻辑
+      const addedFiles = Array.from(files).map(f => `${f.name}-${f.lastModified}-${f.size}`);
+      addedFiles.forEach(fileId => {
+        // 获取 store 的 update 方法
+        const updateStatus = useAttachmentStore.getState().updateFileStatus;
+        updateStatus(fileId, "uploading", 0);
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 10;
+          if (progress <= 100) {
+            updateStatus(fileId, "uploading", progress);
+          } else {
+            clearInterval(interval);
+            // 模拟成功或失败
+            const success = Math.random() > 0.2; // 80% 成功率
+            updateStatus(fileId, success ? "success" : "error", 100, success ? undefined : "上传失败示例");
+          }
+        }, 200);
+      });
+    }
+    // 清空文件输入元素的值，允许用户再次选择相同的文件
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+
+  // 计算是否有任何附件正在上传中
+  const isUploading = attachments.some(f => f.status === 'uploading');
 
   return (
     <ChatContainer isWelcomeScreen={isWelcomeScreen} isDark={isDark} className={className} widthClass={widthClass}>
+      {/* 隐藏的文件输入元素 */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+        multiple // 允许选择多个文件
+        // 可以添加 accept 属性限制文件类型，例如 accept="image/*,.pdf"
+      />
+      {/* 附件预览栏，仅当有附件时显示 */}
+      <AttachmentPreviewBar
+        isDark={isDark}
+        onHeightChange={handleAttachmentBarHeightChange}
+      />
+
       {/* 文本区域 */}
       <ChatTextArea>
         <ChatTextInput
@@ -154,15 +219,14 @@ export const ChatInput = ({
           isDark={isDark}
           onCompositionStart={handleCompositionStart}
           onCompositionEnd={handleCompositionEnd}
-          onHeightChange={handleHeightChange}
+          onHeightChange={handleTextHeightChange}
         />
       </ChatTextArea>
 
-      {/* 按钮区域 - 调整布局确保按钮贴边 */}
+      {/* 按钮区域 */}
       <div className="px-4">
         <ChatButtonArea>
           <div className="flex-none">
-            {/* 使用TooltipWrapper组件 - 自动处理服务器/客户端渲染差异 */}
             <TooltipWrapper 
               content="添加附件" 
               id="add-attachment-tooltip" 
@@ -173,7 +237,6 @@ export const ChatInput = ({
                 isDark={isDark} 
                 ariaLabel="添加附件"
                 onClick={handleAttachmentClick}
-                disabled={isProcessing || isWaitingForResponse}
               />
             </TooltipWrapper>
           </div>
@@ -190,9 +253,9 @@ export const ChatInput = ({
               }
               variant="submit"
               onClick={isWaiting ? undefined : (isProcessing ? onStop : handleLocalSubmit)}
-              disabled={isWaiting}
+              disabled={isWaiting || (!isProcessing && (isUploading || !message.trim()))}
               isDark={isDark}
-              ariaLabel="发送消息"
+              ariaLabel={isProcessing ? "停止生成" : "发送消息"}
               forceActiveStyle={isWaiting}
             />
           </div>
