@@ -76,7 +76,24 @@ export function useChatInterface() {
     }
 
     setIsWaitingForResponse(true);
-    addMessage({ text: message, isUser: true }); // 不传递 files 字段，避免类型错误
+    
+    // 将 files 转换为 MessageAttachment 格式
+    const messageAttachments = Array.isArray(files) && files.length > 0 
+      ? files.map(file => ({
+          id: file.upload_file_id,
+          name: file.name,
+          size: file.size,
+          type: file.mime_type,
+          upload_file_id: file.upload_file_id
+        }))
+      : undefined;
+      
+    // 添加包含附件信息的用户消息
+    addMessage({ 
+      text: message, 
+      isUser: true,
+      attachments: messageAttachments 
+    });
 
     if (isWelcomeScreen) {
       setIsWelcomeScreen(false);
