@@ -1,7 +1,8 @@
 "use client";
 
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+// --- BEGIN COMMENT --- 移除 react-i18next 的导入 --- END COMMENT ---
+// import { useTranslation } from 'react-i18next';
 import { cn } from '@lib/utils';
 import { Spinner } from '@components/ui/spinner';
 import { useTheme } from '@lib/hooks/use-theme';
@@ -20,6 +21,8 @@ interface ThinkBlockHeaderProps {
   isOpen: boolean;
   // 点击时触发的回调函数
   onToggle: () => void;
+  // --- BEGIN COMMENT --- 移除 statusText prop --- END COMMENT ---
+  // statusText: { ... };
 }
 
 /**
@@ -33,7 +36,8 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
   isOpen, 
   onToggle 
 }) => {
-  const { t } = useTranslation();
+  // --- BEGIN COMMENT --- 移除 useTranslation hook --- END COMMENT ---
+  // const { t } = useTranslation();
   const { isDark } = useTheme();
   const isMobile = useMobile();
 
@@ -44,12 +48,12 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
   const getStatusText = () => { 
     switch (status) {
       case 'thinking':
-        return t('正在深度思考');
+        return "正在深度思考";
       case 'stopped':
-        return t('思考已停止');
+        return "思考已停止";
       case 'completed':
       default:
-        return t('已深度思考');
+        return "已深度思考";
     }
   };
 
@@ -107,7 +111,7 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
           isThinking ? "text-blue-700 dark:text-blue-300" : "text-gray-500 dark:text-gray-300" 
           // status === 'stopped' && (isDark ? "text-yellow-400" : "text-yellow-600"), 
         )}>
-          {/* --- BEGIN COMMENT --- 显示对应状态的文本 --- END COMMENT --- */}
+          {/* --- BEGIN COMMENT --- 调用函数获取中文文本 --- END COMMENT --- */}
           {getStatusText()} 
         </span>
       </div>
