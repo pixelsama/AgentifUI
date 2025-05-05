@@ -10,10 +10,13 @@ import {
   PromptContainer, 
   ScrollToBottomButton
 } from '@components/chat';
+import { FilePreviewCanvas } from '@components/file-preview/file-preview-canvas';
 import { useChatInterface, useChatStateSync } from '@lib/hooks';
 import { useChatStore } from '@lib/stores/chat-store';
 import { useChatLayoutStore } from '@lib/stores/chat-layout-store';
 import { useChatScroll } from '@lib/hooks/use-chat-scroll';
+import { useFilePreviewStore } from '@lib/stores/ui/file-preview-store';
+import { cn } from '@lib/utils';
 
 export default function ChatPage() {
   const params = useParams();
@@ -21,6 +24,7 @@ export default function ChatPage() {
   
   const setCurrentConversationId = useChatStore((state) => state.setCurrentConversationId);
   const { inputHeight } = useChatLayoutStore();
+  const isPreviewOpen = useFilePreviewStore((state) => state.isPreviewOpen);
 
   const { isDark, isWelcomeScreen } = useChatStateSync();
   
@@ -53,10 +57,19 @@ export default function ChatPage() {
 
   return (
     <div 
-      className={`h-full flex flex-col ${isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}
-      style={{ '--chat-input-height': chatInputHeightVar } as React.CSSProperties}
+      className={cn(
+        "h-full flex",
+        isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
+      )}
     >
-      <div className="relative h-full flex flex-col overflow-hidden">
+      <div 
+        className={cn(
+          "relative h-full flex flex-col overflow-hidden",
+          "transition-[width] duration-300 ease-in-out",
+          isPreviewOpen ? "w-[50%] lg:w-[60%]" : "w-full"
+        )}
+        style={{ '--chat-input-height': chatInputHeightVar } as React.CSSProperties}
+      >
         <div className="flex-1 overflow-hidden">
           {isWelcomeScreen && useChatStore.getState().currentConversationId === null ? (
             <WelcomeScreen />
@@ -87,6 +100,8 @@ export default function ChatPage() {
         
         {useChatStore.getState().currentConversationId === null && <PromptContainer />}
       </div>
+      
+      <FilePreviewCanvas /> 
     </div>
   );
 } 
