@@ -4,6 +4,7 @@ import React from "react"
 import { cn, formatBytes } from "@lib/utils"
 import { AttachmentFile, useAttachmentStore } from "@lib/stores/attachment-store"
 import { XIcon, FileTextIcon, AlertCircleIcon, CheckCircle2Icon, UploadCloudIcon } from "lucide-react"
+import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
 
 // --- BEGIN COMMENT ---
 // 单个附件预览项的 Props 定义
@@ -118,18 +119,20 @@ export const AttachmentPreviewItem: React.FC<AttachmentPreviewItemProps> = ({ at
         </p>
       </div>
 
-      <button
-        type="button"
-        onClick={handleRemove}
-        className={cn(
-          "ml-auto flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors",
-          "bg-gray-300/50 hover:bg-gray-400/70 dark:bg-gray-600/50 dark:hover:bg-gray-500/70",
-          isDark ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-black",
-        )}
-        aria-label="移除附件"
-      >
-        <XIcon className="w-4 h-4" />
-      </button>
+      <TooltipWrapper content="移除附件" placement="top" id={`remove-att-${attachment.id}`}>
+        <button
+          type="button"
+          onClick={handleRemove}
+          className={cn(
+            "ml-auto flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors",
+            "bg-gray-300/50 hover:bg-gray-400/70 dark:bg-gray-600/50 dark:hover:bg-gray-500/70",
+            isDark ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-black",
+          )}
+          aria-label="移除附件"
+        >
+          <XIcon className="w-4 h-4" />
+        </button>
+      </TooltipWrapper>
     </div>
   )
 } 

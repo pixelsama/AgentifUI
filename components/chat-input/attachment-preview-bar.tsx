@@ -79,14 +79,11 @@ export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({ isDa
     <div
       ref={containerRef}
       className={cn(
-        "border-b", // 仅保留底部边框
-        isDark ? "border-gray-700" : "border-gray-200",
-        // --- BEGIN ADDITION ---
-        "overflow-hidden", // 隐藏超出内容，配合 height 过渡
-        "transition-[height] duration-300 ease-in-out", // 添加高度过渡动画
-        // --- END ADDITION ---
+        isDark ? "border-gray-700" : "border-gray-200", // This class no longer has effect but kept for potential future use
+        "overflow-hidden",
+        "transition-[height] duration-300 ease-in-out",
       )}
-      style={{ height: 0 }} // 初始高度为0
+      style={{ height: 0 }}
     >
       {/* --- BEGIN COMMENT ---
       // 内层容器用于 padding 和 flex 布局，ResizeObserver 监听这个元素

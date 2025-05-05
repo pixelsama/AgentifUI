@@ -237,7 +237,6 @@ export const ChatInput = ({
                 isDark={isDark} 
                 ariaLabel="添加附件"
                 onClick={handleAttachmentClick}
-                disabled={isWaiting || isUploading || isProcessing}
               />
             </TooltipWrapper>
           </div>
