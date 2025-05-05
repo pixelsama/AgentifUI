@@ -311,10 +311,16 @@ export const ChatInput = ({
               variant="submit"
               onClick={isWaiting ? undefined : (isProcessing ? onStop : handleLocalSubmit)}
               disabled={
+                // --- BEGIN 中文注释 ---
+                // 1. 等待响应时禁用
                 isWaiting ||
-                isUploadingFiles ||
-                uploadErrorOccurred ||
-                (!isProcessing && !message.trim() && attachments.every(f => f.status === 'success'))
+                // 2. 有文件正在上传时禁用
+                attachments.some(f => f.status === 'uploading') ||
+                // 3. 有文件上传失败时禁用
+                attachments.some(f => f.status === 'error') ||
+                // 4. 没有消息内容时禁用（去除多余判断）
+                (!isProcessing && !message.trim())
+                // --- END 中文注释 ---
               }
               isDark={isDark}
               ariaLabel={isProcessing ? "停止生成" : (isUploadingFiles ? "正在上传..." : (uploadErrorOccurred ? "处理附件错误" : "发送消息"))}
