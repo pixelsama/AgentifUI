@@ -118,7 +118,7 @@ export const ChatInput = ({
   }, [setInputHeight, textAreaHeight])
 
   // TODO: 获取真实的 User ID 和 App ID - 占位符实现
-  const currentUserId = "placeholder-user-id"; // 实际应从认证状态获取
+  const currentUserId = "userlyz"; // 实际应从认证状态获取
   const currentAppId = "default"; // 实际应从应用上下文或 props 获取
 
   const handleLocalSubmit = async () => {
@@ -215,25 +215,26 @@ export const ChatInput = ({
     if (files && files.length > 0) {
       addFiles(Array.from(files)) // 将选中的文件添加到附件 Store
 
-      // 模拟上传过程 (仅用于演示)
-      // 实际应用中应替换为真实的文件上传逻辑
-      const addedFiles = Array.from(files).map(f => `${f.name}-${f.lastModified}-${f.size}`);
-      addedFiles.forEach(fileId => {
-        // 获取 store 的 update 方法
-        const updateStatus = useAttachmentStore.getState().updateFileStatus;
-        updateStatus(fileId, "uploading", 0);
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += 10;
-          if (progress <= 100) {
-            updateStatus(fileId, "uploading", progress);
-          } else {
-            clearInterval(interval);
-            // 模拟成功或失败
-            const success = Math.random() > 0.2; // 80% 成功率
-            updateStatus(fileId, success ? "success" : "error", 100, success ? undefined : "上传失败示例");
-          }
-        }, 200);
+      // 遍历每个新文件，立即发起真实上传
+      Array.from(files).forEach((file) => {
+        const fileId = `${file.name}-${file.lastModified}-${file.size}`;
+        // 1. 标记为 uploading，进度 0
+        updateFileStatus(fileId, 'uploading', 0);
+        // 2. 调用真实上传，传入进度回调
+        uploadDifyFile(currentAppId, file, currentUserId, (progress) => {
+          // 实时更新进度
+          updateFileStatus(fileId, 'uploading', progress);
+        })
+          .then((response) => {
+            // 上传成功，记录 difyFileId，状态 success
+            updateFileUploadedId(fileId, response.id);
+            console.log(`[ChatInput] 文件上传成功: ${fileId} -> ${response.id}`);
+          })
+          .catch((error) => {
+            // 上传失败，状态 error，记录错误
+            updateFileStatus(fileId, 'error', undefined, error.message || '上传失败');
+            console.error(`[ChatInput] 文件上传失败: ${fileId}`, error);
+          });
       });
     }
     // 清空文件输入元素的值，允许用户再次选择相同的文件

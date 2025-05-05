@@ -65,7 +65,7 @@ export function useChatInterface() {
   // --- BEGIN COMMENT ---
   // TODO: 获取真实的用户标识符，这里使用占位符
   // --- END COMMENT ---
-  const currentUserIdentifier = "user-placeholder-123"; 
+  const currentUserIdentifier = "userlyz"; 
 
   // --- 处理消息提交 ---
   const handleSubmit = useCallback(async (message: string) => {
