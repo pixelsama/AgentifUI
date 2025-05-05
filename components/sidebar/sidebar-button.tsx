@@ -23,66 +23,52 @@ export function SidebarButton({ icon, text, active = false, className, onClick, 
   return (
     <button
       className={cn(
-        "relative flex items-center rounded-3xl px-3 py-2.5 text-sm font-medium",
-        "transition-[width,background-color,transform,box-shadow] duration-300 ease-in-out",
-        "cursor-pointer",
+        "relative flex items-center rounded-lg px-3 py-2 text-sm font-medium",
+        "transition-all duration-200 ease-in-out",
+        "cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+        isDark ? "focus-visible:ring-blue-500 focus-visible:ring-offset-gray-900" : "focus-visible:ring-primary focus-visible:ring-offset-background",
+
+        "border border-transparent",
         
-        // 通用悬停效果
-        "hover:scale-[1.02]",
-        
-        // 亮色模式下的样式
         !isDark && [
-          "hover:bg-accent/50",
-          "hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]",
+          "text-gray-600 hover:text-gray-900",
+          "hover:bg-gray-100",
           active 
-            ? "bg-primary/10 text-primary shadow-[0_4px_12px_rgba(0,0,0,0.25)]" 
-            : "text-foreground/80 hover:text-foreground",
+            ? "bg-gray-100 text-primary font-semibold shadow-sm border-gray-200/80"
+            : "",
         ],
         
-        // 暗色模式下的样式
         isDark && [
+          "text-gray-400 hover:text-gray-100",
           "hover:bg-gray-800",
-          "hover:shadow-[0_4px_16px_rgba(0,0,0,0.4)]",
           active 
-            ? "bg-gray-800/90 text-blue-400 shadow-inner shadow-black/20 border border-gray-700" 
-            : "text-gray-300 hover:text-white",
+            ? "bg-gray-800 text-blue-400 font-semibold shadow-sm border-gray-700"
+            : "",
         ],
         
-        // 响应式宽度，保持原始定位布局
         isExpanded ? "w-full" : "w-10",
         className,
       )}
       onClick={handleClick}
       {...props}
     >
-      {/* 图标容器 - 修正图标位置，确保在收缩模式下居中 */}
       <span className={cn(
         "flex h-5 w-5 items-center justify-center",
-        "transition-[margin,transform] duration-300 ease-in-out",
+        "transition-[margin,transform,color] duration-200 ease-in-out",
         
-        // 亮色模式下的图标样式
-        !isDark && [
-          active ? "text-primary" : "text-foreground/70",
-        ],
+        active 
+          ? (isDark ? "text-blue-400" : "text-primary") 
+          : (isDark ? "text-gray-400" : "text-gray-500"),
         
-        // 暗色模式下的图标样式
-        isDark && [
-          active ? "text-blue-400" : "text-gray-400",
-        ],
-        
-        // 图标在收缩状态下的缩放效果
         !isExpanded && "scale-110",
-        
-        // 关键修复：收缩状态下，给图标一个负的左边距，使它向左移动以实现居中
         !isExpanded && "-ml-0.5",
       )}>
         {icon}
       </span>
 
-      {/* 文本内容 - 使用绝对定位，根据 isExpanded 瞬时显隐 */}
       <span className={cn(
-        "absolute left-10 whitespace-nowrap",
-        isDark && active && "text-blue-300",
+        "absolute left-10 whitespace-nowrap transition-colors duration-200",
+        active && (isDark ? "text-blue-300" : "text-primary font-medium"),
         isExpanded ? "block" : "hidden"
       )}>
         {text}

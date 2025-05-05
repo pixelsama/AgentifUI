@@ -43,15 +43,14 @@ export function SidebarAppList({
   }
 
   return (
-    <div className="space-y-3 px-3">
+    <div className="space-y-2 px-3">
       <div className={cn(
-        "px-3 text-xs font-semibold flex items-center gap-2",
-        isDark ? "text-blue-400" : "text-primary/90"
+        "pl-1 pr-3 mb-2 text-sm font-semibold uppercase flex items-center gap-2 tracking-wider",
+        "text-gray-600 dark:text-gray-400"
       )}>
-        <Grid className="h-3.5 w-3.5" />
         <span>应用列表</span>
       </div>
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         {visibleApps.map((app) => (
           <SidebarButton 
             key={app.id} 
@@ -65,13 +64,16 @@ export function SidebarAppList({
         {applications.length > 2 && (
           <SidebarButton
             icon={showAllApps 
-              ? <ChevronUp className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" /> 
-              : <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5" />
+              ? <ChevronUp className="h-4 w-4" /> 
+              : <ChevronDown className="h-4 w-4" />
             }
-            text={showAllApps ? "收起" : "更多"}
+            text={showAllApps ? "收起" : "显示更多"}
             className={cn(
-              "w-full text-xs group",
-              isDark ? "text-gray-500" : "text-muted-foreground"
+              "w-full text-xs group font-medium",
+              isDark ? "text-gray-400" : "text-gray-500",
+              "bg-transparent dark:bg-transparent",
+              "dark:hover:bg-gray-700/60",
+              "border-none shadow-none"
             )}
             onClick={toggleShowAllApps}
           />

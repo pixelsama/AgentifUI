@@ -12,34 +12,32 @@ export function SidebarHeader() {
 
   return (
     <div className={cn(
-      "flex flex-col gap-2.5 py-4 px-3",
-      isDark 
-        ? "bg-gradient-to-b from-gray-900 via-gray-900/98 to-transparent" 
-        : "bg-gradient-to-b from-background via-background to-transparent"
+      "flex flex-col gap-2 py-4 px-3",
     )}>
       <SidebarButton
-        icon={<SidebarChatIcon />}
-        text="收起"
+        icon={<SidebarChatIcon isDark={isDark} />}
+        text={isExpanded ? "收起侧栏" : "展开侧栏"}
         onClick={toggleSidebar}
-        aria-label={isExpanded ? "收起" : "展开"}
+        aria-label={isExpanded ? "收起侧栏" : "展开侧栏"}
         className={cn(
           "group",
-          isDark && "hover:border-gray-700"
         )}
       />
       <SidebarButton
         icon={<Plus className={cn(
           "h-5 w-5 transition-transform duration-200 group-hover:rotate-90",
-          isDark && "text-gray-400 group-hover:text-blue-400"
+          isDark
+            ? "text-gray-400 group-hover:text-blue-400"
+            : "text-gray-500 group-hover:text-primary"
         )} />}
         text="发起新对话"
         onClick={() => console.log("New chat")}
         aria-label="发起新对话"
         className={cn(
-          "group shadow-md",
+          "group font-medium",
           isDark 
-            ? "bg-gray-800/80 hover:bg-gray-700/80 hover:border-gray-600 hover:shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
-            : "bg-gray-100"
+            ? "bg-gray-800/90 hover:bg-gray-700/90 border border-gray-700/50 hover:border-gray-600 shadow-sm hover:shadow-md"
+            : "bg-primary/10 hover:bg-primary/15 text-primary shadow-sm hover:shadow-md"
         )}
       />
     </div>

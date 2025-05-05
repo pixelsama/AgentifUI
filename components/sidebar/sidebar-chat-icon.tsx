@@ -6,9 +6,10 @@ interface SidebarChatIconProps {
   // 允许自定义类名和大小
   className?: string
   size?: 'sm' | 'md' | 'lg'
+  isDark?: boolean
 }
 
-export function SidebarChatIcon({ className, size = 'md' }: SidebarChatIconProps) {
+export function SidebarChatIcon({ className, size = 'md', isDark }: SidebarChatIconProps) {
   // 根据size属性确定尺寸
   const sizeClasses = {
     sm: {
@@ -39,16 +40,16 @@ export function SidebarChatIcon({ className, size = 'md' }: SidebarChatIconProps
   return (
     <div 
       className={cn(
-        "flex flex-col justify-center items-start transition-transform duration-200",
+        "flex flex-col justify-center items-start transition-transform duration-150",
         gap,
         container,
         "group-hover:scale-105",
         className
       )}
     >
-      <div className={cn(line1, "bg-current rounded-full transition-all duration-200 group-hover:w-full")} />
-      <div className={cn(line2, "bg-current rounded-full transition-all duration-200 group-hover:w-4/5")} />
-      <div className={cn(line3, "bg-current rounded-full transition-all duration-200 group-hover:w-3/5")} />
+      <div className={cn(line1, "bg-current rounded-full transition-all duration-150 group-hover:w-full", isDark ? "opacity-80" : "opacity-70")} />
+      <div className={cn(line2, "bg-current rounded-full transition-all duration-150 group-hover:w-4/5", isDark ? "opacity-80" : "opacity-70")} />
+      <div className={cn(line3, "bg-current rounded-full transition-all duration-150 group-hover:w-3/5", isDark ? "opacity-80" : "opacity-70")} />
     </div>
   )
 } 

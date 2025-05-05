@@ -9,8 +9,8 @@ export function SidebarBackdrop() {
   return (
     <div
       className={cn(
-        "fixed inset-0 bg-background/70 backdrop-blur-md z-10",
-        "transition-all duration-300 ease-in-out",
+        "fixed inset-0 bg-black/20 backdrop-blur-sm z-10",
+        "transition-opacity duration-300 ease-in-out",
         "md:hidden", // 仅在移动设备上显示
         isExpanded 
           ? "opacity-100 pointer-events-auto" 

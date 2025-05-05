@@ -9,15 +9,15 @@ import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { MoreButton, DropdownMenu, PinButton } from "@components/ui"
 import { useMobile } from "@lib/hooks/use-mobile"
 
-// 示例数据 - 使用新的图标组件
-const chatHistory = [
-  { id: 1, title: "网站开发指南", icon: <SidebarChatIcon size="sm" />, isPinned: false },
-  { id: 2, title: "JavaScript最佳实践", icon: <SidebarChatIcon size="sm" />, isPinned: true },
-  { id: 3, title: "React Hooks详解", icon: <SidebarChatIcon size="sm" />, isPinned: false },
-  { id: 4, title: "Grid与Flexbox比较", icon: <SidebarChatIcon size="sm" />, isPinned: false },
-  { id: 5, title: "TypeScript技巧", icon: <SidebarChatIcon size="sm" />, isPinned: false },
-  { id: 6, title: "Next.js App Router", icon: <SidebarChatIcon size="sm" />, isPinned: false },
-]
+// Sample data - Passing isDark to SidebarChatIcon
+const getChatHistory = (isDark: boolean) => [
+  { id: 1, title: "网站开发指南", icon: <SidebarChatIcon size="sm" isDark={isDark} />, isPinned: false },
+  { id: 2, title: "JavaScript最佳实践", icon: <SidebarChatIcon size="sm" isDark={isDark} />, isPinned: true },
+  { id: 3, title: "React Hooks详解", icon: <SidebarChatIcon size="sm" isDark={isDark} />, isPinned: false },
+  { id: 4, title: "Grid与Flexbox比较", icon: <SidebarChatIcon size="sm" isDark={isDark} />, isPinned: false },
+  { id: 5, title: "TypeScript技巧", icon: <SidebarChatIcon size="sm" isDark={isDark} />, isPinned: false },
+  { id: 6, title: "Next.js App Router", icon: <SidebarChatIcon size="sm" isDark={isDark} />, isPinned: false },
+];
 
 interface SidebarChatListProps {
   isDark: boolean
@@ -42,9 +42,19 @@ export function SidebarChatList({
   const { lockExpanded } = useSidebarStore()
   const isMobile = useMobile()
   const [showAllChats, setShowAllChats] = React.useState(false)
-  const [pinnedChats, setPinnedChats] = React.useState(chatHistory.filter(chat => chat.isPinned));
-  const [unpinnedChats, setUnpinnedChats] = React.useState(chatHistory.filter(chat => !chat.isPinned));
   
+  // Get chat history based on current theme
+  const chatHistory = React.useMemo(() => getChatHistory(isDark), [isDark]);
+
+  const [pinnedChats, setPinnedChats] = React.useState(() => chatHistory.filter(chat => chat.isPinned));
+  const [unpinnedChats, setUnpinnedChats] = React.useState(() => chatHistory.filter(chat => !chat.isPinned));
+
+  // Update state when chatHistory changes (due to theme change)
+  React.useEffect(() => {
+    setPinnedChats(chatHistory.filter(chat => chat.isPinned));
+    setUnpinnedChats(chatHistory.filter(chat => !chat.isPinned));
+  }, [chatHistory]);
+
   // 根据是否展示全部聊天记录决定显示哪些未固定的聊天
   const visibleUnpinnedChats = showAllChats ? unpinnedChats : unpinnedChats.slice(0, 3);
 
@@ -133,38 +143,44 @@ export function SidebarChatList({
   );
 
   return (
-    <div className="space-y-3 px-3">
+    <div className="space-y-2 px-3">
       <div className={cn(
-        "px-3 text-xs font-semibold flex items-center gap-2",
-        isDark ? "text-blue-400" : "text-primary/90"
+        "pl-1 pr-3 mb-2 text-sm font-semibold uppercase flex items-center gap-2 tracking-wider",
+        "text-gray-600 dark:text-gray-400"
       )}>
-        <MessageSquare className="h-3.5 w-3.5" />
         <span>对话列表</span>
       </div>
       
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         {/* 固定的聊天 */}
         {pinnedChats.length > 0 && (
           <>
             {pinnedChats.map(renderChatItem)}
-            {unpinnedChats.length > 0 && <div className="my-2 border-t border-gray-200 dark:border-gray-700" />}
+            {unpinnedChats.length > 0 && <div className="my-2 border-t border-gray-200/80 dark:border-gray-700/50" />}
           </>
         )}
         
         {/* 未固定的聊天 */}
         {visibleUnpinnedChats.map(renderChatItem)}
         
-        {/* 更多按钮 */}
+        {/* More/Less Button - Cleaned up className overrides */}
         {unpinnedChats.length > 3 && (
           <SidebarButton
             icon={showAllChats 
-              ? <ChevronUp className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" /> 
-              : <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5" />
+              ? <ChevronUp className="h-4 w-4" /> 
+              : <ChevronDown className="h-4 w-4" />
             }
-            text={showAllChats ? "收起" : "更多"}
+            text={showAllChats ? "收起" : "显示更多"}
             className={cn(
-              "w-full text-xs group",
-              isDark ? "text-gray-500" : "text-muted-foreground"
+              "w-full text-xs group font-medium",
+              // Base text colors
+              isDark ? "text-gray-400" : "text-gray-500",
+              // Ensure base background is transparent, especially in dark mode
+              "bg-transparent dark:bg-transparent", 
+              // Explicitly set dark hover background override
+              "dark:hover:bg-gray-700/60", 
+              // Keep border/shadow overrides
+              "border-none shadow-none"
             )}
             onClick={toggleShowAllChats}
           />
