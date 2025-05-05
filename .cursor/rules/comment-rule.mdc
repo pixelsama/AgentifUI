@@ -1,7 +1,7 @@
 ---
-description: 当你要添加注释的时候，记得按照规则添加中文注释
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Commenting Guidelines
 

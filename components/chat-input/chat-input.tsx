@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { PlusIcon, ArrowUpIcon, Square, Loader2, Paperclip } from "lucide-react"
+import { PlusIcon, ArrowUpIcon, Square, Loader2 } from "lucide-react"
 import { useChatWidth, useInputHeightReset } from "@lib/hooks"
 import { useChatLayoutStore } from "@lib/stores/chat-layout-store"
 import { useChatInputStore } from "@lib/stores/chat-input-store"
@@ -19,6 +19,7 @@ import { uploadDifyFile } from "@lib/services/dify/file-service"
 import { DifyFileUploadResponse } from "@lib/services/dify/types"
 import { AttachmentFile } from "@lib/stores/attachment-store"
 import { useNotificationStore } from "@lib/stores/ui/notification-store"
+import { FileTypeSelector } from "./file-type-selector"
 
 // 创建一个全局焦点管理器
 interface FocusManagerState {
@@ -84,8 +85,6 @@ export const ChatInput = ({
   // 本地状态，存储附件栏和文本框的各自高度
   const [attachmentBarHeight, setAttachmentBarHeight] = useState(0)
   const [textAreaHeight, setTextAreaHeight] = useState(INITIAL_INPUT_HEIGHT)
-  // 隐藏的文件输入元素引用
-  const fileInputRef = useRef<HTMLInputElement>(null)
   
   // 使用高度重置钩子
   useInputHeightReset(isWelcomeScreen)
@@ -116,9 +115,11 @@ export const ChatInput = ({
     setInputHeight(textAreaHeight + height)
   }, [setInputHeight, textAreaHeight])
 
+  // --- BEGIN 中文注释 --- 用户ID和应用ID信息 ---
   // TODO: 获取真实的 User ID 和 App ID - 占位符实现
   const currentUserId = "userlyz"; // 实际应从认证状态获取
   const currentAppId = "default"; // 实际应从应用上下文或 props 获取
+  // --- END 中文注释 ---
 
   // 提交消息（实现乐观 UI：先清空，失败再恢复）
   const handleLocalSubmit = async () => {
@@ -227,22 +228,16 @@ export const ChatInput = ({
     }
   }, [message]);
   
-  // 处理附件按钮点击
-  const handleAttachmentClick = () => {
-    fileInputRef.current?.click()
-  }
-
-  // 处理文件选择变化
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
+  // --- BEGIN 中文注释 --- 文件类型选择处理 ---
+  // 处理文件类型选择后的文件上传
+  const handleFileSelect = (files: FileList | null, accept: string) => {
     if (files && files.length > 0) {
       const filesArray = Array.from(files);
-      addFiles(filesArray) // 添加到 Store
+      addFiles(filesArray); // 添加到 Store
 
       // 对每个文件发起上传
       filesArray.forEach((file) => {
         const fileId = `${file.name}-${file.lastModified}-${file.size}`;
-        // updateFileStatus(fileId, 'pending'); // 可选：先设为pending? 还是直接uploading?
         updateFileStatus(fileId, 'uploading', 0); // 立即标记为上传中
 
         // 调用上传服务
@@ -262,12 +257,10 @@ export const ChatInput = ({
         });
       });
     }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  }
+  };
+  // --- END 中文注释 ---
   
-  // --- 新增：重试上传逻辑 ---
+  // --- 重试上传逻辑 ---
   const handleRetryUpload = useCallback(async (fileId: string) => {
     console.log(`[ChatInput] Retrying upload for file ID: ${fileId}`);
     // 直接从 store state 获取文件
@@ -313,15 +306,6 @@ export const ChatInput = ({
 
   return (
     <ChatContainer isWelcomeScreen={isWelcomeScreen} isDark={isDark} className={className} widthClass={widthClass}>
-      {/* 隐藏的文件输入元素 */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        style={{ display: "none" }}
-        onChange={handleFileChange}
-        multiple // 允许选择多个文件
-        // 可以添加 accept 属性限制文件类型，例如 accept="image/*,.pdf"
-      />
       {/* 附件预览栏，仅当有附件时显示 */}
       <AttachmentPreviewBar
         isDark={isDark}
@@ -349,19 +333,11 @@ export const ChatInput = ({
       <div className="px-4">
         <ChatButtonArea>
           <div className="flex-none">
-            <TooltipWrapper 
-              content="添加附件" 
-              id="add-attachment-tooltip" 
-              placement="top"
-            >
-              <ChatButton 
-                icon={<Paperclip className="h-4 w-4" />}
-                isDark={isDark} 
-                ariaLabel="添加附件"
-                onClick={handleAttachmentClick}
-                disabled={isUploading || isProcessing}
-              />
-            </TooltipWrapper>
+            <FileTypeSelector
+              onFileSelect={handleFileSelect}
+              disabled={isUploading || isProcessing}
+              ariaLabel="添加附件"
+            />
           </div>
           <div className="flex-none">
             <ChatButton
