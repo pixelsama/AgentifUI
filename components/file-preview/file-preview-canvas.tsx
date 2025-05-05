@@ -6,55 +6,24 @@ import { XIcon } from 'lucide-react'
 import { cn, formatBytes } from '@lib/utils'
 import { useFilePreviewStore } from '@lib/stores/ui/file-preview-store'
 import { useTheme } from '@lib/hooks'
-import type { MessageAttachment } from '@lib/stores/chat-store'; // 导入 MessageAttachment 类型
+import type { MessageAttachment } from '@lib/stores/chat-store';
 
-// 文件内容预览组件
+// 简化版：文件内容预览组件 - 只显示基础信息
 const FileContentViewer: React.FC<{ file: MessageAttachment | null; isDark: boolean }> = ({ file, isDark }) => {
   if (!file) return null;
 
-  // --- 基础预览实现 ---
-  const filePreviewUrl = `/api/files/preview/${file.upload_file_id}`; // 假设的预览URL
-
-  const renderPreview = () => {
-    if (file.type.startsWith('image/')) {
-      return (
-        <img 
-          src={filePreviewUrl} 
-          alt={file.name} 
-          className="max-w-full h-auto rounded-lg my-4 object-contain" 
-        />
-      );
-    }
-    // TODO: 添加对 PDF, 文本等其他类型的预览支持 (e.g., using iframe or specific libraries)
-    // else if (file.type === 'application/pdf') { ... }
-    // else if (file.type.startsWith('text/')) { ... }
-    else {
-      return (
-        <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-          (暂不支持预览此文件类型)
-        </p>
-      );
-    }
-  }
-
   return (
-    <div className={cn("p-4 rounded-lg mt-4", isDark ? "bg-gray-700/70" : "bg-gray-100")}>
-      <h3 className="text-lg font-semibold mb-2">文件详情</h3>
-      <p><strong>名称:</strong> {file.name}</p>
-      <p><strong>类型:</strong> {file.type}</p>
-      <p><strong>大小:</strong> {formatBytes(file.size)}</p>
-      
-      {/* 渲染预览内容 */}
-      {renderPreview()}
-
-      {/* 可选：添加下载按钮 */} 
-      {/* <a 
-        href={filePreviewUrl + '?download=true'} // 添加下载参数 
-        download={file.name} 
-        className="mt-4 inline-block px-3 py-1 rounded bg-blue-500 text-white text-sm hover:bg-blue-600 transition-colors"
-      >
-        下载文件
-      </a> */}
+    // 保留外层容器用于可能的样式调整
+    <div> 
+      <h3 className="text-lg font-semibold mb-4">文件信息</h3>
+      <div className={cn("space-y-1 text-sm", isDark ? "text-gray-300" : "text-gray-700")}>
+        <p><strong>名称:</strong> {file.name}</p>
+        <p><strong>类型:</strong> {file.type}</p>
+        <p><strong>大小:</strong> {formatBytes(file.size)}</p>
+      </div>
+      <p className="mt-6 text-xs text-gray-500 dark:text-gray-400">
+        (文件内容预览功能需后端支持)
+      </p>
     </div>
   );
 };
@@ -68,11 +37,11 @@ export const FilePreviewCanvas = () => {
     visible: { x: 0 },
   };
 
-  // 定义与 CSS transition 匹配的动画参数
+  // 加快动画速度：减少 duration
   const transitionConfig = {
     type: "tween",
-    duration: 0.3, // 对应 duration-300
-    ease: "easeInOut" // 尝试匹配 ease-in-out, 可选 'linear', 'easeIn', 'easeOut' 等
+    duration: 0.2, // 从 0.3 减小到 0.2
+    ease: "easeInOut"
   };
 
   return (
@@ -87,8 +56,7 @@ export const FilePreviewCanvas = () => {
           initial="hidden"
           animate="visible"
           exit="hidden"
-          // 使用 tween 动画并匹配 CSS 过渡参数
-          transition={transitionConfig}
+          transition={transitionConfig} // 应用更快的动画配置
         >
           <div className="flex flex-col h-full">
             {/* 面板头部 */}
@@ -97,7 +65,7 @@ export const FilePreviewCanvas = () => {
               isDark ? "border-gray-700" : "border-gray-200"
             )}>
               <h2 className="text-xl font-semibold truncate" title={currentPreviewFile?.name}>
-                {currentPreviewFile?.name || '文件预览'}
+                {currentPreviewFile?.name || '文件信息'} {/* 标题也改为文件信息 */}
               </h2>
               <button
                 onClick={closePreview}
@@ -112,6 +80,7 @@ export const FilePreviewCanvas = () => {
             </div>
             {/* 面板内容区 */}
             <div className="flex-1 overflow-y-auto p-4">
+              {/* 使用简化版的 FileContentViewer */}
               <FileContentViewer file={currentPreviewFile} isDark={isDark} />
             </div>
           </div>
