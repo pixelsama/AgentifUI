@@ -25,6 +25,7 @@ interface AttachmentStoreState {
   updateFileStatus: (id: string, status: AttachmentFile["status"], progress?: number, error?: string) => void
   updateFileUploadedId: (id: string, uploadedId: string) => void
   clearFiles: () => void
+  setFiles: (files: AttachmentFile[]) => void
 }
 
 // --- BEGIN COMMENT ---
@@ -108,4 +109,10 @@ export const useAttachmentStore = create<AttachmentStoreState>((set, get) => ({
   clearFiles: () => {
     set({ files: [] });
   },
+
+  // --- BEGIN ADDITION --- 实现 setFiles ---
+  setFiles: (filesToRestore) => {
+    set({ files: filesToRestore });
+  }
+  // --- END ADDITION ---
 })) 

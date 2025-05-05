@@ -49,7 +49,7 @@ interface ChatInputProps {
   className?: string
   placeholder?: string
   maxHeight?: number
-  onSubmit?: (message: string, files: { type: string; transfer_method: string; upload_file_id: string; name: string; size: number; mime_type: string; }[]) => void
+  onSubmit?: (message: string, files?: { type: string; transfer_method: string; upload_file_id: string; name: string; size: number; mime_type: string; }[]) => void
   onStop?: () => void
   isProcessing?: boolean
   isWaitingForResponse?: boolean
@@ -123,28 +123,54 @@ export const ChatInput = ({
 
   // 提交消息（只负责消息和已上传文件的组装与提交）
   const handleLocalSubmit = async () => {
-    // 1. 过滤所有上传成功的文件，组装 Dify API 规范的 files 字段
-    const uploadedFiles = attachments.filter(f => f.status === 'success' && f.uploadedId);
-    // 组装 Dify 文件对象数组（upload_file_id 一定为 string）
-    const files = uploadedFiles
-      .filter(f => typeof f.uploadedId === 'string')
-      .map(f => ({
-        type: getDifyFileType(f),
-        transfer_method: 'local_file',
-        upload_file_id: f.uploadedId as string, // 明确断言为 string
-        name: f.name,
-        size: f.size,
-        mime_type: f.type,
-      }));
+    // --- BEGIN 中文注释 --- 状态暂存与恢复逻辑 ---
+    let savedMessage = "";
+    let savedAttachments: AttachmentFile[] = [];
+    // --- END 中文注释 ---
+    try {
+      // 1. 暂存当前状态 (在调用 onSubmit 前)
+      savedMessage = message;
+      savedAttachments = useAttachmentStore.getState().files;
+      console.log("[ChatInput] 暂存状态", { savedMessage, savedAttachments });
 
-    // 2. 只有消息有内容时才允许提交
-    if (message.trim() && onSubmit) {
-      onSubmit(message, files);
-      clearMessage();
-      clearAttachments();
-      useChatScrollStore.getState().scrollToBottom('smooth');
-    } else {
-      console.log("[ChatInput] 没有可提交的消息内容。");
+      // 2. 过滤所有上传成功的文件，组装 Dify API 规范的 files 字段
+      const uploadedFiles = savedAttachments.filter(f => f.status === 'success' && f.uploadedId);
+      const files = uploadedFiles
+        .filter(f => typeof f.uploadedId === 'string')
+        .map(f => ({
+          type: getDifyFileType(f),
+          transfer_method: 'local_file',
+          upload_file_id: f.uploadedId as string, // 明确断言为 string
+          name: f.name,
+          size: f.size,
+          mime_type: f.type,
+        }));
+
+      // 3. 只有消息有内容时才允许提交
+      if (message.trim() && onSubmit) {
+        // --- BEGIN 中文注释 --- 调用可能抛出错误的提交函数 ---
+        // 确保 filesToSend 是符合类型的数组或 undefined
+        const filesToSend = (Array.isArray(files) && files.length > 0) ? files : undefined;
+        await onSubmit(message, filesToSend);
+        // --- END 中文注释 ---
+        
+        // --- BEGIN 中文注释 --- 提交成功，清空状态 ---
+        console.log("[ChatInput] 提交成功，清空状态");
+        clearMessage();
+        clearAttachments();
+        useChatScrollStore.getState().scrollToBottom('smooth');
+        // --- END 中文注释 ---
+      } else {
+        console.log("[ChatInput] 没有可提交的消息内容（此逻辑可能不应执行，因为按钮已禁用）。");
+      }
+    } catch (error) {
+      // --- BEGIN 中文注释 --- 提交失败，恢复状态 ---
+      console.error("[ChatInput] 消息提交失败，执行回滚", error);
+      setMessage(savedMessage);
+      useAttachmentStore.getState().setFiles(savedAttachments);
+      // 可选：给用户错误提示，例如使用 toast
+      // toast.error("消息发送失败，请重试");
+      // --- END 中文注释 ---
     }
   };
 

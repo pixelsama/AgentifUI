@@ -161,6 +161,7 @@ export function useChatInterface() {
         addMessage({ text: `抱歉，请求失败: ${(error as Error).message}`, isUser: false, error: "API 请求失败" });
       }
       setCurrentTaskId(null);
+      throw error;
     }
   }, [
     isProcessing,
