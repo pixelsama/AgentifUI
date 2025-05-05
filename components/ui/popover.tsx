@@ -118,8 +118,8 @@ export function Popover({
 
     if (!isMobile) {
       // 仅在桌面端应用微调偏移量
-      adjustedTop = top - 12; // 上移 8px (约 2mm)
-      adjustedLeft = left + 85; // 右移 4px (约 1mm)
+      adjustedTop = top - 12; // 上移 12px
+      adjustedLeft = left + 85; // 右移 85px 
     }
     // --- END: 条件偏移 --- 
 
@@ -313,8 +313,12 @@ export function PopoverItem({
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
     >
-      {icon && <span className="flex-shrink-0 w-5 h-5">{icon}</span>}
-      <span className="truncate font-medium">{children}</span>
+      {icon && (
+        <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+          {icon}
+        </span>
+      )}
+      <span className="truncate font-medium leading-5 mt-px">{children}</span>
     </button>
   )
 }
