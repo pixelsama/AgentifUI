@@ -15,6 +15,9 @@ import { ChatContainer } from "./container"
 import { ChatButtonArea, ChatTextArea } from "./layout"
 import { create } from "zustand"
 import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
+import { uploadDifyFile } from "@lib/services/dify/file-service"
+import { DifyFileUploadResponse } from "@lib/services/dify/types"
+import { AttachmentFile } from "@lib/stores/attachment-store"
 
 // 创建一个全局焦点管理器
 interface FocusManagerState {
@@ -76,12 +79,14 @@ export const ChatInput = ({
   } = useChatInputStore()
   
   // 附件状态
-  const { files: attachments, addFiles, clearFiles: clearAttachments } = useAttachmentStore()
+  const { files: attachments, addFiles, clearFiles: clearAttachments, updateFileStatus, updateFileUploadedId } = useAttachmentStore()
   // 本地状态，存储附件栏和文本框的各自高度
   const [attachmentBarHeight, setAttachmentBarHeight] = useState(0)
   const [textAreaHeight, setTextAreaHeight] = useState(INITIAL_INPUT_HEIGHT)
   // 隐藏的文件输入元素引用
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false)
+  const [uploadErrorOccurred, setUploadErrorOccurred] = useState(false)
   
   // 使用高度重置钩子
   useInputHeightReset(isWelcomeScreen)
@@ -112,16 +117,66 @@ export const ChatInput = ({
     setInputHeight(textAreaHeight + height)
   }, [setInputHeight, textAreaHeight])
 
-  const handleLocalSubmit = () => {
-    if (!message.trim() && attachments.length === 0) return
-    if (onSubmit) {
+  // TODO: 获取真实的 User ID 和 App ID - 占位符实现
+  const currentUserId = "placeholder-user-id"; // 实际应从认证状态获取
+  const currentAppId = "default"; // 实际应从应用上下文或 props 获取
+
+  const handleLocalSubmit = async () => {
+    const filesToUpload = attachments.filter(f => f.status === 'pending');
+
+    if (filesToUpload.length > 0) {
+      console.log(`[ChatInput] Found ${filesToUpload.length} files to upload.`);
+      setIsUploadingFiles(true);
+      setUploadErrorOccurred(false);
+
+      filesToUpload.forEach(f => updateFileStatus(f.id, 'uploading'));
+
+      const uploadPromises = filesToUpload.map(attachment =>
+        uploadDifyFile(currentAppId, attachment.file, currentUserId)
+          .then(response => ({ status: 'fulfilled' as const, value: response, localId: attachment.id }))
+          .catch(error => ({ status: 'rejected' as const, reason: error, localId: attachment.id }))
+      );
+      const results: PromiseSettledResult<{ status: 'fulfilled'; value: DifyFileUploadResponse; localId: string; } | { status: 'rejected'; reason: any; localId: string; }>[] = await Promise.allSettled(uploadPromises);
+
+      let hasError = false;
+      results.forEach(result => {
+        if (result.status === 'fulfilled') {
+          const fulfilledResult = result.value as { status: 'fulfilled'; value: DifyFileUploadResponse; localId: string; };
+          updateFileUploadedId(fulfilledResult.localId, fulfilledResult.value.id);
+          console.log(`[ChatInput] File upload success: ${fulfilledResult.localId} -> ${fulfilledResult.value.id}`);
+        } else {
+          hasError = true;
+          const rejectedResult = result as PromiseRejectedResult & { reason: { localId?: string, message?: string } };
+          const errorMessage = rejectedResult.reason?.message || 'Unknown upload error';
+          const localId = rejectedResult.reason?.localId || 'unknown-local-id';
+          updateFileStatus(localId, 'error', undefined, errorMessage);
+          console.error(`[ChatInput] File upload failed: ${localId}`, rejectedResult.reason);
+        }
+      });
+
+      setIsUploadingFiles(false);
+      setUploadErrorOccurred(hasError);
+
+      if (hasError) {
+        console.log("[ChatInput] Upload errors occurred. Aborting message submission.");
+        return;
+      }
+
+      console.log("[ChatInput] All files uploaded successfully. Ready to send message (logic should be externalized).");
+
+      if (message.trim() && onSubmit) {
+        clearMessage();
+      }
+
+    } else if (message.trim() && onSubmit) {
+      console.log("[ChatInput] No files to upload, submitting text message only (using prop).");
       onSubmit(message);
+      clearMessage();
+      useChatScrollStore.getState().scrollToBottom('smooth');
+    } else {
+        console.log("[ChatInput] Nothing to submit (no text and no pending files).");
     }
-    clearMessage();
-    clearAttachments();
-    
-    useChatScrollStore.getState().scrollToBottom('smooth');
-  }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey && !isComposing) {
@@ -237,6 +292,7 @@ export const ChatInput = ({
                 isDark={isDark} 
                 ariaLabel="添加附件"
                 onClick={handleAttachmentClick}
+                disabled={isUploadingFiles || isProcessing}
               />
             </TooltipWrapper>
           </div>
@@ -253,9 +309,14 @@ export const ChatInput = ({
               }
               variant="submit"
               onClick={isWaiting ? undefined : (isProcessing ? onStop : handleLocalSubmit)}
-              disabled={isWaiting || (!isProcessing && (isUploading || !message.trim()))}
+              disabled={
+                isWaiting ||
+                isUploadingFiles ||
+                uploadErrorOccurred ||
+                (!isProcessing && !message.trim() && attachments.every(f => f.status === 'success'))
+              }
               isDark={isDark}
-              ariaLabel={isProcessing ? "停止生成" : "发送消息"}
+              ariaLabel={isProcessing ? "停止生成" : (isUploadingFiles ? "正在上传..." : (uploadErrorOccurred ? "处理附件错误" : "发送消息"))}
               forceActiveStyle={isWaiting}
             />
           </div>
