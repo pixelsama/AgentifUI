@@ -18,6 +18,7 @@ import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
 import { uploadDifyFile } from "@lib/services/dify/file-service"
 import { DifyFileUploadResponse } from "@lib/services/dify/types"
 import { AttachmentFile } from "@lib/stores/attachment-store"
+import { useNotificationStore } from "@lib/stores/ui/notification-store"
 
 // 创建一个全局焦点管理器
 interface FocusManagerState {
@@ -121,19 +122,19 @@ export const ChatInput = ({
   const currentUserId = "userlyz"; // 实际应从认证状态获取
   const currentAppId = "default"; // 实际应从应用上下文或 props 获取
 
-  // 提交消息（只负责消息和已上传文件的组装与提交）
+  // 提交消息（实现乐观 UI：先清空，失败再恢复）
   const handleLocalSubmit = async () => {
     // --- BEGIN 中文注释 --- 状态暂存与恢复逻辑 ---
     let savedMessage = "";
     let savedAttachments: AttachmentFile[] = [];
     // --- END 中文注释 ---
     try {
-      // 1. 暂存当前状态 (在调用 onSubmit 前)
+      // 1. 暂存当前状态 (在清空和调用 onSubmit 前)
       savedMessage = message;
       savedAttachments = useAttachmentStore.getState().files;
       console.log("[ChatInput] 暂存状态", { savedMessage, savedAttachments });
 
-      // 2. 过滤所有上传成功的文件，组装 Dify API 规范的 files 字段
+      // 2. 过滤准备提交的文件 (使用暂存的状态)
       const uploadedFiles = savedAttachments.filter(f => f.status === 'success' && f.uploadedId);
       const files = uploadedFiles
         .filter(f => typeof f.uploadedId === 'string')
@@ -145,31 +146,38 @@ export const ChatInput = ({
           size: f.size,
           mime_type: f.type,
         }));
+      const filesToSend = (Array.isArray(files) && files.length > 0) ? files : undefined;
 
-      // 3. 只有消息有内容时才允许提交
-      if (message.trim() && onSubmit) {
-        // --- BEGIN 中文注释 --- 调用可能抛出错误的提交函数 ---
-        // 确保 filesToSend 是符合类型的数组或 undefined
-        const filesToSend = (Array.isArray(files) && files.length > 0) ? files : undefined;
-        await onSubmit(message, filesToSend);
-        // --- END 中文注释 ---
-        
-        // --- BEGIN 中文注释 --- 提交成功，清空状态 ---
-        console.log("[ChatInput] 提交成功，清空状态");
+      // 3. 检查是否可以提交 (使用暂存的消息)
+      if (savedMessage.trim() && onSubmit) {
+        // --- BEGIN 中文注释 --- 乐观 UI：立即清空 ---
         clearMessage();
         clearAttachments();
-        useChatScrollStore.getState().scrollToBottom('smooth');
+        useChatScrollStore.getState().scrollToBottom('smooth'); // 滚动到底部
+        // --- END 中文注释 ---
+        
+        // --- BEGIN 中文注释 --- 调用可能抛出错误的提交函数 (使用暂存的消息和组装好的文件)
+        await onSubmit(savedMessage, filesToSend);
+        // --- END 中文注释 ---
+        
+        // --- BEGIN 中文注释 --- 提交成功，无需额外操作，因为已提前清空 ---
+        console.log("[ChatInput] 提交成功 (已提前清空)");
         // --- END 中文注释 ---
       } else {
-        console.log("[ChatInput] 没有可提交的消息内容（此逻辑可能不应执行，因为按钮已禁用）。");
+        // 如果因为消息为空不能提交，理论上按钮已禁用，但以防万一
+        console.log("[ChatInput] 没有可提交的消息内容。");
       }
     } catch (error) {
       // --- BEGIN 中文注释 --- 提交失败，恢复状态 ---
       console.error("[ChatInput] 消息提交失败，执行回滚", error);
       setMessage(savedMessage);
       useAttachmentStore.getState().setFiles(savedAttachments);
-      // 可选：给用户错误提示，例如使用 toast
-      // toast.error("消息发送失败，请重试");
+      // 调用通知 Store 显示错误消息
+      useNotificationStore.getState().showNotification(
+        `消息发送失败: ${(error as Error)?.message || '未知错误'}`,
+        'error',
+        3000 // 持续 3 秒
+      );
       // --- END 中文注释 ---
     }
   };
