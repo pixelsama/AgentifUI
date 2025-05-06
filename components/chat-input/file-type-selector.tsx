@@ -68,7 +68,7 @@ export const FileTypeSelector = ({
   // 创建触发器按钮，并用 Tooltip 包裹
   const triggerButton = (
     <TooltipWrapper 
-      content={ariaLabel}
+      content="添加附件，支持文档 (.pdf, .docx, .txt,)、图片 (.jpg, .png) 等"
       id="file-type-selector-tooltip"
       placement="top" 
     >
