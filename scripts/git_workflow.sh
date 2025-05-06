@@ -1525,21 +1525,37 @@ cmd_save() {
         echo -e -n "${CYAN}编辑完成后，请按 Enter 键继续提交... (按 Ctrl+C 取消提交)${NC}"
         read -r 
 
-        # 检查用户是否真的编辑了文件
+        # 检查用户是否真的编辑了文件 (移除了所有#或空行，或添加了非注释内容)
         if ! grep -v -q -E '^#|^$' "$commit_msg_file"; then
             echo -e "${RED}错误：提交信息文件为空或只包含注释行。提交已取消。${NC}"
-            rm -f "$commit_msg_file"
+            rm -f "$commit_msg_file" # 清理模板文件
             return 1
         fi
 
-        echo -e "${BLUE}使用编辑后的文件继续提交...${NC}"
-        # save 命令默认不传递其他 git commit 参数，除了可能的 -m (已被处理)
-        if git commit --file="$commit_msg_file"; then 
-            echo -e "${GREEN}快速保存成功！${NC}"
+        # --- 新增：清理 COMMIT_EDITMSG 中的注释行 ---
+        local cleaned_commit_msg_file="${commit_msg_file}.cleaned"
+        grep -v '^#' "$commit_msg_file" | sed '/^$/N;/^\n$/D' > "$cleaned_commit_msg_file" # 移除#开头的行和多余的空行
+
+        # 检查清理后的文件是否还有实际内容
+        if ! grep -v -q -E '^$' "$cleaned_commit_msg_file"; then
+            echo -e "${RED}错误：清理后的提交信息为空。提交已取消。${NC}"
+            rm -f "$commit_msg_file" "$cleaned_commit_msg_file"
+            return 1
+        fi
+
+        echo -e "${BLUE}使用编辑并清理后的文件继续提交...${NC}"
+        if git commit --file="$cleaned_commit_msg_file" "${commit_args[@]}"; then 
+            echo -e "${GREEN}提交成功！${NC}"
+            rm -f "$cleaned_commit_msg_file" # Git 成功后会删 COMMIT_EDITMSG，我们删掉清理后的
+            # Git 成功提交后会自动清理 COMMIT_EDITMSG, 如果原始文件还在也应该清理
+            if [ -f "$commit_msg_file" ]; then
+                 rm -f "$commit_msg_file"
+            fi
             return 0
         else
             echo -e "${RED}使用编辑后的文件提交失败。${NC}"
-            echo -e "${YELLOW}提交信息文件仍保留在: $commit_msg_file${NC}"
+            echo -e "${YELLOW}原始提交信息文件仍保留在: $commit_msg_file${NC}"
+            echo -e "${YELLOW}清理后的提交信息文件仍保留在: $cleaned_commit_msg_file${NC}"
             echo "你可以检查文件内容和暂存区状态 ('git status')。"
             return 1
         fi
