@@ -793,7 +793,17 @@ cmd_rm_branch() {
         fi
         
         echo -e "${YELLOW}⚠️ 警告：即将删除除了 '$MAIN_BRANCH' 之外的所有本地分支！${NC}"
-        mapfile -t branches_to_delete < <(git branch --format="%(refname:short)" | grep -v -e "^${MAIN_BRANCH}$" -e "^\* ${MAIN_BRANCH}$")
+        
+        # 使用 while read 替代 mapfile 提高兼容性
+        local branches_to_delete=()
+        while IFS= read -r branch_name; do
+            # 过滤掉可能的空行
+            if [ -n "$branch_name" ]; then
+                branches_to_delete+=("$branch_name")
+            fi
+        done < <(git branch --format="%(refname:short)" | grep -v -e "^${MAIN_BRANCH}$" -e "^\* ${MAIN_BRANCH}$")
+        
+        # mapfile -t branches_to_delete < <(git branch --format="%(refname:short)" | grep -v -e "^${MAIN_BRANCH}$" -e "^\* ${MAIN_BRANCH}$")
         
         if [ ${#branches_to_delete[@]} -eq 0 ]; then
             echo "没有其他可删除的本地分支。"
@@ -1616,6 +1626,7 @@ show_help() {
     echo "  finish [-n|--no-switch] - 完成当前分支开发: 检查/提交, 推送, 准备 PR/MR (-n 不切主分支)"
     echo "  main | master [...]     - 推送主分支 ($MAIN_BRANCH) 到远程 (用于主分支维护, 可加 -f 等)"
     echo "  sync                    - 同步开发分支: 拉取主分支最新代码并 rebase 当前分支"
+    echo "  clean <分支名>          - 清理已合并分支: 切主分支->更新->删除本地/远程"
     echo ""
     echo -e "${CYAN}常用 Git 操作:${NC}"
     echo "  status [-r] [-l]        - 显示工作区状态 (默认纯本地; -r 获取远程; -l 显示日志)"
@@ -1632,7 +1643,6 @@ show_help() {
     echo "  merge <来源分支> [...]  - 合并指定分支到当前分支 (可加 git merge 参数)"
     echo "  rm <分支名> [-f]        - 删除指定本地分支 (可选删远程, -f 强制)"
     echo "  rm all [-f]             - (仅限主分支)删除除主分支外所有本地分支 (-f 强制)"
-    echo "  clean <分支名>          - 清理已合并分支: 切主分支->更新->删除本地/远程"
     echo ""
     echo -e "${CYAN}历史与差异:${NC}"
     echo "  log [...]               - 显示提交历史 (支持 git log 参数, 带分页)"
@@ -1898,3 +1908,99 @@ main() {
 
 # 执行主函数，并将所有参数传递给它
 main "$@"
+
+# 清理已合并的分支 (切换到主分支, 拉取, 删除本地和远程)
+cmd_clean_branch() {
+    if ! check_in_git_repo; then return 1; fi
+
+    local target_branch="$1"
+    local force=false # clean 命令默认不强制删除，依赖 rm 的合并检查
+
+    if [ -z "$target_branch" ]; then
+        echo -e "${RED}错误: 请指定要清理的分支名称。${NC}"
+        echo "用法: gw clean <已合并的分支名>"
+        return 1
+    fi
+    
+    if [ "$target_branch" = "$MAIN_BRANCH" ]; then
+         echo -e "${RED}错误: 不能清理主分支 ($MAIN_BRANCH)。${NC}"
+         return 1
+    fi
+    
+    # 检查是否有多余参数 (暂不支持 -f)
+    if [ $# -gt 1 ]; then
+         echo -e "${YELLOW}警告: 'clean' 命令当前不接受除分支名外的其他参数，已忽略。${NC}"
+    fi
+
+    echo -e "${CYAN}=== 清理分支 '$target_branch' ===${NC}"
+
+    local current_branch
+    current_branch=$(get_current_branch_name)
+    if [ $? -ne 0 ]; then return 1; fi
+    local stash_needed=false
+
+    # 1. 如果当前不在主分支，先切换到主分支
+    if [ "$current_branch" != "$MAIN_BRANCH" ]; then
+        echo -e "${BLUE}当前不在主分支，准备切换到 '$MAIN_BRANCH'...${NC}"
+        # 检查未提交变更
+        if check_uncommitted_changes || check_untracked_files; then
+            echo -e "${YELLOW}检测到未提交的变更。在切换前需要处理:${NC}"
+            echo "1) 暂存变更"
+            echo "2) 取消清理"
+            echo -n "请选择 [1-2]: "
+            read -r choice
+            if [ "$choice" = "1" ]; then
+                 echo -e "${BLUE}正在暂存...${NC}"
+                 if ! git stash save "Auto-stash before cleaning branch $target_branch"; then
+                     echo -e "${RED}暂存失败，清理操作取消。${NC}"
+                     return 1
+                 fi
+                 stash_needed=true
+            else
+                 echo "清理操作已取消。"
+                 return 1
+            fi
+        fi
+        # 执行切换
+        if ! git checkout "$MAIN_BRANCH"; then
+             echo -e "${RED}切换到主分支失败。请检查工作区状态。${NC}"
+             if $stash_needed; then git stash pop; fi # 尝试恢复
+             return 1
+        fi
+        echo -e "${GREEN}已切换到主分支 '$MAIN_BRANCH'。${NC}"
+    fi
+
+    # 2. 拉取主分支最新代码
+    echo -e "${BLUE}正在从远程 '$REMOTE_NAME' 更新主分支 '$MAIN_BRANCH'...${NC}"
+    if ! do_pull_with_retry "$REMOTE_NAME" "$MAIN_BRANCH"; then
+        echo -e "${RED}拉取主分支更新失败。${NC}"
+        # 即使拉取失败，也可能继续尝试删除分支？或者中止？暂定中止
+        if $stash_needed; then git stash pop; fi # 尝试恢复
+        return 1
+    fi
+    echo -e "${GREEN}主分支已是最新。${NC}"
+
+    # 3. 删除目标分支 (使用 cmd_rm_branch 的逻辑，但不带 all)
+    echo -e "${BLUE}准备删除分支 '$target_branch'...${NC}"
+    # 注意：cmd_rm_branch 内部会检查分支是否存在、是否是当前（现在不可能是了）、是否是主分支
+    # 它还会检查合并状态（默认 -d），并询问是否删除远程
+    if cmd_rm_branch "$target_branch"; then
+        echo -e "${GREEN}分支 '$target_branch' 清理完成。${NC}"
+    else
+        echo -e "${RED}分支 '$target_branch' 清理过程中删除步骤失败。请检查上面的错误信息。${NC}"
+        if $stash_needed; then git stash pop; fi # 尝试恢复
+        return 1
+    fi
+    
+    # 4. 如果之前暂存了，尝试恢复
+    if $stash_needed; then
+        echo -e "${BLUE}正在尝试恢复之前暂存的变更...${NC}"
+        if git stash pop; then
+            echo -e "${GREEN}成功恢复暂存的变更。${NC}"
+        else
+            echo -e "${RED}自动恢复暂存失败。可能存在冲突。请手动处理 (git stash list)。${NC}"
+        fi
+    fi
+
+    return 0
+}
