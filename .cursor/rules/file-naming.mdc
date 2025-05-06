@@ -50,11 +50,12 @@ alwaysApply: true
 
 - 使用**kebab-case**（连字符命名法）
 - 通常使用`.ts`扩展名
-- 例如：`supabase-auth.ts`, `format-date.ts`, `dify-config.ts`
+- 例如：`auth-utils.ts`, `format-date.ts`, `dify-config.ts`
 
 ### API路由文件
 
 - 主要使用Next.js的`route.ts`标准命名
+- NextAuth.js 核心路由位于 `app/api/auth/[...nextauth]/route.ts`
 - 相关辅助文件可使用描述性名称，如`utils.ts`, `validation.ts`
 
 ### 静态资源文件
@@ -73,12 +74,12 @@ alwaysApply: true
 
 - 使用明确的描述性名称
 - 通常采用项目通用格式（如`.config.ts`后缀或使用连字符）
-- 例如：`supabase-config.ts`, `dify-config.ts`
+- 例如：`auth.config.ts` (如果将NextAuth配置抽离), `dify-config.ts`
 
 ### 测试文件
 
 - 与被测试文件名对应，添加`.test.ts`或`.spec.ts`后缀
-- 例如：`button.test.tsx`, `supabase-auth.spec.ts`
+- 例如：`button.test.tsx`, `auth-utils.spec.ts`
 
 ## 目录命名
 
@@ -107,14 +108,14 @@ alwaysApply: true
 ## 实例对照表
 
 | 文件类型 | 命名风格 | 示例 |
-|---------|---------|------|
+|---|---|---|
 | React组件 | kebab-case | `button.tsx`, `user-card.tsx` |
-| 工具函数 | kebab-case | `format-date.ts`, `supabase-auth.ts` |
-| API路由 | Next.js约定 | `route.ts` |
+| 工具函数 | kebab-case | `format-date.ts`, `auth-utils.ts` |
+| API路由 | Next.js约定/NextAuth | `app/api/dify/[...]/route.ts`, `app/api/auth/[...nextauth]/route.ts` |
 | 静态资源 | kebab-case | `logo-dark.svg`, `icon-home.png` |
 | 类型定义 | 描述性-types | `api-types.ts`, `user-types.ts` |
-| 配置文件 | 描述性-config | `dify-config.ts` |
-| 测试文件 | 源文件名+test/spec | `button.test.tsx` |
+| 配置文件 | 描述性-config | `dify-config.ts`, `auth.config.ts` |
+| 测试文件 | 源文件名+test/spec | `button.test.tsx`, `auth-utils.spec.ts` |
 
 ## 建议与提醒
 
