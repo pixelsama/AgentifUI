@@ -1897,7 +1897,7 @@ show_help() {
     echo "  save [-m "消息"] [-e] [文件...] - 快速保存变更: 添加指定文件 (默认全部) 并提交"
     echo "                            (无 -m/-e 则打印文件路径暂停编辑, -e 强制编辑器)"
     echo "  sync                    - 同步开发分支: 拉取主分支最新代码并 rebase 当前分支"
-    echo "  finish [-n|--no-switch] - 完成当前分支开发: 检查/提交, 推送, 准备 PR/MR (-n 不切主分支)"
+    echo "  finish [-n|--no-switch] - 完成当前分支开发: 检查/提交, 推送, (若gh已安装则可选)创建PR (-n 不切主分支)"
     echo "  clean <分支名>          - 清理已合并分支: 切主分支->更新->删除本地/远程"
     echo "  main | master [...]     - 推送主分支 ($MAIN_BRANCH) 到远程 (用于主分支维护, 可加 -f 等)"
     echo ""
