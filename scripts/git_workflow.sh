@@ -646,6 +646,154 @@ cmd_delete_branch() {
     fi
 }
 
+# 删除本地分支 (新命令 gw rm)
+cmd_rm_branch() {
+    if ! check_in_git_repo; then return 1; fi
+
+    local target="$1"
+    local force=false
+    local delete_remote=false # 暂不自动删除远程，保持与 cmd_delete_branch 逻辑一致，需要确认
+    
+    # 处理参数
+    if [ -z "$target" ]; then
+        echo -e "${RED}错误: 请指定要删除的分支名称或 'all'。${NC}"
+        echo "用法: gw rm <分支名|all> [-f]"
+        return 1
+    fi
+    shift # 移除 target 参数
+    
+    # 检查剩余参数是否有 -f
+    for arg in "$@"; do
+        if [ "$arg" = "-f" ] || [ "$arg" = "--force" ]; then
+            force=true
+            break
+        fi
+    done
+
+    local current_branch
+    current_branch=$(get_current_branch_name)
+    if [ $? -ne 0 ]; then return 1; fi
+
+    # --- 处理 gw rm all --- 
+    if [ "$target" = "all" ]; then
+        if [ "$current_branch" != "$MAIN_BRANCH" ]; then
+            echo -e "${RED}错误: 'gw rm all' 只能在主分支 ($MAIN_BRANCH) 上执行以确保安全。${NC}"
+            echo "您当前在分支 '$current_branch'。"
+            return 1
+        fi
+        
+        echo -e "${YELLOW}⚠️ 警告：即将删除除了 '$MAIN_BRANCH' 之外的所有本地分支！${NC}"
+        mapfile -t branches_to_delete < <(git branch --format="%(refname:short)" | grep -v -e "^${MAIN_BRANCH}$" -e "^\* ${MAIN_BRANCH}$")
+        
+        if [ ${#branches_to_delete[@]} -eq 0 ]; then
+            echo "没有其他可删除的本地分支。"
+            return 0
+        fi
+        
+        echo "将要删除以下分支:"
+        for b in "${branches_to_delete[@]}"; do echo " - $b"; done
+        echo ""
+        
+        local confirm_msg="确认要删除这 ${#branches_to_delete[@]} 个本地分支吗？此操作不可逆！"
+        if $force; then
+            confirm_msg="强制删除模式 (-f): ${confirm_msg}"
+        fi
+
+        if ! confirm_action "$confirm_msg" "N"; then
+            echo "已取消批量删除操作。"
+            return 1
+        fi
+        
+        local delete_flag="-d"
+        if $force; then delete_flag="-D"; fi
+        local success_count=0
+        local fail_count=0
+        
+        echo -e "${BLUE}开始批量删除分支...${NC}"
+        for branch in "${branches_to_delete[@]}"; do
+            echo -n "删除分支 '$branch'... "
+            if git branch $delete_flag "$branch"; then
+                echo -e "${GREEN}成功${NC}"
+                success_count=$((success_count + 1))
+            else
+                echo -e "${RED}失败${NC}"
+                fail_count=$((fail_count + 1))
+            fi
+        done
+        
+        echo -e "${GREEN}批量删除完成。成功: $success_count, 失败: $fail_count ${NC}"
+        if [ $fail_count -gt 0 ]; then
+             echo -e "${YELLOW}提示: 删除失败的分支可能包含未合并的更改 (若未使用 -f) 或其他问题。${NC}"
+             return 1 # 返回错误码表示部分失败
+        fi
+        return 0
+
+    # --- 处理 gw rm <分支名> --- 
+    else
+        local branch="$target" # target 就是分支名
+        
+        # 不能删除当前分支
+        if [ "$branch" = "$current_branch" ]; then
+            echo -e "${RED}错误：不能删除当前所在的分支。请先切换到其他分支。${NC}"
+            return 1
+        fi
+        
+        # 不能删除主分支
+        if [ "$branch" = "$MAIN_BRANCH" ]; then
+            echo -e "${RED}错误：不能删除主分支 ($MAIN_BRANCH)。${NC}"
+            return 1
+        fi
+        
+        # 检查分支是否存在
+        if ! git rev-parse --verify --quiet "refs/heads/$branch"; then
+             echo -e "${RED}错误：本地分支 '$branch' 不存在。${NC}"
+             return 1
+        fi
+
+        # 检查合并状态 (仅当非强制删除时)
+        local delete_flag="-d"
+        if $force; then
+            delete_flag="-D"
+            echo -e "${YELLOW}⚠️ 警告：将强制删除分支 '$branch'，即使它包含未合并的更改。${NC}"
+        else
+            # 检查是否已合并到当前分支
+            # 注意：这里检查的是合并到 *当前* 分支，如果想检查合并到 main，需要切换或修改逻辑
+            if ! git branch --merged | grep -q -E "(^|\s)${branch}$"; then
+                 echo -e "${YELLOW}⚠️ 警告：分支 '$branch' 包含未合并到当前分支 ('$current_branch') 的更改。${NC}"
+                 if confirm_action "是否要强制删除此分支？" "N"; then
+                     delete_flag="-D" # 用户确认强制删除
+                 else
+                     echo "已取消分支删除操作。"
+                     return 1
+                 fi
+            fi
+        fi
+        
+        # 执行删除
+        echo -e "${BLUE}正在删除本地分支 '$branch'...${NC}"
+        if git branch $delete_flag "$branch"; then
+            echo -e "${GREEN}成功删除本地分支 '$branch'${NC}"
+            
+            # 询问是否删除远程分支 (与 cmd_delete_branch 保持一致)
+            if git ls-remote --heads "$REMOTE_NAME" "$branch" | grep -q "$branch"; then
+                if confirm_action "是否同时删除远程分支 '$REMOTE_NAME/$branch'？" "N"; then
+                    echo -e "${BLUE}正在删除远程分支...${NC}"
+                    if git push "$REMOTE_NAME" --delete "$branch"; then
+                        echo -e "${GREEN}成功删除远程分支 '$REMOTE_NAME/$branch'${NC}"
+                    else
+                        echo -e "${RED}删除远程分支失败。${NC}"
+                        # 即使远程删除失败，本地删除已成功，返回成功码？还是失败？暂定返回成功
+                    fi
+                fi
+            fi
+            return 0
+        else
+            echo -e "${RED}删除本地分支失败。${NC}"
+            return 1
+        fi
+    fi
+}
+
 # 获取状态摘要
 cmd_status() {
     if ! check_in_git_repo; then
@@ -653,13 +801,31 @@ cmd_status() {
     fi
     
     local fetch_remote=false
-    if [ "$1" = "remote" ] || [ "$1" = "-r" ]; then
-        fetch_remote=true
-        shift # 移除已处理的参数
-    fi
+    local show_log=false
+    # 解析参数
+    local remaining_args=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -r|--remote)
+                fetch_remote=true
+                shift
+                ;;
+            -l|--log)
+                show_log=true
+                shift
+                ;;
+            *)
+                # 保留无法识别的参数（如果需要传递给 git status 或其他）
+                # 但对于 status，通常不需要其他参数
+                echo -e "${YELLOW}警告: status 命令忽略未知参数: $1${NC}"
+                shift
+                ;;
+        esac
+    done
     
     if $fetch_remote; then
         echo -e "${BLUE}正在从远程仓库 '$REMOTE_NAME' 获取最新状态...${NC}"
+        # 只在显式请求时才 fetch
         git fetch --quiet "$REMOTE_NAME"
         if [ $? -ne 0 ]; then
             echo -e "${YELLOW}警告: 从远程获取状态失败。可能无法看到最新的远程分支信息。${NC}"
@@ -672,18 +838,20 @@ cmd_status() {
         return 1
     fi
     
-    echo -e "${CYAN}=== Git 仓库状态 ===${NC}"
+    echo -e "${CYAN}=== Git 本地仓库状态 ===${NC}" # 标题强调本地
     echo -e "${BOLD}当前分支:${NC} $current_branch"
     
-    # 检查远程分支是否存在，并获取领先/落后状态
-    if git show-ref --verify --quiet "refs/remotes/$REMOTE_NAME/$current_branch"; then
+    # 检查本地是否存在对应的远程跟踪分支信息
+    local remote_branch_ref="refs/remotes/$REMOTE_NAME/$current_branch"
+    if git show-ref --verify --quiet "$remote_branch_ref"; then
         local ahead_behind
-        ahead_behind=$(git rev-list --left-right --count "$current_branch"..."$REMOTE_NAME/$current_branch" 2>/dev/null)
+        # 基于本地已有的信息进行比较，不自动 fetch
+        ahead_behind=$(git rev-list --left-right --count "$current_branch...$remote_branch_ref" 2>/dev/null)
         if [ $? -eq 0 ]; then
             local ahead=$(echo "$ahead_behind" | awk '{print $1}')
             local behind=$(echo "$ahead_behind" | awk '{print $2}')
             
-            local compare_info="与远程 $REMOTE_NAME/$current_branch 比较:"
+            local compare_info="与本地跟踪的 $REMOTE_NAME/$current_branch 比较:"
             if [ "$ahead" -gt 0 ] && [ "$behind" -gt 0 ]; then
                 compare_info+=" ${YELLOW}领先 $ahead, 落后 $behind${NC}"
             elif [ "$ahead" -gt 0 ]; then
@@ -693,21 +861,24 @@ cmd_status() {
             else
                 compare_info+=" ${GREEN}已同步${NC}"
             fi
-            echo -e "${BOLD}远程状态:${NC} $compare_info"
+            echo -e "${BOLD}远程跟踪状态:${NC} $compare_info"
             
             if [ "$behind" -gt 0 ]; then
-                echo -e "${YELLOW}  提示: 您的分支落后于远程分支，建议执行 'gw pull' 或 'gw sync' 更新。${NC}"
+                echo -e "${YELLOW}  提示: 您的分支可能落后于远程，可执行 'gw fetch' 或 'gw pull' 更新。${NC}"
             fi
-        else
-            echo -e "${BOLD}远程状态:${NC} ${YELLOW}无法计算与远程分支的差异 (可能远程刚 fetch?) ${NC}"
+            if ! $fetch_remote ; then
+                 echo -e "${PURPLE}  (此状态基于本地缓存，可能不是最新，使用 'gw status -r' 获取最新)${NC}"
+        fi
+    else
+            echo -e "${BOLD}远程跟踪状态:${NC} ${YELLOW}无法计算与远程分支的差异 (也许刚 fetch 或有其他问题?) ${NC}"
         fi
     else
         # 检查分支是否是新建的且未推送
         if ! git log "$REMOTE_NAME/$current_branch..$current_branch" >/dev/null 2>&1; then 
-             echo -e "${BOLD}远程状态:${NC} ${PURPLE}分支 '$current_branch' 尚未推送到远程 '$REMOTE_NAME'${NC}"
+             echo -e "${BOLD}远程跟踪状态:${NC} ${PURPLE}分支 '$current_branch' 尚未推送到远程 '$REMOTE_NAME' 或本地无跟踪信息${NC}"
         else
             # 如果远程分支不存在但本地有基于它的记录，说明可能远程分支已被删除
-            echo -e "${BOLD}远程状态:${NC} ${YELLOW}远程分支 '$REMOTE_NAME/$current_branch' 可能已被删除或本地未同步${NC}"
+            echo -e "${BOLD}远程跟踪状态:${NC} ${YELLOW}远程分支 '$REMOTE_NAME/$current_branch' 可能已被删除或本地未同步${NC}"
         fi
        
     fi
@@ -716,20 +887,19 @@ cmd_status() {
     echo -e "\n${BOLD}本地变更详情 (git status -sb):${NC}"
     git status -sb
     
-    # 仅在有详细输出需求时才显示完整 status（可以通过参数控制，暂不添加）
-    # echo -e "\n${BOLD}详细状态 (git status):${NC}"
-    # git status
-    
-    # 显示最近提交
-    echo -e "\n${BOLD}最近提交:${NC}"
-    # 使用更详细和彩色的格式
-    git log -3 --pretty=format:"%C(yellow)%h%Creset %s %C(bold blue)<%an>%Creset %C(green)(%ar)%Creset%C(auto)%d%Creset"
-    echo ""
-    
-    # 显示最近的标签
-    latest_tag=$(git describe --tags --abbrev=0 2>/dev/null)
-    if [ $? -eq 0 ] && [ -n "$latest_tag" ]; then
-        echo -e "${BOLD}最近标签:${NC} $latest_tag"
+    # --- 只有在指定 -l/--log 时才显示日志和标签 ---
+    if $show_log; then
+        # 显示最近提交
+        echo -e "\n${BOLD}最近提交 (-l):${NC}"
+        # 使用更详细和彩色的格式
+        git log -3 --pretty=format:"%C(yellow)%h%Creset %s %C(bold blue)<%an>%Creset %C(green)(%ar)%Creset%C(auto)%d%Creset"
+        echo ""
+        
+        # 显示最近的标签
+        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null)
+        if [ $? -eq 0 ] && [ -n "$latest_tag" ]; then
+            echo -e "${BOLD}最近标签 (-l):${NC} $latest_tag"
+        fi
     fi
     
     return 0
@@ -829,7 +999,7 @@ cmd_commit() {
             -a|--all)
                 add_all_flag=true
                 commit_args+=("-a") # git commit -a 会自动暂存已跟踪文件的修改和删除
-                shift
+    shift
                 ;;
             # 你可以在这里添加更多 git commit 支持的参数处理，例如 --amend, -S 等
             *)
@@ -855,10 +1025,10 @@ cmd_commit() {
     
     # 如果指定了 -a 标志，则不需要检查暂存区，git commit -a 会处理
     if ! $add_all_flag; then
-        # 检查是否有已暂存的变更
+    # 检查是否有已暂存的变更
         if git diff --cached --quiet; then
-            echo -e "${YELLOW}没有已暂存的变更可提交。${NC}"
-            
+        echo -e "${YELLOW}没有已暂存的变更可提交。${NC}"
+        
             # 检查是否有未暂存的变更或未追踪文件
             if check_uncommitted_changes || check_untracked_files; then
                 echo -e "提示: 有未暂存的变更或未追踪的文件。"
@@ -1120,55 +1290,88 @@ cmd_sync() {
     return 0
 }
 
-# 快速保存所有变更 (add -A + commit)
+# 快速保存变更 (add + commit)
 cmd_save() {
     if ! check_in_git_repo; then return 1; fi
 
     local message=""
-    # 检查是否有 -m 参数
-    if [ "$1" = "-m" ] || [ "$1" = "--message" ]; then
-        if [ -n "$2" ]; then
-            message="$2"
-            shift 2
-        else
-            echo -e "${RED}错误: -m/--message 选项需要一个参数。${NC}"
-            echo "用法: gw save [-m \"提交消息\"]"
+    local files_to_add=() # 存储要添加的文件
+    local commit_args=() # 存储最终传递给 git commit 的参数
+    local add_all=true # 默认添加所有变更
+
+    # 解析参数，区分 -m 和文件路径
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -m|--message)
+                if [ -n "$2" ]; then
+                    message="$2"
+                    commit_args+=("-m" "$message")
+                    shift 2 # 跳过 -m 和消息参数
+                else
+                    echo -e "${RED}错误: -m/--message 选项需要一个参数。${NC}"
+                    echo "用法: gw save [-m \"提交消息\"] [文件...]"
+                    return 1
+                fi
+                ;;
+            -*)
+                # 不支持其他选项，例如 -a 在 save 中没有意义，因为默认就是 add all
+                echo -e "${RED}错误: 'save' 命令不支持选项 '$1'。${NC}"
+                echo "用法: gw save [-m \"提交消息\"] [文件...]"
+                return 1
+                ;;
+            *)
+                # 如果不是选项，则认为是文件路径
+                add_all=false # 一旦指定了文件，就不是 add all 了
+                files_to_add+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    echo -e "${BLUE}正在准备保存变更...${NC}"
+    
+    # 1. 添加变更
+    if $add_all; then
+        echo -e "${BLUE}正在添加所有变更到暂存区...${NC}"
+        git add -A
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}快速保存失败：添加所有变更时出错。${NC}"
             return 1
         fi
-    elif [ $# -gt 0 ]; then # 如果有其他参数，提示错误用法
-         echo -e "${RED}错误: 无效参数 '$1'。${NC}"
-         echo "用法: gw save [-m \"提交消息\"]"
-         return 1
+    elif [ ${#files_to_add[@]} -gt 0 ]; then
+        echo -e "${BLUE}正在添加指定文件到暂存区: ${files_to_add[*]}${NC}"
+        # 使用 -- 确保文件名不会被误解为选项
+        git add -- "${files_to_add[@]}"
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}快速保存失败：添加指定文件时出错。${NC}"
+            return 1
+        fi
+    else
+        # 理论上不会到这里，因为没有参数或只有 -m 时 add_all 仍为 true
+        echo -e "${YELLOW}没有指定要保存的文件，也没有添加所有变更。${NC}"
+        return 1 
     fi
-
-    echo -e "${BLUE}正在快速保存所有变更...${NC}"
     
-    # 1. 添加所有变更
-    cmd_add_all
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}快速保存失败：添加变更时出错。${NC}"
-        return 1
-    fi
-    
-    # 检查是否有实际变更被暂存（add_all 可能成功但无事发生）
+    # 2. 检查是否有实际变更被暂存
     if git diff --cached --quiet; then
-        echo -e "${YELLOW}没有检测到需要保存的变更。${NC}"
-        return 0 # 返回成功，因为状态是干净的
+        if $add_all; then
+            echo -e "${YELLOW}没有检测到需要保存的变更。${NC}"
+        else
+            echo -e "${YELLOW}指定的文件没有变更或未能添加到暂存区。${NC}"
+        fi
+        return 0 # 返回成功，因为状态是干净的或没有有效暂存
     fi
 
-    # 2. 提交
-    echo -e "${BLUE}准备提交...${NC}"
-    local commit_args=()
-    if [ -n "$message" ]; then
-        commit_args=("-m" "$message")
-    fi
-    
-    # 调用 git commit，如果没有 message 会打开编辑器
+    # 3. 提交
+    echo -e "${BLUE}准备提交暂存的变更...${NC}"
+    # 如果没有通过 -m 提供消息，git commit 会自动打开编辑器
     if git commit "${commit_args[@]}"; then
         echo -e "${GREEN}快速保存成功！${NC}"
         return 0
     else
         echo -e "${RED}快速保存失败：提交时出错或被取消。${NC}"
+        # 可以尝试撤销刚才的 add 操作吗？比较复杂，暂时不处理
+        # echo -e "${YELLOW}提示：刚才添加的文件仍在暂存区。${NC}"
         return 1
     fi
 }
@@ -1176,6 +1379,25 @@ cmd_save() {
 # 完成当前分支工作 (准备 PR/MR)
 cmd_finish() {
     if ! check_in_git_repo; then return 1; fi
+
+    local no_switch=false
+    # 检查是否有 --no-switch 或 -n 参数
+    for arg in "$@"; do
+        if [ "$arg" = "--no-switch" ] || [ "$arg" = "-n" ]; then
+            no_switch=true
+            break
+        fi
+    done
+    # 如果有其他不支持的参数，可以给出警告或错误
+    if [ $# -gt 0 ] && ! $no_switch; then 
+         # 如果只提供了 -n/--no-switch，# 仍然是 1，所以要判断!$no_switch
+         if [ $# -eq 1 ] && $no_switch ; then
+             # 合法情况：只有一个参数且是 --no-switch 或 -n
+             : # do nothing
+         else
+             echo -e "${YELLOW}警告: 'finish' 命令当前只支持 '-n'/'--no-switch' 参数，忽略其他参数: $@ ${NC}"
+         fi
+    fi
 
     local current_branch
     current_branch=$(get_current_branch_name)
@@ -1226,8 +1448,8 @@ cmd_finish() {
                     echo -e "${YELLOW}警告: 变更已暂存，不会包含在本次推送和 PR 中。${NC}"
                 else
                     echo -e "${RED}暂存失败，操作已取消。${NC}"
-                    return 1
-                fi
+            return 1
+        fi
                 ;;
             3|*)
                 echo "完成操作已取消。"
@@ -1249,8 +1471,8 @@ cmd_finish() {
     echo -e "${GREEN}分支 '$current_branch' 已成功推送到远程。${NC}"
     echo -e "${CYAN}现在您可以前往 GitHub/GitLab 等平台基于 '$current_branch' 创建 Pull Request / Merge Request。${NC}"
 
-    # 3. 询问是否切回主分支
-    if [ "$current_branch" != "$MAIN_BRANCH" ]; then
+    # 3. 询问是否切回主分支 (除非指定了 --no-switch)
+    if ! $no_switch && [ "$current_branch" != "$MAIN_BRANCH" ]; then
         if confirm_action "是否要切换回主分支 ($MAIN_BRANCH) 并拉取更新？"; then
             echo -e "${BLUE}正在切换到主分支 '$MAIN_BRANCH'...${NC}"
             if git checkout "$MAIN_BRANCH"; then
@@ -1275,34 +1497,38 @@ show_help() {
     echo -e "${BOLD}Git 工作流助手 (gw) 使用说明${NC}"
     echo "用法: gw <命令> [参数...]"
     echo ""
-    echo -e "${CYAN}常用命令:${NC}"
-    echo "  status [-r|remote]      - 显示工作区状态 (默认本地, -r 获取远程状态)"
-    echo "  add [文件...]           - 添加指定文件到暂存区 (无参数则交互式选择)"
+    echo -e "${CYAN}⭐ 核心工作流命令 ⭐${NC}"
+    echo "  new <分支名> [基础分支] - 从最新的主分支 (或指定基础分支) 创建并切换，开始新任务"
+    echo "  save [-m \"消息\"] [文件...] - 快速保存变更: 添加指定文件 (默认全部) 并提交开发进展"
+    echo "  finish [-n|--no-switch] - 完成当前分支开发: 检查/提交, 推送, 准备 PR/MR (-n 不切主分支)"
+    echo "  main | master [...]     - 推送主分支 ($MAIN_BRANCH) 到远程 (用于主分支维护, 可加 -f 等)"
+    echo "  sync                    - 同步开发分支: 拉取主分支最新代码并 rebase 当前分支"
+    echo ""
+    echo -e "${CYAN}常用 Git 操作:${NC}"
+    echo "  status [-r] [-l]        - 显示工作区状态 (默认纯本地; -r 获取远程; -l 显示日志)"
+    echo "  add [文件...]           - 添加文件到暂存区 (无参数则交互式选择)"
     echo "  add-all                 - 添加所有变更到暂存区 (git add -A)"
-    echo "  commit [-m \"消息\"] [-a] - 提交变更 (-m 指定消息, -a 自动添加已跟踪变更, 无 -m 打开编辑器)"
-    echo "  save [-m \"消息\"]        - 快速保存所有变更 (git add -A && git commit ...)"
-    echo "  push [远程] [分支] [...] - 推送本地提交 (若有未提交变更会提示; 自动处理首次推送 -u)"
-    echo "  pull [远程] [分支] [...] - 拉取并合并更新 (git pull)"
+    echo "  commit [-m \"消息\"] [-a] - 提交暂存或指定变更 (无 -m 打开编辑器, -a 添加已跟踪文件)"
+    echo "  pull [远程] [分支] [...] - 拉取并合并远程更新 (git pull)"
     echo "  fetch [远程] [...]      - 从远程获取最新信息，但不合并 (git fetch)"
-    echo "  sync                    - 同步当前分支: 拉取主分支最新代码并 rebase 当前分支"
     echo ""
-    echo -e "${CYAN}工作流命令:${NC}"
-    echo "  new <分支名> [基础分支] - 从最新的主分支 (或指定基础分支) 创建并切换"
-    echo "  finish                  - 完成当前分支工作: 检查/提交变更, 推送, 询问切回主分支"
-    echo "  main | master [...]     - 推送主分支 ($MAIN_BRANCH) 到远程 (可加 -f 等参数)"
-    echo ""
-    echo -e "${CYAN}分支管理:${NC}"
+    echo -e "${CYAN}其他分支操作:${NC}"
     echo "  branch                  - 列出本地分支 (同 git branch)"
     echo "  branch -a               - 列出所有分支 (本地和远程跟踪)"
-    echo "  branch <新分支名> [基础分支] - (同 gw new) 创建新分支"
-    echo "  checkout <分支名>       - 切换分支 (若有未提交变更会提示处理)"
+    echo "  checkout <分支名>       - 切换到已存在的分支 (会处理未提交变更)"
     echo "  merge <来源分支> [...]  - 合并指定分支到当前分支 (可加 git merge 参数)"
-    echo "  branch delete <分支名> [-f] - 智能删除分支 (检查合并状态, 可选删远程, -f 强制)"
-    echo "                            (也可直接用 git branch -d/-D <分支名>)"
+    echo "  rm <分支名> [-f]        - 删除指定本地分支 (可选删远程, -f 强制)"
+    echo "  rm all [-f]             - (仅限主分支)删除除主分支外所有本地分支 (-f 强制)"
+    echo "  clean <分支名>          - 清理已合并分支: 切主分支->更新->删除本地/远程"
     echo ""
     echo -e "${CYAN}历史与差异:${NC}"
     echo "  log [...]               - 显示提交历史 (支持 git log 参数, 带分页)"
     echo "  diff [...]              - 显示变更差异 (支持 git diff 参数, 如 --cached)"
+    echo "  reset                 - ${RED}危险:${NC} 丢弃所有本地未提交的变更 (工作区和暂存区)"
+    echo "                            (相当于 git reset --hard HEAD, 需要强确认)"
+    echo "  reset <目标>          - ${RED}危险:${NC} 将当前分支强制重置到指定 <目标>"
+    echo "                            (<目标> 可以是提交ID, 分支名, 标签等)"
+    echo "                            (丢失目标之后的所有本地提交, 需要强确认)"
     echo ""
     echo -e "${CYAN}兼容旧版 (gp) 命令:${NC}"
     echo "  1 | first <分支名> [...] - 首次推送指定分支 (带 -u)"
@@ -1393,46 +1619,41 @@ main() {
         branch)
             # 根据参数决定调用哪个分支函数或 git branch
             case "$1" in
-                delete)
-                    shift # 移除 'delete'
-                    cmd_delete_branch "$@"
-                    ;;
-                 # 可以考虑将创建新分支也整合到这里，例如 gw branch new <name> [base]
-                 # new)
-                 #   shift
-                 #   cmd_new_branch "$@"
-                 #   ;;
                  # 如果没有子命令或选项，则列出分支
                  ""|-a|-r|--list|--show-current) 
                     # 调用 cmd_branches 获取增强的列表，或者直接用 git branch
                     # cmd_branches # 使用我们自定义的彩色列表
                     git branch "$@" # 或者使用原生 git branch
                     ;;
-                 # 处理删除分支的 -d 和 -D 选项 (虽然推荐用 delete 子命令)
+                 # 处理删除分支的 -d 和 -D 选项 (仍然保留对原生 git branch -d/-D 的支持)
                  -d|-D)
                      local branch_to_delete="$2"
                      if [ -z "$branch_to_delete" ]; then
                         echo -e "${RED}错误: 请提供要删除的分支名称。${NC}"
                         LAST_COMMAND_STATUS=1
                      else
-                        # 使用原生 git branch 删除，因为 cmd_delete_branch 是交互式的
+                        # 使用原生 git branch 删除
                         echo -e "${BLUE}正在使用 'git branch $@' 删除分支...${NC}"
                         git branch "$@"
                         LAST_COMMAND_STATUS=$?
                      fi
                      ;;
                  *)
-                     # 默认行为：创建新分支
-                     # 检查第一个参数是否像一个有效的选项，如果不是，则认为是新分支名
+                     # 默认行为：创建新分支 (调用 cmd_new_branch)
                      if [[ "$1" =~ ^- ]]; then
                         echo -e "${RED}未知的分支选项或命令: $1${NC}"
                         echo "请使用 'gw help' 查看可用选项。"
                         LAST_COMMAND_STATUS=1
                      else
                         cmd_new_branch "$@"
+                        LAST_COMMAND_STATUS=$?
                      fi
                      ;;
             esac
+            # LAST_COMMAND_STATUS=$? # 退出码在 case 内部设置
+            ;;
+        rm) # 新增的删除命令
+            cmd_rm_branch "$@"
             LAST_COMMAND_STATUS=$?
             ;;
         checkout|switch|co)
@@ -1534,6 +1755,16 @@ main() {
             echo -e "${RED}未知命令: $command${NC}"
             show_help
             LAST_COMMAND_STATUS=1
+            ;;
+        # --- 重置命令 --- 
+        reset)
+            cmd_reset "$@"
+            LAST_COMMAND_STATUS=$?
+            ;;
+        # --- 清理命令 ---
+        clean)
+            cmd_clean_branch "$@"
+            LAST_COMMAND_STATUS=$?
             ;;
     esac
 
