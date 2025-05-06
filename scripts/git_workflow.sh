@@ -1681,10 +1681,11 @@ main() {
     fi
 
     local command="$1"
-    # 如果没有命令，显示帮助
+    # 如果没有命令，提示使用 help
     if [ -z "$command" ]; then
-        show_help
-        return 0
+        # show_help # 不再直接显示完整帮助
+        echo "请输入一个命令。运行 'gw help' 查看可用命令。"
+        return 1 # 返回错误码，因为没有执行有效命令
     fi
     shift # 移除命令参数，剩下的是命令的参数
     
@@ -1881,8 +1882,9 @@ main() {
             ;;
         # --- 未知命令 ---    
         *)
-            echo -e "${RED}未知命令: $command${NC}"
-            show_help
+            echo -e "${RED}错误: 未知命令 \"$command\"${NC}"
+            # show_help # 不再直接显示完整帮助
+            echo "请运行 'gw help' 查看可用命令。"
             LAST_COMMAND_STATUS=1
             ;;
         # --- 重置命令 --- 
