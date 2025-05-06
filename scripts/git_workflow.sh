@@ -39,6 +39,29 @@ PURPLE='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color
 
+# --- 辅助打印函数 ---
+print_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_step() {
+    echo -e "${CYAN}[STEP]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    # 警告信息使用黄色，并输出到 stderr
+    echo -e "${YELLOW}[WARN]${NC} $1" >&2
+}
+
+print_error() {
+    # 错误信息使用红色，并输出到 stderr
+    echo -e "${RED}[ERROR]${NC} $1" >&2
+}
+
 # 记录最后一次命令的执行状态
 LAST_COMMAND_STATUS=0
 
