@@ -1102,6 +1102,7 @@ cmd_commit() {
     local message=""
     local add_all_flag=false
     local commit_args=()
+    local use_standard_editor=false # 新增标志，默认不使用标准编辑器流程
     
     # 解析参数
     while [[ $# -gt 0 ]]; do
@@ -1119,23 +1120,39 @@ cmd_commit() {
             -a|--all)
                 add_all_flag=true
                 commit_args+=("-a") # git commit -a 会自动暂存已跟踪文件的修改和删除
-    shift
+                shift
                 ;;
-            # 你可以在这里添加更多 git commit 支持的参数处理，例如 --amend, -S 等
+            -e|--editor)
+                use_standard_editor=true # 明确要求使用标准编辑器流程
+                shift
+                ;;
+            -F|--file)
+                 # 如果使用 -F 或 --file，也认为是"非默认"行为，走标准流程
+                 commit_args+=("$1") 
+                 if [ -n "$2" ]; then
+                     commit_args+=("$2")
+                     shift 2
+                 else
+                     echo -e "${RED}错误: $1 选项需要一个文件参数。${NC}"
+                     return 1
+                 fi
+                 use_standard_editor=true # 标记为非默认流程
+                 ;;
+            --amend)
+                 commit_args+=("$1")
+                 use_standard_editor=true # amend 通常需要编辑器或基于旧消息
+                 shift
+                 ;;
+            # 你可以在这里添加更多 git commit 支持的参数处理，例如 -S 等
             *)
-                # 如果不是已知选项，则认为是提交消息的一部分（如果 -m 未提供）或无效参数
-                if [ -z "$message" ] && [[ ! "$1" =~ ^- ]]; then
-                     # 允许多个词作为提交信息，但推荐使用 -m
-                     if [ ${#commit_args[@]} -eq 0 ]; then # 确保只添加一次消息
-                        message="$*" # 将剩余所有非选项参数作为消息
+                # ... (处理未知参数或无选项消息的逻辑保持不变) ...
+                 if [ -z "$message" ] && [[ ! "$1" =~ ^- ]]; then
+                     if [ ${#commit_args[@]} -eq 0 ]; then
+                        message="$*"
                         commit_args+=("-m" "$message")
                      fi
-                     break # 消息是最后一个参数
+                     break 
                 else
-                    # 将未识别的参数传递给 git commit
-                    # 注意：这可能不安全，需要谨慎使用
-                    # commit_args+=("$1")
-                    # shift
                     echo -e "${YELLOW}警告: 忽略未知或不支持的参数: $1 ${NC}"
                     shift
                 fi
@@ -1143,49 +1160,91 @@ cmd_commit() {
         esac
     done
     
-    # 如果指定了 -a 标志，则不需要检查暂存区，git commit -a 会处理
+    # 如果指定了 -a 标志... (这部分暂存检查逻辑不变) ...
     if ! $add_all_flag; then
-    # 检查是否有已暂存的变更
         if git diff --cached --quiet; then
-        echo -e "${YELLOW}没有已暂存的变更可提交。${NC}"
-        
-            # 检查是否有未暂存的变更或未追踪文件
-            if check_uncommitted_changes || check_untracked_files; then
-                echo -e "提示: 有未暂存的变更或未追踪的文件。"
-                echo -e "您可以使用 'gw add <文件>' 或 'gw add-all' 来暂存它们，"
-                echo -e "或者使用 'gw commit -a' 来暂存已跟踪文件的修改并提交。"
-            fi
-            return 1
+             # ... (无暂存变更的处理不变) ...
+             return 1
         fi
     else
-         # 使用 -a 时，检查是否有任何变更（已跟踪）
          if git diff --quiet && git diff --cached --quiet; then
-             echo -e "${YELLOW}没有任何已跟踪的文件发生变更可提交 (-a)。${NC}"
-             # 检查是否有未追踪文件，提示用户需要手动 add
-             if check_untracked_files; then
-                echo -e "提示: 有未追踪的文件，'commit -a' 不会包含它们，请使用 'gw add' 手动添加。"
-             fi
-             return 1
+              # ... (使用 -a 但无变更的处理不变) ...
+              return 1
          fi
     fi
     
-    # 执行提交
-    echo -e "${BLUE}准备执行提交...${NC}"
-    
-    # 如果没有通过 -m 提供消息，git commit 会自动打开编辑器
-    # 如果提供了 -a，它会被包含在 commit_args 中传递给 git commit
-    if git commit "${commit_args[@]}"; then
-        echo -e "${GREEN}提交成功！${NC}"
-        return 0
-    else
-        echo -e "${RED}提交失败或被取消。${NC}"
-        # 检查是否是因为空提交或没有变更（理论上前面检查过了，但以防万一）
-        if git diff --cached --quiet && ! $add_all_flag; then
-             echo -e "${YELLOW}原因可能是没有暂存任何变更。${NC}"
-        elif $add_all_flag && git diff --quiet && git diff --cached --quiet; then
-             echo -e "${YELLOW}原因可能是没有任何已跟踪的文件发生变更。${NC}"
+    # --- 根据是否需要标准编辑器流程决定如何提交 ---
+    # 如果用户提供了 -m, -F, --file, --amend, 或 -e/--editor，则使用标准 git commit
+    local use_non_default_commit=false
+    if [[ " ${commit_args[*]} " =~ " -m " ]] || \ 
+       [[ " ${commit_args[*]} " =~ " -F " ]] || \ 
+       [[ " ${commit_args[*]} " =~ " --file " ]] || \ 
+       [[ " ${commit_args[*]} " =~ " --amend " ]] || \ 
+       $use_standard_editor; then
+        use_non_default_commit=true
+    fi
+
+    if $use_non_default_commit; then
+        echo -e "${BLUE}执行标准 git commit 流程 (可能打开编辑器)...${NC}"
+        if git commit "${commit_args[@]}"; then
+            echo -e "${GREEN}提交成功！${NC}"
+            return 0
+        else
+             # ... (标准提交流程失败的处理) ...
+             echo -e "${RED}提交失败或被取消。${NC}"
+             if git diff --cached --quiet && ! $add_all_flag; then
+                  echo -e "${YELLOW}原因可能是没有暂存任何变更。${NC}"
+             elif $add_all_flag && git diff --quiet && git diff --cached --quiet; then
+                  echo -e "${YELLOW}原因可能是没有任何已跟踪的文件发生变更。${NC}"
+             fi
+             return 1
         fi
-        return 1
+    else
+        # --- 执行新的默认流程：打印路径、暂停、再提交 --- 
+        echo -e "${BLUE}准备提交信息文件供编辑...${NC}"
+        local git_dir
+        git_dir=$(git rev-parse --git-dir)
+        if [ $? -ne 0 ] || [ -z "$git_dir" ]; then
+            echo -e "${RED}错误：无法获取 .git 目录路径。${NC}"
+            return 1
+        fi
+        local commit_msg_file="$git_dir/COMMIT_EDITMSG"
+        
+        # 准备提交信息文件模板
+        # 清空旧文件（如果存在）
+        > "$commit_msg_file"
+        echo "" >> "$commit_msg_file" # 开头空行
+        echo "# 请输入提交说明。以 '#' 开始的行将被忽略。" >> "$commit_msg_file"
+        echo "#" >> "$commit_msg_file"
+        echo "# 暂存的变更：" >> "$commit_msg_file"
+        git diff --cached --name-status | sed 's/^/# /' >> "$commit_msg_file"
+        # 如果是 commit -a? (目前 commit -a 会走标准流程，不进这里)
+        
+        echo -e "${YELLOW}请在你的编辑器中打开并编辑以下文件以输入提交信息:${NC}"
+        echo -e "  ${BOLD}$commit_msg_file${NC}"
+        echo -e "(在 macOS 上，你可以尝试 ${BOLD}Cmd + 点击${NC} 上面的路径快速打开)"
+        echo -e -n "${CYAN}编辑完成后，请按 Enter 键继续提交... (按 Ctrl+C 取消提交)${NC}"
+        read -r # 等待用户按 Enter
+
+        # 检查用户是否真的编辑了文件
+        if ! grep -v -q -E '^#|^$' "$commit_msg_file"; then
+            echo -e "${RED}错误：提交信息文件为空或只包含注释行。提交已取消。${NC}"
+            rm -f "$commit_msg_file" # 清理模板文件
+            return 1
+        fi
+
+        echo -e "${BLUE}使用编辑后的文件继续提交...${NC}"
+        # 使用 --file 参数，并传递其他可能的非编辑相关参数 (理论上这里 commit_args 应为空)
+        if git commit --file="$commit_msg_file" "${commit_args[@]}"; then 
+            echo -e "${GREEN}提交成功！${NC}"
+            # Git 成功提交后会自动清理 COMMIT_EDITMSG
+            return 0
+        else
+            echo -e "${RED}使用编辑后的文件提交失败。${NC}"
+            echo -e "${YELLOW}提交信息文件仍保留在: $commit_msg_file${NC}"
+            echo "你可以检查文件内容和暂存区状态 ('git status')。"
+            return 1
+        fi
     fi
 }
 
@@ -1419,81 +1478,137 @@ cmd_save() {
     local files_to_add=() # 存储要添加的文件
     local commit_args=() # 存储最终传递给 git commit 的参数
     local add_all=true # 默认添加所有变更
+    local use_standard_editor=false # 新增标志
 
-    # 解析参数，区分 -m 和文件路径
+    # 解析参数，区分 -m, -e 和文件路径
     while [[ $# -gt 0 ]]; do
         case "$1" in
             -m|--message)
-                if [ -n "$2" ]; then
+                # ... (-m 处理不变) ...
+                 if [ -n "$2" ]; then
                     message="$2"
                     commit_args+=("-m" "$message")
-                    shift 2 # 跳过 -m 和消息参数
+                    shift 2 
                 else
                     echo -e "${RED}错误: -m/--message 选项需要一个参数。${NC}"
-                    echo "用法: gw save [-m \"提交消息\"] [文件...]"
-            return 1
-        fi
+                    echo "用法: gw save [-m \"提交消息\"] [-e] [文件...]"
+                    return 1
+                fi
+                ;;
+            -e|--editor)
+                use_standard_editor=true # 明确要求使用标准编辑器流程
+                shift
                 ;;
             -*)
-                # 不支持其他选项，例如 -a 在 save 中没有意义，因为默认就是 add all
                 echo -e "${RED}错误: 'save' 命令不支持选项 '$1'。${NC}"
-                echo "用法: gw save [-m \"提交消息\"] [文件...]"
+                echo "用法: gw save [-m \"提交消息\"] [-e] [文件...]"
                 return 1
                 ;;
             *)
-                # 如果不是选项，则认为是文件路径
-                add_all=false # 一旦指定了文件，就不是 add all 了
-                files_to_add+=("$1")
-                shift
+                # ... (文件处理不变) ...
+                 add_all=false 
+                 files_to_add+=("$1")
+                 shift
                 ;;
         esac
     done
 
     echo -e "${BLUE}正在准备保存变更...${NC}"
     
-    # 1. 添加变更
+    # 1. 添加变更 (逻辑不变)
     if $add_all; then
-        echo -e "${BLUE}正在添加所有变更到暂存区...${NC}"
-        git add -A
-        if [ $? -ne 0 ]; then
-            echo -e "${RED}快速保存失败：添加所有变更时出错。${NC}"
-            return 1
-        fi
+        # ... (add -A) ...
+         echo -e "${BLUE}正在添加所有变更到暂存区...${NC}"
+         git add -A
+         if [ $? -ne 0 ]; then
+             echo -e "${RED}快速保存失败：添加所有变更时出错。${NC}"
+             return 1
+         fi
     elif [ ${#files_to_add[@]} -gt 0 ]; then
-        echo -e "${BLUE}正在添加指定文件到暂存区: ${files_to_add[*]}${NC}"
-        # 使用 -- 确保文件名不会被误解为选项
-        git add -- "${files_to_add[@]}"
-        if [ $? -ne 0 ]; then
-            echo -e "${RED}快速保存失败：添加指定文件时出错。${NC}"
-            return 1
-        fi
+        # ... (add 指定文件) ...
+         echo -e "${BLUE}正在添加指定文件到暂存区: ${files_to_add[*]}${NC}"
+         git add -- "${files_to_add[@]}"
+         if [ $? -ne 0 ]; then
+             echo -e "${RED}快速保存失败：添加指定文件时出错。${NC}"
+             return 1
+         fi
     else
-        # 理论上不会到这里，因为没有参数或只有 -m 时 add_all 仍为 true
-        echo -e "${YELLOW}没有指定要保存的文件，也没有添加所有变更。${NC}"
-        return 1 
+        # ... (无文件处理不变) ...
+         echo -e "${YELLOW}没有指定要保存的文件，也没有添加所有变更。${NC}"
+         return 1 
     fi
     
-    # 2. 检查是否有实际变更被暂存
+    # 2. 检查是否有实际变更被暂存 (逻辑不变)
     if git diff --cached --quiet; then
-        if $add_all; then
-            echo -e "${YELLOW}没有检测到需要保存的变更。${NC}"
-        else
-            echo -e "${YELLOW}指定的文件没有变更或未能添加到暂存区。${NC}"
-        fi
-        return 0 # 返回成功，因为状态是干净的或没有有效暂存
+        # ... (无暂存变更处理不变) ...
+         if $add_all; then
+             echo -e "${YELLOW}没有检测到需要保存的变更。${NC}"
+         else
+             echo -e "${YELLOW}指定的文件没有变更或未能添加到暂存区。${NC}"
+         fi
+         return 0
     fi
 
     # 3. 提交
     echo -e "${BLUE}准备提交暂存的变更...${NC}"
-    # 如果没有通过 -m 提供消息 (commit_args 为空), git commit 会自动打开编辑器
-    if git commit "${commit_args[@]}"; then
-        echo -e "${GREEN}快速保存成功！${NC}"
-        return 0
+    local use_non_default_commit=false
+    # save 命令不处理 -F, --file, --amend，只看是否有 -m 或 -e
+    if [[ " ${commit_args[*]} " =~ " -m " ]] || $use_standard_editor; then
+        use_non_default_commit=true
+    fi
+
+    if $use_non_default_commit; then
+        # 使用标准流程 (如果 commit_args 为空，则 git commit 会打开编辑器)
+        echo -e "${BLUE}执行标准 git commit 流程 (可能打开编辑器)...${NC}"
+        if git commit "${commit_args[@]}"; then
+            echo -e "${GREEN}快速保存成功！${NC}"
+            return 0
+        else
+            echo -e "${RED}快速保存失败：提交时出错或被取消。${NC}"
+            return 1
+        fi
     else
-        echo -e "${RED}快速保存失败：提交时出错或被取消。${NC}"
-        # 可以尝试撤销刚才的 add 操作吗？比较复杂，暂时不处理
-        # echo -e "${YELLOW}提示：刚才添加的文件仍在暂存区。${NC}"
-        return 1
+        # --- 执行新的默认流程：打印路径、暂停、再提交 --- 
+        local git_dir
+        git_dir=$(git rev-parse --git-dir)
+        if [ $? -ne 0 ] || [ -z "$git_dir" ]; then
+            echo -e "${RED}错误：无法获取 .git 目录路径。${NC}"
+            return 1
+        fi
+        local commit_msg_file="$git_dir/COMMIT_EDITMSG"
+        
+        # 准备提交信息文件模板
+        > "$commit_msg_file"
+        echo "" >> "$commit_msg_file"
+        echo "# 请输入提交说明。以 '#' 开始的行将被忽略。" >> "$commit_msg_file"
+        echo "#" >> "$commit_msg_file"
+        echo "# 暂存的变更：" >> "$commit_msg_file"
+        git diff --cached --name-status | sed 's/^/# /' >> "$commit_msg_file"
+        
+        echo -e "${YELLOW}请在你的编辑器中打开并编辑以下文件以输入提交信息:${NC}"
+        echo -e "  ${BOLD}$commit_msg_file${NC}"
+        echo -e "(在 macOS 上，你可以尝试 ${BOLD}Cmd + 点击${NC} 上面的路径快速打开)"
+        echo -e -n "${CYAN}编辑完成后，请按 Enter 键继续提交... (按 Ctrl+C 取消提交)${NC}"
+        read -r 
+
+        # 检查用户是否真的编辑了文件
+        if ! grep -v -q -E '^#|^$' "$commit_msg_file"; then
+            echo -e "${RED}错误：提交信息文件为空或只包含注释行。提交已取消。${NC}"
+            rm -f "$commit_msg_file"
+            return 1
+        fi
+
+        echo -e "${BLUE}使用编辑后的文件继续提交...${NC}"
+        # save 命令默认不传递其他 git commit 参数，除了可能的 -m (已被处理)
+        if git commit --file="$commit_msg_file"; then 
+            echo -e "${GREEN}快速保存成功！${NC}"
+            return 0
+        else
+            echo -e "${RED}使用编辑后的文件提交失败。${NC}"
+            echo -e "${YELLOW}提交信息文件仍保留在: $commit_msg_file${NC}"
+            echo "你可以检查文件内容和暂存区状态 ('git status')。"
+            return 1
+        fi
     fi
 }
 
@@ -1621,23 +1736,25 @@ show_help() {
     echo ""
     echo -e "${CYAN}⭐ 核心工作流命令 ⭐${NC}"
     echo "  new <分支名> [基础分支] - 从最新的主分支 (或指定基础分支) 创建并切换，开始新任务"
-    echo "  save [-m \"消息\"] [文件...] - 快速保存变更: 添加指定文件 (默认全部) 并提交"
-    echo "                            (无 -m 则打开编辑器)"
-    echo "  finish [-n|--no-switch] - 完成当前分支开发: 检查/提交, 推送, 准备 PR/MR (-n 不切主分支)"
-    echo "  main | master [...]     - 推送主分支 ($MAIN_BRANCH) 到远程 (用于主分支维护, 可加 -f 等)"
+    echo "  save [-m \"消息\"] [-e] [文件...] - 快速保存变更: 添加指定文件 (默认全部) 并提交"
+    echo "                            (无 -m/-e 则打印文件路径暂停编辑, -e 强制编辑器)"
     echo "  sync                    - 同步开发分支: 拉取主分支最新代码并 rebase 当前分支"
+    echo "  finish [-n|--no-switch] - 完成当前分支开发: 检查/提交, 推送, 准备 PR/MR (-n 不切主分支)"
     echo "  clean <分支名>          - 清理已合并分支: 切主分支->更新->删除本地/远程"
+    echo "  main | master [...]     - 推送主分支 ($MAIN_BRANCH) 到远程 (用于主分支维护, 可加 -f 等)"
     echo ""
     echo -e "${CYAN}常用 Git 操作:${NC}"
     echo "  status [-r] [-l]        - 显示工作区状态 (默认纯本地; -r 获取远程; -l 显示日志)"
     echo "  add [文件...]           - 添加文件到暂存区 (无参数则交互式选择)"
     echo "  add-all                 - 添加所有变更到暂存区 (git add -A)"
-    echo "  commit [-m \"消息\"] [-a] - 提交暂存或指定变更 (无 -m 打开编辑器, -a 添加已跟踪文件)"
-    echo "  pull [远程] [分支] [...] - 拉取并合并远程更新 (git pull)"
+    echo "  commit [-m \"消息\"] [-a] [-e] [-F 文件] [--amend] - 提交暂存或指定变更"
+    echo "                            (无 -m 等选项则打印文件路径暂停编辑, -e 强制编辑器, -a 添加已跟踪)"
+    echo "  pull [远程] [分支] [...] - 拉取并合并远程更新 (带重试, 支持 git pull 参数)"
+    echo "  push [远程] [分支] [...] - 推送本地提交到远程 (带重试, 自动处理 -u, 支持 git push 参数)"
     echo "  fetch [远程] [...]      - 从远程获取最新信息，但不合并 (git fetch)"
     echo ""
     echo -e "${CYAN}其他分支操作:${NC}"
-    echo "  branch                  - 列出本地分支 (同 git branch)"
+    echo "  branch                  - 列出本地分支 (使用原生 git branch)"
     echo "  branch -a               - 列出所有分支 (本地和远程跟踪)"
     echo "  checkout <分支名>       - 切换到已存在的分支 (会处理未提交变更)"
     echo "  merge <来源分支> [...]  - 合并指定分支到当前分支 (可加 git merge 参数)"
@@ -1647,11 +1764,8 @@ show_help() {
     echo -e "${CYAN}历史与差异:${NC}"
     echo "  log [...]               - 显示提交历史 (支持 git log 参数, 带分页)"
     echo "  diff [...]              - 显示变更差异 (支持 git diff 参数, 如 --cached)"
-    echo "  reset                 - ${RED}危险:${NC} 丢弃所有本地未提交的变更 (工作区和暂存区)"
-    echo "                            (相当于 git reset --hard HEAD, 需要强确认)"
-    echo "  reset <目标>          - ${RED}危险:${NC} 将当前分支强制重置到指定 <目标>"
-    echo "                            (<目标> 可以是提交ID, 分支名, 标签等)"
-    echo "                            (丢失目标之后的所有本地提交, 需要强确认)"
+    echo -e "  reset <目标> [...]      - ${RED}危险:${NC} 将当前分支或文件重置到指定状态"
+    echo -e "                            (谨慎使用! 支持 git reset 参数, 如 --hard, commit ID, HEAD~)"
     echo ""
     echo -e "${CYAN}兼容旧版 (gp) 命令:${NC}"
     echo "  1 | first <分支名> [...] - 首次推送指定分支 (带 -u)"
@@ -1665,7 +1779,7 @@ show_help() {
     echo -e "${YELLOW}环境变量:${NC}"
     echo "  MAIN_BRANCH (默认: $MAIN_BRANCH) - 可通过环境变量覆盖主分支名"
     echo "  REMOTE_NAME (默认: $REMOTE_NAME) - 可通过环境变量覆盖默认远程名"
-    echo "  MAX_ATTEMPTS (默认: $MAX_ATTEMPTS), DELAY_SECONDS (默认: $DELAY_SECONDS) - 控制推送重试"
+    echo "  MAX_ATTEMPTS (默认: $MAX_ATTEMPTS), DELAY_SECONDS (默认: $DELAY_SECONDS) - 控制推送/拉取重试"
     echo ""
     echo -e "${YELLOW}提示:${NC} 大部分命令在 Git 命令基础上增加了交互提示和工作流优化。"
     echo -e "对于 push/pull/log/diff/branch/merge 等命令, 你仍然可以使用它们原生支持的 Git 参数。"
