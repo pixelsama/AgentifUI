@@ -1054,7 +1054,7 @@ cmd_commit() {
             -a|--all)
                 add_all_flag=true
                 commit_args+=("-a") # git commit -a 会自动暂存已跟踪文件的修改和删除
-                shift
+    shift
                 ;;
             -e|--editor)
                 use_standard_editor=true # 明确要求使用标准编辑器流程
@@ -1097,12 +1097,12 @@ cmd_commit() {
     # 如果指定了 -a 标志... (这部分暂存检查逻辑不变) ...
     if ! $add_all_flag; then
         if git diff --cached --quiet; then
-             # ... (无暂存变更的处理不变) ...
+             echo -e "${YELLOW}没有暂存的变更可提交。${NC}"
              return 1
         fi
     else
          if git diff --quiet && git diff --cached --quiet; then
-              # ... (使用 -a 但无变更的处理不变) ...
+              echo -e "${YELLOW}没有任何已跟踪的文件发生变更。${NC}"
               return 1
          fi
     fi
@@ -1110,10 +1110,10 @@ cmd_commit() {
     # --- 根据是否需要标准编辑器流程决定如何提交 ---
     # 如果用户提供了 -m, -F, --file, --amend, 或 -e/--editor，则使用标准 git commit
     local use_non_default_commit=false
-    if [[ " ${commit_args[*]} " =~ " -m " ]] || \ 
-       [[ " ${commit_args[*]} " =~ " -F " ]] || \ 
-       [[ " ${commit_args[*]} " =~ " --file " ]] || \ 
-       [[ " ${commit_args[*]} " =~ " --amend " ]] || \ 
+    if [[ " ${commit_args[*]} " =~ " -m " ]] || \
+       [[ " ${commit_args[*]} " =~ " -F " ]] || \
+       [[ " ${commit_args[*]} " =~ " --file " ]] || \
+       [[ " ${commit_args[*]} " =~ " --amend " ]] || \
        $use_standard_editor; then
         use_non_default_commit=true
     fi
@@ -1426,8 +1426,8 @@ cmd_save() {
                 else
                     echo -e "${RED}错误: -m/--message 选项需要一个参数。${NC}"
                     echo "用法: gw save [-m \"提交消息\"] [-e] [文件...]"
-                    return 1
-                fi
+            return 1
+        fi
                 ;;
             -e|--editor)
                 use_standard_editor=true # 明确要求使用标准编辑器流程
@@ -1897,7 +1897,7 @@ show_help() {
     echo "  save [-m "消息"] [-e] [文件...] - 快速保存变更: 添加指定文件 (默认全部) 并提交"
     echo "                            (无 -m/-e 则打印文件路径暂停编辑, -e 强制编辑器)"
     echo "  sync                    - 同步开发分支: 拉取主分支最新代码并 rebase 当前分支"
-    echo "  finish [-n|--no-switch] - 完成当前分支开发: 检查/提交, 推送, (若gh已安装则可选)创建PR (-n 不切主分支)"
+    echo "  finish [-n|--no-switch] - 完成当前分支开发: 检查/提交, 推送, 准备 PR/MR (-n 不切主分支)"
     echo "  clean <分支名>          - 清理已合并分支: 切主分支->更新->删除本地/远程"
     echo "  main | master [...]     - 推送主分支 ($MAIN_BRANCH) 到远程 (用于主分支维护, 可加 -f 等)"
     echo ""
