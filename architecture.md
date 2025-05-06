@@ -6,13 +6,13 @@
 ┌─────────────────┐      ┌───────────────────┐      ┌─────────────────┐      ┌─────────────┐
 │                 │      │                   │      │                 │      │             │
 │  前端应用层       │──────▶   Next.js API层   │──────▶   服务集成层      │──────▶  数据存储层  │
-│  React + TS     │      │   路由和中间件      │      │  Supabase API   │      │ PostgreSQL  │
-│  Tailwind CSS   │◀─────│                   │◀─────│  Dify API       │◀─────│ (Supabase)  │
+│  React + TS     │      │ (含NextAuth.js)   │      │  Dify API       │      │ PostgreSQL  │
+│  Tailwind CSS   │◀─────│ 路由和中间件        │◀─────│  (或其他服务)   │◀─────│ (或其他DB)  │
 │                 │      │                   │      │                 │      │             │
 └─────────────────┘      └───────────────────┘      └─────────────────┘      └─────────────┘
 ```
 
-LLM-EduHub采用现代化的四层架构设计，结合Next.js App Router的最佳实践，实现前端、API、服务集成和数据存储的无缝衔接。这种分层设计确保了关注点分离，使系统更易于维护和扩展。
+LLM-EduHub采用现代化的多层架构设计，结合Next.js App Router的最佳实践，实现前端、API、服务集成和数据存储的无缝衔接。这种分层设计确保了关注点分离，使系统更易于维护和扩展。核心认证服务由 **NextAuth.js** 提供。
 
 ## 2. 前端架构
 
@@ -22,6 +22,7 @@ LLM-EduHub采用现代化的四层架构设计，结合Next.js App Router的最�
 - **样式方案**: Tailwind CSS
 - **构建工具**: Next.js (App Router)
 - **状态管理**: Zustand
+- **认证库**: NextAuth.js
 - **工具库**: Lucide Icons, clsx/cn
 
 ### 目录结构设计
@@ -33,9 +34,7 @@ llm-eduhub/
   ├── .vscode/            # VSCode配置文件
   ├── app/                # 应用源代码（App Router模式）
   │   ├── api/            # API路由
-  │   │   ├── auth/       # 认证相关API
-  │   │   │   ├── identify/ # 用户身份识别
-  │   │   │   └── sso/    # 单点登录
+  │   │   ├── auth/       # NextAuth.js 核心认证路由 ([...nextauth])
   │   │   └── dify/       # Dify API集成
   │   │       └── [appId]/[...slug]/ # 动态路由处理
   │   ├── about/          # About页面路由
@@ -46,7 +45,7 @@ llm-eduhub/
   │   └── page.tsx        # 首页路由
   ├── components/         # 组件目录
   │   ├── ui/             # 通用UI组件
-  │   ├── auth/           # 认证相关组件
+  │   ├── auth/           # 认证相关组件 (例如登录按钮, 用户菜单)
   │   ├── chat/           # 聊天相关组件
   │   │   └── messages/   # 消息组件
   │   ├── chat-input/     # 聊天输入组件
@@ -65,7 +64,7 @@ llm-eduhub/
   │       ├── sidebar-backdrop.tsx # 移动设备背景遮罩
   │       └── sidebar-chat-icon.tsx # 聊天图标 
   ├── lib/                # 工具和配置
-  │   ├── config/         # 配置文件
+  │   ├── config/         # 配置文件 (例如 dify-config.ts)
   │   ├── hooks/          # 共享钩子函数
   │   │   ├── use-chat-width.ts      # 统一宽度管理
   │   │   ├── use-chat-interface.ts  # 聊天界面逻辑封装
@@ -91,16 +90,12 @@ llm-eduhub/
   │   ├── test_dify_proxy_advanced.py # 高级Dify代理测试脚本
   │   └── test_dify_proxy_streaming.py # Dify流式代理测试脚本
   ├── styles/             # 全局样式
-  ├── supabase/           # Supabase配置和迁移
-  │   ├── .branches/      # 分支管理
-  │   ├── .temp/          # 临时文件
-  │   └── migrations/     # 数据库迁移
   ├── templates/          # 模板文件目录
-  ├── .env.local          # 本地环境变量
+  ├── .env.local          # 本地环境变量 (需包含 NEXTAUTH_SECRET, NEXTAUTH_URL 等)
   ├── .gitignore          # Git忽略配置
-  ├── CONTRIBUTING.md     # 贡献指南
+  ├── CONTRIBUTING.md     # 贡献指南 (已更新为 NextAuth.js)
   ├── eslint.config.mjs   # ESLint配置
-  ├── middleware.ts       # Next.js中间件
+  ├── middleware.ts       # Next.js中间件 (已移除 Supabase Auth, 待集成 NextAuth.js 中间件)
   ├── next-env.d.ts       # Next.js TypeScript声明
   ├── next.config.ts      # Next.js配置
   ├── package-lock.json   # 依赖锁定文件
@@ -283,90 +278,69 @@ lib/hooks/
 ```
 app/
   ├── api/
-  │   ├── auth/                     # 认证相关API
-  │   │   ├── identify/             # 用户身份识别
-  │   │   └── sso/                  # 单点登录
-  │   │       └── initiate/         # SSO初始化
+  │   ├── auth/                     # NextAuth.js 核心认证路由
+  │   │   └── [...nextauth]/        # 处理登录、登出、会话、回调等
+  │   │       └── route.ts          # NextAuth.js 处理器
   │   ├── dify/                     # Dify API集成
   │   │   └── [appId]/[...slug]/    # 动态路由处理
-  │   └── ...                       # 其他API路由
+  │   └── ...                       # 其他业务 API 路由 (例如后台管理 API)
   └── ...
 ```
 
 ### 中间件设计
 中间件主要分为两类：
 
-1. **Edge中间件**：位于项目根目录的`middleware.ts`文件，运行在Edge运行时环境，在路由解析前处理所有传入请求。主要负责：
-   - 认证状态验证
-   - 基本的请求检查
-   - 路由重定向
-   - CORS配置
-   - 请求频率限制
+1. **Edge中间件**：位于项目根目录的`middleware.ts`文件。
+   *   目前已**移除 Supabase Auth 逻辑**。
+   *   **后续需要集成 NextAuth.js 提供的中间件**或使用其 `auth()` 辅助函数来实现路由保护（检查用户会话）。
+   *   可以继续负责基本的请求检查、路由重定向（如 `/chat` -> `/chat/new`）、CORS 配置、请求频率限制等。
 
-2. **API路由中间件**：在具体API路由处理函数内部使用的逻辑组件，负责：
-   - API密钥管理和验证
-   - 请求参数验证
-   - 详细请求日志
-   - 错误处理和格式化
+2. **API路由内部逻辑**：在具体API路由处理函数内部（例如后台管理 API）
+   *   可以使用 NextAuth.js 的 `auth()` 辅助函数获取当前登录用户信息（ID、角色等）。
+   *   负责API密钥管理、请求参数验证、详细请求日志、错误处理和基于角色的访问控制 (RBAC)。
 
 ## 5. 数据存储设计
 
-### Supabase表结构
+### 数据库选型
+- **数据库类型**: PostgreSQL (可以使用 Supabase 托管的，或其他云服务商，或自建)
+- **ORM (推荐)**: Prisma (或其他 Node.js ORM)
 
-```
-├── auth.users                 # Supabase内置用户表
-│   ├── id
-│   ├── email
-│   ├── created_at
-│   └── ...
-├── user_profiles              # 用户资料
-│   ├── user_id (FK -> auth.users.id)
-│   ├── display_name
-│   ├── avatar_url
-│   └── ...
-├── chat_sessions              # 聊天会话
-│   ├── id
-│   ├── user_id (FK -> auth.users.id)
-│   ├── title
-│   ├── created_at
-│   └── ...
-├── chat_messages              # 聊天消息
-│   ├── id
-│   ├── session_id (FK -> chat_sessions.id)
-│   ├── role (user/assistant)
-│   ├── content
-│   ├── created_at
-│   └── ...
-├── model_providers            # 模型提供商
-│   ├── id
-│   ├── name
-│   ├── api_base
-│   └── ...
-└── api_keys                   # API密钥管理
-    ├── id
-    ├── provider_id (FK -> model_providers.id)
-    ├── key_value (加密存储)
-    ├── usage_count
-    └── ...
-```
+### 核心数据模型 (示例，需根据实际需求细化)
+- **用户 (`User`)**: 存储用户信息 (id, name, email, image)。如果使用 NextAuth.js Adapter，会自动创建/管理此表及相关表。
+- **账户 (`Account`)**: 存储 OAuth 提供商信息 (provider, providerAccountId)。由 NextAuth.js Adapter 管理。
+- **会话 (`Session`)**: 存储用户登录会话。由 NextAuth.js Adapter 管理。
+- **验证令牌 (`VerificationToken`)**: 用于邮件验证等。由 NextAuth.js Adapter 管理。
+- **角色 (`Role`)**: 定义系统角色 (e.g., admin, user)。
+- **权限 (`Permission`)**: 定义具体操作权限。
+- **用户角色关联 (`UserRole`)**: 连接用户和角色。
+- **聊天会话 (`ChatSession`)**: 存储聊天记录元数据。
+- **聊天消息 (`ChatMessage`)**: 存储具体聊天内容。
+- **Dify配置 (`DifyConfig`) / AI配置 (`AiConfig`)**: 存储 Dify 或其他 AI 服务的配置信息（如 API Key, URL），可能按用户或组织区分。
+- **组织 (`Organization`)** (如果需要多租户)。
 
 ### 存储策略
-- 敏感数据（如API密钥）使用Supabase提供的行级安全性(RLS)和服务器端加密
-- 大型数据（如聊天历史）考虑分页加载和增量同步
-- 实时功能（如聊天）利用Supabase的实时订阅功能
+- 敏感数据（如外部 API 密钥）应加密存储或通过安全的环境变量管理。
+- 使用 ORM (如 Prisma) 进行数据库交互和迁移管理。
+- 实时功能可考虑使用 WebSocket 或数据库的实时订阅机制（如果数据库支持）。
 
 ## 6. 认证流程
 
 ### 认证方式
-- Supabase内置认证（邮箱/密码）
-- OAuth社交登录（GitHub, Google等）
-- 企业SSO集成
+- 使用 **NextAuth.js** 实现统一认证。
+- 支持多种认证提供者 (Providers):
+   - **Credentials**: 邮箱/密码登录。
+   - **OAuth**: Google, GitHub 等社交登录。
+   - **OIDC / SAML**: 对接企业级 SSO 系统。
 
-### 认证流程图
+### 认证流程图 (示例: OAuth 登录)
 ```
-用户 → 登录请求 → Next.js API(auth/...) → Supabase Auth → JWT令牌
-  ↓
-保存令牌 → 客户端状态更新 → 受保护资源访问 → API中间件验证
+用户点击登录按钮 → 前端调用 NextAuth signIn('google') → 重定向到 Google 授权页
+  ↑                                                          ↓
+  授权成功后回调到 NextAuth API Route (/api/auth/callback/google) ← Google 返回授权码
+  ↑                                                          ↓
+  NextAuth 处理回调，获取用户信息，创建/更新用户记录，建立会话 (JWT/数据库) → 返回会话 Cookie 给浏览器
+  ↑                                                          ↓
+  浏览器后续请求携带会话 Cookie → NextAuth 中间件/API 验证会话 → 允许访问受保护资源
 ```
 
 ## 7. AI模型集成
@@ -386,8 +360,9 @@ app/
 
 **模型路由决策逻辑**：
 - 基于用户在界面中的明确选择
+- 通过后台管理系统配置的模型参数（如 API Key, URL），这些配置可存储在数据库中，按需读取。
 - 考虑配置的使用限额和成本控制
-- 根据请求特性选择最适合的模型（如需要流式响应的对话选用支持流式的模型）
+- 根据请求特性选择最适合的模型
 - 提供自动故障转移能力，当首选模型不可用时切换到备选模型
 
 ### 模型调用优化
@@ -398,54 +373,50 @@ app/
 ## 8. 部署和扩展策略
 
 ### 部署选项
-- **开发环境**: 本地开发服务器
-- **测试环境**: Vercel预览部署
-- **生产环境**: Vercel或其他云服务提供商
+- **开发环境**: 本地开发服务器 (`npm run dev`)。
+- **测试/生产环境**: Vercel, Docker 容器化部署到云服务器或本地服务器 (支持私有化)。
 
 ### 扩展考虑
-- 使用Edge Functions提高全球性能
-- 实现细粒度缓存策略减少API调用
-- 考虑无服务器数据库连接池管理大量连接
+- 使用 Edge Functions (如果部署平台支持) 提高全局性能。
+- 实现细粒度缓存策略减少 API 调用。
+- 数据库连接池管理。
+- 应用层横向扩展。
 
 ## 9. 安全性考虑
 
 ### 数据安全
-- API密钥等敏感信息仅在服务器端处理
-- 实现请求来源验证防止未授权访问
-- 定期轮换密钥和令牌
+- 外部 API 密钥等敏感信息通过环境变量或安全的配置管理服务注入，避免硬编码。
+- 使用 NextAuth.js 的 CSRF 保护和安全的会话管理。
+- 实现请求来源验证。
 
 ### 输入验证
-- 对所有API输入实施严格验证
-- 实现内容过滤防止潜在的LLM注入攻击，具体策略包括：
-  - 使用输入清理库（如DOMPurify）处理用户输入
-  - 实施输入长度和格式限制
-  - 移除或转义潜在的指令注入模式
-  - 实现提示模板隔离，避免用户输入直接拼接到系统提示中
-  - 对模型输出进行后处理，检测并过滤不适当内容
-- 限制请求大小和频率
+- 对所有 API 输入实施严格验证 (推荐使用 Zod 等库)。
+- 实现内容过滤防止潜在的 LLM 注入攻击。
+- 限制请求大小和频率 (Rate Limiting)。
 
 ## 10. 后续开发路线图
 
 ### 近期计划
-- 完善基础组件库
-- 实现核心认证流程
-- 建立Dify API代理的完整功能
+- **实现基于 NextAuth.js 的核心认证流程 (邮箱/密码, 至少一个 OAuth/SSO Provider)**。
+- 完善基础组件库。
+- 建立 Dify API 代理的完整功能，并确保配置可管理。
 
 ### 中期目标
-- 添加用户资料和偏好设置
-- 实现高级聊天功能（历史、保存等）
-- 添加多模型切换能力
+- **构建后台管理基础框架 (用户管理, 角色/权限管理)**。
+- 实现 Dify 模型参数等配置的后台管理功能。
+- 实现高级聊天功能（历史、保存等）。
 
 ### 长期愿景
-- 构建高级分析仪表板
-- 实现企业级权限管理
-- 支持自定义模型微调和部署
+- **完善后台管理功能 (分析仪表板, 操作日志等)**。
+- 实现企业级权限管理和多租户支持 (如果需要)。
+- 支持自定义模型微调和部署。
 
 ## 11. 参考资源
 
-- Next.js App Router文档
-- Supabase文档中的身份验证和数据库指南
-- Dify API文档和集成示例
-- Tailwind CSS设计系统最佳实践
+- [Next.js App Router文档](https://nextjs.org/docs)
+- [NextAuth.js文档](https://next-auth.js.org/)
+- [Prisma文档](https://www.prisma.io/docs/) (如果使用 Prisma)
+- [Dify API文档](https://docs.dify.ai/)
+- [Tailwind CSS设计系统最佳实践](https://tailwindcss.com/docs)
 
 这份架构文档提供了LLM-EduHub项目的整体设计蓝图，应根据项目进展和需求变化定期更新。

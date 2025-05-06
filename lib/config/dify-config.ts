@@ -1,61 +1,64 @@
-import { supabase } from '@lib/config/supabase-config';
+// --- BEGIN COMMENT ---
+// 移除无效的导入语句，因为 supabase-config.ts 已被删除
+// --- END COMMENT ---
+// import { createServiceClient } from './supabase-config' // 移除，后续可能用Prisma或其他方式获取
 
 export interface DifyAppConfig {
   apiKey: string;
   apiUrl: string;
 }
 
+// --- BEGIN COMMENT ---
+// 从环境变量或数据库（未来可能）安全地获取Dify应用的配置信息。
+// 目前优先从环境变量读取全局配置。
+// 未来可以扩展为基于 appId 或 userId 从数据库获取特定配置。
+// --- END COMMENT ---
 export const getDifyAppConfig = async (
-  appId: string,
-  userId?: string,  // 添加用户ID参数用于权限检查
+  appId: string, // 保留 appId 参数，为未来扩展性
+  userId?: string,  // 保留 userId 参数，为未来可能的权限检查
 ): Promise<DifyAppConfig | null> => {
-  // 1. 尝试从数据库获取配置
-  try {
-    const { data, error } = await supabase
-      .from('ai_configs')
-      .select('*')
-      .eq('provider', 'dify')
-      .eq('app_id', appId)
-      .eq('enabled', true)
-      .single();
-      
-    if (error || !data) {
-      console.error(`配置缺失：Dify应用"${appId}"，将尝试从环境变量获取`);
-      // 2. 数据库获取失败，回退到环境变量
-      return getFallbackDifyConfig(appId);
-    }
+  // --- BEGIN COMMENT ---
+  // TODO: 实现从数据库或其他配置源按 appId 获取配置的逻辑
+  // 例如，使用 Prisma 查询特定于应用或用户的 Dify API Key 和 URL
+  // const prisma = new PrismaClient();
+  // const userAppConfig = await prisma.difyConfig.findUnique({ where: { userId_appId: { userId, appId } } });
+  // if (userAppConfig) return { apiKey: userAppConfig.apiKey, apiUrl: userAppConfig.apiUrl };
+  //
+  // 目前暂时使用全局环境变量作为回退或主要来源
+  // --- END COMMENT ---
+  const apiKey = process.env.DIFY_API_KEY;
+  const apiUrl = process.env.DIFY_API_URL;
+
+  if (!apiKey || !apiUrl) {
+    console.error("Dify API Key or API URL is not configured in environment variables.");
+    // --- BEGIN COMMENT ---
+    // 未来可以尝试从数据库加载配置, 例如调用下面 getFallbackDifyConfig
+    // 或者直接查询数据库中的默认配置
+    // --- END COMMENT ---
     
-    return {
-      apiKey: data.api_key,
-      apiUrl: data.api_url
-    };
-  } catch (error) {
-    console.error(`从数据库获取Dify配置时出错:`, error);
-    // 3. 异常时回退到环境变量
-    return getFallbackDifyConfig(appId);
+    // 调用回退配置函数，如果存在
+    return getFallbackDifyConfig(appId); 
   }
+
+  return {
+    apiKey,
+    apiUrl,
+  };
 };
 
-// 回退到环境变量的方法
+
+// --- BEGIN COMMENT ---
+// 提供一个备用的Dify配置获取方式，例如用于特定应用或默认值。
+// 目前返回 null，表示如果没有环境变量则配置失败。
+// 未来可以实现从默认配置表或固定值加载。
+// --- END COMMENT ---
 const getFallbackDifyConfig = (appId: string): DifyAppConfig | null => {
-  const apiKeyEnvVar = `DIFY_APP_${appId.toUpperCase()}_KEY`;
-  const apiUrlEnvVar = `DIFY_APP_${appId.toUpperCase()}_URL`;
-
-  const apiKey = process.env[apiKeyEnvVar];
-  const apiUrl = process.env[apiUrlEnvVar];
-
-  // 如果没有指定appId的环境变量，尝试使用通用的Dify环境变量
-  const fallbackApiKey = apiKey || process.env.DIFY_API_KEY;
-  const fallbackApiUrl = apiUrl || process.env.DIFY_API_URL;
-
-  if (!fallbackApiKey || !fallbackApiUrl) {
-    console.error(
-      `缺少Dify应用"${appId}"的配置。请确保${apiKeyEnvVar}和${apiUrlEnvVar}或通用的DIFY_API_KEY和DIFY_API_URL已设置。`,
-    );
-    return null;
-  }
-
-  return { apiKey: fallbackApiKey, apiUrl: fallbackApiUrl };
+  console.warn(`[Dify Config] Fallback configuration requested for appId: ${appId}, but no fallback logic is implemented.`);
+  // --- BEGIN COMMENT ---
+  // 示例: 未来可能从数据库或其他配置源加载后备配置
+  // Example: if (appId === 'default-chat') return { apiKey: 'default_key_abc', apiUrl: 'https://default.dify.ai/api' };
+  // --- END COMMENT ---
+  return null; 
 };
 
 // 这个函数就是我们为未来接入数据库留的抽象层。
