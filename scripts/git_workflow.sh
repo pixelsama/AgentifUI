@@ -1054,7 +1054,7 @@ cmd_commit() {
             -a|--all)
                 add_all_flag=true
                 commit_args+=("-a") # git commit -a 会自动暂存已跟踪文件的修改和删除
-                shift
+    shift
                 ;;
             -e|--editor)
                 use_standard_editor=true # 明确要求使用标准编辑器流程
@@ -1097,12 +1097,12 @@ cmd_commit() {
     # 如果指定了 -a 标志... (这部分暂存检查逻辑不变) ...
     if ! $add_all_flag; then
         if git diff --cached --quiet; then
-             # ... (无暂存变更的处理不变) ...
+             echo -e "${YELLOW}没有暂存的变更可提交。${NC}"
              return 1
         fi
     else
          if git diff --quiet && git diff --cached --quiet; then
-              # ... (使用 -a 但无变更的处理不变) ...
+              echo -e "${YELLOW}没有任何已跟踪的文件发生变更。${NC}"
               return 1
          fi
     fi
@@ -1110,10 +1110,10 @@ cmd_commit() {
     # --- 根据是否需要标准编辑器流程决定如何提交 ---
     # 如果用户提供了 -m, -F, --file, --amend, 或 -e/--editor，则使用标准 git commit
     local use_non_default_commit=false
-    if [[ " ${commit_args[*]} " =~ " -m " ]] || \ 
-       [[ " ${commit_args[*]} " =~ " -F " ]] || \ 
-       [[ " ${commit_args[*]} " =~ " --file " ]] || \ 
-       [[ " ${commit_args[*]} " =~ " --amend " ]] || \ 
+    if [[ " ${commit_args[*]} " =~ " -m " ]] || \
+       [[ " ${commit_args[*]} " =~ " -F " ]] || \
+       [[ " ${commit_args[*]} " =~ " --file " ]] || \
+       [[ " ${commit_args[*]} " =~ " --amend " ]] || \
        $use_standard_editor; then
         use_non_default_commit=true
     fi
@@ -1167,15 +1167,30 @@ cmd_commit() {
             return 1
         fi
 
-        echo -e "${BLUE}使用编辑后的文件继续提交...${NC}"
-        # 使用 --file 参数，并传递其他可能的非编辑相关参数 (理论上这里 commit_args 应为空)
-        if git commit --file="$commit_msg_file" "${commit_args[@]}"; then 
+        # --- 新增：清理 COMMIT_EDITMSG 中的注释行和模板提示行 ---
+        local cleaned_commit_msg_file="${commit_msg_file}.cleaned"
+        grep -v -E '^#|请输入提交说明|暂存的变更' "$commit_msg_file" | sed '/^$/N;/^\n$/D' > "$cleaned_commit_msg_file" # 移除#开头的行、模板提示和多余的空行
+
+        # 检查清理后的文件是否还有实际内容
+        if ! grep -v -q -E '^$' "$cleaned_commit_msg_file"; then
+            echo -e "${RED}错误：清理后的提交信息为空。提交已取消。${NC}"
+            rm -f "$commit_msg_file" "$cleaned_commit_msg_file"
+            return 1
+        fi
+
+        echo -e "${BLUE}使用编辑并清理后的文件继续提交...${NC}"
+        if git commit --file="$cleaned_commit_msg_file" "${commit_args[@]}"; then 
             echo -e "${GREEN}提交成功！${NC}"
-            # Git 成功提交后会自动清理 COMMIT_EDITMSG
+            rm -f "$cleaned_commit_msg_file" # Git 成功后会删 COMMIT_EDITMSG，我们删掉清理后的
+            # Git 成功提交后会自动清理 COMMIT_EDITMSG, 如果原始文件还在也应该清理
+            if [ -f "$commit_msg_file" ]; then
+                 rm -f "$commit_msg_file"
+            fi
             return 0
         else
             echo -e "${RED}使用编辑后的文件提交失败。${NC}"
-            echo -e "${YELLOW}提交信息文件仍保留在: $commit_msg_file${NC}"
+            echo -e "${YELLOW}原始提交信息文件仍保留在: $commit_msg_file${NC}"
+            echo -e "${YELLOW}清理后的提交信息文件仍保留在: $cleaned_commit_msg_file${NC}"
             echo "你可以检查文件内容和暂存区状态 ('git status')。"
             return 1
         fi
@@ -1426,8 +1441,8 @@ cmd_save() {
                 else
                     echo -e "${RED}错误: -m/--message 选项需要一个参数。${NC}"
                     echo "用法: gw save [-m \"提交消息\"] [-e] [文件...]"
-                    return 1
-                fi
+            return 1
+        fi
                 ;;
             -e|--editor)
                 use_standard_editor=true # 明确要求使用标准编辑器流程
