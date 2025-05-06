@@ -1639,6 +1639,212 @@ cmd_finish() {
     echo -e "${GREEN}=== 分支 '$current_branch' 完成工作流结束 ===${NC}"
     return 0
 }
+# 清理已合并的分支 (切换到主分支, 拉取, 删除本地和远程)
+cmd_clean_branch() {
+    if ! check_in_git_repo; then return 1; fi
+
+    local target_branch="$1"
+    local force=false # clean 命令默认不强制删除，依赖 rm 的合并检查
+
+    if [ -z "$target_branch" ]; then
+        echo -e "${RED}错误: 请指定要清理的分支名称。${NC}"
+        echo "用法: gw clean <已合并的分支名>"
+        return 1
+    fi
+    
+    if [ "$target_branch" = "$MAIN_BRANCH" ]; then
+         echo -e "${RED}错误: 不能清理主分支 ($MAIN_BRANCH)。${NC}"
+         return 1
+    fi
+    
+    # 检查是否有多余参数 (暂不支持 -f)
+    if [ $# -gt 1 ]; then
+         echo -e "${YELLOW}警告: 'clean' 命令当前不接受除分支名外的其他参数，已忽略。${NC}"
+    fi
+
+    echo -e "${CYAN}=== 清理分支 '$target_branch' ===${NC}"
+
+    local current_branch
+    current_branch=$(get_current_branch_name)
+    if [ $? -ne 0 ]; then return 1; fi
+    local stash_needed=false
+
+    # 1. 如果当前不在主分支，先切换到主分支
+    if [ "$current_branch" != "$MAIN_BRANCH" ]; then
+        echo -e "${BLUE}当前不在主分支，准备切换到 '$MAIN_BRANCH'...${NC}"
+        # 检查未提交变更
+        if check_uncommitted_changes || check_untracked_files; then
+            echo -e "${YELLOW}检测到未提交的变更。在切换前需要处理:${NC}"
+            echo "1) 暂存变更"
+            echo "2) 取消清理"
+            echo -n "请选择 [1-2]: "
+            read -r choice
+            if [ "$choice" = "1" ]; then
+                 echo -e "${BLUE}正在暂存...${NC}"
+                 if ! git stash save "Auto-stash before cleaning branch $target_branch"; then
+                     echo -e "${RED}暂存失败，清理操作取消。${NC}"
+                     return 1
+                 fi
+                 stash_needed=true
+            else
+                 echo "清理操作已取消。"
+                 return 1
+            fi
+        fi
+        # 执行切换
+        if ! git checkout "$MAIN_BRANCH"; then
+             echo -e "${RED}切换到主分支失败。请检查工作区状态。${NC}"
+             if $stash_needed; then git stash pop; fi # 尝试恢复
+             return 1
+        fi
+        echo -e "${GREEN}已切换到主分支 '$MAIN_BRANCH'。${NC}"
+    fi
+
+    # 2. 拉取主分支最新代码
+    echo -e "${BLUE}正在从远程 '$REMOTE_NAME' 更新主分支 '$MAIN_BRANCH'...${NC}"
+    if ! do_pull_with_retry "$REMOTE_NAME" "$MAIN_BRANCH"; then
+        echo -e "${RED}拉取主分支更新失败。${NC}"
+        # 即使拉取失败，也可能继续尝试删除分支？或者中止？暂定中止
+        if $stash_needed; then git stash pop; fi # 尝试恢复
+        return 1
+    fi
+    echo -e "${GREEN}主分支已是最新。${NC}"
+
+    # 3. 删除目标分支 (使用 cmd_rm_branch 的逻辑，但不带 all)
+    echo -e "${BLUE}准备删除分支 '$target_branch'...${NC}"
+    # 注意：cmd_rm_branch 内部会检查分支是否存在、是否是当前（现在不可能是了）、是否是主分支
+    # 它还会检查合并状态（默认 -d），并询问是否删除远程
+    if cmd_rm_branch "$target_branch"; then
+        echo -e "${GREEN}分支 '$target_branch' 清理完成。${NC}"
+    else
+        echo -e "${RED}分支 '$target_branch' 清理过程中删除步骤失败。请检查上面的错误信息。${NC}"
+        if $stash_needed; then git stash pop; fi # 尝试恢复
+        return 1
+    fi
+    
+    # 4. 如果之前暂存了，尝试恢复
+    if $stash_needed; then
+        echo -e "${BLUE}正在尝试恢复之前暂存的变更...${NC}"
+        if git stash pop; then
+            echo -e "${GREEN}成功恢复暂存的变更。${NC}"
+        else
+            echo -e "${RED}自动恢复暂存失败。可能存在冲突。请手动处理 (git stash list)。${NC}"
+        fi
+    fi
+
+    return 0
+}
+
+# 创建并切换到新分支 (函数名改为 gw_new 以匹配调用约定)
+gw_new() {
+    local new_branch_name="$1"
+    local local_flag=false
+    local base_branch_param=""
+
+    # 解析参数，处理 --local 标志和可选的基础分支
+    if [[ "$2" == "--local" ]]; then
+        local_flag=true
+        base_branch_param="$3" # 基础分支是第三个参数
+    elif [[ "$1" && "$2" && ! "$2" =~ ^- ]]; then
+        # 如果第二个参数不是选项，认为是基础分支
+        base_branch_param="$2"
+    # else # 如果只有新分支名，base_branch_param 保持空
+    fi
+
+    # 如果未提供新分支名
+    if [[ -z "$new_branch_name" ]]; then
+        print_error "错误：需要提供新分支名称。"
+        show_help # Use print_error and show_help for consistency
+        return 1
+    fi
+
+    # 验证分支名是否有效 (使用 print_error)
+    if ! git check-ref-format --branch "$new_branch_name"; then
+        print_error "错误：无效的分支名称 '$new_branch_name'。"
+        return 1
+    fi
+
+    # 确定基础分支 (使用 main_branch_name 变量)
+    local base_branch=${base_branch_param:-$MAIN_BRANCH} # Use the determined MAIN_BRANCH variable
+    print_info "将基于分支 '${base_branch}' 创建新分支 '${new_branch_name}'."
+
+    # --- BEGIN MODIFIED COMMENT ---
+    # 检查基础分支是否存在于本地或远程。如果只在远程存在，尝试获取它。
+    # 如果指定了 --local，我们假设基础分支在本地是存在的，因为我们不打算拉取。
+    # --- END MODIFIED COMMENT ---
+    local base_branch_exists_locally=false
+    if git rev-parse --verify --quiet "refs/heads/$base_branch" > /dev/null 2>&1; then
+        base_branch_exists_locally=true
+    fi
+
+    if ! $base_branch_exists_locally && ! $local_flag; then
+        # 如果本地不存在且不是 local 模式，尝试从远程获取
+        if git rev-parse --verify --quiet "refs/remotes/$REMOTE_NAME/$base_branch" > /dev/null 2>&1; then
+            print_warning "警告：本地不存在基础分支 '${base_branch}'，但远程存在。尝试从远程获取..."
+            # 尝试只 fetch 这个特定的分支引用
+            if ! git fetch "$REMOTE_NAME" "$base_branch":"refs/remotes/$REMOTE_NAME/$base_branch"; then
+                 print_error "错误：无法从远程 '${REMOTE_NAME}' 获取基础分支 '${base_branch}' 的引用。"
+                 return 1
+            fi
+            # 创建本地跟踪分支
+             if ! git branch "$base_branch" "refs/remotes/$REMOTE_NAME/$base_branch"; then
+                 print_error "错误：创建本地跟踪分支 '${base_branch}' 失败。"
+                 return 1
+             fi
+            print_success "成功获取并创建本地基础分支 '${base_branch}'。"
+            base_branch_exists_locally=true
+        else
+            print_error "错误：基础分支 '${base_branch}' 在本地和远程 '${REMOTE_NAME}' 都不存在。"
+            return 1
+        fi
+    elif ! $base_branch_exists_locally && $local_flag; then
+         print_error "错误：--local 模式要求基础分支 '${base_branch}' 必须在本地存在。"
+         return 1
+    fi
+
+    # 切换到基础分支 (现在确保它本地存在)
+    print_step "1/3: 切换到基础分支 '${base_branch}'..."
+    if ! git checkout "$base_branch"; then
+        print_error "错误：切换到基础分支 '${base_branch}' 失败。"
+        return 1
+    fi
+    print_success "已切换到基础分支 '${base_branch}'。"
+
+    # 如果不是 --local 模式，则拉取最新代码
+    if [[ "$local_flag" == false ]]; then
+        print_step "2/3: 拉取基础分支 '${base_branch}' 的最新代码..."
+        # 使用带重试的 pull，并指定 rebase
+        if ! do_pull_with_retry --rebase "$REMOTE_NAME" "$base_branch"; then
+            print_error "错误：从 '${REMOTE_NAME}/${base_branch}' 拉取代码 (rebase) 失败。"
+            print_warning "请检查网络连接或手动解决冲突后重试。"
+            # 停留在基础分支让用户解决
+            return 1
+        fi
+        print_success "基础分支 '${base_branch}' 已更新至最新。"
+    else
+        print_step "2/3: 跳过拉取最新代码 (--local 模式)。基础分支状态为本地当前状态。" # 更清晰的提示
+    fi
+
+    # 创建并切换到新分支
+    print_step "3/3: 创建并切换到新分支 '${new_branch_name}'..."
+    if git rev-parse --verify --quiet "refs/heads/$new_branch_name" > /dev/null 2>&1; then
+         print_warning "警告：分支 '${new_branch_name}' 已存在。将直接切换到该分支。"
+         if ! git checkout "$new_branch_name"; then
+             print_error "错误：切换到已存在的分支 '${new_branch_name}' 失败。"
+             return 1
+         fi
+    else
+        if ! git checkout -b "$new_branch_name"; then
+            print_error "错误：创建并切换到新分支 '${new_branch_name}' 失败。"
+            # 这里可以尝试切换回基础分支以保持状态一致性
+            git checkout "$base_branch"
+            return 1
+        fi
+    fi
+
+    print_success "操作完成！已创建并切换到新分支 '${new_branch_name}'。"
+    print_info "现在可以开始在新分支上进行开发了。"
+}
 
 # 显示帮助信息
 show_help() {
@@ -1929,209 +2135,3 @@ main() {
 # 执行主函数，并将所有参数传递给它
 main "$@"
 
-# 清理已合并的分支 (切换到主分支, 拉取, 删除本地和远程)
-cmd_clean_branch() {
-    if ! check_in_git_repo; then return 1; fi
-
-    local target_branch="$1"
-    local force=false # clean 命令默认不强制删除，依赖 rm 的合并检查
-
-    if [ -z "$target_branch" ]; then
-        echo -e "${RED}错误: 请指定要清理的分支名称。${NC}"
-        echo "用法: gw clean <已合并的分支名>"
-        return 1
-    fi
-    
-    if [ "$target_branch" = "$MAIN_BRANCH" ]; then
-         echo -e "${RED}错误: 不能清理主分支 ($MAIN_BRANCH)。${NC}"
-         return 1
-    fi
-    
-    # 检查是否有多余参数 (暂不支持 -f)
-    if [ $# -gt 1 ]; then
-         echo -e "${YELLOW}警告: 'clean' 命令当前不接受除分支名外的其他参数，已忽略。${NC}"
-    fi
-
-    echo -e "${CYAN}=== 清理分支 '$target_branch' ===${NC}"
-
-    local current_branch
-    current_branch=$(get_current_branch_name)
-    if [ $? -ne 0 ]; then return 1; fi
-    local stash_needed=false
-
-    # 1. 如果当前不在主分支，先切换到主分支
-    if [ "$current_branch" != "$MAIN_BRANCH" ]; then
-        echo -e "${BLUE}当前不在主分支，准备切换到 '$MAIN_BRANCH'...${NC}"
-        # 检查未提交变更
-        if check_uncommitted_changes || check_untracked_files; then
-            echo -e "${YELLOW}检测到未提交的变更。在切换前需要处理:${NC}"
-            echo "1) 暂存变更"
-            echo "2) 取消清理"
-            echo -n "请选择 [1-2]: "
-            read -r choice
-            if [ "$choice" = "1" ]; then
-                 echo -e "${BLUE}正在暂存...${NC}"
-                 if ! git stash save "Auto-stash before cleaning branch $target_branch"; then
-                     echo -e "${RED}暂存失败，清理操作取消。${NC}"
-                     return 1
-                 fi
-                 stash_needed=true
-            else
-                 echo "清理操作已取消。"
-                 return 1
-            fi
-        fi
-        # 执行切换
-        if ! git checkout "$MAIN_BRANCH"; then
-             echo -e "${RED}切换到主分支失败。请检查工作区状态。${NC}"
-             if $stash_needed; then git stash pop; fi # 尝试恢复
-             return 1
-        fi
-        echo -e "${GREEN}已切换到主分支 '$MAIN_BRANCH'。${NC}"
-    fi
-
-    # 2. 拉取主分支最新代码
-    echo -e "${BLUE}正在从远程 '$REMOTE_NAME' 更新主分支 '$MAIN_BRANCH'...${NC}"
-    if ! do_pull_with_retry "$REMOTE_NAME" "$MAIN_BRANCH"; then
-        echo -e "${RED}拉取主分支更新失败。${NC}"
-        # 即使拉取失败，也可能继续尝试删除分支？或者中止？暂定中止
-        if $stash_needed; then git stash pop; fi # 尝试恢复
-        return 1
-    fi
-    echo -e "${GREEN}主分支已是最新。${NC}"
-
-    # 3. 删除目标分支 (使用 cmd_rm_branch 的逻辑，但不带 all)
-    echo -e "${BLUE}准备删除分支 '$target_branch'...${NC}"
-    # 注意：cmd_rm_branch 内部会检查分支是否存在、是否是当前（现在不可能是了）、是否是主分支
-    # 它还会检查合并状态（默认 -d），并询问是否删除远程
-    if cmd_rm_branch "$target_branch"; then
-        echo -e "${GREEN}分支 '$target_branch' 清理完成。${NC}"
-    else
-        echo -e "${RED}分支 '$target_branch' 清理过程中删除步骤失败。请检查上面的错误信息。${NC}"
-        if $stash_needed; then git stash pop; fi # 尝试恢复
-        return 1
-    fi
-    
-    # 4. 如果之前暂存了，尝试恢复
-    if $stash_needed; then
-        echo -e "${BLUE}正在尝试恢复之前暂存的变更...${NC}"
-        if git stash pop; then
-            echo -e "${GREEN}成功恢复暂存的变更。${NC}"
-        else
-            echo -e "${RED}自动恢复暂存失败。可能存在冲突。请手动处理 (git stash list)。${NC}"
-        fi
-    fi
-
-    return 0
-}
-
-# 创建并切换到新分支 (函数名改为 gw_new 以匹配调用约定)
-gw_new() {
-    local new_branch_name="$1"
-    local local_flag=false
-    local base_branch_param=""
-
-    # 解析参数，处理 --local 标志和可选的基础分支
-    if [[ "$2" == "--local" ]]; then
-        local_flag=true
-        base_branch_param="$3" # 基础分支是第三个参数
-    elif [[ "$1" && "$2" && ! "$2" =~ ^- ]]; then
-        # 如果第二个参数不是选项，认为是基础分支
-        base_branch_param="$2"
-    # else # 如果只有新分支名，base_branch_param 保持空
-    fi
-
-    # 如果未提供新分支名
-    if [[ -z "$new_branch_name" ]]; then
-        print_error "错误：需要提供新分支名称。"
-        show_help # Use print_error and show_help for consistency
-        return 1
-    fi
-
-    # 验证分支名是否有效 (使用 print_error)
-    if ! git check-ref-format --branch "$new_branch_name"; then
-        print_error "错误：无效的分支名称 '$new_branch_name'。"
-        return 1
-    fi
-
-    # 确定基础分支 (使用 main_branch_name 变量)
-    local base_branch=${base_branch_param:-$MAIN_BRANCH} # Use the determined MAIN_BRANCH variable
-    print_info "将基于分支 '${base_branch}' 创建新分支 '${new_branch_name}'."
-
-    # --- BEGIN MODIFIED COMMENT ---
-    # 检查基础分支是否存在于本地或远程。如果只在远程存在，尝试获取它。
-    # 如果指定了 --local，我们假设基础分支在本地是存在的，因为我们不打算拉取。
-    # --- END MODIFIED COMMENT ---
-    local base_branch_exists_locally=false
-    if git rev-parse --verify --quiet "refs/heads/$base_branch" > /dev/null 2>&1; then
-        base_branch_exists_locally=true
-    fi
-
-    if ! $base_branch_exists_locally && ! $local_flag; then
-        # 如果本地不存在且不是 local 模式，尝试从远程获取
-        if git rev-parse --verify --quiet "refs/remotes/$REMOTE_NAME/$base_branch" > /dev/null 2>&1; then
-            print_warning "警告：本地不存在基础分支 '${base_branch}'，但远程存在。尝试从远程获取..."
-            # 尝试只 fetch 这个特定的分支引用
-            if ! git fetch "$REMOTE_NAME" "$base_branch":"refs/remotes/$REMOTE_NAME/$base_branch"; then
-                 print_error "错误：无法从远程 '${REMOTE_NAME}' 获取基础分支 '${base_branch}' 的引用。"
-                 return 1
-            fi
-            # 创建本地跟踪分支
-             if ! git branch "$base_branch" "refs/remotes/$REMOTE_NAME/$base_branch"; then
-                 print_error "错误：创建本地跟踪分支 '${base_branch}' 失败。"
-                 return 1
-             fi
-            print_success "成功获取并创建本地基础分支 '${base_branch}'。"
-            base_branch_exists_locally=true
-        else
-            print_error "错误：基础分支 '${base_branch}' 在本地和远程 '${REMOTE_NAME}' 都不存在。"
-            return 1
-        fi
-    elif ! $base_branch_exists_locally && $local_flag; then
-         print_error "错误：--local 模式要求基础分支 '${base_branch}' 必须在本地存在。"
-         return 1
-    fi
-
-    # 切换到基础分支 (现在确保它本地存在)
-    print_step "1/3: 切换到基础分支 '${base_branch}'..."
-    if ! git checkout "$base_branch"; then
-        print_error "错误：切换到基础分支 '${base_branch}' 失败。"
-        return 1
-    fi
-    print_success "已切换到基础分支 '${base_branch}'。"
-
-    # 如果不是 --local 模式，则拉取最新代码
-    if [[ "$local_flag" == false ]]; then
-        print_step "2/3: 拉取基础分支 '${base_branch}' 的最新代码..."
-        # 使用带重试的 pull，并指定 rebase
-        if ! do_pull_with_retry --rebase "$REMOTE_NAME" "$base_branch"; then
-            print_error "错误：从 '${REMOTE_NAME}/${base_branch}' 拉取代码 (rebase) 失败。"
-            print_warning "请检查网络连接或手动解决冲突后重试。"
-            # 停留在基础分支让用户解决
-            return 1
-        fi
-        print_success "基础分支 '${base_branch}' 已更新至最新。"
-    else
-        print_step "2/3: 跳过拉取最新代码 (--local 模式)。基础分支状态为本地当前状态。" # 更清晰的提示
-    fi
-
-    # 创建并切换到新分支
-    print_step "3/3: 创建并切换到新分支 '${new_branch_name}'..."
-    if git rev-parse --verify --quiet "refs/heads/$new_branch_name" > /dev/null 2>&1; then
-         print_warning "警告：分支 '${new_branch_name}' 已存在。将直接切换到该分支。"
-         if ! git checkout "$new_branch_name"; then
-             print_error "错误：切换到已存在的分支 '${new_branch_name}' 失败。"
-             return 1
-         fi
-    else
-        if ! git checkout -b "$new_branch_name"; then
-            print_error "错误：创建并切换到新分支 '${new_branch_name}' 失败。"
-            # 这里可以尝试切换回基础分支以保持状态一致性
-            git checkout "$base_branch"
-            return 1
-        fi
-    fi
-
-    print_success "操作完成！已创建并切换到新分支 '${new_branch_name}'。"
-    print_info "现在可以开始在新分支上进行开发了。"
-}
