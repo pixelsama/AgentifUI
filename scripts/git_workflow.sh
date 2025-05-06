@@ -237,6 +237,116 @@ do_push_with_retry() {
     return 1
 }
 
+# 执行带重试的 Git 拉取
+do_pull_with_retry() {
+    local pull_args=()
+    local remote="$REMOTE_NAME"
+    local branch_to_pull=""
+    local current_branch
+    current_branch=$(get_current_branch_name)
+    if [ $? -ne 0 ]; then return 1; fi
+
+    # 解析参数以确定远程和分支，保留其他选项如 --rebase, --ff-only
+    local other_args=()
+    local potential_remote=""
+    local potential_branch=""
+    local args_array=("$@")
+    local arg_count=$#
+
+    for (( i=0; i<$arg_count; i++ )); do
+        local arg="${args_array[i]}"
+        case "$arg" in
+            # 保留 pull 支持的常见选项
+            --rebase|--ff|--ff-only|--no-ff|--stat|--no-stat|-v|--verbose|-q|--quiet)
+                other_args+=("$arg")
+                ;;
+             # 可以根据需要添加更多选项
+            -*)
+                other_args+=("$arg") # 保留其他未知选项
+                ;;
+            *)
+                # 非选项参数，可能是远程或分支
+                if [ -z "$potential_remote" ]; then
+                    if git remote | grep -q "^$arg$"; then
+                        potential_remote="$arg"
+                    elif [ -z "$potential_branch" ]; then
+                        potential_branch="$arg"
+                    else
+                        other_args+=("$arg")
+                    fi
+                elif [ -z "$potential_branch" ]; then
+                    potential_branch="$arg"
+                else
+                    other_args+=("$arg")
+                fi
+                ;;
+        esac
+    done
+
+    # 确定最终的远程和分支
+    remote=${potential_remote:-$REMOTE_NAME} # 默认远程
+    # 如果未指定分支，git pull 默认会拉取当前分支的上游
+    # 如果指定了分支，则使用指定的分支
+    if [ -n "$potential_branch" ]; then
+       branch_to_pull=$potential_branch
+       pull_args=("$remote" "$branch_to_pull")
+    else
+        # 未指定分支时，pull_args 只包含 remote，让 git pull 决定拉取哪个分支
+        # 或者可以尝试获取当前分支的上游？但直接传 remote 更简单
+        pull_args=("$remote")
+    fi
+    pull_args+=("${other_args[@]}") # 添加其他保留的参数
+
+    local command_str="git pull ${pull_args[*]}"
+    
+    echo -e "${GREEN}--- Git 拉取重试执行 ---${NC}"
+    echo "将尝试执行命令: $command_str"
+    echo "最大尝试次数: $MAX_ATTEMPTS"
+    if [ "$DELAY_SECONDS" -gt 0 ]; then
+        echo "每次尝试间隔: ${DELAY_SECONDS} 秒"
+    fi
+    echo "-----------------------------------------"
+
+    # 开始循环尝试
+    for i in $(seq 1 $MAX_ATTEMPTS)
+    do
+       echo "--- 第 $i/$MAX_ATTEMPTS 次尝试: 执行 '$command_str' --- "
+
+       # 执行 git pull 命令
+       git pull "${pull_args[@]}"
+
+       # 检查退出状态码
+       EXIT_CODE=$?
+       if [ $EXIT_CODE -eq 0 ]; then
+          echo -e "${GREEN}--- 拉取成功 (第 $i 次尝试). 操作完成. ---${NC}"
+          return 0
+       else
+          # 区分是否是合并冲突，冲突时重试无意义
+          if git diff --name-only --diff-filter=U --relative | grep -q .; then
+              echo -e "${RED}!!! 拉取失败：检测到合并冲突 (退出码: $EXIT_CODE)。请手动解决冲突后提交。!!!${NC}"
+              echo -e "运行 'git status' 查看冲突文件。"
+              echo -e "解决后运行 'gw add <冲突文件>' 和 'gw commit'。"
+              return 1 # 返回失败，因为需要手动干预
+          fi
+          echo -e "${RED}!!! 第 $i 次尝试拉取失败 (退出码: $EXIT_CODE)。可能是网络问题，正在重试... !!!${NC}"
+       fi
+
+       # 如果已经是最后一次尝试，则不需要等待
+       if [ $i -eq $MAX_ATTEMPTS ]; then
+           break
+       fi
+
+       # 如果配置了延迟，则等待
+       if [ "$DELAY_SECONDS" -gt 0 ]; then
+           sleep $DELAY_SECONDS
+       fi
+    done
+
+    # 如果循环完成仍未成功
+    echo -e "${RED}=== 尝试 $MAX_ATTEMPTS 次后拉取仍失败. 操作终止. 请检查网络连接或错误信息. ===${NC}"
+    return 1
+}
+
 # 交互式选择文件
 interactive_select_files() {
     local title="$1"
@@ -529,8 +639,8 @@ cmd_new_branch() {
     
     # 更新基础分支
     echo -e "${BLUE}更新 '$base_branch' 分支...${NC}"
-    git pull "$REMOTE_NAME" "$base_branch"
-    if [ $? -ne 0 ]; then
+    # git pull "$REMOTE_NAME" "$base_branch"
+    if ! do_pull_with_retry "$REMOTE_NAME" "$base_branch"; then
         echo -e "${YELLOW}警告：拉取最新代码失败，可能会基于过时的代码创建分支。${NC}"
         if ! confirm_action "是否继续创建分支？"; then
             return 1
@@ -889,14 +999,14 @@ cmd_status() {
     
     # --- 只有在指定 -l/--log 时才显示日志和标签 ---
     if $show_log; then
-        # 显示最近提交
+    # 显示最近提交
         echo -e "\n${BOLD}最近提交 (-l):${NC}"
         # 使用更详细和彩色的格式
         git log -3 --pretty=format:"%C(yellow)%h%Creset %s %C(bold blue)<%an>%Creset %C(green)(%ar)%Creset%C(auto)%d%Creset"
-        echo ""
-        
-        # 显示最近的标签
-        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null)
+    echo ""
+    
+    # 显示最近的标签
+    latest_tag=$(git describe --tags --abbrev=0 2>/dev/null)
         if [ $? -eq 0 ] && [ -n "$latest_tag" ]; then
             echo -e "${BOLD}最近标签 (-l):${NC} $latest_tag"
         fi
@@ -1233,7 +1343,8 @@ cmd_sync() {
 
     # 3. 拉取主分支最新代码
     echo -e "${BLUE}正在从远程 '$REMOTE_NAME' 拉取主分支 ($MAIN_BRANCH) 的最新代码...${NC}"
-    if ! git pull "$REMOTE_NAME" "$MAIN_BRANCH"; then
+    # if ! git pull "$REMOTE_NAME" "$MAIN_BRANCH"; then
+    if ! do_pull_with_retry "$REMOTE_NAME" "$MAIN_BRANCH"; then
         echo -e "${RED}拉取主分支更新失败。${NC}"
         echo -e "${BLUE}正在切换回原分支 '$original_branch'...${NC}"
         git checkout "$original_branch"
@@ -1271,8 +1382,8 @@ cmd_sync() {
         if $stash_needed; then
              echo -e "${YELLOW}请注意：您之前暂存的变更在 Rebase 成功后需要手动恢复 (git stash pop)。${NC}"
         fi
-        return 1
-    fi
+                return 1
+            fi
 
     # 6. 如果之前暂存了，尝试恢复
     if $stash_needed; then
@@ -1310,8 +1421,8 @@ cmd_save() {
                 else
                     echo -e "${RED}错误: -m/--message 选项需要一个参数。${NC}"
                     echo "用法: gw save [-m \"提交消息\"] [文件...]"
-                    return 1
-                fi
+            return 1
+        fi
                 ;;
             -*)
                 # 不支持其他选项，例如 -a 在 save 中没有意义，因为默认就是 add all
@@ -1364,7 +1475,7 @@ cmd_save() {
 
     # 3. 提交
     echo -e "${BLUE}准备提交暂存的变更...${NC}"
-    # 如果没有通过 -m 提供消息，git commit 会自动打开编辑器
+    # 如果没有通过 -m 提供消息 (commit_args 为空), git commit 会自动打开编辑器
     if git commit "${commit_args[@]}"; then
         echo -e "${GREEN}快速保存成功！${NC}"
         return 0
@@ -1477,7 +1588,8 @@ cmd_finish() {
             echo -e "${BLUE}正在切换到主分支 '$MAIN_BRANCH'...${NC}"
             if git checkout "$MAIN_BRANCH"; then
                 echo -e "${BLUE}正在拉取主分支最新代码...${NC}"
-                if git pull "$REMOTE_NAME" "$MAIN_BRANCH"; then
+                # if git pull "$REMOTE_NAME" "$MAIN_BRANCH"; then
+                if do_pull_with_retry "$REMOTE_NAME" "$MAIN_BRANCH"; then
                     echo -e "${GREEN}已成功切换到主分支并更新。${NC}"
                 else
                     echo -e "${YELLOW}已切换到主分支，但拉取更新失败。请稍后手动执行 'gw pull'。${NC}"
@@ -1499,7 +1611,8 @@ show_help() {
     echo ""
     echo -e "${CYAN}⭐ 核心工作流命令 ⭐${NC}"
     echo "  new <分支名> [基础分支] - 从最新的主分支 (或指定基础分支) 创建并切换，开始新任务"
-    echo "  save [-m \"消息\"] [文件...] - 快速保存变更: 添加指定文件 (默认全部) 并提交开发进展"
+    echo "  save [-m \"消息\"] [文件...] - 快速保存变更: 添加指定文件 (默认全部) 并提交"
+    echo "                            (无 -m 则打开编辑器)"
     echo "  finish [-n|--no-switch] - 完成当前分支开发: 检查/提交, 推送, 准备 PR/MR (-n 不切主分支)"
     echo "  main | master [...]     - 推送主分支 ($MAIN_BRANCH) 到远程 (用于主分支维护, 可加 -f 等)"
     echo "  sync                    - 同步开发分支: 拉取主分支最新代码并 rebase 当前分支"
@@ -1594,12 +1707,18 @@ main() {
             ;;
         pull)
             # 直接调用 git pull，可以增加交互或检查
-            echo -e "${BLUE}正在执行 git pull $* ...${NC}"
-            git pull "$@"
-            LAST_COMMAND_STATUS=$?
-            if [ $LAST_COMMAND_STATUS -ne 0 ]; then
-                echo -e "${RED}git pull 失败。请检查错误信息。${NC}"
+            echo -e "${BLUE}准备执行 git pull (带重试)...${NC}"
+            # git pull "$@"
+            # 使用带重试的 pull
+            if do_pull_with_retry "$@"; then
+                 LAST_COMMAND_STATUS=0
+            else
+                 # do_pull_with_retry 内部已经打印了错误和冲突信息
+                 LAST_COMMAND_STATUS=1
             fi
+            # if [ $LAST_COMMAND_STATUS -ne 0 ]; then
+            #     echo -e "${RED}git pull 失败。请检查错误信息。${NC}"
+            # fi
             ;;
         fetch)
             cmd_fetch "$@"
