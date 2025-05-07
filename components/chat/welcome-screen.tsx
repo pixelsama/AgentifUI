@@ -10,7 +10,7 @@ interface WelcomeScreenProps {
 }
 
 // 定义欢迎页文本内容的向上偏移，在这里修改垂直高度
-const WELCOME_TEXT_SHIFT = "-5rem"; // 示例偏移值（根据需要调整）
+const WELCOME_TEXT_SHIFT = "-8rem"; // 示例偏移值（根据需要调整）
 
 export const WelcomeScreen = ({ className }: WelcomeScreenProps) => {
   const { isDark } = useTheme()
