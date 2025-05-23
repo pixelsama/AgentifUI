@@ -4,7 +4,7 @@ import * as React from "react"
 import { MessageSquare, ChevronDown, ChevronUp, Trash, Edit, Clock } from "lucide-react"
 import { SidebarListButton } from "./sidebar-list-button" // 使用新的 SidebarListButton 组件
 import { SidebarChatIcon } from "./sidebar-chat-icon"
-import { ChatSkeleton } from "./chat-skeleton"
+// import { ChatSkeleton } from "./chat-skeleton"
 import { cn } from "@lib/utils"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { useMobile } from "@lib/hooks/use-mobile"
@@ -250,7 +250,8 @@ export function SidebarChatList({
   // 只有在首次加载或强制刷新时才显示骨架屏
   // 如果有上一次成功加载的对话列表，则使用缓存的列表，避免闪烁
   // --- END COMMENT ---
-  const showSkeleton = isLoadingConversations && conversations.length === 0 && prevLoadedConversations.length === 0;
+  // const showSkeleton = isLoadingConversations && conversations.length === 0 && prevLoadedConversations.length === 0;
+  // const showSkeleton = false;
 
   return (
     <div className="flex flex-col space-y-1">
@@ -265,7 +266,7 @@ export function SidebarChatList({
       </div>
       
       {/* 显示骨架屏 */}
-      {showSkeleton && <ChatSkeleton isDark={isDark} count={5} />}
+      {/* {showSkeleton && <ChatSkeleton isDark={isDark} count={5} />} */}
       
       {/* --- 待处理对话列表 --- */}
       {pendingChats.length > 0 && (
