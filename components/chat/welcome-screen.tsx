@@ -62,7 +62,7 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
             {shouldStartTyping ? (
               <TypeWriter 
                 text={finalText}
-                speed={120} // 主标题稍慢
+                speed={50} // 主标题稍慢
                 delay={300} // 延迟开始，给页面加载一点时间
                 waitingEffect={finalText.endsWith("...")} // 只有等待状态才显示效果
                 className="text-2xl font-bold"
@@ -77,7 +77,7 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
             {shouldStartTyping && (
               <TypeWriter 
                 text="在下方输入框中输入消息开始聊天"
-                speed={40} // 副标题更快
+                speed={20} // 副标题更快
                 delay={finalText.endsWith("...") ? 1500 : 2200} // 根据是否有用户名调整延迟
                 className={`${isDark ? "text-gray-400" : "text-gray-500"}`}
               />
