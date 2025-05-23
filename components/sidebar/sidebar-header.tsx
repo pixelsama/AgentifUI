@@ -91,6 +91,16 @@ export function SidebarHeader() {
         disableLockBehavior={true}
         onClick={() => {
           // --- BEGIN COMMENT ---
+          // 检查当前路径是否已经是新对话页面
+          // 如果已经在新对话页面，直接返回不执行任何操作
+          // 避免重复点击导致状态重置和不必要的操作
+          // --- END COMMENT ---
+          const isAlreadyOnNewChat = window.location.pathname === '/chat/new';
+          if (isAlreadyOnNewChat) {
+            return; // 如果已经在新对话页面，不执行任何操作
+          }
+          
+          // --- BEGIN COMMENT ---
           // 如果当前处于悬停展开状态，立即收起sidebar避免卡顿
           // --- END COMMENT ---
           const { isHovering, setHovering } = useSidebarStore.getState();
@@ -98,17 +108,8 @@ export function SidebarHeader() {
             setHovering(false);
           }
           
-          // --- BEGIN COMMENT ---
-          // 检查当前路径是否已经是新对话页面
-          // 如果已经在新对话页面，只重置状态而不进行路由跳转
-          // 避免重复点击导致标题消失的问题
-          // --- END COMMENT ---
-          const isAlreadyOnNewChat = window.location.pathname === '/chat/new';
-          
-          // 如果不在新对话页面，则跳转到新对话页面
-          if (!isAlreadyOnNewChat) {
-            router.push('/chat/new');
-          }
+          // 跳转到新对话页面
+          router.push('/chat/new');
           
           // 立即重置状态，不使用延迟
           // 清理消息和重置状态
@@ -122,11 +123,6 @@ export function SidebarHeader() {
           // 设置侧边栏状态
           const { selectItem } = useSidebarStore.getState();
           selectItem('chat', null, true); // 保持当前展开状态
-          
-          // 如果已经在新对话页面，手动设置标题以确保其可见
-          if (isAlreadyOnNewChat) {
-            document.title = '新对话 | if-agent-ui';
-          }
         }}
         aria-label="发起新对话"
         className={cn(
