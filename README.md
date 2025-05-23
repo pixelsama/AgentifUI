@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# if-agent-ui 企业级智能聊天平台
 
-## Getting Started
+## 项目简介
 
-First, run the development server:
+if-agent-ui 是一个现代化的多端智能聊天平台前端，基于 Next.js App Router 架构，结合 Supabase Auth、Dify API、Zustand 状态管理和分层数据服务，致力于为企业提供安全、可扩展、易维护的 LLM 聊天体验。
+
+本项目注重工程规范、数据一致性、性能优化与用户体验，适用于企业知识库、AI 助手等场景。
+
+## 主要功能
+
+- 多端响应式聊天 UI，支持移动与桌面
+- 支持多应用/多对话管理
+- 消息持久化与断点恢复
+- Dify API 集成（支持流式回复）
+- Supabase 用户认证与权限管理
+- API 密钥安全管理与加密
+- 高性能消息分页与缓存
+- 主题切换与无障碍支持
+- 健壮的错误处理与状态同步
+
+## 技术栈
+
+- **前端框架**：Next.js 15 (App Router)
+- **UI**：React 18, Tailwind CSS 4
+- **状态管理**：Zustand
+- **后端服务**：Supabase (Auth + Database)
+- **API集成**：Dify, OpenAI 等
+- **工具库**：clsx/cn, Lucide Icons, lodash, date-fns
+- **类型系统**：TypeScript
+
+## 架构设计
+
+采用分层架构，关注点分离：
+
+```
+UI组件 (React)
+    ↓
+自定义Hooks (use-*)
+    ↓
+数据库操作 (lib/db/*)
+    ↓
+数据服务 (lib/services/*)
+    ↓
+Supabase Client
+```
+
+## 核心亮点
+
+- **安全**：严格依赖数据库对话ID，避免临时状态写入，确保数据一致性
+- **可维护**：支持临时ID、Dify ID、数据库ID三者转换，流程健壮
+- **易集成**：API密钥安全体系，支持加密存储、分用户/实例管理、回退机制
+- **数据主权**：严格类型约束，前后端类型同步，行级安全策略（RLS）保障数据隔离
+---
+
+## 快速开始
+
+1. 安装依赖
+
+```bash
+npm install
+```
+
+2. 配置环境变量（参考 `.env.local.example`）
+
+3. 启动开发服务器
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. 访问 http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 主要目录说明
 
-## Learn More
+- `app/`           Next.js 路由与页面
+- `components/`    通用与业务组件
+- `lib/`           数据、服务、hooks、状态管理
+- `docs/`          架构、数据库和API密钥设计文档
+- `supabase/`      数据库迁移文件
 
-To learn more about Next.js, take a look at the following resources:
+## 交流与支持
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+如有问题或建议，请通过 issue 或 PR 与我们联系。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
