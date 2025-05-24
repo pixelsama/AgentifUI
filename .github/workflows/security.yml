@@ -2,9 +2,9 @@ name: Security Checks
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ master, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
   schedule:
     # 每天凌晨2点运行安全检查
     - cron: '0 2 * * *'
@@ -108,7 +108,7 @@ jobs:
   supabase-security:
     name: Supabase安全检查
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
     - name: Checkout code
@@ -189,7 +189,7 @@ jobs:
     name: 安全团队通知
     runs-on: ubuntu-latest
     needs: [dependency-scan, code-security, environment-check]
-    if: failure() && github.ref == 'refs/heads/main'
+    if: failure() && github.ref == 'refs/heads/master'
     
     steps:
     - name: Send security alert
