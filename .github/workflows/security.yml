@@ -1,0 +1,205 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # 每天凌晨2点运行安全检查
+    - cron: '0 2 * * *'
+
+jobs:
+  dependency-scan:
+    name: 依赖安全扫描
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run npm audit
+      run: |
+        npm audit --audit-level=moderate
+        npm audit --json > audit-results.json || true
+        
+    - name: Upload audit results
+      uses: actions/upload-artifact@v4
+      with:
+        name: npm-audit-results
+        path: audit-results.json
+        
+  code-security:
+    name: 代码安全检查
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run ESLint security rules
+      run: |
+        npx eslint . --ext .ts,.tsx,.js,.jsx \
+          --format json \
+          --output-file eslint-security-results.json || true
+          
+    - name: TypeScript security check
+      run: |
+        npx tsc --noEmit --strict
+        
+    - name: Check for hardcoded secrets
+      run: |
+        # 检查是否有硬编码的密钥或敏感信息
+        if grep -r -i "password\|secret\|key\|token" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" . | grep -v node_modules | grep -v ".git" | grep -E "(=|:)\s*['\"][^'\"]{10,}['\"]"; then
+          echo "⚠️ 发现可能的硬编码敏感信息"
+          exit 1
+        fi
+        
+    - name: Upload security scan results
+      uses: actions/upload-artifact@v4
+      with:
+        name: code-security-results
+        path: eslint-security-results.json
+
+  environment-check:
+    name: 环境配置检查
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Check environment files
+      run: |
+        # 检查是否有 .env 文件被意外提交
+        if find . -name ".env" -not -path "./node_modules/*" -not -path "./.git/*" | grep -q .; then
+          echo "❌ 发现 .env 文件被提交到版本控制"
+          exit 1
+        fi
+        
+        # 检查是否有 .env.example 文件
+        if [ ! -f ".env.local.example" ]; then
+          echo "⚠️ 缺少 .env.local.example 文件"
+        fi
+        
+        # 检查 package.json 中的脚本安全性
+        if grep -q "rm -rf" package.json; then
+          echo "⚠️ package.json 中发现潜在危险的删除命令"
+        fi
+
+  supabase-security:
+    name: Supabase安全检查
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Supabase CLI
+      uses: supabase/setup-cli@v1
+      with:
+        version: latest
+        
+    - name: Check database migrations
+      run: |
+        # 检查迁移文件的安全性
+        if find supabase/migrations -name "*.sql" -exec grep -l "DROP\|DELETE\|TRUNCATE" {} \; | grep -q .; then
+          echo "⚠️ 发现包含危险操作的迁移文件"
+        fi
+        
+        # 检查是否有RLS策略
+        if ! find supabase/migrations -name "*.sql" -exec grep -l "ROW LEVEL SECURITY\|RLS" {} \; | grep -q .; then
+          echo "⚠️ 建议为所有表启用行级安全策略"
+        fi
+
+  security-report:
+    name: 生成安全报告
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, code-security, environment-check]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: security-artifacts
+        
+    - name: Generate security report
+      run: |
+        echo "# 安全检查报告" > security-report.md
+        echo "生成时间: $(date)" >> security-report.md
+        echo "" >> security-report.md
+        
+        echo "## 检查结果" >> security-report.md
+        echo "- 依赖安全扫描: ${{ needs.dependency-scan.result }}" >> security-report.md
+        echo "- 代码安全检查: ${{ needs.code-security.result }}" >> security-report.md
+        echo "- 环境配置检查: ${{ needs.environment-check.result }}" >> security-report.md
+        echo "" >> security-report.md
+        
+        if [ -f "security-artifacts/npm-audit-results/audit-results.json" ]; then
+          echo "## 依赖漏洞详情" >> security-report.md
+          cat security-artifacts/npm-audit-results/audit-results.json | jq -r '.vulnerabilities | to_entries[] | "- \(.key): \(.value.severity)"' >> security-report.md || echo "无漏洞发现" >> security-report.md
+        fi
+        
+    - name: Upload security report
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-report
+        path: security-report.md
+        
+    - name: Comment PR with security results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          if (fs.existsSync('security-report.md')) {
+            const report = fs.readFileSync('security-report.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🔒 安全检查报告\n\n${report}`
+            });
+          }
+
+  notify-security-team:
+    name: 安全团队通知
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, code-security, environment-check]
+    if: failure() && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Send security alert
+      run: |
+        echo "🚨 安全检查失败，需要立即关注！"
+        echo "分支: ${{ github.ref }}"
+        echo "提交: ${{ github.sha }}"
+        echo "详情: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        
+        # 这里可以集成实际的通知系统，如Slack、企业微信等
+        # curl -X POST -H 'Content-type: application/json' \
+        #   --data '{"text":"安全检查失败: ${{ github.repository }}"}' \
+        #   ${{ secrets.SLACK_WEBHOOK_URL }} 
