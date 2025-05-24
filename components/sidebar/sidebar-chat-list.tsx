@@ -212,7 +212,7 @@ export function SidebarChatList({
       <DropdownMenuV2
         placement="bottom"
         alignToTriggerBottom={true}
-        minWidth={150}
+        minWidth={140}
         contentClassName={cn(isDark ? "bg-stone-800 border border-stone-700" : "bg-white border border-stone-200")}
         trigger={
           <MoreButtonV2
