@@ -13,17 +13,17 @@
 // --- END COMMENT ---
 
 // 统一数据服务
-export { dataService } from '@lib/services/data-service';
+export { dataService } from '@lib/services/db/data-service';
 
 // 缓存服务
-export { cacheService, CacheKeys } from '@lib/services/cache-service';
+export { cacheService, CacheKeys } from '@lib/services/db/cache-service';
 
 // 实时订阅服务
-export { realtimeService, SubscriptionKeys, SubscriptionConfigs } from '@lib/services/realtime-service';
+export { realtimeService, SubscriptionKeys, SubscriptionConfigs } from '@lib/services/db/realtime-service';
 
 // 消息服务
-export { messageService } from '@lib/services/message-service';
-export type { MessagePage, PaginationCursor } from '@lib/services/message-service';
+export { messageService } from '@lib/services/db/message-service';
+export type { MessagePage, PaginationCursor } from '@lib/services/db/message-service';
 
 // Result类型和错误处理
 export type { Result } from '@lib/types/result';
@@ -39,8 +39,8 @@ export {
 // --- BEGIN COMMENT ---
 // 导入服务实例，用于内部函数使用
 // --- END COMMENT ---
-import { cacheService as cacheServiceInstance } from '@lib/services/cache-service';
-import { realtimeService as realtimeServiceInstance } from '@lib/services/realtime-service';
+import { cacheService as cacheServiceInstance } from '@lib/services/db/cache-service';
+import { realtimeService as realtimeServiceInstance } from '@lib/services/db/realtime-service';
 
 // --- BEGIN COMMENT ---
 // 兼容性导出：保留原有函数接口

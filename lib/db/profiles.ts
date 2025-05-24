@@ -5,9 +5,9 @@
  * 更新为使用统一的数据服务和Result类型
  */
 
-import { dataService } from '@lib/services/data-service';
-import { cacheService, CacheKeys } from '@lib/services/cache-service';
-import { realtimeService, SubscriptionKeys, SubscriptionConfigs } from '@lib/services/realtime-service';
+import { dataService } from '@lib/services/db/data-service';
+import { cacheService, CacheKeys } from '@lib/services/db/cache-service';
+import { realtimeService, SubscriptionKeys, SubscriptionConfigs } from '@lib/services/db/realtime-service';
 import { Result, success, failure } from '@lib/types/result';
 import { Profile } from '@lib/types/database';
 import { createClient } from '../supabase/client';

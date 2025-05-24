@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useState, useRef } from 'react';
-import { messageService } from '@lib/services/message-service';
+import { messageService } from '@lib/services/db/message-service';
 import { getMessageByContentAndRole, createPlaceholderAssistantMessage } from '@lib/db/messages';
 import { ChatMessage, useChatStore } from '@lib/stores/chat-store';
 

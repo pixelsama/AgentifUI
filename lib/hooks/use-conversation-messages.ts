@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { messageService } from '@lib/services/message-service';
+import { messageService } from '@lib/services/db/message-service';
 import { getConversationByExternalId } from '@lib/db/conversations';
 import { Message } from '@lib/types/database';
 import { useChatStore, ChatMessage } from '@lib/stores/chat-store';

@@ -57,25 +57,25 @@ if (result.success) {
 }
 ```
 
-#### 2. 缓存服务 (`lib/services/cache-service.ts`)
+#### 2. 缓存服务 (`lib/services/db/cache-service.ts`)
 - **TTL缓存管理**: 自动过期清理
 - **模式匹配清理**: `clearByPattern('user:*')`
 - **内存统计**: 实时监控缓存使用情况
 - **批量操作**: 高效的缓存管理
 
-#### 3. 实时订阅服务 (`lib/services/realtime-service.ts`)
+#### 3. 实时订阅服务 (`lib/services/db/realtime-service.ts`)
 - **防重复订阅**: 自动去重，避免内存泄漏
 - **共享订阅**: 多组件共享同一订阅
 - **自动清理**: 组件卸载时自动清理
 - **错误恢复**: 网络断开重连机制
 
-#### 4. 统一数据服务 (`lib/services/data-service.ts`)
+#### 4. 统一数据服务 (`lib/services/db/data-service.ts`)
 - **通用CRUD**: 标准化的增删改查操作
 - **集成缓存**: 自动缓存和失效策略
 - **重试机制**: 网络异常时自动重试
 - **错误分类**: 智能的错误类型识别
 
-#### 5. 消息服务 (`lib/services/message-service.ts`)
+#### 5. 消息服务 (`lib/services/db/message-service.ts`)
 - **游标分页**: 高性能的分页实现
 - **批量操作**: 减少数据库往返次数
 - **智能排序**: 数据库级排序优化
@@ -119,7 +119,7 @@ if (profile) {
 **统一缓存键命名**:
 ```typescript
 // 使用预定义的缓存键
-import { CacheKeys } from '@lib/services/cache-service';
+import { CacheKeys } from '@lib/services/db/cache-service';
 
 // ✅ 正确使用
 await cacheService.set(CacheKeys.user(userId), profileData);

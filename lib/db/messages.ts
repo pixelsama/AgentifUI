@@ -5,8 +5,8 @@
  * 更新为使用新的messageService和统一数据服务，同时保留兼容版本
  */
 
-import { messageService } from '@lib/services/message-service';
-import { dataService } from '@lib/services/data-service';
+import { messageService } from '@lib/services/db/message-service';
+import { dataService } from '@lib/services/db/data-service';
 import { Result, success, failure } from '@lib/types/result';
 import { createClient } from '@lib/supabase/client';
 import { Message, MessageStatus } from '@lib/types/database';

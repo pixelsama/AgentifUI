@@ -5,8 +5,8 @@
  * 更新为使用统一的数据服务和Result类型
  */
 
-import { dataService } from '@lib/services/data-service';
-import { cacheService, CacheKeys } from '@lib/services/cache-service';
+import { dataService } from '@lib/services/db/data-service';
+import { cacheService, CacheKeys } from '@lib/services/db/cache-service';
 import { Result, success, failure } from '@lib/types/result';
 import { createClient } from '../supabase/client';
 import { ApiKey } from '../types/database';

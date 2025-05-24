@@ -5,9 +5,9 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { dataService } from '@lib/services/data-service';
-import { realtimeService, SubscriptionKeys, SubscriptionConfigs } from '@lib/services/realtime-service';
-import { cacheService, CacheKeys } from '@lib/services/cache-service';
+import { dataService } from '@lib/services/db/data-service';
+import { realtimeService, SubscriptionKeys, SubscriptionConfigs } from '@lib/services/db/realtime-service';
+import { cacheService, CacheKeys } from '@lib/services/db/cache-service';
 import { Conversation } from '@lib/types/database';
 import { createClient } from '@lib/supabase/client';
 
