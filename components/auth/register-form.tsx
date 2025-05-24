@@ -31,8 +31,29 @@ export function RegisterForm() {
     e.preventDefault();
     
     // 表单验证
+    if (!formData.name.trim()) {
+      setError('请输入姓名');
+      return;
+    }
+    
+    if (!formData.email.trim()) {
+      setError('请输入邮箱地址');
+      return;
+    }
+    
+    if (formData.password.length < 6) {
+      setError('密码长度至少6位');
+      return;
+    }
+    
     if (formData.password !== formData.confirmPassword) {
       setError('两次输入的密码不一致');
+      return;
+    }
+    
+    // 验证用户名格式（如果提供）
+    if (formData.username.trim() && !/^[a-zA-Z0-9_-]{2,20}$/.test(formData.username.trim())) {
+      setError('昵称只能包含字母、数字、下划线和连字符，长度2-20位');
       return;
     }
     
@@ -46,16 +67,33 @@ export function RegisterForm() {
         password: formData.password,
         options: {
           data: {
-            full_name: formData.name,
-            username: formData.username || undefined, // 如果为空则不传递
+            full_name: formData.name.trim(), // 去除首尾空格
+            username: formData.username.trim() || undefined, // 去除空格，如果为空则不传递
           },
         },
       });
       
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        // 处理常见的注册错误
+        if (signUpError.message.includes('already registered')) {
+          throw new Error('该邮箱已被注册，请使用其他邮箱或直接登录');
+        } else if (signUpError.message.includes('Password should be')) {
+          throw new Error('密码强度不够，请使用更复杂的密码');
+        } else if (signUpError.message.includes('Invalid email')) {
+          throw new Error('邮箱格式不正确，请检查后重试');
+        } else {
+          throw signUpError;
+        }
+      }
       
-      // 注册成功后跳转到登录页面，并显示验证邮件提示
-      router.push('/login?registered=true');
+      // 检查是否需要邮箱验证
+      if (data.user && !data.user.email_confirmed_at) {
+        // 需要邮箱验证
+        router.push('/login?registered=true&verify=true');
+      } else {
+        // 直接注册成功（如果禁用了邮箱验证）
+        router.push('/login?registered=true');
+      }
     } catch (err: any) {
       setError(err.message || '注册失败，请稍后再试');
     } finally {
