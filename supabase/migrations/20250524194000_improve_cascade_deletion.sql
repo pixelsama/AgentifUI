@@ -245,11 +245,12 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 8. 创建索引以提升清理操作性能
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_org_members_org_id_role 
+-- 注意：在迁移中不能使用 CONCURRENTLY，改为普通索引创建
+CREATE INDEX IF NOT EXISTS idx_org_members_org_id_role 
   ON org_members(org_id, role);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_org_members_user_id_role 
+CREATE INDEX IF NOT EXISTS idx_org_members_user_id_role 
   ON org_members(user_id, role);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_messages_conversation_id 
+CREATE INDEX IF NOT EXISTS idx_messages_conversation_id 
   ON messages(conversation_id);
 
 -- 刷新 Supabase 客户端缓存
