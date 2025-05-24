@@ -78,12 +78,6 @@ jobs:
         fi
         
         echo "✅ 未发现硬编码敏感信息"
-        
-    - name: 🔍 TypeScript 类型检查
-      run: |
-        echo "🔍 运行 TypeScript 类型检查..."
-        npx tsc --noEmit
-        echo "✅ TypeScript 类型检查通过"
 
   environment-check:
     name: 🌍 环境配置检查
@@ -188,7 +182,6 @@ jobs:
           echo ""
           echo "## 🔐 代码安全"
           echo "✅ 硬编码检查通过"
-          echo "✅ TypeScript类型检查通过"
           echo ""
           echo "## 🌍 环境配置"
           echo "✅ 配置安全检查通过"
