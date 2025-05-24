@@ -42,14 +42,6 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key # 服务角色密钥（仅服务
 # (可选) OAuth Provider 配置
 # 这些在 Supabase 控制台中配置
 
-# Dify配置
-DIFY_API_KEY=your_dify_api_key
-DIFY_API_URL=https://api.dify.ai
-
-# 网站URL
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-```
-
 ### 3\. 启动开发服务器
 
 ```bash
