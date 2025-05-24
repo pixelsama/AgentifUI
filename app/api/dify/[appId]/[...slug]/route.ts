@@ -29,7 +29,7 @@ function createMinimalHeaders(contentType?: string): Headers {
 async function proxyToDify(
   req: NextRequest, // 原始 Next.js 请求对象
   // 修改点 1：接收包含 params 的 context 对象
-  context: { params: Promise<DifyApiParams> | DifyApiParams } // 允许 Promise 或直接对象以兼容不同 Next.js 版本或场景
+  context: { params: Promise<DifyApiParams> } // 统一使用 Promise 类型
 ) {
 
   // 修改点 2：使用 await 获取 params 的值
@@ -351,16 +351,42 @@ async function proxyToDify(
 }
 
 // --- 导出对应 HTTP 方法的处理函数 ---
-// 直接将 proxyToDify 赋给需要支持的方法
+// 为每个 HTTP 方法创建符合 Next.js 15 要求的处理函数
 
-export {
-    proxyToDify as GET,
-    proxyToDify as POST,
-    proxyToDify as PUT,
-    proxyToDify as DELETE,
-    proxyToDify as PATCH
-    // OPTIONS 通常由 Next.js 或 Vercel 自动处理 CORS 预检，但如果需要自定义可以添加
-};
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<DifyApiParams> }
+) {
+  return proxyToDify(req, context);
+}
+
+export async function POST(
+  req: NextRequest,
+  context: { params: Promise<DifyApiParams> }
+) {
+  return proxyToDify(req, context);
+}
+
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<DifyApiParams> }
+) {
+  return proxyToDify(req, context);
+}
+
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<DifyApiParams> }
+) {
+  return proxyToDify(req, context);
+}
+
+export async function PATCH(
+  req: NextRequest,
+  context: { params: Promise<DifyApiParams> }
+) {
+  return proxyToDify(req, context);
+}
 
 // --- BEGIN OPTIMIZATION: Explicit OPTIONS handler --- 
 // 添加明确的 OPTIONS 请求处理函数，以确保 CORS 预检请求在各种部署环境下都能正确响应

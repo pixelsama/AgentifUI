@@ -5,6 +5,11 @@ import { createClient } from '@lib/supabase/client';
 import { Provider, ServiceInstance, ApiKey } from '@lib/types/database';
 import { Result } from '@lib/types/result';
 
+// --- BEGIN COMMENT ---
+// 重新导出类型定义，供其他组件使用
+// --- END COMMENT ---
+export type { Provider, ServiceInstance, ApiKey } from '@lib/types/database';
+
 // 导入数据库操作函数
 import {
   getActiveProviders,

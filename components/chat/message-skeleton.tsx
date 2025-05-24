@@ -48,3 +48,21 @@ export function MessageSkeleton() {
     </div>
   );
 }
+
+// --- BEGIN COMMENT ---
+// 添加 MessageSkeletonGroup 组件，用于显示多个消息骨架屏
+// --- END COMMENT ---
+interface MessageSkeletonGroupProps {
+  count?: number;
+  className?: string;
+}
+
+export function MessageSkeletonGroup({ count = 3, className }: MessageSkeletonGroupProps) {
+  return (
+    <div className={cn("space-y-4", className)}>
+      {Array.from({ length: count }).map((_, index) => (
+        <MessageSkeleton key={index} />
+      ))}
+    </div>
+  );
+}

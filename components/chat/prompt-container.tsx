@@ -9,7 +9,7 @@ import { PromptPanel } from "@components/ui/prompt-panel"
 import { Sparkles, HelpCircle, BookOpen, Building, LucideIcon } from "lucide-react"
 import { usePromptPanelStore } from "@lib/stores/ui/prompt-panel-store"
 import { useChatLayoutStore, INITIAL_INPUT_HEIGHT } from "@lib/stores/chat-layout-store"
-import { PROMPT_CATEGORIES } from "@presets/prompt.json"
+import { PROMPT_CATEGORIES } from "@presets/prompt"
 import { useChatTransitionStore } from "@lib/stores/chat-transition-store"
 
 interface PromptContainerProps {

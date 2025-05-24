@@ -55,11 +55,12 @@ export function SidebarAppList({
           <SidebarButton 
             key={app.id} 
             icon={app.icon} 
-            text={app.title}
             active={selectedId === app.id}
             className="w-full group"
             onClick={() => onSelectApp(app.id)}
-          />
+          >
+            {app.title}
+          </SidebarButton>
         ))}
         {applications.length > 2 && (
           <SidebarButton
@@ -67,7 +68,6 @@ export function SidebarAppList({
               ? <ChevronUp className="h-4 w-4" /> 
               : <ChevronDown className="h-4 w-4" />
             }
-            text={showAllApps ? "收起" : "显示更多"}
             className={cn(
               "w-full text-xs group font-medium",
               isDark ? "text-gray-300" : "text-gray-500",
@@ -76,7 +76,9 @@ export function SidebarAppList({
               "border-none shadow-none"
             )}
             onClick={toggleShowAllApps}
-          />
+          >
+            {showAllApps ? "收起" : "显示更多"}
+          </SidebarButton>
         )}
       </div>
     </div>
