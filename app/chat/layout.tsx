@@ -7,6 +7,7 @@ import { cn } from "@lib/utils"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { useEffect } from "react"
 import { useMobile } from "@lib/hooks"
+import { StagewiseToolbarWrapper } from "@components/dev/stagewise-toolbar"
 
 interface ChatLayoutProps {
   children: React.ReactNode
@@ -55,6 +56,7 @@ export default function ChatLayout({ children }: ChatLayoutProps) {
       >
         <div className="h-full p-0">{children}</div>
       </main>
+      <StagewiseToolbarWrapper />
     </div>
   )
 } 
