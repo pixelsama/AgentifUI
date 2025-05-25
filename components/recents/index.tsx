@@ -9,7 +9,7 @@ import { useChatStore } from "@lib/stores/chat-store"
 import { useChatInputStore } from "@lib/stores/chat-input-store"
 import { useChatTransitionStore } from "@lib/stores/chat-transition-store"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
-import { useSidebarConversations } from "@lib/hooks/use-sidebar-conversations"
+import { useAllConversations } from "@lib/hooks/use-all-conversations"
 import { RecentsList } from "./recents-list"
 import { useChatWidth } from "@lib/hooks/use-chat-width"
 
@@ -24,16 +24,17 @@ export function Recents() {
   const { widthClass, paddingClass } = useChatWidth()
   
   // --- BEGIN COMMENT ---
-  // 获取历史对话列表，默认加载10个，滚动时加载更多
+  // 获取所有历史对话列表，不限制数量
   // --- END COMMENT ---
   const { 
     conversations, 
     isLoading, 
     error, 
-    total, 
-    hasMore, 
-    loadMore 
-  } = useSidebarConversations(10)
+    total,
+    refresh,
+    deleteConversation,
+    renameConversation
+  } = useAllConversations()
   
   // --- BEGIN COMMENT ---
   // 处理搜索输入变化
@@ -102,12 +103,35 @@ export function Recents() {
           widthClass, paddingClass
         )}>
           <div className="flex items-center justify-between">
-            <h1 className={cn(
-              "text-2xl font-bold",
-              isDark ? "text-stone-100" : "text-stone-800"
-            )}>
-              历史对话
-            </h1>
+            <div className="flex flex-col">
+              <h1 className={cn(
+                "text-2xl font-bold",
+                isDark ? "text-stone-100" : "text-stone-800"
+              )}>
+                历史对话
+              </h1>
+              {/* --- BEGIN COMMENT ---
+              // 显示对话总数的美观文字
+              // --- END COMMENT --- */}
+              <div className={cn(
+                "text-sm mt-1",
+                isDark ? "text-stone-400" : "text-stone-600"
+              )}>
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <span className={cn(
+                      "w-3 h-3 rounded-full animate-pulse mr-2 inline-block",
+                      isDark ? "bg-stone-600" : "bg-stone-400"
+                    )} />
+                    正在加载对话记录...
+                  </span>
+                ) : total > 0 ? (
+                  `共找到 ${total} 个历史对话`
+                ) : (
+                  "暂无历史对话记录"
+                )}
+              </div>
+            </div>
             
             <button
               onClick={handleNewChat}
@@ -164,9 +188,11 @@ export function Recents() {
             conversations={filteredConversations}
             isLoading={isLoading}
             onConversationClick={handleConversationClick}
-            hasMore={hasMore}
-            loadMore={loadMore}
             searchQuery={searchQuery}
+            total={total}
+            onDelete={deleteConversation}
+            onRename={renameConversation}
+            onRefresh={refresh}
           />
         </div>
       </div>

@@ -12,15 +12,17 @@ import { DropdownMenu } from "@components/ui/dropdown-menu"
 
 // --- BEGIN COMMENT ---
 // 历史对话列表组件
-// 显示对话列表，支持加载更多、搜索等功能
+// 显示对话列表，支持搜索、删除、重命名等功能
 // --- END COMMENT ---
 interface RecentsListProps {
   conversations: Conversation[]
   isLoading: boolean
   onConversationClick: (id: string) => void
-  hasMore: boolean
-  loadMore: () => void
   searchQuery: string
+  total: number
+  onDelete: (conversationId: string) => Promise<boolean>
+  onRename: (conversationId: string, newTitle: string) => Promise<boolean>
+  onRefresh: () => void
 }
 
 // --- BEGIN COMMENT ---
@@ -31,38 +33,18 @@ export function RecentsList({
   conversations,
   isLoading,
   onConversationClick,
-  hasMore,
-  loadMore,
-  searchQuery
+  searchQuery,
+  total,
+  onDelete,
+  onRename,
+  onRefresh
 }: RecentsListProps): React.ReactElement {
   const { isDark } = useTheme()
   const listRef = React.useRef<HTMLDivElement>(null)
   
   // --- BEGIN COMMENT ---
-  // 处理滚动加载更多
+  // 移除滚动加载更多功能，因为现在加载所有对话
   // --- END COMMENT ---
-  React.useEffect(() => {
-    const handleScroll = () => {
-      if (!listRef.current || !hasMore) return
-      
-      const { scrollTop, scrollHeight, clientHeight } = listRef.current
-      // 当滚动到距离底部 100px 时加载更多
-      if (scrollHeight - scrollTop - clientHeight < 100) {
-        loadMore()
-      }
-    }
-    
-    const listElement = listRef.current
-    if (listElement) {
-      listElement.addEventListener('scroll', handleScroll)
-    }
-    
-    return () => {
-      if (listElement) {
-        listElement.removeEventListener('scroll', handleScroll)
-      }
-    }
-  }, [hasMore, loadMore])
   
   // --- BEGIN COMMENT ---
   // 处理重命名对话
@@ -74,12 +56,11 @@ export function RecentsList({
     if (!newTitle || newTitle.trim() === '') return
     
     try {
-      const { renameConversation } = await import('@lib/db/conversations')
-      const success = await renameConversation(conversation.id, newTitle.trim())
+      const success = await onRename(conversation.id, newTitle.trim())
       
       if (success) {
-        // 刷新页面以显示新标题
-        window.location.reload()
+        // 刷新列表以显示新标题
+        onRefresh()
       } else {
         alert('重命名会话失败。')
       }
@@ -98,12 +79,11 @@ export function RecentsList({
     if (!confirmed) return
     
     try {
-      const { deleteConversation } = await import('@lib/db/conversations')
-      const success = await deleteConversation(conversation.id)
+      const success = await onDelete(conversation.id)
       
       if (success) {
-        // 刷新页面以更新列表
-        window.location.reload()
+        // 刷新列表以更新显示
+        onRefresh()
       } else {
         alert('删除会话失败。')
       }
@@ -281,17 +261,21 @@ export function RecentsList({
         <div className="flex flex-col">
           {conversations.map(renderConversationItem)}
           
-          {/* 加载更多指示器 */}
-          {hasMore && (
+          {/* --- BEGIN COMMENT ---
+          // 显示对话总数信息，在列表底部
+          // --- END COMMENT --- */}
+          {conversations.length > 0 && (
             <div className={cn(
-              "flex items-center justify-center py-4",
-              isDark ? "text-stone-500" : "text-stone-500"
+              "flex items-center justify-center py-6 mt-4 border-t",
+              isDark ? "text-stone-500 border-stone-700" : "text-stone-500 border-stone-200"
             )}>
-              <div className={cn(
-                "h-5 w-5 rounded-full border-2 border-t-transparent animate-spin",
-                isDark ? "border-stone-600" : "border-stone-400"
-              )} />
-              <span className="ml-2 text-sm">加载更多...</span>
+              <Clock className="h-4 w-4 mr-2" />
+              <span className="text-sm">
+                {searchQuery ? 
+                  `搜索结果：${conversations.length} 个对话` : 
+                  `共 ${total} 个历史对话`
+                }
+              </span>
             </div>
           )}
         </div>
