@@ -8,6 +8,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   
+  // 生产环境自动移除 console.log
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'] // 保留 console.error 和 console.warn
+    } : false
+  },
+  
   // 在构建时忽略 ESLint 错误
   eslint: {
     ignoreDuringBuilds: true,
