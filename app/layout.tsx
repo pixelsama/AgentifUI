@@ -17,7 +17,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "if-agent-ui",
+  title: "AgentifUI",
   description: "企业级大模型应用",
 };
 

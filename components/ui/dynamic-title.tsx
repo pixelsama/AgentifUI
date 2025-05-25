@@ -26,7 +26,7 @@ export function DynamicTitle() {
   const [lastTitle, setLastTitle] = useState<string | null>(null)
   
   // 基础应用名称
-  const baseTitle = 'if-agent-ui'
+  const baseTitle = 'AgentifUI'
   useEffect(() => {
     // 标记开始更新标题
     setIsUpdating(true)

@@ -65,7 +65,7 @@ export function RecentsList({
         // --- END COMMENT ---
         const currentTitle = document.title
         const oldTitle = conversation.title || '新对话'
-        const baseTitle = 'if-agent-ui'
+        const baseTitle = 'AgentifUI'
         
         if (currentTitle.includes(oldTitle)) {
           document.title = `${newTitle.trim()} | ${baseTitle}`
@@ -122,7 +122,7 @@ export function RecentsList({
   const handleConversationItemClick = (conversation: Conversation) => {
     const conversationId = conversation.external_id || conversation.id || ''
     const title = conversation.title || '新对话'
-    const baseTitle = 'if-agent-ui'
+    const baseTitle = 'AgentifUI'
     const fullTitle = `${title} | ${baseTitle}`
     
     // --- BEGIN COMMENT ---

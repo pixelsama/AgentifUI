@@ -92,7 +92,7 @@ export function SidebarChatList({
         // 重命名成功后直接更新页面标题，无需刷新页面
         // --- END COMMENT ---
         if (selectedId === chatId) {
-          const baseTitle = 'if-agent-ui';
+          const baseTitle = 'AgentifUI';
           document.title = `${newTitle.trim()} | ${baseTitle}`;
         }
         

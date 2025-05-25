@@ -76,7 +76,7 @@ export function Recents() {
       useSidebarStore.getState().selectItem('chat', null, true)
       
       // 设置标题
-      document.title = '新对话 | if-agent-ui'
+      document.title = '新对话 | AgentifUI'
     }, 100)
   }
   

@@ -1,8 +1,8 @@
-# if-agent-ui 企业级智能聊天平台
+# AgentifUI 企业级智能聊天平台
 
 ## 项目简介
 
-if-agent-ui 是一个现代化的多端智能聊天平台前端，基于 Next.js App Router 架构，结合 Supabase Auth、Dify API、Zustand 状态管理和分层数据服务，致力于为企业提供安全、可扩展、易维护的 LLM 聊天体验。
+AgentifUI 是一个现代化的多端智能聊天平台前端，基于 Next.js App Router 架构，结合 Supabase Auth、Dify API、Zustand 状态管理和分层数据服务，致力于为企业提供安全、可扩展、易维护的 LLM 聊天体验。
 
 本项目注重工程规范、数据一致性、性能优化与用户体验，适用于企业知识库、AI 助手等场景。
 

@@ -24,7 +24,7 @@ export default function RecentsPage() {
     setMounted()
     
     // 设置页面标题
-    document.title = "历史对话 | if-agent-ui"
+    document.title = "历史对话 | AgentifUI"
   }, [setMounted])
 
   return (
