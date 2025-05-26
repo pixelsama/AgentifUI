@@ -290,7 +290,7 @@
  * - 如需更宽松：调整为 1.4-1.5
  */
 .assistant-message-content {
-  line-height: 1.6 !important;
+  line-height: 1.35 !important;
 }
 
 /* 
