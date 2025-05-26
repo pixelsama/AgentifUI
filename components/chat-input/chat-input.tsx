@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { PlusIcon, ArrowUpIcon, Square, Loader2 } from "lucide-react"
 import { useChatWidth, useInputHeightReset } from "@lib/hooks"
-import { useSupabaseAuth } from "@lib/supabase/hooks"; 
+import { useSupabaseAuth } from "@lib/supabase/hooks"
 import { useCurrentApp } from "@lib/hooks/use-current-app";
 import { useChatLayoutStore } from "@lib/stores/chat-layout-store"
 import { useChatInputStore } from "@lib/stores/chat-input-store"
@@ -150,9 +150,9 @@ export const ChatInput = ({
     }
   }, [setInputHeight, textAreaHeight, currentLayoutInputHeight]); // attachmentBarHeight 从依赖中移除
 
-  // --- BEGIN 中文注释 --- 用户ID和应用ID信息 ---
+  // --- BEGIN 中文注释 --- 用户ID 应用ID信息 ---
   const { session } = useSupabaseAuth();
-  const currentUserId = session?.user?.id;
+  const activeUserId = session?.user?.id;
   const { 
     currentAppId, 
     isLoading: isLoadingAppId, 
@@ -161,26 +161,6 @@ export const ChatInput = ({
     isReady: isAppReady
   } = useCurrentApp();
   // --- END 中文注释 ---
-
-  // --- BEGIN COMMENT ---
-  // 处理用户未登录或AppId加载状态的副作用
-  // --- END COMMENT ---
-  useEffect(() => {
-    if (!currentUserId && session !== undefined) { // session !== undefined 表示认证状态已确定
-      console.log("ChatInput: User not logged in.");
-      // TODO: 可以在此禁用输入框或提示用户登录
-      // 例如: useNotificationStore.getState().showNotification("请先登录以发送消息", "warning");
-    }
-    if (isLoadingAppId) {
-      console.log("ChatInput: App ID is loading...");
-      // TODO: 可以在此设置一个加载状态，例如禁用输入框
-    }
-    if (errorLoadingAppId) {
-      console.error("ChatInput: Error loading App ID:", errorLoadingAppId);
-      // TODO: 可以在此显示错误提示给用户
-      // 例如: useNotificationStore.getState().showNotification(`应用加载失败: ${errorLoadingAppId}`, "error");
-    }
-  }, [currentUserId, session, isLoadingAppId, errorLoadingAppId]);
 
   // 提交消息（实现乐观 UI：先清空，失败再恢复）
   const handleLocalSubmit = async () => {
@@ -209,20 +189,6 @@ export const ChatInput = ({
       const filesToSend = (Array.isArray(files) && files.length > 0) ? files : undefined;
 
       // 3. 检查是否可以提交 (使用暂存的消息)
-      // --- BEGIN COMMENT ---
-      // 在提交前，再次校验 userId 和 appId
-      // --- END COMMENT ---
-      if (!currentUserId) {
-        console.error("ChatInput: Cannot submit, user not authenticated.");
-        useNotificationStore.getState().showNotification("请先登录后再发送消息", "error");
-        return; // 阻止提交
-      }
-      if (!currentAppId || isLoadingAppId) {
-        console.error(`ChatInput: Cannot submit, App ID not ready (current: ${currentAppId}, loading: ${isLoadingAppId}).`);
-        useNotificationStore.getState().showNotification(isLoadingAppId ? "应用正在加载，请稍候..." : "当前未选择应用，无法发送消息", "warning");
-        return; // 阻止提交
-      }
-
       if (savedMessage.trim() && onSubmit) {
         // --- BEGIN 中文注释 --- 乐观 UI：立即清空 ---
         clearMessage();
@@ -329,7 +295,7 @@ export const ChatInput = ({
     if (isWelcomeScreen) {
       const timer = setTimeout(() => {
         useFocusManager.getState().focusInput();
-      }, 150); // 150ms延迟，确保过渡动画完成
+      }, 150);
       
       return () => clearTimeout(timer);
     }
@@ -364,14 +330,12 @@ export const ChatInput = ({
 
         // 调用上传服务
         // --- BEGIN COMMENT ---
-        // 确保 currentAppId 和 currentUserId 在调用时是有效的
+        // 使用当前的 appId 进行上传，如果没有则使用默认值
         // --- END COMMENT ---
-        if (!currentAppId || !currentUserId) {
-          console.error("ChatInput: Cannot upload file, appId or userId is missing.");
-          updateFileStatus(fileId, 'error', undefined, '应用或用户信息丢失，无法上传');
-          return;
-        }
-        uploadDifyFile(currentAppId, file, currentUserId, (progress) => {
+        const appIdToUse = currentAppId || 'chat-input-warning-no-app-id';
+        const userIdToUse = session?.user?.id || 'chat-input-warning-no-user-id'; // 使用匿名用户ID
+        
+        uploadDifyFile(appIdToUse, file, userIdToUse, (progress) => {
           // 更新进度
           updateFileStatus(fileId, 'uploading', progress);
         })
@@ -408,18 +372,15 @@ export const ChatInput = ({
     // 2. 重新调用上传服务
     try {
       // --- BEGIN COMMENT ---
-      // 确保 currentAppId 和 currentUserId 在调用时是有效的
+      // 使用当前的 appId 进行上传，如果没有则使用默认值
       // --- END COMMENT ---
-      if (!currentAppId || !currentUserId) {
-        console.error(`[ChatInput] Cannot retry upload for ${fileId}: appId or userId is missing.`);
-        updateFileStatus(fileId, 'error', undefined, '应用或用户信息丢失，无法重试上传');
-        useNotificationStore.getState().showNotification(`文件 ${attachment.name} 重试失败: 应用或用户信息丢失`, 'error');
-        return;
-      }
+      const appIdToUse = currentAppId || 'chat-input-warning-no-app-id';
+      const userIdToUse = session?.user?.id || 'chat-input-warning-no-user-id'; // 使用匿名用户ID
+      
       const response = await uploadDifyFile(
-        currentAppId, 
+        appIdToUse, 
         attachment.file, // 使用原始 File 对象
-        currentUserId, 
+        userIdToUse, 
         (progress) => {
           // 更新进度回调
           updateFileStatus(fileId, 'uploading', progress);
@@ -437,7 +398,7 @@ export const ChatInput = ({
         'error'
       );
     }
-  }, [currentAppId, currentUserId, updateFileStatus, updateFileUploadedId]);
+  }, [currentAppId, updateFileStatus, updateFileUploadedId, session?.user?.id]);
 
   // --- 计算按钮禁用状态 (依赖 store) ---
   const isUploading = attachments.some(f => f.status === 'uploading');
