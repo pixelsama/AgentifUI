@@ -9,6 +9,7 @@ CREATE TYPE message_status AS ENUM ('sent', 'delivered', 'error');
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   full_name TEXT,
+  username TEXT UNIQUE,
   avatar_url TEXT,
   role user_role DEFAULT 'user'::user_role,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -182,8 +183,13 @@ CREATE POLICY "用户可以更新自己的偏好设置" ON user_preferences
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, avatar_url)
-  VALUES (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+  INSERT INTO public.profiles (id, full_name, username, avatar_url)
+  VALUES (
+    new.id, 
+    new.raw_user_meta_data->>'full_name', 
+    CONCAT('user_', SUBSTRING(CAST(new.id AS TEXT), 1, 8)),
+    new.raw_user_meta_data->>'avatar_url'
+  );
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
