@@ -46,16 +46,16 @@ next-env.d.ts
 
 # test files
 /files
-/scripts
+# /scripts
 
 # venv
 .venv
 
 # documentation
-/docs/supabase-docs.md
-/docs/DATABASE-DESIGN.md
-/docs/EMBEDDABLE_CHAT_COMPONENT_DESIGN.md
-/docs/README-API-KEY-MANAGEMENT.md
+# /docs/supabase-docs.md
+# /docs/DATABASE-DESIGN.md
+# /docs/EMBEDDABLE_CHAT_COMPONENT_DESIGN.md
+# /docs/README-API-KEY-MANAGEMENT.md
 
 # 环境变量文件
 .env
