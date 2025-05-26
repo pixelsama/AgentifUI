@@ -39,7 +39,8 @@ export function useChatInterface() {
     error: errorLoadingAppId,
     hasCurrentApp,
     isReady: isAppReady,
-    ensureAppReady // 新增：强制等待App配置就绪的方法
+    ensureAppReady, // 新增：强制等待App配置就绪的方法
+    validateConfig // 新增：验证并切换App配置的方法
   } = useCurrentApp();
   // --- END COMMENT ---
 
@@ -66,9 +67,11 @@ export function useChatInterface() {
   // 状态管理：
   // difyConversationId: Dify对话ID（外部ID），用于路由和 API 调用
   // dbConversationUUID: 数据库对话ID（内部ID），用于消息持久化
+  // conversationAppId: 历史对话的原始appId，优先于localStorage中的当前app
   // --- END COMMENT ---
   const [difyConversationId, setDifyConversationId] = useState<string | null>(null);
   const [dbConversationUUID, setDbConversationUUID] = useState<string | null>(null);
+  const [conversationAppId, setConversationAppId] = useState<string | null>(null);
 
   const isSubmittingRef = useRef(false);
   // --- BEGIN COMMENT ---
@@ -118,18 +121,33 @@ export function useChatInterface() {
           const result = await getConversationByExternalId(pathConversationId);
           
           if (result.success && result.data) {
-            console.log(`[路由监听] 找到对话记录，数据库ID=${result.data.id}`);
+            console.log(`[路由监听] 找到对话记录，数据库ID=${result.data.id}, 原始appId=${result.data.app_id}`);
             setDbConversationUUID(result.data.id);
+            
+            // --- BEGIN COMMENT ---
+            // 🎯 关键修复：保存历史对话的原始appId
+            // 这确保继续历史对话时使用正确的app，而不是localStorage中当前选中的app
+            // --- END COMMENT ---
+            if (result.data.app_id) {
+              setConversationAppId(result.data.app_id);
+              console.log(`[路由监听] 设置对话原始appId: ${result.data.app_id}`);
+            } else {
+              setConversationAppId(null);
+              console.log(`[路由监听] 对话记录中没有appId，将使用当前选中的app`);
+            }
           } else if (result.success && !result.data) {
             console.log(`[路由监听] 未找到外部ID为 ${pathConversationId} 的对话记录`);
             setDbConversationUUID(null);
+            setConversationAppId(null);
           } else {
             console.error(`[路由监听] 查询对话记录失败:`, result.error);
             setDbConversationUUID(null);
+            setConversationAppId(null);
           }
         } catch (error) {
           console.error(`[路由监听] 查询对话记录异常:`, error);
           setDbConversationUUID(null);
+          setConversationAppId(null);
         }
       };
       
@@ -140,6 +158,7 @@ export function useChatInterface() {
       console.log(`[路由监听] 新对话或临时对话，重置状态`);
       setDifyConversationId(null);
       setDbConversationUUID(null);
+      setConversationAppId(null);
     }
   }, [currentPathname]);
 
@@ -163,15 +182,34 @@ export function useChatInterface() {
     }
 
     // --- BEGIN COMMENT ---
-    // 🎯 核心修改：强制等待App配置就绪，解决时序问题
-    // 移除原有的简单检查，改为主动等待配置加载完成
-    // 新增错误恢复机制，提供用户友好的反馈
+    // 🎯 核心修改：智能App选择逻辑
+    // 1. 如果是历史对话，优先使用对话记录中的原始appId
+    // 2. 如果是新对话或历史对话没有appId，使用当前选中的app
+    // 3. 强制等待App配置就绪，解决时序问题
     // --- END COMMENT ---
     let appConfig: { appId: string; instance: ServiceInstance };
     try {
-      console.log('[handleSubmit] 开始等待App配置就绪...');
-      appConfig = await ensureAppReady();
-      console.log(`[handleSubmit] App配置就绪: ${appConfig.appId}`);
+      console.log('[handleSubmit] 开始确定使用的App...');
+      
+      // 🎯 智能App选择：历史对话优先使用原始app，新对话使用当前app
+      if (conversationAppId) {
+        console.log(`[handleSubmit] 历史对话，使用原始appId: ${conversationAppId}`);
+        // 对于历史对话，验证并切换到原始app
+        await validateConfig(conversationAppId);
+        appConfig = await ensureAppReady();
+        
+        // 验证是否成功切换到目标app
+        if (appConfig.appId !== conversationAppId) {
+          console.warn(`[handleSubmit] 切换到原始app失败，期望: ${conversationAppId}, 实际: ${appConfig.appId}`);
+          // 可以选择抛出错误或继续使用当前app
+        }
+      } else {
+        console.log('[handleSubmit] 新对话或无原始appId，使用当前选中的app');
+        // 对于新对话，使用当前选中的app
+        appConfig = await ensureAppReady();
+      }
+      
+      console.log(`[handleSubmit] 最终使用的App: ${appConfig.appId}`);
     } catch (error) {
       console.error('[handleSubmit] App配置获取失败:', error);
       
@@ -799,6 +837,8 @@ export function useChatInterface() {
   }, [
     currentUserId, // 替换 currentUserIdentifier
     ensureAppReady, // 替换 currentAppId，使用强制等待方法
+    validateConfig, // 新增：验证配置方法
+    conversationAppId, // 新增：历史对话的原始appId
     addMessage, setIsWaitingForResponse, isWelcomeScreen, setIsWelcomeScreen,
     appendMessageChunk, finalizeStreamingMessage, markAsManuallyStopped, setMessageError,
     setCurrentConversationId, setCurrentTaskId, router, currentPathname, flushChunkBuffer,
@@ -942,6 +982,7 @@ export function useChatInterface() {
     isAppConfigLoading: isLoadingAppId,
     appConfigError: errorLoadingAppId,
     isUserLoggedIn: !!currentUserId, // 方便 UI 判断用户是否登录
-    difyConversationId // 暴露 Dify 对话 ID
+    difyConversationId, // 暴露 Dify 对话 ID
+    conversationAppId // 暴露历史对话的原始appId，用于调试和UI显示
   };
 }
