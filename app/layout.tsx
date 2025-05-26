@@ -10,6 +10,7 @@ import { ClientLayout } from "./layouts/client-layout";
 import { cn } from "@lib/utils";
 import { Providers } from "./providers"; // 确保导入 Providers 组件
 import { DynamicTitle } from "@components/ui/dynamic-title"; // 导入动态标题组件
+import { StagewiseToolbarWrapper } from "@components/dev/stagewise-toolbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
             <NotificationBar />
           </ClientLayout>
         </Providers>
+        {process.env.SHARE_STAGEWISE_TOOLBAR === "true" && <StagewiseToolbarWrapper />}
       </body>
     </html>
   );
