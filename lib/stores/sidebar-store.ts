@@ -160,7 +160,7 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
       if (newIsExpanded === false) {
         setTimeout(() => {
           set({ clickCooldown: false })
-        }, 200) // 缩短冷却时间
+        }, 150) // 缩短冷却时间
       }
 
       // 当收起侧边栏时，立即隐藏内容
@@ -217,7 +217,7 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
           if (!get().clickCooldown && !get().isLocked) {
             set({ isHovering: true, isExpanded: true, hoverTimeoutId: null })
           }
-        }, 150) // 缩短悬停展开延迟
+        }, 10) // 缩短悬停展开延迟
 
         return { hoverTimeoutId: timeoutId }
       }
@@ -233,7 +233,7 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
             hoverTimeoutId: null,
             contentVisible: false
           })
-        }, 200) // 缩短悬停关闭延迟
+        }, 150) // 缩短悬停关闭延迟
 
         return { hoverTimeoutId: timeoutId }
       }
