@@ -10,6 +10,7 @@ import { useLogout } from "@lib/hooks/use-logout"
 import { DropdownMenu } from "@components/ui/dropdown-menu"
 import { Settings, LogOut } from "lucide-react"
 import { AvatarButton } from "./avatar-button"
+import { AppSelector } from "./app-selector"
 
 /**
  * 桌面端顶部导航栏组件
@@ -54,6 +55,12 @@ export function NavBar() {
         <div className="flex items-center space-x-2">
           {/* 左侧空间预留给未来的导航元素 */}
         </div>
+        
+        {/* 中间：App选择器 */}
+        <div className="flex-1 flex justify-center">
+          <AppSelector />
+        </div>
+        
         <div className="flex items-center">
           <AvatarButton dropdownId="user-menu" isDark={isDark} />
         </div>
