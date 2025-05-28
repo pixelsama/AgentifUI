@@ -9,6 +9,11 @@ import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 
+// --- BEGIN COMMENT ---
+// 从chat-input.tsx导入全局焦点管理器
+// --- END COMMENT ---
+import { useFocusManager } from './chat-input';
+
 interface AppSelectorButtonProps {
   className?: string;
 }
@@ -21,6 +26,11 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
   const { isDark } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isOptimisticSwitching, setIsOptimisticSwitching] = useState(false);
+
+  // --- BEGIN COMMENT ---
+  // 获取全局焦点管理器
+  // --- END COMMENT ---
+  const { focusInput } = useFocusManager();
 
   // --- BEGIN COMMENT ---
   // 🎯 获取可用的app列表，现在会自动触发批量参数获取
@@ -56,10 +66,15 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
   // --- BEGIN COMMENT ---
   // 🎯 乐观UI：应用切换处理
   // 立即关闭下拉菜单，显示切换后的应用名称，右侧显示小spinner
+  // 修改：确保在操作完成后恢复输入框焦点
   // --- END COMMENT ---
   const handleAppChange = async (newAppId: string) => {
     if (newAppId === currentAppId) {
       setIsOpen(false);
+      // --- BEGIN COMMENT ---
+      // 即使没有实际切换，也要恢复焦点
+      // --- END COMMENT ---
+      setTimeout(() => focusInput(), 0);
       return;
     }
 
@@ -94,8 +109,48 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
     } finally {
       // 结束乐观切换状态
       setIsOptimisticSwitching(false);
+      
+      // --- BEGIN COMMENT ---
+      // 无论成功还是失败，都要确保恢复输入框焦点
+      // 使用setTimeout确保在状态更新完成后执行
+      // --- END COMMENT ---
+      setTimeout(() => focusInput(), 0);
     }
   };
+
+  // --- BEGIN COMMENT ---
+  // 修改：处理下拉菜单的打开/关闭，确保操作后恢复焦点
+  // --- END COMMENT ---
+  const handleToggleDropdown = useCallback((e: React.MouseEvent) => {
+    // 阻止事件冒泡，避免触发其他元素的点击事件
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setIsOpen(prev => {
+      const newIsOpen = !prev;
+      
+      // --- BEGIN COMMENT ---
+      // 如果是关闭下拉菜单，恢复输入框焦点
+      // 如果是打开，焦点会自然地在下拉菜单上，这是期望的行为
+      // --- END COMMENT ---
+      if (!newIsOpen) {
+        setTimeout(() => focusInput(), 0);
+      }
+      
+      return newIsOpen;
+    });
+  }, [focusInput]);
+
+  // --- BEGIN COMMENT ---
+  // 修改：处理背景点击关闭下拉菜单，确保恢复焦点
+  // --- END COMMENT ---
+  const handleBackdropClick = useCallback(() => {
+    setIsOpen(false);
+    // --- BEGIN COMMENT ---
+    // 背景点击关闭下拉菜单后，恢复输入框焦点
+    // --- END COMMENT ---
+    setTimeout(() => focusInput(), 0);
+  }, [focusInput]);
 
   // 获取当前选中的app名称
   const currentApp = modelApps.find(app => app.id === currentAppId);
@@ -125,10 +180,15 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
       {/* --- BEGIN MODIFIED COMMENT ---
       主按钮：无边框无背景，serif字体，stone配色
       移除宽度限制，允许向左扩展显示完整名称
+      修改：使用自定义点击处理器确保焦点管理
       --- END MODIFIED COMMENT --- */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggleDropdown}
         disabled={isValidating}
+        // --- BEGIN COMMENT ---
+        // 添加onMouseDown防止按钮点击时输入框失去焦点
+        // --- END COMMENT ---
+        onMouseDown={(e) => e.preventDefault()}
         className={cn(
           "flex items-center space-x-1 px-2 py-1 rounded-md text-sm font-serif",
           "transition-colors duration-200",
@@ -171,13 +231,14 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
 
       {/* --- BEGIN COMMENT ---
       下拉菜单：只显示模型类型的应用
+      修改：使用自定义点击处理器确保焦点管理
       --- END COMMENT --- */}
       {isOpen && (
         <>
           {/* 背景遮罩 */}
           <div 
             className="fixed inset-0 z-10" 
-            onClick={() => setIsOpen(false)}
+            onClick={handleBackdropClick}
           />
           
           {/* --- BEGIN MODIFIED COMMENT ---
@@ -203,6 +264,10 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
                 <button
                   key={app.id}
                   onClick={() => handleAppChange(app.id)}
+                  // --- BEGIN COMMENT ---
+                  // 添加onMouseDown防止按钮点击时输入框失去焦点
+                  // --- END COMMENT ---
+                  onMouseDown={(e) => e.preventDefault()}
                   className={cn(
                     "w-full text-left px-3 py-2 text-sm font-serif",
                     "transition-colors duration-150",
