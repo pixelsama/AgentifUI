@@ -105,7 +105,7 @@ export function Recents() {
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <h1 className={cn(
-                "text-2xl font-bold",
+                "text-2xl font-bold font-serif",
                 isDark ? "text-stone-100" : "text-stone-800"
               )}>
                 历史对话
@@ -120,7 +120,7 @@ export function Recents() {
                 {isLoading ? (
                   <span className="flex items-center">
                     <span className={cn(
-                      "w-3 h-3 rounded-full animate-pulse mr-2 inline-block",
+                      "w-3 h-3 rounded-full animate-pulse mr-2 inline-block font-serif",
                       isDark ? "bg-stone-600" : "bg-stone-400"
                     )} />
                     正在加载对话记录...
