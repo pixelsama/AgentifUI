@@ -238,8 +238,7 @@ export function useConversationMessages() {
     }
     
     // 获取滚动控制函数
-    const reset = useChatScrollStore.getState().reset;
-    const forceScrollToBottom = useChatScrollStore.getState().forceScrollToBottom;
+    const resetScrollState = useChatScrollStore.getState().resetScrollState;
     
     // 取消任何进行中的请求
     cancelCurrentRequest();
@@ -329,7 +328,7 @@ export function useConversationMessages() {
       // 使用requestAnimationFrame确保DOM已更新后再关闭骨架屏
       requestAnimationFrame(() => {
         // 确保滚动到底部，使用可靠的方法
-        reset();
+        resetScrollState();
         
         // 再次使用requestAnimationFrame确保上面的操作已完成
         requestAnimationFrame(() => {
@@ -384,8 +383,7 @@ export function useConversationMessages() {
     }
     
     // 获取滚动控制函数
-    const reset = useChatScrollStore.getState().reset;
-    const forceScrollToBottom = useChatScrollStore.getState().forceScrollToBottom;
+    const scrollToBottom = useChatScrollStore.getState().scrollToBottom;
     
     // 取消任何进行中的请求
     cancelCurrentRequest();
@@ -586,8 +584,7 @@ export function useConversationMessages() {
     console.log(`[useConversationMessages] 路由变化检测: 是否首次发送=${isFirstMessageTransition}, 从=${isFromNewChat}, 到=${isToExistingChat}, 消息数=${hasExistingMessages}`);
     
     // 获取滚动控制函数
-    const reset = useChatScrollStore.getState().reset;
-    const forceScrollToBottom = useChatScrollStore.getState().forceScrollToBottom;
+    const resetScrollState = useChatScrollStore.getState().resetScrollState;
     
     // 取消任何进行中的请求
     cancelCurrentRequest();
@@ -604,7 +601,7 @@ export function useConversationMessages() {
       }
       
       // 确保滚动到底部
-      reset();
+      resetScrollState();
       return;
     }
     
@@ -633,7 +630,7 @@ export function useConversationMessages() {
     startLoading('initial');
     
     // 确保滚动回顶部，避免在新对话加载时显示滚动按钮
-    reset();
+    resetScrollState();
     
     if (externalId) {
       setDifyConversationId(externalId);
