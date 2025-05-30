@@ -2,132 +2,188 @@ import { create } from 'zustand';
 import { RefObject } from 'react';
 
 // --- BEGIN COMMENT ---
-// 定义滚动状态接口
+// 简化的滚动状态接口
+// 专注于核心功能：自动滚动和用户控制
 // --- END COMMENT ---
 interface ChatScrollState {
+  // --- 核心状态 ---
   // --- BEGIN COMMENT ---
-  // 标记用户是否已手动向上滚动，离开聊天底部。
-  // 如果为 true，则禁用自动滚动到底部的行为。
+  // 滚动容器引用
+  // --- END COMMENT ---
+  scrollRef: RefObject<HTMLElement> | null;
+  
+  // --- BEGIN COMMENT ---
+  // 用户是否主动向上滚动（暂停自动滚动）
   // --- END COMMENT ---
   userScrolledUp: boolean;
+  
   // --- BEGIN COMMENT ---
-  // 更新 userScrolledUp 状态的方法。
+  // 是否在底部
   // --- END COMMENT ---
-  setUserScrolledUp: (scrolledUp: boolean) => void;
   isAtBottom: boolean;
-  setIsAtBottom: (isBottom: boolean) => void;
-  scrollRef: RefObject<HTMLElement> | null;
-  setScrollRef: (ref: RefObject<HTMLElement>) => void;
-  scrollToBottom: (behavior?: ScrollBehavior, onScrollEnd?: () => void) => void;
+  
   // --- BEGIN COMMENT ---
-  // 添加重置滚动状态的方法
+  // 是否正在程序化滚动（避免触发用户滚动事件）
   // --- END COMMENT ---
-  resetScrollState: (onScrollEnd?: () => void) => void;
+  isProgrammaticScrolling: boolean;
+  
+  // --- 操作方法 ---
+  setScrollRef: (ref: RefObject<HTMLElement>) => void;
+  
+  // --- BEGIN COMMENT ---
+  // 滚动到底部 - 核心方法
+  // --- END COMMENT ---
+  scrollToBottom: (behavior?: ScrollBehavior) => void;
+  
+  // --- BEGIN COMMENT ---
+  // 强制滚动到底部（忽略用户状态）
+  // --- END COMMENT ---
+  forceScrollToBottom: (behavior?: ScrollBehavior) => void;
+  
+  // --- BEGIN COMMENT ---
+  // 处理用户滚动事件
+  // --- END COMMENT ---
+  handleUserScroll: () => void;
+  
+  // --- BEGIN COMMENT ---
+  // 重置状态
+  // --- END COMMENT ---
+  reset: () => void;
 }
 
 // --- BEGIN COMMENT ---
-// 创建 Zustand store 来管理聊天滚动状态。
+// 滚动阈值：距离底部多少像素被认为是"在底部"
+// --- END COMMENT ---
+const SCROLL_THRESHOLD = 100;
+
+// --- BEGIN COMMENT ---
+// 创建简化的滚动状态管理Store
 // --- END COMMENT ---
 export const useChatScrollStore = create<ChatScrollState>((set, get) => ({
-  // --- BEGIN COMMENT ---
-  // 初始状态：默认用户在底部，自动滚动是激活的。
-  // --- END COMMENT ---
+  // --- 初始状态 ---
+  scrollRef: null,
   userScrolledUp: false,
   isAtBottom: true,
-  scrollRef: null,
-  // --- BEGIN COMMENT ---
-  // 实现状态更新方法。
-  // --- END COMMENT ---
-  setUserScrolledUp: (scrolledUp) => {
-    if (get().userScrolledUp !== scrolledUp) {
-      set({ userScrolledUp: scrolledUp });
-    }
-  },
-  setIsAtBottom: (isBottom) => {
-    if (get().isAtBottom !== isBottom) {
-      set({ isAtBottom: isBottom });
-    }
-  },
+  isProgrammaticScrolling: false,
+  
+  // --- 设置滚动容器引用 ---
   setScrollRef: (ref) => {
-    if (get().scrollRef !== ref) {
-      set({ scrollRef: ref });
-    }
+    set({ scrollRef: ref });
   },
   
   // --- BEGIN COMMENT ---
-  // 增强版 scrollToBottom 方法，确保一定会滚动到底部
+  // 滚动到底部 - 只有在用户没有向上滚动时才执行
   // --- END COMMENT ---
-  scrollToBottom: (behavior = 'auto', onScrollEnd) => {
-    const { scrollRef } = get();
+  scrollToBottom: (behavior = 'smooth') => {
+    const { scrollRef, userScrolledUp } = get();
+    
+    // --- BEGIN COMMENT ---
+    // 如果用户已向上滚动，不自动滚动
+    // --- END COMMENT ---
+    if (userScrolledUp) {
+      return;
+    }
+    
     if (scrollRef?.current) {
-      requestAnimationFrame(() => { 
-        if (scrollRef.current) {
-          scrollRef.current.scrollTo({
-            top: scrollRef.current.scrollHeight,
+      set({ isProgrammaticScrolling: true });
+      
+      requestAnimationFrame(() => {
+        const element = scrollRef.current;
+        if (element) {
+          element.scrollTo({
+            top: element.scrollHeight,
             behavior: behavior
           });
+          
           // --- BEGIN COMMENT ---
-          // 确保程序化滚动后状态一致
+          // 滚动完成后更新状态
           // --- END COMMENT ---
-          if (get().userScrolledUp !== false || get().isAtBottom !== true) {
-            set({ userScrolledUp: false, isAtBottom: true });
-          }
-          // --- BEGIN COMMENT ---
-          // 如果提供了 onScrollEnd 回调，则调用它
-          // --- END COMMENT ---
-          if (onScrollEnd) {
-            onScrollEnd();
-          }
+          setTimeout(() => {
+            set({ 
+              isProgrammaticScrolling: false,
+              isAtBottom: true,
+              userScrolledUp: false
+            });
+          }, behavior === 'smooth' ? 300 : 0);
         } else {
-          // --- BEGIN COMMENT ---
-          // 如果 scrollRef.current 不知何故变为空，仍然调用 onScrollEnd
-          // --- END COMMENT ---
-          if (onScrollEnd) {
-            onScrollEnd();
-          }
+          set({ isProgrammaticScrolling: false });
         }
       });
-    } else {
-      // --- BEGIN COMMENT ---
-      // 如果没有 scrollRef，立即调用 onScrollEnd
-      // --- END COMMENT ---
-      if (onScrollEnd) {
-        onScrollEnd();
-      }
     }
   },
   
   // --- BEGIN COMMENT ---
-  // 添加一个新方法，用于关键事件后重置滚动状态
+  // 强制滚动到底部 - 忽略用户状态，总是滚动
   // --- END COMMENT ---
-  resetScrollState: (onScrollEnd) => {
-    // --- BEGIN COMMENT ---
-    // 首先设置状态，如果 ref 可用则滚动
-    // --- END COMMENT ---
-    if (get().userScrolledUp !== false || get().isAtBottom !== true) {
-      set({ userScrolledUp: false, isAtBottom: true });
-    }
+  forceScrollToBottom: (behavior = 'auto') => {
     const { scrollRef } = get();
+    
     if (scrollRef?.current) {
+      set({ isProgrammaticScrolling: true });
+      
       requestAnimationFrame(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTo({
-            top: scrollRef.current.scrollHeight,
-            behavior: 'auto' 
+        const element = scrollRef.current;
+        if (element) {
+          element.scrollTo({
+            top: element.scrollHeight,
+            behavior: behavior
           });
-          if (onScrollEnd) {
-            onScrollEnd();
-          }
+          
+          // --- BEGIN COMMENT ---
+          // 强制滚动后重置所有状态
+          // --- END COMMENT ---
+          setTimeout(() => {
+            set({ 
+              isProgrammaticScrolling: false,
+              isAtBottom: true,
+              userScrolledUp: false
+            });
+          }, behavior === 'smooth' ? 300 : 0);
         } else {
-          if (onScrollEnd) {
-            onScrollEnd();
-          }
+          set({ isProgrammaticScrolling: false });
         }
       });
-    } else {
-      if (onScrollEnd) {
-        onScrollEnd();
-      }
     }
+  },
+  
+  // --- BEGIN COMMENT ---
+  // 处理用户滚动事件
+  // --- END COMMENT ---
+  handleUserScroll: () => {
+    const { scrollRef, isProgrammaticScrolling } = get();
+    
+    // --- BEGIN COMMENT ---
+    // 如果是程序化滚动，忽略
+    // --- END COMMENT ---
+    if (isProgrammaticScrolling || !scrollRef?.current) {
+      return;
+    }
+    
+    const element = scrollRef.current;
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    
+    // --- BEGIN COMMENT ---
+    // 计算是否在底部
+    // --- END COMMENT ---
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD;
+    
+    // --- BEGIN COMMENT ---
+    // 更新状态
+    // --- END COMMENT ---
+    set({
+      isAtBottom,
+      userScrolledUp: !isAtBottom
+    });
+  },
+  
+  // --- BEGIN COMMENT ---
+  // 重置所有状态
+  // --- END COMMENT ---
+  reset: () => {
+    set({
+      userScrolledUp: false,
+      isAtBottom: true,
+      isProgrammaticScrolling: false
+    });
   }
 }));
