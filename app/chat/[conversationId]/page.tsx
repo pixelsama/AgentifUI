@@ -141,10 +141,7 @@ export default function ChatPage() {
           ) : (
             <div 
               ref={setScrollRef}
-              className={cn(
-                "h-full overflow-y-auto scroll-smooth chat-scroll-container",
-                "overflow-x-hidden min-w-0"
-              )}
+              className="h-full overflow-y-auto scroll-smooth chat-scroll-container"
             >
               {/* --- BEGIN COMMENT ---
               显示"加载更多"按钮或加载指示器的条件：
