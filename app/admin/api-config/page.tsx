@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useApiConfigStore, ServiceInstance } from '@lib/stores/api-config-store';
 import { useTheme } from '@lib/hooks/use-theme';
+import { useSaveShortcut } from '@lib/hooks/use-keyboard-shortcut';
+import { SaveShortcutBadge } from '@components/ui/keyboard-shortcut-badge';
 import { cn } from '@lib/utils';
 import DifyParametersPanel from '@components/admin/api-config/dify-parameters-panel';
 import type { DifyParametersSimplifiedConfig } from '@lib/types/dify-parameters';
@@ -198,6 +200,26 @@ const InstanceForm = ({
     // 所有验证通过
     setInstanceIdError('');
   };
+  
+  // --- BEGIN COMMENT ---
+  // 🎯 使用新的快捷键Hook替换原有的键盘监听
+  // --- END COMMENT ---
+  const handleSaveShortcut = () => {
+    // 检查是否在处理中，避免重复提交
+    if (isProcessing) {
+      return;
+    }
+    
+    // 模拟表单提交事件
+    const formElement = document.querySelector('form');
+    if (formElement) {
+      const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+      formElement.dispatchEvent(submitEvent);
+    }
+  };
+  
+  // 使用保存快捷键Hook
+  useSaveShortcut(handleSaveShortcut, !isProcessing);
   
   useEffect(() => {
     const newData = {
@@ -1290,7 +1312,10 @@ const InstanceForm = ({
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              {isProcessing ? '保存中...' : '保存'}
+              <span>{isProcessing ? '保存中...' : '保存'}</span>
+              {!isProcessing && (
+                <SaveShortcutBadge className="ml-3" />
+              )}
             </button>
             <button
               type="button"
