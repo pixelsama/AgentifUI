@@ -855,8 +855,8 @@ const InstanceForm = ({
                     ? "opacity-50 cursor-not-allowed"
                     : "cursor-pointer",
                   isDark 
-                    ? "bg-blue-600 hover:bg-blue-500 text-white" 
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                    ? "bg-stone-600 hover:bg-stone-500 text-white" 
+                    : "bg-stone-600 hover:bg-stone-700 text-white"
                 )}
               >
                 {isSyncing ? (
