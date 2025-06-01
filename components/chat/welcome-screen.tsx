@@ -43,6 +43,58 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
   const [typewriterKey, setTypewriterKey] = useState(0)
   
   // --- BEGIN COMMENT ---
+  // 🎯 新增：动态打字速度配置
+  // 根据文字长度智能调整打字速度，提升长文本体验
+  // --- END COMMENT ---
+  const typewriterConfig = useMemo(() => {
+    const textLength = finalText.length
+    
+    // --- BEGIN COMMENT ---
+    // 🎯 智能速度阈值配置
+    // 短文本：慢速打字，营造仪式感
+    // 中等文本：中速打字，平衡体验
+    // 长文本：快速打字，避免等待过久
+    // 超长文本：极速打字，快速完成
+    // --- END COMMENT ---
+    if (textLength <= 20) {
+      // 短文本（≤20字符）：慢速打字，营造仪式感
+      return {
+        speed: 20,
+        delay: 50,
+        description: '短文本-慢速'
+      }
+    } else if (textLength <= 50) {
+      // 中短文本（21-50字符）：标准速度
+      return {
+        speed: 15,
+        delay: 40,
+        description: '中短文本-标准'
+      }
+    } else if (textLength <= 100) {
+      // 中等文本（51-100字符）：中速打字
+      return {
+        speed: 10,
+        delay: 30,
+        description: '中等文本-中速'
+      }
+    } else if (textLength <= 200) {
+      // 长文本（101-200字符）：快速打字
+      return {
+        speed: 5,
+        delay: 10,
+        description: '长文本-快速'
+      }
+    } else {
+      // 超长文本（>200字符）：极速打字
+      return {
+        speed: 8,
+        delay: 100,
+        description: '超长文本-极速'
+      }
+    }
+  }, [finalText.length])
+  
+  // --- BEGIN COMMENT ---
   // 使用智能布局系统获取欢迎文字的位置和标题样式
   // --- END COMMENT ---
   const { welcomeText: welcomePosition, welcomeTextTitle, needsCompactLayout } = useWelcomeLayout()
@@ -195,7 +247,8 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
         console.log('[WelcomeScreen] 使用数据库开场白:', {
           appId: currentAppInstance?.instance_id,
           source: 'database_config',
-          text: welcomeText.substring(0, 50) + '...'
+          text: welcomeText.substring(0, 50) + '...',
+          length: welcomeText.length
         });
       } else if (username) {
         // --- BEGIN COMMENT ---
@@ -228,7 +281,7 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
     currentAppInstance?.instance_id,
     isValidating,     // 🎯 监听验证状态
     isLoading,        // 🎯 监听加载状态
-    isAppSwitching    // �� 新增：监听应用切换状态
+    isAppSwitching    // 🎯 新增：监听应用切换状态
   ]);
 
   return (
@@ -253,15 +306,16 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
           style={welcomeTextTitle}
         >
           {/* --- BEGIN COMMENT ---
-          直接显示打字机效果，无骨架屏
-          长时间加载由 PageLoadingSpinner 处理
+          🎯 优化：智能打字机效果，根据文字长度动态调整速度
+          短文本：慢速打字，营造仪式感
+          长文本：快速打字，避免等待过久
           🎯 添加key属性，确保应用切换时重新开始打字动画
           --- END COMMENT --- */}
           <TypeWriter 
             key={typewriterKey} // 🎯 强制重新开始打字动画
             text={finalText}
-            speed={30}
-            delay={200} // 减少延迟，更快响应
+            speed={typewriterConfig.speed} // 🎯 动态速度
+            delay={typewriterConfig.delay} // 🎯 动态延迟
             waitingEffect={finalText.endsWith("...")}
             className={cn(
               "font-bold leading-tight",
