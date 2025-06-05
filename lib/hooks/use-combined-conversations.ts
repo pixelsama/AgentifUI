@@ -169,6 +169,24 @@ export function useCombinedConversations() {
       return dateB - dateA;
     });
 
+    // --- BEGIN COMMENT ---
+    // 🎯 新增：限制总对话数量为5个，实现"挤出"效果
+    // 当有新的临时对话时，自动移除超出限制的最老对话
+    // --- END COMMENT ---
+    const MAX_CONVERSATIONS = 5;
+    if (finalConversations.length > MAX_CONVERSATIONS) {
+      // 保留前5个对话（包括活跃的临时对话）
+      const keptConversations = finalConversations.slice(0, MAX_CONVERSATIONS);
+      const evictedConversations = finalConversations.slice(MAX_CONVERSATIONS);
+      
+      console.log(`[useCombinedConversations] 🎯 挤出效果触发，保留${keptConversations.length}个对话，移除${evictedConversations.length}个对话`);
+      evictedConversations.forEach(conv => {
+        console.log(`[useCombinedConversations] 挤出对话: ${conv.title} (${conv.id})`);
+      });
+      
+      return keptConversations;
+    }
+
     return finalConversations;
   }, [dbConversations, pendingArray, currentUserId]);
 
