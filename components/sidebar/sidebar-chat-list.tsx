@@ -62,12 +62,6 @@ export function SidebarChatList({
   // --- END COMMENT ---
   const [openDropdownId, setOpenDropdownId] = React.useState<string | null>(null);
   
-  // --- BEGIN COMMENT ---
-  // 🎯 新增：挤出动画状态管理
-  // 记录正在被挤出的对话ID，用于添加退出动画
-  // --- END COMMENT ---
-  const [evictingIds, setEvictingIds] = React.useState<Set<string>>(new Set());
-  
   const [prevLoadedConversations, setPrevLoadedConversations] = React.useState<CombinedConversation[]>([]);
   
   // --- BEGIN COMMENT ---
@@ -80,8 +74,7 @@ export function SidebarChatList({
   }, [isLoadingConversations, conversations]);
   
   // --- BEGIN COMMENT ---
-  // 🎯 新增：检测对话列表变化，识别被挤出的对话
-  // 当对话数量从多变少时，识别消失的对话并添加退出动画
+  // 🎯 检测对话列表变化，识别被挤出的对话（瞬间消失效果）
   // --- END COMMENT ---
   React.useEffect(() => {
     const prevIds = new Set(prevLoadedConversations.map(conv => conv.id));
@@ -92,43 +85,18 @@ export function SidebarChatList({
     
     if (disappearedIds.length > 0) {
       console.log(`[SidebarChatList] 🎯 检测到${disappearedIds.length}个对话被挤出:`, disappearedIds);
-      
-      // 添加挤出动画
-      setEvictingIds(new Set(disappearedIds));
-      
-      // 500ms后清除挤出状态（动画时长）
-      const timeout = setTimeout(() => {
-        setEvictingIds(new Set());
-      }, 500);
-      
-      return () => clearTimeout(timeout);
+      // 瞬间挤出效果：对话直接从列表中消失
     }
   }, [conversations, prevLoadedConversations]);
   
   // --- BEGIN COMMENT ---
-  // 🎯 修改显示逻辑：在挤出动画期间，显示被挤出的对话
-  // 这样可以让用户看到"第五个对话消失"的动画效果
+  // 🎯 显示逻辑：直接显示当前对话列表（瞬间挤出效果）
   // --- END COMMENT ---
   const displayConversations = React.useMemo(() => {
-    let baseConversations = (isLoadingConversations && conversations.length === 0 && prevLoadedConversations.length > 0) 
+    return (isLoadingConversations && conversations.length === 0 && prevLoadedConversations.length > 0) 
       ? prevLoadedConversations 
       : conversations;
-    
-    // 如果有正在被挤出的对话，临时显示它们以便播放退出动画
-    if (evictingIds.size > 0) {
-      const evictingConversations = prevLoadedConversations.filter(conv => 
-        evictingIds.has(conv.id) && !baseConversations.some(c => c.id === conv.id)
-      );
-      
-      if (evictingConversations.length > 0) {
-        console.log(`[SidebarChatList] 🎯 临时显示${evictingConversations.length}个挤出对话用于动画`);
-        // 将挤出的对话添加到列表末尾，这样它们会显示在第5个位置并播放退出动画
-        return [...baseConversations, ...evictingConversations];
-      }
-    }
-    
-    return baseConversations;
-  }, [isLoadingConversations, conversations, prevLoadedConversations, evictingIds]);
+  }, [isLoadingConversations, conversations, prevLoadedConversations]);
   
   const unpinnedChats = React.useMemo(() => {
     return displayConversations.filter(chat => !chat.isPending);
@@ -448,20 +416,9 @@ export function SidebarChatList({
                 // --- END COMMENT ---
                 const isActive = isChatActive(chat);
                 
-                // --- BEGIN COMMENT ---
-                // 🎯 检查当前对话是否正在被挤出，添加相应的动画样式
-                // --- END COMMENT ---
-                const isEvicting = evictingIds.has(chat.id);
-                
                 return (
                   <div 
-                    className={cn(
-                      "group relative transition-all duration-500 ease-in-out",
-                      // --- BEGIN COMMENT ---
-                      // 🎯 挤出动画：向右滑出并淡出
-                      // --- END COMMENT ---
-                      isEvicting && "transform translate-x-full opacity-0"
-                    )} 
+                    className="group relative"
                     key={chat.tempId || chat.id}
                   > 
                     {/* 使用新的 SidebarListButton 替代 SidebarButton */}
@@ -512,22 +469,11 @@ export function SidebarChatList({
               const isActive = isChatActive(chat);
               const itemIsLoading = false; 
 
-                              // --- BEGIN COMMENT ---
-                // 🎯 检查当前对话是否正在被挤出，添加相应的动画样式
-                // --- END COMMENT ---
-                const isEvicting = evictingIds.has(chat.id);
-                
-                return (
-                  <div 
-                    className={cn(
-                      "group relative transition-all duration-500 ease-in-out",
-                      // --- BEGIN COMMENT ---
-                      // 🎯 挤出动画：向右滑出并淡出
-                      // --- END COMMENT ---
-                      isEvicting && "transform translate-x-full opacity-0"
-                    )} 
-                    key={chat.id}
-                  >
+                                            return (
+                <div 
+                  className="group relative"
+                  key={chat.id}
+                >
                     {/* 使用新的 SidebarListButton 替代 SidebarButton */}
                     <SidebarListButton
                       icon={<SidebarChatIcon size="sm" isDark={isDark} />}

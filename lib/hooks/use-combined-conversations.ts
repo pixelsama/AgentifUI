@@ -50,13 +50,15 @@ export interface CombinedConversation extends Partial<Conversation> {
  * @returns 整合后的对话列表、加载状态、错误信息和刷新函数
  */
 export function useCombinedConversations() {
-  // 获取数据库对话列表
+  // --- BEGIN COMMENT ---
+  // 🎯 挤出机制：获取6个数据库对话，这样当有新对话创建时，总数会超过5个，触发挤出逻辑
+  // --- END COMMENT ---
   const {
     conversations: dbConversations,
     isLoading: isDbLoading,
     error: dbError,
     refresh: refreshDbConversations
-  } = useSidebarConversations();
+  } = useSidebarConversations(6);
 
   // --- BEGIN COMMENT ---
   // 获取当前登录用户ID
