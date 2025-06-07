@@ -31,18 +31,6 @@ export function ChatflowNodeTracker({ isVisible, className }: ChatflowNodeTracke
   const executionProgress = useChatflowExecutionStore(state => state.executionProgress)
   const error = useChatflowExecutionStore(state => state.error)
   
-  // 当组件不可见时，清理状态
-  useEffect(() => {
-    if (!isVisible) {
-      // 延迟清理，给动画时间
-      const timer = setTimeout(() => {
-        useChatflowExecutionStore.getState().resetExecution()
-      }, 300)
-      
-      return () => clearTimeout(timer)
-    }
-  }, [isVisible])
-  
   // 如果不可见，不显示
   if (!isVisible) {
     return null
