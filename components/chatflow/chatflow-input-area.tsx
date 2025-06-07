@@ -279,7 +279,7 @@ export function ChatflowInputArea({
         <div className={cn(
           "p-4 rounded-xl border transition-colors",
           isDark 
-            ? "bg-stone-800/30 border-stone-700" 
+            ? "bg-stone-900/50 border-stone-700" 
             : "bg-stone-50/50 border-stone-200"
         )}>
           <label className={cn(
@@ -295,12 +295,13 @@ export function ChatflowInputArea({
             rows={3}
             className={cn(
               "w-full px-3 py-2 rounded-lg border resize-none font-serif",
-              "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-              "transition-colors",
+              "focus:outline-none focus:ring-2 focus:ring-stone-500/30 focus:border-stone-500",
+              "focus:shadow-md focus:shadow-stone-500/20",
+              "transition-all duration-200",
               isDark
                 ? "bg-stone-800 border-stone-600 text-stone-200 placeholder-stone-500"
                 : "bg-white border-stone-300 text-stone-900 placeholder-stone-400",
-              errors.query && "border-red-500 focus:ring-red-500"
+              errors.query && "border-red-500 focus:ring-red-500/30 focus:border-red-500"
             )}
             disabled={isProcessing || isWaiting}
           />
@@ -322,7 +323,7 @@ export function ChatflowInputArea({
               <div key={`${fieldConfig.variable}-${index}`} className={cn(
                 "p-4 rounded-xl border transition-colors",
                 isDark 
-                  ? "bg-stone-800/30 border-stone-700" 
+                  ? "bg-stone-900/50 border-stone-700" 
                   : "bg-stone-50/50 border-stone-200"
               )}>
                 <FileUploadField
@@ -343,7 +344,7 @@ export function ChatflowInputArea({
             <div key={`${fieldConfig.variable}-${index}`} className={cn(
               "p-4 rounded-xl border transition-colors",
               isDark 
-                ? "bg-stone-800/30 border-stone-700" 
+                ? "bg-stone-900/50 border-stone-700" 
                 : "bg-stone-50/50 border-stone-200"
             )}>
               <FormField
