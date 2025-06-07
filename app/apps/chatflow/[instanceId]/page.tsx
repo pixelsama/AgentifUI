@@ -420,7 +420,7 @@ export default function AppDetailPage() {
               <ChatflowNodeTracker
                 isVisible={showNodeTracker}
                 className={cn(
-                  "fixed bottom-40 right-6 z-10 max-w-sm",
+                  "fixed bottom-40 right-6 z-30 max-w-sm",
                   "transition-all duration-300"
                 )}
               />

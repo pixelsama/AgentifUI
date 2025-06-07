@@ -123,13 +123,7 @@ export function ChatflowNodeTracker({ isVisible, className }: ChatflowNodeTracke
           </div>
         )}
         
-        {/* 提示信息 */}
-        <div className={cn(
-          "text-xs font-serif opacity-75",
-          isDark ? "text-stone-400" : "text-stone-500"
-        )}>
-          💡 这是临时的执行进度显示，刷新页面后会消失
-        </div>
+
       </div>
     </div>
   )
