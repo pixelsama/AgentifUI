@@ -141,6 +141,9 @@ export function ChatflowInputArea({
     }
   }, [errors])
 
+  // --- 输入法组合状态管理 ---
+  const [isComposing, setIsComposing] = useState(false)
+
   // --- 查询输入更新 ---
   const handleQueryChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setQuery(e.target.value)
@@ -216,6 +219,32 @@ export function ChatflowInputArea({
     return true
   }, [query, formData, userInputForm, hasFormConfig])
 
+  // --- 键盘事件处理：Enter提交，Shift+Enter换行 ---
+  const handleQueryKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
+      e.preventDefault()
+      
+      // 检查是否可以提交
+      if (!isProcessing && !isWaiting && canSubmit()) {
+        // 创建一个模拟的表单事件来触发提交
+        const form = e.currentTarget.closest('form')
+        if (form) {
+          const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
+          form.dispatchEvent(submitEvent)
+        }
+      }
+    }
+  }, [isProcessing, isWaiting, canSubmit, isComposing])
+
+  // --- 输入法组合事件处理 ---
+  const handleCompositionStart = useCallback(() => {
+    setIsComposing(true)
+  }, [])
+
+  const handleCompositionEnd = useCallback(() => {
+    setIsComposing(false)
+  }, [])
+
   // --- 加载状态 ---
   if (isLoading) {
     return (
@@ -269,7 +298,7 @@ export function ChatflowInputArea({
           "text-sm font-serif",
           isDark ? "text-stone-400" : "text-stone-600"
         )}>
-          {hasFormConfig ? "填写完成后将开始Chatflow" : "输入您的问题开始对话"}
+          {hasFormConfig ? "填写完成后将开始执行Chatflow" : "输入您的问题开始对话"}
         </p>
       </div>
 
@@ -291,6 +320,9 @@ export function ChatflowInputArea({
           <textarea
             value={query}
             onChange={handleQueryChange}
+            onKeyDown={handleQueryKeyDown}
+            onCompositionStart={handleCompositionStart}
+            onCompositionEnd={handleCompositionEnd}
             placeholder="请描述您的问题或需求..."
             rows={3}
             className={cn(
