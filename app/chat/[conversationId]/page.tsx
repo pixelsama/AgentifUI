@@ -29,6 +29,14 @@ import { cn } from '@lib/utils';
 import { NavBar } from '@components/nav-bar/nav-bar';
 import { useProfile } from '@lib/hooks/use-profile';
 
+// --- BEGIN COMMENT ---
+// 🎯 新增：Chatflow 相关导入
+// --- END COMMENT ---
+import { ChatflowFloatingController } from '@components/chatflow/chatflow-floating-controller';
+import { ChatflowNodeTracker } from '@components/chatflow/chatflow-node-tracker';
+import { useChatflowDetection } from '@lib/hooks/use-chatflow-detection';
+import { useChatflowState } from '@lib/hooks/use-chatflow-state';
+
 export default function ChatPage() {
   const params = useParams<{ conversationId: string }>();
   const conversationIdFromUrl = params.conversationId;
@@ -54,13 +62,25 @@ export default function ChatPage() {
   const isPreviewOpen = useFilePreviewStore((state) => state.isPreviewOpen);
   const { colors, isDark } = useThemeColors();
   
-  const { 
-    messages, 
-    handleSubmit: originalHandleSubmit, 
-    isProcessing,        
-    handleStopProcessing, 
+  // --- BEGIN COMMENT ---
+  // 🎯 使用封装的Hook检测chatflow应用
+  // --- END COMMENT ---
+  const { isChatflowApp } = useChatflowDetection();
+  
+  // --- BEGIN COMMENT ---
+  // 🎯 使用封装的Hook管理chatflow状态
+  // --- END COMMENT ---
+  const {
+    messages,
+    handleSubmit: originalHandleSubmit,
+    isProcessing,
+    handleStopProcessing,
     sendDirectMessage,
-  } = useChatInterface();
+    nodeTracker,
+    showNodeTracker,
+    setShowNodeTracker,
+    showFloatingController
+  } = useChatflowState(isChatflowApp);
   
   // --- BEGIN COMMENT ---
   // 使用分页加载钩子获取历史消息
@@ -174,11 +194,41 @@ export default function ChatPage() {
                 isWaitingForResponse={isWaitingForResponse}
                 isLoadingInitial={isLoadingInitial}
               />
+              
+              {/* --- BEGIN COMMENT ---
+              🎯 新增：Chatflow 节点跟踪器 - 仅在chatflow应用时显示
+              弹窗由用户主动点击悬浮球控制，或发送消息时自动弹出
+              --- END COMMENT --- */}
+              {isChatflowApp && showNodeTracker && (
+                <ChatflowNodeTracker 
+                  isVisible={showNodeTracker}
+                  className={cn(
+                    "fixed bottom-40 right-6 z-10 max-w-sm",
+                    "transition-all duration-300"
+                  )}
+                />
+              )}
             </div>
           )}
         </div>
 
         <ScrollToBottomButton />
+
+        {/* --- BEGIN COMMENT ---
+        🎯 新增：Chatflow 悬浮控制器 - 仅在chatflow应用时显示
+        --- END COMMENT --- */}
+        {isChatflowApp && (
+          <ChatflowFloatingController
+            isVisible={showFloatingController}
+            isTrackerVisible={showNodeTracker}
+            onToggleTracker={() => setShowNodeTracker(!showNodeTracker)}
+            onClose={() => {
+              // 悬浮球不能关闭，因为它是chatflow应用的核心功能
+              // 如果需要隐藏，可以关闭跟踪器
+              setShowNodeTracker(false);
+            }}
+          />
+        )}
 
         <ChatInputBackdrop />
         
