@@ -517,6 +517,8 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
         
       case 'parallel_branch_finished':
         const { node_id: finishedBranchNodeId, branch_id: finishedBranchId, status: branchStatus, error: branchError } = event.data
+        
+        // 更新分支状态
         get().updateParallelBranch(finishedBranchNodeId, finishedBranchId, {
           status: branchStatus === 'succeeded' ? 'completed' : 'failed',
           endTime: Date.now(),
@@ -524,6 +526,29 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
           error: branchError,
           description: branchStatus === 'succeeded' ? '分支完成' : '分支失败'
         })
+        
+        // 🎯 更新完成分支计数
+        const { nodes: currentNodes } = get()
+        const parallelNode = currentNodes.find(n => n.id === finishedBranchNodeId)
+        if (parallelNode && parallelNode.parallelBranches) {
+          const completedCount = parallelNode.parallelBranches.filter(
+            branch => branch.status === 'completed' || branch.status === 'failed'
+          ).length
+          
+          get().updateNode(finishedBranchNodeId, {
+            completedBranches: completedCount
+          })
+          
+          // 如果所有分支都完成了，更新节点状态
+          if (completedCount === parallelNode.totalBranches) {
+            const hasFailedBranches = parallelNode.parallelBranches.some(branch => branch.status === 'failed')
+            get().updateNode(finishedBranchNodeId, {
+              status: hasFailedBranches ? 'failed' : 'completed',
+              endTime: Date.now(),
+              description: hasFailedBranches ? '部分分支失败' : '所有分支完成'
+            })
+          }
+        }
         break
         
       default:

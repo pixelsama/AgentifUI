@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
-import { Loader2, Clock, CheckCircle, XCircle, AlertCircle, ChevronDown, ChevronRight, RotateCcw, GitBranch, Zap } from 'lucide-react'
+import { Loader2, Clock, CheckCircle, XCircle, AlertCircle, RotateCcw, GitBranch, Zap } from 'lucide-react'
 import type { ChatflowNode, ChatflowIteration, ChatflowParallelBranch } from '@lib/stores/chatflow-execution-store'
 import { useChatflowExecutionStore } from '@lib/stores/chatflow-execution-store'
 
@@ -223,9 +223,17 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
     }
   }
   
-  return (
+    return (
     <div className="space-y-1">
-      <div className={getBarStyles()}>
+      <div 
+        className={cn(
+          getBarStyles(),
+          // 🎯 所有bar都有悬停效果，只有迭代和并行分支节点才有cursor pointer
+          "hover:scale-[1.02] hover:shadow-md transition-all duration-200",
+          (node.isIterationNode || node.isParallelNode) && "cursor-pointer"
+        )}
+        onClick={(node.isIterationNode || node.isParallelNode) ? () => toggleIterationExpanded(node.id) : undefined}
+      >
         {/* 左侧：状态图标 */}
         <div className="flex-shrink-0">
           {getStatusIcon()}
@@ -233,31 +241,29 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
         
         {/* 中间：节点信息 */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap"> {/* 🎯 添加flex-wrap允许换行 */}
+          <div className="flex items-center gap-2 flex-wrap">
             {/* 节点标题行 */}
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <span className={cn(
-                "font-medium text-sm font-serif truncate", // 🎯 添加truncate防止过长
+                "font-medium text-sm font-serif truncate",
                 isDark ? "text-stone-200" : "text-stone-800"
               )}>
                 {getNodeTitle()}
               </span>
-              
-              {/* 🎯 缩进的子节点不显示轮次信息，只有迭代容器节点显示 */}
             </div>
             
-            {/* 状态标签行 */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-                          {/* 迭代计数显示 */}
-            {node.isIterationNode && node.totalIterations && (
-              <span className={cn(
-                "text-xs px-2 py-0.5 rounded-full bg-stone-200 text-stone-700 font-serif",
-                isDark && "bg-stone-700/50 text-stone-300"
-              )}>
-                {node.currentIteration || 0}/{node.totalIterations}
-              </span>
-            )}
-              
+            {/* 🎯 状态标签行 - 右移一些距离让"执行完成"对齐 */}
+            <div className="flex items-center gap-2 flex-shrink-0 ml-8">
+              {/* 迭代计数显示 */}
+              {node.isIterationNode && node.totalIterations && (
+                <span className={cn(
+                  "text-xs px-2 py-0.5 rounded-full bg-stone-200 text-stone-700 font-serif",
+                  isDark && "bg-stone-700/50 text-stone-300"
+                )}>
+                  {node.currentIteration || 0}/{node.totalIterations}
+                </span>
+              )}
+                
               {/* 并行分支进度指示 */}
               {node.isParallelNode && node.totalBranches && (
                 <span className={cn(
@@ -288,30 +294,12 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
               )}>
                 {getStatusText()}
               </span>
-              
-              {/* 展开/折叠按钮 */}
-              {(node.isIterationNode || node.isParallelNode) && (
-                              <button
-                onClick={() => toggleIterationExpanded(node.id)}
-                className={cn(
-                  "p-1 rounded transition-all duration-200",
-                  isDark 
-                    ? "hover:bg-stone-700 text-stone-400 hover:text-stone-200" 
-                    : "hover:bg-stone-100 text-stone-500 hover:text-stone-700"
-                )}
-              >
-                  <ChevronRight className={cn(
-                    "h-3 w-3 chatflow-expand-button",
-                    isExpanded && "expanded"
-                  )} />
-                </button>
-              )}
             </div>
           </div>
         </div>
         
         {/* 右侧：计时信息 */}
-        <div className="flex-shrink-0 w-16 text-right"> {/* 🎯 固定宽度避免抖动 */}
+        <div className="flex-shrink-0 w-16 text-right">
           {(node.status === 'running' || node.status === 'completed') && elapsedTime > 0 && (
             <div className={cn(
               "text-xs font-serif",
@@ -327,8 +315,11 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
       {/* 实际的子节点显示由父组件根据 isExpanded 状态控制 */}
       
       {/* 🎯 新增：展开的并行分支列表 */}
-      {isExpanded && node.isParallelNode && node.parallelBranches && node.parallelBranches.length > 0 && (
-        <div className="space-y-2 chatflow-expand-enter ml-4">
+      <CollapsibleContent 
+        isExpanded={isExpanded} 
+        show={!!(node.isParallelNode && node.parallelBranches && node.parallelBranches.length > 0)}
+      >
+        <div className="space-y-2 ml-4">
           {/* 并行分支进度条 */}
           {node.totalBranches && (
             <div className="px-3 py-2">
@@ -343,7 +334,7 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
           
           {/* 分支列表 */}
           <div className="space-y-1">
-            {node.parallelBranches.map((branch, index) => (
+            {node.parallelBranches?.map((branch, index) => (
               <ParallelBranchItem
                 key={branch.id}
                 branch={branch}
@@ -353,7 +344,27 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
             ))}
           </div>
         </div>
-      )}
+      </CollapsibleContent>
+    </div>
+  )
+}
+
+// --- 🎯 新增：带有退出动画的折叠内容组件 ---
+interface CollapsibleContentProps {
+  isExpanded: boolean
+  show: boolean
+  children: React.ReactNode
+}
+
+function CollapsibleContent({ isExpanded, show, children }: CollapsibleContentProps) {
+  // 🎯 简化：只有展开时才渲染，关闭时立即消失
+  if (!show || !isExpanded) {
+    return null
+  }
+  
+  return (
+    <div className="animate-in slide-in-from-top-2 fade-in duration-250">
+      {children}
     </div>
   )
 }
