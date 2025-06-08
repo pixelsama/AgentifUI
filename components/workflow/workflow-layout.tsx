@@ -180,7 +180,7 @@ export function WorkflowLayout({ instanceId }: WorkflowLayoutProps) {
   // --- 移动端布局 ---
   if (isMobile) {
     return (
-      <div className="h-[calc(100vh-2.5rem)] flex flex-col">
+      <div className="h-full flex flex-col overflow-hidden">
         {/* 全局错误提示 */}
         {error && (
           <ErrorBanner
@@ -242,7 +242,7 @@ export function WorkflowLayout({ instanceId }: WorkflowLayoutProps) {
   
   // --- 桌面端布局 ---
   return (
-    <div className="h-[calc(100vh-2.5rem)] flex flex-col relative">
+    <div className="h-full flex flex-col relative overflow-hidden">
       {/* 全局错误提示 */}
       {error && (
         <ErrorBanner
@@ -253,10 +253,10 @@ export function WorkflowLayout({ instanceId }: WorkflowLayoutProps) {
         />
       )}
       
-      <div className="flex-1 flex">
+      <div className="flex-1 flex overflow-hidden">
         {/* 主内容区域 */}
         <div className={cn(
-          "flex-1 relative transition-all duration-300",
+          "flex-1 relative transition-all duration-300 overflow-hidden",
           showHistory ? "lg:w-2/3" : "w-full"
         )}>
           <ResizableSplitPane
@@ -265,25 +265,31 @@ export function WorkflowLayout({ instanceId }: WorkflowLayoutProps) {
             minLeftWidth={25}
             maxLeftWidth={75}
             left={
-              <div className="h-full px-8 py-6 overflow-y-auto">
-                <WorkflowInputForm
-                  instanceId={instanceId}
-                  onExecute={handleExecuteWorkflow}
-                  isExecuting={isExecuting}
-                  ref={formResetRef}
-                />
+              <div className="h-full flex flex-col overflow-hidden hide-all-scrollbars">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden px-8 pt-4 pb-12 no-scrollbar">
+                  <WorkflowInputForm
+                    instanceId={instanceId}
+                    onExecute={handleExecuteWorkflow}
+                    isExecuting={isExecuting}
+                    ref={formResetRef}
+                  />
+                </div>
               </div>
             }
             right={
-              <WorkflowTracker
-                isExecuting={isExecuting}
-                executionResult={currentExecution?.outputs || null}
-                currentExecution={currentExecution}
-                onNodeUpdate={handleNodeUpdate}
-                onStop={handleStopExecution}
-                onRetry={handleRetryExecution}
-                onReset={handleCompleteReset}
-              />
+              <div className="h-full flex flex-col overflow-hidden hide-all-scrollbars">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar">
+                  <WorkflowTracker
+                    isExecuting={isExecuting}
+                    executionResult={currentExecution?.outputs || null}
+                    currentExecution={currentExecution}
+                    onNodeUpdate={handleNodeUpdate}
+                    onStop={handleStopExecution}
+                    onRetry={handleRetryExecution}
+                    onReset={handleCompleteReset}
+                  />
+                </div>
+              </div>
             }
           />
         </div>
@@ -291,7 +297,7 @@ export function WorkflowLayout({ instanceId }: WorkflowLayoutProps) {
         {/* 历史记录侧边栏 */}
         {showHistory && (
           <div className={cn(
-            "w-80 min-w-72 border-l",
+            "w-80 min-w-72 border-l overflow-hidden",
             "transition-all duration-300 ease-in-out",
             "transform-gpu", // 使用GPU加速
             isDark ? "border-stone-700" : "border-stone-200"

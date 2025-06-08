@@ -73,7 +73,7 @@ export function WorkflowTracker({
   return (
     <div className="h-full flex flex-col">
       {/* --- 统一状态面板 --- */}
-      {(onStop || onRetry || onReset) && (
+      {(onStop || onRetry || onReset) && (isExecuting || currentExecution || error) && (
         <UnifiedStatusPanel
           isExecuting={isExecuting}
           progress={progress}
@@ -88,7 +88,7 @@ export function WorkflowTracker({
       )}
       
       {/* --- 节点列表 --- */}
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+<div className="flex-1 overflow-y-auto px-6 pt-2 pb-4">
         {!isExecuting && !currentExecution && nodes.length === 0 ? (
           // 空状态
           <div className="h-full flex items-center justify-center">

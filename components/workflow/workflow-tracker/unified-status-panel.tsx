@@ -91,7 +91,7 @@ export function UnifiedStatusPanel({
   
   return (
     <div className={cn(
-      "px-6 py-4 flex-shrink-0",
+      "px-6 pt-2 pb-3 flex-shrink-0",
       // 去掉分割线和背景，融入页面
     )}>
       <div className="space-y-3">

@@ -133,6 +133,50 @@ html, body {
 /* --- BEGIN COMMENT ---
 🎯 全局字体规则 - 确保所有路由都使用统一的字体
 --- END COMMENT --- */
+@layer utilities {
+  /* --- BEGIN COMMENT ---
+  隐藏滚动条但保持滚动功能的工具类 - 增强版
+  --- END COMMENT --- */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+    width: 0px;
+    height: 0px;
+    background: transparent;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar-track {
+    display: none;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar-thumb {
+    display: none;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar-corner {
+    display: none;
+  }
+  
+  /* --- 强制隐藏所有滚动条的全局类 --- */
+  .hide-all-scrollbars,
+  .hide-all-scrollbars * {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+  
+  .hide-all-scrollbars::-webkit-scrollbar,
+  .hide-all-scrollbars *::-webkit-scrollbar {
+    display: none !important;
+    width: 0px !important;
+    height: 0px !important;
+    background: transparent !important;
+  }
+}
+
 @layer base {
   /* 🔥 最强的全局字体设置 - 使用 Inter 作为默认，确保一致性 */
   html, body, * {
