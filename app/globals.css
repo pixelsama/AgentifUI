@@ -649,92 +649,120 @@ Chatflow 执行进度条相关样式
 }
 
 /* --- BEGIN COMMENT ---
-🎯 Chatflow Iteration 树状结构线样式
-为迭代中的节点提供清晰的层级视觉指示，使用连续的树状连接线
+🎯 Chatflow Iteration 层级指示样式
+使用左侧指示条+连接点的设计，提供清晰的层级视觉指示
 --- END COMMENT --- */
 
 /* 迭代节点容器 */
-.iteration-tree-node {
+.iteration-node {
   position: relative;
+}
+
+/* 左侧指示条 - 使用渐变色从淡到深 */
+.iteration-node::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, 
+    #d6d3d1, /* stone-300 */
+    #a8a29e  /* stone-400 */
+  );
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.dark .iteration-node::before {
+  background: linear-gradient(to bottom, 
+    #57534e, /* stone-600 */
+    #44403c  /* stone-700 */
+  );
+}
+
+/* 连接点 - 在指示条上的小圆点 */
+.iteration-node::after {
+  content: '';
+  position: absolute;
+  left: -13.5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: #a8a29e; /* stone-400 */
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  transition: all 0.2s ease;
   z-index: 1;
 }
 
-/* 连续的垂直线 - 贯穿整个节点高度 */
-.iteration-tree-node::before {
-  content: '';
-  position: absolute;
-  left: -18px;
-  top: -12px;
-  height: calc(100% + 24px);
+.dark .iteration-node::after {
+  background-color: #57534e; /* stone-600 */
+  border-color: #1c1917; /* stone-900 */
+}
+
+/* --- BEGIN COMMENT ---
+🎯 悬停效果：指示条和连接点同时高亮
+--- END COMMENT --- */
+.iteration-node:hover::before {
+  background: linear-gradient(to bottom, 
+    #78716c, /* stone-500 */
+    #57534e  /* stone-600 */
+  );
+  width: 4px;
+  left: -12.5px;
+}
+
+.dark .iteration-node:hover::before {
+  background: linear-gradient(to bottom, 
+    #6b7280, /* gray-500 */
+    #4b5563  /* gray-600 */
+  );
+}
+
+.iteration-node:hover::after {
+  background-color: #78716c; /* stone-500 */
+  width: 8px;
+  height: 8px;
+  left: -14px;
+}
+
+.dark .iteration-node:hover::after {
+  background-color: #6b7280; /* gray-500 */
+}
+
+/* --- BEGIN COMMENT ---
+🎯 多层级支持：更深层级使用更深的缩进和更细的指示条
+--- END COMMENT --- */
+.iteration-node.level-2 {
+  margin-left: 2rem; /* 32px */
+}
+
+.iteration-node.level-2::before {
   width: 2px;
-  background-color: #a8a29e; /* stone-400 */
-  border-radius: 1px;
-  z-index: -1;
-  transition: all 0.2s ease;
+  left: -8px;
 }
 
-.dark .iteration-tree-node::before {
-  background-color: #57534e; /* stone-600 */
+.iteration-node.level-2::after {
+  width: 4px;
+  height: 4px;
+  left: -9px;
 }
 
-/* 水平连接线 - 从垂直线延伸到节点 */
-.iteration-tree-node::after {
-  content: '';
-  position: absolute;
-  left: -18px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 2px;
-  background-color: #a8a29e; /* stone-400 */
-  border-radius: 1px;
-  z-index: -1;
-  transition: all 0.2s ease;
+.iteration-node.level-3 {
+  margin-left: 3rem; /* 48px */
 }
 
-.dark .iteration-tree-node::after {
-  background-color: #57534e; /* stone-600 */
+.iteration-node.level-3::before {
+  width: 1px;
+  left: -6px;
 }
 
-/* --- BEGIN COMMENT ---
-🎯 增强效果：悬停时连接线高亮，提供视觉反馈
---- END COMMENT --- */
-.iteration-tree-node:hover::before {
-  background-color: #78716c; /* stone-500 */
+.iteration-node.level-3::after {
   width: 3px;
-  left: -19px;
-}
-
-.dark .iteration-tree-node:hover::before {
-  background-color: #6b7280; /* gray-500 */
-}
-
-.iteration-tree-node:hover::after {
-  background-color: #78716c; /* stone-500 */
-  width: 18px;
   height: 3px;
+  left: -7.5px;
 }
 
-.dark .iteration-tree-node:hover::after {
-  background-color: #6b7280; /* gray-500 */
-}
 
-/* --- BEGIN COMMENT ---
-🎯 连接线组合：为了确保垂直线连续，我们需要特殊处理
---- END COMMENT --- */
-
-/* 第一个迭代节点：垂直线从中心开始向下 */
-.iteration-tree-node:first-child::before {
-  top: 50%;
-  height: calc(50% + 12px);
-}
-
-/* 最后一个迭代节点：垂直线到中心结束 */
-.iteration-tree-node:last-child::before {
-  height: calc(50% + 12px);
-}
-
-/* 如果只有一个迭代节点：不显示垂直线 */
-.iteration-tree-node:only-child::before {
-  display: none;
-}

@@ -182,12 +182,13 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
       isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
     )
     
-    // 🎯 优化：迭代中的节点使用树状结构线，提供更清晰的层级视觉指示
-    // 替代简单的左边框，使用伪元素创建连接线效果
+    // --- BEGIN COMMENT ---
+    // 🎯 优化：迭代中的节点使用左侧指示条+连接点设计，提供清晰的层级视觉指示
+    // --- END COMMENT ---
     const iterationStyles = node.isInIteration ? cn(
       "relative ml-6 pl-4",
-      // 添加自定义类用于伪元素样式
-      "iteration-tree-node",
+      // 使用新的指示条样式
+      "iteration-node",
       // 轻微的背景色区分
       isDark ? "bg-stone-800/20" : "bg-stone-50/40"
     ) : ""
