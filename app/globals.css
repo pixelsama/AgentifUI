@@ -650,7 +650,7 @@ Chatflow 执行进度条相关样式
 
 /* --- BEGIN COMMENT ---
 🎯 Chatflow Iteration 层级指示样式
-使用左侧指示条+连接点的设计，提供清晰的层级视觉指示
+紧贴bar左边缘的装饰线，与bar风格保持一致
 --- END COMMENT --- */
 
 /* 迭代节点容器 */
@@ -658,111 +658,76 @@ Chatflow 执行进度条相关样式
   position: relative;
 }
 
-/* 左侧指示条 - 使用渐变色从淡到深 */
+/* 左侧装饰线 - 紧贴bar左边缘，与bar高度和圆角保持一致 */
 .iteration-node::before {
   content: '';
   position: absolute;
-  left: -12px;
+  left: -1px; /* 紧贴bar的左边框 */
   top: 0;
   bottom: 0;
   width: 3px;
   background: linear-gradient(to bottom, 
-    #d6d3d1, /* stone-300 */
-    #a8a29e  /* stone-400 */
+    rgba(168, 162, 158, 0.6), /* stone-400 半透明 */
+    rgba(168, 162, 158, 0.8)  /* stone-400 更不透明 */
   );
-  border-radius: 2px;
+  border-radius: 6px 0 0 6px; /* 左侧圆角与bar的rounded-md匹配 */
   transition: all 0.2s ease;
 }
 
 .dark .iteration-node::before {
   background: linear-gradient(to bottom, 
-    #57534e, /* stone-600 */
-    #44403c  /* stone-700 */
+    rgba(87, 83, 78, 0.6),  /* stone-600 半透明 */
+    rgba(87, 83, 78, 0.8)   /* stone-600 更不透明 */
   );
 }
 
-/* 连接点 - 在指示条上的小圆点 */
+/* 连接点 - 在装饰线中央的小指示器 */
 .iteration-node::after {
   content: '';
   position: absolute;
-  left: -13.5px;
+  left: -0.5px; /* 在装饰线中央 */
   top: 50%;
   transform: translateY(-50%);
-  width: 6px;
-  height: 6px;
-  background-color: #a8a29e; /* stone-400 */
-  border: 2px solid #ffffff;
-  border-radius: 50%;
+  width: 2px;
+  height: 8px;
+  background: #a8a29e; /* stone-400 */
+  border-radius: 1px;
   transition: all 0.2s ease;
   z-index: 1;
 }
 
 .dark .iteration-node::after {
-  background-color: #57534e; /* stone-600 */
-  border-color: #1c1917; /* stone-900 */
+  background: #57534e; /* stone-600 */
 }
 
 /* --- BEGIN COMMENT ---
-🎯 悬停效果：指示条和连接点同时高亮
+🎯 悬停效果：装饰线变宽变亮，连接点也相应变化
 --- END COMMENT --- */
 .iteration-node:hover::before {
-  background: linear-gradient(to bottom, 
-    #78716c, /* stone-500 */
-    #57534e  /* stone-600 */
-  );
   width: 4px;
-  left: -12.5px;
+  left: -2px;
+  background: linear-gradient(to bottom, 
+    rgba(120, 113, 108, 0.8), /* stone-500 */
+    rgba(120, 113, 108, 1)    /* stone-500 完全不透明 */
+  );
 }
 
 .dark .iteration-node:hover::before {
   background: linear-gradient(to bottom, 
-    #6b7280, /* gray-500 */
-    #4b5563  /* gray-600 */
+    rgba(120, 113, 108, 0.8), /* stone-500 */
+    rgba(120, 113, 108, 1)    /* stone-500 完全不透明 */
   );
 }
 
 .iteration-node:hover::after {
-  background-color: #78716c; /* stone-500 */
-  width: 8px;
-  height: 8px;
-  left: -14px;
+  width: 3px;
+  height: 10px;
+  left: -1.5px;
+  background: #78716c; /* stone-500 */
 }
 
 .dark .iteration-node:hover::after {
-  background-color: #6b7280; /* gray-500 */
-}
-
-/* --- BEGIN COMMENT ---
-🎯 多层级支持：更深层级使用更深的缩进和更细的指示条
---- END COMMENT --- */
-.iteration-node.level-2 {
-  margin-left: 2rem; /* 32px */
-}
-
-.iteration-node.level-2::before {
-  width: 2px;
-  left: -8px;
-}
-
-.iteration-node.level-2::after {
-  width: 4px;
-  height: 4px;
-  left: -9px;
-}
-
-.iteration-node.level-3 {
-  margin-left: 3rem; /* 48px */
-}
-
-.iteration-node.level-3::before {
-  width: 1px;
-  left: -6px;
-}
-
-.iteration-node.level-3::after {
-  width: 3px;
-  height: 3px;
-  left: -7.5px;
+  background: #78716c; /* stone-500 */
 }
 
 
