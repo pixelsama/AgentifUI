@@ -257,7 +257,6 @@ export default function AppsPage() {
           <AppList
             apps={sortedApps}
             viewMode={viewMode}
-            favoriteAppIds={favoriteApps.map(fav => fav.instanceId)}
             onAppClick={handleOpenApp}
           />
         </div>
