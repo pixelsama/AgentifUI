@@ -79,7 +79,10 @@ export function ChatflowNodeTracker({ isVisible, className }: ChatflowNodeTracke
           : "bg-white/80 border-stone-200 backdrop-blur-sm"
       )}>
         {/* 标题栏 */}
-        <div className="flex items-center gap-2 pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
+        <div className={cn(
+          "flex items-center gap-2 pb-2 border-b",
+          isDark ? "border-stone-700/50" : "border-stone-200/50"
+        )}>
           <Workflow className={cn(
             "h-4 w-4",
             isDark ? "text-stone-400" : "text-stone-600"

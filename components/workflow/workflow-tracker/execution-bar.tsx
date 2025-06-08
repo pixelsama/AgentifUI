@@ -344,7 +344,8 @@ export function ExecutionBar({ node, index, delay = 0 }: ExecutionBarProps) {
             <div
               key={iteration.id}
               className={cn(
-                "ml-6 border-l-2 border-stone-300 dark:border-stone-600 bg-stone-50/30 dark:bg-stone-800/30",
+                "relative ml-6 pl-4 iteration-node",
+                isDark ? "bg-stone-800/30" : "bg-stone-50/30",
                 "flex items-center gap-3 px-3 py-2 rounded-md border transition-all duration-300 font-serif",
                 iteration.status === 'running'
                   ? isDark
@@ -390,7 +391,8 @@ export function ExecutionBar({ node, index, delay = 0 }: ExecutionBarProps) {
             <div
               key={branch.id}
               className={cn(
-                "ml-6 border-l-2 border-stone-300 dark:border-stone-600 bg-stone-50/30 dark:bg-stone-800/30",
+                "relative ml-6 pl-4 iteration-node",
+                isDark ? "bg-stone-800/30" : "bg-stone-50/30",
                 "flex items-center gap-3 px-3 py-2 rounded-md border transition-all duration-300 font-serif",
                 branch.status === 'running'
                   ? isDark
