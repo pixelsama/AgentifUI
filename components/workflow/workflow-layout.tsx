@@ -10,6 +10,7 @@ import { ExecutionHistory } from './execution-history'
 import { ResultViewer } from './workflow-tracker/result-viewer'
 import { HistoryButton } from '@components/workflow/history-button'
 import { MobileTabSwitcher } from '@components/workflow/mobile-tab-switcher'
+import { ResizableSplitPane } from '@components/ui/resizable-split-pane'
 import { useWorkflowHistoryStore } from '@lib/stores/workflow-history-store'
 import { useWorkflowExecution } from '@lib/hooks/use-workflow-execution'
 import { AlertCircle, RefreshCw, X } from 'lucide-react'
@@ -252,58 +253,57 @@ export function WorkflowLayout({ instanceId }: WorkflowLayoutProps) {
         />
       )}
       
-      {/* 主内容区域 */}
-      <div className="flex-1 flex relative">
-        {/* 左侧：输入表单 */}
-      <div className={cn(
-        "flex-1 min-w-0 border-r transition-all duration-300",
-        isDark ? "border-stone-700" : "border-stone-200",
-        showHistory ? "lg:w-1/3" : "lg:w-1/2"
-      )}>
-        <div className="h-full px-8 py-6 overflow-y-auto">
-          <WorkflowInputForm
-            instanceId={instanceId}
-            onExecute={handleExecuteWorkflow}
-            isExecuting={isExecuting}
-            ref={formResetRef}
-          />
-        </div>
-      </div>
-      
-      {/* 右侧：节点跟踪器 */}
-      <div className={cn(
-        "flex-1 min-w-0 transition-all duration-300",
-        showHistory ? "lg:w-1/3" : "lg:w-1/2"
-      )}>
-        <WorkflowTracker
-          isExecuting={isExecuting}
-          executionResult={currentExecution?.outputs || null}
-          currentExecution={currentExecution}
-          onNodeUpdate={handleNodeUpdate}
-          onStop={handleStopExecution}
-          onRetry={handleRetryExecution}
-          onReset={handleCompleteReset}
-        />
-      </div>
-      
-      {/* 历史记录侧边栏 */}
-      {showHistory && (
+      <div className="flex-1 flex">
+        {/* 主内容区域 */}
         <div className={cn(
-          "w-80 min-w-72 border-l",
-          "transition-all duration-300 ease-in-out",
-          "transform-gpu", // 使用GPU加速
-          isDark ? "border-stone-700" : "border-stone-200"
+          "flex-1 relative transition-all duration-300",
+          showHistory ? "lg:w-2/3" : "w-full"
         )}>
-          <ExecutionHistory
-            instanceId={instanceId}
-            onClose={() => setShowHistory(false)}
-            isMobile={false}
-            onViewResult={handleViewResult}
+          <ResizableSplitPane
+            storageKey="workflow-split-pane"
+            defaultLeftWidth={50}
+            minLeftWidth={25}
+            maxLeftWidth={75}
+            left={
+              <div className="h-full px-8 py-6 overflow-y-auto">
+                <WorkflowInputForm
+                  instanceId={instanceId}
+                  onExecute={handleExecuteWorkflow}
+                  isExecuting={isExecuting}
+                  ref={formResetRef}
+                />
+              </div>
+            }
+            right={
+              <WorkflowTracker
+                isExecuting={isExecuting}
+                executionResult={currentExecution?.outputs || null}
+                currentExecution={currentExecution}
+                onNodeUpdate={handleNodeUpdate}
+                onStop={handleStopExecution}
+                onRetry={handleRetryExecution}
+                onReset={handleCompleteReset}
+              />
+            }
           />
         </div>
-      )}
-      
-             {/* 历史记录按钮已移至NavBar */}
+        
+        {/* 历史记录侧边栏 */}
+        {showHistory && (
+          <div className={cn(
+            "w-80 min-w-72 border-l",
+            "transition-all duration-300 ease-in-out",
+            "transform-gpu", // 使用GPU加速
+            isDark ? "border-stone-700" : "border-stone-200"
+          )}>
+            <ExecutionHistory
+              instanceId={instanceId}
+              onClose={() => setShowHistory(false)}
+              isMobile={false}
+              onViewResult={handleViewResult}
+            />
+          </div>
+        )}
       </div>
       
       {/* --- 结果查看器（页面层级，带模糊背景） --- */}
