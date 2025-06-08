@@ -191,12 +191,41 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
       isExecuting: false,
       formLocked: false,
       currentNodeId: null,
-      // 将所有运行中的节点标记为失败
-      nodes: state.nodes.map(node => 
-        node.status === 'running' 
-          ? { ...node, status: 'failed', error: '执行已停止' }
-          : node
-      )
+      // 将所有运行中的节点标记为停止状态
+      nodes: state.nodes.map(node => {
+        if (node.status === 'running') {
+          return { 
+            ...node, 
+            status: 'failed', // 保持为failed，因为这是中断的执行
+            error: '用户手动停止',
+            endTime: Date.now(),
+            description: node.title + ' (已停止)'
+          }
+        }
+        // 同时处理迭代中的节点
+        if (node.iterations) {
+          return {
+            ...node,
+            iterations: node.iterations.map(iteration => 
+              iteration.status === 'running'
+                ? { ...iteration, status: 'failed', endTime: Date.now() }
+                : iteration
+            )
+          }
+        }
+        // 同时处理并行分支中的节点
+        if (node.parallelBranches) {
+          return {
+            ...node,
+            parallelBranches: node.parallelBranches.map(branch => 
+              branch.status === 'running'
+                ? { ...branch, status: 'failed', endTime: Date.now() }
+                : branch
+            )
+          }
+        }
+        return node
+      })
     }))
   },
   
