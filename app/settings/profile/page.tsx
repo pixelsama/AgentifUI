@@ -10,6 +10,7 @@ import { Profile } from '@lib/types/database';
 import { createClient } from '@lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { UserCircle } from 'lucide-react';
+import { useTheme } from '@lib/hooks/use-theme';
 
 // --- BEGIN COMMENT ---
 // 生成用户头像的首字母（与desktop-user-avatar保持一致）
@@ -51,6 +52,7 @@ const getAvatarBgColor = (name: string) => {
 // --- END COMMENT ---
 export default function ProfileSettingsPage() {
   const { colors } = useSettingsColors();
+  const { isDark } = useTheme();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -121,11 +123,11 @@ export default function ProfileSettingsPage() {
         
         <div className={cn(
           "rounded-lg p-6 mb-6",
-          colors.isDark ? "border border-red-800 bg-red-900/20 text-red-300" : "border border-red-200 bg-red-50 text-red-700"
+          isDark ? "border border-red-800 bg-red-900/20 text-red-300" : "border border-red-200 bg-red-50 text-red-700"
         )}>
           <h2 className={cn(
             "text-lg font-medium mb-4 font-serif",
-            colors.isDark ? "text-red-200" : "text-red-800"
+            isDark ? "text-red-200" : "text-red-800"
           )}>
             加载资料时出错
           </h2>
@@ -134,7 +136,7 @@ export default function ProfileSettingsPage() {
             onClick={() => window.location.reload()}
             className={cn(
               "px-4 py-2 rounded-md transition-colors font-serif",
-              colors.isDark ? "bg-red-800/50 hover:bg-red-700/50 text-red-200" : "bg-red-100 hover:bg-red-200 text-red-800"
+              isDark ? "bg-red-800/50 hover:bg-red-700/50 text-red-200" : "bg-red-100 hover:bg-red-200 text-red-800"
             )}
           >
             重试

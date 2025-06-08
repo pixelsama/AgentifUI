@@ -8,6 +8,7 @@ import { AccountSettings } from '@components/settings/account-settings';
 import { createClient } from '@lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { LogOut, Shield } from 'lucide-react';
+import { useTheme } from '@lib/hooks/use-theme';
 
 // --- BEGIN COMMENT ---
 // 账号设置页面
@@ -15,6 +16,7 @@ import { LogOut, Shield } from 'lucide-react';
 // --- END COMMENT ---
 export default function AccountSettingsPage() {
   const { colors } = useSettingsColors();
+  const { isDark } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -65,13 +67,13 @@ export default function AccountSettingsPage() {
         
         <div className={cn(
           "rounded-lg p-6 mb-6",
-          colors.isDark 
+          isDark 
             ? "border border-red-800 bg-red-900/20 text-red-300"
             : "border border-red-200 bg-red-50 text-red-700"
         )}>
           <h2 className={cn(
             "text-lg font-medium mb-4 font-serif",
-            colors.isDark ? "text-red-200" : "text-red-800"
+            isDark ? "text-red-200" : "text-red-800"
           )}>
             加载账号信息时出错
           </h2>
@@ -80,7 +82,7 @@ export default function AccountSettingsPage() {
             onClick={() => window.location.reload()}
             className={cn(
               "px-4 py-2 rounded-md transition-colors font-serif",
-              colors.isDark 
+              isDark 
                 ? "bg-red-800/50 hover:bg-red-700/50 text-red-200"
                 : "bg-red-100 hover:bg-red-200 text-red-800"
             )}
@@ -164,7 +166,7 @@ export default function AccountSettingsPage() {
                 disabled
                 className={cn(
                   "px-4 py-2 rounded-md font-serif",
-                  colors.isDark 
+                  isDark 
                     ? "bg-stone-600 text-stone-400"
                     : "bg-stone-300 text-stone-500"
                 )}
