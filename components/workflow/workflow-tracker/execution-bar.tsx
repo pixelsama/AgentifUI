@@ -105,8 +105,9 @@ export function ExecutionBar({ node, index, delay = 0 }: ExecutionBarProps) {
   
   const getBarStyles = () => {
     const baseStyles = cn(
-      "flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-300",
-      "transform",
+      // 🎯 应用chatflow经验：细bar样式 + 悬停效果
+      "flex items-center gap-3 px-3 py-2 rounded-md border transition-all duration-300",
+      "transform hover:scale-[1.02] hover:shadow-md font-serif",
       isVisible ? "animate-fade-in opacity-100 translate-y-0" : "opacity-0 translate-y-2"
     )
     
@@ -189,10 +190,10 @@ export function ExecutionBar({ node, index, delay = 0 }: ExecutionBarProps) {
       </div>
       
       {/* 右侧：计时信息 */}
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 w-16 text-right">
         {(node.status === 'running' || node.status === 'completed') && elapsedTime > 0 && (
           <div className={cn(
-            "text-xs font-mono",
+            "text-xs font-serif",
             isDark ? "text-stone-400" : "text-stone-500"
           )}>
             {formatTime(elapsedTime)}
