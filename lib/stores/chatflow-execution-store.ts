@@ -69,6 +69,9 @@ interface ChatflowExecutionState {
     status: 'running' | 'completed'
   } | null
   
+  // 🎯 新增：迭代节点的展开状态
+  iterationExpandedStates: Record<string, boolean>
+  
   // 执行进度
   executionProgress: {
     current: number
@@ -102,6 +105,9 @@ interface ChatflowExecutionState {
   setError: (error: string | null) => void
   setCanRetry: (canRetry: boolean) => void
   
+  // 🎯 新增：迭代展开状态管理
+  toggleIterationExpanded: (nodeId: string) => void
+  
   // 从 SSE 事件更新状态
   handleNodeEvent: (event: any) => void
 }
@@ -112,6 +118,7 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
   currentNodeId: null,
   isExecuting: false,
   currentIteration: null,
+  iterationExpandedStates: {},
   
   executionProgress: {
     current: 0,
@@ -267,6 +274,16 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
     set({ canRetry })
   },
   
+  // 🎯 新增：切换迭代展开状态
+  toggleIterationExpanded: (nodeId: string) => {
+    set(state => ({
+      iterationExpandedStates: {
+        ...state.iterationExpandedStates,
+        [nodeId]: !state.iterationExpandedStates[nodeId]
+      }
+    }))
+  },
+  
   // 处理 SSE 事件
   handleNodeEvent: (event: any) => {
     const { nodes } = get()
@@ -285,12 +302,7 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
         // 检查是否在迭代中
         const isInIteration = !!(currentIteration && currentIteration.status === 'running')
         
-        console.log('[ChatflowExecution] 🎯 节点开始:', {
-          nodeId: node_id,
-          title: nodeTitle,
-          isInIteration,
-          iterationInfo: isInIteration ? `第${currentIteration.index}轮` : '无'
-        })
+
         
         const existingNodeIndex = nodes.findIndex(n => n.id === node_id)
         
@@ -359,24 +371,18 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
         break
         
       case 'iteration_started':
-        console.log('[ChatflowExecution] 🔍 迭代开始事件详细数据:', JSON.stringify(event.data, null, 2))
-        
         const { node_id: iterNodeId, iteration_id, iteration_index, title: iterTitle, node_type: iterNodeType } = event.data
         const totalIterations = event.data.metadata?.iterator_length || event.data.total_iterations || 1
         
-        console.log('[ChatflowExecution] 🎯 开始新迭代:', {
-          nodeId: iterNodeId,
-          iterationId: iteration_id,
-          index: iteration_index || 1,
-          total: totalIterations
-        })
+        // 🎯 修复：迭代开始时应该从0开始，第一次iteration_next才是第1轮
+        const initialIndex = 0
         
         // 设置当前迭代状态 - 后续的节点都会归属到这个迭代
         set({
           currentIteration: {
             nodeId: iterNodeId,
             iterationId: iteration_id || `iter-${Date.now()}`,
-            index: iteration_index || 1,
+            index: initialIndex,
             totalIterations: totalIterations,
             startTime: Date.now(),
             status: 'running'
@@ -386,27 +392,34 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
         // 创建迭代容器节点（如果不存在）
         const existingIterNode = nodes.find(n => n.id === iterNodeId)
         if (!existingIterNode) {
-          console.log('[ChatflowExecution] 🎯 创建迭代容器节点:', iterNodeId)
           get().addNode({
             id: iterNodeId,
             title: iterTitle || '迭代',
             status: 'running',
             startTime: Date.now(),
-            description: `第 ${iteration_index || 1} 轮 / 共 ${totalIterations} 轮`,
+            description: `准备迭代 (共 ${totalIterations} 轮)`,
             type: iterNodeType || 'iteration',
             visible: true,
             isIterationNode: true,
             totalIterations: totalIterations,
-            currentIteration: iteration_index || 1
+            currentIteration: initialIndex
           })
         } else {
           // 更新现有迭代容器
           get().updateNode(iterNodeId, {
-            description: `第 ${iteration_index || 1} 轮 / 共 ${totalIterations} 轮`,
-            currentIteration: iteration_index || 1,
+            description: `准备迭代 (共 ${totalIterations} 轮)`,
+            currentIteration: initialIndex,
             status: 'running'
           })
         }
+        
+        // 🎯 自动展开迭代节点
+        set(state => ({
+          iterationExpandedStates: {
+            ...state.iterationExpandedStates,
+            [iterNodeId]: true
+          }
+        }))
         break
         
       case 'iteration_next':
@@ -414,20 +427,37 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
         const { currentIteration: currentIter } = get()
         
         if (currentIter && currentIter.nodeId === nextNodeId) {
-          console.log('[ChatflowExecution] 🎯 迭代进入下一轮:', nextIndex)
+          // 🎯 从0开始递增：0->1, 1->2, 2->3
+          const newIterationIndex = currentIter.index + 1
+          
+          console.log('[ChatflowExecution] 🎯 迭代进入下一轮:', {
+            '当前轮次': newIterationIndex,
+            '总轮次': currentIter.totalIterations
+          })
+          
           // 更新当前迭代状态
           set({
             currentIteration: {
               ...currentIter,
-              index: nextIndex,
-              startTime: Date.now() // 重置开始时间
+              index: newIterationIndex,
+              startTime: Date.now()
             }
           })
           
-          // 更新迭代容器节点
+          // 🎯 关键：使用控制台显示的当前轮次来更新UI
           get().updateNode(nextNodeId, {
-            description: `第 ${nextIndex} 轮 / 共 ${currentIter.totalIterations} 轮`,
-            currentIteration: nextIndex
+            description: `第 ${newIterationIndex} 轮 / 共 ${currentIter.totalIterations} 轮`,
+            currentIteration: newIterationIndex
+          })
+          
+          // 更新所有在迭代中的子节点的轮次标记
+          const { nodes } = get()
+          nodes.forEach(node => {
+            if (node.isInIteration && !node.isIterationNode) {
+              get().updateNode(node.id, {
+                iterationIndex: newIterationIndex
+              })
+            }
           })
         }
         break
@@ -437,15 +467,27 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
         const { currentIteration: completedIter } = get()
         
         if (completedIter && completedIter.nodeId === completedNodeId) {
-          console.log('[ChatflowExecution] 🎯 迭代完成:', completedNodeId)
-          // 清除当前迭代状态
-          set({ currentIteration: null })
-          
-          // 更新迭代容器节点为完成状态
+          // 更新迭代容器节点为完成状态，保持最终计数
           get().updateNode(completedNodeId, {
             status: 'completed',
             endTime: Date.now(),
-            description: `迭代完成 (共 ${completedIter.totalIterations} 轮)`
+            description: `迭代完成 (共 ${completedIter.totalIterations} 轮)`,
+            currentIteration: completedIter.totalIterations
+          })
+          
+          // 清除当前迭代状态
+          set({ currentIteration: null })
+          
+          // 清除所有节点的迭代标记
+          const { nodes } = get()
+          Object.keys(nodes).forEach(nodeId => {
+            const node = nodes.find(n => n.id === nodeId)
+            if (node && node.isInIteration) {
+              get().updateNode(nodeId, {
+                isInIteration: false,
+                iterationIndex: undefined
+              })
+            }
           })
         }
         break

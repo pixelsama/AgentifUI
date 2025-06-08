@@ -603,3 +603,47 @@ Chatflow 执行进度条相关样式
 .chatflow-status-change {
   animation: node-status-transition 0.3s ease-out;
 }
+
+/* --- 🎯 新增：Chatflow展开/折叠动画 --- */
+@keyframes expand-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 200px;
+  }
+}
+
+@keyframes collapse-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 200px;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+    max-height: 0;
+  }
+}
+
+.chatflow-expand-enter {
+  animation: expand-in 0.25s ease-out forwards;
+}
+
+.chatflow-collapse-exit {
+  animation: collapse-out 0.2s ease-in forwards;
+}
+
+/* 展开/折叠按钮旋转动画 */
+.chatflow-expand-button {
+  transition: transform 0.2s ease-out;
+}
+
+.chatflow-expand-button.expanded {
+  transform: rotate(90deg);
+}
