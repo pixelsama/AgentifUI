@@ -575,18 +575,7 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
                   </button>
                 </TooltipWrapper>
                 
-                {/* 上传进度条 */}
-                {uploadFile.status === 'uploading' && (
-                  <div className={cn(
-                    "absolute bottom-0 left-0 right-0 h-1 rounded-b-xl overflow-hidden",
-                    isDark ? "bg-stone-700" : "bg-stone-200"
-                  )}>
-                    <div 
-                      className="h-full bg-gradient-to-r from-stone-500 to-stone-400 transition-all duration-300 rounded-b-xl"
-                      style={{ width: `${uploadFile.progress}%` }}
-                    />
-                  </div>
-                )}
+
               </div>
             ))}
           </div>

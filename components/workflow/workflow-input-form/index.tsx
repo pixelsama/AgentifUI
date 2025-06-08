@@ -252,7 +252,7 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
       <div className="h-full flex flex-col">
         {/* --- 表单内容 --- */}
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
-          <div className="flex-1 space-y-6 overflow-y-auto">
+          <div className="flex-1 space-y-6 overflow-y-auto overflow-x-visible px-2">
             {userInputForm.map((formItem: DifyUserInputFormItem, index: number) => {
               const fieldType = Object.keys(formItem)[0]
               const fieldConfig = formItem[fieldType as keyof typeof formItem]
