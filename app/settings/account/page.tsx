@@ -64,22 +64,25 @@ export default function AccountSettingsPage() {
         <h1 className="text-2xl font-bold mb-6 font-serif">账号设置</h1>
         
         <div className={cn(
-          "rounded-lg p-6",
-          "border border-red-200 dark:border-red-800",
-          "bg-red-50 dark:bg-red-900/20",
-          "text-red-700 dark:text-red-300"
+          "rounded-lg p-6 mb-6",
+          colors.isDark 
+            ? "border border-red-800 bg-red-900/20 text-red-300"
+            : "border border-red-200 bg-red-50 text-red-700"
         )}>
-          <h2 className="text-lg font-medium mb-4 text-red-800 dark:text-red-200 font-serif">加载账号信息时出错</h2>
+          <h2 className={cn(
+            "text-lg font-medium mb-4 font-serif",
+            colors.isDark ? "text-red-200" : "text-red-800"
+          )}>
+            加载账号信息时出错
+          </h2>
           <p className="mb-4 font-serif">{error.message}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className={cn(
-              "px-4 py-2 rounded-lg",
-              "bg-red-100 dark:bg-red-800/50",
-              "hover:bg-red-200 dark:hover:bg-red-700/50",
-              "text-red-800 dark:text-red-200",
-              "transition-colors duration-200",
-              "font-serif"
+              "px-4 py-2 rounded-md transition-colors font-serif",
+              colors.isDark 
+                ? "bg-red-800/50 hover:bg-red-700/50 text-red-200"
+                : "bg-red-100 hover:bg-red-200 text-red-800"
             )}
           >
             重试
@@ -160,14 +163,13 @@ export default function AccountSettingsPage() {
               <button
                 disabled
                 className={cn(
-                  "px-3 py-2 rounded-lg",
-                  "text-sm font-serif",
-                  "bg-stone-300 dark:bg-stone-600",
-                  "text-stone-500 dark:text-stone-400",
-                  "cursor-not-allowed"
+                  "px-4 py-2 rounded-md font-serif",
+                  colors.isDark 
+                    ? "bg-stone-600 text-stone-400"
+                    : "bg-stone-300 text-stone-500"
                 )}
               >
-                退出登录
+                删除账号
               </button>
             </div>
           </div>
