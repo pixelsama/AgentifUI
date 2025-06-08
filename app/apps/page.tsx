@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
 import { useMobile } from "@lib/hooks"
 import { cn } from "@lib/utils"
@@ -20,6 +20,7 @@ import type { AppInstance } from "@components/apps/types"
 
 export default function AppsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { colors } = useThemeColors()
   const isMobile = useMobile()
   const { addFavoriteApp, favoriteApps } = useFavoriteAppsStore()
@@ -38,6 +39,51 @@ export default function AppsPage() {
     // 清除sidebar选中状态，因为在应用市场页面不应该有选中的应用
     selectItem(null, null)
   }, [fetchApps, selectItem])
+
+  // 🎯 新增：处理URL查询参数，支持直接跳转到特定筛选
+  useEffect(() => {
+    const categoryParam = searchParams.get('category')
+    const searchParam = searchParams.get('search')
+    
+    if (categoryParam) {
+      setSelectedCategory(decodeURIComponent(categoryParam))
+    }
+    
+    if (searchParam) {
+      setSearchTerm(decodeURIComponent(searchParam))
+    }
+  }, [searchParams])
+
+  // 🎯 新增：更新URL查询参数的函数
+  const updateURLParams = (category?: string, search?: string) => {
+    const params = new URLSearchParams()
+    
+    if (category && category !== "全部") {
+      params.set('category', encodeURIComponent(category))
+    }
+    
+    if (search && search.trim()) {
+      params.set('search', encodeURIComponent(search.trim()))
+    }
+    
+    const queryString = params.toString()
+    const newURL = queryString ? `/apps?${queryString}` : '/apps'
+    
+    // 使用replace避免在浏览器历史中创建过多条目
+    router.replace(newURL, { scroll: false })
+  }
+
+  // 🎯 修改分类选择处理函数，同步更新URL
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category)
+    updateURLParams(category, searchTerm)
+  }
+
+  // 🎯 修改搜索处理函数，同步更新URL
+  const handleSearchChange = (search: string) => {
+    setSearchTerm(search)
+    updateURLParams(selectedCategory, search)
+  }
 
   // 🎯 将原始应用数据转换为应用市场格式
   // 过滤出应用市场类型的应用，并从config中提取显示信息
@@ -245,9 +291,9 @@ export default function AppsPage() {
           {/* 🎯 优化搜索和过滤栏：支持Dify应用类型筛选 */}
           <AppFilters
             searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
+            onSearchChange={handleSearchChange}
             selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
+            onCategoryChange={handleCategoryChange}
             categories={categories}
             viewMode={viewMode}
             onViewModeChange={setViewMode}

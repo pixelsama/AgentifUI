@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Zap, Bot, Plus, EyeOff } from "lucide-react"
+import { Zap, Bot, Plus, EyeOff, Heart } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useCurrentApp } from "@lib/hooks/use-current-app"
 import { useChatStore } from "@lib/stores/chat-store"
@@ -341,6 +341,40 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* 查看全部收藏按钮 - 参考chat list的"查看全部历史"样式 */}
+      {favoriteApps.length > 0 && (
+        <div className="px-2">
+          <div className="mt-1">
+            <SidebarListButton
+              icon={
+                <Heart className={cn(
+                  "h-5 w-5",
+                  isDark
+                    ? "text-gray-400"
+                    : openDropdownId 
+                      ? "text-gray-500" // 有菜单打开时禁用悬停效果
+                      : "text-gray-500 group-hover:text-primary" // 正常状态下的悬停效果
+                )} />
+              }
+              disableHover={!!openDropdownId} // 当有菜单打开时禁用悬停效果
+              onClick={() => {
+                router.push('/apps?category=常用应用')
+              }}
+              className={cn(
+                "w-full group font-medium",
+                isDark 
+                  ? "bg-stone-700 hover:bg-stone-600 border border-stone-600 hover:border-stone-500/80 shadow-sm hover:shadow-md text-gray-100 hover:text-white" 
+                  : "bg-primary/10 hover:bg-primary/15 text-primary shadow-sm hover:shadow-md border border-stone-300/50"
+              )}
+            >
+              <span className="text-xs font-medium font-serif">
+                {favoriteApps.length > 5 ? `查看全部收藏 (${favoriteApps.length})` : '查看收藏应用'}
+              </span>
+            </SidebarListButton>
+          </div>
         </div>
       )}
     </div>
