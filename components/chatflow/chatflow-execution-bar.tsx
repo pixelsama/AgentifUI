@@ -179,43 +179,53 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
     const baseStyles = cn(
       "flex items-center gap-3 px-3 py-2 rounded-md border transition-all duration-300", // 🎯 恢复细bar样式
       "transform font-serif",
-      isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
-      // 🎯 迭代中的节点添加缩进和特殊样式
-      node.isInIteration && "ml-6 border-l-2 border-stone-300 dark:border-stone-600 bg-stone-50/30 dark:bg-stone-800/30"
+      isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
     )
+    
+    // 🎯 优化：迭代中的节点使用树状结构线，提供更清晰的层级视觉指示
+    // 替代简单的左边框，使用伪元素创建连接线效果
+    const iterationStyles = node.isInIteration ? cn(
+      "relative ml-6 pl-4",
+      // 添加自定义类用于伪元素样式
+      "iteration-tree-node",
+      // 轻微的背景色区分
+      isDark ? "bg-stone-800/20" : "bg-stone-50/40"
+    ) : ""
+    
+    const combinedBaseStyles = cn(baseStyles, iterationStyles)
     
     switch (node.status) {
       case 'running':
         return cn(
-          baseStyles,
+          combinedBaseStyles,
           isDark
             ? "bg-stone-700/50 border-stone-600 shadow-lg shadow-stone-900/30"
             : "bg-stone-200/50 border-stone-300 shadow-lg shadow-stone-200/50"
         )
       case 'completed':
         return cn(
-          baseStyles,
+          combinedBaseStyles,
           isDark
             ? "bg-stone-600/30 border-stone-500"
             : "bg-stone-100 border-stone-300"
         )
       case 'failed':
         return cn(
-          baseStyles,
+          combinedBaseStyles,
           isDark
             ? "bg-red-900/20 border-red-700/50"
             : "bg-red-50 border-red-200"
         )
       case 'pending':
         return cn(
-          baseStyles,
+          combinedBaseStyles,
           isDark
             ? "bg-stone-800/50 border-stone-700/50"
             : "bg-stone-50 border-stone-200"
         )
       default:
         return cn(
-          baseStyles,
+          combinedBaseStyles,
           isDark
             ? "bg-stone-800/50 border-stone-700/50"
             : "bg-stone-50 border-stone-200"
