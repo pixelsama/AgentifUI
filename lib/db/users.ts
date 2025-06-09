@@ -159,8 +159,20 @@ export async function getUserList(filters: UserFilters = {}): Promise<Result<{
       const { data: authData, error: authError } = await supabase
         .rpc('get_admin_users', { user_ids: userIds });
       
-      if (!authError && authData) {
+      if (authError) {
+        console.error('获取auth.users信息失败:', {
+          error: authError,
+          userIdsCount: userIds.length,
+          errorCode: authError.code,
+          errorMessage: authError.message,
+          errorDetails: authError.details
+        });
+        // 如果RPC调用失败，仍然继续处理，但记录错误
+      } else if (authData) {
+        console.log('成功获取auth数据，用户数量:', authData.length);
         authUsers = authData;
+      } else {
+        console.warn('RPC调用成功但返回空数据');
       }
     }
 

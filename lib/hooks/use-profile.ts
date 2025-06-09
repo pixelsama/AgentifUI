@@ -26,6 +26,10 @@ export interface Profile {
   organization_role?: string | null;
   department?: string | null;
   job_title?: string | null;
+  // --- BEGIN COMMENT ---
+  // auth.users表的信息：用于settings页面显示
+  // --- END COMMENT ---
+  auth_last_sign_in_at?: string | null;
 }
 
 // localStorage缓存相关常量
@@ -189,6 +193,14 @@ export function useProfile(userId?: string): UseProfileResult {
       const orgMember = profileData.org_members?.[0]; // 取第一个组织
       const organization = orgMember?.organizations;
       
+      // --- BEGIN COMMENT ---
+      // 获取auth.users中的last_sign_in_at信息
+      // --- END COMMENT ---
+      let authLastSignInAt: string | null = null;
+      if (session?.user) {
+        authLastSignInAt = session.user.last_sign_in_at || null;
+      }
+
       const newProfile: Profile = {
         id: profileData.id,
         full_name: profileData.full_name,
@@ -208,7 +220,11 @@ export function useProfile(userId?: string): UseProfileResult {
         } : null,
         organization_role: orgMember?.role || null,
         department: orgMember?.department || null,
-        job_title: orgMember?.job_title || null
+        job_title: orgMember?.job_title || null,
+        // --- BEGIN COMMENT ---
+        // 添加auth信息用于settings页面显示
+        // --- END COMMENT ---
+        auth_last_sign_in_at: authLastSignInAt
       };
       
       // 更新状态和缓存
