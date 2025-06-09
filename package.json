@@ -11,6 +11,12 @@
     "migrate-dify": "ts-node scripts/migrate-dify-config.ts",
     "init-dify": "node init-scripts/init-dify-config.js"
   },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "bufferutil",
+      "utf-8-validate"
+    ]
+  },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@radix-ui/react-popover": "^1.1.11",
