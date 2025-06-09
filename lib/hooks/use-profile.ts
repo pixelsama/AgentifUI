@@ -13,7 +13,9 @@ export interface Profile {
   role: UserRole;
   updated_at: string | null;
   created_at: string | null;
-  // 企业信息
+  // --- BEGIN COMMENT ---
+  // 企业组织信息：包含企业基本信息、用户在组织中的角色和部门信息
+  // --- END COMMENT ---
   organization?: {
     id: string;
     name: string;
@@ -21,6 +23,8 @@ export interface Profile {
     created_at: string;
   } | null;
   organization_role?: string | null;
+  department?: string | null;
+  job_title?: string | null;
 }
 
 // localStorage缓存相关常量
@@ -158,21 +162,27 @@ export function useProfile(userId?: string): UseProfileResult {
       if (result.success && result.data) {
         let newProfile = result.data as Profile;
         
-        // 同时获取用户的企业信息
+        // --- BEGIN COMMENT ---
+        // 同时获取用户的企业信息，包括部门和职位
+        // --- END COMMENT ---
         try {
           const orgResult = await getUserOrganization(targetUserId);
           if (orgResult.success && orgResult.data) {
             newProfile = {
               ...newProfile,
               organization: orgResult.data.organization,
-              organization_role: orgResult.data.role
+              organization_role: orgResult.data.role,
+              department: orgResult.data.department,
+              job_title: orgResult.data.job_title
             };
           } else {
             // 用户没有关联企业
             newProfile = {
               ...newProfile,
               organization: null,
-              organization_role: null
+              organization_role: null,
+              department: null,
+              job_title: null
             };
           }
         } catch (orgError) {
@@ -181,7 +191,9 @@ export function useProfile(userId?: string): UseProfileResult {
           newProfile = {
             ...newProfile,
             organization: null,
-            organization_role: null
+            organization_role: null,
+            department: null,
+            job_title: null
           };
         }
         
