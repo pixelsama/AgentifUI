@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
 import { Textarea } from '@components/ui/textarea'
-import { Plus, Users, Building2, UserPlus, Settings, Shield } from 'lucide-react'
+import { Plus, Users, Building2, UserPlus, Settings, Shield, Trash2, UserMinus } from 'lucide-react'
 import { cn } from '@lib/utils'
 import AppPermissionsManagement from './app-permissions'
 
@@ -180,6 +180,62 @@ export default function OrganizationsManagement() {
       }
     } catch (error) {
       console.error('添加用户到组织失败:', error)
+    }
+  }
+
+  // --- BEGIN COMMENT ---
+  // 从组织中移除用户
+  // --- END COMMENT ---
+  const handleRemoveUserFromOrg = async (memberId: string) => {
+    if (!confirm('确定要移除此成员吗？')) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/admin/organizations/members', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ memberId }),
+      })
+
+      if (response.ok) {
+        await fetchOrgMembers()
+        await fetchDepartmentInfo()
+      }
+    } catch (error) {
+      console.error('移除组织成员失败:', error)
+    }
+  }
+
+  // --- BEGIN COMMENT ---
+  // 删除组织
+  // --- END COMMENT ---
+  const handleDeleteOrganization = async (orgId: string, orgName: string) => {
+    if (!confirm(`确定要删除组织"${orgName}"吗？此操作不可撤销。`)) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/admin/organizations', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orgId }),
+      })
+
+      if (response.ok) {
+        await fetchOrganizations()
+        await fetchOrgMembers()
+        await fetchDepartmentInfo()
+      } else {
+        const data = await response.json()
+        alert(data.error || '删除组织失败')
+      }
+    } catch (error) {
+      console.error('删除组织失败:', error)
     }
   }
 
@@ -408,10 +464,22 @@ export default function OrganizationsManagement() {
               return (
                 <Card key={org.id}>
                   <CardHeader>
-                    <CardTitle className="font-serif">{org.name}</CardTitle>
-                    <CardDescription className="font-serif">
-                      {org.settings?.description || '暂无描述'}
-                    </CardDescription>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="font-serif">{org.name}</CardTitle>
+                        <CardDescription className="font-serif">
+                          {org.settings?.description || '暂无描述'}
+                        </CardDescription>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteOrganization(org.id, org.name)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
@@ -441,26 +509,62 @@ export default function OrganizationsManagement() {
         {/* --- 部门管理标签页 --- */}
         <TabsContent value="departments" className="space-y-4">
           <div className="space-y-4">
-            {departmentInfo.map((dept) => (
-              <Card key={`${dept.org_id}-${dept.department}`}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="font-serif">{dept.org_name} - {dept.department}</CardTitle>
-                      <CardDescription className="font-serif">
-                        {dept.member_count} 名成员 • 角色: {dept.roles}
-                      </CardDescription>
+            {departmentInfo.map((dept) => {
+              const deptMembers = orgMembers.filter(
+                m => m.org_id === dept.org_id && m.department === dept.department
+              )
+              
+              return (
+                <Card key={`${dept.org_id}-${dept.department}`}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="font-serif">{dept.org_name} - {dept.department}</CardTitle>
+                        <CardDescription className="font-serif">
+                          {dept.member_count} 名成员 • 角色: {dept.roles}
+                        </CardDescription>
+                      </div>
+                      <Badge 
+                        variant={dept.has_permissions ? "default" : "secondary"}
+                        className="font-serif"
+                      >
+                        {dept.has_permissions ? '已配置权限' : '未配置权限'}
+                      </Badge>
                     </div>
-                    <Badge 
-                      variant={dept.has_permissions ? "default" : "secondary"}
-                      className="font-serif"
-                    >
-                      {dept.has_permissions ? '已配置权限' : '未配置权限'}
-                    </Badge>
-                  </div>
-                </CardHeader>
-              </Card>
-            ))}
+                  </CardHeader>
+                  <CardContent>
+                    {deptMembers.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium text-stone-700 font-serif">部门成员:</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {deptMembers.map((member) => (
+                            <div key={member.id} className="flex items-center justify-between p-2 bg-stone-50 rounded">
+                              <div className="flex items-center space-x-2">
+                                <div className="text-sm font-serif">
+                                  {member.user?.full_name || member.user?.username || '未知用户'}
+                                </div>
+                                <Badge variant="outline" className="text-xs font-serif">
+                                  {member.role === 'owner' ? '所有者' : 
+                                   member.role === 'admin' ? '管理员' : '成员'}
+                                </Badge>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveUserFromOrg(member.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <UserMinus className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </TabsContent>
 

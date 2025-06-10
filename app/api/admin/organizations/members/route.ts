@@ -160,4 +160,68 @@ export async function POST(request: NextRequest) {
     console.error('添加组织成员API错误:', error)
     return NextResponse.json({ error: '服务器内部错误' }, { status: 500 })
   }
+}
+
+// --- BEGIN COMMENT ---
+// 从组织中移除用户
+// --- END COMMENT ---
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    
+    // --- 检查用户权限 ---
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: '未授权访问' }, { status: 401 })
+    }
+
+    // --- 检查是否为管理员 ---
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role !== 'admin') {
+      return NextResponse.json({ error: '权限不足' }, { status: 403 })
+    }
+
+    // --- 解析请求数据 ---
+    const { memberId } = await request.json()
+
+    if (!memberId?.trim()) {
+      return NextResponse.json({ error: '成员ID不能为空' }, { status: 400 })
+    }
+
+    // --- 检查成员是否存在 ---
+    const { data: member } = await supabase
+      .from('org_members')
+      .select('*')
+      .eq('id', memberId)
+      .single()
+
+    if (!member) {
+      return NextResponse.json({ error: '成员不存在' }, { status: 404 })
+    }
+
+    // --- 删除组织成员 ---
+    const { error } = await supabase
+      .from('org_members')
+      .delete()
+      .eq('id', memberId)
+
+    if (error) {
+      console.error('移除组织成员失败:', error)
+      return NextResponse.json({ error: '移除组织成员失败' }, { status: 500 })
+    }
+
+    return NextResponse.json({ 
+      success: true,
+      message: '成功移除组织成员'
+    })
+
+  } catch (error) {
+    console.error('移除组织成员API错误:', error)
+    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 })
+  }
 } 

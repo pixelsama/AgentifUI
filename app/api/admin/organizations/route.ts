@@ -102,4 +102,86 @@ export async function POST(request: NextRequest) {
     console.error('创建组织API错误:', error)
     return NextResponse.json({ error: '服务器内部错误' }, { status: 500 })
   }
+}
+
+// --- BEGIN COMMENT ---
+// 删除组织
+// --- END COMMENT ---
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    
+    // --- 检查用户权限 ---
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: '未授权访问' }, { status: 401 })
+    }
+
+    // --- 检查是否为管理员 ---
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role !== 'admin') {
+      return NextResponse.json({ error: '权限不足' }, { status: 403 })
+    }
+
+    // --- 解析请求数据 ---
+    const { orgId } = await request.json()
+
+    if (!orgId?.trim()) {
+      return NextResponse.json({ error: '组织ID不能为空' }, { status: 400 })
+    }
+
+    // --- 检查组织是否存在 ---
+    const { data: organization } = await supabase
+      .from('organizations')
+      .select('id, name')
+      .eq('id', orgId)
+      .single()
+
+    if (!organization) {
+      return NextResponse.json({ error: '组织不存在' }, { status: 404 })
+    }
+
+    // --- 检查组织是否还有成员 ---
+    const { data: members } = await supabase
+      .from('org_members')
+      .select('id')
+      .eq('org_id', orgId)
+
+    if (members && members.length > 0) {
+      return NextResponse.json({ 
+        error: '无法删除有成员的组织，请先移除所有成员' 
+      }, { status: 400 })
+    }
+
+    // --- 删除相关的部门权限配置 ---
+    await supabase
+      .from('department_app_permissions')
+      .delete()
+      .eq('org_id', orgId)
+
+    // --- 删除组织 ---
+    const { error } = await supabase
+      .from('organizations')
+      .delete()
+      .eq('id', orgId)
+
+    if (error) {
+      console.error('删除组织失败:', error)
+      return NextResponse.json({ error: '删除组织失败' }, { status: 500 })
+    }
+
+    return NextResponse.json({ 
+      success: true,
+      message: `成功删除组织: ${organization.name}`
+    })
+
+  } catch (error) {
+    console.error('删除组织API错误:', error)
+    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 })
+  }
 } 
