@@ -11,12 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
 import { Switch } from '@components/ui/switch'
-import { Settings, Shield, Users, Globe, Lock, Building2, Search, Filter, Edit, Plus, Minus } from 'lucide-react'
+import { Settings, Shield, Users, Globe, Lock, Building2, Search, Filter, Edit, Plus, Minus, Save, RefreshCw } from 'lucide-react'
 import { cn } from '@lib/utils'
 import toast from 'react-hot-toast'
 
 // --- BEGIN COMMENT ---
-// 现代化权限管理界面 - 紧凑设计
+// 重新设计的权限配置组件：简化状态管理，修复Switch更新问题
 // --- END COMMENT ---
 
 interface ServiceInstance {
@@ -24,11 +24,7 @@ interface ServiceInstance {
   display_name: string
   description?: string
   instance_id: string
-  api_path: string
   visibility: 'public' | 'org_only' | 'private'
-  config: any
-  created_at: string
-  updated_at: string
 }
 
 interface DepartmentPermission {
@@ -39,7 +35,6 @@ interface DepartmentPermission {
   is_enabled: boolean
   usage_quota?: number
   used_count: number
-  org_name: string
 }
 
 interface OrgDepartment {
@@ -49,16 +44,97 @@ interface OrgDepartment {
   member_count: number
 }
 
+// --- BEGIN COMMENT ---
+// 权限变更项：使用完整ID避免分割错误
+// --- END COMMENT ---
+interface PermissionChange {
+  orgId: string
+  department: string
+  appId: string
+  isEnabled: boolean
+  usageQuota?: number
+}
+
 export default function AppPermissionsManagement() {
   const { isDark } = useTheme()
+  
+  // 基础数据
   const [serviceInstances, setServiceInstances] = useState<ServiceInstance[]>([])
   const [departmentPermissions, setDepartmentPermissions] = useState<DepartmentPermission[]>([])
   const [orgDepartments, setOrgDepartments] = useState<OrgDepartment[]>([])
   const [loading, setLoading] = useState(true)
+  
+  // 对话框状态
   const [selectedApp, setSelectedApp] = useState<ServiceInstance | null>(null)
   const [isPermissionDialogOpen, setIsPermissionDialogOpen] = useState(false)
+  
+  // --- BEGIN COMMENT ---
+  // 🔧 简化的权限变更缓存：使用数组避免Map的复杂性
+  // --- END COMMENT ---
+  const [permissionChanges, setPermissionChanges] = useState<PermissionChange[]>([])
+  const [isSaving, setIsSaving] = useState(false)
 
-  // 数据获取函数
+  // --- BEGIN COMMENT ---
+  // 🔧 缓存可见性变更，不立即发API
+  // --- END COMMENT ---
+  const [visibilityChanges, setVisibilityChanges] = useState<Map<string, string>>(new Map())
+
+  // --- BEGIN COMMENT ---
+  // 📊 获取组织部门数据
+  // --- END COMMENT ---
+  const fetchOrgDepartments = async () => {
+    try {
+      // 并行获取组织和成员数据
+      const [orgResponse, memberResponse] = await Promise.all([
+        fetch('/api/admin/organizations'),
+        fetch('/api/admin/organizations/members')
+      ])
+      
+      if (!orgResponse.ok || !memberResponse.ok) {
+        throw new Error('获取数据失败')
+      }
+      
+      const [orgData, memberData] = await Promise.all([
+        orgResponse.json(),
+        memberResponse.json()
+      ])
+      
+      // 生成部门列表
+      const departments: OrgDepartment[] = []
+      const organizations = orgData.organizations || []
+      const members = memberData.members || []
+      
+      organizations.forEach((org: any) => {
+        const orgMembers = members.filter((member: any) => member.org_id === org.id)
+        const deptCounts = new Map<string, number>()
+        
+        orgMembers.forEach((member: any) => {
+          const dept = member.department || '默认部门'
+          deptCounts.set(dept, (deptCounts.get(dept) || 0) + 1)
+        })
+        
+        deptCounts.forEach((count, department) => {
+          departments.push({
+            org_id: org.id,
+            org_name: org.name,
+            department,
+            member_count: count
+          })
+        })
+      })
+      
+      setOrgDepartments(departments)
+      console.log(`[权限配置] 获取到 ${departments.length} 个部门`)
+      
+    } catch (error) {
+      console.error('[权限配置] 获取组织部门失败:', error)
+      toast.error('获取组织部门失败')
+    }
+  }
+
+  // --- BEGIN COMMENT ---
+  // 📊 获取应用实例
+  // --- END COMMENT ---
   const fetchServiceInstances = async () => {
     try {
       const response = await fetch('/api/admin/app-permissions/instances')
@@ -67,11 +143,14 @@ export default function AppPermissionsManagement() {
         setServiceInstances(data.instances || [])
       }
     } catch (error) {
-      toast.error('获取应用实例失败')
       console.error('获取应用实例失败:', error)
+      toast.error('获取应用实例失败')
     }
   }
 
+  // --- BEGIN COMMENT ---
+  // 📊 获取部门权限
+  // --- END COMMENT ---
   const fetchDepartmentPermissions = async () => {
     try {
       const response = await fetch('/api/admin/app-permissions/departments')
@@ -80,24 +159,14 @@ export default function AppPermissionsManagement() {
         setDepartmentPermissions(data.permissions || [])
       }
     } catch (error) {
-      toast.error('获取部门权限失败')
       console.error('获取部门权限失败:', error)
+      toast.error('获取部门权限失败')
     }
   }
 
-  const fetchOrgDepartments = async () => {
-    try {
-      const response = await fetch('/api/admin/organizations/departments')
-      if (response.ok) {
-        const data = await response.json()
-        setOrgDepartments(data.departments || [])
-      }
-    } catch (error) {
-      toast.error('获取组织部门失败')
-      console.error('获取组织部门失败:', error)
-    }
-  }
-
+  // --- BEGIN COMMENT ---
+  // 🔄 更新应用可见性
+  // --- END COMMENT ---
   const updateAppVisibility = async (appId: string, visibility: string) => {
     try {
       const response = await fetch('/api/admin/app-permissions/visibility', {
@@ -113,34 +182,211 @@ export default function AppPermissionsManagement() {
         toast.error('更新失败')
       }
     } catch (error) {
-      toast.error('更新应用可见性失败')
       console.error('更新应用可见性失败:', error)
+      toast.error('更新应用可见性失败')
     }
   }
 
-  const updateDepartmentPermission = async (
-    orgId: string,
-    department: string,
-    appId: string,
-    permission: { is_enabled: boolean; usage_quota?: number }
-  ) => {
-    try {
-      const response = await fetch('/api/admin/app-permissions/departments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orgId, department, appId, ...permission }),
-      })
-
-      if (response.ok) {
-        await fetchDepartmentPermissions()
-        toast.success('部门权限更新成功')
-      } else {
-        toast.error('更新失败')
-      }
-    } catch (error) {
-      toast.error('更新部门权限失败')
-      console.error('更新部门权限失败:', error)
+  // --- BEGIN COMMENT ---
+  // 🔧 缓存可见性变更，不立即发API
+  // --- END COMMENT ---
+  const updateVisibilityCache = (appId: string, visibility: string) => {
+    setVisibilityChanges(prev => {
+      const newChanges = new Map(prev)
+      newChanges.set(appId, visibility)
+      return newChanges
+    })
+    
+    // 同时更新selectedApp状态以刷新模态框
+    if (selectedApp && selectedApp.id === appId) {
+      setSelectedApp(prev => prev ? { ...prev, visibility: visibility as any } : null)
     }
+    
+    console.log(`[权限配置] 缓存可见性变更: ${appId} -> ${visibility}`)
+  }
+
+  const getAppVisibility = (appId: string) => {
+    return visibilityChanges.get(appId) || serviceInstances.find(app => app.id === appId)?.visibility || 'public'
+  }
+
+  // --- BEGIN COMMENT ---
+  // 🔧 获取部门权限状态（包含缓存的变更）
+  // --- END COMMENT ---
+  const getDepartmentPermissionState = (orgId: string, department: string, appId: string) => {
+    // 先查找缓存的变更
+    const change = permissionChanges.find(
+      c => c.orgId === orgId && c.department === department && c.appId === appId
+    )
+    
+    if (change) {
+      return {
+        is_enabled: change.isEnabled,
+        usage_quota: change.usageQuota
+      }
+    }
+    
+    // 查找当前权限
+    const permission = departmentPermissions.find(
+      p => p.org_id === orgId && p.department === department && p.service_instance_id === appId
+    )
+    
+    return {
+      is_enabled: permission?.is_enabled || false,
+      usage_quota: permission?.usage_quota
+    }
+  }
+
+  // --- BEGIN COMMENT ---
+  // 🔧 更新权限变更缓存
+  // --- END COMMENT ---
+  const updatePermissionChange = (orgId: string, department: string, appId: string, isEnabled: boolean) => {
+    setPermissionChanges(prev => {
+      // 移除已存在的变更
+      const filtered = prev.filter(
+        c => !(c.orgId === orgId && c.department === department && c.appId === appId)
+      )
+      
+      // 获取当前权限的配额
+      const currentPermission = departmentPermissions.find(
+        p => p.org_id === orgId && p.department === department && p.service_instance_id === appId
+      )
+      
+      // 添加新的变更
+      filtered.push({
+        orgId,
+        department,
+        appId,
+        isEnabled,
+        usageQuota: currentPermission?.usage_quota
+      })
+      
+      console.log(`[权限配置] 更新权限变更: ${orgId}-${department}-${appId} -> ${isEnabled}`)
+      return filtered
+    })
+  }
+
+  // --- BEGIN COMMENT ---
+  // 💾 批量保存权限变更
+  // --- END COMMENT ---
+  const savePermissionChanges = async () => {
+    if (permissionChanges.length === 0) {
+      toast('没有需要保存的变更')
+      return
+    }
+
+    setIsSaving(true)
+    let successCount = 0
+    let failureCount = 0
+
+    try {
+      console.log(`[权限配置] 开始保存 ${permissionChanges.length} 个权限变更`)
+      
+      for (const change of permissionChanges) {
+        try {
+          const response = await fetch('/api/admin/app-permissions/departments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orgId: change.orgId,
+              department: change.department,
+              appId: change.appId,
+              is_enabled: change.isEnabled,
+              usage_quota: change.usageQuota
+            }),
+          })
+
+          if (response.ok) {
+            successCount++
+          } else {
+            const errorData = await response.json()
+            console.error(`[权限配置] 保存失败:`, errorData)
+            failureCount++
+          }
+        } catch (error) {
+          console.error(`[权限配置] 保存异常:`, error)
+          failureCount++
+        }
+      }
+      
+      if (failureCount === 0) {
+        toast.success(`成功保存 ${successCount} 个权限配置`)
+      } else {
+        toast(`保存完成：${successCount} 个成功，${failureCount} 个失败`)
+      }
+
+      // 清除缓存并重新获取数据
+      setPermissionChanges([])
+      await fetchDepartmentPermissions()
+      
+    } catch (error) {
+      console.error('[权限配置] 批量保存失败:', error)
+      toast.error('保存权限配置失败')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // --- BEGIN COMMENT ---
+  // 💾 保存可见性变更
+  // --- END COMMENT ---
+  const saveVisibilityChanges = async () => {
+    if (visibilityChanges.size === 0) return
+
+    for (const [appId, visibility] of visibilityChanges.entries()) {
+      try {
+        const response = await fetch('/api/admin/app-permissions/visibility', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appId, visibility }),
+        })
+
+        if (!response.ok) {
+          console.error(`保存可见性失败: ${appId}`)
+        }
+      } catch (error) {
+        console.error(`保存可见性异常: ${appId}`, error)
+      }
+    }
+
+    setVisibilityChanges(new Map())
+    await fetchServiceInstances()
+  }
+
+  // --- BEGIN COMMENT ---
+  // 💾 保存所有变更（可见性 + 权限）
+  // --- END COMMENT ---
+  const saveAllChanges = async () => {
+    if (permissionChanges.length === 0 && visibilityChanges.size === 0) {
+      toast('没有需要保存的变更')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      // 保存可见性变更
+      await saveVisibilityChanges()
+      
+      // 保存权限变更
+      if (permissionChanges.length > 0) {
+        await savePermissionChanges()
+      }
+      
+      toast.success('所有变更保存成功')
+    } catch (error) {
+      toast.error('保存变更失败')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const resetAllChanges = () => {
+    setPermissionChanges([])
+    setVisibilityChanges(new Map())
+    toast('已重置所有未保存的变更')
+  }
+
+  const getTotalChanges = () => {
+    return permissionChanges.length + visibilityChanges.size
   }
 
   // 工具函数
@@ -177,8 +423,6 @@ export default function AppPermissionsManagement() {
     }
   }
 
-
-
   // 初始化数据
   useEffect(() => {
     const loadData = async () => {
@@ -196,16 +440,14 @@ export default function AppPermissionsManagement() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-stone-600 dark:text-stone-400 font-serif">加载中...</div>
+        <RefreshCw className="w-5 h-5 animate-spin text-stone-600 mr-2" />
+        <span className="text-stone-600 dark:text-stone-400 font-serif">加载中...</span>
       </div>
     )
   }
 
   return (
-    <div className={cn(
-      "space-y-6 p-6",
-      isDark ? "bg-stone-950" : "bg-stone-50"
-    )}>
+    <div className="space-y-6">
       {/* 页面标题 */}
       <div>
         <h1 className={cn(
@@ -227,7 +469,7 @@ export default function AppPermissionsManagement() {
         {serviceInstances.map((app) => {
           const appPermissions = getAppDepartmentPermissions(app.id)
           const authorizedDepts = appPermissions.filter(p => p.is_enabled).length
-          const visibilityConfig = getVisibilityConfig(app.visibility)
+          const visibilityConfig = getVisibilityConfig(getAppVisibility(app.id))
           
           return (
             <Card key={app.id} className={cn(
@@ -334,7 +576,19 @@ export default function AppPermissionsManagement() {
       )}
 
       {/* 权限配置对话框 */}
-      <Dialog open={isPermissionDialogOpen} onOpenChange={setIsPermissionDialogOpen}>
+      <Dialog 
+        open={isPermissionDialogOpen} 
+        onOpenChange={(open) => {
+          if (!open && getTotalChanges() > 0) {
+            if (confirm('您有未保存的更改，确定要关闭吗？')) {
+              resetAllChanges()
+              setIsPermissionDialogOpen(false)
+            }
+          } else {
+            setIsPermissionDialogOpen(open)
+          }
+        }}
+      >
         <DialogContent className={cn(
           "max-w-2xl max-h-[80vh] overflow-y-auto",
           isDark ? "bg-stone-900 border-stone-800" : "bg-white border-stone-200"
@@ -372,8 +626,8 @@ export default function AppPermissionsManagement() {
                     控制谁可以看到这个应用
                   </p>
                   <Select
-                    value={selectedApp.visibility}
-                    onValueChange={(value) => updateAppVisibility(selectedApp.id, value)}
+                    value={getAppVisibility(selectedApp.id)}
+                    onValueChange={(value) => updateVisibilityCache(selectedApp.id, value)}
                   >
                     <SelectTrigger className={cn(
                       "font-serif",
@@ -414,7 +668,7 @@ export default function AppPermissionsManagement() {
                 </div>
 
                 {/* 部门权限配置 */}
-                {selectedApp.visibility === 'org_only' && (
+                {getAppVisibility(selectedApp.id) === 'org_only' && (
                   <div>
                     <Label className={cn(
                       "text-base font-medium font-serif",
@@ -428,9 +682,11 @@ export default function AppPermissionsManagement() {
                     )}>
                       设置哪些部门可以使用此应用
                     </p>
+                    
                     <div className="space-y-3 max-h-64 overflow-y-auto">
                       {orgDepartments.map((dept) => {
-                        const permission = departmentPermissions.find(
+                        const currentState = getDepartmentPermissionState(dept.org_id, dept.department, selectedApp.id)
+                        const originalPermission = departmentPermissions.find(
                           p => p.org_id === dept.org_id && 
                                p.department === dept.department && 
                                p.service_instance_id === selectedApp.id
@@ -462,25 +718,20 @@ export default function AppPermissionsManagement() {
                             </div>
                             
                             <div className="flex items-center space-x-3">
-                              {permission?.is_enabled && (
+                              {currentState.is_enabled && (
                                 <div className="text-right">
                                   <p className="text-xs text-stone-600 dark:text-stone-400 font-serif">
-                                    配额: {permission.usage_quota || '无限制'}
+                                    配额: {currentState.usage_quota || '无限制'}
                                   </p>
                                   <p className="text-xs text-stone-600 dark:text-stone-400 font-serif">
-                                    已用: {permission.used_count}
+                                    已用: {originalPermission?.used_count || 0}
                                   </p>
                                 </div>
                               )}
                               <Switch
-                                checked={permission?.is_enabled || false}
+                                checked={currentState.is_enabled}
                                 onCheckedChange={(checked) => {
-                                  updateDepartmentPermission(
-                                    dept.org_id,
-                                    dept.department,
-                                    selectedApp.id,
-                                    { is_enabled: checked, usage_quota: permission?.usage_quota }
-                                  )
+                                  updatePermissionChange(dept.org_id, dept.department, selectedApp.id, checked)
                                 }}
                               />
                             </div>
@@ -494,6 +745,9 @@ export default function AppPermissionsManagement() {
                           <p className="text-stone-600 dark:text-stone-400 font-serif">
                             暂无组织部门
                           </p>
+                          <p className="text-xs text-stone-500 dark:text-stone-500 font-serif mt-2">
+                            请先在组织管理中添加成员到部门
+                          </p>
                         </div>
                       )}
                     </div>
@@ -501,16 +755,52 @@ export default function AppPermissionsManagement() {
                 )}
               </div>
               
-              <DialogFooter>
-                <Button
-                  onClick={() => setIsPermissionDialogOpen(false)}
-                  className={cn(
-                    "font-serif",
-                    isDark ? "bg-stone-100 hover:bg-stone-200 text-stone-900" : "bg-stone-900 hover:bg-stone-800 text-white"
-                  )}
-                >
-                  完成
-                </Button>
+              <DialogFooter className="gap-2">
+                {/* 显示待保存更改数量 */}
+                {getTotalChanges() > 0 && (
+                  <div className="text-sm text-amber-600 dark:text-amber-400 font-serif mr-auto">
+                    有 {getTotalChanges()} 个待保存的更改
+                  </div>
+                )}
+                
+                {/* 重置按钮 */}
+                {getTotalChanges() > 0 && (
+                  <Button
+                    variant="outline"
+                    onClick={resetAllChanges}
+                    disabled={isSaving}
+                    className={cn(
+                      "font-serif",
+                      isDark ? "border-stone-700 text-stone-300 hover:bg-stone-800" : "border-stone-300 text-stone-700 hover:bg-stone-50"
+                    )}
+                  >
+                    重置
+                  </Button>
+                )}
+                
+                {/* 保存按钮 */}
+                {getTotalChanges() > 0 && (
+                  <Button
+                    onClick={saveAllChanges}
+                    disabled={isSaving}
+                    className={cn(
+                      "font-serif",
+                      isDark ? "bg-stone-100 hover:bg-stone-200 text-stone-900" : "bg-stone-900 hover:bg-stone-800 text-white"
+                    )}
+                  >
+                    {isSaving ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        保存中...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        保存更改
+                      </>
+                    )}
+                  </Button>
+                )}
               </DialogFooter>
             </>
           )}
