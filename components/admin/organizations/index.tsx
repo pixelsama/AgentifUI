@@ -161,6 +161,15 @@ export default function OrganizationsManagement() {
     jobTitle: ''
   })
 
+  // --- 新增成员编辑相关状态 ---
+  const [isEditMemberOpen, setIsEditMemberOpen] = useState(false)
+  const [editingMember, setEditingMember] = useState<OrgMember | null>(null)
+  const [editMemberForm, setEditMemberForm] = useState({
+    role: 'member' as 'owner' | 'admin' | 'member',
+    jobTitle: '',
+    department: ''
+  })
+
   // --- 从现有成员数据生成部门信息 ---
   const getDepartmentInfo = () => {
     const departmentGroups = orgMembers.reduce((acc, member) => {
@@ -645,6 +654,49 @@ export default function OrganizationsManagement() {
       ...prev,
       selectedUsers: allSelected ? [] : availableUsers.map(user => user.id)
     }))
+  }
+
+  // --- 编辑成员相关函数 ---
+  const openEditMember = (member: OrgMember) => {
+    setEditingMember(member)
+    setEditMemberForm({
+      role: member.role,
+      jobTitle: member.job_title || '',
+      department: member.department || ''
+    })
+    setIsEditMemberOpen(true)
+  }
+
+  const handleEditMember = async () => {
+    if (!editingMember) return
+
+    setOperationLoading(true)
+    try {
+      const response = await fetch(`/api/admin/organizations/members/${editingMember.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          role: editMemberForm.role,
+          jobTitle: editMemberForm.jobTitle,
+          department: editMemberForm.department
+        }),
+      })
+
+      if (response.ok) {
+        toast.success('成员信息更新成功')
+        await fetchOrgMembers()
+        setIsEditMemberOpen(false)
+        setEditingMember(null)
+      } else {
+        const errorData = await response.json()
+        toast.error(errorData.error || '更新成员信息失败')
+      }
+    } catch (error) {
+      toast.error('更新成员信息失败')
+      console.error('更新成员信息失败:', error)
+    } finally {
+      setOperationLoading(false)
+    }
   }
 
   if (loading) {
@@ -1306,8 +1358,8 @@ export default function OrganizationsManagement() {
                             "p-3 rounded-lg border cursor-pointer transition-all",
                             batchAddForm.selectedUsers.includes(user.id)
                               ? isDark 
-                                ? "bg-blue-900/30 border-blue-700 ring-1 ring-blue-600/50" 
-                                : "bg-blue-50 border-blue-300 ring-1 ring-blue-200"
+                                ? "bg-stone-700 border-stone-600 ring-1 ring-stone-500/50" 
+                                : "bg-stone-100 border-stone-400 ring-1 ring-stone-300/50"
                               : isDark
                                 ? "bg-stone-800 border-stone-700 hover:bg-stone-750"
                                 : "bg-white border-stone-200 hover:bg-stone-50"
@@ -1317,7 +1369,9 @@ export default function OrganizationsManagement() {
                             <div className={cn(
                               "w-6 h-6 rounded border-2 flex items-center justify-center",
                               batchAddForm.selectedUsers.includes(user.id)
-                                ? "bg-blue-600 border-blue-600"
+                                ? isDark
+                                  ? "bg-stone-600 border-stone-600"
+                                  : "bg-stone-700 border-stone-700"
                                 : isDark 
                                   ? "border-stone-600" 
                                   : "border-stone-300"
@@ -1468,6 +1522,167 @@ export default function OrganizationsManagement() {
                     </>
                   ) : (
                     `批量添加 (${batchAddForm.selectedUsers.length})`
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* --- 编辑成员对话框 --- */}
+          <Dialog open={isEditMemberOpen} onOpenChange={(open) => {
+            setIsEditMemberOpen(open)
+            if (!open) {
+              setEditingMember(null)
+              setEditMemberForm({
+                role: 'member',
+                jobTitle: '',
+                department: ''
+              })
+            }
+          }}>
+            <DialogContent className={cn(
+              "max-w-md",
+              isDark ? "bg-stone-900 border-stone-800" : "bg-stone-50 border-stone-200"
+            )}>
+              <DialogHeader>
+                <DialogTitle className={cn(
+                  "font-serif",
+                  isDark ? "text-stone-100" : "text-stone-900"
+                )}>
+                  编辑成员信息
+                </DialogTitle>
+                <DialogDescription className={cn(
+                  "font-serif",
+                  isDark ? "text-stone-400" : "text-stone-600"
+                )}>
+                  修改 {editingMember?.user?.full_name || editingMember?.user?.username || '成员'} 的信息
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <div>
+                  <Label className={cn(
+                    "font-serif",
+                    isDark ? "text-stone-300" : "text-stone-700"
+                  )}>
+                    部门
+                  </Label>
+                  <Input
+                    value={editMemberForm.department}
+                    onChange={(e) => setEditMemberForm(prev => ({ ...prev, department: e.target.value }))}
+                    placeholder="输入部门名称"
+                    className={cn(
+                      "font-serif mt-1",
+                      isDark ? "bg-stone-800 border-stone-700 text-stone-100" : "bg-white border-stone-300"
+                    )}
+                  />
+                </div>
+                
+                <div>
+                  <Label className={cn(
+                    "font-serif",
+                    isDark ? "text-stone-300" : "text-stone-700"
+                  )}>
+                    职位
+                  </Label>
+                  <Input
+                    value={editMemberForm.jobTitle}
+                    onChange={(e) => setEditMemberForm(prev => ({ ...prev, jobTitle: e.target.value }))}
+                    placeholder="输入职位（可选）"
+                    className={cn(
+                      "font-serif mt-1",
+                      isDark ? "bg-stone-800 border-stone-700 text-stone-100" : "bg-white border-stone-300"
+                    )}
+                  />
+                </div>
+                
+                <div>
+                  <Label className={cn(
+                    "font-serif",
+                    isDark ? "text-stone-300" : "text-stone-700"
+                  )}>
+                    角色
+                  </Label>
+                  <Select
+                    value={editMemberForm.role}
+                    onValueChange={(value: 'owner' | 'admin' | 'member') =>
+                      setEditMemberForm(prev => ({ ...prev, role: value }))
+                    }
+                  >
+                    <SelectTrigger className={cn(
+                      "font-serif mt-1",
+                      isDark ? "bg-stone-800 border-stone-700 text-stone-100" : "bg-white border-stone-300"
+                    )}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className={isDark ? "bg-stone-800 border-stone-700" : "bg-white border-stone-200"}>
+                      <SelectItem value="member" className="font-serif">成员</SelectItem>
+                      <SelectItem value="admin" className="font-serif">管理员</SelectItem>
+                      <SelectItem value="owner" className="font-serif">所有者</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* 当前信息显示 */}
+                <div className={cn(
+                  "p-3 rounded-lg border bg-stone-50",
+                  isDark ? "bg-stone-800 border-stone-700" : "bg-stone-100 border-stone-200"
+                )}>
+                  <Label className={cn(
+                    "font-serif text-xs",
+                    isDark ? "text-stone-400" : "text-stone-600"
+                  )}>
+                    当前信息
+                  </Label>
+                  <div className="mt-1 space-y-1 text-xs">
+                    <div className={cn(
+                      "font-serif",
+                      isDark ? "text-stone-300" : "text-stone-700"
+                    )}>
+                      部门: {editingMember?.department || '未设置'}
+                    </div>
+                    <div className={cn(
+                      "font-serif",
+                      isDark ? "text-stone-300" : "text-stone-700"
+                    )}>
+                      职位: {editingMember?.job_title || '未设置'}
+                    </div>
+                    <div className={cn(
+                      "font-serif",
+                      isDark ? "text-stone-300" : "text-stone-700"
+                    )}>
+                      角色: {editingMember?.role === 'owner' ? '所有者' : editingMember?.role === 'admin' ? '管理员' : '成员'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditMemberOpen(false)}
+                  className={cn(
+                    "font-serif",
+                    isDark ? "border-stone-700 text-stone-300" : "border-stone-300 text-stone-700"
+                  )}
+                >
+                  取消
+                </Button>
+                <Button
+                  onClick={handleEditMember}
+                  disabled={operationLoading}
+                  className={cn(
+                    "font-serif",
+                    isDark ? "bg-stone-100 hover:bg-stone-200 text-stone-900" : "bg-stone-900 hover:bg-stone-800 text-white"
+                  )}
+                >
+                  {operationLoading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      更新中...
+                    </>
+                  ) : (
+                    '保存修改'
                   )}
                 </Button>
               </DialogFooter>
@@ -1634,12 +1849,25 @@ export default function OrganizationsManagement() {
                           </p>
                           <div className="flex flex-wrap gap-1">
                             {orgDepartments.slice(0, 3).map((dept) => (
-                              <Badge key={dept.department} variant="secondary" className="text-xs font-serif">
+                              <Badge 
+                                key={dept.department} 
+                                variant="outline" 
+                                className={cn(
+                                  "text-xs font-serif",
+                                  isDark ? "border-stone-600 text-stone-300" : "border-stone-300 text-stone-700"
+                                )}
+                              >
                                 {dept.department}
                               </Badge>
                             ))}
                             {orgDepartments.length > 3 && (
-                              <Badge variant="outline" className="text-xs font-serif">
+                              <Badge 
+                                variant="outline" 
+                                className={cn(
+                                  "text-xs font-serif",
+                                  isDark ? "border-stone-600 text-stone-400" : "border-stone-300 text-stone-500"
+                                )}
+                              >
                                 +{orgDepartments.length - 3}
                               </Badge>
                             )}
@@ -1813,6 +2041,20 @@ export default function OrganizationsManagement() {
                                 {member.role === 'admin' && '管理员'}
                                 {member.role === 'member' && '成员'}
                               </Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openEditMember(member)}
+                                disabled={operationLoading}
+                                className={cn(
+                                  "font-serif",
+                                  isDark 
+                                    ? "border-stone-700 hover:bg-stone-800 text-stone-300 hover:text-stone-100" 
+                                    : "border-stone-300 hover:bg-stone-100 text-stone-700 hover:text-stone-900"
+                                )}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
