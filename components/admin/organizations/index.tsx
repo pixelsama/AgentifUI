@@ -1172,7 +1172,10 @@ export default function OrganizationsManagement() {
                             {org.settings?.description || '暂无描述'}
                           </CardDescription>
                           {org.settings?.type && (
-                            <Badge variant="outline" className="text-xs font-serif mt-1">
+                            <Badge variant="outline" className={cn(
+                              "text-xs font-serif mt-1",
+                              isDark ? "text-stone-400 border-stone-600" : "text-stone-600 border-stone-300"
+                            )}>
                               {org.settings.type}
                             </Badge>
                           )}
