@@ -10,8 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
 import { Textarea } from '@components/ui/textarea'
-import { Plus, Users, Building2, UserPlus, Settings } from 'lucide-react'
+import { Plus, Users, Building2, UserPlus, Settings, Shield } from 'lucide-react'
 import { cn } from '@lib/utils'
+import AppPermissionsManagement from './app-permissions'
 
 // --- BEGIN COMMENT ---
 // 组织管理相关类型定义
@@ -357,10 +358,11 @@ export default function OrganizationsManagement() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview" className="font-serif">概览</TabsTrigger>
           <TabsTrigger value="organizations" className="font-serif">组织列表</TabsTrigger>
           <TabsTrigger value="departments" className="font-serif">部门管理</TabsTrigger>
+          <TabsTrigger value="permissions" className="font-serif">应用权限</TabsTrigger>
         </TabsList>
 
         {/* --- 概览标签页 --- */}
@@ -460,6 +462,11 @@ export default function OrganizationsManagement() {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        {/* --- 应用权限标签页 --- */}
+        <TabsContent value="permissions" className="space-y-4">
+          <AppPermissionsManagement />
         </TabsContent>
       </Tabs>
     </div>
