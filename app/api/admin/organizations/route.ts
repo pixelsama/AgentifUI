@@ -107,6 +107,80 @@ export async function POST(request: NextRequest) {
 // --- BEGIN COMMENT ---
 // 删除组织
 // --- END COMMENT ---
+// --- BEGIN COMMENT ---
+// 更新组织信息
+// --- END COMMENT ---
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    
+    // --- 检查用户权限 ---
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: '未授权访问' }, { status: 401 })
+    }
+
+    // --- 检查是否为管理员 ---
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role !== 'admin') {
+      return NextResponse.json({ error: '权限不足' }, { status: 403 })
+    }
+
+    // --- 解析请求数据 ---
+    const { orgId, name, settings } = await request.json()
+
+    if (!orgId?.trim()) {
+      return NextResponse.json({ error: '组织ID不能为空' }, { status: 400 })
+    }
+
+    if (!name?.trim()) {
+      return NextResponse.json({ error: '组织名称不能为空' }, { status: 400 })
+    }
+
+    // --- 检查组织是否存在 ---
+    const { data: existingOrg } = await supabase
+      .from('organizations')
+      .select('id, name, settings')
+      .eq('id', orgId)
+      .single()
+
+    if (!existingOrg) {
+      return NextResponse.json({ error: '组织不存在' }, { status: 404 })
+    }
+
+    // --- 更新组织 ---
+    const { data: organization, error } = await supabase
+      .from('organizations')
+      .update({
+        name: name.trim(),
+        settings: settings || {},
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orgId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('更新组织失败:', error)
+      return NextResponse.json({ error: '更新组织失败' }, { status: 500 })
+    }
+
+    return NextResponse.json({ 
+      organization,
+      success: true 
+    })
+
+  } catch (error) {
+    console.error('更新组织API错误:', error)
+    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 })
+  }
+}
+
 export async function DELETE(request: NextRequest) {
   try {
     const supabase = await createClient()
