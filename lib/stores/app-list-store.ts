@@ -212,19 +212,31 @@ export const useAppListStore = create<AppListState>((set, get) => ({
         throw new Error(result.error);
       }
       
-      // 转换UserAccessibleApp到AppInfo格式
-      const apps: AppInfo[] = result.data.map((app: UserAccessibleApp) => ({
-        id: app.service_instance_id,
-        name: app.display_name || app.instance_id,
-        instance_id: app.instance_id,
-        display_name: app.display_name || undefined,
-        description: app.description || undefined,
-        config: app.config,
-        usage_quota: app.usage_quota,
-        used_count: app.used_count,
-        quota_remaining: app.quota_remaining,
-        visibility: app.visibility
-      }));
+      // 转换UserAccessibleApp到AppInfo格式，并去重
+      const appMap = new Map<string, AppInfo>();
+      
+      result.data.forEach((app: UserAccessibleApp) => {
+        const appInfo: AppInfo = {
+          id: app.service_instance_id,
+          name: app.display_name || app.instance_id,
+          instance_id: app.instance_id,
+          display_name: app.display_name || undefined,
+          description: app.description || undefined,
+          config: app.config,
+          usage_quota: app.usage_quota,
+          used_count: app.used_count,
+          quota_remaining: app.quota_remaining,
+          visibility: app.visibility
+        };
+        
+        // 🔧 关键修复：使用service_instance_id作为唯一键去重
+        // 如果用户在多个部门都有权限，只保留一条记录，避免React key重复错误
+        if (!appMap.has(app.service_instance_id)) {
+          appMap.set(app.service_instance_id, appInfo);
+        }
+      });
+      
+      const apps: AppInfo[] = Array.from(appMap.values());
       
       set({ 
         apps, 

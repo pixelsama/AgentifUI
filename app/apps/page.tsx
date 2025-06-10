@@ -40,52 +40,86 @@ export default function AppsPage() {
   const [selectedCategory, setSelectedCategory] = useState("全部")
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   // --- BEGIN COMMENT ---
-  // 🎯 新增：用户状态管理
+  // 🎯 新增：用户状态管理 - 修复权限泄露问题
   // --- END COMMENT ---
-  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [currentUser, setCurrentUser] = useState<any>(undefined) // undefined = 未加载, null = 未登录, object = 已登录
   const [userProfile, setUserProfile] = useState<any>(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [userStateLoaded, setUserStateLoaded] = useState(false) // 🔧 新增：用户状态是否已加载完成
 
   // --- BEGIN COMMENT ---
-  // 🎯 获取当前用户信息
+  // 🎯 获取当前用户信息 - 修复权限泄露时序问题
   // --- END COMMENT ---
   useEffect(() => {
     const getCurrentUser = async () => {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      setCurrentUser(user)
-      
-      if (user) {
-        // 获取用户profile信息
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single()
-        if (profile) {
-          setUserProfile(profile)
-          setIsAdmin(profile.role === 'admin')
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        console.log('[Apps] 获取用户信息:', user ? `用户ID: ${user.id}` : '未登录')
+        
+        if (user) {
+          // 获取用户profile信息
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+          
+          if (profile) {
+            console.log('[Apps] 用户角色:', profile.role)
+            setUserProfile(profile)
+            setIsAdmin(profile.role === 'admin')
+          }
         }
+        
+        // 🔧 关键修复：无论是否登录，都设置用户状态和加载完成标志
+        setCurrentUser(user)
+        setUserStateLoaded(true)
+        
+        console.log('[Apps] 用户状态加载完成')
+      } catch (error) {
+        console.error('[Apps] 获取用户信息失败:', error)
+        // 即使出错也要设置加载完成，避免无限loading
+        setCurrentUser(null)
+        setUserStateLoaded(true)
       }
     }
     getCurrentUser()
   }, [])
 
   // --- BEGIN COMMENT ---
-  // 🎯 根据用户身份获取应用列表
-  // 管理员：获取所有应用（包括私有）
-  // 普通用户：获取公开应用
-  // 未登录用户：获取公开应用
+  // 🎯 根据用户身份获取应用列表 - 修复权限泄露问题
+  // 🔧 关键修复：只有在用户状态加载完成后才获取应用列表
   // --- END COMMENT ---
   useEffect(() => {
-    if (isAdmin) {
-      // 管理员获取所有应用
-      fetchAllApps();
-    } else {
-      // 普通用户和未登录用户获取公开应用
-      fetchApps();
+    // 🔧 防止权限泄露：用户状态未加载完成时不执行任何操作
+    if (!userStateLoaded) {
+      console.log('[Apps] 用户状态未加载完成，等待中...')
+      return
     }
-  }, [isAdmin, fetchApps, fetchAllApps]);
+    
+    console.log('[Apps] 用户状态已确定，强制清除缓存并获取正确的应用列表')
+    
+    // 🔥 关键修复：强制清除所有缓存，防止其他页面的缓存影响权限验证
+    const { clearCache } = useAppListStore.getState()
+    clearCache()
+    
+    if (currentUser) {
+      // 已登录用户：根据权限获取应用
+      if (isAdmin) {
+        console.log('[Apps] 管理员用户，获取所有应用')
+        fetchAllApps()
+      } else {
+        console.log('[Apps] 普通用户，获取有权限的应用')
+        fetchUserAccessibleApps(currentUser.id)
+      }
+    } else {
+      // 未登录用户：获取公开应用
+      console.log('[Apps] 未登录用户，获取公开应用')
+      fetchApps()
+    }
+  }, [userStateLoaded, currentUser, isAdmin, fetchApps, fetchUserAccessibleApps, fetchAllApps])
 
   // 🎯 在组件挂载时获取应用列表并清除sidebar选中状态
   useEffect(() => {
@@ -382,8 +416,9 @@ export default function AppsPage() {
     }
   }
 
-  // 🎯 加载状态显示
-  if (isLoading) {
+  // 🎯 加载状态显示 - 修复权限泄露问题
+  // 🔧 关键修复：用户状态未加载完成或应用正在加载时都显示loading
+  if (!userStateLoaded || isLoading) {
     return <AppLoading />
   }
 
