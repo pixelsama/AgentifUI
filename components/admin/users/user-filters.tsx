@@ -52,14 +52,14 @@ export const UserFiltersComponent: React.FC<UserFiltersProps> = ({
   ]
 
   // --- BEGIN COMMENT ---
-  // 认证来源选项（只包含已实现的认证方式）
+  // 认证来源选项（直接对应Supabase的provider值）
   // --- END COMMENT ---
   const authSourceOptions = [
-    { value: '', label: '所有来源' },
-    { value: 'password', label: '密码登录' },
-    { value: 'github', label: 'GitHub' },
-    { value: 'phone', label: '手机登录' }
-    // 注意：Google SSO 和其他 SSO 暂未实现
+    { value: '', label: '全部认证来源' },
+    { value: 'email', label: '📧 邮箱' },
+    { value: 'github', label: '🐙 GitHub' },
+    { value: 'phone', label: '📱 手机号' },
+    { value: 'google', label: '🔍 Google' },
   ]
 
   // --- BEGIN COMMENT ---

@@ -23,15 +23,19 @@ export type ExecutionStatus = 'pending' | 'running' | 'completed' | 'failed' | '
 // 用户和身份管理
 export interface Profile {
   id: string;
-  full_name: string | null;
-  username: string | null;
-  avatar_url: string | null;
-  role: UserRole;
-  status: AccountStatus;
+  email?: string;
+  full_name?: string;
+  username?: string;
+  avatar_url?: string;
+  auth_source: string;
+  phone?: string;
+  department?: string;
+  job_title?: string;
   created_at: string;
   updated_at: string;
+  role: UserRole;
+  status: AccountStatus;
   last_login: string | null;
-  auth_source: string;
   sso_provider_id: string | null;
 }
 
