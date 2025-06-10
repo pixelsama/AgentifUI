@@ -214,6 +214,8 @@ CREATE POLICY "管理员可以查看所有执行记录" ON app_executions
 
 **`department_app_permissions` 表** - 实现部门级应用访问权限控制：
 
+**⚠️ 重要说明：此表不包含任何自动生成的虚拟数据，所有权限记录都必须通过管理界面手动配置。**
+
 #### 表结构设计
 
 1. **权限控制字段**：
@@ -232,6 +234,23 @@ CREATE POLICY "管理员可以查看所有执行记录" ON app_executions
 3. **扩展和时间戳**：
    - `settings`: 扩展配置，JSONB 格式
    - `created_at`, `updated_at`: 时间戳字段
+
+#### 权限配置原则
+
+1. **手动配置原则**：
+   - 所有权限记录必须通过管理界面手动创建
+   - 系统不会自动为组织×部门×应用的组合创建权限记录
+   - 确保权限控制的精确性和安全性
+
+2. **默认拒绝策略**：
+   - 如果部门没有权限记录，则无法访问 `org_only` 类型的应用
+   - 只有 `public` 应用对所有用户可见
+   - 管理员需要明确授权部门访问特定应用
+
+3. **数据清理保证**：
+   - 迁移文件 `20250610140000_clean_virtual_department_permissions.sql` 已清空所有虚拟数据
+   - 修改了同步函数，移除自动创建权限的逻辑
+   - 确保数据库中只包含真实的权限配置
 
 #### 权限控制机制
 
@@ -613,6 +632,8 @@ if (!isAdmin) return <AccessDenied />;
 ### 部门应用权限管理
 - `/supabase/migrations/20250610120000_add_org_app_permissions.sql`: 初始组织级权限系统（已被替代）
 - `/supabase/migrations/20250610120001_redesign_department_permissions.sql`: 重新设计的部门级权限系统，实现精确的部门级应用权限控制
+- `/supabase/migrations/20250610130000_add_department_permission_management.sql`: 添加部门权限管理函数和同步工具
+- `/supabase/migrations/20250610140000_clean_virtual_department_permissions.sql`: **清空虚拟权限数据，确保只有手动配置的权限记录**
 
 ## 迁移文件说明
 
