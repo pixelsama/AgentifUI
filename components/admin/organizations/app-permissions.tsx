@@ -270,11 +270,9 @@ export default function AppPermissionsManagement() {
   // --- END COMMENT ---
   const savePermissionChanges = async () => {
     if (permissionChanges.length === 0) {
-      toast('没有需要保存的变更')
-      return
+      return { success: true, count: 0 }
     }
 
-    setIsSaving(true)
     let successCount = 0
     let failureCount = 0
 
@@ -308,21 +306,15 @@ export default function AppPermissionsManagement() {
         }
       }
       
-      if (failureCount === 0) {
-        toast.success(`成功保存 ${successCount} 个权限配置`)
-      } else {
-        toast(`保存完成：${successCount} 个成功，${failureCount} 个失败`)
-      }
-
       // 清除缓存并重新获取数据
       setPermissionChanges([])
       await fetchDepartmentPermissions()
       
+      return { success: failureCount === 0, successCount, failureCount }
+      
     } catch (error) {
       console.error('[权限配置] 批量保存失败:', error)
-      toast.error('保存权限配置失败')
-    } finally {
-      setIsSaving(false)
+      return { success: false, successCount, failureCount }
     }
   }
 
@@ -330,7 +322,12 @@ export default function AppPermissionsManagement() {
   // 💾 保存可见性变更
   // --- END COMMENT ---
   const saveVisibilityChanges = async () => {
-    if (visibilityChanges.size === 0) return
+    if (visibilityChanges.size === 0) {
+      return { success: true, count: 0 }
+    }
+
+    let successCount = 0
+    let failureCount = 0
 
     for (const [appId, visibility] of visibilityChanges.entries()) {
       try {
@@ -340,16 +337,22 @@ export default function AppPermissionsManagement() {
           body: JSON.stringify({ appId, visibility }),
         })
 
-        if (!response.ok) {
+        if (response.ok) {
+          successCount++
+        } else {
           console.error(`保存可见性失败: ${appId}`)
+          failureCount++
         }
       } catch (error) {
         console.error(`保存可见性异常: ${appId}`, error)
+        failureCount++
       }
     }
 
     setVisibilityChanges(new Map())
     await fetchServiceInstances()
+    
+    return { success: failureCount === 0, successCount, failureCount }
   }
 
   // --- BEGIN COMMENT ---
@@ -364,14 +367,24 @@ export default function AppPermissionsManagement() {
     setIsSaving(true)
     try {
       // 保存可见性变更
-      await saveVisibilityChanges()
+      const visibilityResult = await saveVisibilityChanges()
       
       // 保存权限变更
-      if (permissionChanges.length > 0) {
-        await savePermissionChanges()
+      const permissionResult = await savePermissionChanges()
+      
+      // 统一显示结果
+      const totalSuccess = (visibilityResult.successCount || 0) + (permissionResult.successCount || 0)
+      const totalFailure = (visibilityResult.failureCount || 0) + (permissionResult.failureCount || 0)
+      
+      if (totalFailure === 0) {
+        toast.success(`成功保存 ${totalSuccess} 个配置`)
+      } else {
+        toast(`保存完成：${totalSuccess} 个成功，${totalFailure} 个失败`)
       }
       
-      toast.success('所有变更保存成功')
+      // 关闭弹窗
+      setIsPermissionDialogOpen(false)
+      
     } catch (error) {
       toast.error('保存变更失败')
     } finally {
