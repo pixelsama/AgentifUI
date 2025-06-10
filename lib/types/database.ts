@@ -74,16 +74,23 @@ export interface OrgMember {
 // 🎯 更新：部门应用权限管理
 // 改为基于部门的权限控制，更符合实际业务需求
 // --- END COMMENT ---
-export type AppPermissionLevel = 'full' | 'read_only' | 'restricted';
+// --- BEGIN COMMENT ---
+// 🎯 应用权限级别类型 - 已删除，简化权限设计
+// export type AppPermissionLevel = 'full' | 'read_only' | 'restricted';
+// --- END COMMENT ---
 export type AppVisibility = 'public' | 'org_only' | 'private';
 
+// --- BEGIN COMMENT ---
+// 🎯 部门应用权限接口 - 简化版本
+// 删除了混淆的permission_level字段，只保留核心的is_enabled和usage_quota
+// --- END COMMENT ---
 export interface DepartmentAppPermission {
   id: string;
   org_id: string;
   department: string;
   service_instance_id: string;
   is_enabled: boolean;
-  permission_level: AppPermissionLevel;
+  // permission_level: AppPermissionLevel; // ❌ 已删除 - 造成混淆的字段
   usage_quota: number | null; // NULL表示无限制
   used_count: number;
   quota_reset_date: string;
@@ -346,7 +353,7 @@ export interface AppExecution {
 
 // --- BEGIN COMMENT ---
 // 🎯 用户可访问应用的扩展信息
-// 包含权限级别和配额信息
+// 简化版本：删除了permission_level字段
 // --- END COMMENT ---
 export interface UserAccessibleApp {
   service_instance_id: string;
@@ -356,7 +363,7 @@ export interface UserAccessibleApp {
   api_path: string;
   visibility: AppVisibility;
   config: ServiceInstanceConfig;
-  permission_level: AppPermissionLevel;
+  // permission_level: AppPermissionLevel; // ❌ 已删除
   usage_quota: number | null;
   used_count: number;
   quota_remaining: number | null;
@@ -365,11 +372,11 @@ export interface UserAccessibleApp {
 }
 
 // --- BEGIN COMMENT ---
-// 🎯 应用权限检查结果
+// 🎯 应用权限检查结果 - 简化版本
 // --- END COMMENT ---
 export interface AppPermissionCheck {
   has_access: boolean;
-  permission_level: AppPermissionLevel | null;
+  // permission_level: AppPermissionLevel | null; // ❌ 已删除
   quota_remaining: number | null;
   error_message: string | null;
 }

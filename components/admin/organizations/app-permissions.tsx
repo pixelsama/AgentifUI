@@ -14,7 +14,7 @@ import { Settings, Shield, Users, Globe, Lock, Building2 } from 'lucide-react'
 import { cn } from '@lib/utils'
 
 // --- BEGIN COMMENT ---
-// 应用权限管理相关类型定义
+// 应用权限管理相关类型定义 - 简化版本
 // --- END COMMENT ---
 interface ServiceInstance {
   id: string
@@ -28,13 +28,16 @@ interface ServiceInstance {
   updated_at: string
 }
 
+// --- BEGIN COMMENT ---
+// 简化的部门权限接口：移除permission_level字段
+// --- END COMMENT ---
 interface DepartmentPermission {
   id: string
   org_id: string
   department: string
   service_instance_id: string
   is_enabled: boolean
-  permission_level: 'full' | 'read_only' | 'restricted'
+  // permission_level: 'full' | 'read_only' | 'restricted' // ❌ 已删除
   usage_quota?: number
   used_count: number
   org_name: string
@@ -125,7 +128,7 @@ export default function AppPermissionsManagement() {
   }
 
   // --- BEGIN COMMENT ---
-  // 更新部门权限
+  // 更新部门权限 - 简化版本，移除permission_level参数
   // --- END COMMENT ---
   const updateDepartmentPermission = async (
     orgId: string,
@@ -133,7 +136,6 @@ export default function AppPermissionsManagement() {
     appId: string,
     permission: {
       is_enabled: boolean
-      permission_level: string
       usage_quota?: number
     }
   ) => {
@@ -334,15 +336,15 @@ export default function AppPermissionsManagement() {
                                     </span>
                                   </div>
                                   <div className="flex items-center space-x-2">
-                                    <Badge variant="outline" className="text-xs font-serif">
-                                      {perm.permission_level === 'full' ? '完全访问' : 
-                                       perm.permission_level === 'read_only' ? '只读' : '受限'}
-                                    </Badge>
+                                    {/* --- 移除权限级别显示，只显示配额信息 --- */}
                                     {perm.usage_quota && (
                                       <Badge variant="secondary" className="text-xs font-serif">
                                         {perm.used_count}/{perm.usage_quota}
                                       </Badge>
                                     )}
+                                    <Badge variant="outline" className="text-xs font-serif">
+                                      已启用
+                                    </Badge>
                                   </div>
                                 </div>
                               ))}
@@ -417,9 +419,9 @@ export default function AppPermissionsManagement() {
                           return (
                             <div key={perm.id} className="flex items-center justify-between p-2 bg-stone-50 rounded">
                               <span className="font-serif text-sm">{app?.display_name}</span>
+                              {/* --- 简化显示：移除权限级别，只显示启用状态 --- */}
                               <Badge variant="outline" className="text-xs font-serif">
-                                {perm.permission_level === 'full' ? '完全' : 
-                                 perm.permission_level === 'read_only' ? '只读' : '受限'}
+                                已启用
                               </Badge>
                             </div>
                           )
@@ -436,7 +438,7 @@ export default function AppPermissionsManagement() {
         </TabsContent>
       </Tabs>
 
-      {/* --- 权限配置对话框 --- */}
+      {/* --- 权限配置对话框 - 简化版本 --- */}
       <Dialog open={isPermissionDialogOpen} onOpenChange={setIsPermissionDialogOpen}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
@@ -466,6 +468,7 @@ export default function AppPermissionsManagement() {
                     </div>
                     
                     <div className="flex items-center space-x-4">
+                      {/* --- 启用/禁用开关 --- */}
                       <div className="flex items-center space-x-2">
                         <Label className="font-serif text-sm">启用</Label>
                         <Switch
@@ -476,63 +479,36 @@ export default function AppPermissionsManagement() {
                               dept.department,
                               selectedApp.id,
                               {
-                                is_enabled: checked,
-                                permission_level: existingPerm?.permission_level || 'full'
+                                is_enabled: checked
                               }
                             )
                           }}
                         />
                       </div>
                       
+                      {/* --- 配额设置（仅在启用时显示） --- */}
                       {existingPerm?.is_enabled && (
-                        <>
-                          <Select
-                            value={existingPerm.permission_level}
-                            onValueChange={(value) => {
+                        <div className="flex items-center space-x-2">
+                          <Label className="font-serif text-sm">配额</Label>
+                          <Input
+                            type="number"
+                            placeholder="无限制"
+                            value={existingPerm.usage_quota || ''}
+                            onChange={(e) => {
+                              const quota = e.target.value ? parseInt(e.target.value) : undefined
                               updateDepartmentPermission(
                                 dept.org_id,
                                 dept.department,
                                 selectedApp.id,
                                 {
                                   is_enabled: true,
-                                  permission_level: value
+                                  usage_quota: quota
                                 }
                               )
                             }}
-                          >
-                            <SelectTrigger className="w-24 font-serif">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="full" className="font-serif">完全</SelectItem>
-                              <SelectItem value="read_only" className="font-serif">只读</SelectItem>
-                              <SelectItem value="restricted" className="font-serif">受限</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          
-                          <div className="flex items-center space-x-2">
-                            <Label className="font-serif text-sm">配额</Label>
-                            <Input
-                              type="number"
-                              placeholder="无限制"
-                              value={existingPerm.usage_quota || ''}
-                              onChange={(e) => {
-                                const quota = e.target.value ? parseInt(e.target.value) : undefined
-                                updateDepartmentPermission(
-                                  dept.org_id,
-                                  dept.department,
-                                  selectedApp.id,
-                                  {
-                                    is_enabled: true,
-                                    permission_level: existingPerm.permission_level,
-                                    usage_quota: quota
-                                  }
-                                )
-                              }}
-                              className="w-20 font-serif"
-                            />
-                          </div>
-                        </>
+                            className="w-20 font-serif"
+                          />
+                        </div>
                       )}
                     </div>
                   </div>

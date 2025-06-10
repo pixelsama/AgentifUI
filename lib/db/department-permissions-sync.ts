@@ -102,13 +102,12 @@ export async function getPermissionSyncStatus(): Promise<Result<{
 }
 
 /**
- * 批量更新部门权限
+ * 批量更新部门权限 - 简化版本
  */
 export async function batchUpdateDepartmentPermissions(updates: {
   org_id: string;
   department: string;
   service_instance_id: string;
-  permission_level: 'full' | 'read_only' | 'restricted';
   usage_quota?: number | null;
   is_enabled: boolean;
 }[]): Promise<Result<number>> {
@@ -116,16 +115,27 @@ export async function batchUpdateDepartmentPermissions(updates: {
     const supabase = createClient();
     
     const { data, error } = await supabase
-      .rpc('batch_update_department_permissions', {
-        updates: updates
-      });
+      .from('department_app_permissions')
+      .upsert(
+        updates.map(update => ({
+          org_id: update.org_id,
+          department: update.department,
+          service_instance_id: update.service_instance_id,
+          is_enabled: update.is_enabled,
+          usage_quota: update.usage_quota,
+          updated_at: new Date().toISOString()
+        })),
+        {
+          onConflict: 'org_id,department,service_instance_id'
+        }
+      );
 
     if (error) {
       console.error('批量更新部门权限失败:', error);
       return { success: false, error: error.message };
     }
 
-    return { success: true, data: data };
+    return { success: true, data: updates.length };
   } catch (error) {
     console.error('批量更新部门权限异常:', error);
     return { success: false, error: '批量更新部门权限失败' };

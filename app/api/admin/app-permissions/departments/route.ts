@@ -64,7 +64,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
-    const { orgId, department, appId, is_enabled, permission_level, usage_quota } = await request.json()
+    // --- BEGIN COMMENT ---
+    // 简化请求参数：移除permission_level字段
+    // --- END COMMENT ---
+    const { orgId, department, appId, is_enabled, usage_quota } = await request.json()
 
     // --- BEGIN COMMENT ---
     // 获取当前用户信息，验证管理员权限
@@ -97,6 +100,7 @@ export async function POST(request: NextRequest) {
 
     // --- BEGIN COMMENT ---
     // 使用upsert操作，如果记录存在则更新，不存在则创建
+    // 简化版本：只保留is_enabled和usage_quota字段
     // --- END COMMENT ---
     const { error } = await supabase
       .from('department_app_permissions')
@@ -105,7 +109,6 @@ export async function POST(request: NextRequest) {
         department,
         service_instance_id: appId,
         is_enabled: is_enabled ?? true,
-        permission_level: permission_level || 'full',
         usage_quota: usage_quota || null,
         updated_at: new Date().toISOString()
       }, {

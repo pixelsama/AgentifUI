@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import type { DifyAppParametersResponse } from '@lib/services/dify/types';
 import type { ServiceInstanceConfig, UserAccessibleApp, AppVisibility } from '@lib/types/database';
 
+// --- BEGIN COMMENT ---
+// 简化的应用信息接口：移除permission_level字段
+// --- END COMMENT ---
 interface AppInfo {
   id: string;
   name: string;
@@ -9,7 +12,7 @@ interface AppInfo {
   display_name?: string;
   description?: string;
   config?: ServiceInstanceConfig;
-  permission_level?: string;
+  // permission_level?: string; // ❌ 已删除
   usage_quota?: number | null;
   used_count?: number;
   quota_remaining?: number | null;
@@ -163,7 +166,6 @@ export const useAppListStore = create<AppListState>((set, get) => ({
         display_name: app.display_name || undefined,
         description: app.description || undefined,
         config: app.config,
-        permission_level: app.permission_level,
         usage_quota: app.usage_quota,
         used_count: app.used_count,
         quota_remaining: app.quota_remaining,

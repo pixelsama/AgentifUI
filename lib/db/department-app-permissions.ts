@@ -12,8 +12,7 @@ import { createClient } from '@lib/supabase/client';
 import type { 
   DepartmentAppPermission, 
   UserAccessibleApp, 
-  AppPermissionCheck,
-  AppPermissionLevel 
+  AppPermissionCheck
 } from '@lib/types/database';
 
 // --- BEGIN COMMENT ---
@@ -36,7 +35,7 @@ export async function getUserAccessibleApps(userId: string): Promise<Result<User
     const supabase = createClient();
     
     const { data, error } = await supabase.rpc('get_user_accessible_apps', {
-      user_id: userId
+      p_user_id: userId
     });
 
     if (error) {
@@ -56,14 +55,14 @@ export async function getUserAccessibleApps(userId: string): Promise<Result<User
  */
 export async function checkUserAppPermission(
   userId: string, 
-  appInstanceId: string
+  serviceInstanceId: string
 ): Promise<Result<AppPermissionCheck>> {
   try {
     const supabase = createClient();
     
     const { data, error } = await supabase.rpc('check_user_app_permission', {
-      user_id: userId,
-      app_instance_id: appInstanceId
+      p_user_id: userId,
+      p_service_instance_id: serviceInstanceId
     });
 
     if (error) {
@@ -79,7 +78,6 @@ export async function checkUserAppPermission(
         success: true, 
         data: { 
           has_access: false, 
-          permission_level: null, 
           quota_remaining: null, 
           error_message: '权限检查失败' 
         } 
@@ -98,14 +96,14 @@ export async function checkUserAppPermission(
  */
 export async function incrementAppUsage(
   userId: string, 
-  appInstanceId: string
-): Promise<Result<boolean>> {
+  serviceInstanceId: string
+): Promise<Result<{ success: boolean; new_used_count: number; quota_remaining: number | null; error_message: string | null }>> {
   try {
     const supabase = createClient();
     
     const { data, error } = await supabase.rpc('increment_app_usage', {
-      user_id: userId,
-      app_instance_id: appInstanceId
+      p_user_id: userId,
+      p_service_instance_id: serviceInstanceId
     });
 
     if (error) {
@@ -113,7 +111,9 @@ export async function incrementAppUsage(
       return { success: false, error: error.message };
     }
 
-    return { success: true, data: data || false };
+    // 数据库函数返回单行结果
+    const result = Array.isArray(data) ? data[0] : data;
+    return { success: true, data: result };
   } catch (error) {
     console.error('增加应用使用计数异常:', error);
     return { success: false, error: '更新使用计数失败' };
@@ -181,7 +181,6 @@ export async function upsertDepartmentAppPermission(
         department,
         service_instance_id: serviceInstanceId,
         is_enabled: permission.is_enabled ?? true,
-        permission_level: permission.permission_level ?? 'full',
         usage_quota: permission.usage_quota ?? null,
         settings: permission.settings ?? {},
         updated_at: new Date().toISOString()
@@ -199,7 +198,7 @@ export async function upsertDepartmentAppPermission(
     return { success: true, data };
   } catch (error) {
     console.error('创建/更新部门应用权限异常:', error);
-    return { success: false, error: '保存权限配置失败' };
+    return { success: false, error: '创建/更新权限失败' };
   }
 }
 
@@ -229,7 +228,7 @@ export async function deleteDepartmentAppPermission(
     return { success: true, data: true };
   } catch (error) {
     console.error('删除部门应用权限异常:', error);
-    return { success: false, error: '删除权限配置失败' };
+    return { success: false, error: '删除权限失败' };
   }
 }
 
@@ -241,7 +240,6 @@ export async function batchSetDepartmentAppPermissions(
   department: string,
   permissions: Array<{
     serviceInstanceId: string;
-    permissionLevel: AppPermissionLevel;
     usageQuota?: number | null;
     isEnabled?: boolean;
   }>
@@ -253,9 +251,8 @@ export async function batchSetDepartmentAppPermissions(
       org_id: orgId,
       department,
       service_instance_id: p.serviceInstanceId,
-      permission_level: p.permissionLevel,
-      usage_quota: p.usageQuota ?? null,
       is_enabled: p.isEnabled ?? true,
+      usage_quota: p.usageQuota ?? null,
       settings: {},
       updated_at: new Date().toISOString()
     }));
@@ -275,7 +272,7 @@ export async function batchSetDepartmentAppPermissions(
     return { success: true, data: data || [] };
   } catch (error) {
     console.error('批量设置部门应用权限异常:', error);
-    return { success: false, error: '批量保存权限配置失败' };
+    return { success: false, error: '批量设置权限失败' };
   }
 }
 
@@ -317,23 +314,28 @@ export async function getDepartmentAppUsageStats(
       query = query.eq('department', department);
     }
 
-    const { data, error } = await query.order('department').order('used_count', { ascending: false });
+    const { data, error } = await query;
 
     if (error) {
       console.error('获取部门应用使用统计失败:', error);
       return { success: false, error: error.message };
     }
 
-    // 计算使用统计
-    const stats = (data || []).map(item => ({
-      department: item.department,
-      service_instance_id: item.service_instance_id,
-      display_name: item.service_instances[0].display_name,
-      used_count: item.used_count,
-      usage_quota: item.usage_quota,
-      quota_remaining: item.usage_quota ? Math.max(0, item.usage_quota - item.used_count) : null,
-      usage_percentage: item.usage_quota ? Math.round((item.used_count / item.usage_quota) * 100) : null
-    }));
+    // 计算统计数据
+    const stats = (data || []).map(item => {
+      const quotaRemaining = item.usage_quota ? Math.max(0, item.usage_quota - item.used_count) : null;
+      const usagePercentage = item.usage_quota ? Math.round((item.used_count / item.usage_quota) * 100) : null;
+      
+      return {
+        department: item.department,
+        service_instance_id: item.service_instance_id,
+        display_name: (item.service_instances as any)?.display_name || '未知应用',
+        used_count: item.used_count,
+        usage_quota: item.usage_quota,
+        quota_remaining: quotaRemaining,
+        usage_percentage: usagePercentage
+      };
+    });
 
     return { success: true, data: stats };
   } catch (error) {
@@ -343,7 +345,7 @@ export async function getDepartmentAppUsageStats(
 }
 
 /**
- * 重置月度配额
+ * 重置月度配额（定时任务使用）
  */
 export async function resetMonthlyQuotas(): Promise<Result<number>> {
   try {
@@ -364,7 +366,7 @@ export async function resetMonthlyQuotas(): Promise<Result<number>> {
 }
 
 /**
- * 获取用户所属部门信息
+ * 获取用户部门信息
  */
 export async function getUserDepartmentInfo(userId: string): Promise<Result<{
   orgId: string;
@@ -390,7 +392,7 @@ export async function getUserDepartmentInfo(userId: string): Promise<Result<{
 
     if (error) {
       if (error.code === 'PGRST116') {
-        // 用户未加入任何组织
+        // 用户不属于任何组织
         return { success: true, data: null };
       }
       console.error('获取用户部门信息失败:', error);
@@ -401,7 +403,7 @@ export async function getUserDepartmentInfo(userId: string): Promise<Result<{
       success: true, 
       data: {
         orgId: data.org_id,
-        orgName: data.organizations[0].name,
+        orgName: (data.organizations as any).name,
         department: data.department || '',
         role: data.role
       }
