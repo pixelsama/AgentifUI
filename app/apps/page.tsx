@@ -20,6 +20,10 @@ import {
 // import { getDifyAppTypeInfo, getAllDifyAppTypes } from "@lib/types/dify-app-types"
 // --- END COMMENT ---
 import type { AppInstance } from "@components/apps/types"
+// --- BEGIN COMMENT ---
+// 🎯 新增：导入用户认证相关功能
+// --- END COMMENT ---
+import { createClient } from "@lib/supabase/client"
 
 export default function AppsPage() {
   const router = useRouter()
@@ -30,18 +34,64 @@ export default function AppsPage() {
   const { selectItem } = useSidebarStore()
   
   // 🎯 使用真实的应用列表数据，替代硬编码
-  const { apps: rawApps, fetchApps, isLoading } = useAppListStore()
+  const { apps: rawApps, fetchApps, fetchUserAccessibleApps, isLoading, fetchAllApps } = useAppListStore()
   
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("全部")
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  // --- BEGIN COMMENT ---
+  // 🎯 新增：用户状态管理
+  // --- END COMMENT ---
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [userProfile, setUserProfile] = useState<any>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // --- BEGIN COMMENT ---
+  // 🎯 获取当前用户信息
+  // --- END COMMENT ---
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setCurrentUser(user)
+      
+      if (user) {
+        // 获取用户profile信息
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        if (profile) {
+          setUserProfile(profile)
+          setIsAdmin(profile.role === 'admin')
+        }
+      }
+    }
+    getCurrentUser()
+  }, [])
+
+  // --- BEGIN COMMENT ---
+  // 🎯 根据用户身份获取应用列表
+  // 管理员：获取所有应用（包括私有）
+  // 普通用户：获取公开应用
+  // 未登录用户：获取公开应用
+  // --- END COMMENT ---
+  useEffect(() => {
+    if (isAdmin) {
+      // 管理员获取所有应用
+      fetchAllApps();
+    } else {
+      // 普通用户和未登录用户获取公开应用
+      fetchApps();
+    }
+  }, [isAdmin, fetchApps, fetchAllApps]);
 
   // 🎯 在组件挂载时获取应用列表并清除sidebar选中状态
   useEffect(() => {
-    fetchApps()
     // 清除sidebar选中状态，因为在应用市场页面不应该有选中的应用
     selectItem(null, null)
-  }, [fetchApps, selectItem])
+  }, [selectItem])
 
   // 🎯 新增：处理URL查询参数，支持直接跳转到特定筛选
   useEffect(() => {

@@ -60,6 +60,9 @@ interface AppListState {
   // 🎯 新增：权限相关方法
   setPermissionFilter: (enabled: boolean, userId?: string) => void;
   checkAppPermission: (appInstanceId: string) => Promise<boolean>;
+
+  // 🎯 新增：获取所有应用（管理员用）
+  fetchAllApps: () => Promise<void>;
 }
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5分钟
@@ -95,15 +98,19 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     set({ isLoading: true, error: null });
   
     try {
-      const { getAllDifyApps } = await import('@lib/services/dify/app-service');
-      const rawApps = await getAllDifyApps();
+      // --- BEGIN COMMENT ---
+      // 🎯 根据当前上下文选择获取方法
+      // 这个方法主要用于未登录用户或需要公开应用的场景
+      // --- END COMMENT ---
+      const { getPublicDifyApps } = await import('@lib/services/dify/app-service');
+      const rawApps = await getPublicDifyApps();
       
       // --- BEGIN COMMENT ---
-      // 🎯 为普通应用列表添加默认visibility
+      // 🎯 为公开应用列表添加visibility信息
       // --- END COMMENT ---
       const apps: AppInfo[] = rawApps.map(app => ({
         ...app,
-        visibility: 'public' as AppVisibility // 默认为公开应用
+        visibility: app.visibility as AppVisibility || 'public'
       }));
       
       set({ 
@@ -112,7 +119,54 @@ export const useAppListStore = create<AppListState>((set, get) => ({
         lastFetchTime: now 
       });
       
-      console.log(`[AppListStore] 成功获取 ${apps.length} 个应用列表`);
+      console.log(`[AppListStore] 成功获取 ${apps.length} 个公开应用`);
+      
+      // 🎯 后台同步：更新常用应用信息
+      try {
+        const { useFavoriteAppsStore } = await import('./favorite-apps-store');
+        useFavoriteAppsStore.getState().syncWithAppList(apps);
+      } catch (error) {
+        console.warn('[AppListStore] 同步常用应用信息失败:', error);
+      }
+    } catch (error: any) {
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+    }
+  },
+
+  // 🎯 新增：获取所有应用（管理员用）
+  fetchAllApps: async () => {
+    const now = Date.now();
+    const state = get();
+  
+    // 5分钟内不重复获取
+    if (now - state.lastFetchTime < CACHE_DURATION && state.apps.length > 0) {
+      return;
+    }
+  
+    set({ isLoading: true, error: null });
+  
+    try {
+      const { getAllDifyApps } = await import('@lib/services/dify/app-service');
+      const rawApps = await getAllDifyApps();
+      
+      // --- BEGIN COMMENT ---
+      // 🎯 为所有应用列表添加visibility信息
+      // --- END COMMENT ---
+      const apps: AppInfo[] = rawApps.map(app => ({
+        ...app,
+        visibility: app.visibility as AppVisibility || 'public'
+      }));
+      
+      set({ 
+        apps, 
+        isLoading: false, 
+        lastFetchTime: now 
+      });
+      
+      console.log(`[AppListStore] 成功获取 ${apps.length} 个应用（包括私有）`);
       
       // 🎯 后台同步：更新常用应用信息
       try {
