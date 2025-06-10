@@ -445,7 +445,12 @@ export const UserTable: React.FC<UserTableProps> = ({
                         isDark ? "text-stone-400" : "text-stone-600"
                       )} title={user.phone || '未设置手机'}>
                         <span className="text-xs">📱</span>
-                        <span className="truncate">{user.phone || '未设置'}</span>
+                        <span className="truncate">
+                          {user.phone 
+                            ? (user.phone.startsWith('86') ? user.phone.slice(2) : user.phone)
+                            : '未设置'
+                          }
+                        </span>
                       </p>
                     </div>
                   </td>
