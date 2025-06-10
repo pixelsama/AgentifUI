@@ -25,10 +25,10 @@ export async function GET() {
       return NextResponse.json({ error: '权限不足' }, { status: 403 })
     }
 
-    // --- 获取用户基本信息 ---
+    // --- 获取用户基本信息（只查询profiles表存在的字段） ---
     const { data: users, error } = await supabase
       .from('profiles')
-      .select('id, full_name, username, email, avatar_url, role, status')
+      .select('id, full_name, username, avatar_url, role, status')
       .eq('status', 'active') // 只获取活跃用户
       .order('full_name', { ascending: true })
 
@@ -40,9 +40,8 @@ export async function GET() {
     // --- 格式化用户数据，优先显示真实姓名 ---
     const formattedUsers = (users || []).map(user => ({
       id: user.id,
-      full_name: user.full_name || user.username || user.email || '未知用户',
+      full_name: user.full_name || user.username || '未知用户',
       username: user.username,
-      email: user.email,
       avatar_url: user.avatar_url,
       role: user.role,
       status: user.status

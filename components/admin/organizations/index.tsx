@@ -91,7 +91,6 @@ export default function OrganizationsManagement() {
   
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [orgMembers, setOrgMembers] = useState<OrgMember[]>([])
-  const [departmentInfo, setDepartmentInfo] = useState<OrgDepartmentInfo[]>([])
   const [orgStats, setOrgStats] = useState<OrgStats | null>(null)
   const [loading, setLoading] = useState(true)
   
@@ -100,18 +99,21 @@ export default function OrganizationsManagement() {
   const [isEditOrgOpen, setIsEditOrgOpen] = useState(false)
   const [isAddUserOpen, setIsAddUserOpen] = useState(false)
   
+  // --- Loading状态 ---
+  const [operationLoading, setOperationLoading] = useState(false)
+  
   // --- 表单状态 ---
   const [newOrgForm, setNewOrgForm] = useState({
     name: '',
     description: '',
-    type: 'enterprise'
+    type: 'company'
   })
   
   const [editOrgForm, setEditOrgForm] = useState({
     id: '',
     name: '',
     description: '',
-    type: 'enterprise'
+    type: 'company'
   })
   
   const [addUserForm, setAddUserForm] = useState({
@@ -127,20 +129,47 @@ export default function OrganizationsManagement() {
     id: string
     full_name?: string
     username?: string
-    email?: string
     avatar_url?: string
     role?: string
     status?: string
   }>>([])
-  const [filteredUsers, setFilteredUsers] = useState<typeof allUsers>([])
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
   const [userSearchTerm, setUserSearchTerm] = useState('')
+  const [filteredUsers, setFilteredUsers] = useState<typeof allUsers>([])
+  const [selectedUser, setSelectedUser] = useState<typeof allUsers[0] | null>(null)
+
+  // --- 从现有成员数据生成部门信息 ---
+  const getDepartmentInfo = () => {
+    const departmentGroups = orgMembers.reduce((acc, member) => {
+      if (member.department) {
+        const key = `${member.org_id}-${member.department}`
+        if (!acc[key]) {
+          const org = organizations.find(o => o.id === member.org_id)
+          acc[key] = {
+            org_id: member.org_id,
+            org_name: org?.name || '未知组织',
+            department: member.department,
+            member_count: 0,
+            has_permissions: false,
+            roles: ''
+          }
+        }
+        acc[key].member_count++
+      }
+      return acc
+    }, {} as Record<string, OrgDepartmentInfo>)
+    
+    return Object.values(departmentGroups)
+  }
 
   // --- 计算组织统计数据 ---
   const calculateStats = (): OrgStats => {
     const totalOrganizations = organizations.length
     const totalMembers = orgMembers.length
+    const departmentInfo = getDepartmentInfo()
+    
     const totalDepartments = departmentInfo.length
-    const organizationsWithPermissions = departmentInfo.filter(d => d.has_permissions).length
+    const organizationsWithPermissions = 0 // 暂时设为0，实际需要根据权限数据计算
     const avgMembersPerOrg = totalOrganizations > 0 ? Math.round(totalMembers / totalOrganizations) : 0
     
     // 计算热门部门
@@ -150,9 +179,9 @@ export default function OrganizationsManagement() {
     }, {} as Record<string, number>)
     
     const topDepartments = Object.entries(deptCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 5)
-      .map(([department, count]) => ({ department, count }))
+      .map(([department, count]) => ({ department, count: count as number }))
     
     return {
       totalOrganizations,
@@ -171,6 +200,8 @@ export default function OrganizationsManagement() {
       if (response.ok) {
         const data = await response.json()
         setOrganizations(data.organizations || [])
+      } else {
+        toast.error('获取组织列表失败')
       }
     } catch (error) {
       toast.error('获取组织列表失败')
@@ -184,23 +215,12 @@ export default function OrganizationsManagement() {
       if (response.ok) {
         const data = await response.json()
         setOrgMembers(data.members || [])
+      } else {
+        toast.error('获取成员列表失败')
       }
     } catch (error) {
       toast.error('获取成员列表失败')
       console.error('获取成员列表失败:', error)
-    }
-  }
-
-  const fetchDepartmentInfo = async () => {
-    try {
-      const response = await fetch('/api/admin/organizations/departments')
-      if (response.ok) {
-        const data = await response.json()
-        setDepartmentInfo(data.departments || [])
-      }
-    } catch (error) {
-      toast.error('获取部门信息失败')
-      console.error('获取部门信息失败:', error)
     }
   }
 
@@ -210,7 +230,8 @@ export default function OrganizationsManagement() {
       if (response.ok) {
         const data = await response.json()
         setAllUsers(data.users || [])
-        setFilteredUsers(data.users || [])
+      } else {
+        toast.error('获取用户列表失败')
       }
     } catch (error) {
       toast.error('获取用户列表失败')
@@ -220,6 +241,7 @@ export default function OrganizationsManagement() {
 
   // --- 操作处理函数 ---
   const handleCreateOrganization = async () => {
+    setOperationLoading(true)
     try {
       const response = await fetch('/api/admin/organizations', {
         method: 'POST',
@@ -235,19 +257,23 @@ export default function OrganizationsManagement() {
 
       if (response.ok) {
         setIsCreateOrgOpen(false)
-        setNewOrgForm({ name: '', description: '', type: 'enterprise' })
+        setNewOrgForm({ name: '', description: '', type: 'company' })
         await fetchOrganizations()
         toast.success('组织创建成功')
       } else {
-        toast.error('创建组织失败')
+        const data = await response.json()
+        toast.error(data.error || '创建组织失败')
       }
     } catch (error) {
       toast.error('创建组织失败')
       console.error('创建组织失败:', error)
+    } finally {
+      setOperationLoading(false)
     }
   }
 
   const handleEditOrganization = async () => {
+    setOperationLoading(true)
     try {
       const response = await fetch('/api/admin/organizations', {
         method: 'PATCH',
@@ -264,15 +290,18 @@ export default function OrganizationsManagement() {
 
       if (response.ok) {
         setIsEditOrgOpen(false)
-        setEditOrgForm({ id: '', name: '', description: '', type: 'enterprise' })
+        setEditOrgForm({ id: '', name: '', description: '', type: 'company' })
         await fetchOrganizations()
         toast.success('组织更新成功')
       } else {
-        toast.error('更新组织失败')
+        const data = await response.json()
+        toast.error(data.error || '更新组织失败')
       }
     } catch (error) {
       toast.error('更新组织失败')
       console.error('更新组织失败:', error)
+    } finally {
+      setOperationLoading(false)
     }
   }
 
@@ -281,12 +310,18 @@ export default function OrganizationsManagement() {
       id: org.id,
       name: org.name,
       description: org.settings?.description || '',
-      type: org.settings?.type || 'enterprise'
+      type: org.settings?.type || 'company'
     })
     setIsEditOrgOpen(true)
   }
 
   const handleAddUserToOrg = async () => {
+    if (!addUserForm.department.trim()) {
+      toast.error('部门不能为空')
+      return
+    }
+
+    setOperationLoading(true)
     try {
       const response = await fetch('/api/admin/organizations/members', {
         method: 'POST',
@@ -303,10 +338,8 @@ export default function OrganizationsManagement() {
           jobTitle: '',
           role: 'member'
         })
-        setUserSearchTerm('')
-        setFilteredUsers(allUsers)
+        resetUserSelection()
         await fetchOrgMembers()
-        await fetchDepartmentInfo()
         toast.success('成员添加成功')
       } else {
         const data = await response.json()
@@ -315,34 +348,68 @@ export default function OrganizationsManagement() {
     } catch (error) {
       toast.error('添加成员失败')
       console.error('添加用户到组织失败:', error)
+    } finally {
+      setOperationLoading(false)
     }
   }
 
-  // 用户搜索筛选
+  // --- 优化后的用户选择逻辑 ---
+  const resetUserSelection = () => {
+    setUserSearchTerm('')
+    setFilteredUsers([])
+    setSelectedUser(null)
+    setIsUserDropdownOpen(false)
+    setAddUserForm(prev => ({ ...prev, userId: '' }))
+  }
+
+  const initializeUserList = () => {
+    if (allUsers.length > 0) {
+      setFilteredUsers(allUsers.slice(0, 20))
+    }
+  }
+
   const handleUserSearch = (searchTerm: string) => {
     setUserSearchTerm(searchTerm)
-    if (!searchTerm.trim()) {
-      setFilteredUsers(allUsers)
-      return
-    }
+    setSelectedUser(null)
     
-    const filtered = allUsers.filter(user => 
-      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    setFilteredUsers(filtered)
+    if (!searchTerm.trim()) {
+      setFilteredUsers(allUsers.slice(0, 20))
+    } else {
+      const filtered = allUsers.filter(user => 
+        user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.username?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      setFilteredUsers(filtered.slice(0, 20))
+    }
+  }
+
+  const toggleUserDropdown = () => {
+    const newOpen = !isUserDropdownOpen
+    setIsUserDropdownOpen(newOpen)
+    
+    if (newOpen && !userSearchTerm) {
+      initializeUserList()
+    }
   }
 
   const selectUser = (user: typeof allUsers[0]) => {
+    setSelectedUser(user)
     setAddUserForm(prev => ({ ...prev, userId: user.id }))
-    setUserSearchTerm(user.full_name || user.username || user.email || '')
-    setFilteredUsers([])
+    setUserSearchTerm('')
+    setIsUserDropdownOpen(false)
   }
 
-  const handleRemoveUserFromOrg = async (memberId: string) => {
-    if (!confirm('确定要移除此成员吗？')) return
+  const getDisplayText = () => {
+    if (selectedUser) {
+      return selectedUser.full_name || selectedUser.username || '已选择用户'
+    }
+    return userSearchTerm || ''
+  }
 
+  const handleRemoveUserFromOrg = async (memberId: string, memberName: string) => {
+    if (!confirm(`确定要移除成员"${memberName}"吗？`)) return
+
+    setOperationLoading(true)
     try {
       const response = await fetch('/api/admin/organizations/members', {
         method: 'DELETE',
@@ -352,20 +419,23 @@ export default function OrganizationsManagement() {
 
       if (response.ok) {
         await fetchOrgMembers()
-        await fetchDepartmentInfo()
         toast.success('成员移除成功')
       } else {
-        toast.error('移除成员失败')
+        const data = await response.json()
+        toast.error(data.error || '移除成员失败')
       }
     } catch (error) {
       toast.error('移除成员失败')
       console.error('移除组织成员失败:', error)
+    } finally {
+      setOperationLoading(false)
     }
   }
 
   const handleDeleteOrganization = async (orgId: string, orgName: string) => {
     if (!confirm(`确定要删除组织"${orgName}"吗？此操作不可撤销。`)) return
 
+    setOperationLoading(true)
     try {
       const response = await fetch('/api/admin/organizations', {
         method: 'DELETE',
@@ -374,9 +444,7 @@ export default function OrganizationsManagement() {
       })
 
       if (response.ok) {
-        await fetchOrganizations()
-        await fetchOrgMembers()
-        await fetchDepartmentInfo()
+        await Promise.all([fetchOrganizations(), fetchOrgMembers()])
         toast.success('组织删除成功')
       } else {
         const data = await response.json()
@@ -385,6 +453,8 @@ export default function OrganizationsManagement() {
     } catch (error) {
       toast.error('删除组织失败')
       console.error('删除组织失败:', error)
+    } finally {
+      setOperationLoading(false)
     }
   }
 
@@ -395,7 +465,6 @@ export default function OrganizationsManagement() {
       await Promise.all([
         fetchOrganizations(),
         fetchOrgMembers(),
-        fetchDepartmentInfo(),
         fetchAllUsers()
       ])
       setLoading(false)
@@ -405,10 +474,32 @@ export default function OrganizationsManagement() {
 
   // --- 计算统计数据 ---
   useEffect(() => {
-    if (organizations.length > 0 || orgMembers.length > 0 || departmentInfo.length > 0) {
+    if (organizations.length > 0 || orgMembers.length > 0) {
       setOrgStats(calculateStats())
     }
-  }, [organizations, orgMembers, departmentInfo])
+  }, [organizations, orgMembers])
+
+  // --- 初始化用户列表显示 ---
+  useEffect(() => {
+    if (allUsers.length > 0 && filteredUsers.length === 0 && !userSearchTerm && !selectedUser) {
+      setFilteredUsers(allUsers.slice(0, 20))
+    }
+  }, [allUsers, userSearchTerm, selectedUser])
+
+  // --- 点击外部关闭下拉列表 ---
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      if (!target.closest('.user-search-container')) {
+        setIsUserDropdownOpen(false)
+      }
+    }
+
+    if (isUserDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isUserDropdownOpen])
 
   if (loading) {
     return (
@@ -514,36 +605,34 @@ export default function OrganizationsManagement() {
                   )}>
                     组织类型
                   </Label>
-                  <Select
+                  <Input
                     value={newOrgForm.type}
-                    onValueChange={(value) => setNewOrgForm(prev => ({ ...prev, type: value }))}
-                  >
-                    <SelectTrigger className={cn(
+                    onChange={(e) => setNewOrgForm(prev => ({ ...prev, type: e.target.value }))}
+                    placeholder="输入组织类型（如：公司、团队、部门等）"
+                    className={cn(
                       "font-serif mt-1",
                       isDark ? "bg-stone-800 border-stone-700 text-stone-100" : "bg-white border-stone-300"
-                    )}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className={isDark ? "bg-stone-800 border-stone-700" : "bg-white border-stone-200"}>
-                      <SelectItem value="enterprise" className="font-serif">企业</SelectItem>
-                      <SelectItem value="government" className="font-serif">政府机构</SelectItem>
-                      <SelectItem value="nonprofit" className="font-serif">非营利组织</SelectItem>
-                      <SelectItem value="education" className="font-serif">教育机构</SelectItem>
-                      <SelectItem value="other" className="font-serif">其他</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    )}
+                  />
                 </div>
               </div>
               <DialogFooter>
                 <Button
                   onClick={handleCreateOrganization}
-                  disabled={!newOrgForm.name.trim()}
+                  disabled={!newOrgForm.name.trim() || operationLoading}
                   className={cn(
                     "font-serif",
                     isDark ? "bg-stone-100 hover:bg-stone-200 text-stone-900" : "bg-stone-900 hover:bg-stone-800 text-white"
                   )}
                 >
-                  创建
+                  {operationLoading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      创建中...
+                    </>
+                  ) : (
+                    '创建'
+                  )}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -611,42 +700,45 @@ export default function OrganizationsManagement() {
                   )}>
                     组织类型
                   </Label>
-                  <Select
+                  <Input
                     value={editOrgForm.type}
-                    onValueChange={(value) => setEditOrgForm(prev => ({ ...prev, type: value }))}
-                  >
-                    <SelectTrigger className={cn(
+                    onChange={(e) => setEditOrgForm(prev => ({ ...prev, type: e.target.value }))}
+                    placeholder="输入组织类型（如：公司、团队、部门等）"
+                    className={cn(
                       "font-serif mt-1",
                       isDark ? "bg-stone-800 border-stone-700 text-stone-100" : "bg-white border-stone-300"
-                    )}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className={isDark ? "bg-stone-800 border-stone-700" : "bg-white border-stone-200"}>
-                      <SelectItem value="enterprise" className="font-serif">企业</SelectItem>
-                      <SelectItem value="government" className="font-serif">政府机构</SelectItem>
-                      <SelectItem value="nonprofit" className="font-serif">非营利组织</SelectItem>
-                      <SelectItem value="education" className="font-serif">教育机构</SelectItem>
-                      <SelectItem value="other" className="font-serif">其他</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    )}
+                  />
                 </div>
               </div>
               <DialogFooter>
                 <Button
                   onClick={handleEditOrganization}
-                  disabled={!editOrgForm.name.trim()}
+                  disabled={!editOrgForm.name.trim() || operationLoading}
                   className={cn(
                     "font-serif",
                     isDark ? "bg-stone-100 hover:bg-stone-200 text-stone-900" : "bg-stone-900 hover:bg-stone-800 text-white"
                   )}
                 >
-                  保存
+                  {operationLoading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      保存中...
+                    </>
+                  ) : (
+                    '保存'
+                  )}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
 
-          <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+          <Dialog open={isAddUserOpen} onOpenChange={(open) => {
+            setIsAddUserOpen(open)
+            if (!open) {
+              resetUserSelection()
+            }
+          }}>
             <DialogTrigger asChild>
               <Button variant="outline" className={cn(
                 "font-serif",
@@ -675,76 +767,173 @@ export default function OrganizationsManagement() {
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
-                <div className="relative">
+                <div className="relative user-search-container">
                   <Label className={cn(
                     "font-serif",
                     isDark ? "text-stone-300" : "text-stone-700"
                   )}>
                     选择用户
                   </Label>
-                  <div className="relative mt-1">
-                    <Input
-                      value={userSearchTerm}
-                      onChange={(e) => handleUserSearch(e.target.value)}
-                      placeholder="搜索用户姓名、用户名或邮箱"
-                      className={cn(
-                        "font-serif",
-                        isDark ? "bg-stone-800 border-stone-700 text-stone-100" : "bg-white border-stone-300"
-                      )}
-                    />
-                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-stone-400" />
-                  </div>
                   
-                  {/* 用户下拉列表 */}
-                  {userSearchTerm && filteredUsers.length > 0 && (
-                    <div className={cn(
-                      "absolute z-50 w-full mt-1 max-h-60 overflow-auto border rounded-md shadow-lg",
-                      isDark ? "bg-stone-800 border-stone-700" : "bg-white border-stone-200"
-                    )}>
-                      {filteredUsers.slice(0, 10).map((user) => (
-                        <div
-                          key={user.id}
-                          onClick={() => selectUser(user)}
-                          className={cn(
-                            "px-3 py-2 cursor-pointer hover:bg-stone-100 dark:hover:bg-stone-700",
-                            "flex items-center justify-between"
-                          )}
-                        >
-                          <div>
-                            <p className="font-medium font-serif text-stone-900 dark:text-stone-100">
-                              {user.full_name}
+                  {/* 选择器容器 */}
+                  <div className="relative mt-1">
+                    {/* 主输入框/显示框 */}
+                    <div
+                      className={cn(
+                        "relative flex items-center min-h-[40px] w-full rounded-md border px-3 py-2 cursor-pointer",
+                        "transition-colors font-serif",
+                        isUserDropdownOpen && "ring-2 ring-stone-400/20",
+                                                   isDark 
+                             ? "bg-stone-800 border-stone-700 text-stone-100 hover:bg-stone-800/80"
+                             : "bg-white border-stone-300 text-stone-900 hover:bg-stone-50"
+                      )}
+                      onClick={toggleUserDropdown}
+                    >
+                      {/* 用户显示区域 */}
+                      {selectedUser ? (
+                        <div className="flex items-center flex-1 min-w-0">
+                          <div className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0",
+                            selectedUser.role === 'admin' && (isDark ? "bg-blue-900 text-blue-200" : "bg-blue-100 text-blue-800"),
+                            selectedUser.role === 'manager' && (isDark ? "bg-green-900 text-green-200" : "bg-green-100 text-green-800"),
+                            selectedUser.role === 'user' && (isDark ? "bg-stone-700 text-stone-300" : "bg-stone-200 text-stone-700")
+                          )}>
+                            <UserIcon className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">
+                              {selectedUser.full_name || selectedUser.username}
                             </p>
-                            <p className="text-sm text-stone-600 dark:text-stone-400 font-serif">
-                              {user.username && `@${user.username}`} {user.email && `• ${user.email}`}
+                            <p className={cn(
+                              "text-xs truncate",
+                              isDark ? "text-stone-400" : "text-stone-600"
+                            )}>
+                              @{selectedUser.username} • {selectedUser.role}
                             </p>
                           </div>
-                          <Badge 
-                            variant="outline" 
-                            className="text-xs font-serif"
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              resetUserSelection()
+                            }}
+                            className={cn(
+                              "ml-2 p-1 rounded-full hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors",
+                              "text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
+                            )}
                           >
-                            {user.role}
-                          </Badge>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
                         </div>
-                      ))}
-                      {filteredUsers.length > 10 && (
-                        <div className="px-3 py-2 text-sm text-stone-500 dark:text-stone-400 font-serif">
-                          显示前10个结果，请继续输入以缩小范围
+                      ) : (
+                        <div className="flex items-center flex-1">
+                          <Search className="w-4 h-4 text-stone-400 mr-2" />
+                          <span className={cn(
+                            "flex-1 text-sm",
+                            isDark ? "text-stone-400" : "text-stone-500"
+                          )}>
+                            点击选择用户
+                          </span>
                         </div>
                       )}
+                      
+                      {/* 下拉箭头 */}
+                      <ChevronDown className={cn(
+                        "w-4 h-4 ml-2 transition-transform text-stone-400",
+                        isUserDropdownOpen && "rotate-180"
+                      )} />
                     </div>
-                  )}
-                  
-                  {/* 无搜索结果 */}
-                  {userSearchTerm && filteredUsers.length === 0 && (
-                    <div className={cn(
-                      "absolute z-50 w-full mt-1 p-3 border rounded-md shadow-lg",
-                      isDark ? "bg-stone-800 border-stone-700" : "bg-white border-stone-200"
-                    )}>
-                      <p className="text-sm text-stone-500 dark:text-stone-400 font-serif">
-                        未找到匹配的用户
-                      </p>
-                    </div>
-                  )}
+                    
+                    {/* 搜索输入框（下拉打开时显示） */}
+                    {isUserDropdownOpen && (
+                      <div className={cn(
+                        "absolute z-50 w-full mt-1 border rounded-md shadow-lg",
+                        isDark ? "bg-stone-800 border-stone-700" : "bg-white border-stone-200"
+                      )}>
+                        <div className="p-2 border-b border-stone-200 dark:border-stone-700">
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-stone-400" />
+                            <Input
+                              value={userSearchTerm}
+                              onChange={(e) => handleUserSearch(e.target.value)}
+                              placeholder="搜索用户姓名或用户名..."
+                              className={cn(
+                                "pl-10 font-serif border-0 focus:ring-0",
+                                isDark ? "bg-stone-900 text-stone-100" : "bg-stone-50 text-stone-900"
+                              )}
+                              autoFocus
+                            />
+                          </div>
+                        </div>
+                        
+                        {/* 用户列表 */}
+                        <div className="max-h-60 overflow-auto">
+                          {filteredUsers.length > 0 ? (
+                            <>
+                              {filteredUsers.map((user) => (
+                                <div
+                                  key={user.id}
+                                  onClick={() => selectUser(user)}
+                                  className={cn(
+                                    "px-3 py-3 cursor-pointer transition-colors",
+                                    "hover:bg-stone-100 dark:hover:bg-stone-700",
+                                    "flex items-center justify-between"
+                                  )}
+                                >
+                                  <div className="flex items-center flex-1 min-w-0">
+                                    <div className={cn(
+                                      "w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0",
+                                      user.role === 'admin' && (isDark ? "bg-blue-900 text-blue-200" : "bg-blue-100 text-blue-800"),
+                                      user.role === 'manager' && (isDark ? "bg-green-900 text-green-200" : "bg-green-100 text-green-800"),
+                                      user.role === 'user' && (isDark ? "bg-stone-700 text-stone-300" : "bg-stone-200 text-stone-700")
+                                    )}>
+                                      <UserIcon className="w-4 h-4" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-medium font-serif text-stone-900 dark:text-stone-100 truncate">
+                                        {user.full_name || user.username}
+                                      </p>
+                                      <p className="text-sm text-stone-600 dark:text-stone-400 font-serif truncate">
+                                        @{user.username}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <Badge 
+                                    variant="outline" 
+                                    className="text-xs font-serif ml-2 flex-shrink-0"
+                                  >
+                                    {user.role}
+                                  </Badge>
+                                </div>
+                              ))}
+                              
+                              {/* 统计信息 */}
+                              {allUsers.length > 20 && (
+                                <div className={cn(
+                                  "px-3 py-2 text-xs border-t",
+                                                                     isDark ? "text-stone-400 border-stone-700 bg-stone-900/50" : "text-stone-500 border-stone-200 bg-stone-50"
+                                )}>
+                                  {userSearchTerm 
+                                    ? `显示 ${filteredUsers.length} 个搜索结果` 
+                                    : `显示前 20 个用户，共 ${allUsers.length} 个`
+                                  }
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <div className="px-3 py-6 text-center">
+                              <UserIcon className="w-12 h-12 text-stone-400 mx-auto mb-2" />
+                              <p className="text-sm text-stone-500 dark:text-stone-400 font-serif">
+                                {userSearchTerm ? '未找到匹配的用户' : '暂无用户数据'}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <Label className={cn(
@@ -836,13 +1025,20 @@ export default function OrganizationsManagement() {
               <DialogFooter>
                 <Button
                   onClick={handleAddUserToOrg}
-                  disabled={!addUserForm.userId.trim() || !addUserForm.orgId}
+                  disabled={!selectedUser || !addUserForm.orgId || operationLoading}
                   className={cn(
                     "font-serif",
                     isDark ? "bg-stone-100 hover:bg-stone-200 text-stone-900" : "bg-stone-900 hover:bg-stone-800 text-white"
                   )}
                 >
-                  添加
+                  {operationLoading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      添加中...
+                    </>
+                  ) : (
+                    '添加'
+                  )}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -895,7 +1091,7 @@ export default function OrganizationsManagement() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {organizations.map((org) => {
               const orgMemberCount = orgMembers.filter(m => m.org_id === org.id).length
-              const orgDepartments = departmentInfo.filter(d => d.org_id === org.id)
+              const orgDepartments = getDepartmentInfo().filter(d => d.org_id === org.id)
               
               return (
                 <Card key={org.id} className={cn(
@@ -930,8 +1126,9 @@ export default function OrganizationsManagement() {
                           size="sm"
                           variant="outline"
                           onClick={() => openEditDialog(org)}
+                          disabled={operationLoading}
                           className={cn(
-                            "text-stone-600 border-stone-200 hover:bg-stone-50",
+                            "text-stone-600 border-stone-200 hover:bg-stone-50 disabled:opacity-50",
                             "dark:text-stone-400 dark:border-stone-700 dark:hover:bg-stone-800"
                           )}
                         >
@@ -941,12 +1138,17 @@ export default function OrganizationsManagement() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleDeleteOrganization(org.id, org.name)}
+                          disabled={operationLoading}
                           className={cn(
-                            "text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300",
+                            "text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 disabled:opacity-50",
                             "dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
                           )}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          {operationLoading ? (
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -1026,8 +1228,20 @@ export default function OrganizationsManagement() {
 
         {/* 部门管理 */}
         <TabsContent value="departments" className="space-y-4">
+          {/* --- 部门管理头部操作区 --- */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-medium font-serif text-stone-900 dark:text-stone-100">
+                部门管理
+              </h3>
+              <p className="text-sm text-stone-600 dark:text-stone-400 font-serif">
+                管理各组织的部门结构
+              </p>
+            </div>
+          </div>
+
           <div className="space-y-4">
-            {departmentInfo.map((dept) => {
+            {getDepartmentInfo().map((dept) => {
               const deptMembers = orgMembers.filter(
                 m => m.org_id === dept.org_id && m.department === dept.department
               )
@@ -1110,10 +1324,15 @@ export default function OrganizationsManagement() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleRemoveUserFromOrg(member.id)}
-                                className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                onClick={() => handleRemoveUserFromOrg(member.id, member.user?.full_name || member.user?.username || '未知用户')}
+                                disabled={operationLoading}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
                               >
-                                <UserMinus className="w-3 h-3" />
+                                {operationLoading ? (
+                                  <RefreshCw className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <UserMinus className="w-3 h-3" />
+                                )}
                               </Button>
                             </div>
                           </div>
@@ -1133,7 +1352,7 @@ export default function OrganizationsManagement() {
             })}
           </div>
           
-          {departmentInfo.length === 0 && (
+          {getDepartmentInfo().length === 0 && (
             <Card className={cn(
               "border shadow-sm",
               isDark ? "bg-stone-900 border-stone-800" : "bg-white border-stone-200"
