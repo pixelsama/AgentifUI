@@ -24,7 +24,7 @@ export type ExecutionStatus = 'pending' | 'running' | 'completed' | 'failed' | '
 export interface Profile {
   id: string;
   email?: string;
-  full_name?: string;
+  full_name?: string | null;
   username?: string;
   avatar_url?: string;
   auth_source: string;
@@ -66,6 +66,28 @@ export interface OrgMember {
   role: OrgMemberRole;
   department: string | null;
   job_title: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// --- BEGIN COMMENT ---
+// 🎯 更新：部门应用权限管理
+// 改为基于部门的权限控制，更符合实际业务需求
+// --- END COMMENT ---
+export type AppPermissionLevel = 'full' | 'read_only' | 'restricted';
+export type AppVisibility = 'public' | 'org_only' | 'private';
+
+export interface DepartmentAppPermission {
+  id: string;
+  org_id: string;
+  department: string;
+  service_instance_id: string;
+  is_enabled: boolean;
+  permission_level: AppPermissionLevel;
+  usage_quota: number | null; // NULL表示无限制
+  used_count: number;
+  quota_reset_date: string;
+  settings: Record<string, any>;
   created_at: string;
   updated_at: string;
 }
@@ -205,6 +227,9 @@ export interface ServiceInstanceConfig {
   [key: string]: any;
 }
 
+// --- BEGIN COMMENT ---
+// 🎯 扩展ServiceInstance接口，添加可见性字段
+// --- END COMMENT ---
 export interface ServiceInstance {
   id: string;
   provider_id: string;
@@ -213,6 +238,7 @@ export interface ServiceInstance {
   instance_id: string;
   api_path: string;
   is_default: boolean;
+  visibility: AppVisibility; // 新增字段
   config: ServiceInstanceConfig;
   created_at: string;
   updated_at: string;
@@ -318,6 +344,36 @@ export interface AppExecution {
   completed_at: string | null;
 }
 
+// --- BEGIN COMMENT ---
+// 🎯 用户可访问应用的扩展信息
+// 包含权限级别和配额信息
+// --- END COMMENT ---
+export interface UserAccessibleApp {
+  service_instance_id: string;
+  display_name: string | null;
+  description: string | null;
+  instance_id: string;
+  api_path: string;
+  visibility: AppVisibility;
+  config: ServiceInstanceConfig;
+  permission_level: AppPermissionLevel;
+  usage_quota: number | null;
+  used_count: number;
+  quota_remaining: number | null;
+  department: string | null;
+  org_name: string | null;
+}
+
+// --- BEGIN COMMENT ---
+// 🎯 应用权限检查结果
+// --- END COMMENT ---
+export interface AppPermissionCheck {
+  has_access: boolean;
+  permission_level: AppPermissionLevel | null;
+  quota_remaining: number | null;
+  error_message: string | null;
+}
+
 // 数据库类型命名空间
 export namespace Database {
   export interface Tables {
@@ -336,5 +392,8 @@ export namespace Database {
     ai_configs: AiConfig;
     api_logs: ApiLog;
     app_executions: AppExecution;
+    department_app_permissions: DepartmentAppPermission;
+    user_accessible_apps: UserAccessibleApp;
+    app_permission_checks: AppPermissionCheck;
   }
 }

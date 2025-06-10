@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { DifyAppParametersResponse } from '@lib/services/dify/types';
-import type { ServiceInstanceConfig } from '@lib/types/database';
+import type { ServiceInstanceConfig, UserAccessibleApp, AppVisibility } from '@lib/types/database';
 
 interface AppInfo {
   id: string;
@@ -9,6 +9,11 @@ interface AppInfo {
   display_name?: string;
   description?: string;
   config?: ServiceInstanceConfig;
+  permission_level?: string;
+  usage_quota?: number | null;
+  used_count?: number;
+  quota_remaining?: number | null;
+  visibility?: AppVisibility;
 }
 
 // 🎯 新增：应用参数缓存接口
@@ -34,7 +39,13 @@ interface AppListState {
   // 🎯 添加请求锁，防止同一应用的并发请求
   fetchingApps: Set<string>; // 正在请求中的应用ID集合
 
+  // 🎯 新增：权限相关状态
+  usePermissionFilter: boolean; // 是否启用权限过滤
+  currentUserId: string | null; // 当前用户ID
+
   fetchApps: () => Promise<void>;
+  // 🎯 新增：获取用户可访问的应用（带权限过滤）
+  fetchUserAccessibleApps: (userId: string) => Promise<void>;
   clearCache: () => void;
   
   // 🎯 新增：应用参数相关方法
@@ -42,6 +53,10 @@ interface AppListState {
   fetchAppParameters: (appId: string) => Promise<void>;
   getAppParameters: (appId: string) => DifyAppParametersResponse | null;
   clearParametersCache: () => void;
+
+  // 🎯 新增：权限相关方法
+  setPermissionFilter: (enabled: boolean, userId?: string) => void;
+  checkAppPermission: (appInstanceId: string) => Promise<boolean>;
 }
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5分钟
@@ -61,6 +76,10 @@ export const useAppListStore = create<AppListState>((set, get) => ({
   // 🎯 添加请求锁，防止同一应用的并发请求
   fetchingApps: new Set(),
 
+  // 🎯 新增：权限相关状态初始化
+  usePermissionFilter: false,
+  currentUserId: null,
+
   fetchApps: async () => {
     const now = Date.now();
     const state = get();
@@ -74,7 +93,16 @@ export const useAppListStore = create<AppListState>((set, get) => ({
   
     try {
       const { getAllDifyApps } = await import('@lib/services/dify/app-service');
-      const apps = await getAllDifyApps();
+      const rawApps = await getAllDifyApps();
+      
+      // --- BEGIN COMMENT ---
+      // 🎯 为普通应用列表添加默认visibility
+      // --- END COMMENT ---
+      const apps: AppInfo[] = rawApps.map(app => ({
+        ...app,
+        visibility: 'public' as AppVisibility // 默认为公开应用
+      }));
+      
       set({ 
         apps, 
         isLoading: false, 
@@ -98,6 +126,118 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     }
   },
 
+  // 🎯 新增：获取用户可访问的应用（带权限过滤）
+  fetchUserAccessibleApps: async (userId: string) => {
+    const now = Date.now();
+    const state = get();
+  
+    // 如果用户ID变化，清除缓存
+    if (state.currentUserId !== userId) {
+      set({ 
+        apps: [], 
+        lastFetchTime: 0,
+        currentUserId: userId 
+      });
+    }
+  
+    // 5分钟内不重复获取
+    if (now - state.lastFetchTime < CACHE_DURATION && state.apps.length > 0) {
+      return;
+    }
+  
+    set({ isLoading: true, error: null });
+  
+    try {
+      const { getUserAccessibleApps } = await import('@lib/db/department-app-permissions');
+      const result = await getUserAccessibleApps(userId);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      
+      // 转换UserAccessibleApp到AppInfo格式
+      const apps: AppInfo[] = result.data.map((app: UserAccessibleApp) => ({
+        id: app.service_instance_id,
+        name: app.display_name || app.instance_id,
+        instance_id: app.instance_id,
+        display_name: app.display_name || undefined,
+        description: app.description || undefined,
+        config: app.config,
+        permission_level: app.permission_level,
+        usage_quota: app.usage_quota,
+        used_count: app.used_count,
+        quota_remaining: app.quota_remaining,
+        visibility: app.visibility
+      }));
+      
+      set({ 
+        apps, 
+        isLoading: false, 
+        lastFetchTime: now,
+        usePermissionFilter: true,
+        currentUserId: userId
+      });
+      
+      console.log(`[AppListStore] 成功获取用户 ${userId} 可访问的 ${apps.length} 个应用`);
+      
+    } catch (error: any) {
+      console.error('[AppListStore] 获取用户可访问应用失败:', error);
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+    }
+  },
+
+  // 🎯 设置权限过滤模式
+  setPermissionFilter: (enabled: boolean, userId?: string) => {
+    const state = get();
+    
+    // 如果启用权限过滤但没有提供用户ID，从当前状态获取
+    if (enabled && !userId && !state.currentUserId) {
+      console.warn('[AppListStore] 启用权限过滤但未提供用户ID');
+      return;
+    }
+    
+    set({ 
+      usePermissionFilter: enabled,
+      currentUserId: userId || state.currentUserId
+    });
+    
+    // 如果切换模式，清除缓存以强制重新获取
+    if (enabled !== state.usePermissionFilter) {
+      set({ 
+        apps: [], 
+        lastFetchTime: 0 
+      });
+    }
+  },
+
+  // 🎯 检查用户对特定应用的访问权限
+  checkAppPermission: async (appInstanceId: string) => {
+    const state = get();
+    
+    if (!state.currentUserId) {
+      console.warn('[AppListStore] 检查应用权限但未设置用户ID');
+      return false;
+    }
+    
+    try {
+      const { checkUserAppPermission } = await import('@lib/db/department-app-permissions');
+      const result = await checkUserAppPermission(state.currentUserId, appInstanceId);
+      
+      if (!result.success) {
+        console.warn(`[AppListStore] 检查应用权限失败: ${result.error}`);
+        return false;
+      }
+      
+      return result.data.has_access;
+    } catch (error) {
+      console.error('[AppListStore] 检查应用权限异常:', error);
+      return false;
+    }
+  },
+
   // 🎯 新增：批量获取所有应用的参数
   fetchAllAppParameters: async () => {
     const now = Date.now();
@@ -112,7 +252,13 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     // 如果没有应用列表，先获取应用列表
     if (state.apps.length === 0) {
       console.log('[AppListStore] 应用列表为空，先获取应用列表');
-      await get().fetchApps();
+      
+      // 🎯 根据权限过滤模式选择获取方法
+      if (state.usePermissionFilter && state.currentUserId) {
+        await get().fetchUserAccessibleApps(state.currentUserId);
+      } else {
+        await get().fetchApps();
+      }
     }
     
     const currentApps = get().apps;
@@ -183,6 +329,62 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     return cached.data;
   },
 
+  // 🎯 新增：获取指定应用的参数（单独请求）
+  fetchAppParameters: async (appId: string) => {
+    const state = get();
+    
+    // 防止重复请求
+    if (state.fetchingApps.has(appId)) {
+      console.log(`[AppListStore] 应用 ${appId} 正在请求中，跳过重复请求`);
+      return;
+    }
+    
+    // 检查缓存
+    const cached = state.parametersCache[appId];
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      console.log(`[AppListStore] 应用 ${appId} 参数缓存有效，跳过请求`);
+      return;
+    }
+    
+    // 找到对应的应用信息
+    const app = state.apps.find(a => a.id === appId);
+    if (!app) {
+      console.warn(`[AppListStore] 未找到应用 ${appId}`);
+      return;
+    }
+    
+    // 添加到请求锁
+    set({ 
+      fetchingApps: new Set([...state.fetchingApps, appId])
+    });
+    
+    try {
+      const { getDifyAppParameters } = await import('@lib/services/dify/app-service');
+      const parameters = await getDifyAppParameters(app.instance_id);
+      
+      // 更新缓存
+      const newCache = {
+        ...get().parametersCache,
+        [appId]: {
+          data: parameters,
+          timestamp: Date.now()
+        }
+      };
+      
+      set({ parametersCache: newCache });
+      console.log(`[AppListStore] 成功获取应用 ${app.instance_id} 的参数`);
+      
+    } catch (error) {
+      console.error(`[AppListStore] 获取应用 ${app.instance_id} 参数失败:`, error);
+    } finally {
+      // 移除请求锁
+      const currentState = get();
+      const newFetchingApps = new Set(currentState.fetchingApps);
+      newFetchingApps.delete(appId);
+      set({ fetchingApps: newFetchingApps });
+    }
+  },
+
   // 🎯 新增：清理参数缓存
   clearParametersCache: () => {
     set({
@@ -198,66 +400,14 @@ export const useAppListStore = create<AppListState>((set, get) => ({
       apps: [], 
       lastFetchTime: 0,
       error: null,
+      // 🎯 清理权限相关缓存
+      usePermissionFilter: false,
+      currentUserId: null,
+      // 清理参数缓存
       parametersCache: {},
       lastParametersFetchTime: 0,
       parametersError: null,
       fetchingApps: new Set()
     });
   },
-
-  // 🎯 新增：获取单个应用的参数
-  fetchAppParameters: async (appId: string) => {
-    const now = Date.now();
-    const state = get();
-    const cached = state.parametersCache[appId];
-    
-    // 🎯 检查是否正在请求中，防止并发请求
-    if (state.fetchingApps.has(appId)) {
-      console.log(`[AppListStore] 应用 ${appId} 正在请求中，跳过重复请求`);
-      return;
-    }
-    
-    // 检查缓存是否仍然有效
-    if (cached && (now - cached.timestamp < CACHE_DURATION)) {
-      console.log(`[AppListStore] 应用 ${appId} 参数缓存仍然有效，跳过获取`);
-      return;
-    }
-    
-    // 🎯 添加到请求锁中
-    const newFetchingApps = new Set(state.fetchingApps);
-    newFetchingApps.add(appId);
-    set({ fetchingApps: newFetchingApps });
-    
-    try {
-      console.log(`[AppListStore] 开始获取应用 ${appId} 的参数`);
-      
-      const { getDifyAppParameters } = await import('@lib/services/dify/app-service');
-      const parameters = await getDifyAppParameters(appId);
-      
-      // 更新缓存
-      const currentState = get();
-      set({
-        parametersCache: {
-          ...currentState.parametersCache,
-          [appId]: {
-            data: parameters,
-            timestamp: now
-          }
-        }
-      });
-      
-      console.log(`[AppListStore] 成功获取应用 ${appId} 的参数`);
-      
-    } catch (error: any) {
-      console.error(`[AppListStore] 获取应用 ${appId} 参数失败:`, error);
-      // 单个应用失败不影响其他操作，不设置全局错误状态
-      throw error;
-    } finally {
-      // 🎯 从请求锁中移除，无论成功还是失败
-      const currentState = get();
-      const updatedFetchingApps = new Set(currentState.fetchingApps);
-      updatedFetchingApps.delete(appId);
-      set({ fetchingApps: updatedFetchingApps });
-    }
-  }
 })); 
