@@ -346,17 +346,19 @@ export async function updateUserStatus(userId: string, status: AccountStatus): P
 }
 
 /**
- * 删除用户（仅删除profile，auth.users会通过级联删除）
+ * 删除用户（使用安全的RPC函数删除auth.users记录，触发级联删除）
  */
 export async function deleteUser(userId: string): Promise<Result<void>> {
   try {
-    const { error } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', userId);
+    const { data, error } = await supabase
+      .rpc('safe_delete_user', { target_user_id: userId });
 
     if (error) {
       return failure(new Error(`删除用户失败: ${error.message}`));
+    }
+
+    if (!data) {
+      return failure(new Error('删除用户失败：操作未成功'));
     }
 
     return success(undefined);
