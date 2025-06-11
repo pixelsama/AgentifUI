@@ -69,6 +69,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       description: '管理应用实例和配置参数'
     },
     { 
+      text: '关于与通知', 
+      icon: Menu, 
+      href: '/admin/content',
+      description: '管理About页面和系统通知推送'
+    },
+    { 
       text: '用户管理', 
       icon: Users, 
       href: '/admin/users',
