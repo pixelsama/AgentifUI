@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
 import { Eye } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 // --- BEGIN COMMENT ---
 // 导入所有原子化组件
@@ -159,14 +160,16 @@ export default function ContentManagementPage() {
       })
       
       // --- BEGIN COMMENT ---
-      // 这里可以添加成功提示
+      // 显示保存成功提示
       // --- END COMMENT ---
+      toast.success('配置保存成功')
       
     } catch (error) {
       console.error('保存配置失败:', error)
       // --- BEGIN COMMENT ---
-      // 这里可以添加错误提示
+      // 显示保存失败提示
       // --- END COMMENT ---
+      toast.error('保存配置失败，请重试')
     } finally {
       setIsSaving(false)
     }
@@ -226,13 +229,13 @@ export default function ContentManagementPage() {
       isDark ? "bg-stone-900" : "bg-stone-50"
     )}>
       {/* --- BEGIN COMMENT ---
-      页面头部区域 - 标题和描述
+      页面头部区域 - 标题和描述 (压缩高度)
       --- END COMMENT --- */}
       <div className={cn(
         "border-b",
         isDark ? "bg-stone-800 border-stone-600" : "bg-white border-stone-200"
       )}>
-        <div className="w-full px-4 py-6">
+        <div className="w-full px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
               <h1 className={cn(
@@ -242,7 +245,7 @@ export default function ContentManagementPage() {
                 关于与通知管理
               </h1>
               <p className={cn(
-                "mt-2 text-sm",
+                "mt-1 text-sm",
                 isDark ? "text-stone-400" : "text-stone-600"
               )}>
                 管理About页面内容和系统通知推送设置

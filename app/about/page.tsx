@@ -15,6 +15,7 @@ export default function AboutPage() {
   const [mounted, setMounted] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [aboutConfig, setAboutConfig] = useState<AboutPageConfig>(defaultAboutConfig);
+  const [configLoaded, setConfigLoaded] = useState(false);
   
   // 确保客户端渲染一致性
   useEffect(() => {
@@ -102,12 +103,34 @@ export default function AboutPage() {
       } catch (error) {
         console.error('Failed to load about config:', error);
         // 加载失败时使用默认配置
+      } finally {
+        setConfigLoaded(true);
       }
     };
 
     checkUser();
     loadConfig();
   }, []);
+
+  // --- BEGIN COMMENT ---
+  // 在配置加载完成和客户端挂载完成前显示加载状态，避免时序问题
+  // --- END COMMENT ---
+  if (!mounted || !configLoaded) {
+    return (
+      <main className="min-h-screen w-full py-4 px-4 sm:py-6 sm:px-6 lg:px-8 overflow-x-hidden">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center py-20">
+            <div className={cn(
+              "text-lg",
+              isDark ? "text-stone-400" : "text-stone-600"
+            )}>
+              加载中...
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen w-full py-4 px-4 sm:py-6 sm:px-6 lg:px-8 overflow-x-hidden">
