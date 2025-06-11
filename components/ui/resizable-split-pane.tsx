@@ -145,7 +145,7 @@ export function ResizableSplitPane({
       </div>
       
       {/* 分割线和拖拽区域 */}
-      <div className="relative flex items-center justify-center group z-[1001]">
+      <div className="relative flex items-center justify-center group">
         {/* 可视分割线 */}
         <div className={cn(
           "w-px h-full transition-all duration-200",
@@ -156,7 +156,7 @@ export function ResizableSplitPane({
         {/* 拖拽热区 */}
         <div 
           className={cn(
-            "absolute inset-y-0 -left-2 -right-2 cursor-col-resize z-[1002]",
+            "absolute inset-y-0 -left-2 -right-2 cursor-col-resize",
             "flex items-center justify-center",
             "transition-all duration-150",
             isDragging && "bg-stone-500/5"
@@ -169,7 +169,7 @@ export function ResizableSplitPane({
           <div className={cn(
             "flex items-center justify-center",
             "w-4 h-8 rounded-full border transition-all duration-150",
-            "shadow-sm z-[1003]",
+            "shadow-sm",
             // 默认状态
             isDark 
               ? "bg-stone-800/80 border-stone-600/50 text-stone-400" 
