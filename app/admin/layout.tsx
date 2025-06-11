@@ -284,7 +284,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       "transition-all duration-200 ease-in-out",
                       "outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
                       isDark ? "focus-visible:ring-blue-500 focus-visible:ring-offset-gray-900" : "focus-visible:ring-primary focus-visible:ring-offset-background",
-                      "border border-transparent min-h-[2.75rem]",
+                      "border border-transparent h-10 min-h-[2.5rem]",
                       !isDark && [
                         "text-stone-600",
                         "hover:bg-stone-300 hover:shadow-md",
@@ -308,7 +308,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       {isExpanded && contentVisible && (
                         <div className={cn(
                           "ml-2 flex-1 min-w-0 truncate font-serif",
-                          "flex items-center leading-none"
+                          "flex items-center leading-snug"
                         )}>
                           {item.text}
                         </div>
