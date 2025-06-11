@@ -7,24 +7,12 @@ import {
   Plus,
   Trash2
 } from 'lucide-react'
+import type { AboutPageConfig, ValueCard } from '@lib/config/about-config'
 
 // --- BEGIN COMMENT ---
-// About页面配置类型定义
+// 导出配置类型供其他组件使用
 // --- END COMMENT ---
-export interface ValueCard {
-  id: string
-  title: string
-  description: string
-}
-
-export interface AboutPageConfig {
-  title: string
-  subtitle: string
-  mission: string
-  valueCards: ValueCard[]
-  buttonText: string
-  copyrightText: string
-}
+export type { AboutPageConfig, ValueCard }
 
 interface AboutEditorProps {
   config: AboutPageConfig

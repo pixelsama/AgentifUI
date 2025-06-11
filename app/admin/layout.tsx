@@ -18,7 +18,13 @@ import {
   BarChart3,
   PanelLeft,
   PanelLeftClose,
-  Building2
+  Building2,
+  Bell,
+  ShieldCheck,
+  Settings,
+  FileText,
+  Search,
+  Plus
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -70,7 +76,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     },
     { 
       text: '关于与通知', 
-      icon: Menu, 
+      icon: Bell, 
       href: '/admin/content',
       description: '管理About页面和系统通知推送'
     },

@@ -12,7 +12,8 @@ import {
   ArrowRight,
   Key,
   Building2,
-  Menu
+  Menu,
+  Bell
 } from 'lucide-react'
 
 interface AdminCardProps {
@@ -123,7 +124,7 @@ export default function AdminPage() {
     {
       title: '关于与通知',
       description: '管理About页面内容和系统通知推送',
-      icon: Menu,
+      icon: Bell,
       href: '/admin/content',
       stats: '功能可用'
     },

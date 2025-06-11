@@ -16,60 +16,40 @@ export function ContentTabs({ activeTab, onTabChange }: ContentTabsProps) {
   const tabs = [
     {
       key: 'about' as const,
-      label: 'About页面',
-      icon: FileText,
-      description: '管理About页面内容'
+      label: 'About',
+      icon: FileText
     },
     {
       key: 'notifications' as const,
-      label: '通知管理',
-      icon: Bell,
-      description: '管理系统通知推送'
+      label: '通知',
+      icon: Bell
     }
   ]
 
   return (
     <div className={cn(
-      "border-b",
-      isDark ? "border-stone-600" : "border-stone-200"
+      "inline-flex items-center rounded-lg border p-1",
+      isDark ? "bg-stone-700 border-stone-600" : "bg-stone-100 border-stone-300"
     )}>
-      <div className="flex">
-        {tabs.map(({ key, label, icon: Icon, description }) => (
-          <button
-            key={key}
-            onClick={() => onTabChange(key)}
-            className={cn(
-              "flex items-center gap-3 px-6 py-4 text-sm font-medium transition-colors relative",
-              activeTab === key
-                ? isDark ? "text-stone-100 bg-stone-700" : "text-stone-900 bg-stone-50"
-                : isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-600 hover:text-stone-700"
-            )}
-          >
-            <Icon className="h-4 w-4" />
-            <div className="text-left">
-              <div>{label}</div>
-              <div className={cn(
-                "text-xs mt-0.5",
-                activeTab === key
-                  ? isDark ? "text-stone-300" : "text-stone-600"
-                  : isDark ? "text-stone-500" : "text-stone-500"
-              )}>
-                {description}
-              </div>
-            </div>
-            
-            {/* --- BEGIN COMMENT ---
-            活动标签指示器
-            --- END COMMENT --- */}
-            {activeTab === key && (
-              <div className={cn(
-                "absolute bottom-0 left-0 right-0 h-0.5",
-                isDark ? "bg-stone-100" : "bg-stone-900"
-              )} />
-            )}
-          </button>
-        ))}
-      </div>
+      {tabs.map(({ key, label, icon: Icon }) => (
+        <button
+          key={key}
+          onClick={() => onTabChange(key)}
+          className={cn(
+            "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
+            activeTab === key
+              ? isDark 
+                ? "bg-stone-600 text-stone-100 shadow-sm" 
+                : "bg-white text-stone-900 shadow-sm"
+              : isDark 
+                ? "text-stone-400 hover:text-stone-300 hover:bg-stone-650" 
+                : "text-stone-600 hover:text-stone-700 hover:bg-stone-200/50"
+          )}
+        >
+          <Icon className="h-4 w-4" />
+          <span>{label}</span>
+        </button>
+      ))}
     </div>
   )
 } 

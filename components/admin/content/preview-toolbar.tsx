@@ -3,7 +3,7 @@
 import React from 'react'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
-import { Monitor, Tablet, Smartphone, Eye } from 'lucide-react'
+import { Monitor, Tablet, Smartphone, Eye, EyeOff } from 'lucide-react'
 
 interface PreviewToolbarProps {
   activeTab: 'about' | 'notifications'
@@ -54,9 +54,9 @@ export function PreviewToolbar({
       --- END COMMENT --- */}
       <div className="flex items-center gap-2">
         {/* --- BEGIN COMMENT ---
-        设备切换按钮 (仅About页面显示)
+        设备切换按钮 (仅About页面且预览开启时显示)
         --- END COMMENT --- */}
-        {activeTab === 'about' && (
+        {activeTab === 'about' && showPreview && (
           <div className={cn(
             "flex items-center border rounded-lg p-1",
             isDark ? "bg-stone-700 border-stone-600" : "bg-white border-stone-300"
@@ -92,7 +92,7 @@ export function PreviewToolbar({
               : isDark ? "bg-stone-700 hover:bg-stone-600 text-stone-300" : "bg-stone-200 hover:bg-stone-300 text-stone-700"
           )}
         >
-          <Eye className="h-4 w-4" />
+          {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           {showPreview ? '隐藏预览' : '显示预览'}
         </button>
       </div>

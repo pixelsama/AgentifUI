@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@components/ui/button';
 import { createClient } from '@lib/supabase/client';
 import { useTheme } from '@lib/hooks/use-theme';
+import { getAboutConfig, defaultAboutConfig, type AboutPageConfig } from '@lib/config/about-config';
 
 export default function AboutPage() {
   const router = useRouter();
   const { isDark } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [aboutConfig, setAboutConfig] = useState<AboutPageConfig>(defaultAboutConfig);
   
   // 确保客户端渲染一致性
   useEffect(() => {
@@ -92,7 +94,18 @@ export default function AboutPage() {
       setCurrentUser(user);
     };
 
+    const loadConfig = async () => {
+      try {
+        const config = await getAboutConfig();
+        setAboutConfig(config);
+      } catch (error) {
+        console.error('Failed to load about config:', error);
+        // 加载失败时使用默认配置
+      }
+    };
+
     checkUser();
+    loadConfig();
   }, []);
 
   return (
@@ -112,7 +125,7 @@ export default function AboutPage() {
             className={`text-4xl md:text-5xl font-bold bg-gradient-to-r ${colors.titleGradient} bg-clip-text text-transparent mb-6 leading-tight py-2`}
 
           >
-            关于 AgentifUI
+            {aboutConfig.title}
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -120,7 +133,7 @@ export default function AboutPage() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className={`text-xl ${colors.textColor} max-w-3xl mx-auto font-light`}
           >
-            连接 AI 与企业，打造大模型应用新体验
+            {aboutConfig.subtitle}
           </motion.p>
         </motion.section>
 
@@ -133,8 +146,7 @@ export default function AboutPage() {
         >
           <h2 className={`text-2xl font-bold ${colors.headingColor} mb-6`}>我们的使命</h2>
           <p className={`text-lg ${colors.paragraphColor}`}>
-            AgentifUI 致力于利用大型语言模型的力量，为企业和教育机构提供创新的应用解决方案。
-            我们整合了多种模型供应商的能力，并基于 Dify 后端提供稳定、可靠的服务，帮助组织充分利用 AI 技术的价值。
+            {aboutConfig.mission}
           </p>
         </motion.section>
 
@@ -147,12 +159,7 @@ export default function AboutPage() {
         >
           <h2 className={`text-2xl font-bold ${colors.headingColor} mb-6`}>我们的价值观</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { title: "技术创新", description: "持续集成前沿的大模型技术，为企业提供领先的 AI 解决方案" },
-              { title: "数据安全", description: "支持私有化部署和严格的数据保护措施，确保企业数据的安全与隐私" },
-              { title: "灵活定制", description: "提供高度可定制的解决方案，满足不同行业和场景的特定需求" },
-              { title: "知识增强", description: "通过 RAG 技术实现私有知识库的整合，增强模型的上下文感知能力" }
-            ].map((value, index) => (
+            {aboutConfig.valueCards.map((value, index) => (
               <motion.div 
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
