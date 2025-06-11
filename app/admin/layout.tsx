@@ -45,6 +45,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [contentVisible, setContentVisible] = useState(false)
   const [hoverTimeoutId, setHoverTimeoutId] = useState<number | null>(null)
   const [isMounted, setIsMounted] = useState(false)
+  
+  // --- BEGIN COMMENT ---
+  // 点击状态管理 - 提供立即视觉反馈
+  // --- END COMMENT ---
+  const [clickingHref, setClickingHref] = useState<string | null>(null)
 
   // --- BEGIN COMMENT ---
   // 管理菜单项配置 - 包含管理主页
@@ -162,6 +167,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   // --- BEGIN COMMENT ---
+  // 处理菜单项点击 - 提供立即视觉反馈
+  // --- END COMMENT ---
+  const handleMenuClick = (href: string) => {
+    setClickingHref(href)
+    // 清除点击状态，避免长时间显示
+    setTimeout(() => {
+      setClickingHref(null)
+    }, 1000) // 1秒后清除，给页面加载足够时间
+  }
+
+  // --- BEGIN COMMENT ---
   // 清理定时器
   // --- END COMMENT ---
   useEffect(() => {
@@ -273,12 +289,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="space-y-1">
               {menuItems.map((item) => {
                 const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))
+                const isClicking = clickingHref === item.href
                 const Icon = item.icon
                 
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={() => handleMenuClick(item.href)}
                     className={cn(
                       "relative flex items-center rounded-lg px-3 py-2 text-sm font-medium",
                       "transition-all duration-200 ease-in-out",
@@ -288,12 +306,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       !isDark && [
                         "text-stone-600",
                         "hover:bg-stone-300 hover:shadow-md",
-                        isActive && "bg-stone-300 shadow-sm border-stone-400/80",
+                        (isActive || isClicking) && "bg-stone-300 shadow-sm border-stone-400/80",
                       ],
                       isDark && [
                         "text-gray-200",
                         "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50",
-                        isActive && "bg-stone-600 shadow-sm border-stone-500",
+                        (isActive || isClicking) && "bg-stone-600 shadow-sm border-stone-500",
                       ],
                       isExpanded ? "w-full" : "w-10 justify-center",
                     )}

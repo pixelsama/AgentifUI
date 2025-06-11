@@ -10,7 +10,8 @@ import {
   BarChart3,
   Shield,
   ArrowRight,
-  Key
+  Key,
+  Building2
 } from 'lucide-react'
 
 interface AdminCardProps {
@@ -123,6 +124,13 @@ export default function AdminPage() {
       description: '管理用户账户、权限和访问控制',
       icon: Users,
       href: '/admin/users',
+      stats: '功能可用'
+    },
+    {
+      title: '组织管理',
+      description: '管理组织结构、部门和成员关系',
+      icon: Building2,
+      href: '/admin/organizations',
       stats: '功能可用'
     },
     {
