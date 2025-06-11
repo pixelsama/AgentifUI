@@ -113,7 +113,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, [])
 
   // --- BEGIN COMMENT ---
-  // 处理内容显示逻辑
+  // 处理内容显示逻辑 - 优化响应速度
   // --- END COMMENT ---
   useEffect(() => {
     if (!isExpanded) {
@@ -121,15 +121,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       return
     }
     
+    // 🎯 减少内容显示延迟，提升响应速度
     const timer = setTimeout(() => {
       setContentVisible(true)
-    }, 50)
+    }, 20) // 从50ms减少到20ms
     
     return () => clearTimeout(timer)
   }, [isExpanded])
 
   // --- BEGIN COMMENT ---
-  // 处理悬停 - 简化逻辑，只有悬停展开/收起
+  // 处理悬停 - 优化响应速度，减少延迟
   // --- END COMMENT ---
   const handleSetHovering = (hovering: boolean) => {
     // 移动端忽略悬停
@@ -143,23 +144,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       setHoverTimeoutId(null)
     }
 
-    // 悬停进入
+    // 🎯 悬停进入 - 立即响应，无延迟
     if (hovering && !isExpanded) {
-      const timeoutId = window.setTimeout(() => {
-        setIsHovering(true)
-        setIsExpanded(true)
-      }, 10)
-      setHoverTimeoutId(timeoutId)
+      setIsHovering(true)
+      setIsExpanded(true)
       return
     }
 
-    // 悬停离开
+    // 🎯 悬停离开 - 减少延迟，提升响应速度
     if (!hovering && isHovering) {
       const timeoutId = window.setTimeout(() => {
         setIsHovering(false)
         setIsExpanded(false)
         setContentVisible(false)
-      }, 150)
+      }, 100) // 从150ms减少到100ms
       setHoverTimeoutId(timeoutId)
       return
     }
@@ -279,7 +277,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <aside
         className={cn(
           "fixed top-0 left-0 bottom-0 flex flex-col border-r",
-          "transition-[width] duration-300 ease-in-out",
+          // 🎯 优化动画速度 - 从300ms减少到150ms，使用更快的缓动函数
+          "transition-[width] duration-150 ease-out",
           // 宽度设置 - 展开时64，收起时16
           isExpanded ? "w-64" : "w-16",
           // 移动端未挂载时隐藏
@@ -364,7 +363,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       主内容区域 - 顶部留出navbar空间，左侧始终留出slim sidebar空间
       --- END COMMENT --- */}
       <main className={cn(
-        "pt-12 ml-16 transition-all duration-300 ease-in-out min-h-screen relative"
+        // 🎯 优化主内容区域过渡动画速度
+        "pt-12 ml-16 transition-all duration-150 ease-out min-h-screen relative"
       )}>
         {/* --- BEGIN COMMENT ---
         导航加载状态覆盖层 - 仅覆盖主内容区域
