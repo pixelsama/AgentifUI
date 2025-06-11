@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
+import { Eye } from 'lucide-react'
 
 // --- BEGIN COMMENT ---
 // 导入所有原子化组件
@@ -14,7 +15,7 @@ import { NotificationEditor, NotificationConfig } from '@components/admin/conten
 import { AboutPreview } from '@components/admin/content/about-preview'
 import { NotificationPreview } from '@components/admin/content/notification-preview'
 import { PreviewToolbar } from '@components/admin/content/preview-toolbar'
-import { SaveActions } from '@components/admin/content/save-actions'
+
 import { ResizableSplitPane } from '@components/ui/resizable-split-pane'
 import { getAboutConfig, saveAboutConfig, defaultAboutConfig } from '@lib/config/about-config'
 
@@ -31,6 +32,7 @@ export default function ContentManagementPage() {
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
   const [isSaving, setIsSaving] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
+  const [showFullscreenPreview, setShowFullscreenPreview] = useState(false)
 
   // --- BEGIN COMMENT ---
   // About页面配置状态
@@ -207,6 +209,17 @@ export default function ContentManagementPage() {
     setSelectedNotification(notification)
   }
 
+  // --- BEGIN COMMENT ---
+  // 全屏预览处理函数
+  // --- END COMMENT ---
+  const handleFullscreenPreview = () => {
+    setShowFullscreenPreview(true)
+  }
+
+  const handleCloseFullscreenPreview = () => {
+    setShowFullscreenPreview(false)
+  }
+
   return (
     <div className={cn(
       "min-h-screen flex flex-col",
@@ -219,7 +232,7 @@ export default function ContentManagementPage() {
         "border-b",
         isDark ? "bg-stone-800 border-stone-600" : "bg-white border-stone-200"
       )}>
-        <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="w-full px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className={cn(
@@ -273,6 +286,60 @@ export default function ContentManagementPage() {
                         onSelectedChange={handleSelectedNotificationChange}
                       />
                     )}
+                    
+                    {/* --- BEGIN COMMENT ---
+                    保存操作区域 - 集成到编辑区域底部
+                    --- END COMMENT --- */}
+                    <div className={cn(
+                      "mt-8 pt-6 border-t",
+                      isDark ? "border-stone-600" : "border-stone-200"
+                    )}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {hasChanges && (
+                            <div className={cn(
+                              "flex items-center gap-2 text-sm",
+                              isDark ? "text-stone-400" : "text-stone-600"
+                            )}>
+                              <div className="w-2 h-2 rounded-full bg-orange-500" />
+                              <span>有未保存的更改</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={handleReset}
+                            disabled={!hasChanges || isSaving}
+                            className={cn(
+                              "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                              hasChanges && !isSaving
+                                ? isDark 
+                                  ? "text-stone-300 hover:bg-stone-700" 
+                                  : "text-stone-600 hover:bg-stone-100"
+                                : "text-stone-500 cursor-not-allowed"
+                            )}
+                          >
+                            重置
+                          </button>
+                          
+                          <button
+                            onClick={handleSave}
+                            disabled={!hasChanges || isSaving}
+                            className={cn(
+                              "px-6 py-2 rounded-lg text-sm font-medium transition-colors",
+                              hasChanges && !isSaving
+                                ? isDark 
+                                  ? "bg-stone-100 text-stone-900 hover:bg-white" 
+                                  : "bg-stone-900 text-white hover:bg-stone-800"
+                                : "bg-stone-300 text-stone-500 cursor-not-allowed"
+                            )}
+                          >
+                            {isSaving ? '保存中...' : '保存更改'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -288,6 +355,7 @@ export default function ContentManagementPage() {
                   onDeviceChange={setPreviewDevice}
                   showPreview={showPreview}
                   onPreviewToggle={() => setShowPreview(!showPreview)}
+                  onFullscreenPreview={handleFullscreenPreview}
                 />
                 
                 {/* --- BEGIN COMMENT ---
@@ -310,7 +378,7 @@ export default function ContentManagementPage() {
           />
         ) : (
           <div className={cn(
-            "flex-1 border-r",
+            "flex-1 border-r relative",
             isDark ? "bg-stone-800 border-stone-600" : "bg-white border-stone-200"
           )}>
             <div className="h-full overflow-auto">
@@ -328,22 +396,77 @@ export default function ContentManagementPage() {
                     onSelectedChange={handleSelectedNotificationChange}
                   />
                 )}
+                
+                {/* --- BEGIN COMMENT ---
+                保存操作区域 - 集成到编辑区域底部
+                --- END COMMENT --- */}
+                <div className={cn(
+                  "mt-8 pt-6 border-t",
+                  isDark ? "border-stone-600" : "border-stone-200"
+                )}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {hasChanges && (
+                        <div className={cn(
+                          "flex items-center gap-2 text-sm",
+                          isDark ? "text-stone-400" : "text-stone-600"
+                        )}>
+                          <div className="w-2 h-2 rounded-full bg-orange-500" />
+                          <span>有未保存的更改</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={handleReset}
+                        disabled={!hasChanges || isSaving}
+                        className={cn(
+                          "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                          hasChanges && !isSaving
+                            ? isDark 
+                              ? "text-stone-300 hover:bg-stone-700" 
+                              : "text-stone-600 hover:bg-stone-100"
+                            : "text-stone-500 cursor-not-allowed"
+                        )}
+                      >
+                        重置
+                      </button>
+                      
+                      <button
+                        onClick={handleSave}
+                        disabled={!hasChanges || isSaving}
+                        className={cn(
+                          "px-6 py-2 rounded-lg text-sm font-medium transition-colors",
+                          hasChanges && !isSaving
+                            ? isDark 
+                              ? "bg-stone-100 text-stone-900 hover:bg-white" 
+                              : "bg-stone-900 text-white hover:bg-stone-800"
+                            : "bg-stone-300 text-stone-500 cursor-not-allowed"
+                        )}
+                      >
+                        {isSaving ? '保存中...' : '保存更改'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             
             {/* --- BEGIN COMMENT ---
             预览切换区域 (当预览面板隐藏时显示)
             --- END COMMENT --- */}
-            <div className="absolute top-4 right-4">
+            <div className="absolute top-6 right-6">
               <button
                 onClick={() => setShowPreview(true)}
                 className={cn(
-                  "p-3 rounded-lg transition-colors text-sm font-medium shadow-lg",
+                  "flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-lg",
                   isDark 
                     ? "bg-stone-700 hover:bg-stone-600 text-stone-300 border border-stone-600" 
                     : "bg-white hover:bg-stone-50 text-stone-600 border border-stone-200"
                 )}
               >
+                <Eye className="h-4 w-4" />
                 显示预览
               </button>
             </div>
@@ -352,14 +475,51 @@ export default function ContentManagementPage() {
       </div>
 
       {/* --- BEGIN COMMENT ---
-      底部保存操作栏 - 保存、重置按钮和状态显示
+      全屏预览模态框
       --- END COMMENT --- */}
-      <SaveActions
-        hasChanges={hasChanges}
-        isSaving={isSaving}
-        onSave={handleSave}
-        onReset={handleReset}
-      />
+      {showFullscreenPreview && activeTab === 'about' && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm">
+          <div className="h-full flex flex-col">
+            {/* 全屏预览工具栏 */}
+            <div className={cn(
+              "flex items-center justify-between px-6 py-4 border-b",
+              isDark ? "bg-stone-800 border-stone-600" : "bg-white border-stone-200"
+            )}>
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "w-3 h-3 rounded-full",
+                  isDark ? "bg-stone-600" : "bg-stone-400"
+                )} />
+                <span className={cn(
+                  "text-sm font-medium",
+                  isDark ? "text-stone-300" : "text-stone-700"
+                )}>
+                  全屏预览 - {aboutConfig.title}
+                </span>
+              </div>
+              <button
+                onClick={handleCloseFullscreenPreview}
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  isDark 
+                    ? "bg-stone-700 hover:bg-stone-600 text-stone-300" 
+                    : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+                )}
+              >
+                关闭预览
+              </button>
+            </div>
+            
+            {/* 全屏预览内容 */}
+            <div className="flex-1 overflow-auto">
+              <AboutPreview 
+                config={aboutConfig}
+                previewDevice="desktop"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

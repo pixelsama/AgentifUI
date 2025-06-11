@@ -3,7 +3,7 @@
 import React from 'react'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
-import { Monitor, Tablet, Smartphone, Eye, EyeOff } from 'lucide-react'
+import { Monitor, Tablet, Smartphone, Eye, EyeOff, Maximize2 } from 'lucide-react'
 
 interface PreviewToolbarProps {
   activeTab: 'about' | 'notifications'
@@ -11,6 +11,7 @@ interface PreviewToolbarProps {
   onDeviceChange: (device: 'desktop' | 'tablet' | 'mobile') => void
   showPreview: boolean
   onPreviewToggle: () => void
+  onFullscreenPreview?: () => void
 }
 
 export function PreviewToolbar({ 
@@ -18,7 +19,8 @@ export function PreviewToolbar({
   previewDevice, 
   onDeviceChange, 
   showPreview, 
-  onPreviewToggle 
+  onPreviewToggle,
+  onFullscreenPreview
 }: PreviewToolbarProps) {
   const { isDark } = useTheme()
 
@@ -78,6 +80,23 @@ export function PreviewToolbar({
               </button>
             ))}
           </div>
+        )}
+
+        {/* --- BEGIN COMMENT ---
+        全屏预览按钮 (仅About页面的桌面模式显示)
+        --- END COMMENT --- */}
+        {activeTab === 'about' && showPreview && previewDevice === 'desktop' && onFullscreenPreview && (
+          <button
+            onClick={onFullscreenPreview}
+            className={cn(
+              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+              isDark ? "bg-stone-700 hover:bg-stone-600 text-stone-300" : "bg-stone-200 hover:bg-stone-300 text-stone-700"
+            )}
+            title="全屏预览"
+          >
+            <Maximize2 className="h-4 w-4" />
+            <span className="hidden sm:inline">全屏</span>
+          </button>
         )}
 
         {/* --- BEGIN COMMENT ---

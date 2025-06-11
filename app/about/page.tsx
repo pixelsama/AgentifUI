@@ -187,7 +187,7 @@ export default function AboutPage() {
             className={`${colors.buttonClass} px-8 py-3 h-auto text-base font-medium rounded-lg transition-all duration-200`}
             onClick={handleExploreClick}
           >
-            开始探索
+            {aboutConfig.buttonText}
           </Button>
         </motion.section>
         
@@ -199,7 +199,7 @@ export default function AboutPage() {
           className={`text-center ${colors.textColor} text-sm`}
         >
           <p>
-            © <span suppressHydrationWarning>{new Date().getFullYear()}</span> AgentifUI. 探索大模型应用的未来。
+            {aboutConfig.copyrightText}
           </p>
         </motion.div>
       </div>
