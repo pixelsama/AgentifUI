@@ -248,10 +248,30 @@ export default function ContentManagementPage() {
                 管理About页面内容和系统通知推送设置
               </p>
             </div>
-            <ContentTabs 
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-            />
+            <div className="flex items-center gap-4">
+              {/* --- BEGIN COMMENT ---
+              显示预览按钮 (当预览隐藏时显示)
+              --- END COMMENT --- */}
+              {!showPreview && (
+                <button
+                  onClick={() => setShowPreview(true)}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-sm",
+                    isDark 
+                      ? "bg-stone-700 hover:bg-stone-600 text-stone-300 border border-stone-600" 
+                      : "bg-white hover:bg-stone-50 text-stone-600 border border-stone-200"
+                  )}
+                >
+                  <Eye className="h-4 w-4" />
+                  显示预览
+                </button>
+              )}
+              
+              <ContentTabs 
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -453,23 +473,7 @@ export default function ContentManagementPage() {
               </div>
             </div>
             
-            {/* --- BEGIN COMMENT ---
-            预览切换区域 (当预览面板隐藏时显示)
-            --- END COMMENT --- */}
-            <div className="absolute top-6 right-6">
-              <button
-                onClick={() => setShowPreview(true)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-lg",
-                  isDark 
-                    ? "bg-stone-700 hover:bg-stone-600 text-stone-300 border border-stone-600" 
-                    : "bg-white hover:bg-stone-50 text-stone-600 border border-stone-200"
-                )}
-              >
-                <Eye className="h-4 w-4" />
-                显示预览
-              </button>
-            </div>
+
           </div>
         )}
       </div>

@@ -157,7 +157,7 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
         <div className={cn(
           deviceStyles.screen,
           previewDevice === 'desktop' 
-            ? "" 
+            ? isDark ? "bg-stone-900" : "bg-stone-50"
             : isDark ? "bg-stone-800" : "bg-white"
         )}>
           <div className={deviceStyles.content}>
@@ -195,14 +195,19 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
                 </section>
 
                 {/* --- BEGIN COMMENT ---
-                价值观部分 - 与About页面完全一致，使用md:grid-cols-2
+                价值观部分 - 与About页面完全一致，根据设备类型使用正确的网格布局
                 --- END COMMENT --- */}
                 <section className={responsive.spacing.section}>
                   <h2 className={cn(responsive.valuesTitle, colors.headingColor)}>
                     我们的价值观
                   </h2>
                   <div className={cn(
-                    "grid grid-cols-1 md:grid-cols-2",
+                    "grid",
+                    previewDevice === 'mobile' 
+                      ? "grid-cols-1" 
+                      : previewDevice === 'tablet'
+                      ? "grid-cols-1 sm:grid-cols-2"
+                      : "grid-cols-1 md:grid-cols-2",
                     responsive.spacing.cardGap
                   )}>
                     {config.valueCards.map((value, index) => (

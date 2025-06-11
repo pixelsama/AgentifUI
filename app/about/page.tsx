@@ -7,6 +7,7 @@ import { Button } from '@components/ui/button';
 import { createClient } from '@lib/supabase/client';
 import { useTheme } from '@lib/hooks/use-theme';
 import { getAboutConfig, defaultAboutConfig, type AboutPageConfig } from '@lib/config/about-config';
+import { cn } from '@lib/utils';
 
 export default function AboutPage() {
   const router = useRouter();
@@ -109,21 +110,24 @@ export default function AboutPage() {
   }, []);
 
   return (
-    <main className="min-h-screen w-full py-6 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
+    <main className="min-h-screen w-full py-4 px-4 sm:py-6 sm:px-6 lg:px-8 overflow-x-hidden">
       <div className="max-w-5xl mx-auto">
         {/* 标题部分 */}
         <motion.section 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10"
+          className="text-center mb-6 sm:mb-8 lg:mb-10"
         >
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className={`text-4xl md:text-5xl font-bold bg-gradient-to-r ${colors.titleGradient} bg-clip-text text-transparent mb-6 leading-tight py-2`}
-
+            className={cn(
+              "font-bold bg-gradient-to-r bg-clip-text text-transparent leading-tight py-2",
+              "text-3xl mb-4 sm:text-4xl md:text-5xl sm:mb-6",
+              `${colors.titleGradient}`
+            )}
           >
             {aboutConfig.title}
           </motion.h1>
@@ -131,7 +135,11 @@ export default function AboutPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className={`text-xl ${colors.textColor} max-w-3xl mx-auto font-light`}
+            className={cn(
+              "max-w-3xl mx-auto font-light",
+              "text-base sm:text-lg lg:text-xl",
+              colors.textColor
+            )}
           >
             {aboutConfig.subtitle}
           </motion.p>
@@ -142,10 +150,19 @@ export default function AboutPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="mb-10"
+          className="mb-6 sm:mb-8 lg:mb-10"
         >
-          <h2 className={`text-2xl font-bold ${colors.headingColor} mb-6`}>我们的使命</h2>
-          <p className={`text-lg ${colors.paragraphColor}`}>
+          <h2 className={cn(
+            "font-bold mb-4 sm:mb-6",
+            "text-xl sm:text-2xl",
+            colors.headingColor
+          )}>
+            我们的使命
+          </h2>
+          <p className={cn(
+            "text-sm sm:text-base lg:text-lg leading-relaxed",
+            colors.paragraphColor
+          )}>
             {aboutConfig.mission}
           </p>
         </motion.section>
@@ -155,20 +172,43 @@ export default function AboutPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="mb-10"
+          className="mb-6 sm:mb-8 lg:mb-10"
         >
-          <h2 className={`text-2xl font-bold ${colors.headingColor} mb-6`}>我们的价值观</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <h2 className={cn(
+            "font-bold mb-4 sm:mb-6",
+            "text-xl sm:text-2xl",
+            colors.headingColor
+          )}>
+            我们的价值观
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {aboutConfig.valueCards.map((value, index) => (
               <motion.div 
-                key={index}
+                key={value.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                className={`${colors.cardBg} ${colors.cardShadow} border ${colors.cardBorder} rounded-xl p-6`}
+                className={cn(
+                  "border rounded-xl",
+                  "p-4 sm:p-6",
+                  colors.cardBg,
+                  colors.cardShadow,
+                  colors.cardBorder
+                )}
               >
-                <h3 className={`text-lg font-semibold ${colors.cardHeadingColor} mb-2`}>{value.title}</h3>
-                <p className={`${colors.cardTextColor}`}>{value.description}</p>
+                <h3 className={cn(
+                  "font-semibold mb-2",
+                  "text-base sm:text-lg",
+                  colors.cardHeadingColor
+                )}>
+                  {value.title}
+                </h3>
+                <p className={cn(
+                  "text-sm sm:text-base leading-relaxed",
+                  colors.cardTextColor
+                )}>
+                  {value.description}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -179,12 +219,15 @@ export default function AboutPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="text-center mb-10"
+          className="text-center mb-6 sm:mb-8 lg:mb-10"
         >
-          {/* "加入我们"标题和段落已根据用户要求移除 */}
           <Button
             size="lg" 
-            className={`${colors.buttonClass} px-8 py-3 h-auto text-base font-medium rounded-lg transition-all duration-200`}
+            className={cn(
+              "h-auto font-medium rounded-lg transition-all duration-200",
+              "px-6 py-2 text-sm sm:px-8 sm:py-3 sm:text-base",
+              colors.buttonClass
+            )}
             onClick={handleExploreClick}
           >
             {aboutConfig.buttonText}
@@ -196,7 +239,11 @@ export default function AboutPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className={`text-center ${colors.textColor} text-sm`}
+          className={cn(
+            "text-center",
+            "text-xs sm:text-sm",
+            colors.textColor
+          )}
         >
           <p>
             {aboutConfig.copyrightText}
