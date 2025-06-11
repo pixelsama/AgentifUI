@@ -7,6 +7,7 @@ import {
   Plus,
   Trash2
 } from 'lucide-react'
+import { CustomSelect } from '@components/ui/custom-select'
 
 // --- BEGIN COMMENT ---
 // 通知配置类型定义
@@ -238,21 +239,16 @@ export function NotificationEditor({
               )}>
                 通知类型
               </label>
-              <select
+              <CustomSelect
                 value={selectedNotification.type}
-                onChange={(e) => updateNotification(selectedNotification.id, { type: e.target.value as any })}
-                className={cn(
-                  "w-full px-3 py-2 rounded-lg border text-sm",
-                  isDark 
-                    ? "bg-stone-700 border-stone-600 text-stone-100" 
-                    : "bg-white border-stone-300 text-stone-900"
-                )}
-              >
-                <option value="announcement">公告</option>
-                <option value="update">更新</option>
-                <option value="feature">新功能</option>
-                <option value="maintenance">维护</option>
-              </select>
+                onChange={(value) => updateNotification(selectedNotification.id, { type: value as any })}
+                options={[
+                  { value: 'announcement', label: '公告' },
+                  { value: 'update', label: '更新' },
+                  { value: 'feature', label: '新功能' },
+                  { value: 'maintenance', label: '维护' }
+                ]}
+              />
             </div>
 
             <div>
@@ -262,21 +258,16 @@ export function NotificationEditor({
               )}>
                 优先级
               </label>
-              <select
+              <CustomSelect
                 value={selectedNotification.priority}
-                onChange={(e) => updateNotification(selectedNotification.id, { priority: e.target.value as any })}
-                className={cn(
-                  "w-full px-3 py-2 rounded-lg border text-sm",
-                  isDark 
-                    ? "bg-stone-700 border-stone-600 text-stone-100" 
-                    : "bg-white border-stone-300 text-stone-900"
-                )}
-              >
-                <option value="low">低</option>
-                <option value="medium">中</option>
-                <option value="high">高</option>
-                <option value="critical">紧急</option>
-              </select>
+                onChange={(value) => updateNotification(selectedNotification.id, { priority: value as any })}
+                options={[
+                  { value: 'low', label: '低' },
+                  { value: 'medium', label: '中' },
+                  { value: 'high', label: '高' },
+                  { value: 'critical', label: '紧急' }
+                ]}
+              />
             </div>
           </div>
 
@@ -291,20 +282,15 @@ export function NotificationEditor({
               )}>
                 显示位置
               </label>
-              <select
+              <CustomSelect
                 value={selectedNotification.position}
-                onChange={(e) => updateNotification(selectedNotification.id, { position: e.target.value as any })}
-                className={cn(
-                  "w-full px-3 py-2 rounded-lg border text-sm",
-                  isDark 
-                    ? "bg-stone-700 border-stone-600 text-stone-100" 
-                    : "bg-white border-stone-300 text-stone-900"
-                )}
-              >
-                <option value="center">中央模态框</option>
-                <option value="top-center">顶部横幅</option>
-                <option value="bottom-right">右下角提示</option>
-              </select>
+                onChange={(value) => updateNotification(selectedNotification.id, { position: value as any })}
+                options={[
+                  { value: 'center', label: '中央模态框' },
+                  { value: 'top-center', label: '顶部横幅' },
+                  { value: 'bottom-right', label: '右下角提示' }
+                ]}
+              />
             </div>
 
             <div>
@@ -314,20 +300,15 @@ export function NotificationEditor({
               )}>
                 目标用户
               </label>
-              <select
+              <CustomSelect
                 value={selectedNotification.targetAudience}
-                onChange={(e) => updateNotification(selectedNotification.id, { targetAudience: e.target.value as any })}
-                className={cn(
-                  "w-full px-3 py-2 rounded-lg border text-sm",
-                  isDark 
-                    ? "bg-stone-700 border-stone-600 text-stone-100" 
-                    : "bg-white border-stone-300 text-stone-900"
-                )}
-              >
-                <option value="all">所有用户</option>
-                <option value="new_users">新用户</option>
-                <option value="returning_users">回访用户</option>
-              </select>
+                onChange={(value) => updateNotification(selectedNotification.id, { targetAudience: value as any })}
+                options={[
+                  { value: 'all', label: '所有用户' },
+                  { value: 'new_users', label: '新用户' },
+                  { value: 'returning_users', label: '回访用户' }
+                ]}
+              />
             </div>
           </div>
 

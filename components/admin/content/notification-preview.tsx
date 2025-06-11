@@ -1,10 +1,10 @@
 "use client"
 
-import React from 'react'
+import React, { useState, useRef } from 'react'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
 import { NotificationConfig } from './notification-editor'
-import { X, Bell, AlertTriangle, Info, Wrench } from 'lucide-react'
+import { X, Bell, AlertTriangle, Info, Wrench, Move } from 'lucide-react'
 
 interface NotificationPreviewProps {
   notification: NotificationConfig | null
@@ -12,6 +12,10 @@ interface NotificationPreviewProps {
 
 export function NotificationPreview({ notification }: NotificationPreviewProps) {
   const { isDark } = useTheme()
+  const [position, setPosition] = useState({ x: 50, y: 50 }) // 百分比位置
+  const [isDragging, setIsDragging] = useState(false)
+  const dragRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   if (!notification) {
     return (
@@ -20,7 +24,7 @@ export function NotificationPreview({ notification }: NotificationPreviewProps) 
         isDark ? "bg-stone-800 border-stone-600" : "bg-white border-stone-200"
       )}>
         <p className={cn(
-          "text-center",
+          "text-center text-sm",
           isDark ? "text-stone-400" : "text-stone-500"
         )}>
           选择一个通知以预览效果
@@ -30,75 +34,226 @@ export function NotificationPreview({ notification }: NotificationPreviewProps) 
   }
 
   // --- BEGIN COMMENT ---
+  // 拖拽处理函数
+  // --- END COMMENT ---
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return
+      
+      const container = containerRef.current.getBoundingClientRect()
+      const x = ((e.clientX - container.left) / container.width) * 100
+      const y = ((e.clientY - container.top) / container.height) * 100
+      
+      setPosition({
+        x: Math.max(0, Math.min(100, x)),
+        y: Math.max(0, Math.min(100, y))
+      })
+    }
+    
+    const handleMouseUp = () => {
+      setIsDragging(false)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+    
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
+
+  // --- BEGIN COMMENT ---
   // 获取通知类型图标
   // --- END COMMENT ---
   const getTypeIcon = () => {
     switch (notification.type) {
       case 'update':
-        return <Bell className="h-5 w-5" />
+        return <Bell className="h-4 w-4" />
       case 'feature':
-        return <Info className="h-5 w-5" />
+        return <Info className="h-4 w-4" />
       case 'maintenance':
-        return <Wrench className="h-5 w-5" />
+        return <Wrench className="h-4 w-4" />
       case 'announcement':
       default:
-        return <AlertTriangle className="h-5 w-5" />
+        return <AlertTriangle className="h-4 w-4" />
     }
   }
 
   // --- BEGIN COMMENT ---
-  // 获取优先级颜色
+  // 获取优先级样式 (使用stone配色)
   // --- END COMMENT ---
-  const getPriorityColor = () => {
+  const getPriorityStyles = () => {
     switch (notification.priority) {
       case 'critical':
-        return isDark ? "text-red-400 bg-red-900/30" : "text-red-600 bg-red-50"
+        return {
+          border: isDark ? "border-red-500/50" : "border-red-300",
+          bg: isDark ? "bg-stone-800/95" : "bg-stone-50/95",
+          iconColor: isDark ? "text-red-400" : "text-red-600"
+        }
       case 'high':
-        return isDark ? "text-orange-400 bg-orange-900/30" : "text-orange-600 bg-orange-50"
+        return {
+          border: isDark ? "border-orange-500/50" : "border-orange-300",
+          bg: isDark ? "bg-stone-800/95" : "bg-stone-50/95",
+          iconColor: isDark ? "text-orange-400" : "text-orange-600"
+        }
       case 'medium':
-        return isDark ? "text-blue-400 bg-blue-900/30" : "text-blue-600 bg-blue-50"
+        return {
+          border: isDark ? "border-stone-500/50" : "border-stone-300",
+          bg: isDark ? "bg-stone-800/95" : "bg-stone-50/95",
+          iconColor: isDark ? "text-stone-400" : "text-stone-600"
+        }
       case 'low':
       default:
-        return isDark ? "text-stone-400 bg-stone-700" : "text-stone-600 bg-stone-100"
+        return {
+          border: isDark ? "border-stone-600/50" : "border-stone-200",
+          bg: isDark ? "bg-stone-800/95" : "bg-stone-50/95",
+          iconColor: isDark ? "text-stone-500" : "text-stone-500"
+        }
     }
   }
 
+  const styles = getPriorityStyles()
+
   // --- BEGIN COMMENT ---
-  // 渲染中央模态框通知
+  // 渲染可拖拽的通知组件
   // --- END COMMENT ---
-  const renderCenterModal = () => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className={cn(
-        "max-w-md w-full rounded-xl shadow-xl",
-        isDark ? "bg-stone-800 border border-stone-600" : "bg-white border border-stone-200"
-      )}>
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className={cn(
-              "flex items-center gap-3 flex-1",
-              getPriorityColor()
+  const renderDraggableNotification = () => {
+    if (notification.position === 'top-center') {
+      return (
+        <div 
+          className={cn(
+            "absolute top-0 left-1/2 transform -translate-x-1/2 w-full max-w-md p-3 border-b shadow-sm",
+            styles.border,
+            styles.bg
+          )}
+          style={{ zIndex: 1000 }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className={styles.iconColor}>
+                {getTypeIcon()}
+              </span>
+              <div>
+                <h4 className={cn(
+                  "font-medium text-sm",
+                  isDark ? "text-stone-100" : "text-stone-900"
+                )}>
+                  {notification.title}
+                </h4>
+                <p className={cn(
+                  "text-xs",
+                  isDark ? "text-stone-300" : "text-stone-600"
+                )}>
+                  {notification.content}
+                </p>
+              </div>
+            </div>
+            <button className={cn(
+              "p-1 rounded hover:bg-stone-500/20 transition-colors",
+              isDark ? "text-stone-400" : "text-stone-500"
             )}>
-              {getTypeIcon()}
-              <h3 className="font-semibold text-lg">
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    if (notification.position === 'bottom-right') {
+      return (
+        <div 
+          className={cn(
+            "absolute bottom-4 right-4 max-w-sm rounded-lg shadow-lg border backdrop-blur-sm",
+            styles.border,
+            styles.bg
+          )}
+          style={{ zIndex: 1000 }}
+        >
+          <div className="p-3">
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className={styles.iconColor}>
+                  {getTypeIcon()}
+                </span>
+                <h4 className={cn(
+                  "font-medium text-sm",
+                  isDark ? "text-stone-100" : "text-stone-900"
+                )}>
+                  {notification.title}
+                </h4>
+              </div>
+              <button className={cn(
+                "p-1 rounded hover:bg-stone-500/20 transition-colors",
+                isDark ? "text-stone-400" : "text-stone-500"
+              )}>
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+            <p className={cn(
+              "text-sm leading-relaxed",
+              isDark ? "text-stone-300" : "text-stone-600"
+            )}>
+              {notification.content}
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    // center position - 可拖拽的模态框样式
+    return (
+      <div 
+        ref={dragRef}
+        className={cn(
+          "absolute max-w-md rounded-xl shadow-xl border backdrop-blur-sm cursor-move",
+          styles.border,
+          styles.bg,
+          isDragging ? "cursor-grabbing" : "cursor-grab"
+        )}
+        style={{ 
+          left: `${position.x}%`, 
+          top: `${position.y}%`,
+          transform: 'translate(-50%, -50%)',
+          zIndex: 1000
+        }}
+        onMouseDown={handleMouseDown}
+      >
+        <div className="p-4">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-3 flex-1">
+              <span className={styles.iconColor}>
+                {getTypeIcon()}
+              </span>
+              <h3 className={cn(
+                "font-semibold",
+                isDark ? "text-stone-100" : "text-stone-900"
+              )}>
                 {notification.title}
               </h3>
             </div>
-            <button className={cn(
-              "p-1 rounded hover:bg-gray-100 transition-colors",
-              isDark ? "hover:bg-stone-700 text-stone-400" : "hover:bg-stone-100 text-stone-500"
-            )}>
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              <Move className={cn(
+                "h-3 w-3",
+                isDark ? "text-stone-500" : "text-stone-400"
+              )} />
+              <button className={cn(
+                "p-1 rounded hover:bg-stone-500/20 transition-colors",
+                isDark ? "text-stone-400" : "text-stone-500"
+              )}>
+                <X className="h-3 w-3" />
+              </button>
+            </div>
           </div>
           <p className={cn(
-            "mb-6 leading-relaxed",
+            "mb-4 leading-relaxed text-sm",
             isDark ? "text-stone-300" : "text-stone-700"
           )}>
             {notification.content}
           </p>
-          <div className="flex gap-3 justify-end">
+          <div className="flex gap-2 justify-end">
             <button className={cn(
-              "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+              "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
               isDark 
                 ? "bg-stone-700 hover:bg-stone-600 text-stone-100" 
                 : "bg-stone-100 hover:bg-stone-200 text-stone-700"
@@ -106,7 +261,7 @@ export function NotificationPreview({ notification }: NotificationPreviewProps) 
               稍后提醒
             </button>
             <button className={cn(
-              "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+              "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
               isDark 
                 ? "bg-stone-100 text-stone-900 hover:bg-white" 
                 : "bg-stone-900 text-white hover:bg-stone-800"
@@ -116,77 +271,21 @@ export function NotificationPreview({ notification }: NotificationPreviewProps) 
           </div>
         </div>
       </div>
-    </div>
-  )
-
-  // --- BEGIN COMMENT ---
-  // 渲染顶部横幅通知
-  // --- END COMMENT ---
-  const renderTopBanner = () => (
-    <div className={cn(
-      "w-full p-4 border-b",
-      getPriorityColor()
-    )}>
-      <div className="max-w-4xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {getTypeIcon()}
-          <div>
-            <h4 className="font-medium">{notification.title}</h4>
-            <p className="text-sm opacity-90">{notification.content}</p>
-          </div>
-        </div>
-        <button className="p-1 rounded hover:bg-black/10 transition-colors">
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-    </div>
-  )
-
-  // --- BEGIN COMMENT ---
-  // 渲染右下角通知
-  // --- END COMMENT ---
-  const renderBottomRight = () => (
-    <div className="fixed bottom-4 right-4 z-50">
-      <div className={cn(
-        "max-w-sm rounded-lg shadow-lg border",
-        isDark ? "bg-stone-800 border-stone-600" : "bg-white border-stone-200"
-      )}>
-        <div className="p-4">
-          <div className="flex items-start justify-between mb-2">
-            <div className={cn(
-              "flex items-center gap-2",
-              getPriorityColor()
-            )}>
-              {getTypeIcon()}
-              <h4 className="font-medium text-sm">{notification.title}</h4>
-            </div>
-            <button className={cn(
-              "p-1 rounded hover:bg-gray-100 transition-colors",
-              isDark ? "hover:bg-stone-700 text-stone-400" : "hover:bg-stone-100 text-stone-500"
-            )}>
-              <X className="h-3 w-3" />
-            </button>
-          </div>
-          <p className={cn(
-            "text-sm",
-            isDark ? "text-stone-300" : "text-stone-600"
-          )}>
-            {notification.content}
-          </p>
-        </div>
-      </div>
-    </div>
-  )
+    )
+  }
 
   return (
-    <div className={cn(
-      "h-full border rounded-lg relative overflow-hidden",
-      isDark ? "bg-stone-900 border-stone-600" : "bg-stone-50 border-stone-200"
-    )}>
+    <div 
+      ref={containerRef}
+      className={cn(
+        "h-full border rounded-lg relative overflow-hidden",
+        isDark ? "bg-stone-900 border-stone-600" : "bg-stone-50 border-stone-200"
+      )}
+    >
       {/* --- BEGIN COMMENT ---
-      模拟页面背景
+      模拟页面背景内容
       --- END COMMENT --- */}
-      <div className="h-full p-8">
+      <div className="h-full p-6">
         <div className={cn(
           "max-w-4xl mx-auto",
           isDark ? "text-stone-300" : "text-stone-600"
@@ -197,55 +296,64 @@ export function NotificationPreview({ notification }: NotificationPreviewProps) 
           )}>
             AgentifUI 平台
           </h1>
-          <p className="mb-4">这是一个模拟的应用界面，用于展示通知的显示效果。</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <p className="mb-4 text-sm">这是一个模拟的应用界面，用于展示通知的显示效果。</p>
+          <div className={cn(
+            "grid grid-cols-1 md:grid-cols-2 gap-4 mb-6",
+          )}>
             <div className={cn(
-              "p-4 rounded-lg",
-              isDark ? "bg-stone-800" : "bg-white"
+              "p-4 rounded-lg border",
+              isDark ? "bg-stone-800 border-stone-600" : "bg-white border-stone-200"
             )}>
               <h3 className={cn(
-                "font-semibold mb-2",
+                "font-medium mb-2",
                 isDark ? "text-stone-100" : "text-stone-900"
               )}>
-                功能模块 1
+                功能模块
               </h3>
-              <p className="text-sm">这里是一些示例内容...</p>
+              <p className={cn(
+                "text-sm",
+                isDark ? "text-stone-400" : "text-stone-600"
+              )}>
+                这里是一些示例内容，用于展示通知在真实页面中的显示效果。
+              </p>
             </div>
             <div className={cn(
-              "p-4 rounded-lg",
-              isDark ? "bg-stone-800" : "bg-white"
+              "p-4 rounded-lg border",
+              isDark ? "bg-stone-800 border-stone-600" : "bg-white border-stone-200"
             )}>
               <h3 className={cn(
-                "font-semibold mb-2",
+                "font-medium mb-2",
                 isDark ? "text-stone-100" : "text-stone-900"
               )}>
-                功能模块 2
+                数据统计
               </h3>
-              <p className="text-sm">这里是一些示例内容...</p>
+              <p className={cn(
+                "text-sm",
+                isDark ? "text-stone-400" : "text-stone-600"
+              )}>
+                通知会根据设置的位置显示在页面的不同区域。
+              </p>
             </div>
           </div>
+          
+          {/* --- BEGIN COMMENT ---
+          位置调整提示
+          --- END COMMENT --- */}
+          {notification.position === 'center' && (
+            <div className={cn(
+              "text-xs p-2 rounded border",
+              isDark ? "bg-stone-800 border-stone-600 text-stone-400" : "bg-stone-100 border-stone-200 text-stone-600"
+            )}>
+              💡 提示：中央通知支持拖拽调整位置
+            </div>
+          )}
         </div>
       </div>
 
       {/* --- BEGIN COMMENT ---
-      根据位置渲染通知
+      渲染通知 (无背景遮罩，页面融合式)
       --- END COMMENT --- */}
-      {notification.position === 'center' && renderCenterModal()}
-      {notification.position === 'top-center' && renderTopBanner()}
-      {notification.position === 'bottom-right' && renderBottomRight()}
-
-      {/* --- BEGIN COMMENT ---
-      预览说明
-      --- END COMMENT --- */}
-      <div className="absolute top-4 left-4">
-        <div className={cn(
-          "px-3 py-1 rounded-full text-xs font-medium",
-          isDark ? "bg-stone-700 text-stone-300" : "bg-white text-stone-600"
-        )}>
-          预览模式 - {notification.position === 'center' ? '中央模态框' : 
-                    notification.position === 'top-center' ? '顶部横幅' : '右下角提示'}
-        </div>
-      </div>
+      {notification.isActive && renderDraggableNotification()}
     </div>
   )
 } 

@@ -75,7 +75,7 @@ export default function ContentManagementPage() {
       type: 'announcement',
       priority: 'medium',
       position: 'center',
-      isActive: true,
+      isActive: false,
       startDate: '2024-01-01',
       endDate: null,
       targetAudience: 'new_users'
