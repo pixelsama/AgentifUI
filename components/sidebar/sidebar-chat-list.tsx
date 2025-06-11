@@ -471,7 +471,8 @@ export function SidebarChatList({
               const isActive = isChatActive(chat);
               // 🎯 新增：检查当前对话是否正在点击中
               const isClicking = clickingChatId === chat.id;
-              const itemIsLoading = isClicking; 
+              // 🎯 修复：点击状态不应该影响内容渲染，只影响图标显示
+              const itemIsLoading = false; 
 
                                             return (
                 <div 
@@ -483,7 +484,7 @@ export function SidebarChatList({
                       icon={<SidebarChatIcon size="sm" isDark={isDark} />}
                       active={isActive}
                       onClick={() => onSelectChat(chat.id)}
-                      isLoading={itemIsLoading}
+                      isLoading={isClicking}
                       hasOpenDropdown={openDropdownId === chat.id}
                       disableHover={!!openDropdownId || isClicking}
                       moreActionsTrigger={
