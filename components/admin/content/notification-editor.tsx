@@ -10,19 +10,17 @@ import {
 import { CustomSelect } from '@components/ui/custom-select'
 
 // --- BEGIN COMMENT ---
-// 通知配置类型定义
+// 通知配置类型定义 - 简化版本
 // --- END COMMENT ---
 export interface NotificationConfig {
   id: string
   title: string
   content: string
   type: 'update' | 'feature' | 'announcement' | 'maintenance'
-  priority: 'low' | 'medium' | 'high' | 'critical'
   position: 'center' | 'bottom-right' | 'top-center'
   isActive: boolean
   startDate: string
   endDate: string | null
-  targetAudience: 'all' | 'new_users' | 'returning_users'
 }
 
 interface NotificationEditorProps {
@@ -49,12 +47,10 @@ export function NotificationEditor({
       title: '新通知',
       content: '请输入通知内容...',
       type: 'announcement',
-      priority: 'medium',
       position: 'center',
       isActive: false,
       startDate: new Date().toISOString().split('T')[0],
       endDate: null,
-      targetAudience: 'all'
     }
     onNotificationsChange([...notifications, newNotification])
     onSelectedChange(newNotification)
@@ -229,87 +225,46 @@ export function NotificationEditor({
           </div>
 
           {/* --- BEGIN COMMENT ---
-          通知类型和优先级
+          通知类型
           --- END COMMENT --- */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={cn(
-                "block text-sm font-medium mb-2",
-                isDark ? "text-stone-300" : "text-stone-700"
-              )}>
-                通知类型
-              </label>
-              <CustomSelect
-                value={selectedNotification.type}
-                onChange={(value) => updateNotification(selectedNotification.id, { type: value as any })}
-                options={[
-                  { value: 'announcement', label: '公告' },
-                  { value: 'update', label: '更新' },
-                  { value: 'feature', label: '新功能' },
-                  { value: 'maintenance', label: '维护' }
-                ]}
-              />
-            </div>
-
-            <div>
-              <label className={cn(
-                "block text-sm font-medium mb-2",
-                isDark ? "text-stone-300" : "text-stone-700"
-              )}>
-                优先级
-              </label>
-              <CustomSelect
-                value={selectedNotification.priority}
-                onChange={(value) => updateNotification(selectedNotification.id, { priority: value as any })}
-                options={[
-                  { value: 'low', label: '低' },
-                  { value: 'medium', label: '中' },
-                  { value: 'high', label: '高' },
-                  { value: 'critical', label: '紧急' }
-                ]}
-              />
-            </div>
+          <div>
+            <label className={cn(
+              "block text-sm font-medium mb-2",
+              isDark ? "text-stone-300" : "text-stone-700"
+            )}>
+              通知类型
+            </label>
+            <CustomSelect
+              value={selectedNotification.type}
+              onChange={(value) => updateNotification(selectedNotification.id, { type: value as any })}
+              options={[
+                { value: 'announcement', label: '公告' },
+                { value: 'update', label: '更新' },
+                { value: 'feature', label: '新功能' },
+                { value: 'maintenance', label: '维护' }
+              ]}
+            />
           </div>
 
           {/* --- BEGIN COMMENT ---
-          显示位置和目标用户
+          显示位置
           --- END COMMENT --- */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={cn(
-                "block text-sm font-medium mb-2",
-                isDark ? "text-stone-300" : "text-stone-700"
-              )}>
-                显示位置
-              </label>
-              <CustomSelect
-                value={selectedNotification.position}
-                onChange={(value) => updateNotification(selectedNotification.id, { position: value as any })}
-                options={[
-                  { value: 'center', label: '中央模态框' },
-                  { value: 'top-center', label: '顶部横幅' },
-                  { value: 'bottom-right', label: '右下角提示' }
-                ]}
-              />
-            </div>
-
-            <div>
-              <label className={cn(
-                "block text-sm font-medium mb-2",
-                isDark ? "text-stone-300" : "text-stone-700"
-              )}>
-                目标用户
-              </label>
-              <CustomSelect
-                value={selectedNotification.targetAudience}
-                onChange={(value) => updateNotification(selectedNotification.id, { targetAudience: value as any })}
-                options={[
-                  { value: 'all', label: '所有用户' },
-                  { value: 'new_users', label: '新用户' },
-                  { value: 'returning_users', label: '回访用户' }
-                ]}
-              />
-            </div>
+          <div>
+            <label className={cn(
+              "block text-sm font-medium mb-2",
+              isDark ? "text-stone-300" : "text-stone-700"
+            )}>
+              显示位置
+            </label>
+            <CustomSelect
+              value={selectedNotification.position}
+              onChange={(value) => updateNotification(selectedNotification.id, { position: value as any })}
+              options={[
+                { value: 'center', label: '中央模态框' },
+                { value: 'top-center', label: '顶部横幅' },
+                { value: 'bottom-right', label: '右下角提示' }
+              ]}
+            />
           </div>
 
           {/* --- BEGIN COMMENT ---
@@ -358,21 +313,62 @@ export function NotificationEditor({
           </div>
 
           {/* --- BEGIN COMMENT ---
-          激活状态
+          激活状态 - 优化显示，更明显
           --- END COMMENT --- */}
-          <div>
-            <label className={cn(
-              "flex items-center gap-2 text-sm font-medium",
-              isDark ? "text-stone-300" : "text-stone-700"
-            )}>
-              <input
-                type="checkbox"
-                checked={selectedNotification.isActive}
-                onChange={(e) => updateNotification(selectedNotification.id, { isActive: e.target.checked })}
-                className="rounded"
-              />
-              激活此通知
-            </label>
+          <div className={cn(
+            "p-4 rounded-lg border",
+            isDark ? "bg-stone-700 border-stone-600" : "bg-stone-100 border-stone-200"
+          )}>
+            <div className="flex items-center justify-between">
+              <div>
+                <label className={cn(
+                  "text-sm font-medium block mb-1",
+                  isDark ? "text-stone-100" : "text-stone-900"
+                )}>
+                  通知状态
+                </label>
+                <p className={cn(
+                  "text-xs",
+                  isDark ? "text-stone-400" : "text-stone-600"
+                )}>
+                  只有激活的通知才会在预览中显示
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={cn(
+                  "text-sm",
+                  selectedNotification.isActive 
+                    ? isDark ? "text-green-400" : "text-green-600"
+                    : isDark ? "text-stone-400" : "text-stone-500"
+                )}>
+                  {selectedNotification.isActive ? "已激活" : "未激活"}
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedNotification.isActive}
+                    onChange={(e) => updateNotification(selectedNotification.id, { isActive: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className={cn(
+                    "relative w-11 h-6 rounded-full peer transition-colors duration-200",
+                    "peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-offset-2",
+                    selectedNotification.isActive
+                      ? isDark 
+                        ? "bg-stone-600 peer-focus:ring-stone-500" 
+                        : "bg-stone-800 peer-focus:ring-stone-300"
+                      : isDark 
+                        ? "bg-stone-700 peer-focus:ring-stone-600" 
+                        : "bg-stone-300 peer-focus:ring-stone-200"
+                  )}>
+                    <div className={cn(
+                      "absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform duration-200",
+                      selectedNotification.isActive ? "translate-x-5" : "translate-x-0"
+                    )} />
+                  </div>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       )}

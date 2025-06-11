@@ -14,7 +14,7 @@ import { ContentTabs } from '@components/admin/content/content-tabs'
 import { AboutEditor, AboutPageConfig } from '@components/admin/content/about-editor'
 import { NotificationEditor, NotificationConfig } from '@components/admin/content/notification-editor'
 import { AboutPreview } from '@components/admin/content/about-preview'
-import { NotificationPreview } from '@components/admin/content/notification-preview'
+import NotificationPreview from '@components/admin/content/notification-preview'
 import { PreviewToolbar } from '@components/admin/content/preview-toolbar'
 
 import { ResizableSplitPane } from '@components/ui/resizable-split-pane'
@@ -73,24 +73,20 @@ export default function ContentManagementPage() {
       title: '欢迎使用 AgentifUI',
       content: '感谢您选择 AgentifUI！我们为您准备了丰富的功能，快来探索吧。',
       type: 'announcement',
-      priority: 'medium',
       position: 'center',
       isActive: false,
       startDate: '2024-01-01',
-      endDate: null,
-      targetAudience: 'new_users'
+      endDate: null
     },
     {
       id: '2',
       title: '系统更新通知',
       content: '我们即将在今晚进行系统维护，预计停机时间为2小时，感谢您的耐心等待。',
       type: 'maintenance',
-      priority: 'high',
       position: 'top-center',
       isActive: false,
       startDate: '2024-01-15',
-      endDate: '2024-01-16',
-      targetAudience: 'all'
+      endDate: '2024-01-16'
     }
   ]
 
