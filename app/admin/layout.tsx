@@ -47,9 +47,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isMounted, setIsMounted] = useState(false)
   
   // --- BEGIN COMMENT ---
-  // 点击状态管理 - 提供立即视觉反馈
+  // 导航状态管理 - 提供立即视觉反馈和加载状态
   // --- END COMMENT ---
-  const [clickingHref, setClickingHref] = useState<string | null>(null)
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null)
+  const [isNavigating, setIsNavigating] = useState(false)
 
   // --- BEGIN COMMENT ---
   // 管理菜单项配置 - 包含管理主页
@@ -167,15 +168,27 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   // --- BEGIN COMMENT ---
-  // 处理菜单项点击 - 提供立即视觉反馈
+  // 处理菜单项点击 - 提供立即视觉反馈和互斥选中
   // --- END COMMENT ---
   const handleMenuClick = (href: string) => {
-    setClickingHref(href)
-    // 清除点击状态，避免长时间显示
-    setTimeout(() => {
-      setClickingHref(null)
-    }, 1000) // 1秒后清除，给页面加载足够时间
+    // 如果已经在导航中，忽略重复点击
+    if (isNavigating) return
+    
+    // 立即设置导航状态
+    setNavigatingTo(href)
+    setIsNavigating(true)
   }
+
+  // --- BEGIN COMMENT ---
+  // 监听路由变化，清除导航状态
+  // --- END COMMENT ---
+  useEffect(() => {
+    if (navigatingTo && pathname === navigatingTo) {
+      // 路由已经切换到目标页面，清除导航状态
+      setNavigatingTo(null)
+      setIsNavigating(false)
+    }
+  }, [pathname, navigatingTo])
 
   // --- BEGIN COMMENT ---
   // 清理定时器
@@ -193,6 +206,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       "min-h-screen font-serif relative",
       colors.mainBackground.tailwind
     )}>
+
+
       {/* --- BEGIN COMMENT ---
       顶部导航栏 - 固定在顶部，不受sidebar影响，使用与sidebar相同的配色，确保z-index在sidebar之上
       --- END COMMENT --- */}
@@ -288,8 +303,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <div className="pt-16 px-3 pb-4">
             <div className="space-y-1">
               {menuItems.map((item) => {
-                const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))
-                const isClicking = clickingHref === item.href
+                // 🎯 重新设计选中逻辑，确保互斥
+                const isCurrentPage = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))
+                const isNavigatingToThis = navigatingTo === item.href
+                
+                // 🎯 选中状态：正在导航到此页面 OR (当前在此页面 AND 没有在导航到其他页面)
+                const isActive = isNavigatingToThis || (isCurrentPage && !navigatingTo)
+                
                 const Icon = item.icon
                 
                 return (
@@ -306,12 +326,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       !isDark && [
                         "text-stone-600",
                         "hover:bg-stone-300 hover:shadow-md",
-                        (isActive || isClicking) && "bg-stone-300 shadow-sm border-stone-400/80",
+                        isActive && "bg-stone-300 shadow-sm border-stone-400/80",
                       ],
                       isDark && [
                         "text-gray-200",
                         "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50",
-                        (isActive || isClicking) && "bg-stone-600 shadow-sm border-stone-500",
+                        isActive && "bg-stone-600 shadow-sm border-stone-500",
                       ],
                       isExpanded ? "w-full" : "w-10 justify-center",
                     )}
@@ -344,8 +364,27 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       主内容区域 - 顶部留出navbar空间，左侧始终留出slim sidebar空间
       --- END COMMENT --- */}
       <main className={cn(
-        "pt-12 ml-16 transition-all duration-300 ease-in-out min-h-screen"
+        "pt-12 ml-16 transition-all duration-300 ease-in-out min-h-screen relative"
       )}>
+        {/* --- BEGIN COMMENT ---
+        导航加载状态覆盖层 - 仅覆盖主内容区域
+        --- END COMMENT --- */}
+        {isNavigating && (
+          <div className={cn(
+            "absolute inset-0 z-10 flex items-center justify-center",
+            "backdrop-blur-sm",
+            isDark ? "bg-stone-900/50" : "bg-white/50"
+          )}>
+            <div className={cn(
+              "flex items-center gap-3 px-6 py-3 rounded-lg border shadow-lg",
+              isDark ? "bg-stone-800 border-stone-700 text-stone-200" : "bg-white border-stone-200 text-stone-700"
+            )}>
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-current border-t-transparent" />
+              <span className="text-sm font-medium">正在加载...</span>
+            </div>
+          </div>
+        )}
+        
         {children}
       </main>
     </div>
