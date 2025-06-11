@@ -59,7 +59,10 @@ export class RealtimeService {
       console.log(`[实时订阅] 添加处理函数到现有订阅: ${key}`);
     } else {
       // 创建新的订阅
-      const channelKey = `${config.table}-${config.event}-${config.filter || 'all'}`;
+      // --- BEGIN COMMENT ---
+      // 🔧 修复重复订阅问题：使用订阅键作为channel名称，确保每个订阅都有唯一的channel
+      // --- END COMMENT ---
+      const channelKey = `channel-${key}`;
       const channel = this.supabase.channel(channelKey);
 
       // 创建复合处理函数，调用所有注册的处理函数
