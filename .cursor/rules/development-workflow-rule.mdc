@@ -1,211 +1,96 @@
-# 开发工作流程规范
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Development Workflow Rule
 
-本文档定义了 AgentifUI 项目中进行功能开发和 Bug 修复的标准工作流程，确保代码质量、系统稳定性和团队协作效率。
+## Core Principles
 
-## 核心原则
+1. **Analyze First**: Understand the problem before coding
+2. **Risk Assessment**: Evaluate impact before changes
+3. **Minimal Changes**: Smallest safe modifications
+4. **Comprehensive Validation**: Multi-dimensional verification
+5. **Standard Commits**: Follow git-commit-rule
 
-1. **先分析，后动手**：深入理解问题本质，避免盲目修改
-2. **风险评估优先**：每次修改前必须评估潜在影响和副作用
-3. **渐进式修改**：优先选择最小化、最安全的修改方案
-4. **全面验证**：修改后进行多维度验证，确保无回归问题
-5. **规范提交**：遵循 Git 提交规范，保持清晰的版本历史
+## Standard Workflow
 
-## 标准工作流程
+### Phase 1: Problem Analysis
+- **Root Cause**: Understand the real issue, not just symptoms
+- **Impact Scope**: Identify affected modules and users
+- **Code Research**: Use `codebase_search` to find related implementations
+- **Solution Design**: Compare 2-3 approaches, choose lowest risk
 
-### 阶段 1：问题分析与理解
+### Phase 2: Risk Assessment
+- **Direct Impact**: Files and functions directly affected
+- **Indirect Impact**: Dependent components and callers
+- **Breaking Changes**: API/interface compatibility
+- **Performance Impact**: Load time, memory, responsiveness
+- **Security Risk**: Permissions, data safety, XSS/CSRF
 
-#### 1.1 问题定位
-- **深度分析**：理解问题的表面现象和根本原因
-- **影响范围**：确定问题影响的功能模块和用户群体
-- **复现路径**：明确问题的触发条件和复现步骤
-- **日志分析**：查看相关错误日志和控制台输出
+### Phase 3: Implementation
+- **Minimal Scope**: Only necessary changes, avoid unrelated refactoring
+- **Interface Stability**: Preserve existing function signatures
+- **Type Safety**: Ensure TypeScript correctness
+- **Error Handling**: Comprehensive error management
 
-#### 1.2 代码调研
-- **相关代码搜索**：使用 `codebase_search` 查找相关实现
-- **依赖关系分析**：理解涉及的组件、Hook、服务之间的关系
-- **历史变更回顾**：查看相关代码的 Git 历史和最近修改
-- **架构理解**：确保修改符合项目整体架构设计
+### Phase 4: Validation
+- **Function Test**: Core functionality works as expected
+- **Regression Test**: Existing features remain intact
+- **Type Check**: `npx tsc --noEmit`
+- **Build Test**: `pnpm run build`
+- **Cross-browser**: Test in major browsers
 
-#### 1.3 解决方案设计
-- **多方案对比**：提出 2-3 个可行的解决方案
-- **优缺点分析**：评估每个方案的实现复杂度、性能影响、维护成本
-- **最优方案选择**：选择风险最低、收益最高的方案
+### Phase 5: Documentation & Commit
+- **Update Docs**: API, component, architecture docs if needed
+- **Git Commit**: Follow git-commit-rule strictly
+- **Self Review**: Complete code review before submission
 
-### 阶段 2：修改前风险评估
+## Special Scenarios
 
-#### 2.1 影响范围评估
-- **直接影响**：修改会直接影响哪些文件和功能
-- **间接影响**：可能影响的调用者、依赖者、相关组件
-- **用户影响**：对不同用户群体（管理员、普通用户、匿名用户）的影响
-- **数据影响**：是否涉及数据结构变更、迁移需求
+### Bug Fixes
+1. **Reproduce**: Ensure stable reproduction
+2. **Root Cause**: Deep analysis, avoid surface fixes
+3. **Minimal Fix**: Lowest risk solution
+4. **Regression Check**: Verify complete fix
 
-#### 2.2 技术风险评估
-- **破坏性变更**：是否会破坏现有 API 或组件接口
-- **性能影响**：是否会影响页面加载速度、响应时间、内存使用
-- **兼容性风险**：是否会影响浏览器兼容性、移动端适配
-- **安全风险**：是否涉及权限控制、数据安全、XSS/CSRF 防护
+### Feature Development
+1. **Requirements**: Deep understanding of user needs
+2. **Technical Design**: Consider scalability and maintainability
+3. **Phased Implementation**: Break into verifiable stages
+4. **User Testing**: Real user feedback
 
-#### 2.3 回滚计划
-- **回滚策略**：如果修改出现问题，如何快速回滚
-- **数据备份**：如果涉及数据变更，确保有备份方案
-- **监控指标**：定义用于判断修改是否成功的关键指标
+## Quality Checklist
 
-### 阶段 3：代码实现
+### Pre-commit
+- [ ] TypeScript type check passes
+- [ ] Build succeeds
+- [ ] Core functionality tested
+- [ ] No regression issues
+- [ ] Code follows project standards
+- [ ] Commit message follows git-commit-rule
 
-#### 3.1 最小化修改原则
-- **精准修改**：只修改必要的代码，避免不相关的重构
-- **保持接口稳定**：尽量不改变现有函数签名和组件 Props
-- **向后兼容**：新功能应该向后兼容，旧代码能继续工作
-- **渐进式部署**：支持功能开关、灰度发布等渐进式部署策略
+## Important Notes
 
-#### 3.2 代码质量要求
-- **类型安全**：确保 TypeScript 类型定义正确且完整
-- **错误处理**：实现完善的错误处理和用户友好的错误提示
-- **性能优化**：避免不必要的重渲染、内存泄漏、阻塞操作
-- **可读性**：代码结构清晰，注释充分，命名规范
+### Development Server Usage
+**⚠️ DO NOT run `pnpm run dev` unless explicitly needed**
+- The developer is usually already running dev server
+- Only run if specifically requested or confirmed safe
+- Always ask before starting development server
+- Use build/type-check commands for validation instead
 
-#### 3.3 测试覆盖
-- **单元测试**：为核心逻辑编写单元测试
-- **集成测试**：验证组件间的交互是否正常
-- **端到端测试**：验证完整的用户操作流程
-- **边界测试**：测试异常情况和边界条件
-
-### 阶段 4：修改后全面验证
-
-#### 4.1 功能验证
-- **核心功能**：验证修改的核心功能是否按预期工作
-- **相关功能**：验证可能受影响的相关功能是否正常
-- **回归测试**：确保现有功能没有被破坏
-- **用户场景**：模拟真实用户的使用场景进行测试
-
-#### 4.2 技术验证
-- **类型检查**：运行 `npx tsc --noEmit` 确保无类型错误
-- **构建测试**：运行 `pnpm run build` 确保构建成功
-- **代码规范**：运行 linter 检查代码风格和潜在问题
-- **性能测试**：验证修改对性能的影响在可接受范围内
-
-#### 4.3 兼容性验证
-- **浏览器兼容性**：在主流浏览器中测试功能
-- **移动端适配**：验证移动设备上的显示和交互
-- **响应式设计**：测试不同屏幕尺寸下的表现
-- **无障碍访问**：确保符合基本的无障碍访问标准
-
-#### 4.4 安全验证
-- **权限控制**：验证用户权限控制是否正确
-- **数据验证**：确保输入验证和数据清理到位
-- **XSS 防护**：检查是否存在 XSS 漏洞
-- **CSRF 防护**：验证 CSRF 保护机制是否有效
-
-### 阶段 5：文档更新与提交
-
-#### 5.1 文档更新
-- **API 文档**：更新相关的 API 接口文档
-- **组件文档**：更新组件的使用说明和示例
-- **架构文档**：如果涉及架构变更，更新相关设计文档
-- **变更日志**：记录重要的功能变更和 Breaking Changes
-
-#### 5.2 Git 提交规范
-- **提交信息格式**：严格遵循 `git-commit-rule` 规范
-- **原子性提交**：每个提交只包含一个逻辑变更
-- **提交粒度**：避免过大或过小的提交，保持合理粒度
-- **提交验证**：提交前确保代码通过所有检查
-
-#### 5.3 代码审查准备
-- **自我审查**：提交前进行完整的自我代码审查
-- **测试用例**：提供清晰的测试步骤和预期结果
-- **影响说明**：详细说明修改的影响范围和注意事项
-- **回滚方案**：提供明确的回滚操作步骤
-
-## 特殊场景处理
-
-### Bug 修复流程
-1. **问题复现**：确保能稳定复现问题
-2. **根因分析**：深入分析问题的根本原因，避免治标不治本
-3. **最小修复**：采用最小化的修复方案，降低引入新问题的风险
-4. **回归验证**：重点验证修复是否彻底，是否引入新问题
-
-### 功能开发流程
-1. **需求分析**：深入理解功能需求和用户场景
-2. **技术设计**：设计技术方案，考虑扩展性和维护性
-3. **分阶段实现**：将大功能拆分为小的可验证的阶段
-4. **用户测试**：邀请真实用户参与测试，收集反馈
-
-### 性能优化流程
-1. **性能基线**：建立性能测试基线，量化优化目标
-2. **瓶颈识别**：使用性能分析工具识别真正的瓶颈
-3. **优化实施**：针对性地进行优化，避免过度优化
-4. **效果验证**：量化优化效果，确保达到预期目标
-
-### 重构流程
-1. **重构目标**：明确重构的目标和预期收益
-2. **影响评估**：全面评估重构对现有功能的影响
-3. **分步重构**：将大的重构拆分为小的、可验证的步骤
-4. **功能保持**：确保重构过程中功能行为保持不变
-
-## 质量检查清单
-
-### 提交前检查
-- [ ] 代码通过 TypeScript 类型检查
-- [ ] 代码通过构建测试
-- [ ] 核心功能经过手动测试
-- [ ] 相关功能无回归问题
-- [ ] 代码符合项目规范
-- [ ] 提交信息符合规范
-- [ ] 文档已更新（如需要）
-
-### 发布前检查
-- [ ] 所有自动化测试通过
-- [ ] 性能指标在可接受范围内
-- [ ] 安全检查通过
-- [ ] 兼容性测试通过
-- [ ] 用户验收测试通过
-- [ ] 回滚方案已准备
-- [ ] 监控和告警已配置
-
-## 工具和命令
-
-### 常用检查命令
+### Common Commands
 ```bash
-# TypeScript 类型检查
+# Type checking (preferred for validation)
 npx tsc --noEmit
 
-# 构建测试
+# Build testing (safe to run)
 pnpm run build
 
-# 代码格式检查
-pnpm run lint
-
-# 运行测试
-pnpm run test
-
-# 启动开发服务器
-pnpm run dev
 ```
 
-### 常用搜索命令
-```bash
-# 搜索相关代码
-grep -r "关键词" --include="*.ts" --include="*.tsx" .
-
-# 查看文件历史
-git log --oneline -p -- 文件路径
-
-# 查看提交差异
-git show 提交哈希
-```
-
-## 持续改进
-
-### 流程优化
-- **定期回顾**：定期回顾工作流程的执行效果
-- **问题收集**：收集团队在执行过程中遇到的问题
-- **流程改进**：基于实际经验持续优化工作流程
-- **工具升级**：引入更好的工具来提高开发效率
-
-### 知识分享
-- **经验总结**：将解决复杂问题的经验形成文档
-- **最佳实践**：总结和分享开发最佳实践
-- **技术分享**：定期进行技术分享和讨论
-- **代码审查**：通过代码审查传播知识和经验
-
-遵循此工作流程将确保代码质量、系统稳定性和团队协作效率的持续提升。 
+## Continuous Improvement
+- Regular workflow review
+- Collect team feedback
+- Process optimization
+- Tool upgrades 
