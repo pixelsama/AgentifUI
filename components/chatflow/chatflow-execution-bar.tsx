@@ -288,7 +288,7 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
                 "text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-700",
                 isDark && "bg-stone-700/50 text-stone-300"
               )}>
-                {node.currentIteration || 0}/{node.totalIterations}
+                {(node.currentIteration || 0) + 1}/{node.totalIterations}
               </span>
             )}
             {node.isParallelNode && node.totalBranches && (
@@ -304,7 +304,7 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
                 "text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-700",
                 isDark && "bg-stone-700/50 text-stone-300"
               )}>
-                {node.maxLoops ? `${node.currentLoop || 0}/${node.maxLoops}` : `${node.currentLoop || 0}`}
+                {node.maxLoops ? `${(node.currentLoop || 0) + 1}/${node.maxLoops}` : `${(node.currentLoop || 0) + 1}`}
               </span>
             )}
               

@@ -684,11 +684,10 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
         const { node_id: nextNodeId, iteration_id: nextIterationId, iteration_index: nextIndex } = event.data
         
         // 更新当前迭代轮次
-        const currentNode = get().nodes.find(n => n.id === nextNodeId)
         const { currentIteration: currentIterState } = get()
-        if (currentNode && currentIterState && currentIterState.nodeId === nextNodeId) {
-          // 🎯 关键修复：确保使用正确的迭代索引 - 从0开始内部计数，但显示时加1
-          const newIndex = nextIndex !== undefined ? nextIndex : (currentIterState.index + 1)
+        if (currentIterState && currentIterState.nodeId === nextNodeId) {
+          // 🎯 关键修复：与chatflow保持完全一致的递增逻辑
+          const newIndex = currentIterState.index + 1
           
           console.log('[工作流Store] 🎯 迭代进入下一轮:', {
             '内部索引': newIndex,
@@ -804,13 +803,13 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
         break
 
       case 'loop_next':
-        // 🎯 完全模仿 chatflow 的处理循环下一轮事件
+        // 🎯 修复：与chatflow和iteration_next保持完全一致的递增逻辑
         const { node_id: nextLoopNodeId, index: nextLoopIndex } = event.data
         const { currentLoop: currentLoopState } = get()
 
         if (currentLoopState && currentLoopState.nodeId === nextLoopNodeId) {
-          // 🎯 关键修复：确保使用正确的循环索引 - 从0开始内部计数，但显示时加1
-          const newLoopIndex = nextLoopIndex !== undefined ? nextLoopIndex : (currentLoopState.index + 1)
+          // 🎯 关键修复：与chatflow保持完全一致的递增逻辑
+          const newLoopIndex = currentLoopState.index + 1
           
           console.log('[工作流Store] 🔄 循环进入下一轮:', {
             '内部索引': newLoopIndex,

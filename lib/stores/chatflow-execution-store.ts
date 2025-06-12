@@ -716,13 +716,16 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
         break
 
       case 'loop_next':
-        // 🎯 新增：处理循环下一轮事件
+        // 🎯 修复：处理循环下一轮事件，与iteration_next保持完全一致的递增逻辑
         const { node_id: nextLoopNodeId, index: nextLoopIndex } = event.data
         const { currentLoop: currentLoopState } = get()
 
         if (currentLoopState && currentLoopState.nodeId === nextLoopNodeId) {
+          // 🎯 关键修复：使用与iteration相同的递增逻辑，而不是直接使用event数据
+          const newLoopIndex = currentLoopState.index + 1
+
           console.log('[ChatflowExecution] 🔄 循环进入下一轮:', {
-            '当前轮次': nextLoopIndex,
+            '当前轮次': newLoopIndex,
             '最大轮次': currentLoopState.maxLoops
           })
 
@@ -730,7 +733,7 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
           set({
             currentLoop: {
               ...currentLoopState,
-              index: nextLoopIndex,
+              index: newLoopIndex,
               startTime: Date.now()
             }
           })
@@ -738,8 +741,8 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
           // 更新循环容器节点显示
           const maxLoopsText = currentLoopState.maxLoops ? ` / 最多 ${currentLoopState.maxLoops} 次` : ''
           get().updateNode(nextLoopNodeId, {
-            description: `第 ${nextLoopIndex} 轮循环${maxLoopsText}`,
-            currentLoop: nextLoopIndex
+            description: `第 ${newLoopIndex} 轮循环${maxLoopsText}`,
+            currentLoop: newLoopIndex
           })
 
           // 更新所有在循环中的子节点的轮次标记
@@ -747,7 +750,7 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
           nodes.forEach(node => {
             if (node.isInLoop && !node.isLoopNode) {
               get().updateNode(node.id, {
-                loopIndex: nextLoopIndex
+                loopIndex: newLoopIndex
               })
             }
           })
