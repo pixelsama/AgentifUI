@@ -74,6 +74,8 @@ export function ChatflowNodeTracker({ isVisible, className }: ChatflowNodeTracke
     )}>
       <div className={cn(
         "rounded-lg border p-4 space-y-3",
+        // 限制实际宽度，避免与聊天内容冲突
+        "max-w-[320px] min-w-[280px]",
         isDark 
           ? "bg-stone-800/50 border-stone-700/50 backdrop-blur-sm" 
           : "bg-white/80 border-stone-200 backdrop-blur-sm"

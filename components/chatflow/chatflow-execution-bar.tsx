@@ -106,11 +106,11 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
   }
   
   const getStatusText = () => {
-    // 🎯 迭代节点显示特殊状态文本
+    // 🎯 所有状态文本统一4个字，保持对齐
     if (node.isIterationNode) {
       switch (node.status) {
         case 'running':
-          return '正在迭代...'
+          return '正在迭代'
         case 'completed':
           return '迭代完成'
         case 'failed':
@@ -122,7 +122,7 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
     
     switch (node.status) {
       case 'running':
-        return node.description || '正在处理...'
+        return '正在执行'
       case 'completed':
         return '处理完成'
       case 'failed':
@@ -250,35 +250,31 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
           {getStatusIcon()}
         </div>
         
-        {/* 中间：节点信息 */}
+        {/* 中间：节点信息 - 紧凑布局 */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* 节点标题行 */}
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <span className={cn(
-                "font-medium text-sm font-serif truncate",
-                isDark ? "text-stone-200" : "text-stone-800"
-              )}>
-                {getNodeTitle()}
-              </span>
-            </div>
+          {/* 节点标题和状态在同一行 */}
+          <div className="flex items-center justify-between gap-2">
+            <span className={cn(
+              "font-medium text-sm font-serif truncate flex-1",
+              isDark ? "text-stone-200" : "text-stone-800"
+            )}>
+              {getNodeTitle()}
+            </span>
             
-            {/* 🎯 状态标签行 - 右移一些距离让"执行完成"对齐 */}
-            <div className="flex items-center gap-2 flex-shrink-0 ml-8">
-              {/* 迭代计数显示 */}
+            {/* 状态标签 - 简化显示 */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              {/* 迭代/并行分支计数 */}
               {node.isIterationNode && node.totalIterations && (
                 <span className={cn(
-                  "text-xs px-2 py-0.5 rounded-full bg-stone-200 text-stone-700 font-serif",
+                  "text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-700",
                   isDark && "bg-stone-700/50 text-stone-300"
                 )}>
                   {node.currentIteration || 0}/{node.totalIterations}
                 </span>
               )}
-                
-              {/* 并行分支进度指示 */}
               {node.isParallelNode && node.totalBranches && (
                 <span className={cn(
-                  "text-xs px-2 py-0.5 rounded-full bg-stone-200 text-stone-700 font-serif",
+                  "text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-700",
                   isDark && "bg-stone-700/50 text-stone-300"
                 )}>
                   {node.completedBranches || 0}/{node.totalBranches}
@@ -286,11 +282,16 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
               )}
               
               <span className={cn(
-                "text-xs px-2 py-0.5 rounded-full font-serif",
+                "text-xs px-1.5 py-0.5 rounded font-serif transition-all duration-300",
                 node.status === 'running'
-                  ? isDark
-                    ? "bg-stone-600/40 text-stone-200"
-                    : "bg-stone-300/60 text-stone-700"
+                  ? cn(
+                      // 基础样式
+                      isDark
+                        ? "bg-stone-600/40 text-stone-200"
+                        : "bg-stone-300/60 text-stone-700",
+                      // 微妙的脉冲效果
+                      "animate-pulse"
+                    )
                   : node.status === 'completed'
                     ? isDark
                       ? "bg-stone-500/40 text-stone-100"
@@ -309,8 +310,8 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
           </div>
         </div>
         
-        {/* 右侧：计时信息 */}
-        <div className="flex-shrink-0 w-16 text-right">
+        {/* 右侧：计时信息 - 更紧凑 */}
+        <div className="flex-shrink-0 w-12 text-right">
           {(node.status === 'running' || node.status === 'completed') && elapsedTime > 0 && (
             <div className={cn(
               "text-xs font-serif",
