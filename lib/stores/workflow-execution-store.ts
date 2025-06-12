@@ -689,6 +689,16 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
           // 🎯 关键修复：与chatflow保持完全一致的递增逻辑
           const newIndex = currentIterState.index + 1
           
+          // 🎯 边界检查：防止超出最大迭代次数
+          if (newIndex >= currentIterState.totalIterations) {
+            console.warn('[工作流Store] ⚠️  收到多余的iteration_next事件，已达到最大迭代次数:', {
+              '当前index': currentIterState.index,
+              '新index': newIndex,
+              '总次数': currentIterState.totalIterations
+            })
+            break // 忽略多余的iteration_next事件
+          }
+          
           console.log('[工作流Store] 🎯 迭代进入下一轮:', {
             '内部索引': newIndex,
             '显示轮次': newIndex + 1,
@@ -811,10 +821,22 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
           // 🎯 关键修复：与chatflow保持完全一致的递增逻辑
           const newLoopIndex = currentLoopState.index + 1
           
+          // 🎯 边界检查：防止超出最大循环次数
+          if (currentLoopState.maxLoops && newLoopIndex >= currentLoopState.maxLoops) {
+            console.warn('[工作流Store] ⚠️  收到多余的loop_next事件，已达到最大循环次数:', {
+              '当前index': currentLoopState.index,
+              '新index': newLoopIndex,
+              '最大次数': currentLoopState.maxLoops
+            })
+            break // 忽略多余的loop_next事件
+          }
+          
           console.log('[工作流Store] 🔄 循环进入下一轮:', {
-            '内部索引': newLoopIndex,
+            '当前循环状态index': currentLoopState.index,
+            '新的内部索引': newLoopIndex,
             '显示轮次': newLoopIndex + 1,
-            '最大轮次': currentLoopState.maxLoops
+            '最大轮次': currentLoopState.maxLoops,
+            '即将设置node.currentLoop为': newLoopIndex
           })
 
           // 更新当前循环状态
@@ -858,7 +880,7 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
             status: 'completed',
             endTime: Date.now(),
             description: `循环完成 (共执行 ${finalLoopCount} 次)`,
-            currentLoop: finalLoopCount,
+            // 🎯 关键修复：不修改 currentLoop 字段，避免UI显示时的重复加一
             totalLoops: finalLoopCount
           })
 

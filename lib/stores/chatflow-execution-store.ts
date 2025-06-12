@@ -535,6 +535,16 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
           // 🎯 从0开始递增：0->1, 1->2, 2->3
           const newIterationIndex = currentIter.index + 1
 
+          // 🎯 边界检查：防止超出最大迭代次数
+          if (newIterationIndex >= currentIter.totalIterations) {
+            console.warn('[ChatflowExecution] ⚠️  收到多余的iteration_next事件，已达到最大迭代次数:', {
+              '当前index': currentIter.index,
+              '新index': newIterationIndex,
+              '总次数': currentIter.totalIterations
+            })
+            break // 忽略多余的iteration_next事件
+          }
+
           console.log('[ChatflowExecution] 🎯 迭代进入下一轮:', {
             '当前轮次': newIterationIndex,
             '总轮次': currentIter.totalIterations
@@ -577,7 +587,8 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
             status: 'completed',
             endTime: Date.now(),
             description: `迭代完成 (共 ${completedIter.totalIterations} 轮)`,
-            currentIteration: completedIter.totalIterations
+            // 🎯 关键修复：不修改 currentIteration 字段，避免UI显示时的重复加一
+            totalIterations: completedIter.totalIterations
           })
 
           // 清除当前迭代状态
@@ -724,6 +735,16 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
           // 🎯 关键修复：使用与iteration相同的递增逻辑，而不是直接使用event数据
           const newLoopIndex = currentLoopState.index + 1
 
+          // 🎯 边界检查：防止超出最大循环次数
+          if (currentLoopState.maxLoops && newLoopIndex >= currentLoopState.maxLoops) {
+            console.warn('[ChatflowExecution] ⚠️  收到多余的loop_next事件，已达到最大循环次数:', {
+              '当前index': currentLoopState.index,
+              '新index': newLoopIndex,
+              '最大次数': currentLoopState.maxLoops
+            })
+            break // 忽略多余的loop_next事件
+          }
+
           console.log('[ChatflowExecution] 🔄 循环进入下一轮:', {
             '当前轮次': newLoopIndex,
             '最大轮次': currentLoopState.maxLoops
@@ -770,7 +791,7 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
             status: 'completed',
             endTime: Date.now(),
             description: `循环完成 (共执行 ${finalLoopCount} 次)`,
-            currentLoop: finalLoopCount,
+            // 🎯 关键修复：不修改 currentLoop 字段，避免UI显示时的重复加一
             totalLoops: finalLoopCount
           })
 
