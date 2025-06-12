@@ -632,30 +632,40 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
         break
         
       case 'iteration_started':
-        const { node_id: iterNodeId, iteration_id, iteration_index, total_iterations } = event.data
+        const { node_id: iterNodeId, iteration_id, iteration_index, title: iterTitle, node_type: iterNodeType } = event.data
+        // 🎯 修复：使用与chatflow相同的回退逻辑来获取总迭代次数
+        const totalIterations = event.data.metadata?.iterator_length || event.data.total_iterations || 1
+        
+        console.log('[工作流Store] 🎯 Iteration started debug:', {
+          iterNodeId,
+          'event.data.metadata': event.data.metadata,
+          'event.data.total_iterations': event.data.total_iterations,
+          'resolved totalIterations': totalIterations
+        })
         
         // 创建或更新迭代节点
         const existingNode = get().nodes.find(n => n.id === iterNodeId)
         if (!existingNode) {
           get().addNode({
             id: iterNodeId,
-            title: '循环迭代',
-            type: 'iteration',
+            title: iterTitle || '循环迭代',
+            type: iterNodeType || 'iteration',
             status: 'running',
             startTime: Date.now(),
-            description: '准备迭代',
+            description: `准备迭代 (共 ${totalIterations} 轮)`,
             visible: true,
             isIterationNode: true,
-            totalIterations: total_iterations,
+            totalIterations: totalIterations,
             currentIteration: 0,
             iterations: []
           })
         } else {
           get().updateNode(iterNodeId, {
             isIterationNode: true,
-            totalIterations: total_iterations,
+            totalIterations: totalIterations,
             currentIteration: 0,
-            status: 'running'
+            status: 'running',
+            description: `准备迭代 (共 ${totalIterations} 轮)`
           })
         }
         
@@ -665,7 +675,7 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
             nodeId: iterNodeId,
             iterationId: iteration_id || `iter-${Date.now()}`,
             index: 0,
-            totalIterations: total_iterations,
+            totalIterations: totalIterations,
             startTime: Date.now(),
             status: 'running'
           }
