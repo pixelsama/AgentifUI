@@ -867,12 +867,18 @@ export type DifyWorkflowSseEvent =
   | DifyWorkflowSseFinishedEvent
   | DifyWorkflowSseNodeStartedEvent
   | DifyWorkflowSseNodeFinishedEvent
-  | DifyWorkflowSseErrorEvent;
+  | DifyWorkflowSseErrorEvent
+  | DifySseIterationStartedEvent
+  | DifySseIterationNextEvent
+  | DifySseIterationCompletedEvent
+  | DifySseLoopStartedEvent
+  | DifySseLoopNextEvent
+  | DifySseLoopCompletedEvent;
 
 /** Workflow 流式响应接口 */
 export interface DifyWorkflowStreamResponse {
-  // 节点执行进度流
-  progressStream: AsyncGenerator<DifyWorkflowSseNodeStartedEvent | DifyWorkflowSseNodeFinishedEvent, void, undefined>;
+  // 🎯 修复：节点执行进度流，支持所有 workflow 事件类型
+  progressStream: AsyncGenerator<DifyWorkflowSseEvent, void, undefined>;
   
   // 获取 workflow_run_id
   getWorkflowRunId: () => string | null;

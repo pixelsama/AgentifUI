@@ -14,6 +14,16 @@ export interface WorkflowIteration {
   outputs?: any
 }
 
+export interface WorkflowLoop {
+  id: string
+  index: number
+  status: 'running' | 'completed' | 'failed'
+  startTime: number
+  endTime?: number
+  inputs?: any
+  outputs?: any
+}
+
 /**
  * 工作流并行分支接口
  */
@@ -47,6 +57,16 @@ export interface WorkflowNode {
   currentIteration?: number
   iterations?: WorkflowIteration[]
   isInIteration?: boolean // 是否是迭代中的子节点
+  iterationIndex?: number // 迭代中的子节点所属轮次
+  
+  // 🎯 新增：循环支持
+  isLoopNode?: boolean
+  totalLoops?: number
+  currentLoop?: number
+  loops?: WorkflowLoop[]
+  maxLoops?: number
+  isInLoop?: boolean // 是否是循环中的子节点
+  loopIndex?: number // 循环中的子节点所属轮次
   
   // 🎯 新增：并行分支支持
   isParallelNode?: boolean
@@ -87,6 +107,25 @@ interface WorkflowExecutionState {
   
   // 🎯 新增：迭代和并行分支状态
   iterationExpandedStates: Record<string, boolean>
+  loopExpandedStates: Record<string, boolean>
+  
+  // 🎯 当前运行中的迭代和循环状态 - 与 chatflow 保持一致的结构
+  currentIteration: {
+    nodeId: string
+    iterationId: string
+    index: number
+    totalIterations: number
+    startTime: number
+    status: 'running' | 'completed'
+  } | null
+  currentLoop: {
+    nodeId: string
+    loopId: string
+    index: number
+    maxLoops?: number
+    startTime: number
+    status: 'running' | 'completed'
+  } | null
   
   // --- Actions ---
   startExecution: (formData: Record<string, any>) => void
@@ -126,10 +165,14 @@ interface WorkflowExecutionState {
   addIteration: (nodeId: string, iteration: WorkflowIteration) => void
   updateIteration: (nodeId: string, iterationId: string, updates: Partial<WorkflowIteration>) => void
   completeIteration: (nodeId: string, iterationId: string) => void
+  addLoop: (nodeId: string, loop: WorkflowLoop) => void
+  updateLoop: (nodeId: string, loopId: string, updates: Partial<WorkflowLoop>) => void
+  completeLoop: (nodeId: string, loopId: string) => void
   addParallelBranch: (nodeId: string, branch: WorkflowParallelBranch) => void
   updateParallelBranch: (nodeId: string, branchId: string, updates: Partial<WorkflowParallelBranch>) => void
   completeParallelBranch: (nodeId: string, branchId: string, status: 'completed' | 'failed') => void
   toggleIterationExpanded: (nodeId: string) => void
+  toggleLoopExpanded: (nodeId: string) => void
   
   // 🎯 新增：SSE事件处理
   handleNodeEvent: (event: any) => void
@@ -167,6 +210,9 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
   difyWorkflowRunId: null,
   currentExecution: null,
   iterationExpandedStates: {},
+  loopExpandedStates: {},
+  currentIteration: null,
+  currentLoop: null,
   
   // --- 执行控制 ---
   startExecution: (formData: Record<string, any>) => {
@@ -431,6 +477,45 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
       endTime: Date.now()
     })
   },
+
+  // 🎯 新增：循环管理方法
+  addLoop: (nodeId: string, loop: WorkflowLoop) => {
+    console.log('[工作流Store] 添加循环:', nodeId, loop)
+    set((state) => ({
+      nodes: state.nodes.map(node =>
+        node.id === nodeId
+          ? {
+              ...node,
+              loops: [...(node.loops || []), loop]
+            }
+          : node
+      )
+    }))
+  },
+
+  updateLoop: (nodeId: string, loopId: string, updates: Partial<WorkflowLoop>) => {
+    console.log('[工作流Store] 更新循环:', nodeId, loopId, updates)
+    set((state) => ({
+      nodes: state.nodes.map(node =>
+        node.id === nodeId
+          ? {
+              ...node,
+              loops: node.loops?.map(loop =>
+                loop.id === loopId ? { ...loop, ...updates } : loop
+              ) || []
+            }
+          : node
+      )
+    }))
+  },
+
+  completeLoop: (nodeId: string, loopId: string) => {
+    console.log('[工作流Store] 完成循环:', nodeId, loopId)
+    get().updateLoop(nodeId, loopId, {
+      status: 'completed',
+      endTime: Date.now()
+    })
+  },
   
   addParallelBranch: (nodeId: string, branch: WorkflowParallelBranch) => {
     console.log('[工作流Store] 添加并行分支:', nodeId, branch)
@@ -479,6 +564,16 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
       }
     }))
   },
+
+  toggleLoopExpanded: (nodeId: string) => {
+    console.log('[工作流Store] 切换循环展开状态:', nodeId)
+    set((state) => ({
+      loopExpandedStates: {
+        ...state.loopExpandedStates,
+        [nodeId]: !state.loopExpandedStates[nodeId]
+      }
+    }))
+  },
   
   // 🎯 新增：SSE事件处理 - 借鉴chatflow的实现
   handleNodeEvent: (event: any) => {
@@ -487,7 +582,47 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
     switch (event.event) {
       case 'node_started':
         const { node_id, node_type, title } = event.data
-        get().onNodeStarted(node_id, title || `${node_type} 节点`, '开始执行')
+        
+        // 🎯 关键修复：检查是否在迭代或循环中，这是子节点标记的核心逻辑 - 与 chatflow 保持一致
+        const { currentIteration, currentLoop } = get()
+        const isInIteration = !!(currentIteration && currentIteration.status === 'running' && currentIteration.nodeId !== node_id)
+        const isInLoop = !!(currentLoop && currentLoop.status === 'running' && currentLoop.nodeId !== node_id)
+        
+        // 如果是子节点，需要添加标记
+        if (isInIteration || isInLoop) {
+          const existingNode = get().nodes.find(n => n.id === node_id)
+          if (existingNode) {
+            // 更新现有节点，添加嵌套标记
+            get().updateNode(node_id, {
+              status: 'running',
+              startTime: Date.now(),
+              description: '开始执行',
+              visible: true,
+              isInIteration,
+              isInLoop,
+              iterationIndex: currentIteration?.index,
+              loopIndex: currentLoop?.index
+            })
+          } else {
+            // 创建新的子节点，带有嵌套标记
+            get().addNode({
+              id: node_id,
+              title: title || `${node_type} 节点`,
+              type: node_type,
+              status: 'running',
+              startTime: Date.now(),
+              description: '开始执行',
+              visible: true,
+              isInIteration,
+              isInLoop,
+              iterationIndex: currentIteration?.index,
+              loopIndex: currentLoop?.index
+            })
+          }
+        } else {
+          // 常规节点处理
+          get().onNodeStarted(node_id, title || `${node_type} 节点`, '开始执行')
+        }
         break
         
       case 'node_finished':
@@ -524,6 +659,18 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
           })
         }
         
+        // 🎯 关键修复：设置当前迭代状态 - 这是子节点标记的关键
+        set({
+          currentIteration: {
+            nodeId: iterNodeId,
+            iterationId: iteration_id || `iter-${Date.now()}`,
+            index: 0,
+            totalIterations: total_iterations,
+            startTime: Date.now(),
+            status: 'running'
+          }
+        })
+        
         // 自动展开迭代节点
         set((state) => ({
           iterationExpandedStates: {
@@ -538,10 +685,40 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
         
         // 更新当前迭代轮次
         const currentNode = get().nodes.find(n => n.id === nextNodeId)
-        if (currentNode) {
-          const newIndex = nextIndex !== undefined ? nextIndex : (currentNode.currentIteration || 0) + 1
+        const { currentIteration: currentIterState } = get()
+        if (currentNode && currentIterState && currentIterState.nodeId === nextNodeId) {
+          // 🎯 关键修复：确保使用正确的迭代索引 - 从0开始内部计数，但显示时加1
+          const newIndex = nextIndex !== undefined ? nextIndex : (currentIterState.index + 1)
+          
+          console.log('[工作流Store] 🎯 迭代进入下一轮:', {
+            '内部索引': newIndex,
+            '显示轮次': newIndex + 1,
+            '总轮次': currentIterState.totalIterations
+          })
+          
+          // 更新节点显示 - 内部存储从0开始的索引
           get().updateNode(nextNodeId, {
-            currentIteration: newIndex
+            currentIteration: newIndex,
+            description: `第 ${newIndex + 1} 轮 / 共 ${currentIterState.totalIterations} 轮`
+          })
+          
+          // 🎯 关键修复：更新当前迭代状态
+          set({
+            currentIteration: {
+              ...currentIterState,
+              index: newIndex,
+              startTime: Date.now()
+            }
+          })
+          
+          // 更新所有在迭代中的子节点的轮次标记
+          const { nodes } = get()
+          nodes.forEach(node => {
+            if (node.isInIteration && !node.isIterationNode) {
+              get().updateNode(node.id, {
+                iterationIndex: newIndex
+              })
+            }
           })
         }
         break
@@ -553,6 +730,145 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
           endTime: Date.now(),
           description: '迭代完成'
         })
+        // 清除当前迭代状态
+        set((state) => ({ currentIteration: null }))
+        break
+
+      // 🎯 完全模仿 chatflow 的 loop_started 逻辑
+      case 'loop_started':
+        // 🎯 修复：根据实际数据结构解析字段，与chatflow的iteration_started保持一致
+        const { 
+          id: loopId, 
+          node_id: loopNodeId, 
+          title: loopTitle, 
+          node_type: loopNodeType,
+          metadata: loopMetadata,
+          inputs: loopInputs
+        } = event.data
+        
+        // 从metadata或inputs中获取最大循环次数
+        const maxLoops = loopMetadata?.loop_length || loopInputs?.loop_count || undefined
+        const initialLoopIndex = 0 // 循环从0开始，与迭代保持一致
+        
+        console.log('[工作流Store] 🔄 Loop started:', {
+          loopNodeId,
+          loopTitle,
+          maxLoops,
+          loopMetadata,
+          loopInputs
+        })
+        
+        // 设置当前循环状态 - 后续的节点都会归属到这个循环
+        set({
+          currentLoop: {
+            nodeId: loopNodeId,
+            loopId: loopId,
+            index: initialLoopIndex,
+            maxLoops: maxLoops,
+            startTime: Date.now(),
+            status: 'running'
+          }
+        })
+
+        // 创建循环容器节点（如果不存在），与迭代保持一致的逻辑
+        const existingLoopNode = get().nodes.find(n => n.id === loopNodeId)
+        if (!existingLoopNode) {
+          get().addNode({
+            id: loopNodeId,
+            title: loopTitle || '循环',
+            status: 'running',
+            startTime: Date.now(),
+            description: maxLoops ? `准备循环 (最多 ${maxLoops} 次)` : '准备循环',
+            type: loopNodeType || 'loop',
+            visible: true,
+            isLoopNode: true,
+            maxLoops: maxLoops,
+            currentLoop: initialLoopIndex
+          })
+        } else {
+          // 更新现有循环容器
+          get().updateNode(loopNodeId, {
+            description: maxLoops ? `准备循环 (最多 ${maxLoops} 次)` : '准备循环',
+            currentLoop: initialLoopIndex,
+            status: 'running'
+          })
+        }
+
+        // 🎯 自动展开循环节点
+        set(state => ({
+          loopExpandedStates: {
+            ...state.loopExpandedStates,
+            [loopNodeId]: true
+          }
+        }))
+        break
+
+      case 'loop_next':
+        // 🎯 完全模仿 chatflow 的处理循环下一轮事件
+        const { node_id: nextLoopNodeId, index: nextLoopIndex } = event.data
+        const { currentLoop: currentLoopState } = get()
+
+        if (currentLoopState && currentLoopState.nodeId === nextLoopNodeId) {
+          // 🎯 关键修复：确保使用正确的循环索引 - 从0开始内部计数，但显示时加1
+          const newLoopIndex = nextLoopIndex !== undefined ? nextLoopIndex : (currentLoopState.index + 1)
+          
+          console.log('[工作流Store] 🔄 循环进入下一轮:', {
+            '内部索引': newLoopIndex,
+            '显示轮次': newLoopIndex + 1,
+            '最大轮次': currentLoopState.maxLoops
+          })
+
+          // 更新当前循环状态
+          set({
+            currentLoop: {
+              ...currentLoopState,
+              index: newLoopIndex,
+              startTime: Date.now()
+            }
+          })
+
+          // 更新循环容器节点显示 - 内部存储从0开始的索引
+          const maxLoopsText = currentLoopState.maxLoops ? ` / 最多 ${currentLoopState.maxLoops} 次` : ''
+          get().updateNode(nextLoopNodeId, {
+            description: `第 ${newLoopIndex + 1} 轮循环${maxLoopsText}`,
+            currentLoop: newLoopIndex
+          })
+
+          // 更新所有在循环中的子节点的轮次标记
+          const { nodes } = get()
+          nodes.forEach(node => {
+            if (node.isInLoop && !node.isLoopNode) {
+              get().updateNode(node.id, {
+                loopIndex: newLoopIndex
+              })
+            }
+          })
+        }
+        break
+
+      case 'loop_completed':
+        const { node_id: completedLoopNodeId, outputs: loopOutputs } = event.data
+        const { currentLoop: completedLoopState } = get()
+
+        if (completedLoopState && completedLoopState.nodeId === completedLoopNodeId) {
+          // 🎯 修复：从outputs中推断总循环次数，或使用当前循环状态的最大轮次
+          const finalLoopCount = loopOutputs?.loop_round || completedLoopState.index + 1 || completedLoopState.maxLoops || 0
+          
+          // 更新循环容器节点为完成状态
+          get().updateNode(completedLoopNodeId, {
+            status: 'completed',
+            endTime: Date.now(),
+            description: `循环完成 (共执行 ${finalLoopCount} 次)`,
+            currentLoop: finalLoopCount,
+            totalLoops: finalLoopCount
+          })
+
+          // 清除当前循环状态
+          set({ currentLoop: null })
+
+          // 🎯 修复：保持循环子节点的标记，让用户能看到完整的层级结构
+          // 不清除 isInLoop 标记，这样完成的循环子节点仍然保持缩进显示
+        }
         break
         
       case 'parallel_branch_started':
@@ -636,7 +952,7 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
   },
   
   // --- 重置状态 ---
-  reset: () => {
+    reset: () => {
     console.log('[工作流Store] 重置所有状态（保留历史记录）')
     set({
       isExecuting: false,
@@ -650,11 +966,14 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
       difyTaskId: null,
       difyWorkflowRunId: null,
       currentExecution: null,
-      iterationExpandedStates: {}
+      iterationExpandedStates: {},
+      loopExpandedStates: {},
+      currentIteration: null,
+      currentLoop: null
       // 注意：不重置 executionHistory，保持历史记录
     })
   },
-  
+
   clearAll: () => {
     console.log('[工作流Store] 完全清空所有状态')
     set({
@@ -670,7 +989,10 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
       difyTaskId: null,
       difyWorkflowRunId: null,
       currentExecution: null,
-      iterationExpandedStates: {}
+      iterationExpandedStates: {},
+      loopExpandedStates: {},
+      currentIteration: null,
+      currentLoop: null
     })
   },
   
@@ -687,7 +1009,10 @@ export const useWorkflowExecutionStore = create<WorkflowExecutionState>((set, ge
       difyTaskId: null,
       difyWorkflowRunId: null,
       currentExecution: null,
-      iterationExpandedStates: {}
+      iterationExpandedStates: {},
+      loopExpandedStates: {},
+      currentIteration: null,
+      currentLoop: null
       // 保留：formData, executionHistory
     }))
   }
