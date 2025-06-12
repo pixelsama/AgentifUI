@@ -106,6 +106,9 @@ interface ChatflowExecutionState {
 
   // 🎯 新增：迭代节点的展开状态
   iterationExpandedStates: Record<string, boolean>
+  
+  // 🎯 新增：循环节点的展开状态
+  loopExpandedStates: Record<string, boolean>
 
   // 执行进度
   executionProgress: {
@@ -147,6 +150,9 @@ interface ChatflowExecutionState {
 
   // 🎯 新增：迭代展开状态管理
   toggleIterationExpanded: (nodeId: string) => void
+  
+  // 🎯 新增：循环展开状态管理
+  toggleLoopExpanded: (nodeId: string) => void
 
   // 从 SSE 事件更新状态
   handleNodeEvent: (event: any) => void
@@ -160,6 +166,7 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
   currentIteration: null,
   currentLoop: null,
   iterationExpandedStates: {},
+  loopExpandedStates: {},
 
   executionProgress: {
     current: 0,
@@ -354,6 +361,16 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
       iterationExpandedStates: {
         ...state.iterationExpandedStates,
         [nodeId]: !state.iterationExpandedStates[nodeId]
+      }
+    }))
+  },
+  
+  // 🎯 新增：切换循环展开状态
+  toggleLoopExpanded: (nodeId: string) => {
+    set(state => ({
+      loopExpandedStates: {
+        ...state.loopExpandedStates,
+        [nodeId]: !state.loopExpandedStates[nodeId]
       }
     }))
   },
@@ -566,17 +583,8 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
           // 清除当前迭代状态
           set({ currentIteration: null })
 
-          // 清除所有节点的迭代标记
-          const { nodes } = get()
-          Object.keys(nodes).forEach(nodeId => {
-            const node = nodes.find(n => n.id === nodeId)
-            if (node && node.isInIteration) {
-              get().updateNode(nodeId, {
-                isInIteration: false,
-                iterationIndex: undefined
-              })
-            }
-          })
+          // 🎯 修复：保持迭代子节点的标记，让用户能看到完整的层级结构
+          // 不清除 isInIteration 标记，这样完成的迭代子节点仍然保持缩进显示
         }
         break
 
@@ -700,8 +708,8 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
 
         // 🎯 自动展开循环节点
         set(state => ({
-          iterationExpandedStates: {
-            ...state.iterationExpandedStates,
+          loopExpandedStates: {
+            ...state.loopExpandedStates,
             [loopNodeId]: true
           }
         }))
@@ -766,16 +774,8 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>((set, ge
           // 清除当前循环状态
           set({ currentLoop: null })
 
-          // 清除所有节点的循环标记
-          const { nodes: currentNodes } = get()
-          currentNodes.forEach(node => {
-            if (node.isInLoop && node.id !== completedLoopNodeId) {
-              get().updateNode(node.id, {
-                isInLoop: false,
-                loopIndex: undefined
-              })
-            }
-          })
+          // 🎯 修复：保持循环子节点的标记，让用户能看到完整的层级结构
+          // 不清除 isInLoop 标记，这样完成的循环子节点仍然保持缩进显示
         }
         break
 

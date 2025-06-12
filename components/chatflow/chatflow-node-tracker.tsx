@@ -31,6 +31,7 @@ export function ChatflowNodeTracker({ isVisible, className }: ChatflowNodeTracke
   const executionProgress = useChatflowExecutionStore(state => state.executionProgress)
   const error = useChatflowExecutionStore(state => state.error)
   const iterationExpandedStates = useChatflowExecutionStore(state => state.iterationExpandedStates)
+  const loopExpandedStates = useChatflowExecutionStore(state => state.loopExpandedStates)
   
   // 🎯 过滤和分组节点：根据展开状态控制迭代/循环中的节点显示
   const getVisibleNodes = () => {
@@ -71,7 +72,7 @@ export function ChatflowNodeTracker({ isVisible, className }: ChatflowNodeTracke
         )
         
         // 如果找到循环容器节点且已展开，则显示此循环中的节点
-        if (loopNode && iterationExpandedStates[loopNode.id]) {
+        if (loopNode && loopExpandedStates[loopNode.id]) {
           visibleNodes.push(node)
         }
       }

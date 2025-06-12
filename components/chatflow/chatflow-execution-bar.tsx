@@ -30,8 +30,8 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
   const [elapsedTime, setElapsedTime] = useState(0)
   
   // 🎯 使用store中的展开状态
-  const { iterationExpandedStates, toggleIterationExpanded } = useChatflowExecutionStore()
-  const isExpanded = iterationExpandedStates[node.id] || false
+  const { iterationExpandedStates, loopExpandedStates, toggleIterationExpanded, toggleLoopExpanded } = useChatflowExecutionStore()
+  const isExpanded = (node.isIterationNode ? iterationExpandedStates[node.id] : node.isLoopNode ? loopExpandedStates[node.id] : false) || false
   
   // --- 延迟显示动画 ---
   useEffect(() => {
@@ -256,7 +256,13 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
           "hover:scale-[1.02] hover:shadow-md transition-all duration-200",
           (node.isIterationNode || node.isParallelNode || node.isLoopNode) && "cursor-pointer"
         )}
-        onClick={(node.isIterationNode || node.isParallelNode || node.isLoopNode) ? () => toggleIterationExpanded(node.id) : undefined}
+        onClick={(node.isIterationNode || node.isParallelNode || node.isLoopNode) ? () => {
+          if (node.isIterationNode) {
+            toggleIterationExpanded(node.id)
+          } else if (node.isLoopNode) {
+            toggleLoopExpanded(node.id)
+          }
+        } : undefined}
       >
         {/* 左侧：状态图标 */}
         <div className="flex-shrink-0">
