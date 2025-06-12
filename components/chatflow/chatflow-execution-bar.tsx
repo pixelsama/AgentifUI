@@ -120,6 +120,19 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
       }
     }
     
+    if (node.isLoopNode) {
+      switch (node.status) {
+        case 'running':
+          return '正在循环'
+        case 'completed':
+          return '循环完成'
+        case 'failed':
+          return '循环失败'
+        default:
+          return '等待循环'
+      }
+    }
+    
     switch (node.status) {
       case 'running':
         return '正在执行'
@@ -183,17 +196,17 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
     )
     
     // --- BEGIN COMMENT ---
-    // 🎯 优化：迭代中的节点使用左侧指示条+连接点设计，提供清晰的层级视觉指示
+    // 🎯 优化：迭代/循环中的节点使用左侧指示条+连接点设计，提供清晰的层级视觉指示
     // --- END COMMENT ---
-    const iterationStyles = node.isInIteration ? cn(
+    const nestedStyles = (node.isInIteration || node.isInLoop) ? cn(
       "relative ml-6 pl-4",
       // 使用新的指示条样式
-      "iteration-node",
+      node.isInIteration ? "iteration-node" : "loop-node",
       // 轻微的背景色区分
       isDark ? "bg-stone-800/20" : "bg-stone-50/40"
     ) : ""
     
-    const combinedBaseStyles = cn(baseStyles, iterationStyles)
+    const combinedBaseStyles = cn(baseStyles, nestedStyles)
     
     switch (node.status) {
       case 'running':
@@ -239,11 +252,11 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
       <div 
         className={cn(
           getBarStyles(),
-          // 🎯 所有bar都有悬停效果，只有迭代和并行分支节点才有cursor pointer
+          // 🎯 所有bar都有悬停效果，只有迭代、并行分支和循环节点才有cursor pointer
           "hover:scale-[1.02] hover:shadow-md transition-all duration-200",
-          (node.isIterationNode || node.isParallelNode) && "cursor-pointer"
+          (node.isIterationNode || node.isParallelNode || node.isLoopNode) && "cursor-pointer"
         )}
-        onClick={(node.isIterationNode || node.isParallelNode) ? () => toggleIterationExpanded(node.id) : undefined}
+        onClick={(node.isIterationNode || node.isParallelNode || node.isLoopNode) ? () => toggleIterationExpanded(node.id) : undefined}
       >
         {/* 左侧：状态图标 */}
         <div className="flex-shrink-0">
@@ -263,23 +276,31 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
             
             {/* 状态标签 - 简化显示 */}
             <div className="flex items-center gap-1 flex-shrink-0">
-              {/* 迭代/并行分支计数 */}
-              {node.isIterationNode && node.totalIterations && (
-                <span className={cn(
-                  "text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-700",
-                  isDark && "bg-stone-700/50 text-stone-300"
-                )}>
-                  {node.currentIteration || 0}/{node.totalIterations}
-                </span>
-              )}
-              {node.isParallelNode && node.totalBranches && (
-                <span className={cn(
-                  "text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-700",
-                  isDark && "bg-stone-700/50 text-stone-300"
-                )}>
-                  {node.completedBranches || 0}/{node.totalBranches}
-                </span>
-              )}
+                          {/* 迭代/并行分支/循环计数 */}
+            {node.isIterationNode && node.totalIterations && (
+              <span className={cn(
+                "text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-700",
+                isDark && "bg-stone-700/50 text-stone-300"
+              )}>
+                {node.currentIteration || 0}/{node.totalIterations}
+              </span>
+            )}
+            {node.isParallelNode && node.totalBranches && (
+              <span className={cn(
+                "text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-700",
+                isDark && "bg-stone-700/50 text-stone-300"
+              )}>
+                {node.completedBranches || 0}/{node.totalBranches}
+              </span>
+            )}
+            {node.isLoopNode && (
+              <span className={cn(
+                "text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-700",
+                isDark && "bg-stone-700/50 text-stone-300"
+              )}>
+                {node.maxLoops ? `${node.currentLoop || 0}/${node.maxLoops}` : `${node.currentLoop || 0}`}
+              </span>
+            )}
               
               <span className={cn(
                 "text-xs px-1.5 py-0.5 rounded font-serif transition-all duration-300",
