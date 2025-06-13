@@ -97,7 +97,8 @@ const InstanceForm = ({
   onSave, 
   onCancel, 
   isProcessing,
-  showFeedback
+  showFeedback,
+  defaultProviderId
 }: {
   instance: Partial<ServiceInstance> | null
   isEditing: boolean
@@ -105,6 +106,7 @@ const InstanceForm = ({
   onCancel: () => void
   isProcessing: boolean
   showFeedback: (message: string, severity: 'success' | 'error' | 'info' | 'warning') => void
+  defaultProviderId?: string | null
 }) => {
   const { isDark } = useTheme();
   const { serviceInstances, apiKeys, providers } = useApiConfigStore();
@@ -285,10 +287,18 @@ const InstanceForm = ({
     } else {
       // --- BEGIN COMMENT ---
       // 新建模式：初始化默认提供商选择
+      // 优先使用筛选的提供商，其次是Dify，最后是第一个活跃的提供商
       // --- END COMMENT ---
       const getInitialProviderId = () => {
         const activeProviders = providers.filter(p => p.is_active);
         if (activeProviders.length === 0) return '';
+        
+        // 如果有筛选的提供商且该提供商是活跃的，优先使用
+        if (defaultProviderId) {
+          const filteredProvider = activeProviders.find(p => p.id === defaultProviderId);
+          if (filteredProvider) return filteredProvider.id;
+        }
+        
         if (activeProviders.length === 1) return activeProviders[0].id;
         const difyProvider = activeProviders.find(p => p.name.toLowerCase() === 'dify');
         return difyProvider ? difyProvider.id : activeProviders[0].id;
@@ -1486,6 +1496,7 @@ export default function ApiConfigPage() {
   })
   const [isProcessing, setIsProcessing] = useState(false)
   const [showProviderModal, setShowProviderModal] = useState(false)
+  const [currentFilterProviderId, setCurrentFilterProviderId] = useState<string | null>(null)
 
   useEffect(() => {
     const handleSelectInstance = (event: CustomEvent) => {
@@ -1524,16 +1535,23 @@ export default function ApiConfigPage() {
       }, 100)
     }
 
+    const handleFilterChanged = (event: CustomEvent) => {
+      const { providerId } = event.detail
+      setCurrentFilterProviderId(providerId)
+    }
+
     window.addEventListener('selectInstance', handleSelectInstance as EventListener)
     window.addEventListener('toggleAddForm', handleToggleAddForm)
     window.addEventListener('instanceDeleted', handleInstanceDeleted as EventListener)
     window.addEventListener('defaultInstanceChanged', handleDefaultInstanceChanged as EventListener)
+    window.addEventListener('filterChanged', handleFilterChanged as EventListener)
     
     return () => {
       window.removeEventListener('selectInstance', handleSelectInstance as EventListener)
       window.removeEventListener('toggleAddForm', handleToggleAddForm)
       window.removeEventListener('instanceDeleted', handleInstanceDeleted as EventListener)
       window.removeEventListener('defaultInstanceChanged', handleDefaultInstanceChanged as EventListener)
+      window.removeEventListener('filterChanged', handleFilterChanged as EventListener)
     }
   }, [showAddForm, selectedInstance])
 
@@ -1598,6 +1616,7 @@ export default function ApiConfigPage() {
           <InstanceForm
             instance={null}
             isEditing={false}
+            defaultProviderId={currentFilterProviderId}
             onSave={(data) => {
               setIsProcessing(true)
               // --- 提取setAsDefault状态和其他数据 ---

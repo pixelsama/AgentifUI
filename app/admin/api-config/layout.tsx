@@ -1,6 +1,7 @@
 "use client"
 
 import React, { ReactNode, useEffect, useState, useMemo } from 'react'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { useApiConfigStore, ServiceInstance } from '@lib/stores/api-config-store'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
@@ -22,6 +23,9 @@ interface ApiConfigLayoutProps {
 
 export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
   const { isDark } = useTheme()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
   
   const {
     serviceInstances: instances,
@@ -37,7 +41,13 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | null>(null)
-  const [filterProviderId, setFilterProviderId] = useState<string | null>(null) // null表示显示全部
+  
+  // --- BEGIN COMMENT ---
+  // 从URL查询参数获取筛选状态
+  // --- END COMMENT ---
+  const [filterProviderId, setFilterProviderId] = useState<string | null>(() => {
+    return searchParams.get('provider') || null
+  })
 
   // --- BEGIN COMMENT ---
   // 初始化数据加载
@@ -51,7 +61,42 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
   }, [hasInitiallyLoaded, loadInstances])
 
   // --- BEGIN COMMENT ---
-  // 🎯 新增：根据筛选条件过滤应用实例
+  // 处理筛选变化并同步URL
+  // --- END COMMENT ---
+  const handleFilterChange = (providerId: string | null) => {
+    setFilterProviderId(providerId)
+    
+    // 更新URL查询参数
+    const params = new URLSearchParams(searchParams.toString())
+    if (providerId) {
+      params.set('provider', providerId)
+    } else {
+      params.delete('provider')
+    }
+    
+    const newUrl = `${pathname}?${params.toString()}`
+    router.replace(newUrl, { scroll: false })
+    
+    // --- BEGIN COMMENT ---
+    // 通知page组件筛选状态变化，用于新建应用时自动设置提供商
+    // --- END COMMENT ---
+    window.dispatchEvent(new CustomEvent('filterChanged', {
+      detail: { providerId }
+    }))
+  }
+
+  // --- BEGIN COMMENT ---
+  // 监听URL变化同步筛选状态
+  // --- END COMMENT ---
+  useEffect(() => {
+    const urlProviderId = searchParams.get('provider')
+    if (urlProviderId !== filterProviderId) {
+      setFilterProviderId(urlProviderId)
+    }
+  }, [searchParams, filterProviderId])
+
+  // --- BEGIN COMMENT ---
+  // 🎯 根据筛选条件过滤应用实例
   // --- END COMMENT ---
   const filteredInstances = useMemo(() => {
     if (!filterProviderId) {
@@ -213,7 +258,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
             <InstanceFilterSelector
               providers={providers}
               selectedProviderId={filterProviderId}
-              onFilterChange={setFilterProviderId}
+              onFilterChange={handleFilterChange}
               instanceCount={filteredInstances.length}
               isLoading={!hasInitiallyLoaded && instancesLoading}
             />
