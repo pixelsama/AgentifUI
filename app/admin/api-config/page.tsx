@@ -31,6 +31,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { DifyAppTypeSelector } from '@components/admin/api-config/dify-app-type-selector';
+
 import { validateDifyFormData } from '@lib/services/dify/validation';
 import type { DifyAppType } from '@lib/types/dify-app-types';
 import { getDifyAppParameters } from '@lib/services/dify/app-service';
@@ -104,7 +105,7 @@ const InstanceForm = ({
   showFeedback: (message: string, severity: 'success' | 'error' | 'info' | 'warning') => void
 }) => {
   const { isDark } = useTheme();
-  const { serviceInstances, apiKeys } = useApiConfigStore();
+  const { serviceInstances, apiKeys, providers } = useApiConfigStore();
   
   // --- 获取当前实例的最新状态 ---
   const currentInstance = instance ? serviceInstances.find(inst => inst.id === instance.id) : null;
@@ -1451,12 +1452,13 @@ export default function ApiConfigPage() {
             isEditing={false}
             onSave={(data) => {
               setIsProcessing(true)
+              // --- 提取setAsDefault状态和其他数据 ---
+              const { setAsDefault, ...instanceData } = data
+              
+              // --- 使用默认的提供商选择逻辑 ---
               const defaultProviderId = providers.find(p => p.name === 'Dify')?.id || 
                                       providers[0]?.id || 
                                       '1'
-              
-              // --- 提取setAsDefault状态和其他数据 ---
-              const { setAsDefault, ...instanceData } = data
               
               addInstance({
                 ...instanceData,
