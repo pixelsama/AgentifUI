@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { ChevronDown, ChevronUp, Check, Loader2 } from 'lucide-react';
@@ -15,7 +15,7 @@ interface InstanceFilterSelectorProps {
   isLoading?: boolean; // 新增loading状态
 }
 
-export function InstanceFilterSelector({ 
+export const InstanceFilterSelector = memo(function InstanceFilterSelector({ 
   providers, 
   selectedProviderId, 
   onFilterChange, 
@@ -179,4 +179,4 @@ export function InstanceFilterSelector({
       )}
     </div>
   );
-} 
+}); 
