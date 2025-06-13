@@ -31,6 +31,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { DifyAppTypeSelector } from '@components/admin/api-config/dify-app-type-selector';
+import { ProviderManagementModal } from '@components/admin/api-config/provider-management-modal';
 
 import { validateDifyFormData } from '@lib/services/dify/validation';
 import type { DifyAppType } from '@lib/types/dify-app-types';
@@ -1493,6 +1494,7 @@ export default function ApiConfigPage() {
     severity: 'info'
   })
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showProviderModal, setShowProviderModal] = useState(false)
 
   useEffect(() => {
     const handleSelectInstance = (event: CustomEvent) => {
@@ -1563,6 +1565,15 @@ export default function ApiConfigPage() {
     }))
   }
 
+  // --- BEGIN COMMENT ---
+  // Provider管理相关处理函数
+  // --- END COMMENT ---
+  const handleProviderChange = () => {
+    // 重新加载providers数据
+    window.dispatchEvent(new CustomEvent('reloadProviders'))
+    showFeedback('提供商配置已更新', 'success')
+  }
+
   useEffect(() => {
     window.dispatchEvent(new CustomEvent('addFormToggled', {
       detail: { 
@@ -1574,6 +1585,44 @@ export default function ApiConfigPage() {
 
   return (
     <div className="h-full flex flex-col">
+      {/* --- 页面工具栏 --- */}
+      <div className={cn(
+        "border-b px-6 py-4",
+        isDark ? "border-stone-700 bg-stone-800" : "border-stone-200 bg-white"
+      )}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className={cn(
+              "text-xl font-bold font-serif",
+              isDark ? "text-stone-100" : "text-stone-900"
+            )}>
+              API 配置管理
+            </h1>
+            <p className={cn(
+              "text-sm mt-1 font-serif",
+              isDark ? "text-stone-400" : "text-stone-600"
+            )}>
+              管理应用实例和服务提供商配置
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowProviderModal(true)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-lg transition-colors",
+                "focus:outline-none focus:ring-2 focus:ring-offset-2",
+                isDark 
+                  ? "bg-stone-700 hover:bg-stone-600 text-stone-200 hover:text-stone-100 focus:ring-stone-500" 
+                  : "bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-stone-900 focus:ring-stone-400"
+              )}
+            >
+              <Settings className="w-4 h-4" />
+              <span className="text-sm font-medium">管理提供商</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       {showAddForm ? (
         <div className="flex-1 overflow-y-auto p-6 min-h-0">
           <InstanceForm
@@ -1718,6 +1767,13 @@ export default function ApiConfigPage() {
       )}
       
       <Toast feedback={feedback} onClose={handleCloseFeedback} />
+      
+      {/* --- Provider管理模态框 --- */}
+      <ProviderManagementModal
+        open={showProviderModal}
+        onOpenChange={setShowProviderModal}
+        onProviderChange={handleProviderChange}
+      />
     </div>
   )
 }
