@@ -112,6 +112,24 @@ const InstanceForm = ({
   // --- END COMMENT ---
   const [selectedProviderId, setSelectedProviderId] = useState<string>('');
   
+  // --- BEGIN COMMENT ---
+  // 监听提供商选择变化，自动更新API URL
+  // --- END COMMENT ---
+  useEffect(() => {
+    if (!isEditing && selectedProviderId) {
+      const selectedProvider = providers.find(p => p.id === selectedProviderId);
+      if (selectedProvider && selectedProvider.base_url) {
+        setFormData(prev => ({
+          ...prev,
+          config: {
+            ...prev.config,
+            api_url: selectedProvider.base_url
+          }
+        }));
+      }
+    }
+  }, [selectedProviderId, providers, isEditing]);
+  
   // --- 获取当前实例的最新状态 ---
   const currentInstance = instance ? serviceInstances.find(inst => inst.id === instance.id) : null;
   const isCurrentDefault = currentInstance?.is_default || false;
@@ -246,6 +264,16 @@ const InstanceForm = ({
     };
     
     if (instance) {
+      // --- BEGIN COMMENT ---
+      // 编辑模式：如果API URL为空，使用提供商的base_url
+      // --- END COMMENT ---
+      if (!newData.config.api_url && instance.provider_id) {
+        const currentProvider = providers.find(p => p.id === instance.provider_id);
+        if (currentProvider && currentProvider.base_url) {
+          newData.config.api_url = currentProvider.base_url;
+        }
+      }
+      
       setFormData(newData);
       setBaselineData(newData);
       // --- BEGIN COMMENT ---
@@ -882,13 +910,17 @@ const InstanceForm = ({
                 "text-xs mt-1 font-serif",
                 isDark ? "text-stone-400" : "text-stone-500"
               )}>
-                留空将使用默认URL: {(() => {
+                {(() => {
                   if (isEditing && instance) {
                     const currentProvider = providers.find(p => p.id === instance.provider_id);
-                    return currentProvider?.base_url || 'https://api.dify.ai/v1';
+                    return `当前提供商默认URL: ${currentProvider?.base_url || '未知'}`;
                   } else {
                     const selectedProvider = providers.find(p => p.id === selectedProviderId);
-                    return selectedProvider?.base_url || 'https://api.dify.ai/v1';
+                    if (selectedProvider) {
+                      return `已自动填充提供商URL: ${selectedProvider.base_url}`;
+                    } else {
+                      return '请先选择服务提供商';
+                    }
                   }
                 })()}
               </p>
