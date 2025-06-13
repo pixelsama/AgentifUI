@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
-import { ChevronDown, ChevronUp, Database, Globe, Zap, Check, Filter } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { Provider } from '@lib/types/database';
 
 interface InstanceFilterSelectorProps {
@@ -28,20 +28,6 @@ export function InstanceFilterSelector({
   // 获取当前选中的提供商信息
   // --- END COMMENT ---
   const selectedProvider = selectedProviderId ? providers.find(p => p.id === selectedProviderId) : null;
-  
-  // --- BEGIN COMMENT ---
-  // 获取提供商图标
-  // --- END COMMENT ---
-  const getProviderIcon = (provider: Provider) => {
-    switch (provider.name.toLowerCase()) {
-      case 'dify':
-        return <Zap className="w-3.5 h-3.5" />;
-      case 'openai':
-        return <Globe className="w-3.5 h-3.5" />;
-      default:
-        return <Database className="w-3.5 h-3.5" />;
-    }
-  };
 
   // --- BEGIN COMMENT ---
   // 处理筛选选择
@@ -51,15 +37,7 @@ export function InstanceFilterSelector({
     setIsOpen(false);
   };
 
-  // --- BEGIN COMMENT ---
-  // 获取显示文本
-  // --- END COMMENT ---
-  const getDisplayText = () => {
-    if (selectedProvider) {
-      return selectedProvider.name;
-    }
-    return '全部';
-  };
+
 
   return (
     <div className={cn("relative", className)}>
@@ -78,23 +56,8 @@ export function InstanceFilterSelector({
             "font-bold text-sm font-serif",
             isDark ? "text-stone-100" : "text-stone-900"
           )}>
-            应用实例
+            {selectedProvider ? `${selectedProvider.name}应用` : '全部应用'}
           </h2>
-          
-          {/* --- BEGIN COMMENT ---
-          筛选指示器：显示当前筛选状态
-          --- END COMMENT --- */}
-          {selectedProvider && (
-            <div className="flex items-center gap-1">
-              {getProviderIcon(selectedProvider)}
-              <span className={cn(
-                "text-xs font-serif",
-                isDark ? "text-stone-300" : "text-stone-600"
-              )}>
-                {selectedProvider.name}
-              </span>
-            </div>
-          )}
         </div>
         
         <div className={cn(
@@ -117,11 +80,7 @@ export function InstanceFilterSelector({
         "text-xs font-serif mt-1",
         isDark ? "text-stone-400" : "text-stone-600"
       )}>
-        {selectedProvider ? (
-          `${selectedProvider.name} 应用: ${instanceCount} 个`
-        ) : (
-          `共 ${instanceCount} 个应用`
-        )}
+        共 {instanceCount} 个
       </div>
 
       {/* --- BEGIN COMMENT ---
@@ -160,10 +119,7 @@ export function InstanceFilterSelector({
                     : "hover:bg-stone-200/40 text-stone-700"
               )}
             >
-              <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4" />
-                <span>全部应用</span>
-              </div>
+              <span>全部应用</span>
               
               {!selectedProviderId && (
                 <Check className="w-4 h-4 flex-shrink-0" />
@@ -195,18 +151,7 @@ export function InstanceFilterSelector({
                       : "hover:bg-stone-200/40 text-stone-700"
                 )}
               >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  {getProviderIcon(provider)}
-                  <span className="truncate">{provider.name}</span>
-                  {provider.name === 'Dify' && (
-                    <span className={cn(
-                      "px-1.5 py-0.5 rounded text-xs font-serif",
-                      isDark ? "bg-stone-600 text-stone-300" : "bg-stone-200 text-stone-600"
-                    )}>
-                      推荐
-                    </span>
-                  )}
-                </div>
+                <span className="truncate">{provider.name}</span>
                 
                 {selectedProviderId === provider.id && (
                   <Check className="w-4 h-4 flex-shrink-0" />
