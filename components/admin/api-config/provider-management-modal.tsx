@@ -289,24 +289,40 @@ export function ProviderManagementModal({
                 <div
                   key={provider.id}
                   className={cn(
-                    "border rounded-lg p-4 space-y-3",
-                    editingProvider?.id === provider.id && "border-blue-500 bg-blue-50/50"
+                    "border rounded-lg p-4 space-y-3 transition-colors",
+                    // 基础样式
+                    isDark ? "border-stone-600 bg-stone-800/50" : "border-stone-200 bg-white",
+                    // 编辑状态样式
+                    editingProvider?.id === provider.id && (
+                      isDark 
+                        ? "border-stone-400 bg-stone-700/50" 
+                        : "border-stone-500 bg-stone-100/50"
+                    )
                   )}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <h4 className="font-medium">{provider.name}</h4>
-                                             <span className={cn(
-                         "px-2 py-1 text-xs rounded-full",
-                         isDark ? "bg-stone-700 text-stone-300" : "bg-stone-100 text-stone-700"
-                       )}>
-                         {PROVIDER_TYPES.find(t => t.value === provider.type)?.label || provider.type}
-                       </span>
+                      <h4 className={cn(
+                        "font-medium font-serif",
+                        isDark ? "text-stone-100" : "text-stone-900"
+                      )}>
+                        {provider.name}
+                      </h4>
                       <span className={cn(
-                        "px-2 py-1 text-xs rounded-full",
+                        "px-2 py-1 text-xs rounded-full font-serif",
+                        isDark ? "bg-stone-700 text-stone-300" : "bg-stone-100 text-stone-700"
+                      )}>
+                        {PROVIDER_TYPES.find(t => t.value === provider.type)?.label || provider.type}
+                      </span>
+                      <span className={cn(
+                        "px-2 py-1 text-xs rounded-full font-serif",
                         provider.is_active 
-                          ? "bg-green-100 text-green-700" 
-                          : "bg-red-100 text-red-700"
+                          ? isDark
+                            ? "bg-green-900/50 text-green-300 border border-green-700"
+                            : "bg-green-100 text-green-700"
+                          : isDark
+                            ? "bg-red-900/50 text-red-300 border border-red-700"
+                            : "bg-red-100 text-red-700"
                       )}>
                         {provider.is_active ? '已启用' : '已禁用'}
                       </span>
@@ -331,7 +347,10 @@ export function ProviderManagementModal({
                       </Button>
                     </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className={cn(
+                    "text-sm font-serif",
+                    isDark ? "text-stone-400" : "text-stone-600"
+                  )}>
                     <p><strong>API URL:</strong> {provider.base_url}</p>
                     <p><strong>认证方式:</strong> {AUTH_TYPES.find(a => a.value === provider.auth_type)?.label || provider.auth_type}</p>
                   </div>

@@ -1576,11 +1576,8 @@ export default function ApiConfigPage() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* --- 简化的管理提供商按钮 --- */}
-      <div className={cn(
-        "px-6 py-3 flex justify-end",
-        isDark ? "bg-stone-800" : "bg-white"
-      )}>
+      {/* --- 管理提供商按钮 --- */}
+      <div className="px-6 pt-6 pb-3 flex justify-end">
         <button
           onClick={() => setShowProviderModal(true)}
           className={cn(
