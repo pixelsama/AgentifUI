@@ -1,6 +1,6 @@
 "use client"
 
-import React, { ReactNode, useEffect, useState, useMemo, startTransition } from 'react'
+import React, { ReactNode, useEffect, useState, useMemo } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { useApiConfigStore, ServiceInstance } from '@lib/stores/api-config-store'
 import { useTheme } from '@lib/hooks/use-theme'
@@ -61,7 +61,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
   }, [hasInitiallyLoaded, loadInstances])
 
   // --- BEGIN COMMENT ---
-  // 处理筛选变化并同步URL（优化性能）
+  // 处理筛选变化并同步URL
   // --- END COMMENT ---
   const handleFilterChange = (providerId: string | null) => {
     // 如果值没有变化，直接返回
@@ -69,19 +69,16 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     
     setFilterProviderId(providerId)
     
-    // 使用startTransition优化性能
-    startTransition(() => {
-      // 更新URL查询参数
-      const params = new URLSearchParams(searchParams.toString())
-      if (providerId) {
-        params.set('provider', providerId)
-      } else {
-        params.delete('provider')
-      }
-      
-      const newUrl = `${pathname}?${params.toString()}`
-      router.replace(newUrl, { scroll: false })
-    })
+    // 立即更新URL查询参数，不使用startTransition避免延迟
+    const params = new URLSearchParams(searchParams.toString())
+    if (providerId) {
+      params.set('provider', providerId)
+    } else {
+      params.delete('provider')
+    }
+    
+    const newUrl = `${pathname}?${params.toString()}`
+    router.replace(newUrl, { scroll: false })
     
     // --- BEGIN COMMENT ---
     // 通知page组件筛选状态变化，用于新建应用时自动设置提供商
