@@ -1599,15 +1599,16 @@ export default function ApiConfigPage() {
         <button
           onClick={() => setShowProviderModal(true)}
           className={cn(
-            "flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm",
+            "flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors text-sm font-medium",
             "focus:outline-none focus:ring-2 focus:ring-offset-2",
+            "border shadow-sm",
             isDark 
-              ? "bg-stone-700 hover:bg-stone-600 text-stone-200 hover:text-stone-100 focus:ring-stone-500" 
-              : "bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-stone-900 focus:ring-stone-400"
+              ? "bg-stone-600 hover:bg-stone-500 text-stone-100 hover:text-white border-stone-500 focus:ring-stone-400 shadow-stone-900/20" 
+              : "bg-stone-200 hover:bg-stone-300 text-stone-800 hover:text-stone-900 border-stone-300 focus:ring-stone-500 shadow-stone-200/50"
           )}
         >
           <Settings className="w-4 h-4" />
-          <span className="font-medium font-serif">管理提供商</span>
+          <span className="font-serif">管理提供商</span>
         </button>
       </div>
 
