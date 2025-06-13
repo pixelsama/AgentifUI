@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
-import { ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, Loader2 } from 'lucide-react';
 import { Provider } from '@lib/types/database';
 
 interface InstanceFilterSelectorProps {
@@ -12,6 +12,7 @@ interface InstanceFilterSelectorProps {
   onFilterChange: (providerId: string | null) => void;
   instanceCount: number;
   className?: string;
+  isLoading?: boolean; // 新增loading状态
 }
 
 export function InstanceFilterSelector({ 
@@ -19,7 +20,8 @@ export function InstanceFilterSelector({
   selectedProviderId, 
   onFilterChange, 
   instanceCount,
-  className
+  className,
+  isLoading = false
 }: InstanceFilterSelectorProps) {
   const { isDark } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -62,10 +64,12 @@ export function InstanceFilterSelector({
         
         <div className={cn(
           "flex-shrink-0 w-3 h-3 flex items-center justify-center transition-transform duration-200",
-          "group-hover:scale-110",
+          !isLoading && "group-hover:scale-110",
           isDark ? "text-stone-400" : "text-stone-500"
         )}>
-          {isOpen ? (
+          {isLoading ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : isOpen ? (
             <ChevronUp className="h-3 w-3" />
           ) : (
             <ChevronDown className="h-3 w-3" />

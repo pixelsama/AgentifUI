@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { DifyAppTypeSelector } from '@components/admin/api-config/dify-app-type-selector';
 import { ProviderManagementModal } from '@components/admin/api-config/provider-management-modal';
+import { CustomProviderSelector } from '@components/admin/api-config/custom-provider-selector';
 
 import { validateDifyFormData } from '@lib/services/dify/validation';
 import type { DifyAppType } from '@lib/types/dify-app-types';
@@ -766,24 +767,14 @@ const InstanceForm = ({
               </div>
             ) : (
               // 新建模式：可选择
-              <select
-                value={selectedProviderId}
-                onChange={(e) => setSelectedProviderId(e.target.value)}
-                className={cn(
-                  "px-3 py-1.5 rounded-md text-sm font-serif border",
-                  isDark 
-                    ? "bg-stone-600 border-stone-500 text-stone-200" 
-                    : "bg-white border-stone-300 text-stone-700"
-                )}
-                required
-              >
-                <option value="">请选择提供商</option>
-                {providers.filter(p => p.is_active).map(provider => (
-                  <option key={provider.id} value={provider.id}>
-                    {provider.name}
-                  </option>
-                ))}
-              </select>
+              <div className="w-48">
+                <CustomProviderSelector
+                  providers={providers}
+                  selectedProviderId={selectedProviderId}
+                  onProviderChange={setSelectedProviderId}
+                  placeholder="请选择提供商"
+                />
+              </div>
             )}
           </div>
         </div>
@@ -1585,42 +1576,24 @@ export default function ApiConfigPage() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* --- 页面工具栏 --- */}
+      {/* --- 简化的管理提供商按钮 --- */}
       <div className={cn(
-        "border-b px-6 py-4",
-        isDark ? "border-stone-700 bg-stone-800" : "border-stone-200 bg-white"
+        "px-6 py-3 flex justify-end",
+        isDark ? "bg-stone-800" : "bg-white"
       )}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className={cn(
-              "text-xl font-bold font-serif",
-              isDark ? "text-stone-100" : "text-stone-900"
-            )}>
-              API 配置管理
-            </h1>
-            <p className={cn(
-              "text-sm mt-1 font-serif",
-              isDark ? "text-stone-400" : "text-stone-600"
-            )}>
-              管理应用实例和服务提供商配置
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowProviderModal(true)}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg transition-colors",
-                "focus:outline-none focus:ring-2 focus:ring-offset-2",
-                isDark 
-                  ? "bg-stone-700 hover:bg-stone-600 text-stone-200 hover:text-stone-100 focus:ring-stone-500" 
-                  : "bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-stone-900 focus:ring-stone-400"
-              )}
-            >
-              <Settings className="w-4 h-4" />
-              <span className="text-sm font-medium">管理提供商</span>
-            </button>
-          </div>
-        </div>
+        <button
+          onClick={() => setShowProviderModal(true)}
+          className={cn(
+            "flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm",
+            "focus:outline-none focus:ring-2 focus:ring-offset-2",
+            isDark 
+              ? "bg-stone-700 hover:bg-stone-600 text-stone-200 hover:text-stone-100 focus:ring-stone-500" 
+              : "bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-stone-900 focus:ring-stone-400"
+          )}
+        >
+          <Settings className="w-4 h-4" />
+          <span className="font-medium font-serif">管理提供商</span>
+        </button>
       </div>
 
       {showAddForm ? (

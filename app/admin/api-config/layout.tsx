@@ -96,16 +96,23 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
       loadInstances()
     }
 
+    const handleReloadProviders = () => {
+      // 重新加载providers数据
+      loadInstances() // 这会同时加载providers和instances
+    }
+
     window.addEventListener('addFormToggled', handleAddFormToggled as EventListener)
     window.addEventListener('setInstanceAsDefault', handleSetInstanceAsDefault as EventListener)
     window.addEventListener('directSetDefault', handleDirectSetDefault as EventListener)
     window.addEventListener('reloadInstances', handleReloadInstances)
+    window.addEventListener('reloadProviders', handleReloadProviders)
     
     return () => {
       window.removeEventListener('addFormToggled', handleAddFormToggled as EventListener)
       window.removeEventListener('setInstanceAsDefault', handleSetInstanceAsDefault as EventListener)
       window.removeEventListener('directSetDefault', handleDirectSetDefault as EventListener)
       window.removeEventListener('reloadInstances', handleReloadInstances)
+      window.removeEventListener('reloadProviders', handleReloadProviders)
     }
   }, [])
 
@@ -208,6 +215,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
               selectedProviderId={filterProviderId}
               onFilterChange={setFilterProviderId}
               instanceCount={filteredInstances.length}
+              isLoading={!hasInitiallyLoaded && instancesLoading}
             />
             
             <button

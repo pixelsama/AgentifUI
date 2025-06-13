@@ -11,6 +11,7 @@ import { Textarea } from '@components/ui/textarea';
 import { Trash2, Plus, Edit, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@lib/utils';
+import { useTheme } from '@lib/hooks/use-theme';
 import { Provider } from '@lib/types/database';
 import { 
   getActiveProviders, 
@@ -61,6 +62,7 @@ export function ProviderManagementModal({
   onOpenChange, 
   onProviderChange 
 }: ProviderManagementModalProps) {
+  const { isDark } = useTheme();
   const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
@@ -294,9 +296,12 @@ export function ProviderManagementModal({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <h4 className="font-medium">{provider.name}</h4>
-                      <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
-                        {PROVIDER_TYPES.find(t => t.value === provider.type)?.label || provider.type}
-                      </span>
+                                             <span className={cn(
+                         "px-2 py-1 text-xs rounded-full",
+                         isDark ? "bg-stone-700 text-stone-300" : "bg-stone-100 text-stone-700"
+                       )}>
+                         {PROVIDER_TYPES.find(t => t.value === provider.type)?.label || provider.type}
+                       </span>
                       <span className={cn(
                         "px-2 py-1 text-xs rounded-full",
                         provider.is_active 
