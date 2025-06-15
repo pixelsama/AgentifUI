@@ -536,7 +536,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(({
             retrieverResources={metadata?.dify_retriever_resources || metadata?.dify_metadata?.retriever_resources}
             isDark={isDark}
             className="mt-4 mb-2"
-            animationDelay={isStreaming ? 0 : 200} // 流式响应结束后延迟200ms显示，减少延迟时间
+            animationDelay={isStreaming ? 0 : 300} // 流式响应结束后延迟300ms显示
           />
           
           {/* 助手消息操作按钮 - 添加-ml-2来确保左对齐，调整间距 */}

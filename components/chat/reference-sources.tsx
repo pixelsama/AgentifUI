@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { ChevronDownIcon, ChevronUpIcon, DocumentTextIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline'
 import { cn } from '@lib/utils'
 import { useMobile } from '@lib/hooks/use-mobile'
@@ -32,7 +32,6 @@ export function ReferenceSources({
   const [isExpanded, setIsExpanded] = useState(false)
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
-  const [isVisible, setIsVisible] = useState(false)
   const isMobile = useMobile()
 
   const validResources = useMemo(() => {
@@ -52,22 +51,6 @@ export function ReferenceSources({
       page: resource.page || null
     }))
   }, [retrieverResources])
-
-  useEffect(() => {
-    if (validResources.length > 0) {
-      if (animationDelay > 0) {
-        setIsVisible(false)
-        const timer = setTimeout(() => {
-          setIsVisible(true)
-        }, animationDelay)
-        return () => clearTimeout(timer)
-      } else {
-        setIsVisible(true)
-      }
-    } else {
-      setIsVisible(false)
-    }
-  }, [validResources.length, animationDelay])
 
   if (validResources.length === 0) {
     return null
@@ -120,23 +103,22 @@ export function ReferenceSources({
   }, [])
 
   return (
-    <div 
-      className={cn(
-        "w-full transition-opacity duration-200 ease-out",
-        isVisible ? "opacity-100" : "opacity-0",
-        className
-      )}
-    >
+    <div className={cn("w-full", className)}>
       <button
         onClick={toggleExpanded}
         className={cn(
           "w-full px-3 py-1.5 flex items-center justify-between",
           "border rounded transition-colors duration-150",
           "focus:outline-none focus:ring-2 focus:ring-offset-1",
+          "opacity-0 animate-fade-in",
           isDark 
             ? "bg-stone-800/80 border-stone-700/60 hover:bg-stone-700/80 text-stone-100 focus:ring-stone-500" 
             : "bg-stone-100/90 border-stone-300/70 hover:bg-stone-200/90 text-stone-800 focus:ring-stone-400"
         )}
+        style={{
+          animationDelay: `${animationDelay}ms`,
+          animationFillMode: 'forwards'
+        }}
         aria-expanded={isExpanded}
         aria-label={`${isExpanded ? '收起' : '展开'}引用资源`}
       >
@@ -166,11 +148,15 @@ export function ReferenceSources({
           className={cn(
             "mt-2 border rounded-lg overflow-hidden",
             "transition-all duration-200 ease-out",
-            "animate-in slide-in-from-top-2 fade-in duration-200",
             isDark 
               ? "bg-stone-800/50 border-stone-700/50 backdrop-blur-sm" 
               : "bg-stone-100/60 border-stone-300/60 backdrop-blur-sm"
           )}
+          style={{
+            opacity: 1,
+            transform: 'translateY(0)',
+            animation: 'fadeIn 200ms ease-out'
+          }}
         >
           <div className={cn(
             "divide-y",
