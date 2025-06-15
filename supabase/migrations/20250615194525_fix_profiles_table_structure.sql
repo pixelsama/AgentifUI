@@ -253,5 +253,11 @@ COMMENT ON COLUMN public.profiles.auth_source IS '认证来源：email, google, 
 COMMENT ON COLUMN public.profiles.sso_provider_id IS 'SSO 提供商 ID';
 COMMENT ON COLUMN public.profiles.last_login IS '最后登录时间';
 
-RAISE NOTICE '🎉 profiles 表结构修复完成！';
-RAISE NOTICE '�� 请运行注册测试以验证功能是否正常'; 
+-- --- BEGIN COMMENT ---
+-- 8. 完成提示
+-- --- END COMMENT ---
+DO $$
+BEGIN
+  RAISE NOTICE '🎉 profiles 表结构修复完成！';
+  RAISE NOTICE '📝 请运行注册测试以验证功能是否正常';
+END $$; 
