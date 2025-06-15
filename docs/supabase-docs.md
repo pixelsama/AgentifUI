@@ -183,8 +183,10 @@ CREATE POLICY "管理员可以查看所有执行记录" ON app_executions
 ### API 密钥管理
 
 1. `providers` 表：
-   - 主要字段：`id`, `name`, `type`, `base_url`, `auth_type`, `is_active`, `created_at`, `updated_at`
+   - 主要字段：`id`, `name`, `type`, `base_url`, `auth_type`, `is_active`, `is_default`, `created_at`, `updated_at`
    - 存储 API 服务提供商信息，如 Dify
+   - **默认提供商管理**：通过 `is_default` 字段和唯一约束确保系统中只有一个默认提供商
+   - **自动管理机制**：触发器自动维护默认提供商的唯一性和删除保护
 
 2. `service_instances` 表：
    - 主要字段：`id`, `provider_id`, `name`, `display_name`, `description`, `instance_id`, `api_path`, `is_default`, `visibility`, `config`, `created_at`, `updated_at`

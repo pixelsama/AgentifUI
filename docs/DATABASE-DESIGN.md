@@ -205,8 +205,16 @@
 | base_url | TEXT | 基础URL | NOT NULL |
 | auth_type | TEXT | 认证类型 | NOT NULL |
 | is_active | BOOLEAN | 是否激活 | DEFAULT TRUE |
+| is_default | BOOLEAN | 是否默认提供商 | DEFAULT FALSE |
 | created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT NOW() |
 | updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT NOW() |
+| | | | UNIQUE INDEX: 系统中只能有一个默认提供商 |
+
+**默认提供商管理特性：**
+- **唯一性约束**：通过部分唯一索引确保系统中只有一个默认提供商（`is_default = TRUE`）
+- **自动管理**：触发器自动确保设置新默认提供商时，其他提供商的默认状态被清除
+- **删除保护**：删除默认提供商时，自动将第一个活跃提供商设为新的默认提供商
+- **数据完整性**：确保系统始终有且仅有一个默认提供商（当存在活跃提供商时）
 
 #### service_instances
 
