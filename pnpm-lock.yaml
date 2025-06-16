@@ -127,8 +127,8 @@ importers:
         specifier: ^3
         version: 3.3.1
       '@stagewise/toolbar-next':
-        specifier: ^0.4.7
-        version: 0.4.7(@types/react@19.1.8)(next@15.3.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
+        specifier: ^0.4.8
+        version: 0.4.8(@types/react@19.1.8)(next@15.3.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.1.10
@@ -824,21 +824,21 @@ packages:
   '@rushstack/eslint-patch@1.11.0':
     resolution: {integrity: sha512-zxnHvoMQVqewTJr/W4pKjF0bMGiKJv1WX7bSrkl46Hg0QjESbzBROWK0Wg4RphzSOS5Jiy7eFimmM3UgMrMZbQ==}
 
-  '@stagewise/toolbar-next@0.4.7':
-    resolution: {integrity: sha512-U7uDlTYqIPVlGtukFJMDsUU68jni0nGuxGrXA+VXU74Udt22OtGmFuOr42KdEELXb2vDvZ4igc1XjwRH/4NnkQ==}
+  '@stagewise/toolbar-next@0.4.8':
+    resolution: {integrity: sha512-Ya35ePRkuxroUJX1Tsk+tIZaQIbP9frX5jglXS1FZ3SKDgGpVgb8E0mOmF+QjTwzEU+BhJyMV41/yzqUneBX9g==}
     peerDependencies:
       '@types/react': '>=18.0.0'
       next: '>=14.0.0'
       react: '>=18.0.0'
 
-  '@stagewise/toolbar-react@0.4.7':
-    resolution: {integrity: sha512-of7J8uJiqq38VVxKMxO4dkshb6wOc32xx4epi+ODovMLOrN8Xv2KbYMUxEtoPEKGkZagIwEZWiXKhI8ra29NVw==}
+  '@stagewise/toolbar-react@0.4.8':
+    resolution: {integrity: sha512-g+r2npAfftM87+jFt4go9e0KaIAkQ/sObDKWEmBp4IJaFpsOmcfBtLiF/GIoiXRrllxMa5oQZeRrra8EFq166A==}
     peerDependencies:
       '@types/react': '>=18.0.0'
       react: '>=18.0.0'
 
-  '@stagewise/toolbar@0.4.7':
-    resolution: {integrity: sha512-xU+lDPiGEhFs6Vx5Xwy1y43VQJIul9muN5u0eXnMoFKJYL+ku931at3gTRVP/+4BEgAC4G8P5g3pACyYa0ikOA==}
+  '@stagewise/toolbar@0.4.8':
+    resolution: {integrity: sha512-0ByvC4hYdHHf3rK5M+xSR9mipHYr8naNn2OgDBtv4DE0SoSCr08KfQtZ6VpsBNbOW/Mh1Y4c/AoWcyCTOc2ocA==}
 
   '@supabase/auth-js@2.70.0':
     resolution: {integrity: sha512-BaAK/tOAZFJtzF1sE3gJ2FwTjLf4ky3PSvcvLGEgEmO4BSBkwWKu8l67rLLIBZPDnCyV7Owk2uPyKHa0kj5QGg==}
@@ -3618,20 +3618,20 @@ snapshots:
 
   '@rushstack/eslint-patch@1.11.0': {}
 
-  '@stagewise/toolbar-next@0.4.7(@types/react@19.1.8)(next@15.3.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)':
+  '@stagewise/toolbar-next@0.4.8(@types/react@19.1.8)(next@15.3.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@stagewise/toolbar-react': 0.4.7(@types/react@19.1.8)(react@19.1.0)
+      '@stagewise/toolbar-react': 0.4.8(@types/react@19.1.8)(react@19.1.0)
       '@types/react': 19.1.8
       next: 15.3.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react: 19.1.0
 
-  '@stagewise/toolbar-react@0.4.7(@types/react@19.1.8)(react@19.1.0)':
+  '@stagewise/toolbar-react@0.4.8(@types/react@19.1.8)(react@19.1.0)':
     dependencies:
-      '@stagewise/toolbar': 0.4.7
+      '@stagewise/toolbar': 0.4.8
       '@types/react': 19.1.8
       react: 19.1.0
 
-  '@stagewise/toolbar@0.4.7': {}
+  '@stagewise/toolbar@0.4.8': {}
 
   '@supabase/auth-js@2.70.0':
     dependencies:
