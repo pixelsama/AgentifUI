@@ -443,9 +443,16 @@ const InstanceForm = ({
         } catch (dbError) {
           console.log('[同步配置] 数据库配置失败，尝试使用表单配置:', dbError);
           
-          // 检查表单配置是否完整
-          if (!formData.config.api_url || !formData.apiKey) {
-            throw new Error('数据库配置失效，且表单中的API URL或API Key为空，无法同步配置');
+          // --- BEGIN COMMENT ---
+          // 🎯 改进：编辑模式下支持使用表单配置进行同步
+          // 这样用户可以修改API Key后立即测试，无需先保存
+          // --- END COMMENT ---
+          if (!formData.config.api_url) {
+            throw new Error('API URL为空，无法同步配置。请填写API URL或检查数据库配置。');
+          }
+          
+          if (!formData.apiKey) {
+            throw new Error('API Key为空，无法同步配置。请在API密钥字段中输入新的密钥进行测试。');
           }
           
           // 使用表单配置作为fallback
@@ -497,14 +504,23 @@ const InstanceForm = ({
       const updatedFormData = { ...formData };
       
       if (appInfo) {
-        // 直接同步display_name（如果当前为空则更新）
-        if (!formData.display_name && appInfo.name) {
-          updatedFormData.display_name = appInfo.name;
+        // --- BEGIN COMMENT ---
+        // 🎯 改进：总是同步基本信息，但给用户选择权
+        // 不再限制只有空字段才同步，提高同步功能的实用性
+        // --- END COMMENT ---
+        
+        // 同步display_name（如果有变化则询问用户）
+        if (appInfo.name && appInfo.name !== formData.display_name) {
+          if (!formData.display_name || confirm(`是否将显示名称更新为："${appInfo.name}"？`)) {
+            updatedFormData.display_name = appInfo.name;
+          }
         }
         
-        // 直接同步description（如果当前为空则更新）
-        if (!formData.description && appInfo.description) {
-          updatedFormData.description = appInfo.description;
+        // 同步description（如果有变化则询问用户）
+        if (appInfo.description && appInfo.description !== formData.description) {
+          if (!formData.description || confirm(`是否将描述更新为："${appInfo.description}"？`)) {
+            updatedFormData.description = appInfo.description;
+          }
         }
         
         // --- BEGIN COMMENT ---
@@ -553,12 +569,19 @@ const InstanceForm = ({
       // --- END COMMENT ---
       setBaselineData(updatedFormData);
       
+      // --- BEGIN COMMENT ---
+      // 🎯 添加数据验证，确保真正获取到数据才显示成功
+      // --- END COMMENT ---
       const syncedItems = [];
       if (appInfo) {
         syncedItems.push('基本信息');
       }
       if (difyParams) {
         syncedItems.push('参数配置');
+      }
+      
+      if (syncedItems.length === 0) {
+        throw new Error('未能从 Dify API 获取到任何配置数据，请检查应用ID和API配置是否正确');
       }
       
       showFeedback(`成功从 Dify API 同步${syncedItems.join('和')}！`, 'success');
@@ -798,25 +821,52 @@ const InstanceForm = ({
               )}>
                 应用 ID (instance_id) *
               </label>
-              <input
-                type="text"
-                value={formData.instance_id}
-                onChange={(e) => {
-                  setFormData(prev => ({ ...prev, instance_id: e.target.value }));
-                  validateInstanceId(e.target.value);
-                }}
-                className={cn(
-                  "w-full px-3 py-2 rounded-lg border font-serif",
-                  isDark 
-                    ? "bg-stone-700 border-stone-600 text-stone-100 placeholder-stone-400" 
-                    : "bg-white border-stone-300 text-stone-900 placeholder-stone-500",
-                  isEditing && (isDark ? "bg-stone-800 cursor-not-allowed" : "bg-stone-100 cursor-not-allowed"),
-                  instanceIdError && "border-red-500"
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.instance_id}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, instance_id: e.target.value }));
+                    validateInstanceId(e.target.value);
+                  }}
+                  className={cn(
+                    "w-full px-3 py-2 rounded-lg border font-serif",
+                    !isEditing && "pr-20", // 新建模式下为按钮留空间
+                    isDark 
+                      ? "bg-stone-700 border-stone-600 text-stone-100 placeholder-stone-400" 
+                      : "bg-white border-stone-300 text-stone-900 placeholder-stone-500",
+                    isEditing && (isDark ? "bg-stone-800 cursor-not-allowed" : "bg-stone-100 cursor-not-allowed"),
+                    instanceIdError && "border-red-500"
+                  )}
+                  placeholder="输入应用 ID"
+                  required
+                  disabled={isEditing}
+                />
+                
+                {/* --- BEGIN COMMENT --- */}
+                {/* 🎯 新增：UUID生成按钮（仅在新建模式下显示） */}
+                {/* --- END COMMENT --- */}
+                {!isEditing && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const uuid = crypto.randomUUID();
+                      setFormData(prev => ({ ...prev, instance_id: uuid }));
+                      validateInstanceId(uuid);
+                    }}
+                    className={cn(
+                      "absolute right-2 top-1/2 transform -translate-y-1/2",
+                      "px-2 py-1 text-xs rounded transition-colors cursor-pointer",
+                      isDark 
+                        ? "bg-stone-600 hover:bg-stone-500 text-stone-300 hover:text-stone-200" 
+                        : "bg-stone-200 hover:bg-stone-300 text-stone-600 hover:text-stone-700"
+                    )}
+                    title="生成UUID"
+                  >
+                    UUID
+                  </button>
                 )}
-                placeholder="输入应用 ID"
-                required
-                disabled={isEditing}
-              />
+              </div>
               {isEditing && (
                 <p className={cn(
                   "text-xs mt-1 font-serif",
