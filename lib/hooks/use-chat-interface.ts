@@ -278,10 +278,15 @@ export function useChatInterface(onNodeEvent?: (event: DifySseNodeStartedEvent |
     setIsWaitingForResponse(true);
     
     const messageAttachments = Array.isArray(files) && files.length > 0 
-      ? files.map(file => ({
-          id: file.upload_file_id, name: file.name, size: file.size,
-          type: file.mime_type, upload_file_id: file.upload_file_id
-        }))
+      ? files.map(file => {
+          return {
+            id: file.upload_file_id, 
+            name: file.name, 
+            size: file.size,
+            type: file.mime_type, 
+            upload_file_id: file.upload_file_id
+          }
+        })
       : undefined;
     
     // --- BEGIN COMMENT ---
