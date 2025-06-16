@@ -1327,6 +1327,15 @@ export function useChatInterface(onNodeEvent?: (event: DifySseNodeStartedEvent |
     appConfigError: errorLoadingAppId,
     isUserLoggedIn: !!currentUserId, // 方便 UI 判断用户是否登录
     difyConversationId, // 暴露 Dify 对话 ID
-    conversationAppId // 暴露历史对话的原始appId，用于调试和UI显示
+    conversationAppId, // 暴露历史对话的原始appId，用于调试和UI显示
+    // --- BEGIN COMMENT ---
+    // 🎯 新增：暴露状态清理函数，用于新对话按钮和应用切换时清理对话状态
+    // --- END COMMENT ---
+    clearConversationState: useCallback(() => {
+      console.log('[useChatInterface] 清理对话状态');
+      setDifyConversationId(null);
+      setDbConversationUUID(null);
+      setConversationAppId(null);
+    }, [])
   };
 }
