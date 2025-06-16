@@ -29,7 +29,8 @@ import {
   Loader2,
   Sliders,
   Star,
-  RefreshCw
+  RefreshCw,
+  Lightbulb
 } from 'lucide-react';
 import { DifyAppTypeSelector } from '@components/admin/api-config/dify-app-type-selector';
 import { ProviderManagementModal } from '@components/admin/api-config/provider-management-modal';
@@ -895,7 +896,7 @@ const InstanceForm = ({
                     )}
                     title="点击生成随机UUID作为应用ID"
                   >
-                    <Zap className="h-3 w-3" />
+                    <Lightbulb className="h-3 w-3" />
                     <span>生成ID</span>
                   </button>
                 )}
