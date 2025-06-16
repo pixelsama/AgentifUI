@@ -36,7 +36,7 @@ import { CustomProviderSelector } from '@components/admin/api-config/custom-prov
 
 import { validateDifyFormData } from '@lib/services/dify/validation';
 import type { DifyAppType } from '@lib/types/dify-app-types';
-import { getDifyAppParameters } from '@lib/services/dify/app-service';
+// import { getDifyAppParameters } from '@lib/services/dify/app-service'; // 移除直接导入，改为动态导入保持一致性
 import type { DifyAppParametersResponse } from '@lib/services/dify/types';
 
 interface ApiConfigPageProps {
@@ -436,7 +436,7 @@ const InstanceForm = ({
           console.log('[同步配置] 编辑模式：尝试使用数据库配置');
           
           // 同时获取基本信息和参数
-          const { getDifyAppInfo } = await import('@lib/services/dify');
+          const { getDifyAppInfo, getDifyAppParameters } = await import('@lib/services/dify');
           appInfo = await getDifyAppInfo(formData.instance_id);
           difyParams = await getDifyAppParameters(formData.instance_id);
           
