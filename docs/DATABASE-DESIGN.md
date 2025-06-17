@@ -3,7 +3,7 @@
 本文档详细描述了 AgentifUI 平台的数据库设计，包括表结构、关系、安全机制和特性。本文档与当前数据库状态完全同步，包含所有已应用的迁移文件。
 
 **文档更新日期**: 2025-06-17  
-**数据库版本**: 包含至 20250617140818_drop_sso_views.sql 的所有迁移
+**数据库版本**: 包含至 20250617190000_drop_sso_views.sql 的所有迁移
 
 ## 目录
 
@@ -789,7 +789,7 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 ### 2025-06-17 SSO集成更新 - 北京信息科技大学CAS认证
 - `20250617185201_fix_enum_transaction_issue.sql`: 修复PostgreSQL枚举类型事务问题，添加CAS协议支持
 - `20250617185202_add_bistu_sso_data.sql`: 北信SSO集成数据迁移，添加学工号字段、SSO函数和配置
-- `20250617140818_drop_sso_views.sql`: 清理SSO统计视图，简化数据库对象
+- `20250617190000_drop_sso_views.sql`: 清理SSO统计视图，简化数据库对象
 - `20250609214200_remove_deprecated_admin_views.sql`: 移除过时管理员视图
 - `20250609214300_fix_admin_users_function_types.sql`: 修复管理员用户函数类型
 - `20250609214400_fix_phone_column_type.sql`: 修复手机号列类型

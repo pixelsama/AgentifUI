@@ -3,7 +3,7 @@
 本文档记录了AgentifUI项目中的数据库结构、功能和使用方法。本文档与当前数据库状态完全同步。
 
 **文档更新日期**: 2025-06-17  
-**数据库版本**: 包含至 20250617140818_drop_sso_views.sql 的所有迁移
+**数据库版本**: 包含至 20250617190000_drop_sso_views.sql 的所有迁移
 
 ## 当前系统状态
 
@@ -679,7 +679,7 @@ if (!isAdmin) return <AccessDenied />;
   - 创建find_user_by_employee_number函数用于SSO用户查找
   - 创建create_sso_user函数用于自动创建SSO用户
   - 插入北京信息科技大学CAS提供商配置数据
-- `/supabase/migrations/20250617140818_drop_sso_views.sql`: 清理SSO统计视图，简化数据库对象
+- `/supabase/migrations/20250617190000_drop_sso_views.sql`: 清理SSO统计视图，简化数据库对象
 
 ## 迁移文件说明
 
