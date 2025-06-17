@@ -1087,7 +1087,14 @@ export function useChatInterface(onNodeEvent?: (event: DifySseNodeStartedEvent |
             });
           }
           
-          console.log(`[handleStopProcessing] 僵尸流式状态已修复，停止操作完成`);
+          console.log(`[handleStopProcessing] 僵尸流式状态已修复`);
+          
+          // --- BEGIN COMMENT ---
+          // 🎯 修复：僵尸状态修复后也需要重置关键状态，避免按钮失效
+          // 确保用户可以重新提交，但不影响消息保存逻辑
+          // --- END COMMENT ---
+          isSubmittingRef.current = false;
+          console.log('[handleStopProcessing] 僵尸状态修复完成，用户可以重新提交');
           return; // 修复完成，无需继续停止操作
         }
       }
@@ -1232,10 +1239,14 @@ export function useChatInterface(onNodeEvent?: (event: DifySseNodeStartedEvent |
       }
     }
     
-    // 更新UI状态
-    if (state.isWaitingForResponse && state.streamingMessageId === currentStreamingId) {
-        setIsWaitingForResponse(false);
-    }
+    // --- BEGIN COMMENT ---
+    // 🎯 修复：停止操作后重置关键状态，确保用户可以重新提交
+    // 无条件重置，避免状态不一致导致的按钮失效问题
+    // --- END COMMENT ---
+    setIsWaitingForResponse(false);
+    isSubmittingRef.current = false;
+    
+    console.log('[handleStopProcessing] 正常停止流程完成，用户可以重新提交');
   }, [
     currentUserId,
     currentAppId, // 🎯 修改：直接使用currentAppId和currentAppInstance
