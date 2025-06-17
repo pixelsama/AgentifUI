@@ -491,6 +491,22 @@ export function useChatInterface(onNodeEvent?: (event: DifySseNodeStartedEvent |
           }
         }
         
+        // --- BEGIN COMMENT ---
+        // 🎯 关键修复：历史对话中提前保存用户消息
+        // 解决用户点击停止时消息丢失的问题
+        // 在流式处理开始前就保存用户消息，确保不会因停止操作而丢失
+        // --- END COMMENT ---
+        if (finalDbConvUUID && userMessage && userMessage.persistenceStatus !== 'saved') {
+          console.log(`[handleSubmit] 历史对话提前保存用户消息，ID=${userMessage.id}, 数据库对话ID=${finalDbConvUUID}`);
+          
+          // 立即保存用户消息，不等待流式响应
+          saveMessage(userMessage, finalDbConvUUID).then(() => {
+            console.log(`[handleSubmit] 历史对话用户消息提前保存成功，ID=${userMessage.id}`);
+          }).catch(err => {
+            console.error(`[handleSubmit] 历史对话用户消息提前保存失败，ID=${userMessage.id}:`, err);
+          });
+        }
+        
         // 为现有对话构造一个不包含 user 的基础 payload，因为 DifyChatRequestPayload 会单独添加
         const payloadForExistingStream = {
             query: message,
@@ -760,12 +776,14 @@ export function useChatInterface(onNodeEvent?: (event: DifySseNodeStartedEvent |
       if (currentDbConvId) {
         console.log(`[handleSubmit] 流式响应结束，开始保存消息，数据库对话ID=${currentDbConvId}`);
         
-        // 保存用户消息
-        if (userMessage && userMessage.persistenceStatus !== 'saved') {
-          console.log(`[handleSubmit] 保存用户消息，ID=${userMessage.id}, 数据库对话ID=${currentDbConvId}`);
+        // 保存用户消息（检查是否已经保存过）
+        if (userMessage && userMessage.persistenceStatus !== 'saved' && !userMessage.db_id) {
+          console.log(`[handleSubmit] 流式响应结束后保存用户消息，ID=${userMessage.id}, 数据库对话ID=${currentDbConvId}`);
           saveMessage(userMessage, currentDbConvId).catch(err => {
-            console.error('[handleSubmit] 保存用户消息失败:', err);
+            console.error('[handleSubmit] 流式响应结束后保存用户消息失败:', err);
           });
+        } else if (userMessage) {
+          console.log(`[handleSubmit] 用户消息已保存，跳过重复保存，ID=${userMessage.id}, db_id=${userMessage.db_id}, status=${userMessage.persistenceStatus}`);
         }
         
         // 保存助手消息
