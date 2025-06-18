@@ -3,7 +3,7 @@
 本文档详细描述了 AgentifUI 平台的数据库设计，包括表结构、关系、安全机制和特性。本文档与当前数据库状态完全同步，包含所有已应用的迁移文件。
 
 **文档更新日期**: 2025-06-18  
-**数据库版本**: 包含至 20250618150000_fix_sso_function_types.sql 的所有迁移
+**数据库版本**: 包含至 20250618160000_fix_sso_uuid_type_conversion.sql 的所有迁移
 
 ## 目录
 
@@ -638,10 +638,10 @@ SELECT create_sso_user('2021011221', 'zhang.san', '10000000-0000-0000-0000-00000
 - 设置初始登录时间
 
 **最新修复 (2025-06-18)**：
-- 修正了INSERT语句中的数据类型使用
-- `auth_source` 字段直接使用TEXT值而非枚举类型转换
-- 确保所有枚举类型字段正确转换
-- 避免了类型不匹配导致的插入失败
+- **UUID类型转换修复**: 修正了sso_provider_id字段的类型转换问题，直接使用UUID类型而非错误的TEXT转换
+- **INSERT语句优化**: 确保所有字段的数据类型正确匹配数据库表结构
+- **类型安全保证**: auth_source使用TEXT值，枚举字段正确转换，UUID字段直接使用UUID类型
+- **错误解决**: 彻底解决了"column sso_provider_id is of type uuid but expression is of type text"错误
 
 ### 数据库安全最佳实践
 
@@ -839,9 +839,10 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 - `20250617185202_add_bistu_sso_data.sql`: 北信SSO集成数据迁移，添加学工号字段、SSO函数和配置
 - `20250617190000_drop_sso_views.sql`: 清理SSO统计视图，简化数据库对象
 
-### 2025-06-18 数据库稳定性修复 - RLS策略无限递归问题
+### 2025-06-18 数据库稳定性修复 - RLS策略无限递归问题和SSO类型修复
 - `20250618110000_fix_profiles_infinite_recursion.sql`: 完全修复profiles表RLS策略无限递归问题，确保系统稳定运行
 - `20250618150000_fix_sso_function_types.sql`: 修复SSO数据库函数返回类型不匹配问题，确保北信SSO登录正常工作
+- `20250618160000_fix_sso_uuid_type_conversion.sql`: 修复create_sso_user函数中的UUID类型转换问题，确保SSO用户创建正常工作
 - `20250609214200_remove_deprecated_admin_views.sql`: 移除过时管理员视图
 - `20250609214300_fix_admin_users_function_types.sql`: 修复管理员用户函数类型
 - `20250609214400_fix_phone_column_type.sql`: 修复手机号列类型

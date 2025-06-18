@@ -3,7 +3,7 @@
 本文档记录了AgentifUI项目中的数据库结构、功能和使用方法。本文档与当前数据库状态完全同步。
 
 **文档更新日期**: 2025-06-18  
-**数据库版本**: 包含至 20250618150000_fix_sso_function_types.sql 的所有迁移
+**数据库版本**: 包含至 20250618160000_fix_sso_uuid_type_conversion.sql 的所有迁移
 
 ## 当前系统状态
 
@@ -18,6 +18,7 @@
 - ✅ **学工号管理**: 支持北信学工号字段和身份验证，类型定义完整
 - ✅ **SSO用户管理**: 自动创建SSO用户账户，安全的身份映射
 - ✅ **SSO函数修复**: 修复了数据库函数返回类型不匹配问题，确保SSO登录正常工作
+- ✅ **SSO类型转换修复**: 修复了create_sso_user函数中的UUID类型转换问题，确保SSO用户创建功能正常
 - ✅ **数据库稳定性**: 修复了profiles表RLS策略无限递归问题，确保系统正常运行
 
 ## 数据库概述
@@ -359,7 +360,11 @@ CREATE POLICY "组织管理员可以管理部门应用权限" ON department_app_
 - 为首次SSO登录用户创建账户
 - 自动设置认证来源为bistu_sso（TEXT类型）
 - 生成唯一用户名和完整用户信息
-- **最新修复**: 确保所有数据类型匹配，避免类型转换错误
+- **最新修复 (2025-06-18)**: 
+  - 修复了sso_provider_id字段的UUID类型转换问题
+  - 直接使用UUID类型值而非错误的TEXT转换
+  - 解决了"column sso_provider_id is of type uuid but expression is of type text"错误
+  - 确保所有字段的数据类型正确匹配数据库表结构
 
 ## 行级安全策略 (RLS)
 
@@ -684,6 +689,9 @@ if (!isAdmin) return <AccessDenied />;
   - 创建create_sso_user函数用于自动创建SSO用户
   - 插入北京信息科技大学CAS提供商配置数据
 - `/supabase/migrations/20250617190000_drop_sso_views.sql`: 清理SSO统计视图，简化数据库对象
+
+### 2025-06-18 SSO类型修复 - UUID类型转换问题
+- `/supabase/migrations/20250618160000_fix_sso_uuid_type_conversion.sql`: 修复create_sso_user函数中的UUID类型转换问题，确保SSO用户创建功能正常工作
 
 ## 迁移文件说明
 
