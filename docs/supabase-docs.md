@@ -3,7 +3,7 @@
 本文档记录了AgentifUI项目中的数据库结构、功能和使用方法。本文档与当前数据库状态完全同步。
 
 **文档更新日期**: 2025-06-18  
-**数据库版本**: 包含至 20250618110000_fix_profiles_infinite_recursion.sql 的所有迁移
+**数据库版本**: 包含至 20250618150000_fix_sso_function_types.sql 的所有迁移
 
 ## 当前系统状态
 
@@ -17,6 +17,7 @@
 - ✅ **北信SSO集成**: 完整的CAS 2.0单点登录系统，支持统一认证
 - ✅ **学工号管理**: 支持北信学工号字段和身份验证，类型定义完整
 - ✅ **SSO用户管理**: 自动创建SSO用户账户，安全的身份映射
+- ✅ **SSO函数修复**: 修复了数据库函数返回类型不匹配问题，确保SSO登录正常工作
 - ✅ **数据库稳定性**: 修复了profiles表RLS策略无限递归问题，确保系统正常运行
 
 ## 数据库概述
@@ -350,13 +351,15 @@ CREATE POLICY "组织管理员可以管理部门应用权限" ON department_app_
 
 **`find_user_by_employee_number(emp_num TEXT)`**
 - 根据学工号查找用户信息，专用于北信SSO登录
-- 返回用户的完整profile信息
+- 返回用户的完整profile信息，包括正确的枚举类型和TEXT类型字段
 - 使用SECURITY DEFINER模式确保权限安全
+- **最新修复**: 修正了返回类型中status字段的枚举类型匹配问题
 
 **`create_sso_user(emp_number TEXT, user_name TEXT, sso_provider_uuid UUID)`**
 - 为首次SSO登录用户创建账户
-- 自动设置认证来源为bistu_sso
+- 自动设置认证来源为bistu_sso（TEXT类型）
 - 生成唯一用户名和完整用户信息
+- **最新修复**: 确保所有数据类型匹配，避免类型转换错误
 
 ## 行级安全策略 (RLS)
 

@@ -3,7 +3,7 @@
 本文档详细描述了 AgentifUI 平台的数据库设计，包括表结构、关系、安全机制和特性。本文档与当前数据库状态完全同步，包含所有已应用的迁移文件。
 
 **文档更新日期**: 2025-06-18  
-**数据库版本**: 包含至 20250618110000_fix_profiles_infinite_recursion.sql 的所有迁移
+**数据库版本**: 包含至 20250618150000_fix_sso_function_types.sql 的所有迁移
 
 ## 目录
 
@@ -609,13 +609,19 @@ SELECT * FROM find_user_by_employee_number('2021011221');
 - `username`: 用户名
 - `employee_number`: 学工号
 - `last_login`: 最后登录时间
-- `auth_source`: 认证来源
-- `status`: 账户状态
+- `auth_source`: 认证来源（TEXT类型）
+- `status`: 账户状态（account_status枚举类型）
 
 **安全特性：**
 - 使用 `SECURITY DEFINER` 模式
 - 只返回活跃状态用户
 - 验证学工号格式
+
+**最新修复 (2025-06-18)**：
+- 修正了函数返回类型定义中的数据类型不匹配问题
+- `auth_source` 字段使用正确的TEXT类型
+- `status` 字段使用正确的account_status枚举类型
+- 解决了PostgreSQL返回类型检查错误
 
 **函数：** `create_sso_user(emp_number TEXT, user_name TEXT, sso_provider_uuid UUID)`
 
@@ -628,8 +634,14 @@ SELECT create_sso_user('2021011221', 'zhang.san', '10000000-0000-0000-0000-00000
 **特性：**
 - 自动处理用户名冲突（添加数字后缀）
 - 验证学工号唯一性
-- 自动设置认证来源为 'bistu_sso'
+- 自动设置认证来源为 'bistu_sso'（TEXT类型值）
 - 设置初始登录时间
+
+**最新修复 (2025-06-18)**：
+- 修正了INSERT语句中的数据类型使用
+- `auth_source` 字段直接使用TEXT值而非枚举类型转换
+- 确保所有枚举类型字段正确转换
+- 避免了类型不匹配导致的插入失败
 
 ### 数据库安全最佳实践
 
@@ -829,6 +841,7 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 
 ### 2025-06-18 数据库稳定性修复 - RLS策略无限递归问题
 - `20250618110000_fix_profiles_infinite_recursion.sql`: 完全修复profiles表RLS策略无限递归问题，确保系统稳定运行
+- `20250618150000_fix_sso_function_types.sql`: 修复SSO数据库函数返回类型不匹配问题，确保北信SSO登录正常工作
 - `20250609214200_remove_deprecated_admin_views.sql`: 移除过时管理员视图
 - `20250609214300_fix_admin_users_function_types.sql`: 修复管理员用户函数类型
 - `20250609214400_fix_phone_column_type.sql`: 修复手机号列类型
