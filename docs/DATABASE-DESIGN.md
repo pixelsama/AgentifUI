@@ -2,8 +2,8 @@
 
 本文档详细描述了 AgentifUI 平台的数据库设计，包括表结构、关系、安全机制和特性。本文档与当前数据库状态完全同步，包含所有已应用的迁移文件。
 
-**文档更新日期**: 2025-06-17  
-**数据库版本**: 包含至 20250617190000_drop_sso_views.sql 的所有迁移
+**文档更新日期**: 2025-06-18  
+**数据库版本**: 包含至 20250618110000_fix_profiles_infinite_recursion.sql 的所有迁移
 
 ## 目录
 
@@ -653,6 +653,42 @@ SELECT create_sso_user('2021011221', 'zhang.san', '10000000-0000-0000-0000-00000
    - 视图级别的权限控制
    - 敏感数据的访问控制
 
+### RLS策略优化和修复
+
+#### profiles表RLS策略重构 (2025-06-18)
+
+**问题背景**：
+- profiles表的RLS策略存在无限递归问题
+- 复杂的表间依赖导致策略执行时循环查询
+- 影响系统稳定性和性能
+
+**解决方案**：
+1. **策略简化**：移除所有复杂的表间依赖策略
+2. **超简单策略**：采用最基础的权限控制逻辑
+3. **避免递归**：确保策略不会产生循环查询
+
+**当前策略设计**：
+
+```sql
+-- 查看策略：所有认证用户可查看所有资料
+CREATE POLICY "simple_profiles_select" ON profiles
+  FOR SELECT USING (auth.uid() IS NOT NULL);
+
+-- 插入策略：用户只能插入自己的资料
+CREATE POLICY "simple_profiles_insert" ON profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- 更新策略：用户只能更新自己的资料
+CREATE POLICY "simple_profiles_update" ON profiles
+  FOR UPDATE USING (auth.uid() = id);
+```
+
+**策略特点**：
+- **简单有效**：避免复杂的子查询和表间依赖
+- **性能优化**：减少数据库查询负载
+- **兼容性保持**：确保现有功能正常工作
+- **管理员友好**：管理员可以正常访问所有用户数据
+
 ## 初始数据
 
 系统预设了以下初始数据：
@@ -790,6 +826,9 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 - `20250617185201_fix_enum_transaction_issue.sql`: 修复PostgreSQL枚举类型事务问题，添加CAS协议支持
 - `20250617185202_add_bistu_sso_data.sql`: 北信SSO集成数据迁移，添加学工号字段、SSO函数和配置
 - `20250617190000_drop_sso_views.sql`: 清理SSO统计视图，简化数据库对象
+
+### 2025-06-18 数据库稳定性修复 - RLS策略无限递归问题
+- `20250618110000_fix_profiles_infinite_recursion.sql`: 完全修复profiles表RLS策略无限递归问题，确保系统稳定运行
 - `20250609214200_remove_deprecated_admin_views.sql`: 移除过时管理员视图
 - `20250609214300_fix_admin_users_function_types.sql`: 修复管理员用户函数类型
 - `20250609214400_fix_phone_column_type.sql`: 修复手机号列类型
