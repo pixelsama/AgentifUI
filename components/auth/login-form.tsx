@@ -272,7 +272,7 @@ export function LoginForm() {
           "mt-2 text-sm font-serif",
           isDark ? "text-gray-400" : "text-gray-600"
         )}>
-          继续探索 AI 教育的无限可能
+          欢迎使用智能助手
         </p>
       </div>
 
