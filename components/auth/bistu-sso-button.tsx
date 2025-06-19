@@ -66,7 +66,7 @@ export function BistuSSOButton({
       size={size}
       className={cn(
         // --- BEGIN COMMENT ---
-        // 北信特色的按钮样式
+        // 北信科特色的按钮样式
         // --- END COMMENT ---
         "relative w-full flex items-center justify-center gap-2",
         "bg-blue-600 hover:bg-blue-700 text-white",
@@ -79,43 +79,40 @@ export function BistuSSOButton({
       onClick={handleSSOLogin}
     >
       {/* --- BEGIN COMMENT --- */}
-      {/* 北信Logo图标（可选） */}
+      {/* 根据loading状态显示不同图标 */}
       {/* --- END COMMENT --- */}
-      <svg 
-        className="w-5 h-5" 
-        viewBox="0 0 24 24" 
-        fill="currentColor"
-        aria-hidden="true"
-      >
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-      </svg>
+      {isLoading ? (
+        <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24">
+          <circle 
+            className="opacity-25" 
+            cx="12" 
+            cy="12" 
+            r="10" 
+            stroke="currentColor" 
+            strokeWidth="4" 
+            fill="none"
+          />
+          <path 
+            className="opacity-75" 
+            fill="currentColor" 
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
+      ) : (
+        <svg 
+          className="w-5 h-5" 
+          viewBox="0 0 24 24" 
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+      )}
       
       {/* --- BEGIN COMMENT --- */}
       {/* 按钮文本内容 */}
       {/* --- END COMMENT --- */}
-      {isLoading ? (
-        <>
-          <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24">
-            <circle 
-              className="opacity-25" 
-              cx="12" 
-              cy="12" 
-              r="10" 
-              stroke="currentColor" 
-              strokeWidth="4" 
-              fill="none"
-            />
-            <path 
-              className="opacity-75" 
-              fill="currentColor" 
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          正在跳转...
-        </>
-      ) : (
-        children || '使用北信统一认证登录'
-      )}
+      {isLoading ? '正在跳转...' : (children || '使用北信科统一认证登录')}
     </Button>
   );
 }
@@ -137,7 +134,7 @@ export function SimpleBistuSSOButton({
       variant="outline"
     >
       <span className="text-sm">
-        🏛️ 北信统一认证
+        🏛️ 北信科统一认证
       </span>
     </BistuSSOButton>
   );

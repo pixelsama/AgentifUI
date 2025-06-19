@@ -233,7 +233,7 @@ export class BistuCASService {
         const attributes = success['cas:attributes'] || {};
 
         // --- BEGIN COMMENT ---
-        // 提取用户信息，根据北信CAS实际返回结果：
+        // 提取用户信息，根据北信科CAS实际返回结果：
         // - cas:user 是学工号（如：2021011221）
         // - cas:attributes 包含 cas:name（真实姓名）和 cas:username（学工号）
         // 确保所有字段都转换为字符串类型
@@ -314,7 +314,7 @@ export class BistuCASService {
     }
     
     // --- BEGIN COMMENT ---
-    // 根据北信实际测试结果，学工号为10位数字（如：2021011221）
+    // 根据北信科实际测试结果，学工号为10位数字（如：2021011221）
     // --- END COMMENT ---
     const pattern = /^\d{10}$/;
     return pattern.test(employeeNumber.trim());
@@ -341,7 +341,7 @@ export class BistuCASService {
 export function createBistuCASService(): BistuCASService {
   // --- BEGIN COMMENT ---
   // ⚠️ 需要配置的环境变量:
-  // BISTU_SSO_BASE_URL: 北信CAS服务器地址，默认 https://sso.bistu.edu.cn
+  // BISTU_SSO_BASE_URL: 北信科CAS服务器地址，默认 https://sso.bistu.edu.cn
   // NEXT_PUBLIC_APP_URL: 当前应用的URL，用于构建回调地址
   // --- END COMMENT ---
   const baseUrl = process.env.BISTU_SSO_BASE_URL || 'https://sso.bistu.edu.cn';

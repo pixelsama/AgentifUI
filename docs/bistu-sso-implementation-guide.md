@@ -82,7 +82,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 ### 2. 学工号格式验证
 
-如果北信的学工号格式不是10位数字，请修改：
+如果北信科的学工号格式不是10位数字，请修改：
 
 **文件**: `lib/services/sso/bistu-cas-service.ts`
 **行数**: 约第267行
@@ -146,10 +146,10 @@ response.cookies.set('sso_session', JSON.stringify(sessionData), {
 
 2. **访问登录页面**
    - 打开 `http://localhost:3000/login`
-   - 确认能看到北信SSO登录按钮
+   - 确认能看到北信科SSO登录按钮
 
 3. **测试SSO重定向**
-   - 点击"使用北信统一认证登录"按钮
+   - 点击"使用北信科统一认证登录"按钮
    - 应该重定向到 `https://sso.bistu.edu.cn/login`
 
 4. **测试回调处理**
@@ -210,7 +210,7 @@ SSO login successful - User: username, Employee: 2021011221
 "bg-blue-600 hover:bg-blue-700 text-white",
 
 // 修改按钮文本
-children || '使用北信统一认证登录'
+children || '使用北信科统一认证登录'
 ```
 
 ### 添加额外的用户信息

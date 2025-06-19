@@ -288,7 +288,7 @@
 - `SAML`: SAML 2.0 协议  
 - `CAS`: CAS 2.0/3.0 协议（支持北京信息科技大学统一认证）
 
-**北信CAS配置示例：**
+**北信科CAS配置示例：**
 ```json
 {
   "base_url": "https://sso.bistu.edu.cn",
@@ -597,7 +597,7 @@ SELECT public.initialize_admin('admin@example.com');
 
 **函数：** `find_user_by_employee_number(emp_num TEXT)`
 
-根据学工号查找用户信息，专用于北信SSO登录：
+根据学工号查找用户信息，专用于北信科SSO登录：
 
 ```sql
 SELECT * FROM find_user_by_employee_number('2021011221');
@@ -836,12 +836,12 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 
 ### 2025-06-17 SSO集成更新 - 北京信息科技大学CAS认证
 - `20250617185201_fix_enum_transaction_issue.sql`: 修复PostgreSQL枚举类型事务问题，添加CAS协议支持
-- `20250617185202_add_bistu_sso_data.sql`: 北信SSO集成数据迁移，添加学工号字段、SSO函数和配置
+- `20250617185202_add_bistu_sso_data.sql`: 北信科SSO集成数据迁移，添加学工号字段、SSO函数和配置
 - `20250617190000_drop_sso_views.sql`: 清理SSO统计视图，简化数据库对象
 
 ### 2025-06-18 数据库稳定性修复 - RLS策略无限递归问题和SSO类型修复
 - `20250618110000_fix_profiles_infinite_recursion.sql`: 完全修复profiles表RLS策略无限递归问题，确保系统稳定运行
-- `20250618150000_fix_sso_function_types.sql`: 修复SSO数据库函数返回类型不匹配问题，确保北信SSO登录正常工作
+- `20250618150000_fix_sso_function_types.sql`: 修复SSO数据库函数返回类型不匹配问题，确保北信科SSO登录正常工作
 - `20250618160000_fix_sso_uuid_type_conversion.sql`: 修复create_sso_user函数中的UUID类型转换问题，确保SSO用户创建正常工作
 - `20250609214200_remove_deprecated_admin_views.sql`: 移除过时管理员视图
 - `20250609214300_fix_admin_users_function_types.sql`: 修复管理员用户函数类型

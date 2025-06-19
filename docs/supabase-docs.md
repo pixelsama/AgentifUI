@@ -14,8 +14,8 @@
 - ✅ **用户管理**: 使用函数方式替代了过时的管理员视图
 - ✅ **中间件权限**: 前端路由级别的管理员权限验证
 - ✅ **应用访问控制**: 基于权限的应用可见性管理，二元权限控制
-- ✅ **北信SSO集成**: 完整的CAS 2.0单点登录系统，支持统一认证
-- ✅ **学工号管理**: 支持北信学工号字段和身份验证，类型定义完整
+- ✅ **北信科SSO集成**: 完整的CAS 2.0单点登录系统，支持统一认证
+- ✅ **学工号管理**: 支持北信科学工号字段和身份验证，类型定义完整
 - ✅ **SSO用户管理**: 自动创建SSO用户账户，安全的身份映射
 - ✅ **SSO函数修复**: 修复了数据库函数返回类型不匹配问题，确保SSO登录正常工作
 - ✅ **SSO类型转换修复**: 修复了create_sso_user函数中的UUID类型转换问题，确保SSO用户创建功能正常
@@ -342,7 +342,7 @@ CREATE POLICY "组织管理员可以管理部门应用权限" ON department_app_
 1. `sso_providers` 表：
    - 主要字段：`id`, `name`, `protocol`, `settings`, `client_id`, `client_secret`, `metadata_url`, `enabled`, `created_at`, `updated_at`
    - `protocol` 字段可能的值为 `'SAML'`, `'OAuth2'`, `'OIDC'`, `'CAS'`
-   - 支持多种单点登录协议，包括北信的CAS 2.0认证系统
+   - 支持多种单点登录协议，包括北信科的CAS 2.0认证系统
    - `settings` 字段存储协议特定配置，如CAS服务器地址、回调URL等
 
 2. `domain_sso_mappings` 表：
@@ -351,7 +351,7 @@ CREATE POLICY "组织管理员可以管理部门应用权限" ON department_app_
 #### SSO用户管理函数
 
 **`find_user_by_employee_number(emp_num TEXT)`**
-- 根据学工号查找用户信息，专用于北信SSO登录
+- 根据学工号查找用户信息，专用于北信科SSO登录
 - 返回用户的完整profile信息，包括正确的枚举类型和TEXT类型字段
 - 使用SECURITY DEFINER模式确保权限安全
 - **最新修复**: 修正了返回类型中status字段的枚举类型匹配问题
@@ -681,9 +681,9 @@ if (!isAdmin) return <AccessDenied />;
 - `/supabase/migrations/20250610130000_add_department_permission_management.sql`: 添加部门权限管理函数和同步工具
 - `/supabase/migrations/20250610140000_clean_virtual_department_permissions.sql`: **清空虚拟权限数据，确保只有手动配置的权限记录**
 
-### 北信SSO集成 (2025-06-17)
+### 北信科SSO集成 (2025-06-17)
 - `/supabase/migrations/20250617185201_fix_enum_transaction_issue.sql`: 修复PostgreSQL枚举类型事务问题，添加CAS协议支持到sso_protocol枚举
-- `/supabase/migrations/20250617185202_add_bistu_sso_data.sql`: 北信SSO完整集成，包括：
+- `/supabase/migrations/20250617185202_add_bistu_sso_data.sql`: 北信科SSO完整集成，包括：
   - 在profiles表添加employee_number字段（学工号）
   - 创建find_user_by_employee_number函数用于SSO用户查找
   - 创建create_sso_user函数用于自动创建SSO用户

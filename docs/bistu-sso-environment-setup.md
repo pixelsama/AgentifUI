@@ -10,7 +10,7 @@
 # ⚠️ 重要：以下配置需要根据您的实际环境进行调整
 # --- END COMMENT ---
 
-# 北信CAS服务器地址（通常不需要修改）
+# 北信科CAS服务器地址（通常不需要修改）
 BISTU_SSO_BASE_URL=https://sso.bistu.edu.cn
 
 # 当前应用的完整URL（用于构建回调地址）
@@ -43,7 +43,7 @@ SESSION_SECRET=your-super-secret-session-key-here-change-in-production
 ### 可选配置的变量
 
 1. **BISTU_SSO_BASE_URL**
-   - 北信CAS服务器地址
+   - 北信科CAS服务器地址
    - 默认值：`https://sso.bistu.edu.cn`
    - 通常不需要修改
 
@@ -99,7 +99,7 @@ openssl rand -hex 32
 
 开发环境需要：
 1. 配置正确的回调URL
-2. 确保网络可以访问北信CAS服务器
+2. 确保网络可以访问北信科CAS服务器
 3. 使用有效的学工号测试
 
 ### Q: 生产环境部署注意事项？
