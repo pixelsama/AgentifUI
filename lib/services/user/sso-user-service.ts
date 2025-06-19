@@ -532,7 +532,7 @@ export class SSOUserService {
   }
 
   /**
-   * 获取北信SSO提供商信息
+   * 获取北信科SSO提供商信息
    * @returns SSO提供商信息
    */
   static async getBistuSSOProvider(): Promise<{ id: string; name: string } | null> {
@@ -636,10 +636,12 @@ export class SSOUserService {
     }
     
     // --- BEGIN COMMENT ---
-    // 根据北信实际测试结果，学工号为10位数字（如：2021011221）
+    // 根据北信科实际情况：
+    // - 8位数字为工号（老师使用，如：12345678）
+    // - 10位数字为学号（学生使用，如：2021011221）
     // --- END COMMENT ---
     const trimmed = employeeStr.trim();
-    const pattern = /^\d{10}$/;
+    const pattern = /^\d{8}$|^\d{10}$/;
     return pattern.test(trimmed);
   }
 } 
