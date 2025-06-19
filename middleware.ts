@@ -85,7 +85,8 @@ export async function middleware(request: NextRequest) {
                          pathname === '/about' || 
                          pathname.startsWith('/register') ||
                          pathname === '/forgot-password' ||
-                         pathname === '/reset-password';
+                         pathname === '/reset-password' ||
+                         pathname.startsWith('/sso/processing');
   
   // 启用路由保护逻辑，确保未登录用户无法访问受保护的路由
   if (!user && !isAuthRoute && !isApiRoute && !isPublicRoute) {

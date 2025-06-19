@@ -185,13 +185,13 @@ export async function GET(request: NextRequest) {
 
     // --- BEGIN COMMENT ---
     // 简化SSO会话处理逻辑
-    // 直接重定向到登录页面，并传递用户信息，让前端通过常规Supabase认证流程登录
+    // 重定向到专门的SSO处理页面，而不是登录页面
     // 修复：确保使用正确的学工号构建邮箱，优先使用employeeNumberStr
     // --- END COMMENT ---
     const userEmail = `${user.employee_number || employeeNumberStr}@bistu.edu.cn`;
     console.log(`Setting user email in URL: ${userEmail} (from employee_number: ${user.employee_number}, employeeNumberStr: ${employeeNumberStr})`);
     
-    const successUrl = new URL('/login', appUrl);
+    const successUrl = new URL('/sso/processing', appUrl);
     successUrl.searchParams.set('sso_login', 'success');
     successUrl.searchParams.set('welcome', user.full_name || user.username || 'User');
     successUrl.searchParams.set('redirect_to', returnUrl);
@@ -223,7 +223,7 @@ export async function GET(request: NextRequest) {
       path: '/',
     });
 
-    console.log(`SSO login successful - User: ${user.username}, Redirecting to login page`);
+    console.log(`SSO login successful - User: ${user.username}, Redirecting to SSO processing page`);
     return response;
   } catch (error) {
     console.error('SSO callback processing failed:', error);
