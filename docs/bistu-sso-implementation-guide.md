@@ -34,10 +34,10 @@ NEXT_PUBLIC_BISTU_ONLY_MODE=false
 
 ```bash
 # 查看迁移状态
-npx supabase migration list
+supabase migration list
 
 # 应用SSO支持迁移
-npx supabase db push
+supabase db push
 ```
 
 ### 4. 验证集成

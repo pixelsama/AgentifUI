@@ -1096,10 +1096,10 @@ NEXT_PUBLIC_BISTU_ONLY_MODE=false
 
 ```bash
 # 应用SSO相关迁移
-npx supabase db push
+supabase db push
 
 # 验证迁移状态
-npx supabase migration list
+supabase migration list
 ```
 
 ### 3. 安全配置

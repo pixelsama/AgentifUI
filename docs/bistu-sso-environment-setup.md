@@ -45,10 +45,10 @@ NEXT_PUBLIC_BISTU_ONLY_MODE=false
 
 ```bash
 # 查看迁移状态
-npx supabase migration list
+supabase migration list
 
 # 应用所有迁移
-npx supabase db push
+supabase db push
 ```
 
 关键迁移文件：
@@ -127,7 +127,7 @@ CAS验证成功 → 回调应用 → 验证ticket → 创建/查找用户
 
 - [ ] 设置 `NEXT_PUBLIC_APP_URL=http://localhost:3000`
 - [ ] 配置 `SUPABASE_SERVICE_ROLE_KEY`
-- [ ] 运行数据库迁移：`npx supabase db push`
+- [ ] 运行数据库迁移：`supabase db push`
 - [ ] 安装依赖：`pnpm install fast-xml-parser`
 - [ ] 验证SSO按钮显示正常
 
