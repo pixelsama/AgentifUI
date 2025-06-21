@@ -488,7 +488,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(({
             content={thinkContent}
             isStreaming={isStreaming && !thinkClosed}
             isComplete={thinkClosed || !isStreaming}
-            typewriterSpeed={200}
+            typewriterSpeed={80}
           >
             {(displayedThinkContent) => (
               <ThinkBlockContent 
@@ -518,7 +518,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(({
             content={preprocessMainContent(mainContent)}
             isStreaming={isStreaming}
             isComplete={!isStreaming}
-            typewriterSpeed={150}
+            typewriterSpeed={50}
           >
             {(displayedContent) => (
               <ReactMarkdown
