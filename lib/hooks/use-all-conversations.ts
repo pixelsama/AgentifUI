@@ -92,7 +92,7 @@ export function useAllConversations() {
         { offset: 0, limit: 1000 }, // 设置一个较大的限制，实际上获取所有对话
         {
           cache: true,
-          cacheTTL: 5 * 60 * 1000, // 5分钟缓存，比侧边栏缓存时间长
+          cacheTTL: 2 * 60 * 1000, // 2分钟缓存，与侧边栏保持一致
           subscribe: true,
           subscriptionKey: SubscriptionKeys.allConversations(userId),
           onUpdate: (payload) => {
