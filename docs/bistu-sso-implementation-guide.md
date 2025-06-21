@@ -26,7 +26,9 @@ SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 BISTU_SSO_BASE_URL=https://sso.bistu.edu.cn
 BISTU_CAS_VERSION=2.0
 
-# 北信科专用模式（仅显示SSO登录选项）
+# 北信科专用模式
+# true: 显示北信科SSO + 邮箱密码登录
+# false: 显示所有登录方式（北信科SSO + 邮箱密码 + 社交登录）
 NEXT_PUBLIC_SSO_ONLY_MODE=false
 ```
 
@@ -131,15 +133,18 @@ const allowedReturnUrls = [
 
 ### 4. 北信科专用模式配置
 
-如需启用仅SSO登录模式，设置环境变量：
+如需启用专用模式，设置环境变量：
 
 ```bash
 NEXT_PUBLIC_SSO_ONLY_MODE=true
 ```
 
 启用后登录页面将：
-- 仅显示北信科SSO登录选项
-- 隐藏邮箱密码和社交登录
+- 显示北信科SSO登录按钮
+- 显示邮箱密码登录表单
+- 隐藏社交登录按钮
+- 隐藏手机号登录链接
+- 隐藏注册链接
 - 提供更简洁的认证体验
 
 ## 🔧 核心功能说明

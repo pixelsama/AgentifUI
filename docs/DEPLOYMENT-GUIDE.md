@@ -162,7 +162,9 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 # SSO 配置 (可选 - 如需北信科 SSO)
 # ===========================================
 
-# SSO专用模式（仅显示 SSO 登录）
+# SSO专用模式配置
+# true: 显示北信科SSO + 邮箱密码登录
+# false: 显示所有登录方式（北信科SSO + 邮箱密码 + 社交登录）
 NEXT_PUBLIC_SSO_ONLY_MODE=false
 ```
 

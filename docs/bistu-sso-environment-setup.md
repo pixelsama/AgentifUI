@@ -23,7 +23,9 @@ BISTU_CAS_VERSION=2.0
 # ⚠️ 新增：Supabase Service Role密钥（SSO用户创建必需）
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 
-# 北信科专用模式（可选，设为true则只显示SSO登录）
+# 北信科专用模式（可选）
+# true: 显示北信科SSO + 邮箱密码登录
+# false: 显示所有登录方式（北信科SSO + 邮箱密码 + 社交登录）
 NEXT_PUBLIC_SSO_ONLY_MODE=false
 ```
 
@@ -85,8 +87,8 @@ supabase db push
 
 3. **NEXT_PUBLIC_SSO_ONLY_MODE**
    - 北信科专用模式开关
-   - 设为 `true` 时仅显示SSO登录选项
-   - 设为 `false` 时显示所有登录方式
+   - 设为 `true` 时显示北信科SSO + 邮箱密码登录（不显示社交登录、手机号登录、注册链接）
+   - 设为 `false` 时显示所有登录方式（北信科SSO + 邮箱密码 + 社交登录 + 手机号登录 + 注册链接）
    - 默认值：`false`
 
 ## SSO集成架构

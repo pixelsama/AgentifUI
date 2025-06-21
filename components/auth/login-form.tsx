@@ -98,7 +98,7 @@ export function LoginForm() {
         <BistuSSOCard returnUrl="/chat" />
 
         {/* --- BEGIN COMMENT --- */}
-        {/* 条件渲染：仅在非北信科专用模式下显示其他登录选项 */}
+        {/* 条件渲染：仅在非SSO专用模式下显示社交登录 */}
         {/* --- END COMMENT --- */}
         {!ssoOnlyMode && (
           <>
@@ -106,34 +106,33 @@ export function LoginForm() {
             {/* 社交登录区域 */}
             {/* --- END COMMENT --- */}
             <SocialAuthButtons type="login" redirectTo="/chat" />
-
-            {/* --- BEGIN COMMENT --- */}
-            {/* 分割线 */}
-            {/* --- END COMMENT --- */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className={cn(
-                  "w-full border-t",
-                  isDark ? "border-stone-700" : "border-stone-300"
-                )} />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className={cn(
-                  "px-2 font-serif",
-                  isDark ? "bg-stone-900 text-gray-400" : "bg-stone-50 text-gray-500"
-                )}>
-                  或使用邮箱密码
-                </span>
-              </div>
-            </div>
           </>
         )}
 
         {/* --- BEGIN COMMENT --- */}
-        {/* 条件渲染：仅在非北信科专用模式下显示邮箱密码登录 */}
+        {/* 分割线 - 始终显示 */}
         {/* --- END COMMENT --- */}
-        {!ssoOnlyMode && (
-          <>
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className={cn(
+              "w-full border-t",
+              isDark ? "border-stone-700" : "border-stone-300"
+            )} />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className={cn(
+              "px-2 font-serif",
+              isDark ? "bg-stone-900 text-gray-400" : "bg-stone-50 text-gray-500"
+            )}>
+              或使用邮箱密码
+            </span>
+          </div>
+        </div>
+
+        {/* --- BEGIN COMMENT --- */}
+        {/* 邮箱密码登录 - 始终显示 */}
+        {/* --- END COMMENT --- */}
+        <>
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-5">
                 <div>
@@ -221,34 +220,38 @@ export function LoginForm() {
               </div>
             </form>
 
-            <div className="mt-6 text-center space-y-3">
-              {/* --- BEGIN COMMENT --- */}
-              {/* 手机号登录链接 */}
-              {/* --- END COMMENT --- */}
-              <div>
-                <Link href="/phone-login" className={cn(
-                  "text-sm font-medium font-serif hover:underline",
-                  isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-600 hover:text-stone-700"
+            {/* --- BEGIN COMMENT --- */}
+            {/* 条件渲染：仅在非SSO专用模式下显示手机号登录和注册链接 */}
+            {/* --- END COMMENT --- */}
+            {!ssoOnlyMode && (
+              <div className="mt-6 text-center space-y-3">
+                {/* --- BEGIN COMMENT --- */}
+                {/* 手机号登录链接 */}
+                {/* --- END COMMENT --- */}
+                <div>
+                  <Link href="/phone-login" className={cn(
+                    "text-sm font-medium font-serif hover:underline",
+                    isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-600 hover:text-stone-700"
+                  )}>
+                    📱 使用手机号验证码登录
+                  </Link>
+                </div>
+                
+                <p className={cn(
+                  "text-sm font-serif",
+                  isDark ? "text-gray-400" : "text-gray-600"
                 )}>
-                  📱 使用手机号验证码登录
-                </Link>
+                  还没有账号？{' '}
+                  <Link href="/register" className={cn(
+                    "font-medium font-serif",
+                    isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-700 hover:text-stone-600"
+                  )}>
+                    立即注册
+                  </Link>
+                </p>
               </div>
-              
-              <p className={cn(
-                "text-sm font-serif",
-                isDark ? "text-gray-400" : "text-gray-600"
-              )}>
-                还没有账号？{' '}
-                <Link href="/register" className={cn(
-                  "font-medium font-serif",
-                  isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-700 hover:text-stone-600"
-                )}>
-                  立即注册
-                </Link>
-              </p>
-            </div>
+            )}
           </>
-        )}
       </div>
     </div>
   );
