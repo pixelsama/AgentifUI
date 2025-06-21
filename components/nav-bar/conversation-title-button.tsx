@@ -5,6 +5,10 @@ import { useRouter, usePathname, useParams } from 'next/navigation';
 import { useChatStore } from '@lib/stores/chat-store';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { useCombinedConversations, CombinedConversation, conversationEvents } from '@lib/hooks/use-combined-conversations';
+// --- BEGIN COMMENT ---
+// 🎯 新增：导入完整对话列表hook，用于查找历史对话
+// --- END COMMENT ---
+import { useAllConversations } from '@lib/hooks/use-all-conversations';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { ChevronDown, ChevronUp, Edit, Trash, Star, Blocks } from 'lucide-react';
@@ -27,6 +31,10 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
   const { currentConversationId } = useChatStore();
   const { isExpanded, isLocked, isHovering, selectItem } = useSidebarStore();
   const { conversations, refresh } = useCombinedConversations();
+  // --- BEGIN COMMENT ---
+  // 🎯 新增：获取完整对话列表，用于查找历史对话标题
+  // --- END COMMENT ---
+  const { conversations: allConversations } = useAllConversations();
   const { isDark } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isOperating, setIsOperating] = useState(false);
@@ -92,10 +100,37 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
   }, [conversations, currentConversationId]);
 
   // --- BEGIN COMMENT ---
-  // 🎯 简化：直接使用currentConversation，与sidebar保持一致
-  // 移除复杂的后台获取逻辑，依赖useCombinedConversations提供完整数据
+  // 🎯 新增：当combinedConversations找不到对话时，从完整对话列表中查找
+  // 这样确保从recents页面点击历史对话时能瞬间显示正确标题
   // --- END COMMENT ---
-  const finalConversation = currentConversation;
+  const fallbackConversation = React.useMemo(() => {
+    if (currentConversation || !currentConversationId) return null;
+    
+    // 从完整对话列表中查找历史对话
+    const found = allConversations.find(conv => 
+      conv.external_id === currentConversationId || 
+      conv.id === currentConversationId
+    );
+    
+    if (found) {
+      // 转换为CombinedConversation格式
+      return {
+        id: found.external_id || found.id,
+        title: found.title,
+        user_id: found.user_id,
+        created_at: found.created_at,
+        updated_at: found.updated_at,
+        supabase_pk: found.id,
+        app_id: found.app_id,
+        isPending: false
+      } as CombinedConversation;
+    }
+    
+    return null;
+  }, [currentConversation, currentConversationId, allConversations]);
+
+  // 优先使用combinedConversations中的对话，其次使用fallback对话
+  const finalConversation = currentConversation || fallbackConversation;
   
   // --- BEGIN COMMENT ---
   // 🎯 新增：获取当前对话关联的应用信息，用于显示应用名称标签
