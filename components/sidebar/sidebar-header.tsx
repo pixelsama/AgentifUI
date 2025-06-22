@@ -1,5 +1,6 @@
 "use client"
-import { Plus, PanelLeft, ArrowRightToLine, ArrowLeftToLine, Store } from "lucide-react"
+import React from "react"
+import { ArrowRightToLine, ArrowLeftToLine, CirclePlus, MessageCirclePlus, Edit3, Edit, SquarePen, Pen, Feather } from "lucide-react"
 import { SidebarButton } from "./sidebar-button"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { cn } from "@lib/utils"
@@ -20,6 +21,11 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
   const { isExpanded, toggleSidebar } = useSidebarStore()
   const { isDark } = useTheme()
   const router = useRouter()
+  
+  // --- BEGIN COMMENT ---
+  // 🎯 点击状态管理 - 用于控制点击时的立即切换效果
+  // --- END COMMENT ---
+  const [isClicking, setIsClicking] = React.useState(false)
   
   const setCurrentConversationId = useChatStore((state) => state.setCurrentConversationId)
   const clearMessages = useChatStore(state => state.clearMessages)
@@ -121,7 +127,19 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
                 // 立即移除focus，避免影响父容器的cursor显示
                 // --- END COMMENT ---
                 e.currentTarget.blur();
+                
+                // --- BEGIN COMMENT ---
+                // 🎯 设置点击状态，确保立即显示目标箭头
+                // --- END COMMENT ---
+                setIsClicking(true);
                 toggleSidebar();
+                
+                // --- BEGIN COMMENT ---
+                // 延迟重置点击状态，让过渡动画完成
+                // --- END COMMENT ---
+                setTimeout(() => {
+                  setIsClicking(false);
+                }, 200);
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -144,10 +162,10 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
                 "h-10 w-10", // 正方形固定大小
                 isDark ? [
                   "text-gray-200",
-                  "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50",
+                  "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50 hover:scale-95",
                 ] : [
                   "text-stone-600",
-                  "hover:bg-stone-300 hover:shadow-md",
+                  "hover:bg-stone-300 hover:shadow-md hover:scale-95",
                 ]
               )}
             >
@@ -158,20 +176,22 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
                 "relative flex h-5 w-5 items-center justify-center flex-shrink-0", 
                 isDark ? "text-gray-400" : "text-gray-500",
               )}>
-                {/* 默认图标 - 拉宽版窗口图标 */}
+                {/* 默认图标 - 拉宽版窗口图标，只在非悬停且非点击状态下显示 */}
                 <WidePanelLeft className={cn(
                   "absolute h-5 w-5 transition-all duration-150 ease-out",
                   // 收起状态：sidebar悬停时隐藏窗口图标
                   isHovering && "opacity-0 scale-98",
                   // 按钮悬停时隐藏窗口图标
-                  "group-hover:opacity-0 group-hover:scale-98"
+                  "group-hover:opacity-0 group-hover:scale-98",
+                  // 点击时立即隐藏窗口图标
+                  isClicking && "opacity-0 scale-98"
                 )} />
                 
-                {/* 悬停图标 - 箭头指向竖线，根据展开状态显示方向 */}
+                {/* 悬停图标 - 右箭头，收起状态下悬停或点击时显示 */}
                 <ArrowRightToLine className={cn(
-                  "absolute h-5 w-5 transition-all duration-150 ease-out",
-                  // 收起状态：sidebar悬停或按钮悬停时显示箭头
-                  isHovering ? "opacity-100 scale-100" : "opacity-0 scale-102",
+                  "absolute h-4 w-4 transition-all duration-150 ease-out",
+                  // 收起状态：sidebar悬停、按钮悬停或点击时显示箭头
+                  (isHovering || isClicking) ? "opacity-100 scale-100" : "opacity-0 scale-102",
                   "group-hover:opacity-100 group-hover:scale-100"
                 )} />
               </span>
@@ -186,7 +206,19 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               // 立即移除focus，避免影响父容器的cursor显示
               // --- END COMMENT ---
               e.currentTarget.blur();
+              
+              // --- BEGIN COMMENT ---
+              // 🎯 设置点击状态，确保立即显示目标箭头
+              // --- END COMMENT ---
+              setIsClicking(true);
               toggleSidebar();
+              
+              // --- BEGIN COMMENT ---
+              // 延迟重置点击状态，让过渡动画完成
+              // --- END COMMENT ---
+              setTimeout(() => {
+                setIsClicking(false);
+              }, 200);
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
@@ -207,13 +239,13 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               isDark ? "focus-visible:ring-stone-500 focus-visible:ring-offset-gray-900" : "focus-visible:ring-primary focus-visible:ring-offset-background",
               "border border-transparent",
               "h-10 w-10", // 正方形固定大小
-              isDark ? [
-                "text-gray-200",
-                "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50",
-              ] : [
-                "text-stone-600",
-                "hover:bg-stone-300 hover:shadow-md",
-              ]
+                             isDark ? [
+                 "text-gray-200",
+                 "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50 hover:scale-95",
+               ] : [
+                 "text-stone-600",
+                 "hover:bg-stone-300 hover:shadow-md hover:scale-95",
+               ]
             )}
           >
             {/* --- BEGIN COMMENT ---
@@ -223,18 +255,21 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               "relative flex h-5 w-5 items-center justify-center flex-shrink-0", 
               isDark ? "text-gray-400" : "text-gray-500",
             )}>
-              {/* 默认图标 - 拉宽版窗口图标 */}
+              {/* 默认图标 - 拉宽版窗口图标，只在非悬停且非点击状态下显示 */}
               <WidePanelLeft className={cn(
                 "absolute h-5 w-5 transition-all duration-150 ease-out",
                 // 按钮悬停时隐藏窗口图标
-                "group-hover:opacity-0 group-hover:scale-98"
+                "group-hover:opacity-0 group-hover:scale-98",
+                // 点击时立即隐藏窗口图标
+                isClicking && "opacity-0 scale-98"
               )} />
               
-              {/* 悬停图标 - 箭头指向竖线，根据展开状态显示方向 */}
+              {/* 悬停图标 - 左箭头，展开状态下悬停或点击时显示 */}
               <ArrowLeftToLine className={cn(
-                "absolute h-5 w-5 transition-all duration-150 ease-out",
-                // 展开状态：只有按钮悬停时显示箭头
-                "opacity-0 scale-102 group-hover:opacity-100 group-hover:scale-100"
+                "absolute h-4 w-4 transition-all duration-150 ease-out",
+                // 展开状态：按钮悬停或点击时显示箭头
+                isClicking ? "opacity-100 scale-100" : "opacity-0 scale-102",
+                "group-hover:opacity-100 group-hover:scale-100"
               )} />
             </span>
           </div>
@@ -248,7 +283,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
             "flex-1 min-w-0 truncate",
             "flex items-center leading-none",
             "font-display font-bold text-base tracking-wide",
-            "-mt-0.5 -ml-1", // 微调：稍微往上移一点，靠近左侧按钮一点
+            "-mt-0.5 -ml-2", // 微调：稍微往上移一点，进一步左移与下方按钮对齐
             isDark ? "text-gray-100" : "text-stone-700"
           )}>
             <span className={cn(
@@ -268,8 +303,8 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
       {/* 🎯 发起新对话按钮 - 重要功能，响应式设计突出显示 */}
       {isExpanded ? (
         <SidebarButton
-          icon={<Plus className={cn(
-            "h-5 w-5 transition-all duration-150 ease-out group-hover:rotate-90 group-hover:scale-110",
+          icon={<Edit className={cn(
+            "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-110",
             isDark
               ? "text-gray-300 group-hover:text-white"
               : "text-stone-600 group-hover:text-stone-800"
@@ -278,20 +313,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           onClick={handleNewChat}
           aria-label="发起新对话"
           className={cn(
-            "group font-medium transition-all duration-150 ease-out",
-            isDark 
-              ? [
-                "bg-stone-700/40 hover:bg-stone-600/60",
-                "border border-stone-600/50 hover:border-stone-500/70",
-                "text-gray-300 hover:text-white",
-                "shadow-sm hover:shadow-md hover:shadow-stone-900/20"
-              ]
-              : [
-                "bg-stone-200/60 hover:bg-stone-300/80",
-                "border border-stone-300/60 hover:border-stone-400/80",
-                "text-stone-600 hover:text-stone-800",
-                "shadow-sm hover:shadow-md hover:shadow-stone-900/15"
-              ]
+            "group font-medium transition-all duration-150 ease-out"
           )}
         >
           <span className="font-serif">发起新对话</span>
@@ -305,8 +327,8 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           showArrow={false}
         >
           <SidebarButton
-            icon={<Plus className={cn(
-              "h-5 w-5 transition-all duration-150 ease-out group-hover:rotate-90 group-hover:scale-110",
+            icon={<Edit className={cn(
+              "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-110",
               isDark
                 ? "text-gray-300 group-hover:text-white"
                 : "text-stone-600 group-hover:text-stone-800"
@@ -315,20 +337,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
             onClick={handleNewChat}
             aria-label="发起新对话"
             className={cn(
-              "group font-medium transition-all duration-150 ease-out",
-              isDark 
-                ? [
-                  "bg-stone-700/40 hover:bg-stone-600/60",
-                  "border border-stone-600/50 hover:border-stone-500/70",
-                  "text-gray-300 hover:text-white",
-                  "shadow-sm hover:shadow-md hover:shadow-stone-900/20"
-                ]
-                : [
-                  "bg-stone-200/60 hover:bg-stone-300/80",
-                  "border border-stone-300/60 hover:border-stone-400/80",
-                  "text-stone-600 hover:text-stone-800",
-                  "shadow-sm hover:shadow-md hover:shadow-stone-900/15"
-                ]
+              "group font-medium transition-all duration-150 ease-out"
             )}
           >
             <span className="font-serif">发起新对话</span>
