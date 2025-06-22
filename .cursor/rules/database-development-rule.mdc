@@ -1,5 +1,5 @@
 ---
-description: This rule defines the complete database development workflow for AgentifUI project. It MUST be followed whenever performing any database-related operations including: creating/modifying/deleting tables, adding/removing columns, updating indexes or constraints, modifying RLS policies, creating/updating triggers or functions, changing data types, adding new enums, or any other database schema changes. The rule ensures data safety, type consistency, documentation synchronization, and proper code integration across the entire technology stack.
+description: ⚠️ Database Migration Rule (AgentifUI)  Before creating any database migration, you MUST read and follow this rule.  This rule applies to all schema changes: creating/modifying tables, columns, indexes, constraints, data types, enums, RLS policies, triggers, or functions.  It ensures data safety, type consistency, and code-sync across the stack.  ❗ Ignoring this rule may cause broken migrations, rejected PRs, or production issues.
 globs: 
 alwaysApply: false
 ---
