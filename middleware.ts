@@ -76,17 +76,20 @@ export async function middleware(request: NextRequest) {
   }
 
   // 基于用户会话状态的路由保护逻辑
+  // sso模式下，禁止注册相关路由
   const isAuthRoute = pathname.startsWith('/auth')
   const isApiRoute = pathname.startsWith('/api')
   const isAdminRoute = pathname.startsWith('/admin')
   const isPublicRoute = pathname === '/' || 
-                         pathname === '/login' || 
-                         pathname === '/phone-login' || 
                          pathname === '/about' || 
-                         pathname.startsWith('/register') ||
-                         pathname === '/forgot-password' ||
-                         pathname === '/reset-password' ||
-                         pathname.startsWith('/sso/processing');
+                         pathname === '/login' || 
+                         pathname.startsWith('/sso/processing') ||
+                         (process.env.NEXT_PUBLIC_SSO_ONLY_MODE !== 'true' && (
+                           pathname === '/phone-login' || 
+                           pathname.startsWith('/register') ||
+                           pathname === '/forgot-password' ||
+                           pathname === '/reset-password'
+                         ))
   
   // 启用路由保护逻辑，确保未登录用户无法访问受保护的路由
   if (!user && !isAuthRoute && !isApiRoute && !isPublicRoute) {
