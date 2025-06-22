@@ -1,6 +1,6 @@
 "use client"
 import React from "react"
-import { ArrowRightToLine, ArrowLeftToLine, CirclePlus, MessageCirclePlus, Edit3, Edit, SquarePen, Pen, Feather } from "lucide-react"
+import { ArrowRightToLine, ArrowLeftToLine, CirclePlus, MessageCirclePlus, Edit3, Edit, SquarePen, Pen, Feather, LayoutGrid } from "lucide-react"
 import { SidebarButton } from "./sidebar-button"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { cn } from "@lib/utils"
@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation"
 import { useChatStore } from "@lib/stores/chat-store"
 import { useChatInputStore } from "@lib/stores/chat-input-store"
 import { useChatTransitionStore } from "@lib/stores/chat-transition-store"
-import { Grid3x3, AppWindow, Blocks } from "lucide-react"
 import { useChatInterface } from "@lib/hooks/use-chat-interface"
 import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
 
@@ -149,7 +148,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               }}
               aria-label="展开侧栏"
               className={cn(
-                "group relative flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium",
+                "group relative flex items-center justify-center px-2 py-2 text-sm font-medium",
                 // --- BEGIN COMMENT ---
                 // 使用resize cursor表示可以调整sidebar宽度：展开时向左箭头，收起时向右箭头
                 // --- END COMMENT ---
@@ -160,21 +159,26 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
                 isDark ? "focus-visible:ring-stone-500 focus-visible:ring-offset-gray-900" : "focus-visible:ring-primary focus-visible:ring-offset-background",
                 "border border-transparent",
                 "h-10 w-10", // 正方形固定大小
-                isDark ? [
-                  "text-gray-200",
-                  "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50 hover:scale-95",
-                ] : [
-                  "text-stone-600",
-                  "hover:bg-stone-300 hover:shadow-md hover:scale-95",
-                ]
+                "text-gray-200", // 基础文字颜色
+                "[margin-left:1px]", // 整个按钮向右移动一点点
               )}
             >
+              {/* 🎨 内部背景 - 收起状态仅悬停显示 */}
+              <div className={cn(
+                "absolute inset-1 rounded-md transition-all duration-150 ease-in-out",
+                isDark 
+                  ? "group-hover:bg-stone-600/60" 
+                  : "group-hover:bg-stone-300/80"
+              )} />
+              
               {/* --- BEGIN COMMENT ---
               图标容器 - 包含默认图标和悬停图标的叠加效果
               --- END COMMENT --- */}
               <span className={cn(
-                "relative flex h-5 w-5 items-center justify-center flex-shrink-0", 
-                isDark ? "text-gray-400" : "text-gray-500",
+                "relative flex h-5 w-5 items-center justify-center flex-shrink-0 z-10", 
+                isDark 
+                  ? "text-gray-400 group-hover:text-white" 
+                  : "text-gray-500 group-hover:text-stone-800",
               )}>
                 {/* 默认图标 - 拉宽版窗口图标，只在非悬停且非点击状态下显示 */}
                 <WidePanelLeft className={cn(
@@ -190,9 +194,9 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
                 {/* 悬停图标 - 右箭头，收起状态下悬停或点击时显示 */}
                 <ArrowRightToLine className={cn(
                   "absolute h-4 w-4 transition-all duration-150 ease-out",
-                  // 收起状态：sidebar悬停、按钮悬停或点击时显示箭头，按钮悬停时更大
+                  // 收起状态：sidebar悬停、按钮悬停或点击时显示箭头
                   (isHovering || isClicking) ? "opacity-100 scale-110" : "opacity-0 scale-102",
-                  "group-hover:opacity-100 group-hover:scale-125"
+                  "group-hover:opacity-100" // 🎨 移除放大效果
                 )} />
               </span>
             </div>
@@ -228,7 +232,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
             }}
             aria-label="收起侧栏"
             className={cn(
-              "group relative flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium",
+              "group relative flex items-center justify-center px-2 py-2 text-sm font-medium",
               // --- BEGIN COMMENT ---
               // 使用resize cursor表示可以调整sidebar宽度：展开时向左箭头，收起时向右箭头
               // --- END COMMENT ---
@@ -239,21 +243,26 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               isDark ? "focus-visible:ring-stone-500 focus-visible:ring-offset-gray-900" : "focus-visible:ring-primary focus-visible:ring-offset-background",
               "border border-transparent",
               "h-10 w-10", // 正方形固定大小
-                             isDark ? [
-                 "text-gray-200",
-                 "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50 hover:scale-95",
-               ] : [
-                 "text-stone-600",
-                 "hover:bg-stone-300 hover:shadow-md hover:scale-95",
-               ]
+              "[margin-left:1px]", // 整个按钮向右移动一点点
             )}
           >
+            {/* 🎨 内部背景 - 展开状态默认显示，悬停时增强 */}
+            <div className={cn(
+              "absolute inset-1 rounded-md transition-all duration-150 ease-in-out",
+              // 展开状态：默认有背景色，悬停时增强
+              isDark 
+                ? "bg-stone-600/50 group-hover:bg-stone-600/70" 
+                : "bg-stone-300/50 group-hover:bg-stone-300/80"
+            )} />
+            
             {/* --- BEGIN COMMENT ---
             图标容器 - 包含默认图标和悬停图标的叠加效果
             --- END COMMENT --- */}
             <span className={cn(
-              "relative flex h-5 w-5 items-center justify-center flex-shrink-0", 
-              isDark ? "text-gray-400" : "text-gray-500",
+              "relative flex h-5 w-5 items-center justify-center flex-shrink-0 z-10", 
+              isDark 
+                ? "text-gray-400 group-hover:text-white" 
+                : "text-gray-500 group-hover:text-stone-800",
             )}>
               {/* 默认图标 - 拉宽版窗口图标，只在非悬停且非点击状态下显示 */}
               <WidePanelLeft className={cn(
@@ -267,9 +276,9 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               {/* 悬停图标 - 左箭头，展开状态下悬停或点击时显示 */}
               <ArrowLeftToLine className={cn(
                 "absolute h-4 w-4 transition-all duration-150 ease-out",
-                // 展开状态：按钮悬停或点击时显示箭头，按钮悬停时更大
+                // 展开状态：按钮悬停或点击时显示箭头
                 isClicking ? "opacity-100 scale-110" : "opacity-0 scale-102",
-                "group-hover:opacity-100 group-hover:scale-125"
+                "group-hover:opacity-100" // 🎨 移除放大效果
               )} />
             </span>
           </div>
@@ -348,7 +357,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
       {/* 🎯 应用市场按钮 - 与发起新对话按钮样式完全一致 */}
       {isExpanded ? (
         <SidebarButton
-          icon={<Blocks className={cn(
+          icon={<LayoutGrid className={cn(
             "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-110",
             isDark
               ? "text-gray-300 group-hover:text-white"
@@ -374,7 +383,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           showArrow={false}
         >
           <SidebarButton
-            icon={<Blocks className={cn(
+            icon={<LayoutGrid className={cn(
               "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-110",
               isDark
                 ? "text-gray-300 group-hover:text-white"

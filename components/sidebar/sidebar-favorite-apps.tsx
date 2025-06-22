@@ -344,7 +344,7 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
         </div>
       )}
 
-      {/* 查看全部常用按钮 - 参考chat list的"查看全部历史"样式 */}
+      {/* 🎨 优化：查看全部常用应用按钮 - 保持与列表项对齐 */}
       {favoriteApps.length > 0 && (
         <div className="px-2">
           <div className="mt-1">
@@ -353,10 +353,8 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
                 <Heart className={cn(
                   "h-4 w-4",
                   isDark
-                    ? "text-stone-400"
-                    : openDropdownId 
-                      ? "text-stone-500" 
-                      : "text-stone-500 group-hover:text-stone-600"
+                    ? "text-stone-300"
+                    : "text-stone-600"
                 )} />
               }
               disableHover={!!openDropdownId}
@@ -364,15 +362,28 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
                 router.push('/apps?category=常用应用')
               }}
               className={cn(
-                "w-full group font-medium transition-all duration-200",
+                "w-full group font-medium",
+                // 🎨 现代化样式：更好的对比度和视觉层次
                 isDark 
-                  ? "bg-stone-800/50 hover:bg-stone-700/80 border border-stone-700/50 hover:border-stone-600/80 text-stone-300 hover:text-stone-100" 
-                  : "bg-stone-50/80 hover:bg-stone-100/90 border border-stone-200/60 hover:border-stone-300/80 text-stone-600 hover:text-stone-700"
+                  ? "text-stone-300 hover:text-white bg-stone-800/40 hover:bg-stone-700/60 border border-stone-700/60 hover:border-stone-600" 
+                  : "text-stone-600 hover:text-stone-800 bg-stone-100/40 hover:bg-stone-200/60 border border-stone-300/60 hover:border-stone-400"
               )}
             >
+              <div className="flex items-center justify-between w-full">
               <span className="text-xs font-medium font-serif">
-                {favoriteApps.length > 5 ? `查看全部常用 (${favoriteApps.length})` : '查看常用应用'}
+                  {favoriteApps.length > 5 ? '查看全部常用' : '查看常用应用'}
+                </span>
+                {favoriteApps.length > 1 && (
+                  <span className={cn(
+                    "px-1.5 py-0.5 rounded-full text-[10px] font-bold",
+                    isDark
+                      ? "bg-stone-600/30 text-stone-200"
+                      : "bg-stone-300/50 text-stone-700"
+                  )}>
+                    {favoriteApps.length}
               </span>
+                )}
+              </div>
             </SidebarListButton>
           </div>
         </div>

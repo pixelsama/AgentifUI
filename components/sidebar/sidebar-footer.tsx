@@ -1,5 +1,5 @@
 "use client"
-import { Settings } from "lucide-react"
+import { Settings, Sliders } from "lucide-react"
 import { SidebarButton } from "./sidebar-button"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { cn } from "@lib/utils"
@@ -22,8 +22,8 @@ export function SidebarFooter() {
         // --- END COMMENT ---
         isExpanded ? (
           <SidebarButton
-            icon={<Settings className={cn(
-              "h-5 w-5 transition-transform duration-300 group-hover:rotate-45",
+            icon={<Sliders className={cn(
+              "h-5 w-5 transition-transform duration-300 group-hover:scale-110",
             )} />}
             onClick={() => {
               router.push('/settings')
@@ -42,8 +42,8 @@ export function SidebarFooter() {
             showArrow={false}
           >
             <SidebarButton
-              icon={<Settings className={cn(
-                "h-5 w-5 transition-transform duration-300 group-hover:rotate-45",
+              icon={<Sliders className={cn(
+                "h-5 w-5 transition-transform duration-300 group-hover:scale-110",
               )} />}
               onClick={() => {
                 router.push('/settings')
@@ -56,7 +56,6 @@ export function SidebarFooter() {
           </TooltipWrapper>
         )
       )}
-      
       {isMobile && <MobileUserButton />}
     </div>
   )

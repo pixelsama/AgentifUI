@@ -512,8 +512,7 @@ export function SidebarChatList({
                 );
             })}
             
-            {/* --- 查看全部按钮 --- */}
-            {/* 使用时钟图标，样式与发起新对话按钮类似 */}
+            {/* 🎨 优化：查看全部历史按钮 - 保持与列表项对齐 */}
             {hasMoreChats && (
               <div className="mt-1">
                 <SidebarListButton
@@ -521,27 +520,35 @@ export function SidebarChatList({
                     <Clock className={cn(
                       "h-4 w-4",
                       isDark
-                        ? "text-stone-400"
-                        : openDropdownId 
-                          ? "text-stone-500" 
-                          : "text-stone-500 group-hover:text-stone-600"
+                        ? "text-stone-300"
+                        : "text-stone-600"
                     )} />
                   }
-                  disableHover={!!openDropdownId} // 🎯 当有菜单打开时禁用悬停效果
+                  disableHover={!!openDropdownId}
                   onClick={() => {
-                    // --- BEGIN COMMENT ---
-                    // 不再锁定侧边栏，保持当前状态，导航到历史页面
-                    // --- END COMMENT ---
                     router.push('/chat/recents')
                   }}
                   className={cn(
-                    "w-full group font-medium transition-all duration-200",
+                    "w-full group font-medium",
+                    // 🎨 现代化样式：更好的对比度和视觉层次
                     isDark 
-                      ? "bg-stone-800/50 hover:bg-stone-700/80 border border-stone-700/50 hover:border-stone-600/80 text-stone-300 hover:text-stone-100" 
-                      : "bg-stone-50/80 hover:bg-stone-100/90 border border-stone-200/60 hover:border-stone-300/80 text-stone-600 hover:text-stone-700"
+                      ? "text-stone-300 hover:text-white bg-stone-800/40 hover:bg-stone-700/60 border border-stone-700/60 hover:border-stone-600" 
+                      : "text-stone-600 hover:text-stone-800 bg-stone-100/40 hover:bg-stone-200/60 border border-stone-300/60 hover:border-stone-400"
                   )}
                 >
+                  <div className="flex items-center justify-between w-full">
                   <span className="text-xs font-medium font-serif">查看全部历史</span>
+                    <div className={cn(
+                      "w-4 h-4 flex items-center justify-center rounded transition-all duration-200",
+                      isDark
+                        ? "text-stone-400 group-hover:text-stone-300"
+                        : "text-stone-500 group-hover:text-stone-600"
+                    )}>
+                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
                 </SidebarListButton>
               </div>
             )}
