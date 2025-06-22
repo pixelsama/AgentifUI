@@ -110,6 +110,8 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
             content="展开侧栏"
             id="sidebar-header-expand-tooltip"
             placement="right"
+            size="sm"
+            showArrow={false}
           >
             <div
               role="button"
@@ -299,6 +301,8 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           content="发起新对话"
           id="sidebar-header-new-chat-tooltip"
           placement="right"
+          size="sm"
+          showArrow={false}
         >
           <SidebarButton
             icon={<Plus className={cn(
@@ -370,6 +374,8 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           content="应用市场"
           id="sidebar-header-apps-tooltip"
           placement="right"
+          size="sm"
+          showArrow={false}
         >
           <SidebarButton
             icon={

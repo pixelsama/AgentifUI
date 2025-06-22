@@ -38,6 +38,8 @@ export function SidebarFooter() {
             content="设置"
             id="sidebar-footer-settings-tooltip"
             placement="right"
+            size="sm"
+            showArrow={false}
           >
             <SidebarButton
               icon={<Settings className={cn(

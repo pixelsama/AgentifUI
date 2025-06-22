@@ -5,12 +5,15 @@ import { useState, useRef, useEffect } from "react"
 import { createPortal } from "react-dom"
 
 type TooltipPlacement = "top" | "bottom" | "left" | "right"
+type TooltipSize = "sm" | "md"
 
 export interface TooltipProps {
   children: React.ReactNode
   content: React.ReactNode
   id: string
   placement?: TooltipPlacement
+  size?: TooltipSize
+  showArrow?: boolean
   className?: string
   delayShow?: number
   delayHide?: number
@@ -77,6 +80,8 @@ export function Tooltip({
   content,
   id,
   placement = "top",
+  size = "md",
+  showArrow = true,
   className,
   delayShow = 100, // 减少延迟，使响应更快
   delayHide = 100,
@@ -90,6 +95,27 @@ export function Tooltip({
 
   // 检测是否为暗色模式（简化版）
   const isDark = false // 默认使用亮色模式
+
+  // 根据尺寸获取样式
+  const getSizeStyles = () => {
+    switch (size) {
+      case "sm":
+        return {
+          container: "px-2 py-0.5 rounded text-xs leading-snug",
+          arrow: "w-1.5 h-1.5",
+          arrowOffset: "3px"
+        }
+      case "md":
+      default:
+        return {
+          container: "px-2 py-1 rounded-md text-sm leading-snug",
+          arrow: "w-2 h-2", 
+          arrowOffset: "4px"
+        }
+    }
+  }
+
+  const sizeStyles = getSizeStyles()
 
   // 客户端挂载检测
   useEffect(() => {
@@ -132,7 +158,8 @@ export function Tooltip({
     // 计算位置
     let top: number
     let left: number
-    const gap = 8 // tooltip与触发元素之间的间隙
+    // tooltip与触发元素之间的间隙 - 右侧placement增加距离
+    const gap = placement === "right" ? 10 : 8
     let effectivePlacement = placement
 
     switch (placement) {
@@ -306,8 +333,9 @@ export function Tooltip({
           >
             <div
               className={cn(
-                "relative px-2.5 py-1.5 rounded-md text-sm pointer-events-auto max-w-xs",
-                "backdrop-blur-sm bg-opacity-95 shadow-lg border border-gray-200/10",
+                "relative pointer-events-auto max-w-xs whitespace-nowrap",
+                "backdrop-blur-sm bg-opacity-95 shadow-md border border-gray-200/10",
+                sizeStyles.container,
                 isDark ? "bg-gray-800 text-gray-100" : "bg-gray-800 text-gray-100",
                 className,
               )}
@@ -315,16 +343,19 @@ export function Tooltip({
               onMouseLeave={handleMouseLeave}
             >
               {content}
-              {/* 箭头元素 */}
-              <div
-                className={cn(
-                  "absolute w-2 h-2 rotate-45 bg-inherit border-inherit",
-                  placement === "top" && "bottom-[-4px] left-1/2 -translate-x-1/2 border-b border-r",
-                  placement === "bottom" && "top-[-4px] left-1/2 -translate-x-1/2 border-t border-l",
-                  placement === "left" && "right-[-4px] top-1/2 -translate-y-1/2 border-t border-r",
-                  placement === "right" && "left-[-4px] top-1/2 -translate-y-1/2 border-b border-l",
-                )}
-              />
+              {/* 箭头元素 - 可选显示 */}
+              {showArrow && (
+                <div
+                  className={cn(
+                    "absolute rotate-45 bg-inherit border-inherit",
+                    sizeStyles.arrow,
+                    placement === "top" && `bottom-[-${sizeStyles.arrowOffset}] left-1/2 -translate-x-1/2 border-b border-r`,
+                    placement === "bottom" && `top-[-${sizeStyles.arrowOffset}] left-1/2 -translate-x-1/2 border-t border-l`,
+                    placement === "left" && `right-[-${sizeStyles.arrowOffset}] top-1/2 -translate-y-1/2 border-t border-r`,
+                    placement === "right" && `left-[-${sizeStyles.arrowOffset}] top-1/2 -translate-y-1/2 border-b border-l`,
+                  )}
+                />
+              )}
             </div>
           </div>,
           document.getElementById("tooltip-root") || document.body,
