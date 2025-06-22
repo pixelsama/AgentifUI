@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Search, Plus, Trash2, Loader2 } from "lucide-react"
+import { Search, Trash2, Loader2, Edit3 } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useTheme } from "@lib/hooks/use-theme"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
@@ -305,15 +305,15 @@ export function Recents() {
               <button
                 onClick={handleNewChat}
                 className={cn(
-                  "px-4 py-2 rounded-lg flex items-center text-sm font-medium font-serif",
+                  "px-3 py-2 rounded-lg flex items-center text-sm font-medium font-serif",
                   "transition-all duration-200 ease-in-out",
                   "cursor-pointer hover:shadow-md hover:-translate-y-0.5",
                   isDark 
                     ? "bg-stone-700 hover:bg-stone-600 text-white border border-stone-600" 
-                    : "bg-primary/10 hover:bg-primary/15 text-primary border border-stone-300/50"
+                    : "bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-300"
                 )}
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Edit3 className="h-4 w-4 mr-2" />
                 新对话
               </button>
             </div>
