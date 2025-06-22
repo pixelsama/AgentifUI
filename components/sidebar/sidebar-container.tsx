@@ -75,14 +75,14 @@ export function SidebarContainer() {
         shadow: "shadow-xl shadow-black/40",
         border: "border-r-stone-700/50",
         text: "text-stone-300",
-        hoverBg: "hover:bg-stone-700/30" // 悬停背景效果
+        hoverBg: "hover:bg-stone-700" // 悬停时使用展开状态的背景色
       }
     } else {
       return {
         shadow: "shadow-xl shadow-stone-300/60",
         border: "border-r-stone-300/60",
         text: "text-stone-700",
-        hoverBg: "hover:bg-stone-200/40" // 悬停背景效果
+        hoverBg: "hover:bg-stone-200" // 悬停时使用展开状态的背景色
       }
     }
   }
@@ -114,15 +114,15 @@ export function SidebarContainer() {
         // 简化Z-index设置
         isMobile ? "z-50" : "z-30",
         
-        // 主题样式
-        colors.sidebarBackground.tailwind,
+        // 主题样式 - 展开时使用侧栏背景色，收起时使用主页背景色
+        isExpanded ? colors.sidebarBackground.tailwind : colors.mainBackground.tailwind,
         "backdrop-blur-sm",
         styles.shadow,
         styles.border,
         styles.text,
         
         // --- BEGIN COMMENT ---
-        // 悬停背景效果 - 仅在收起状态且非移动端时显示
+        // 悬停背景效果 - 仅在收起状态且非移动端时显示，使用展开状态的背景色
         // --- END COMMENT ---
         !isExpanded && !isMobile && styles.hoverBg,
         

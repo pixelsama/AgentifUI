@@ -19,9 +19,9 @@ export const lightColors = {
     hex: '#1c1917',
   },
   
-  // 侧边栏背景色 - 稍深于主背景
+  // 侧边栏背景色 - 展开状态的背景色，悬停时也使用此色
   sidebarBackground: {
-    tailwind: 'bg-stone-200', // 与UserMessage亮色背景一致
+    tailwind: 'bg-stone-200', // 与UserMessage亮色背景一致，展开和悬停时使用
     rgb: 'rgb(231, 229, 228)', 
     hex: '#e7e5e4',
   },
@@ -57,9 +57,9 @@ export const darkColors = {
     hex: '#f3f4f6',
   },
   
-  // 侧边栏背景色
+  // 侧边栏背景色 - 展开状态的背景色，悬停时也使用此色
   sidebarBackground: {
-    tailwind: 'bg-stone-700', // 与UserMessage暗色背景完全一致 (移除透明度)
+    tailwind: 'bg-stone-700', // 与UserMessage暗色背景完全一致，展开和悬停时使用
     rgb: 'rgba(68, 64, 60, 1)', // stone-700 不透明
     hex: '#44403c',
   },

@@ -179,20 +179,20 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
                 {/* 默认图标 - 拉宽版窗口图标，只在非悬停且非点击状态下显示 */}
                 <WidePanelLeft className={cn(
                   "absolute h-5 w-5 transition-all duration-150 ease-out",
-                  // 收起状态：sidebar悬停时隐藏窗口图标
-                  isHovering && "opacity-0 scale-98",
-                  // 按钮悬停时隐藏窗口图标
-                  "group-hover:opacity-0 group-hover:scale-98",
+                  // 收起状态：sidebar悬停时隐藏窗口图标并放大
+                  isHovering && "opacity-0 scale-110",
+                  // 按钮悬停时隐藏窗口图标并添加更大的放大效果
+                  "group-hover:opacity-0 group-hover:scale-125",
                   // 点击时立即隐藏窗口图标
-                  isClicking && "opacity-0 scale-98"
+                  isClicking && "opacity-0 scale-110"
                 )} />
                 
                 {/* 悬停图标 - 右箭头，收起状态下悬停或点击时显示 */}
                 <ArrowRightToLine className={cn(
                   "absolute h-4 w-4 transition-all duration-150 ease-out",
-                  // 收起状态：sidebar悬停、按钮悬停或点击时显示箭头
-                  (isHovering || isClicking) ? "opacity-100 scale-100" : "opacity-0 scale-102",
-                  "group-hover:opacity-100 group-hover:scale-100"
+                  // 收起状态：sidebar悬停、按钮悬停或点击时显示箭头，按钮悬停时更大
+                  (isHovering || isClicking) ? "opacity-100 scale-110" : "opacity-0 scale-102",
+                  "group-hover:opacity-100 group-hover:scale-125"
                 )} />
               </span>
             </div>
@@ -258,18 +258,18 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               {/* 默认图标 - 拉宽版窗口图标，只在非悬停且非点击状态下显示 */}
               <WidePanelLeft className={cn(
                 "absolute h-5 w-5 transition-all duration-150 ease-out",
-                // 按钮悬停时隐藏窗口图标
-                "group-hover:opacity-0 group-hover:scale-98",
+                // 按钮悬停时隐藏窗口图标并添加更大的放大效果
+                "group-hover:opacity-0 group-hover:scale-125",
                 // 点击时立即隐藏窗口图标
-                isClicking && "opacity-0 scale-98"
+                isClicking && "opacity-0 scale-110"
               )} />
               
               {/* 悬停图标 - 左箭头，展开状态下悬停或点击时显示 */}
               <ArrowLeftToLine className={cn(
                 "absolute h-4 w-4 transition-all duration-150 ease-out",
-                // 展开状态：按钮悬停或点击时显示箭头
-                isClicking ? "opacity-100 scale-100" : "opacity-0 scale-102",
-                "group-hover:opacity-100 group-hover:scale-100"
+                // 展开状态：按钮悬停或点击时显示箭头，按钮悬停时更大
+                isClicking ? "opacity-100 scale-110" : "opacity-0 scale-102",
+                "group-hover:opacity-100 group-hover:scale-125"
               )} />
             </span>
           </div>
@@ -345,35 +345,22 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
         </TooltipWrapper>
       )}
 
-      {/* 🎯 应用市场按钮 - 次要功能，轻量但协调的设计 */}
+      {/* 🎯 应用市场按钮 - 与发起新对话按钮样式完全一致 */}
       {isExpanded ? (
         <SidebarButton
-          icon={
-            <Blocks className={cn(
-              "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-105",
-              isDark ? "text-stone-500 group-hover:text-stone-300" : "text-stone-500 group-hover:text-stone-700"
-            )} />
-          }
+          icon={<Blocks className={cn(
+            "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-110",
+            isDark
+              ? "text-gray-300 group-hover:text-white"
+              : "text-stone-600 group-hover:text-stone-800"
+          )} />}
           disableLockBehavior={true}
           onClick={() => {
             router.push('/apps');
           }}
           aria-label="应用市场"
           className={cn(
-            "group font-medium transition-all duration-150 ease-out",
-            isDark
-              ? [
-                "bg-transparent hover:bg-stone-700/20",
-                "border border-transparent hover:border-stone-600/25",
-                "text-stone-400 hover:text-stone-300",
-                "hover:shadow-sm hover:shadow-stone-900/8"
-              ]
-              : [
-                "bg-transparent hover:bg-stone-100/70",
-                "border border-transparent hover:border-stone-300/35",
-                "text-stone-500 hover:text-stone-700",
-                "hover:shadow-sm hover:shadow-stone-900/6"
-              ]
+            "group font-medium transition-all duration-150 ease-out"
           )}
         >
           <span className="font-serif">应用市场</span>
@@ -387,32 +374,19 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           showArrow={false}
         >
           <SidebarButton
-            icon={
-              <Blocks className={cn(
-                "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-105",
-                isDark ? "text-stone-500 group-hover:text-stone-300" : "text-stone-500 group-hover:text-stone-700"
-              )} />
-            }
+            icon={<Blocks className={cn(
+              "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-110",
+              isDark
+                ? "text-gray-300 group-hover:text-white"
+                : "text-stone-600 group-hover:text-stone-800"
+            )} />}
             disableLockBehavior={true}
             onClick={() => {
               router.push('/apps');
             }}
             aria-label="应用市场"
             className={cn(
-              "group font-medium transition-all duration-150 ease-out",
-              isDark
-                ? [
-                  "bg-transparent hover:bg-stone-700/20",
-                  "border border-transparent hover:border-stone-600/25",
-                  "text-stone-400 hover:text-stone-300",
-                  "hover:shadow-sm hover:shadow-stone-900/8"
-                ]
-                : [
-                  "bg-transparent hover:bg-stone-100/70",
-                  "border border-transparent hover:border-stone-300/35",
-                  "text-stone-500 hover:text-stone-700",
-                  "hover:shadow-sm hover:shadow-stone-900/6"
-                ]
+              "group font-medium transition-all duration-150 ease-out"
             )}
           >
             <span className="font-serif">应用市场</span>
