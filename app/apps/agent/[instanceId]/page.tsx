@@ -90,6 +90,22 @@ export default function AppDetailPage() {
   const [initError, setInitError] = useState<string | null>(null)
   
   // --- BEGIN COMMENT ---
+  // 🎯 新增：确保loader最少显示0.7秒，让布局有足够时间稳定
+  // --- END COMMENT ---
+  const [hasMinimumLoadTime, setHasMinimumLoadTime] = useState(false)
+  
+  // --- BEGIN COMMENT ---
+  // 🎯 最小加载时间控制：确保loader至少显示0.7秒
+  // --- END COMMENT ---
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasMinimumLoadTime(true)
+    }, 700) // 0.7秒
+    
+    return () => clearTimeout(timer)
+  }, [])
+  
+  // --- BEGIN COMMENT ---
   // 应用相关状态
   // --- END COMMENT ---
   const { apps, fetchApps } = useAppListStore()
@@ -322,9 +338,9 @@ export default function AppDetailPage() {
   }
   
   // --- BEGIN COMMENT ---
-  // 加载状态
+  // 加载状态 - 🎯 确保最少显示0.7秒
   // --- END COMMENT ---
-  if (isInitializing || (isValidating && !isValidatingForMessage) || !currentApp) {
+  if (!hasMinimumLoadTime || isInitializing || (isValidating && !isValidatingForMessage) || !currentApp) {
     return (
       <div className={cn(
         "h-full w-full relative flex flex-col",
