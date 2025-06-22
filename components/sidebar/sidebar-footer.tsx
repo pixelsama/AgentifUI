@@ -6,6 +6,7 @@ import { cn } from "@lib/utils"
 import { MobileUserButton } from "@components/mobile"
 import { useMobile } from "@lib/hooks/use-mobile"
 import { useRouter } from "next/navigation"
+import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
 
 export function SidebarFooter() {
   const isMobile = useMobile()
@@ -15,18 +16,44 @@ export function SidebarFooter() {
     <div className={cn(
       "flex flex-col gap-1.5 p-3 mt-auto",
     )}>
-      {!isMobile && <SidebarButton
-        icon={<Settings className={cn(
-          "h-5 w-5 transition-transform duration-300 group-hover:rotate-45",
-        )} />}
-        onClick={() => {
-          router.push('/settings')
-        }}
-        aria-label="设置"
-        className="group"
-      >
-        <span className="font-serif">设置</span>
-      </SidebarButton>}
+      {!isMobile && (
+        // --- BEGIN COMMENT ---
+        // 在slim状态下显示右侧tooltip，展开状态下不显示tooltip
+        // --- END COMMENT ---
+        isExpanded ? (
+          <SidebarButton
+            icon={<Settings className={cn(
+              "h-5 w-5 transition-transform duration-300 group-hover:rotate-45",
+            )} />}
+            onClick={() => {
+              router.push('/settings')
+            }}
+            aria-label="设置"
+            className="group"
+          >
+            <span className="font-serif">设置</span>
+          </SidebarButton>
+        ) : (
+          <TooltipWrapper
+            content="设置"
+            id="sidebar-footer-settings-tooltip"
+            placement="right"
+          >
+            <SidebarButton
+              icon={<Settings className={cn(
+                "h-5 w-5 transition-transform duration-300 group-hover:rotate-45",
+              )} />}
+              onClick={() => {
+                router.push('/settings')
+              }}
+              aria-label="设置"
+              className="group"
+            >
+              <span className="font-serif">设置</span>
+            </SidebarButton>
+          </TooltipWrapper>
+        )
+      )}
       
       {isMobile && <MobileUserButton />}
     </div>

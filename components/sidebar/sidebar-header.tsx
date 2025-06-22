@@ -10,6 +10,7 @@ import { useChatInputStore } from "@lib/stores/chat-input-store"
 import { useChatTransitionStore } from "@lib/stores/chat-transition-store"
 import { Grid3x3, AppWindow, Blocks } from "lucide-react"
 import { useChatInterface } from "@lib/hooks/use-chat-interface"
+import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
 
 interface SidebarHeaderProps {
   isHovering?: boolean
@@ -87,6 +88,8 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
     }, 100);
   };
 
+
+
   return (
     <div className={cn(
       "flex flex-col gap-2 py-4 px-3",
@@ -100,77 +103,140 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
       )}>
         {/* --- BEGIN COMMENT ---
         侧栏控制按钮 - 固定大小，默认显示窗口图标，悬停时fade到箭头图标
+        在slim状态下显示右侧tooltip
         --- END COMMENT --- */}
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={(e) => {
-            // 点击后移除focus，避免影响父容器的cursor显示
-            const target = e.currentTarget;
-            setTimeout(() => {
-              target.blur();
-            }, 100);
-            toggleSidebar();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
+        {!isExpanded ? (
+          <TooltipWrapper
+            content="展开侧栏"
+            id="sidebar-header-expand-tooltip"
+            placement="right"
+          >
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                // --- BEGIN COMMENT ---
+                // 立即移除focus，避免影响父容器的cursor显示
+                // --- END COMMENT ---
+                e.currentTarget.blur();
+                toggleSidebar();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  toggleSidebar();
+                }
+              }}
+              aria-label="展开侧栏"
+              className={cn(
+                "group relative flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium",
+                // --- BEGIN COMMENT ---
+                // 使用resize cursor表示可以调整sidebar宽度：展开时向左箭头，收起时向右箭头
+                // --- END COMMENT ---
+                "cursor-e-resize",
+                "transition-all duration-150 ease-in-out",
+                "outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                "select-none", // 防止文字选中
+                isDark ? "focus-visible:ring-stone-500 focus-visible:ring-offset-gray-900" : "focus-visible:ring-primary focus-visible:ring-offset-background",
+                "border border-transparent",
+                "h-10 w-10", // 正方形固定大小
+                isDark ? [
+                  "text-gray-200",
+                  "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50",
+                ] : [
+                  "text-stone-600",
+                  "hover:bg-stone-300 hover:shadow-md",
+                ]
+              )}
+            >
+              {/* --- BEGIN COMMENT ---
+              图标容器 - 包含默认图标和悬停图标的叠加效果
+              --- END COMMENT --- */}
+              <span className={cn(
+                "relative flex h-5 w-5 items-center justify-center flex-shrink-0", 
+                isDark ? "text-gray-400" : "text-gray-500",
+              )}>
+                {/* 默认图标 - 拉宽版窗口图标 */}
+                <WidePanelLeft className={cn(
+                  "absolute h-5 w-5 transition-all duration-150 ease-out",
+                  // 收起状态：sidebar悬停时隐藏窗口图标
+                  isHovering && "opacity-0 scale-98",
+                  // 按钮悬停时隐藏窗口图标
+                  "group-hover:opacity-0 group-hover:scale-98"
+                )} />
+                
+                {/* 悬停图标 - 箭头指向竖线，根据展开状态显示方向 */}
+                <ArrowRightToLine className={cn(
+                  "absolute h-5 w-5 transition-all duration-150 ease-out",
+                  // 收起状态：sidebar悬停或按钮悬停时显示箭头
+                  isHovering ? "opacity-100 scale-100" : "opacity-0 scale-102",
+                  "group-hover:opacity-100 group-hover:scale-100"
+                )} />
+              </span>
+            </div>
+          </TooltipWrapper>
+        ) : (
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={(e) => {
+              // --- BEGIN COMMENT ---
+              // 立即移除focus，避免影响父容器的cursor显示
+              // --- END COMMENT ---
+              e.currentTarget.blur();
               toggleSidebar();
-            }
-          }}
-          aria-label={
-            isExpanded ? "收起侧栏" : "展开侧栏"
-          }
-          className={cn(
-            "group relative flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium",
-            "transition-all duration-150 ease-in-out cursor-pointer",
-            "outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-            "select-none", // 防止文字选中
-            isDark ? "focus-visible:ring-stone-500 focus-visible:ring-offset-gray-900" : "focus-visible:ring-primary focus-visible:ring-offset-background",
-            "border border-transparent",
-            "h-10 w-10", // 正方形固定大小
-            isDark ? [
-              "text-gray-200",
-              "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50",
-            ] : [
-              "text-stone-600",
-              "hover:bg-stone-300 hover:shadow-md",
-            ]
-          )}
-        >
-          {/* --- BEGIN COMMENT ---
-          图标容器 - 包含默认图标和悬停图标的叠加效果
-          --- END COMMENT --- */}
-          <span className={cn(
-            "relative flex h-5 w-5 items-center justify-center flex-shrink-0", 
-            isDark ? "text-gray-400" : "text-gray-500",
-          )}>
-            {/* 默认图标 - 拉宽版窗口图标 */}
-            <WidePanelLeft className={cn(
-              "absolute h-5 w-5 transition-all duration-150 ease-out",
-              // 收起状态：sidebar悬停时隐藏窗口图标
-              !isExpanded && isHovering && "opacity-0 scale-98",
-              // 按钮悬停时隐藏窗口图标
-              "group-hover:opacity-0 group-hover:scale-98"
-            )} />
-            
-            {/* 悬停图标 - 箭头指向竖线，根据展开状态显示方向 */}
-            {isExpanded ? (
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleSidebar();
+              }
+            }}
+            aria-label="收起侧栏"
+            className={cn(
+              "group relative flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium",
+              // --- BEGIN COMMENT ---
+              // 使用resize cursor表示可以调整sidebar宽度：展开时向左箭头，收起时向右箭头
+              // --- END COMMENT ---
+              "cursor-w-resize",
+              "transition-all duration-150 ease-in-out",
+              "outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+              "select-none", // 防止文字选中
+              isDark ? "focus-visible:ring-stone-500 focus-visible:ring-offset-gray-900" : "focus-visible:ring-primary focus-visible:ring-offset-background",
+              "border border-transparent",
+              "h-10 w-10", // 正方形固定大小
+              isDark ? [
+                "text-gray-200",
+                "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50",
+              ] : [
+                "text-stone-600",
+                "hover:bg-stone-300 hover:shadow-md",
+              ]
+            )}
+          >
+            {/* --- BEGIN COMMENT ---
+            图标容器 - 包含默认图标和悬停图标的叠加效果
+            --- END COMMENT --- */}
+            <span className={cn(
+              "relative flex h-5 w-5 items-center justify-center flex-shrink-0", 
+              isDark ? "text-gray-400" : "text-gray-500",
+            )}>
+              {/* 默认图标 - 拉宽版窗口图标 */}
+              <WidePanelLeft className={cn(
+                "absolute h-5 w-5 transition-all duration-150 ease-out",
+                // 按钮悬停时隐藏窗口图标
+                "group-hover:opacity-0 group-hover:scale-98"
+              )} />
+              
+              {/* 悬停图标 - 箭头指向竖线，根据展开状态显示方向 */}
               <ArrowLeftToLine className={cn(
                 "absolute h-5 w-5 transition-all duration-150 ease-out",
                 // 展开状态：只有按钮悬停时显示箭头
                 "opacity-0 scale-102 group-hover:opacity-100 group-hover:scale-100"
               )} />
-            ) : (
-              <ArrowRightToLine className={cn(
-                "absolute h-5 w-5 transition-all duration-150 ease-out",
-                // 收起状态：sidebar悬停或按钮悬停时显示箭头
-                isHovering ? "opacity-100 scale-100" : "opacity-0 scale-102",
-                "group-hover:opacity-100 group-hover:scale-100"
-              )} />
-            )}
-          </span>
-        </div>
+            </span>
+          </div>
+        )}
 
         {/* --- BEGIN COMMENT ---
         项目名称 - 展开时作为独立文字显示，样式与按钮一致
@@ -198,68 +264,146 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
       </div>
       
       {/* 🎯 发起新对话按钮 - 重要功能，响应式设计突出显示 */}
-      <SidebarButton
-        icon={<Plus className={cn(
-          "h-5 w-5 transition-all duration-150 ease-out group-hover:rotate-90 group-hover:scale-110",
-          isDark
-            ? "text-gray-300 group-hover:text-white"
-            : "text-stone-600 group-hover:text-stone-800"
-        )} />}
-        disableLockBehavior={true}
-        onClick={handleNewChat}
-        aria-label="发起新对话"
-        className={cn(
-          "group font-medium transition-all duration-150 ease-out",
-          isDark 
-            ? [
-              "bg-stone-700/40 hover:bg-stone-600/60",
-              "border border-stone-600/50 hover:border-stone-500/70",
-              "text-gray-300 hover:text-white",
-              "shadow-sm hover:shadow-md hover:shadow-stone-900/20"
-            ]
-            : [
-              "bg-stone-200/60 hover:bg-stone-300/80",
-              "border border-stone-300/60 hover:border-stone-400/80",
-              "text-stone-600 hover:text-stone-800",
-              "shadow-sm hover:shadow-md hover:shadow-stone-900/15"
-            ]
-        )}
-      >
-        <span className="font-serif">发起新对话</span>
-      </SidebarButton>
+      {isExpanded ? (
+        <SidebarButton
+          icon={<Plus className={cn(
+            "h-5 w-5 transition-all duration-150 ease-out group-hover:rotate-90 group-hover:scale-110",
+            isDark
+              ? "text-gray-300 group-hover:text-white"
+              : "text-stone-600 group-hover:text-stone-800"
+          )} />}
+          disableLockBehavior={true}
+          onClick={handleNewChat}
+          aria-label="发起新对话"
+          className={cn(
+            "group font-medium transition-all duration-150 ease-out",
+            isDark 
+              ? [
+                "bg-stone-700/40 hover:bg-stone-600/60",
+                "border border-stone-600/50 hover:border-stone-500/70",
+                "text-gray-300 hover:text-white",
+                "shadow-sm hover:shadow-md hover:shadow-stone-900/20"
+              ]
+              : [
+                "bg-stone-200/60 hover:bg-stone-300/80",
+                "border border-stone-300/60 hover:border-stone-400/80",
+                "text-stone-600 hover:text-stone-800",
+                "shadow-sm hover:shadow-md hover:shadow-stone-900/15"
+              ]
+          )}
+        >
+          <span className="font-serif">发起新对话</span>
+        </SidebarButton>
+      ) : (
+        <TooltipWrapper
+          content="发起新对话"
+          id="sidebar-header-new-chat-tooltip"
+          placement="right"
+        >
+          <SidebarButton
+            icon={<Plus className={cn(
+              "h-5 w-5 transition-all duration-150 ease-out group-hover:rotate-90 group-hover:scale-110",
+              isDark
+                ? "text-gray-300 group-hover:text-white"
+                : "text-stone-600 group-hover:text-stone-800"
+            )} />}
+            disableLockBehavior={true}
+            onClick={handleNewChat}
+            aria-label="发起新对话"
+            className={cn(
+              "group font-medium transition-all duration-150 ease-out",
+              isDark 
+                ? [
+                  "bg-stone-700/40 hover:bg-stone-600/60",
+                  "border border-stone-600/50 hover:border-stone-500/70",
+                  "text-gray-300 hover:text-white",
+                  "shadow-sm hover:shadow-md hover:shadow-stone-900/20"
+                ]
+                : [
+                  "bg-stone-200/60 hover:bg-stone-300/80",
+                  "border border-stone-300/60 hover:border-stone-400/80",
+                  "text-stone-600 hover:text-stone-800",
+                  "shadow-sm hover:shadow-md hover:shadow-stone-900/15"
+                ]
+            )}
+          >
+            <span className="font-serif">发起新对话</span>
+          </SidebarButton>
+        </TooltipWrapper>
+      )}
 
       {/* 🎯 应用市场按钮 - 次要功能，轻量但协调的设计 */}
-      <SidebarButton
-        icon={
-          <Blocks className={cn(
-            "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-105",
-            isDark ? "text-stone-500 group-hover:text-stone-300" : "text-stone-500 group-hover:text-stone-700"
-          )} />
-        }
-        disableLockBehavior={true}
-        onClick={() => {
-          router.push('/apps');
-        }}
-        aria-label="应用市场"
-        className={cn(
-          "group font-medium transition-all duration-150 ease-out",
-          isDark
-            ? [
-              "bg-transparent hover:bg-stone-700/20",
-              "border border-transparent hover:border-stone-600/25",
-              "text-stone-400 hover:text-stone-300",
-              "hover:shadow-sm hover:shadow-stone-900/8"
-            ]
-            : [
-              "bg-transparent hover:bg-stone-100/70",
-              "border border-transparent hover:border-stone-300/35",
-              "text-stone-500 hover:text-stone-700",
-              "hover:shadow-sm hover:shadow-stone-900/6"
-            ]
-        )}
-      >
-        <span className="font-serif">应用市场</span>
-      </SidebarButton>
+      {isExpanded ? (
+        <SidebarButton
+          icon={
+            <Blocks className={cn(
+              "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-105",
+              isDark ? "text-stone-500 group-hover:text-stone-300" : "text-stone-500 group-hover:text-stone-700"
+            )} />
+          }
+          disableLockBehavior={true}
+          onClick={() => {
+            router.push('/apps');
+          }}
+          aria-label="应用市场"
+          className={cn(
+            "group font-medium transition-all duration-150 ease-out",
+            isDark
+              ? [
+                "bg-transparent hover:bg-stone-700/20",
+                "border border-transparent hover:border-stone-600/25",
+                "text-stone-400 hover:text-stone-300",
+                "hover:shadow-sm hover:shadow-stone-900/8"
+              ]
+              : [
+                "bg-transparent hover:bg-stone-100/70",
+                "border border-transparent hover:border-stone-300/35",
+                "text-stone-500 hover:text-stone-700",
+                "hover:shadow-sm hover:shadow-stone-900/6"
+              ]
+          )}
+        >
+          <span className="font-serif">应用市场</span>
+        </SidebarButton>
+      ) : (
+        <TooltipWrapper
+          content="应用市场"
+          id="sidebar-header-apps-tooltip"
+          placement="right"
+        >
+          <SidebarButton
+            icon={
+              <Blocks className={cn(
+                "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-105",
+                isDark ? "text-stone-500 group-hover:text-stone-300" : "text-stone-500 group-hover:text-stone-700"
+              )} />
+            }
+            disableLockBehavior={true}
+            onClick={() => {
+              router.push('/apps');
+            }}
+            aria-label="应用市场"
+            className={cn(
+              "group font-medium transition-all duration-150 ease-out",
+              isDark
+                ? [
+                  "bg-transparent hover:bg-stone-700/20",
+                  "border border-transparent hover:border-stone-600/25",
+                  "text-stone-400 hover:text-stone-300",
+                  "hover:shadow-sm hover:shadow-stone-900/8"
+                ]
+                : [
+                  "bg-transparent hover:bg-stone-100/70",
+                  "border border-transparent hover:border-stone-300/35",
+                  "text-stone-500 hover:text-stone-700",
+                  "hover:shadow-sm hover:shadow-stone-900/6"
+                ]
+            )}
+          >
+            <span className="font-serif">应用市场</span>
+          </SidebarButton>
+        </TooltipWrapper>
+      )}
 
     </div>
   )

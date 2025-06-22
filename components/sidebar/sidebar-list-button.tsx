@@ -86,6 +86,10 @@ export function SidebarListButton({
         // --- BEGIN COMMENT ---
         // 禁用状态样式
         // --- END COMMENT ---
+        // --- BEGIN COMMENT ---
+        // 恢复cursor-pointer，现在父容器使用cursor-e-resize不会冲突
+        // disabled时使用cursor-not-allowed
+        // --- END COMMENT ---
         isDisabled ? "cursor-not-allowed opacity-60 border-transparent" : "cursor-pointer",
         
         // --- BEGIN COMMENT ---
@@ -131,6 +135,9 @@ export function SidebarListButton({
       <div 
         className={cn(
           "flex flex-1 items-center min-w-0",
+          // --- BEGIN COMMENT ---
+          // 恢复cursor-pointer，确保按钮区域有明确的交互提示
+          // --- END COMMENT ---
           !isDisabled && "cursor-pointer"
         )}
         onClick={handleMainContentClick}

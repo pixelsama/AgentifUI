@@ -18,16 +18,24 @@ export function SidebarContainer() {
   // --- END COMMENT ---
   const [isHovering, setIsHovering] = useState(false)
 
-  // 在移动端上禁用悬停事件
+  // --- BEGIN COMMENT ---
+  // 在移动端上禁用悬停事件，并确保cursor状态正确重置
+  // --- END COMMENT ---
   const handleMouseEnter = () => {
     if (!isMobile) {
       setIsHovering(true)
+      // 确保移除任何可能残留的focus状态
+      const activeElement = document.activeElement as HTMLElement
+      activeElement?.blur?.()
     }
   }
   
   const handleMouseLeave = () => {
     if (!isMobile) {
       setIsHovering(false)
+      // 确保移除任何可能残留的focus状态
+      const activeElement = document.activeElement as HTMLElement
+      activeElement?.blur?.()
     }
   }
 
@@ -119,12 +127,12 @@ export function SidebarContainer() {
         !isExpanded && !isMobile && styles.hoverBg,
         
         // --- BEGIN COMMENT ---
-        // 点击区域提示 - 仅在收起状态时显示cursor-pointer
+        // 点击区域提示 - 仅在收起状态时显示cursor-e-resize，表示可以向右展开
         // 防止文字选中 - 点击时不选中文字
         // 动画期间保持cursor状态，避免闪烁
         // --- END COMMENT ---
         "select-none",
-        (!isExpanded && !isMobile) || (isAnimating && !isMobile) ? "cursor-pointer" : ""
+        (!isExpanded && !isMobile) || (isAnimating && !isMobile) ? "cursor-e-resize" : ""
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
