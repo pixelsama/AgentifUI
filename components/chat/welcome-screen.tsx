@@ -119,17 +119,31 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
   // --- END COMMENT ---
 
   // --- BEGIN COMMENT ---
-  // 🎯 简化的欢迎文字显示逻辑
+  // 🎯 修复的欢迎文字显示逻辑
   // 优先级：数据库开场白 → 用户名问候 → 默认时间问候
-  // 只要有用户名就能显示，不再依赖复杂的应用状态检查
+  // 🚨 修复：重新添加阻塞等待机制，避免重复渲染错误的欢迎文字
   // --- END COMMENT ---
   useEffect(() => {
     console.log('[WelcomeScreen] 当前状态:', {
       username,
       hasOpeningStatement: !!currentAppInstance?.config?.dify_parameters?.opening_statement,
       currentAppId: currentAppInstance?.instance_id,
-      pathname: window.location.pathname
+      pathname: window.location.pathname,
+      isValidating,
+      isLoading
     });
+
+    // --- BEGIN COMMENT ---
+    // 🚨 修复：重新添加应用状态检查，避免在应用切换时显示错误内容
+    // 这是防止重复渲染的关键阻塞点
+    // --- END COMMENT ---
+    if (isValidating || isLoading) {
+      console.log('[WelcomeScreen] 应用正在验证或加载中，暂停更新欢迎文字', {
+        isValidating,
+        isLoading
+      });
+      return;
+    }
 
     // --- BEGIN COMMENT ---
     // 🎯 简化检查：只要用户名不是undefined就可以显示欢迎文字
@@ -141,7 +155,8 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
     }
     
     // --- BEGIN COMMENT ---
-    // 🎯 减少防抖延迟，提高响应速度
+    // 🚨 修复：增加延迟时间，确保应用数据完全稳定后再渲染
+    // 避免在应用切换过程中的中间状态渲染错误内容
     // --- END COMMENT ---
     const updateTimer = setTimeout(() => {
       // --- BEGIN COMMENT ---
@@ -189,7 +204,7 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
       setTypewriterKey(prev => prev + 1);
       
       console.log('[WelcomeScreen] 欢迎文字更新完成:', welcomeText);
-    }, 50); // 减少到50ms，提高响应速度
+    }, 200); // 🚨 修复：增加到200ms，确保应用数据稳定
     
     // 清理定时器
     return () => clearTimeout(updateTimer);
@@ -198,6 +213,8 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
     username, 
     currentAppInstance?.config?.dify_parameters?.opening_statement, 
     currentAppInstance?.instance_id,
+    isValidating,     // 🚨 修复：重新监听验证状态
+    isLoading,        // 🚨 修复：重新监听加载状态
     resetWelcomeTypewriter
   ]);
 
