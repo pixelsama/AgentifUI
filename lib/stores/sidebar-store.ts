@@ -1,4 +1,5 @@
 import { create } from "zustand"
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 // 选中项目类型
 export type SelectedItemType = 'chat' | 'app' | null
@@ -51,11 +52,13 @@ interface SidebarState {
   clearSelection: () => void
 }
 
-export const useSidebarStore = create<SidebarState>((set, get) => ({
-  // --- BEGIN COMMENT ---
-  // 基础状态
-  // --- END COMMENT ---
-  isExpanded: false,
+export const useSidebarStore = create<SidebarState>()(
+  persist(
+    (set, get) => ({
+      // --- BEGIN COMMENT ---
+      // 基础状态 - 桌面端持久化记忆用户偏好
+      // --- END COMMENT ---
+      isExpanded: false,
   // --- BEGIN COMMENT ---
   // 客户端挂载状态 - 初始为 false
   // --- END COMMENT ---
@@ -206,4 +209,17 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
       selectedId: null 
     })
   },
-}))
+    }),
+    {
+      name: 'sidebar-desktop-preferences',
+      storage: createJSONStorage(() => localStorage),
+      // --- BEGIN COMMENT ---
+      // 只在桌面端持久化 isExpanded 状态，移动端使用默认行为
+      // --- END COMMENT ---
+      partialize: (state) => {
+        const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768
+        return isDesktop ? { isExpanded: state.isExpanded } : {}
+      },
+    }
+  )
+)
