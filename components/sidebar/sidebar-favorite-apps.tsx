@@ -186,8 +186,41 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
         />
       )
     }
-    return <Bot className="w-4 h-4" />
-
+    
+    // 🎨 现代化设计：使用彩色渐变背景 + 简洁图标
+    // 基于应用ID生成一致的渐变色彩，确保每个应用都有独特且稳定的视觉标识
+    // 提升sidebar的现代感和视觉层次
+    const getAppGradient = () => {
+      const gradients = [
+        "bg-gradient-to-br from-blue-400 to-blue-600",
+        "bg-gradient-to-br from-purple-400 to-purple-600", 
+        "bg-gradient-to-br from-pink-400 to-pink-600",
+        "bg-gradient-to-br from-green-400 to-green-600",
+        "bg-gradient-to-br from-orange-400 to-orange-600",
+        "bg-gradient-to-br from-teal-400 to-teal-600",
+        "bg-gradient-to-br from-indigo-400 to-indigo-600",
+        "bg-gradient-to-br from-cyan-400 to-cyan-600"
+      ]
+      
+      // 基于应用ID生成一致的哈希值，确保相同应用总是显示相同颜色
+      const hash = app.instanceId.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0)
+        return a & a
+      }, 0)
+      
+      return gradients[Math.abs(hash) % gradients.length]
+    }
+    
+    return (
+      <div className={cn(
+        "w-4 h-4 rounded-md flex items-center justify-center text-white shadow-sm",
+        "transition-all duration-200 group-hover:scale-105",
+        getAppGradient()
+      )}>
+        {/* 使用简洁的几何图标，现代且通用 */}
+        <div className="w-2 h-2 rounded-sm bg-white/90" />
+      </div>
+    )
   }
 
   // 创建下拉菜单
