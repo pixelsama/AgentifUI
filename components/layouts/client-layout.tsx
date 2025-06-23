@@ -32,6 +32,12 @@ export function ClientLayout({ children, fontClasses }: ClientLayoutProps) {
     setMounted(true);
     // 当客户端组件挂载后，给 body 添加 render-ready 类，使其可见
     document.body.classList.add('render-ready');
+    
+    // --- BEGIN COMMENT ---
+    // 🎯 全局设置 sidebar 挂载状态，避免每个布局重复调用导致的闪烁
+    // --- END COMMENT ---
+    const { setMounted: setSidebarMounted } = require('@lib/stores/sidebar-store').useSidebarStore.getState();
+    setSidebarMounted();
 
     // 清理函数：仅当 ClientLayout 自身卸载时才移除 render-ready
     return () => {

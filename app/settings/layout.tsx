@@ -1,13 +1,11 @@
 "use client"
 
-import { Sidebar } from "@components/sidebar"
 import { MobileNavButton } from "@components/mobile"
 import { NavBar } from "@components/nav-bar"
 import { SettingsSidebar } from "@components/settings/settings-sidebar"
 import { SettingsMobileNav } from "@components/settings/settings-mobile-nav"
 import { cn } from "@lib/utils"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
-import { useEffect } from "react"
 import { useMobile } from "@lib/hooks"
 import { useSettingsColors } from '@lib/hooks/use-settings-colors'
 import { useRouter } from "next/navigation"
@@ -18,17 +16,14 @@ interface SettingsLayoutProps {
 }
 
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
-  const { isExpanded, isMounted, setMounted } = useSidebarStore()
+  const { isExpanded, isMounted } = useSidebarStore()
   const isMobile = useMobile()
   const { colors, isDark } = useSettingsColors()
   const router = useRouter()
 
   // --- BEGIN COMMENT ---
-  // 在组件挂载后设置状态
+  // 🎯 移除重复的 setMounted 调用，现在由全局 ClientLayout 统一管理
   // --- END COMMENT ---
-  useEffect(() => {
-    setMounted()
-  }, [setMounted])
 
   // --- BEGIN COMMENT ---
   // 计算主内容区域的左边距
@@ -45,8 +40,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
       "flex min-h-screen h-full",
       colors.pageBackground.tailwind
     )}>
-      {/* 侧边栏 - 始终渲染，由内部控制显示/隐藏 */}
-      <Sidebar />
+      {/* 🎯 Sidebar 已移至根布局，无需重复渲染 */}
 
       {/* --- 添加导航栏 --- */}
       <NavBar />

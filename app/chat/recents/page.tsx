@@ -14,19 +14,16 @@ import { cn } from "@lib/utils"
 // 参考 settings 页面的实现，保持简单的挂载逻辑
 // --- END COMMENT ---
 export default function RecentsPage() {
-  const { setMounted, isExpanded } = useSidebarStore()
+  const { isExpanded } = useSidebarStore()
   const { isDark } = useTheme()
   
   // --- BEGIN COMMENT ---
-  // 在组件挂载后设置状态
-  // 与设置页面保持一致的实现方式
+  // 🎯 移除重复的 setMounted 调用，现在由全局 ClientLayout 统一管理
   // --- END COMMENT ---
   useEffect(() => {
-    setMounted()
-    
     // 设置页面标题
     document.title = "历史对话 | AgentifUI"
-  }, [setMounted])
+  }, [])
 
   return (
     <>

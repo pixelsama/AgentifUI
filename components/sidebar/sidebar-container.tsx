@@ -108,8 +108,7 @@ export function SidebarContainer() {
         // 桌面端始终显示
         !isMobile && "translate-x-0",
         
-        // 移动端未挂载时隐藏，避免初始闪烁
-        isMobile && !isMounted && "opacity-0",
+        // 移动端初始渲染优化（移除 isMounted 依赖，避免路由切换闪烁）
         
         // 简化Z-index设置
         isMobile ? "z-50" : "z-30",

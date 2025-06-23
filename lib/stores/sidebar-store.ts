@@ -108,10 +108,7 @@ export const useSidebarStore = create<SidebarState>()(
 
   // 宽度计算方法
   getSidebarWidth: (isMobile: boolean) => {
-    const { isExpanded, isMounted } = get()
-    
-    // 未挂载前保持宽度为0防止闪烁
-    if (!isMounted) return "w-0"
+    const { isExpanded } = get()
     
     // 根据设备类型和侧边栏状态返回不同宽度类名
     if (isMobile) {

@@ -1,11 +1,9 @@
 "use client"
 
-import { Sidebar } from "@components/sidebar"
 import { MobileNavButton } from "@components/mobile"
 // import { NavBar } from "@components/nav-bar/nav-bar" // NavBar 将在 Page 中引入
 import { cn } from "@lib/utils"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
-import { useEffect } from "react"
 import { useMobile } from "@lib/hooks"
 import { useTheme } from "@lib/hooks/use-theme"
 
@@ -14,14 +12,13 @@ interface ChatLayoutProps {
 }
 
 export default function ChatLayout({ children }: ChatLayoutProps) {
-  const { isExpanded, isMounted, setMounted } = useSidebarStore()
+  const { isExpanded, isMounted } = useSidebarStore()
   const isMobile = useMobile()
   const { isDark } = useTheme()
   
-  // 在组件挂载后设置状态
-  useEffect(() => {
-    setMounted()
-  }, [setMounted])
+  // --- BEGIN COMMENT ---
+  // 🎯 移除重复的 setMounted 调用，现在由全局 ClientLayout 统一管理
+  // --- END COMMENT ---
 
   // --- BEGIN COMMENT ---
   // 计算主内容区域的左边距
@@ -37,8 +34,7 @@ export default function ChatLayout({ children }: ChatLayoutProps) {
       "flex min-h-screen h-full",
       isDark ? "bg-stone-800" : "bg-stone-100"
     )}>
-      {/* 侧边栏 - 始终渲染，由内部控制显示/隐藏 */}
-      <Sidebar />
+      {/* 🎯 Sidebar 已移至根布局，无需重复渲染 */}
       
       {/* 
         移动端导航按钮 - 仅在客户端挂载后显示 
