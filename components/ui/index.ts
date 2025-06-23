@@ -12,8 +12,7 @@ export { PageLoader } from './page-loader'
 export { NotificationBar } from './notification-bar'
 export { ConfirmDialog } from './confirm-dialog'
 export { InputDialog } from './input-dialog'
-export { PromptButton } from "./prompt-button"
-export { PromptPanel } from "./prompt-panel"
+
 export { PinButton } from "./pin-button"
 export { Popover, PopoverItem, PopoverDivider } from "./popover"
 export { TypeWriter } from "./typewriter" 
