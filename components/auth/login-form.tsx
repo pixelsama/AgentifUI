@@ -212,16 +212,21 @@ export function LoginForm() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end">
-                <div className="text-sm">
-                  <Link href="/forgot-password" className={cn(
-                    "font-medium font-serif",
-                    isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-700 hover:text-stone-600"
-                  )}>
-                    忘记密码？
-                  </Link>
+              {/* --- BEGIN COMMENT --- */}
+              {/* 条件渲染：仅在非SSO专用模式下显示忘记密码链接 */}
+              {/* --- END COMMENT --- */}
+              {!ssoOnlyMode && (
+                <div className="flex items-center justify-end">
+                  <div className="text-sm">
+                    <Link href="/forgot-password" className={cn(
+                      "font-medium font-serif",
+                      isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-700 hover:text-stone-600"
+                    )}>
+                      忘记密码？
+                    </Link>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <Button 
