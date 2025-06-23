@@ -13,7 +13,7 @@ import { cn } from "@lib/utils";
 import { Providers } from "./providers"; // 确保导入 Providers 组件
 import { DynamicTitle } from "@components/ui/dynamic-title"; // 导入动态标题组件
 import { StagewiseToolbarWrapper } from "@components/dev/stagewise-toolbar";
-import { Sidebar } from "@components/sidebar"; // 🎯 新增：导入 Sidebar 组件
+import { ConditionalSidebar } from "@components/sidebar/conditional-sidebar"; // 🎯 新增：条件渲染Sidebar
 
 // --- BEGIN COMMENT ---
 // 🎯 Claude 风格的中英文字体配置
@@ -85,8 +85,8 @@ export default function RootLayout({
           {/* 添加 DynamicTitle 组件，确保它能在所有页面中生效 */}
           <DynamicTitle />
           <ClientLayout fontClasses={fontClasses}>
-            {/* 🎯 全局 Sidebar - 避免路由切换时重新挂载 */}
-            <Sidebar />
+            {/* 🎯 条件渲染 Sidebar - 根据路由决定是否显示，避免路由切换时重新挂载 */}
+            <ConditionalSidebar />
             {children}
             <TooltipContainer />
             <NotificationBar />

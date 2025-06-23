@@ -1,11 +1,9 @@
 "use client"
 
 import React from "react"
-import { usePathname } from "next/navigation"
 import { cn } from "@lib/utils"
 import { useMobile } from "@lib/hooks"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
-import { useSettingsColors } from "@lib/hooks/use-settings-colors"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { DesktopUserAvatar } from "./desktop-user-avatar"
 import { ConversationTitleButton } from "./conversation-title-button"
@@ -23,9 +21,7 @@ import { WorkflowHistoryButton } from "./workflow-history-button"
  */
 export function NavBar() {
   const isMobile = useMobile()
-  const pathname = usePathname()
   const { colors } = useThemeColors()
-  const { colors: settingsColors } = useSettingsColors()
   const { isExpanded } = useSidebarStore()
 
   if (isMobile) {
@@ -33,10 +29,10 @@ export function NavBar() {
   }
 
   // --- BEGIN COMMENT ---
-  // 检测是否在设置页面，如果是则使用设置页面的背景色
+  // 🎯 统一navbar背景色，所有页面使用相同的背景色确保一致性
+  // Settings页面也使用主背景色，而不是页面背景色
   // --- END COMMENT ---
-  const isSettingsPage = pathname?.startsWith('/settings')
-  const backgroundColor = isSettingsPage ? settingsColors.pageBackground.tailwind : colors.mainBackground.tailwind
+  const backgroundColor = colors.mainBackground.tailwind
 
   // --- BEGIN COMMENT ---
   // 计算左边距：桌面端始终为sidebar留出空间
