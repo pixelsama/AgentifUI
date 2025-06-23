@@ -4,20 +4,24 @@ import React from "react"
 import { Pin } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useTheme } from "@lib/hooks/use-theme"
-import { Tooltip } from "./tooltip"
+import { TooltipWrapper } from "./tooltip-wrapper"
 
 interface PinButtonProps {
   isPinned: boolean
   onClick: () => void
   className?: string
   size?: "sm" | "md" | "lg"
+  tooltipSize?: "sm" | "md" // tooltip尺寸
+  showTooltipArrow?: boolean // 是否显示tooltip箭头
 }
 
 export function PinButton({
   isPinned,
   onClick,
   className,
-  size = "md"
+  size = "md",
+  tooltipSize = "sm",
+  showTooltipArrow = false
 }: PinButtonProps) {
   const { isDark } = useTheme()
   
@@ -34,10 +38,13 @@ export function PinButton({
   }
   
   return (
-    <Tooltip
+    <TooltipWrapper
       id="pin-tooltip"
       content={isPinned ? "取消固定" : "固定"}
       placement="top"
+      size={tooltipSize}
+      showArrow={showTooltipArrow}
+      desktopOnly={true}
     >
       <button
         className={cn(
@@ -63,6 +70,6 @@ export function PinButton({
           )} 
         />
       </button>
-    </Tooltip>
+    </TooltipWrapper>
   )
 } 

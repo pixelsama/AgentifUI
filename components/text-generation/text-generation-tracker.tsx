@@ -217,6 +217,8 @@ export function TextGenerationTracker({
                     content={isCopied ? "已复制" : "复制文本"}
                     id="text-generation-copy-btn"
                     placement="bottom"
+                    size="sm"
+                    showArrow={false}
                     desktopOnly={true}
                   >
                     <button
@@ -244,6 +246,8 @@ export function TextGenerationTracker({
                     content="下载文本"
                     id="text-generation-download-btn"
                     placement="bottom"
+                    size="sm"
+                    showArrow={false}
                     desktopOnly={true}
                   >
                     <button

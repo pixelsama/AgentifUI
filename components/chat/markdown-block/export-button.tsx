@@ -11,6 +11,8 @@ interface ExportButtonProps {
   language?: string;
   className?: string;
   tooltipPlacement?: "top" | "bottom" | "left" | "right";
+  tooltipSize?: "sm" | "md"; // tooltip尺寸
+  showTooltipArrow?: boolean; // 是否显示tooltip箭头
   onExport?: () => void;
 }
 
@@ -72,6 +74,8 @@ export const ExportButton: React.FC<ExportButtonProps> = React.memo(({
   language = 'text',
   className,
   tooltipPlacement = "bottom",
+  tooltipSize = "sm",
+  showTooltipArrow = false,
   onExport
 }) => {
   const { isDark } = useTheme()
@@ -134,6 +138,8 @@ export const ExportButton: React.FC<ExportButtonProps> = React.memo(({
       content="导出文件"
       id={tooltipId}
       placement={tooltipPlacement}
+      size={tooltipSize}
+      showArrow={showTooltipArrow}
       desktopOnly={true}
     >
       <button

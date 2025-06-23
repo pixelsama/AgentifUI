@@ -103,7 +103,8 @@ export const FileTypeSelector = ({
       content={getTooltipContent()}
       id="file-type-selector-tooltip"
       placement="top" 
-      size="md"
+      size="sm"
+      showArrow={false}
     >
       <ChatButton
         icon={

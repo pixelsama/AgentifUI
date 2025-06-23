@@ -230,6 +230,8 @@ export function TextGenerationResultViewer({ result, execution, onClose }: TextG
                 content={isCopied ? "已复制" : "复制结果"}
                 id="text-result-viewer-copy-btn"
                 placement="bottom"
+                size="sm"
+                showArrow={false}
                 desktopOnly={true}
               >
                 <button
@@ -257,6 +259,8 @@ export function TextGenerationResultViewer({ result, execution, onClose }: TextG
                 content="下载结果"
                 id="text-result-viewer-download-btn"
                 placement="bottom"
+                size="sm"
+                showArrow={false}
                 desktopOnly={true}
               >
                 <button

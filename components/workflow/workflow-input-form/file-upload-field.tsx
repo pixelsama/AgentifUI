@@ -503,7 +503,7 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
                       )} />
                     )}
                     {uploadFile.status === 'error' && (
-                      <TooltipWrapper content="重新上传" placement="top" id={`retry-${uploadFile.id}`}>
+                      <TooltipWrapper content="重新上传" placement="top" id={`retry-${uploadFile.id}`} size="sm" showArrow={false}>
                         <button 
                           type="button"
                           onClick={() => handleRetryUpload(uploadFile.id)}
@@ -564,7 +564,7 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
                 </div>
                 
                 {/* 删除按钮 */}
-                <TooltipWrapper content="移除文件" placement="top" id={`remove-${uploadFile.id}`}>
+                <TooltipWrapper content="移除文件" placement="top" id={`remove-${uploadFile.id}`} size="sm" showArrow={false}>
                   <button
                     type="button"
                     onClick={() => handleRemoveFile(uploadFile.id)}

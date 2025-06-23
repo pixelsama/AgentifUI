@@ -256,6 +256,8 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
                 content={isCopied ? "已复制" : "复制结果"}
                 id="result-viewer-copy-btn"
                 placement="bottom"
+                size="sm"
+                showArrow={false}
                 desktopOnly={true}
               >
                 <button
@@ -283,6 +285,8 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
                 content="下载结果"
                 id="workflow-result-viewer-download-btn"
                 placement="bottom"
+                size="sm"
+                showArrow={false}
                 desktopOnly={true}
               >
                 <button

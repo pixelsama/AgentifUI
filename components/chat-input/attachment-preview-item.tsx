@@ -87,7 +87,7 @@ export const AttachmentPreviewItem: React.FC<AttachmentPreviewItemProps> = ({ at
         return <CheckCircle2Icon className={cn("w-4 h-4", isDark ? "text-stone-400" : "text-stone-500")} />
       case 'error':
         return (
-          <TooltipWrapper content="重新上传" placement="top" id={`retry-att-${attachment.id}`}>
+          <TooltipWrapper content="重新上传" placement="top" id={`retry-att-${attachment.id}`} size="sm" showArrow={false}>
             <button 
               type="button"
               onClick={handleRetryClick}
@@ -147,7 +147,7 @@ export const AttachmentPreviewItem: React.FC<AttachmentPreviewItemProps> = ({ at
         </p>
       </div>
 
-      <TooltipWrapper content="移除附件" placement="top" id={`remove-att-${attachment.id}`}>
+      <TooltipWrapper content="移除附件" placement="top" id={`remove-att-${attachment.id}`} size="sm" showArrow={false}>
         <button
           type="button"
           onClick={handleRemove}

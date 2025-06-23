@@ -10,6 +10,8 @@ interface CopyButtonProps {
   content?: string;
   className?: string;
   tooltipPlacement?: "top" | "bottom" | "left" | "right";
+  tooltipSize?: "sm" | "md"; // tooltip尺寸
+  showTooltipArrow?: boolean; // 是否显示tooltip箭头
   onCopy?: () => void;
 }
 
@@ -25,6 +27,8 @@ export const CopyButton: React.FC<CopyButtonProps> = React.memo(({
   content,
   className,
   tooltipPlacement = "bottom",
+  tooltipSize = "sm",
+  showTooltipArrow = false,
   onCopy
 }) => {
   const { isDark } = useTheme()
@@ -64,6 +68,8 @@ export const CopyButton: React.FC<CopyButtonProps> = React.memo(({
       content={isCopied ? "已复制" : "复制内容"}
       id={tooltipId}
       placement={tooltipPlacement}
+      size={tooltipSize}
+      showArrow={showTooltipArrow}
       desktopOnly={true}
     >
       <button
