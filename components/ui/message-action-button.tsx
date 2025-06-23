@@ -16,6 +16,8 @@ interface MessageActionButtonProps {
   tooltipPosition?: "top" | "bottom" | "left" | "right"
   disabled?: boolean
   active?: boolean // 是否处于激活状态
+  tooltipSize?: "sm" | "md" // tooltip尺寸
+  showTooltipArrow?: boolean // 是否显示tooltip箭头
 }
 
 export const MessageActionButton: React.FC<MessageActionButtonProps> = ({
@@ -27,7 +29,9 @@ export const MessageActionButton: React.FC<MessageActionButtonProps> = ({
   className,
   tooltipPosition = "bottom",
   disabled = false,
-  active = false
+  active = false,
+  tooltipSize = "sm", // message-actions默认使用小尺寸
+  showTooltipArrow = false // message-actions默认不显示箭头
 }) => {
   const { isDark } = useTheme()
   // 使用外部传入的active属性控制状态，而不是内部状态
@@ -78,12 +82,14 @@ export const MessageActionButton: React.FC<MessageActionButtonProps> = ({
     return button
   }
   
-  // 使用TooltipWrapper包装按钮
+  // 使用TooltipWrapper包装按钮，传递新的tooltip属性
   return (
     <TooltipWrapper
       content={displayLabel}
       id={tooltipId}
       placement={tooltipPosition}
+      size={tooltipSize}
+      showArrow={showTooltipArrow}
       desktopOnly={true}
     >
       {button}

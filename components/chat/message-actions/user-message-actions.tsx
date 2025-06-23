@@ -10,6 +10,9 @@ interface UserMessageActionsProps {
   content: string
   onEdit: () => void
   className?: string
+  // tooltip配置
+  tooltipSize?: "sm" | "md"
+  showTooltipArrow?: boolean
 }
 
 /**
@@ -21,15 +24,25 @@ export const UserMessageActions: React.FC<UserMessageActionsProps> = ({
   messageId,
   content,
   onEdit,
-  className
+  className,
+  tooltipSize = "sm",
+  showTooltipArrow = false
 }) => {
   return (
     <MessageActionsContainer 
       align="right" 
       className={className}
     >
-      <CopyButton content={content} />
-      <EditButton onEdit={onEdit} />
+      <CopyButton 
+        content={content}
+        tooltipSize={tooltipSize}
+        showTooltipArrow={showTooltipArrow}
+      />
+      <EditButton 
+        onEdit={onEdit}
+        tooltipSize={tooltipSize}
+        showTooltipArrow={showTooltipArrow}
+      />
     </MessageActionsContainer>
   )
 }

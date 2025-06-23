@@ -9,6 +9,8 @@ interface CopyButtonProps {
   content?: string
   disabled?: boolean
   tooltipPosition?: "top" | "bottom" | "left" | "right"
+  tooltipSize?: "sm" | "md" // tooltip尺寸
+  showTooltipArrow?: boolean // 是否显示tooltip箭头
   className?: string
 }
 
@@ -21,6 +23,8 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
   content,
   disabled = false,
   tooltipPosition = "bottom",
+  tooltipSize = "sm",
+  showTooltipArrow = false,
   className
 }) => {
   const { handleCopy, isCopied } = useCopyAction(content || '')
@@ -43,6 +47,8 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
       active={isCopied && !disabled}
       disabled={disabled}
       tooltipPosition={tooltipPosition}
+      tooltipSize={tooltipSize}
+      showTooltipArrow={showTooltipArrow}
       className={className}
     />
   )

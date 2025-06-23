@@ -8,6 +8,8 @@ import { useEditAction } from "../hooks/use-edit-action"
 interface EditButtonProps {
   onEdit: () => void
   tooltipPosition?: "top" | "bottom" | "left" | "right"
+  tooltipSize?: "sm" | "md" // tooltip尺寸
+  showTooltipArrow?: boolean // 是否显示tooltip箭头
   className?: string
 }
 
@@ -19,6 +21,8 @@ interface EditButtonProps {
 export const EditButton: React.FC<EditButtonProps> = ({
   onEdit,
   tooltipPosition = "bottom",
+  tooltipSize = "sm",
+  showTooltipArrow = false,
   className
 }) => {
   const { handleEdit } = useEditAction(onEdit)
@@ -29,6 +33,8 @@ export const EditButton: React.FC<EditButtonProps> = ({
       label="编辑"
       onClick={handleEdit}
       tooltipPosition={tooltipPosition}
+      tooltipSize={tooltipSize}
+      showTooltipArrow={showTooltipArrow}
       className={className}
     />
   )

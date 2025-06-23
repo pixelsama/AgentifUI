@@ -9,6 +9,8 @@ interface FeedbackButtonProps {
   onFeedback: (isPositive: boolean) => void
   isPositive: boolean
   tooltipPosition?: "top" | "bottom" | "left" | "right"
+  tooltipSize?: "sm" | "md" // tooltip尺寸
+  showTooltipArrow?: boolean // 是否显示tooltip箭头
   className?: string
   active?: boolean // 是否处于激活状态
 }
@@ -23,6 +25,8 @@ export const FeedbackButton: React.FC<FeedbackButtonProps> = ({
   onFeedback,
   isPositive,
   tooltipPosition = "bottom",
+  tooltipSize = "sm",
+  showTooltipArrow = false,
   className,
   active = false
 }) => {
@@ -39,6 +43,8 @@ export const FeedbackButton: React.FC<FeedbackButtonProps> = ({
       onClick={() => handleFeedback(isPositive)}
       active={active || hasFeedback}
       tooltipPosition={tooltipPosition}
+      tooltipSize={tooltipSize}
+      showTooltipArrow={showTooltipArrow}
       className={className}
     />
   )

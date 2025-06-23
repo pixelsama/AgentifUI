@@ -16,6 +16,9 @@ interface AssistantMessageActionsProps {
   onFeedback: (isPositive: boolean) => void
   isRegenerating?: boolean
   className?: string
+  // tooltip配置
+  tooltipSize?: "sm" | "md"
+  showTooltipArrow?: boolean
 }
 
 /**
@@ -33,7 +36,9 @@ export const AssistantMessageActions: React.FC<AssistantMessageActionsProps> = (
   onRegenerate,
   onFeedback,
   isRegenerating = false,
-  className
+  className,
+  tooltipSize = "sm",
+  showTooltipArrow = false
 }) => {
   const { isDark } = useTheme()
   
@@ -53,10 +58,14 @@ export const AssistantMessageActions: React.FC<AssistantMessageActionsProps> = (
       <CopyButton 
         content={content} 
         disabled={!hasContentToCopy}
+        tooltipSize={tooltipSize}
+        showTooltipArrow={showTooltipArrow}
       />
       <RegenerateButton 
         onRegenerate={onRegenerate}
         isRegenerating={isRegenerating}
+        tooltipSize={tooltipSize}
+        showTooltipArrow={showTooltipArrow}
       />
       
       {/* 分隔线 - 使用更深的颜色，在深色模式下不那么显眼 */}
@@ -71,6 +80,8 @@ export const AssistantMessageActions: React.FC<AssistantMessageActionsProps> = (
           onFeedback={() => handleFeedback(true)}
           isPositive={true}
           active={selectedFeedback === true}
+          tooltipSize={tooltipSize}
+          showTooltipArrow={showTooltipArrow}
         />
       )}
       {shouldShowButton(false) && (
@@ -78,6 +89,8 @@ export const AssistantMessageActions: React.FC<AssistantMessageActionsProps> = (
           onFeedback={() => handleFeedback(false)}
           isPositive={false}
           active={selectedFeedback === false}
+          tooltipSize={tooltipSize}
+          showTooltipArrow={showTooltipArrow}
         />
       )}
     </MessageActionsContainer>
