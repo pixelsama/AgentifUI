@@ -8,6 +8,7 @@ import { createClient } from '../../lib/supabase/client';
 import { cn } from '@lib/utils';
 import { useTheme } from '@lib/hooks/use-theme';
 import { SocialAuthButtons } from './social-auth-buttons';
+import { Eye, EyeOff } from 'lucide-react';
 
 export function RegisterForm() {
   const router = useRouter();
@@ -21,6 +22,8 @@ export function RegisterForm() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { isDark } = useTheme();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -231,20 +234,37 @@ export function RegisterForm() {
               )}>
                 密码
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className={cn(
-                  "block w-full px-4 py-3 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
-                  isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
-                )}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={cn(
+                    "block w-full px-4 py-3 pr-12 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
+                    isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
+                  )}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className={cn(
+                    "absolute inset-y-0 right-0 flex items-center pr-3 text-sm leading-5 focus:outline-none transition-colors",
+                    isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-500 hover:text-stone-600"
+                  )}
+                  aria-label={showPassword ? "隐藏密码" : "显示密码"}
+                >
+                  {showPassword ? (
+                    <Eye className="h-5 w-5" />
+                  ) : (
+                    <EyeOff className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </div>
             
             <div>
@@ -254,20 +274,37 @@ export function RegisterForm() {
               )}>
                 确认密码
               </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={cn(
-                  "block w-full px-4 py-3 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
-                  isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
-                )}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={cn(
+                    "block w-full px-4 py-3 pr-12 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
+                    isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
+                  )}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className={cn(
+                    "absolute inset-y-0 right-0 flex items-center pr-3 text-sm leading-5 focus:outline-none transition-colors",
+                    isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-500 hover:text-stone-600"
+                  )}
+                  aria-label={showConfirmPassword ? "隐藏确认密码" : "显示确认密码"}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 

@@ -3,11 +3,30 @@
 import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { ResetPasswordForm } from '@components/auth/reset-password-form';
+import { AuthRedirectGuard } from '@components/auth/auth-redirect-guard';
 import { useTheme } from '@lib/hooks/use-theme';
+import { useSearchParams } from 'next/navigation';
 import { cn } from '@lib/utils';
 
 function ResetPasswordContent() {
-  return <ResetPasswordForm />;
+  const searchParams = useSearchParams();
+  // 检查是否有重置token
+  const hasResetToken = searchParams.get('token') || searchParams.get('access_token');
+  
+  // 只有重置密码请求才需要特殊的重定向逻辑
+  if (hasResetToken) {
+    return <ResetPasswordForm />;
+  }
+  
+  // 没有token时使用守卫组件
+  return (
+    <AuthRedirectGuard 
+      redirectTo="/chat" 
+      redirectMessage="您已登录，正在为您跳转到对话页面..."
+    >
+      <ResetPasswordForm />
+    </AuthRedirectGuard>
+  );
 }
 
 export default function ResetPasswordPage() {

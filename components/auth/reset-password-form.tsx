@@ -355,20 +355,37 @@ export function ResetPasswordForm() {
             )}>
               新密码
             </label>
-            <input
-              id="password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              autoComplete="new-password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-              className={cn(
-                "appearance-none relative block w-full px-3 py-2 border placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
-                isDark ? "bg-stone-800 border-stone-700 text-white" : "border-gray-300 text-gray-900"
-              )}
-              placeholder="输入新密码"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className={cn(
+                  "appearance-none relative block w-full px-3 py-2 pr-12 border placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
+                  isDark ? "bg-stone-800 border-stone-700 text-white" : "border-gray-300 text-gray-900"
+                )}
+                placeholder="输入新密码"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className={cn(
+                  "absolute inset-y-0 right-0 flex items-center pr-3 text-sm leading-5 focus:outline-none transition-colors",
+                  isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-500 hover:text-stone-600"
+                )}
+                aria-label={showPassword ? "隐藏新密码" : "显示新密码"}
+              >
+                {showPassword ? (
+                  <Eye className="h-5 w-5" />
+                ) : (
+                  <EyeOff className="h-5 w-5" />
+                )}
+              </button>
+            </div>
             {formData.password && (
               <p className={cn(
                 "mt-1 text-xs font-serif",
@@ -386,20 +403,37 @@ export function ResetPasswordForm() {
             )}>
               确认密码
             </label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type={showConfirmPassword ? "text" : "password"}
-              autoComplete="new-password"
-              required
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className={cn(
-                "appearance-none relative block w-full px-3 py-2 border placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
-                isDark ? "bg-stone-800 border-stone-700 text-white" : "border-gray-300 text-gray-900"
-              )}
-              placeholder="再次输入新密码"
-            />
+            <div className="relative">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                autoComplete="new-password"
+                required
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className={cn(
+                  "appearance-none relative block w-full px-3 py-2 pr-12 border placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
+                  isDark ? "bg-stone-800 border-stone-700 text-white" : "border-gray-300 text-gray-900"
+                )}
+                placeholder="再次输入新密码"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className={cn(
+                  "absolute inset-y-0 right-0 flex items-center pr-3 text-sm leading-5 focus:outline-none transition-colors",
+                  isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-500 hover:text-stone-600"
+                )}
+                aria-label={showConfirmPassword ? "隐藏确认密码" : "显示确认密码"}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
           </div>
 
           <button

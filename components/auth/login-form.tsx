@@ -9,6 +9,7 @@ import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { SocialAuthButtons } from './social-auth-buttons';
 import { BistuSSOCard } from './bistu-sso-button';
+import { Eye, EyeOff } from 'lucide-react';
 
 export function LoginForm() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export function LoginForm() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -165,39 +167,41 @@ export function LoginForm() {
                   )}>
                     密码
                   </label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    className={cn(
-                      "block w-full px-4 py-3 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
-                      isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
-                    )}
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
+                  <div className="relative">
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      required
+                      className={cn(
+                        "block w-full px-4 py-3 pr-12 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
+                        isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
+                      )}
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={handleChange}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className={cn(
+                        "absolute inset-y-0 right-0 flex items-center pr-3 text-sm leading-5 focus:outline-none transition-colors",
+                        isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-500 hover:text-stone-600"
+                      )}
+                      aria-label={showPassword ? "隐藏密码" : "显示密码"}
+                    >
+                      {showPassword ? (
+                        <Eye className="h-5 w-5" />
+                      ) : (
+                        <EyeOff className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember_me"
-                    name="remember_me"
-                    type="checkbox"
-                    className="h-4 w-4 text-stone-600 focus:ring-stone-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember_me" className={cn(
-                    "ml-2 block text-sm font-serif",
-                    isDark ? "text-gray-300" : "text-gray-700"
-                  )}>
-                    记住我
-                  </label>
-                </div>
-
+              <div className="flex items-center justify-end">
                 <div className="text-sm">
                   <Link href="/forgot-password" className={cn(
                     "font-medium font-serif",
