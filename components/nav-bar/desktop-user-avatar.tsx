@@ -6,7 +6,7 @@ import { useThemeColors } from "@lib/hooks/use-theme-colors";
 import { useLogout } from "@lib/hooks/use-logout";
 import { useProfile } from "@lib/hooks/use-profile";
 import { useRouter } from "next/navigation";
-import { Settings, LogOut, Clock, UserCircle, Info, Shield } from "lucide-react";
+import { Settings, LogOut, Clock, UserCircle, Info, Shield, Sliders, Wrench } from "lucide-react";
 
 // 直接从localStorage获取主题设置
 const getThemeFromCache = () => {
@@ -148,7 +148,7 @@ export function DesktopUserAvatar() {
             action: () => router.push("/chat/recents"),
         },
         {
-            icon: Settings,
+            icon: Sliders,
             label: "设置",
             action: () => router.push("/settings"),
         },
@@ -162,7 +162,7 @@ export function DesktopUserAvatar() {
     // 管理员专用菜单项，仅对管理员用户显示
     const adminMenuItems = [
         {
-            icon: Shield,
+            icon: Wrench,
             label: "管理后台",
             action: () => router.push("/admin"),
         },

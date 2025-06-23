@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { Settings } from 'lucide-react'
+import { Settings, Wrench } from 'lucide-react'
 import { cn } from '@lib/utils'
 import { useTheme } from '@lib/hooks/use-theme'
 import { useProfile } from '@lib/hooks/use-profile'
@@ -78,7 +78,7 @@ export function AdminButton({ variant = 'floating' }: AdminButtonProps) {
             getAdminButtonColors()
           )}
         >
-          <Settings className="h-4 w-4" />
+          <Wrench className="h-4 w-4" />
           <span className="text-sm font-medium">管理后台</span>
         </button>
       </motion.div>
@@ -98,7 +98,7 @@ export function AdminButton({ variant = 'floating' }: AdminButtonProps) {
         getAdminButtonColors()
       )}
     >
-      <Settings className="h-4 w-4" />
+      <Wrench className="h-4 w-4" />
       <span className="text-sm font-medium">管理</span>
     </button>
   )

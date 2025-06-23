@@ -11,7 +11,7 @@ import { useCombinedConversations, CombinedConversation, conversationEvents } fr
 import { useAllConversations } from '@lib/hooks/use-all-conversations';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
-import { ChevronDown, ChevronUp, Edit, Trash, Star, Blocks } from 'lucide-react';
+import { ChevronDown, ChevronUp, Edit, Trash, Star, Blocks, Pen } from 'lucide-react';
 import { ConfirmDialog, InputDialog } from '@components/ui';
 import { useAppListStore } from '@lib/stores/app-list-store';
 import { useFavoriteAppsStore } from '@lib/stores/favorite-apps-store';
@@ -535,7 +535,7 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
                     : "hover:bg-stone-200/60 text-stone-600"
                 )}
               >
-                <Edit className="w-4 h-4 flex-shrink-0" />
+                <Pen className="w-4 h-4 flex-shrink-0" />
                 <span>重命名</span>
               </button>
               

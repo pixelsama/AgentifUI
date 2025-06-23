@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { MessageSquare, ChevronDown, ChevronUp, Trash, Edit, Clock } from "lucide-react"
+import { MessageSquare, ChevronDown, ChevronUp, Trash, Edit, Clock, Pen } from "lucide-react"
 import { SidebarListButton } from "./sidebar-list-button" // 使用新的 SidebarListButton 组件
 import { SidebarChatIcon } from "./sidebar-chat-icon"
 // import { ChatSkeleton } from "./chat-skeleton"
@@ -361,7 +361,7 @@ export function SidebarChatList({
         }
       >
         <DropdownMenuV2.Item
-          icon={<Edit className="w-3.5 h-3.5" />}
+          icon={<Pen className="w-3.5 h-3.5" />}
           onClick={() => handleRename(chat.id)}
           disabled={itemIsLoading || !canPerformActions || isTempChat}
         >
@@ -374,7 +374,7 @@ export function SidebarChatList({
           onClick={() => handleDelete(chat.id)}
           disabled={itemIsLoading || !canPerformActions || isTempChat}
         >
-          删除聊天
+          删除对话
         </DropdownMenuV2.Item>
       </DropdownMenuV2>
     );

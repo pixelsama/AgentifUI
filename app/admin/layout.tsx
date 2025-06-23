@@ -24,7 +24,9 @@ import {
   Settings,
   FileText,
   Search,
-  Plus
+  Plus,
+  Wrench,
+  Edit
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -64,7 +66,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const menuItems: MenuItem[] = [
     { 
       text: '管理主页', 
-      icon: Home, 
+      icon: Wrench, 
       href: '/admin',
       description: '管理后台概览'
     },
@@ -276,7 +278,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   : "text-stone-600 bg-stone-100/80 hover:bg-stone-200 hover:text-stone-900 border border-stone-200 hover:border-stone-300"
               )}
             >
-              <Home className="h-4 w-4" />
+              <Edit className="h-4 w-4" />
               <span className="text-sm hidden sm:inline">返回对话</span>
             </Link>
           </div>

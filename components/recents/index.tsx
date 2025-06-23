@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Search, Trash2, Loader2, Edit3 } from "lucide-react"
+import { Search, Trash2, Loader2, Edit } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useTheme } from "@lib/hooks/use-theme"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
@@ -313,7 +313,7 @@ export function Recents() {
                     : "bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-300"
                 )}
               >
-                <Edit3 className="h-4 w-4 mr-2" />
+                <Edit className="h-4 w-4 mr-2" />
                 新对话
               </button>
             </div>

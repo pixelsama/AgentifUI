@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Zap, Bot, Plus, HeartOff, Heart } from "lucide-react"
+import { Zap, Bot, Plus, HeartOff, Heart, Edit } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useCurrentApp } from "@lib/hooks/use-current-app"
 import { useChatStore } from "@lib/stores/chat-store"
@@ -254,7 +254,7 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
         }
       >
         <DropdownMenuV2.Item
-          icon={<Plus className="w-3.5 h-3.5" />}
+          icon={<Edit className="w-3.5 h-3.5" />}
           onClick={() => {
             // 🎯 点击后立即关闭菜单，避免状态冲突
             setOpenDropdownId(null)

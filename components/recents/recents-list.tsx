@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { MessageSquare, Clock, Trash, Edit, Search, MoreHorizontal } from "lucide-react"
+import { MessageSquare, Clock, Trash, Edit, Search, MoreHorizontal, Pen } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useTheme } from "@lib/hooks/use-theme"
 import { Conversation } from "@lib/types/database"
@@ -355,7 +355,7 @@ export function RecentsList({
                     )}
                   >
                     <DropdownMenu.Item
-                      icon={<Edit className="w-3.5 h-3.5" />}
+                      icon={<Pen className="w-3.5 h-3.5" />}
                       onClick={() => handleRename(conversation)}
                       className="cursor-pointer"
                     >
@@ -368,7 +368,7 @@ export function RecentsList({
                       onClick={() => handleDelete(conversation)}
                       className="cursor-pointer"
                     >
-                      删除聊天
+                      删除对话
                     </DropdownMenu.Item>
                   </DropdownMenu>
                 </div>

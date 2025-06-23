@@ -8,7 +8,7 @@ import { Profile as DatabaseProfile } from "@lib/types/database";
 import { Profile as ExtendedProfile } from "@lib/hooks/use-profile";
 import { updateUserProfile } from "@lib/db/profiles";
 import { updateProfileCache } from "@lib/hooks/use-profile";
-import { User, Mail, AtSign, Calendar, Check, AlertCircle } from "lucide-react";
+import { User, Mail, AtSign, Calendar, Check, AlertCircle, Building2 } from "lucide-react";
 
 // --- BEGIN COMMENT ---
 // 个人资料表单组件
@@ -186,7 +186,7 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-center">
-            <Mail
+            <Building2
               className={cn("w-5 h-5 mr-3", colors.secondaryTextColor.tailwind)}
             />
             <div>

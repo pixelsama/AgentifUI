@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@lib/utils';
 import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { useLogout } from '@lib/hooks/use-logout';
-import { LogOut, Shield, Key, AlertCircle } from 'lucide-react';
+import { LogOut, Shield, Key, AlertCircle, Mail } from 'lucide-react';
 
 // --- BEGIN COMMENT ---
 // 账号设置组件
@@ -69,7 +69,7 @@ export function AccountSettings({ email, authSource }: AccountSettingsProps) {
                 colors.borderColor.tailwind,
                 "border"
               )}>
-                <Shield className={cn("w-5 h-5", colors.secondaryTextColor.tailwind)} />
+                <Mail className={cn("w-5 h-5", colors.secondaryTextColor.tailwind)} />
               </div>
               <div className="ml-4">
                 <p className={cn("text-sm font-serif", colors.secondaryTextColor.tailwind)}>登录邮箱</p>

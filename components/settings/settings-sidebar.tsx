@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { cn } from "@lib/utils"
 import { useSettingsColors } from '@lib/hooks/use-settings-colors'
-import { Settings, User, Palette, KeyRound, Shield } from "lucide-react"
+import { User, Palette, KeyRound, Shield, Sliders } from "lucide-react"
 
 // --- BEGIN COMMENT ---
 // 定义设置选项，包括图标、标题和路径
@@ -13,7 +13,7 @@ export const settingsNavItems = [
   {
     title: "概览",
     href: "/settings",
-    icon: Settings
+    icon: Sliders
   },
   {
     title: "个人资料",
@@ -23,7 +23,7 @@ export const settingsNavItems = [
   {
     title: "账号设置",
     href: "/settings/account",
-    icon: Shield
+    icon: KeyRound
   },
   {
     title: "外观",
