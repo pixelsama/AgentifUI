@@ -158,8 +158,12 @@ export async function POST(request: NextRequest) {
           }
 
           const processingTime = Date.now() - startTime;
-          console.log(`SSO signin successful for user: ${userId} (processing time: ${processingTime}ms)`);
+          console.log(`[SSO认证] SSO signin successful for user: ${userId} (processing time: ${processingTime}ms)`);
 
+          // --- BEGIN COMMENT ---
+          // SSO登录成功，返回结果
+          // 注意：前端缓存清理已在SSO按钮组件中处理
+          // --- END COMMENT ---
           return NextResponse.json({
             success: true,
             session: signInData.session,

@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { Button } from '@components/ui/button';
 import { cn } from '@lib/utils';
 import { useTheme } from '@lib/hooks/use-theme';
+import { clearCacheOnLogin } from '@lib/utils/cache-cleanup';
 
 interface BistuSSOButtonProps {
   returnUrl?: string;
@@ -33,7 +34,12 @@ export function BistuSSOButton({
     try {
       setIsLoading(true);
       
-      console.log('Initiating BISTU SSO login...');
+      console.log('[SSO登录] 开始北信科SSO登录流程');
+      
+      // --- BEGIN COMMENT ---
+      // SSO登录前先清理前一个用户的缓存，防止数据污染
+      // --- END COMMENT ---
+      clearCacheOnLogin();
 
       // --- BEGIN COMMENT ---
       // 构建SSO登录URL
@@ -45,12 +51,14 @@ export function BistuSSOButton({
 
       const ssoLoginUrl = `/api/sso/bistu/login${params.toString() ? '?' + params.toString() : ''}`;
       
+      console.log('[SSO登录] 跳转到SSO认证页面');
+      
       // --- BEGIN COMMENT ---
       // 重定向到SSO登录接口
       // --- END COMMENT ---
       window.location.href = ssoLoginUrl;
     } catch (error) {
-      console.error('Failed to initiate SSO login:', error);
+      console.error('[SSO登录] 启动SSO登录失败:', error);
       setIsLoading(false);
       
       // --- BEGIN COMMENT ---

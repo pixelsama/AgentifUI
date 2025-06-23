@@ -10,6 +10,7 @@ import { cn } from '@lib/utils';
 import { SocialAuthButtons } from './social-auth-buttons';
 import { BistuSSOCard } from './bistu-sso-button';
 import { Eye, EyeOff } from 'lucide-react';
+import { clearCacheOnLogin } from '@lib/utils/cache-cleanup';
 
 export function LoginForm() {
   const router = useRouter();
@@ -43,6 +44,13 @@ export function LoginForm() {
     setError('');
     
     try {
+      console.log('[登录] 开始邮箱密码登录流程');
+      
+      // --- BEGIN COMMENT ---
+      // 登录前先清理前一个用户的缓存，防止数据污染
+      // --- END COMMENT ---
+      clearCacheOnLogin();
+      
       // 使用 Supabase Auth 进行登录
       const supabase = createClient();
       const { error } = await supabase.auth.signInWithPassword({
@@ -54,10 +62,13 @@ export function LoginForm() {
         throw error;
       }
       
+      console.log('[登录] 邮箱密码登录成功');
+      
       // 登录成功，跳转到聊天页面
       router.push('/chat');
       router.refresh(); // 刷新页面以更新用户状态
     } catch (err: any) {
+      console.error('[登录] 邮箱密码登录失败:', err);
       setError(err.message || '登录失败，请检查您的邮箱和密码');
     } finally {
       setIsLoading(false);

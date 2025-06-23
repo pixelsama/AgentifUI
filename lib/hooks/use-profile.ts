@@ -33,9 +33,13 @@ export interface Profile {
   auth_last_sign_in_at?: string | null;
 }
 
-// localStorage缓存相关常量
+// --- BEGIN COMMENT ---
+// 用户资料缓存配置
+// 使用sessionStorage提高安全性，关闭标签页自动清理
+// 缩短缓存时间，减少敏感信息暴露时间
+// --- END COMMENT ---
 const PROFILE_CACHE_KEY = 'user_profile_cache';
-const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5分钟缓存过期时间
+const CACHE_EXPIRY_TIME = 2 * 60 * 1000; // 缩短为2分钟缓存过期时间，提高安全性
 
 // 缓存数据结构
 interface ProfileCache {
@@ -49,23 +53,40 @@ const getProfileFromCache = (userId: string): Profile | null => {
   try {
     if (typeof window === 'undefined') return null; // SSR安全检查
     
-    const cached = localStorage.getItem(PROFILE_CACHE_KEY);
+    // --- BEGIN COMMENT ---
+    // 使用sessionStorage提高安全性，关闭标签页自动清理
+    // --- END COMMENT ---
+    const cached = sessionStorage.getItem(PROFILE_CACHE_KEY);
     if (!cached) return null;
     
     const cacheData: ProfileCache = JSON.parse(cached);
     
-    // 检查用户ID是否匹配
-    if (cacheData.userId !== userId) return null;
-    
-    // 检查是否过期
-    if (Date.now() - cacheData.timestamp > CACHE_EXPIRY_TIME) {
-      localStorage.removeItem(PROFILE_CACHE_KEY);
+    // --- BEGIN COMMENT ---
+    // 严格的用户ID校验，防止跨用户数据污染
+    // --- END COMMENT ---
+    if (cacheData.userId !== userId) {
+      console.warn(`[用户缓存] 用户ID不匹配，清理缓存 (缓存:${cacheData.userId}, 当前:${userId})`);
+      sessionStorage.removeItem(PROFILE_CACHE_KEY);
       return null;
     }
     
+    // --- BEGIN COMMENT ---
+    // 检查缓存是否过期
+    // --- END COMMENT ---
+    if (Date.now() - cacheData.timestamp > CACHE_EXPIRY_TIME) {
+      console.log(`[用户缓存] 缓存已过期，清理缓存`);
+      sessionStorage.removeItem(PROFILE_CACHE_KEY);
+      return null;
+    }
+    
+    console.log(`[用户缓存] 命中用户缓存: ${userId}`);
     return cacheData.profile;
   } catch (error) {
-    console.warn('读取profile缓存失败:', error);
+    console.warn('[用户缓存] 读取profile缓存失败:', error);
+    // 清理损坏的缓存
+    try {
+      sessionStorage.removeItem(PROFILE_CACHE_KEY);
+    } catch {}
     return null;
   }
 };
@@ -79,19 +100,32 @@ const setProfileToCache = (profile: Profile, userId: string): void => {
       timestamp: Date.now(),
       userId
     };
-    localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(cacheData));
+    
+    // --- BEGIN COMMENT ---
+    // 使用sessionStorage存储，提高安全性
+    // --- END COMMENT ---
+    sessionStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(cacheData));
+    console.log(`[用户缓存] 已缓存用户资料: ${userId}`);
   } catch (error) {
-    console.warn('保存profile缓存失败:', error);
+    console.warn('[用户缓存] 保存profile缓存失败:', error);
   }
 };
 
+// --- BEGIN COMMENT ---
 // 导出清除缓存的函数，供其他组件使用
+// 更新为清理sessionStorage
+// --- END COMMENT ---
 export const clearProfileCache = (): void => {
   try {
     if (typeof window === 'undefined') return;
-    localStorage.removeItem(PROFILE_CACHE_KEY);
+    
+    // --- BEGIN COMMENT ---
+    // 清理sessionStorage中的用户资料缓存
+    // --- END COMMENT ---
+    sessionStorage.removeItem(PROFILE_CACHE_KEY);
+    console.log('[用户缓存] 已清理用户资料缓存');
   } catch (error) {
-    console.warn('清除profile缓存失败:', error);
+    console.warn('[用户缓存] 清除profile缓存失败:', error);
   }
 };
 

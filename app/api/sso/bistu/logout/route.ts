@@ -54,7 +54,8 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.redirect(logoutUrl);
     
     // --- BEGIN COMMENT ---
-    // 清除所有相关的cookie
+    // 清除所有相关的cookie和会话数据
+    // 注意：localStorage缓存清理由前端useLogout hook处理
     // --- END COMMENT ---
     const cookiesToClear = [
       'sso_session',

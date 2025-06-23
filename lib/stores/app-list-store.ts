@@ -100,14 +100,22 @@ export const useAppListStore = create<AppListState>((set, get) => ({
 
     // 🔧 关键修复：如果用户ID变化，立即清除缓存
     if (state.currentUserId !== user.id) {
+      // --- BEGIN COMMENT ---
+      // 清理用户相关的应用缓存和参数缓存
+      // --- END COMMENT ---
       set({ 
         apps: [], 
         lastFetchTime: 0,
         currentUserId: user.id,
         isLoading: true,
-        error: null
+        error: null,
+        // 清理参数缓存
+        parametersCache: {},
+        lastParametersFetchTime: 0,
+        parametersError: null,
+        fetchingApps: new Set()
       });
-      console.log(`[AppListStore] 检测到用户变化 (${state.currentUserId} → ${user.id})，清除缓存`);
+      console.log(`[AppListStore] 检测到用户变化 (${state.currentUserId} → ${user.id})，清除所有应用缓存`);
     }
   
     // 重新获取状态（可能已被清除）
@@ -203,14 +211,22 @@ export const useAppListStore = create<AppListState>((set, get) => ({
 
     // 🔧 如果用户ID变化，清除缓存
     if (state.currentUserId !== user.id) {
+      // --- BEGIN COMMENT ---
+      // 管理员模式下也需要清理用户相关缓存
+      // --- END COMMENT ---
       set({ 
         apps: [], 
         lastFetchTime: 0,
         currentUserId: user.id,
         isLoading: true,
-        error: null
+        error: null,
+        // 清理参数缓存
+        parametersCache: {},
+        lastParametersFetchTime: 0,
+        parametersError: null,
+        fetchingApps: new Set()
       });
-      console.log(`[AppListStore] fetchAllApps检测到用户变化 (${state.currentUserId} → ${user.id})，清除缓存`);
+      console.log(`[AppListStore] fetchAllApps检测到用户变化 (${state.currentUserId} → ${user.id})，清除所有应用缓存`);
     }
   
     // 重新获取状态
