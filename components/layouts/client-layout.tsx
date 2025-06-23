@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@lib/utils';
+import { useGlobalShortcuts } from '@lib/hooks/use-global-shortcuts';
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -18,6 +19,14 @@ export function ClientLayout({ children, fontClasses }: ClientLayoutProps) {
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const isChatPage = pathname?.startsWith('/chat');
+  
+  // --- BEGIN COMMENT ---
+  // 🎯 启用全局快捷键：Cmd+K新对话、Cmd+Shift+A应用市场、Cmd+\切换侧栏
+  // --- END COMMENT ---
+  useGlobalShortcuts({
+    enabled: mounted, // 只在客户端挂载后启用
+    disableWhenInputFocused: true // 输入框聚焦时禁用
+  });
   
   useEffect(() => {
     setMounted(true);

@@ -11,6 +11,7 @@ import { useChatInputStore } from "@lib/stores/chat-input-store"
 import { useChatTransitionStore } from "@lib/stores/chat-transition-store"
 import { useChatInterface } from "@lib/hooks/use-chat-interface"
 import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
+import { usePlatformKeys } from "@lib/hooks/use-platform-keys"
 
 interface SidebarHeaderProps {
   isHovering?: boolean
@@ -20,6 +21,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
   const { isExpanded, toggleSidebar } = useSidebarStore()
   const { isDark } = useTheme()
   const router = useRouter()
+  const platformKeys = usePlatformKeys()
   
   // --- BEGIN COMMENT ---
   // 🎯 点击状态管理 - 用于控制点击时的立即切换效果
@@ -112,7 +114,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
         --- END COMMENT --- */}
         {!isExpanded ? (
           <TooltipWrapper
-            content="展开侧栏"
+            content="展开"
             id="sidebar-header-expand-tooltip"
             placement="right"
             size="sm"
@@ -146,11 +148,11 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
                   toggleSidebar();
                 }
               }}
-              aria-label="展开侧栏"
+              aria-label="展开"
               className={cn(
                 "group relative flex items-center justify-center px-2 py-2 text-sm font-medium",
                 // --- BEGIN COMMENT ---
-                // 使用resize cursor表示可以调整sidebar宽度：展开时向左箭头，收起时向右箭头
+                // 使用resize cursor表示可以调整sidebar宽度：展开时向右箭头，收起时向左箭头
                 // --- END COMMENT ---
                 "cursor-e-resize",
                 "transition-all duration-150 ease-in-out",
@@ -230,7 +232,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
                 toggleSidebar();
               }
             }}
-            aria-label="收起侧栏"
+            aria-label="收起"
             className={cn(
               "group relative flex items-center justify-center px-2 py-2 text-sm font-medium",
               // --- BEGIN COMMENT ---
@@ -309,7 +311,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
         )}
       </div>
       
-      {/* 🎯 发起新对话按钮 - 重要功能，响应式设计突出显示 */}
+      {/* 🎯 新对话按钮 - 重要功能，响应式设计突出显示 */}
       {isExpanded ? (
         <SidebarButton
           icon={<Edit className={cn(
@@ -320,16 +322,73 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           )} />}
           disableLockBehavior={true}
           onClick={handleNewChat}
-          aria-label="发起新对话"
+          aria-label="新对话"
           className={cn(
-            "group font-medium transition-all duration-150 ease-out"
+            "group font-medium transition-all duration-150 ease-out",
+            "flex items-center justify-between w-full"
           )}
         >
-          <span className="font-serif">发起新对话</span>
+          <span className="font-serif">新对话</span>
+          {/* 悬停时显示的快捷键 */}
+          <div className={cn(
+            "opacity-0 group-hover:opacity-60 transition-opacity duration-200",
+            "flex items-center gap-1 ml-auto"
+          )}>
+            <span className={cn(
+              "inline-flex items-center justify-center",
+              "w-4 h-4 text-xs font-medium rounded border",
+              "shadow-sm backdrop-blur-sm",
+              isDark 
+                ? "bg-stone-800/90 text-stone-200 border-stone-500/60"
+                : "bg-white/90 text-stone-700 border-stone-300/70"
+            )}>
+              {platformKeys.modifierSymbol}
+            </span>
+            <span className={cn(
+              "inline-flex items-center justify-center",
+              "w-4 h-4 text-xs font-medium rounded border",
+              "shadow-sm backdrop-blur-sm",
+              isDark 
+                ? "bg-stone-800/90 text-stone-200 border-stone-500/60"
+                : "bg-white/90 text-stone-700 border-stone-300/70"
+            )}>
+              K
+            </span>
+          </div>
         </SidebarButton>
       ) : (
         <TooltipWrapper
-          content="发起新对话"
+          content={
+            <div className="flex items-center gap-2.5">
+              <span>新对话</span>
+              <div className="flex items-center gap-0.5">
+                <span 
+                  className={cn(
+                    "inline-flex items-center justify-center",
+                    "w-3 h-3 text-[10px] font-medium rounded border",
+                    "bg-black/8 text-white/50 border-white/5"
+                  )}
+                  style={{
+                    boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.2)'
+                  }}
+                >
+                  {platformKeys.modifierSymbol}
+                </span>
+                <span 
+                  className={cn(
+                    "inline-flex items-center justify-center",
+                    "w-3 h-3 text-[10px] font-medium rounded border",
+                    "bg-black/8 text-white/50 border-white/5"
+                  )}
+                  style={{
+                    boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.2)'
+                  }}
+                >
+                  K
+                </span>
+              </div>
+            </div>
+          }
           id="sidebar-header-new-chat-tooltip"
           placement="right"
           size="sm"
@@ -344,17 +403,17 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
             )} />}
             disableLockBehavior={true}
             onClick={handleNewChat}
-            aria-label="发起新对话"
+            aria-label="新对话"
             className={cn(
               "group font-medium transition-all duration-150 ease-out"
             )}
           >
-            <span className="font-serif">发起新对话</span>
+            <span className="font-serif">新对话</span>
           </SidebarButton>
         </TooltipWrapper>
       )}
 
-      {/* 🎯 应用市场按钮 - 与发起新对话按钮样式完全一致 */}
+      {/* 🎯 应用市场按钮 - 与新对话按钮样式完全一致 */}
       {isExpanded ? (
         <SidebarButton
           icon={<LayoutGrid className={cn(
@@ -369,14 +428,93 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           }}
           aria-label="应用市场"
           className={cn(
-            "group font-medium transition-all duration-150 ease-out"
+            "group font-medium transition-all duration-150 ease-out",
+            "flex items-center justify-between w-full"
           )}
         >
           <span className="font-serif">应用市场</span>
+          {/* 悬停时显示的快捷键 */}
+          <div className={cn(
+            "opacity-0 group-hover:opacity-60 transition-opacity duration-200",
+            "flex items-center gap-1 ml-auto"
+          )}>
+            <span className={cn(
+              "inline-flex items-center justify-center",
+              "w-4 h-4 text-xs font-medium rounded border",
+              "shadow-sm backdrop-blur-sm",
+              isDark 
+                ? "bg-stone-800/90 text-stone-200 border-stone-500/60"
+                : "bg-white/90 text-stone-700 border-stone-300/70"
+            )}>
+              {platformKeys.modifierSymbol}
+            </span>
+            <span className={cn(
+              "inline-flex items-center justify-center",
+              "w-4 h-4 text-xs font-medium rounded border",
+              "shadow-sm backdrop-blur-sm",
+              isDark 
+                ? "bg-stone-800/90 text-stone-200 border-stone-500/60"
+                : "bg-white/90 text-stone-700 border-stone-300/70"
+            )}>
+              ⇧
+            </span>
+            <span className={cn(
+              "inline-flex items-center justify-center",
+              "w-4 h-4 text-xs font-medium rounded border",
+              "shadow-sm backdrop-blur-sm",
+              isDark 
+                ? "bg-stone-800/90 text-stone-200 border-stone-500/60"
+                : "bg-white/90 text-stone-700 border-stone-300/70"
+            )}>
+              A
+            </span>
+          </div>
         </SidebarButton>
       ) : (
         <TooltipWrapper
-          content="应用市场"
+          content={
+            <div className="flex items-center gap-2.5">
+              <span>应用市场</span>
+              <div className="flex items-center gap-0.5">
+                <span 
+                  className={cn(
+                    "inline-flex items-center justify-center",
+                    "w-3 h-3 text-[10px] font-medium rounded border",
+                    "bg-black/8 text-white/50 border-white/5"
+                  )}
+                  style={{
+                    boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.2)'
+                  }}
+                >
+                  {platformKeys.modifierSymbol}
+                </span>
+                <span 
+                  className={cn(
+                    "inline-flex items-center justify-center",
+                    "w-3 h-3 text-[10px] font-medium rounded border",
+                    "bg-black/8 text-white/50 border-white/5"
+                  )}
+                  style={{
+                    boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.2)'
+                  }}
+                >
+                  ⇧
+                </span>
+                <span 
+                  className={cn(
+                    "inline-flex items-center justify-center",
+                    "w-3 h-3 text-[10px] font-medium rounded border",
+                    "bg-black/8 text-white/50 border-white/5"
+                  )}
+                  style={{
+                    boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.2)'
+                  }}
+                >
+                  A
+                </span>
+              </div>
+            </div>
+          }
           id="sidebar-header-apps-tooltip"
           placement="right"
           size="sm"

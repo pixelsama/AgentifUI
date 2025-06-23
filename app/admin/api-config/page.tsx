@@ -6,6 +6,7 @@ import { useApiConfigStore, ServiceInstance } from '@lib/stores/api-config-store
 import { useTheme } from '@lib/hooks/use-theme';
 import { useSaveShortcut } from '@lib/hooks/use-keyboard-shortcut';
 import { SaveShortcutBadge } from '@components/ui/keyboard-shortcut-badge';
+import { KeyboardShortcutBadge } from '@components/ui/keyboard-shortcut';
 import { cn } from '@lib/utils';
 import DifyParametersPanel from '@components/admin/api-config/dify-parameters-panel';
 import type { DifyParametersSimplifiedConfig } from '@lib/types/dify-parameters';
@@ -112,6 +113,8 @@ const InstanceForm = ({
 }) => {
   const { isDark } = useTheme();
   const { serviceInstances, apiKeys, providers } = useApiConfigStore();
+  
+
   
   // --- BEGIN COMMENT ---
   // 新建模式下的提供商选择状态
@@ -1545,7 +1548,10 @@ const InstanceForm = ({
               )}
               <span>{isProcessing ? '保存中...' : '保存'}</span>
               {!isProcessing && (
-                <SaveShortcutBadge className="ml-3" />
+                <KeyboardShortcutBadge 
+                  shortcut="SAVE_SUBMIT" 
+                  className="ml-3"
+                />
               )}
             </button>
             <button
