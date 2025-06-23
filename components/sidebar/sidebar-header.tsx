@@ -11,7 +11,8 @@ import { useChatInputStore } from "@lib/stores/chat-input-store"
 import { useChatTransitionStore } from "@lib/stores/chat-transition-store"
 import { useChatInterface } from "@lib/hooks/use-chat-interface"
 import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
-import { usePlatformKeys } from "@lib/hooks/use-platform-keys"
+import { useFormattedShortcut, COMMON_SHORTCUTS } from "@lib/hooks/use-platform-keys"
+import { KeyCombination } from "@components/ui/adaptive-key-badge"
 
 interface SidebarHeaderProps {
   isHovering?: boolean
@@ -21,7 +22,12 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
   const { isExpanded, toggleSidebar } = useSidebarStore()
   const { isDark } = useTheme()
   const router = useRouter()
-  const platformKeys = usePlatformKeys()
+  
+  // --- BEGIN COMMENT ---
+  // 🎯 使用正确的快捷键映射
+  // --- END COMMENT ---
+  const newChatShortcut = useFormattedShortcut('NEW_CHAT')
+  const appsMarketShortcut = useFormattedShortcut('APPS_MARKET')
   
   // --- BEGIN COMMENT ---
   // 🎯 点击状态管理 - 用于控制点击时的立即切换效果
@@ -315,7 +321,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
       {isExpanded ? (
         <SidebarButton
           icon={<Edit className={cn(
-            "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-110",
+            "h-5 w-5 transition-all duration-150 ease-out",
             isDark
               ? "text-gray-300 group-hover:text-white"
               : "text-stone-600 group-hover:text-stone-800"
@@ -332,28 +338,13 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           {/* 悬停时显示的快捷键 */}
           <div className={cn(
             "opacity-0 group-hover:opacity-60 transition-opacity duration-200",
-            "flex items-center gap-1 ml-auto"
+            "ml-auto"
           )}>
-            <span className={cn(
-              "inline-flex items-center justify-center",
-              "w-4 h-4 text-xs font-medium rounded border",
-              "shadow-sm backdrop-blur-sm",
-              isDark 
-                ? "bg-stone-800/90 text-stone-200 border-stone-500/60"
-                : "bg-white/90 text-stone-700 border-stone-300/70"
-            )}>
-              {platformKeys.modifierSymbol}
-            </span>
-            <span className={cn(
-              "inline-flex items-center justify-center",
-              "w-4 h-4 text-xs font-medium rounded border",
-              "shadow-sm backdrop-blur-sm",
-              isDark 
-                ? "bg-stone-800/90 text-stone-200 border-stone-500/60"
-                : "bg-white/90 text-stone-700 border-stone-300/70"
-            )}>
-              K
-            </span>
+            <KeyCombination 
+              keys={newChatShortcut.symbols}
+              size="md"
+              isDark={isDark}
+            />
           </div>
         </SidebarButton>
       ) : (
@@ -361,32 +352,10 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           content={
             <div className="flex items-center gap-2.5">
               <span>新对话</span>
-              <div className="flex items-center gap-0.5">
-                <span 
-                  className={cn(
-                    "inline-flex items-center justify-center",
-                    "w-3 h-3 text-[10px] font-medium rounded border",
-                    "bg-black/8 text-white/50 border-white/5"
-                  )}
-                  style={{
-                    boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.2)'
-                  }}
-                >
-                  {platformKeys.modifierSymbol}
-                </span>
-                <span 
-                  className={cn(
-                    "inline-flex items-center justify-center",
-                    "w-3 h-3 text-[10px] font-medium rounded border",
-                    "bg-black/8 text-white/50 border-white/5"
-                  )}
-                  style={{
-                    boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.2)'
-                  }}
-                >
-                  K
-                </span>
-              </div>
+              <KeyCombination 
+                keys={newChatShortcut.symbols}
+                size="sm"
+              />
             </div>
           }
           id="sidebar-header-new-chat-tooltip"
@@ -396,7 +365,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
         >
           <SidebarButton
             icon={<Edit className={cn(
-              "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-110",
+              "h-5 w-5 transition-all duration-150 ease-out",
               isDark
                 ? "text-gray-300 group-hover:text-white"
                 : "text-stone-600 group-hover:text-stone-800"
@@ -417,7 +386,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
       {isExpanded ? (
         <SidebarButton
           icon={<LayoutGrid className={cn(
-            "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-110",
+            "h-5 w-5 transition-all duration-150 ease-out",
             isDark
               ? "text-gray-300 group-hover:text-white"
               : "text-stone-600 group-hover:text-stone-800"
@@ -436,38 +405,13 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           {/* 悬停时显示的快捷键 */}
           <div className={cn(
             "opacity-0 group-hover:opacity-60 transition-opacity duration-200",
-            "flex items-center gap-1 ml-auto"
+            "ml-auto"
           )}>
-            <span className={cn(
-              "inline-flex items-center justify-center",
-              "w-4 h-4 text-xs font-medium rounded border",
-              "shadow-sm backdrop-blur-sm",
-              isDark 
-                ? "bg-stone-800/90 text-stone-200 border-stone-500/60"
-                : "bg-white/90 text-stone-700 border-stone-300/70"
-            )}>
-              {platformKeys.modifierSymbol}
-            </span>
-            <span className={cn(
-              "inline-flex items-center justify-center",
-              "w-4 h-4 text-xs font-medium rounded border",
-              "shadow-sm backdrop-blur-sm",
-              isDark 
-                ? "bg-stone-800/90 text-stone-200 border-stone-500/60"
-                : "bg-white/90 text-stone-700 border-stone-300/70"
-            )}>
-              ⇧
-            </span>
-            <span className={cn(
-              "inline-flex items-center justify-center",
-              "w-4 h-4 text-xs font-medium rounded border",
-              "shadow-sm backdrop-blur-sm",
-              isDark 
-                ? "bg-stone-800/90 text-stone-200 border-stone-500/60"
-                : "bg-white/90 text-stone-700 border-stone-300/70"
-            )}>
-              A
-            </span>
+            <KeyCombination 
+              keys={appsMarketShortcut.symbols}
+              size="md"
+              isDark={isDark}
+            />
           </div>
         </SidebarButton>
       ) : (
@@ -475,44 +419,10 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           content={
             <div className="flex items-center gap-2.5">
               <span>应用市场</span>
-              <div className="flex items-center gap-0.5">
-                <span 
-                  className={cn(
-                    "inline-flex items-center justify-center",
-                    "w-3 h-3 text-[10px] font-medium rounded border",
-                    "bg-black/8 text-white/50 border-white/5"
-                  )}
-                  style={{
-                    boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.2)'
-                  }}
-                >
-                  {platformKeys.modifierSymbol}
-                </span>
-                <span 
-                  className={cn(
-                    "inline-flex items-center justify-center",
-                    "w-3 h-3 text-[10px] font-medium rounded border",
-                    "bg-black/8 text-white/50 border-white/5"
-                  )}
-                  style={{
-                    boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.2)'
-                  }}
-                >
-                  ⇧
-                </span>
-                <span 
-                  className={cn(
-                    "inline-flex items-center justify-center",
-                    "w-3 h-3 text-[10px] font-medium rounded border",
-                    "bg-black/8 text-white/50 border-white/5"
-                  )}
-                  style={{
-                    boxShadow: '0 0.5px 1px rgba(0, 0, 0, 0.2)'
-                  }}
-                >
-                  A
-                </span>
-              </div>
+              <KeyCombination 
+                keys={appsMarketShortcut.symbols}
+                size="sm"
+              />
             </div>
           }
           id="sidebar-header-apps-tooltip"
@@ -522,7 +432,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
         >
           <SidebarButton
             icon={<LayoutGrid className={cn(
-              "h-5 w-5 transition-all duration-150 ease-out group-hover:scale-110",
+              "h-5 w-5 transition-all duration-150 ease-out",
               isDark
                 ? "text-gray-300 group-hover:text-white"
                 : "text-stone-600 group-hover:text-stone-800"

@@ -4,9 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useApiConfigStore, ServiceInstance } from '@lib/stores/api-config-store';
 import { useTheme } from '@lib/hooks/use-theme';
-import { useSaveShortcut } from '@lib/hooks/use-keyboard-shortcut';
-import { SaveShortcutBadge } from '@components/ui/keyboard-shortcut-badge';
-import { KeyboardShortcutBadge } from '@components/ui/keyboard-shortcut';
+import { useFormattedShortcut } from '@lib/hooks/use-platform-keys';
+import { KeyCombination } from '@components/ui/adaptive-key-badge';
 import { cn } from '@lib/utils';
 import DifyParametersPanel from '@components/admin/api-config/dify-parameters-panel';
 import type { DifyParametersSimplifiedConfig } from '@lib/types/dify-parameters';
@@ -235,24 +234,9 @@ const InstanceForm = ({
   };
   
   // --- BEGIN COMMENT ---
-  // 🎯 使用新的快捷键Hook替换原有的键盘监听
+  // 🎯 获取保存快捷键信息
   // --- END COMMENT ---
-  const handleSaveShortcut = () => {
-    // 检查是否在处理中，避免重复提交
-    if (isProcessing) {
-      return;
-    }
-    
-    // 模拟表单提交事件
-    const formElement = document.querySelector('form');
-    if (formElement) {
-      const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-      formElement.dispatchEvent(submitEvent);
-    }
-  };
-  
-  // 使用保存快捷键Hook
-  useSaveShortcut(handleSaveShortcut, !isProcessing);
+  const saveShortcut = useFormattedShortcut('SAVE_SUBMIT');
   
   useEffect(() => {
     const newData = {
@@ -1548,8 +1532,10 @@ const InstanceForm = ({
               )}
               <span>{isProcessing ? '保存中...' : '保存'}</span>
               {!isProcessing && (
-                <KeyboardShortcutBadge 
-                  shortcut="SAVE_SUBMIT" 
+                <KeyCombination 
+                  keys={saveShortcut.symbols}
+                  size="md"
+                  isDark={isDark}
                   className="ml-3"
                 />
               )}

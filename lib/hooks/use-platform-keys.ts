@@ -165,7 +165,7 @@ export const COMMON_SHORTCUTS = {
   SUBMIT: ['Enter'],
   
   // 应用功能（AgentifUI专用）
-  NEW_CHAT: ['Cmd', 'N'],
+  NEW_CHAT: ['Cmd', 'K'],
   APPS_MARKET: ['Cmd', 'Shift', 'A'],
   RECENT_CHATS: ['Cmd', 'R'],
 } as const

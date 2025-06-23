@@ -175,6 +175,9 @@ export function useSmartShortcuts(options: {
     
     // 快捷键匹配函数
     function matchesShortcut(event: KeyboardEvent, shortcutKeys: SmartShortcut['keys']): boolean {
+      // 防止密码管理器等特殊事件触发toLowerCase错误
+      if (!event.key || typeof event.key !== 'string') return false
+      
       const keyMatch = event.key.toLowerCase() === shortcutKeys.key.toLowerCase()
       const metaMatch = shortcutKeys.metaKey ? event.metaKey : !event.metaKey
       const ctrlMatch = shortcutKeys.ctrlKey ? event.ctrlKey : !event.ctrlKey
