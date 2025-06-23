@@ -8,11 +8,12 @@
 import { useState } from 'react';
 import { Button } from '@components/ui/button';
 import { cn } from '@lib/utils';
+import { useTheme } from '@lib/hooks/use-theme';
 
 interface BistuSSOButtonProps {
   returnUrl?: string;
   className?: string;
-  variant?: 'default' | 'outline' | 'secondary';
+  variant?: 'gradient' | 'outline' | 'secondary';
   size?: 'default' | 'sm' | 'lg';
   disabled?: boolean;
   children?: React.ReactNode;
@@ -21,7 +22,7 @@ interface BistuSSOButtonProps {
 export function BistuSSOButton({
   returnUrl,
   className,
-  variant = 'default',
+  variant = 'gradient',
   size = 'default',
   disabled = false,
   children,
@@ -66,13 +67,9 @@ export function BistuSSOButton({
       size={size}
       className={cn(
         // --- BEGIN COMMENT ---
-        // 北信科特色的按钮样式
+        // 使用与登录按钮一致的样式
         // --- END COMMENT ---
-        "relative w-full flex items-center justify-center gap-2",
-        "bg-blue-600 hover:bg-blue-700 text-white",
-        "border border-blue-600 hover:border-blue-700",
-        "focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-        "disabled:opacity-50 disabled:cursor-not-allowed",
+        "relative w-full flex items-center justify-center gap-2 font-serif",
         className
       )}
       disabled={disabled || isLoading}
@@ -131,9 +128,9 @@ export function SimpleBistuSSOButton({
     <BistuSSOButton
       returnUrl={returnUrl}
       className={className}
-      variant="outline"
+      variant="gradient"
     >
-      <span className="text-sm">
+      <span className="text-sm font-serif">
         🏛️ 北信科统一认证
       </span>
     </BistuSSOButton>
@@ -150,10 +147,15 @@ export function BistuSSOCard({
   returnUrl?: string; 
   className?: string; 
 }) {
+  const { isDark } = useTheme();
+  
   return (
     <div className={cn(
-      "p-6 border border-gray-200 rounded-lg bg-white shadow-sm",
-      "hover:shadow-md transition-shadow",
+      "p-6 border rounded-lg shadow-sm",
+      "hover:shadow-md transition-shadow font-serif",
+      isDark 
+        ? "border-stone-700 bg-stone-800 shadow-stone-900/30" 
+        : "border-gray-200 bg-white",
       className
     )}>
       <div className="text-center space-y-4">
@@ -161,10 +163,16 @@ export function BistuSSOCard({
         {/* 标题和说明 */}
         {/* --- END COMMENT --- */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className={cn(
+            "text-lg font-semibold font-serif",
+            isDark ? "text-stone-100" : "text-gray-900"
+          )}>
             北京信息科技大学统一认证
           </h3>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className={cn(
+            "text-sm mt-1 font-serif",
+            isDark ? "text-stone-300" : "text-gray-600"
+          )}>
             使用您的学工号和密码登录
           </p>
         </div>
@@ -174,13 +182,16 @@ export function BistuSSOCard({
         {/* --- END COMMENT --- */}
         <BistuSSOButton
           returnUrl={returnUrl}
-          className="w-full"
+          className="w-full font-serif"
         />
 
         {/* --- BEGIN COMMENT --- */}
         {/* 帮助信息 */}
         {/* --- END COMMENT --- */}
-        <div className="text-xs text-gray-500">
+        <div className={cn(
+          "text-xs font-serif",
+          isDark ? "text-stone-400" : "text-gray-500"
+        )}>
           <p>首次登录将自动创建账户</p>
           <p>如有问题请联系系统管理员</p>
         </div>
