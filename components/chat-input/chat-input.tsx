@@ -24,6 +24,7 @@ import { DifyFileUploadResponse } from "@lib/services/dify/types"
 import { AttachmentFile } from "@lib/stores/attachment-store"
 import { useNotificationStore } from "@lib/stores/ui/notification-store"
 import { FileTypeSelector } from "./file-type-selector"
+import { useChatInputRouteSync } from "@lib/hooks/use-chat-input-route-sync"
 
 // 创建一个全局焦点管理器
 interface FocusManagerState {
@@ -120,6 +121,11 @@ export const ChatInput = ({
   
   // 使用高度重置钩子
   useInputHeightReset(isWelcomeScreen)
+  
+  // --- BEGIN COMMENT ---
+  // 🎯 新增：路由同步Hook，确保输入框内容按路由隔离
+  // --- END COMMENT ---
+  useChatInputRouteSync()
   
   // 创建输入框引用
   const inputRef = useCallback((node: HTMLTextAreaElement | null) => {

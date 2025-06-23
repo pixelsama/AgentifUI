@@ -5,6 +5,7 @@ export * from './use-chat-state-sync';
 
 export * from './use-input-focus';
 export * from './use-input-height-reset';
+export * from './use-chat-input-route-sync';
 export * from './use-welcome-screen';
 export * from './use-chat-width';
 export * from './use-mobile';
