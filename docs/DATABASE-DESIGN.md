@@ -2,8 +2,8 @@
 
 本文档详细描述了 AgentifUI 平台的数据库设计，包括表结构、关系、安全机制和特性。本文档与当前数据库状态完全同步，包含所有已应用的迁移文件。
 
-**文档更新日期**: 2025-06-20  
-**数据库版本**: 包含至 20250620131421_extend_sso_providers_table.sql 的所有迁移
+**文档更新日期**: 2025-06-24 
+**数据库版本**: 包含至 20250624090857_ensure_rls_enabled_for_api_tables.sql 的所有迁移
 
 ## 目录
 
@@ -932,6 +932,22 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 - `20250610170000_enable_multi_department_membership.sql`: 启用多部门成员资格
 - `20250610180000_fix_organization_select_for_users.sql`: 修复用户组织查询
 - `20250611103054_fix_security_definer_view_warning.sql`: 修复安全定义视图警告
+
+### 2025-06-24 RLS安全增强 - API表行级安全策略检查
+- `20250624090857_ensure_rls_enabled_for_api_tables.sql`: 确保API相关表启用RLS，智能检查和条件启用
+  
+  **主要功能增强：**
+  - **智能RLS检查**：通过pg_tables系统表检查api_keys、service_instances、providers三个表的RLS状态
+  - **条件启用机制**：只在RLS未启用时才执行启用操作，已启用则跳过，避免重复操作
+  - **完整验证报告**：迁移执行后输出详细的RLS状态验证结果
+  - **安全性保障**：确保所有API相关表都正确启用了行级安全策略
+  - **运维友好**：提供清晰的NOTICE消息，便于运维人员监控和调试
+
+**迁移执行结果验证**：
+- ✅ api_keys表RLS状态: true
+- ✅ service_instances表RLS状态: true  
+- ✅ providers表RLS状态: true
+- ✅ 所有API相关表的RLS都已正确启用
 
 ## 最新迁移详情
 

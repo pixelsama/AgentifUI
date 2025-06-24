@@ -731,6 +731,18 @@ if (!isAdmin) return <AccessDenied />;
   - **向后兼容**：自动迁移现有北信科配置到新的统一结构，确保无缝升级
   - **管理员权限控制**：协议模板表启用RLS，确保只有管理员可以访问和管理协议模板
 
+### 2025-06-24 RLS安全增强 - API表行级安全策略检查
+- `/supabase/migrations/20250624090857_ensure_rls_enabled_for_api_tables.sql`: 确保API相关表启用RLS，智能检查和条件启用
+
+  **迁移特性：**
+  - **智能检查机制**: 使用PostgreSQL系统表pg_tables动态检查RLS状态
+  - **条件执行逻辑**: 只在需要时启用RLS，避免重复操作和错误
+  - **完整验证流程**: 迁移后自动验证所有表的RLS状态并输出报告
+  - **安全性保障**: 确保api_keys、service_instances、providers表的数据安全
+  - **运维友好设计**: 详细的NOTICE消息便于监控和问题排查
+
+  **验证结果**: 所有API相关表RLS状态均为true，安全策略正确启用
+
 ## 迁移文件说明
 
 ### 用户管理系统演进
