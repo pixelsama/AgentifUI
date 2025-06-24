@@ -299,9 +299,9 @@ export function RegisterForm() {
                   aria-label={showConfirmPassword ? "隐藏确认密码" : "显示确认密码"}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
                     <Eye className="h-5 w-5" />
+                  ) : (
+                    <EyeOff className="h-5 w-5" />
                   )}
                 </button>
               </div>
