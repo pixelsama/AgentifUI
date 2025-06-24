@@ -335,7 +335,7 @@
 |--------|------|------|------|
 | id | UUID | 模板ID | 主键，用于管理API的模板操作 |
 | protocol | sso_protocol | 协议类型 | NOT NULL，必须与sso_providers.protocol枚举值一致 |
-| name | TEXT | 模板名称 | NOT NULL，用于管理界面选择协议时展示 |
+| name | TEXT | 模板名称 | NOT NULL,用于管理界面选择协议时展示 |
 | description | TEXT | 协议描述 | 说明协议特性、适用场景和配置要点 |
 | config_schema | JSONB | 配置验证规则 | NOT NULL，JSON Schema格式，用于验证sso_providers.settings字段 |
 | default_settings | JSONB | 默认配置模板 | NOT NULL，创建新提供商时作为初始配置使用 |
@@ -575,10 +575,10 @@ CREATE TRIGGER validate_user_deletion_trigger
 
 #### 管理员权限检查
 
-**函数：** `auth.is_admin()`
+**函数：** `public.is_admin()`
 
 ```sql
-CREATE OR REPLACE FUNCTION auth.is_admin()
+CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
@@ -1091,14 +1091,13 @@ SSO认证系统支持多种认证方式：
 | org_id        |    |  |                |       | enabled       |
 | user_id       |----+  |                |       | created_at    |
 | ai_config_id  |       |                |       | updated_at    |
-| title         |       |                |       +---------------+
-| summary       |       |                |       | providers     |
-| settings      |       |                |       | id            |
-| created_at    |       |                |       | name          |
-| updated_at    |       |                |       | type          |
-| status        |       |                |       | base_url      |
-+---------------+       |                |       | auth_type     |
-      |               |                |       | is_active     |
+| title         |       |                |       | providers     |
+| summary       |       |                |       | id            |
+| settings      |       |                |       | name          |
+| created_at    |       |                |       | type          |
+| updated_at    |       |                |       | base_url      |
+| status        |       |                |       | auth_type     |
++---------------+       |                |       | is_active     |
       |               |                |       | created_at    |
       |               |                |       | updated_at    |
       v               |                |       |               |

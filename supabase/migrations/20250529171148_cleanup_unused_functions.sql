@@ -11,7 +11,7 @@ DROP FUNCTION IF EXISTS public.get_user_list_simple(user_role, account_status, T
 DROP FUNCTION IF EXISTS public.get_user_count(user_role, account_status, TEXT, TEXT);
 
 -- 注释：保留以下重要函数和视图：
--- - auth.is_admin() 函数：用于权限检查
+-- - public.is_admin() 函数：用于权限检查
 -- - public.user_management_view 视图：用于用户列表查询
 -- - public.get_user_stats() 函数：用于统计信息
 -- - public.get_user_detail() 函数：用于用户详情查询 

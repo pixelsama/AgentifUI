@@ -44,7 +44,7 @@ DECLARE
   query_text TEXT;
 BEGIN
   -- 检查是否为管理员
-  IF NOT auth.is_admin() THEN
+  IF NOT public.is_admin() THEN
     RAISE EXCEPTION '权限不足：需要管理员权限';
   END IF;
 

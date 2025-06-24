@@ -1,8 +1,8 @@
 -- 用户管理相关的视图和权限
 -- 为管理员提供用户管理功能
 
--- 1. 创建管理员权限检查函数
-CREATE OR REPLACE FUNCTION auth.is_admin()
+-- 1. 创建管理员权限检查函数（在public模式下避免权限问题）
+CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
@@ -39,15 +39,15 @@ LEFT JOIN auth.users au ON p.id = au.id;
 
 -- 3. 为管理员创建查看用户列表的策略
 CREATE POLICY "管理员可以查看所有用户" ON profiles
-  FOR SELECT USING (auth.is_admin());
+  FOR SELECT USING (public.is_admin());
 
 -- 4. 为管理员创建更新用户的策略  
 CREATE POLICY "管理员可以更新用户" ON profiles
-  FOR UPDATE USING (auth.is_admin());
+  FOR UPDATE USING (public.is_admin());
 
 -- 5. 为管理员创建删除用户的策略
 CREATE POLICY "管理员可以删除用户" ON profiles
-  FOR DELETE USING (auth.is_admin());
+  FOR DELETE USING (public.is_admin());
 
 -- 6. 创建用户统计函数
 CREATE OR REPLACE FUNCTION public.get_user_stats()
@@ -56,7 +56,7 @@ DECLARE
   result JSON;
 BEGIN
   -- 检查是否为管理员
-  IF NOT auth.is_admin() THEN
+  IF NOT public.is_admin() THEN
     RAISE EXCEPTION '权限不足：需要管理员权限';
   END IF;
 
@@ -110,7 +110,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
   -- 检查是否为管理员
-  IF NOT auth.is_admin() THEN
+  IF NOT public.is_admin() THEN
     RAISE EXCEPTION '权限不足：需要管理员权限';
   END IF;
 
@@ -166,7 +166,7 @@ DECLARE
   pages INTEGER;
 BEGIN
   -- 检查是否为管理员
-  IF NOT auth.is_admin() THEN
+  IF NOT public.is_admin() THEN
     RAISE EXCEPTION '权限不足：需要管理员权限';
   END IF;
 

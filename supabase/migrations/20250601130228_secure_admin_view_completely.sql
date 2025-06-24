@@ -5,8 +5,8 @@
 -- 这个视图存在安全漏洞：用户可以通过直接API调用绕过权限检查
 DROP VIEW IF EXISTS public.admin_user_management_view;
 
--- 2. 确保安全的管理员检查函数存在
-CREATE OR REPLACE FUNCTION auth.is_admin()
+-- 2. 确保安全的管理员检查函数存在（使用public模式避免权限问题）
+CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
@@ -50,7 +50,7 @@ DECLARE
   offset_val INTEGER;
 BEGIN
   -- 严格的管理员权限检查
-  IF NOT auth.is_admin() THEN
+  IF NOT public.is_admin() THEN
     RAISE EXCEPTION '权限不足：需要管理员权限';
   END IF;
 
@@ -127,7 +127,7 @@ CREATE OR REPLACE FUNCTION public.get_admin_user_count(
 RETURNS BIGINT AS $$
 BEGIN
   -- 严格的管理员权限检查
-  IF NOT auth.is_admin() THEN
+  IF NOT public.is_admin() THEN
     RAISE EXCEPTION '权限不足：需要管理员权限';
   END IF;
 

@@ -40,8 +40,8 @@ GRANT SELECT ON public.admin_user_management_view TO authenticated;
 -- 4. 添加注释说明
 COMMENT ON VIEW public.admin_user_management_view IS '管理员专用用户管理视图：包含完整用户信息，仅限管理员访问';
 
--- 5. 确保auth.is_admin函数存在且正确
-CREATE OR REPLACE FUNCTION auth.is_admin()
+-- 5. 确保public.is_admin函数存在且正确（避免auth模式权限问题）
+CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (

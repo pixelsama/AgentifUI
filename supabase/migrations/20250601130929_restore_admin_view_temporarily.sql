@@ -1,8 +1,8 @@
 -- 临时恢复管理员用户视图
 -- 确保管理界面能正常工作，同时保持安全性
 
--- 1. 确保管理员检查函数存在
-CREATE OR REPLACE FUNCTION auth.is_admin()
+-- 1. 确保管理员检查函数存在（使用public模式避免权限问题）
+CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (

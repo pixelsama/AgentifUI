@@ -401,7 +401,7 @@ CREATE POLICY "组织管理员可以管理部门应用权限" ON department_app_
 
 ```sql
 -- 检查当前用户是否为管理员
-auth.is_admin() RETURNS BOOLEAN
+public.is_admin() RETURNS BOOLEAN
 ```
 
 该函数用于所有需要管理员权限的操作中，确保只有管理员可以执行敏感操作。

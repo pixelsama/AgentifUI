@@ -14,7 +14,7 @@ CREATE OR REPLACE FUNCTION public.get_user_count(
 RETURNS BIGINT AS $$
 BEGIN
   -- 检查是否为管理员
-  IF NOT auth.is_admin() THEN
+  IF NOT public.is_admin() THEN
     RAISE EXCEPTION '权限不足：需要管理员权限';
   END IF;
 
@@ -69,7 +69,7 @@ DECLARE
   offset_val INTEGER;
 BEGIN
   -- 检查是否为管理员
-  IF NOT auth.is_admin() THEN
+  IF NOT public.is_admin() THEN
     RAISE EXCEPTION '权限不足：需要管理员权限';
   END IF;
 
