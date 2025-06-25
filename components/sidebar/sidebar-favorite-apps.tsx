@@ -309,7 +309,7 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
       --- END COMMENT --- */}
       {displayApps.length > 0 && (
         <div className={cn(
-          "sticky top-0 z-40 px-2 py-1",
+          "sticky top-0 z-40 px-2 py-1 ml-[6px]",
           // --- BEGIN COMMENT ---
           // 使用与sidebar相同的背景色，确保粘性效果完美，无悬停效果
           // 确保z-index足够高，完全覆盖下方内容，避免透明效果
@@ -347,7 +347,7 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
       {/* 加载状态 */}
       {isLoading && (
         <div className={cn(
-          "px-2 py-1 text-xs font-serif",
+          "px-3 py-1 text-xs font-serif",
           isDark ? "text-gray-500" : "text-gray-400"
         )}>
           加载中...
@@ -358,7 +358,7 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
       应用列表：添加顶部间距，保持与标题的分离
       --- END COMMENT --- */}
       {displayApps.length > 0 && (
-        <div className="space-y-1 px-2 pt-1">
+        <div className="space-y-1 px-3 pt-1">
           {displayApps.map((app, index) => {
             // 使用路由判断应用是否被选中
             const isSelected = isAppActive(app)

@@ -406,7 +406,7 @@ export function SidebarChatList({
         // 近期对话粘性标题栏：模仿常用应用的样式，添加粘性定位
         // --- END COMMENT --- */}
         <div className={cn(
-          "sticky top-0 z-40 flex items-center px-2 py-1 text-xs font-medium font-serif",
+          "sticky top-0 z-40 flex items-center px-2 py-1 ml-[6px] text-xs font-medium font-serif",
           // --- BEGIN COMMENT ---
           // 使用与sidebar相同的背景色，确保粘性效果完美
           // 确保z-index足够高，完全覆盖下方内容
@@ -427,7 +427,7 @@ export function SidebarChatList({
         {/* --- 待处理对话列表 --- */}
         {pendingChats.length > 0 && (
           <div className="mb-1.5 pt-1"> {/* 减小底部边距，添加顶部间距 */}
-            <div className="space-y-0.5 px-2"> {/* 减小列表项之间的间距 */}
+            <div className="space-y-0.5 px-3"> {/* 减小列表项之间的间距 */}
               {pendingChats.map(chat => {
                 const itemIsLoading = chat.pendingStatus === 'creating' || 
                                    chat.pendingStatus === 'title_fetching' || 
@@ -482,7 +482,7 @@ export function SidebarChatList({
         
         {/* --- 已保存对话列表 --- */}
         <div className="pt-1"> {/* 添加顶部间距，与粘性标题分离 */}
-          <div className="space-y-0.5 px-2"> {/* 减小列表项之间的间距 */}
+          <div className="space-y-0.5 px-3"> {/* 减小列表项之间的间距 */}
             {visibleUnpinnedChats.map(chat => {
               // --- BEGIN COMMENT ---
               // 使用辅助函数判断项目是否应该处于选中状态
