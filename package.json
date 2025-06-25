@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@stagewise/toolbar-next": "^0.4.8",
+    "@stagewise/toolbar-next": "^0.4.9",
     "@tailwindcss/postcss": "^4",
     "@types/lodash": "^4.17.16",
     "@types/node": "^22.15.30",
