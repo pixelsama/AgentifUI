@@ -27,6 +27,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
   // 🎯 使用正确的快捷键映射
   // --- END COMMENT ---
   const newChatShortcut = useFormattedShortcut('NEW_CHAT')
+  const recentChatsShortcut = useFormattedShortcut('RECENT_CHATS')
   const appsMarketShortcut = useFormattedShortcut('APPS_MARKET')
   
   // --- BEGIN COMMENT ---
@@ -405,10 +406,29 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           )}
         >
           <span className="font-serif">历史对话</span>
+          {/* 悬停时显示的快捷键 */}
+          <div className={cn(
+            "opacity-0 group-hover:opacity-60 transition-opacity duration-200",
+            "ml-auto"
+          )}>
+            <KeyCombination 
+              keys={recentChatsShortcut.symbols}
+              size="md"
+              isDark={isDark}
+            />
+          </div>
         </SidebarButton>
       ) : (
         <TooltipWrapper
-          content="历史对话"
+          content={
+            <div className="flex items-center gap-2.5">
+              <span>历史对话</span>
+              <KeyCombination 
+                keys={recentChatsShortcut.symbols}
+                size="sm"
+              />
+            </div>
+          }
           id="sidebar-header-recents-tooltip"
           placement="right"
           size="sm"

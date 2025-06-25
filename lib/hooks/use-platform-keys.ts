@@ -166,8 +166,8 @@ export const COMMON_SHORTCUTS = {
   
   // 应用功能（AgentifUI专用）
   NEW_CHAT: ['Cmd', 'K'],
+  RECENT_CHATS: ['Cmd', 'H'], // H for History
   APPS_MARKET: ['Cmd', 'Shift', 'A'],
-  RECENT_CHATS: ['Cmd', 'R'],
 } as const
 
 /**

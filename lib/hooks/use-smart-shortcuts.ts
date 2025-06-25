@@ -84,6 +84,13 @@ export function useSmartShortcuts(options: {
         preventDefault: true
       },
       {
+        keys: { key: 'h', metaKey: platformKeys.isMac, ctrlKey: !platformKeys.isMac },
+        category: SHORTCUT_CATEGORIES.NAVIGATION,
+        handler: () => router.push('/chat/recents'),
+        description: '历史对话',
+        preventDefault: true
+      },
+      {
         keys: { key: 'a', metaKey: platformKeys.isMac, ctrlKey: !platformKeys.isMac, shiftKey: true },
         category: SHORTCUT_CATEGORIES.NAVIGATION, 
         handler: () => router.push('/apps'),
@@ -209,6 +216,12 @@ export function useSmartShortcuts(options: {
           category: SHORTCUT_CATEGORIES.NAVIGATION,
           handler: () => {},
           description: '新对话'
+        },
+        {
+          keys: { key: 'h', metaKey: platformKeys.isMac, ctrlKey: !platformKeys.isMac },
+          category: SHORTCUT_CATEGORIES.NAVIGATION,
+          handler: () => {},
+          description: '历史对话'
         },
         {
           keys: { key: 'a', metaKey: platformKeys.isMac, ctrlKey: !platformKeys.isMac, shiftKey: true },
