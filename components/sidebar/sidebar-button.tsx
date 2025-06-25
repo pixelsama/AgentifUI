@@ -75,7 +75,7 @@ export function SidebarButton({
           "text-stone-600",
           variant === 'transparent' 
             ? "hover:bg-stone-300/80" 
-            : "hover:bg-stone-300 hover:shadow-md",
+            : "hover:bg-stone-300/80",
           active && "bg-stone-300 shadow-sm border-stone-400/80",
         ],
         !isDark && isDisabled && ["text-stone-400"],
@@ -83,7 +83,7 @@ export function SidebarButton({
           "text-gray-200",
           variant === 'transparent' 
             ? "hover:bg-stone-600/60" 
-            : "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50",
+            : "hover:bg-stone-600/60",
           active && "bg-stone-700 shadow-sm border-stone-600",
         ],
         isDark && isDisabled && ["text-gray-500"],

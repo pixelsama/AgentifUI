@@ -405,12 +405,12 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
                     // 🎯 点击时的特殊样式
                     isClicking && "opacity-75 cursor-wait",
                     // --- BEGIN COMMENT ---
-                    // 🎨 统一悬停效果：与侧边栏所有区域保持完全一致
-                    // 使用与功能按钮相同的 stone-300/stone-600 + shadow
+                    // 🎨 统一悬停效果：与header保持完全一致
+                    // 使用与header相同的 stone-300/80 和 stone-600/60
                     // --- END COMMENT ---
                     isDark
-                      ? "text-gray-300 hover:text-gray-100 hover:bg-stone-600 hover:shadow-md"
-                      : "text-gray-700 hover:text-gray-900 hover:bg-stone-300 hover:shadow-md"
+                      ? "text-gray-300 hover:text-gray-100 hover:bg-stone-600/60"
+                      : "text-gray-700 hover:text-gray-900 hover:bg-stone-300/80"
                   )}
                 >
                   <div className="flex-1 min-w-0 flex items-center">

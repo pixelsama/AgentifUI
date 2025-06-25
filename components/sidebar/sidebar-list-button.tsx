@@ -93,12 +93,12 @@ export function SidebarListButton({
         isDisabled ? "cursor-not-allowed opacity-60 border-transparent" : "cursor-pointer",
         
         // --- BEGIN COMMENT ---
-        // 🎯 亮色主题样式 - 微调悬停效果
+        // 🎯 亮色主题样式 - 统一悬停效果与header保持一致
         // --- END COMMENT ---
         !isDark && !isDisabled && [
           "text-stone-600",
           // 只有在没有打开下拉菜单且没有禁用悬停时才显示悬停效果
-          !hasOpenDropdown && !disableHover && "hover:bg-stone-300 hover:shadow-md hover:shadow-stone-900/8",
+          !hasOpenDropdown && !disableHover && "hover:bg-stone-300/80",
           active 
             ? "bg-stone-300 shadow-sm border-stone-400/80" 
             : "border-transparent"
@@ -106,12 +106,12 @@ export function SidebarListButton({
         !isDark && isDisabled && ["text-stone-400"],
         
         // --- BEGIN COMMENT ---
-        // 🎯 暗色主题样式 - 微调悬停效果
+        // 🎯 暗色主题样式 - 统一悬停效果与header保持一致
         // --- END COMMENT ---
         isDark && !isDisabled && [
           "text-gray-200",
           // 只有在没有打开下拉菜单且没有禁用悬停时才显示悬停效果
-          !hasOpenDropdown && !disableHover && "hover:bg-stone-600 hover:shadow-md hover:shadow-stone-900/20 hover:border-stone-500/50",
+          !hasOpenDropdown && !disableHover && "hover:bg-stone-600/60",
           active 
             ? "bg-stone-700 shadow-sm border-stone-600" 
             : "border-transparent"
