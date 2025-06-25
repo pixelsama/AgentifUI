@@ -539,12 +539,6 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
                 <span>重命名</span>
               </button>
               
-              {/* 分隔线 */}
-              <div className={cn(
-                "h-px mx-2",
-                isDark ? "bg-stone-600/50" : "bg-stone-300/50"
-              )} />
-              
               {/* 删除选项 */}
               <button
                 onClick={handleDelete}

@@ -369,7 +369,6 @@ export function SidebarChatList({
         >
           重命名
         </DropdownMenuV2.Item>
-        <DropdownMenuV2.Divider />
         <DropdownMenuV2.Item
           icon={<Trash className="w-3.5 h-3.5" />}
           danger

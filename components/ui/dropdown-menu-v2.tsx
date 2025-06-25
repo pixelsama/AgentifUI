@@ -3,6 +3,7 @@
 import React, { useState, createContext, useContext, useEffect, useRef } from "react"
 import { cn } from "@lib/utils"
 import { useTheme } from "@lib/hooks/use-theme"
+import { createPortal } from "react-dom"
 
 // Context to provide closeMenu function to items
 interface DropdownMenuV2ContextType {
@@ -99,12 +100,49 @@ export function DropdownMenuV2({
   onOpenChange,
 }: DropdownMenuV2Props) {
   const [internalIsOpen, setInternalIsOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLDivElement>(null)
   const { isDark } = useTheme()
   
   // 使用外部状态或内部状态
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen
   const setIsOpen = onOpenChange || setInternalIsOpen
+
+  // --- BEGIN COMMENT ---
+  // 🎯 客户端挂载检测
+  // --- END COMMENT ---
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // --- BEGIN COMMENT ---
+  // 🎯 计算trigger位置用于portal定位
+  // --- END COMMENT ---
+  const updateTriggerRect = () => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setTriggerRect(rect)
+    }
+  }
+
+  // --- BEGIN COMMENT ---
+  // 🎯 当菜单打开时更新位置
+  // --- END COMMENT ---
+  useEffect(() => {
+    if (isOpen) {
+      updateTriggerRect()
+      // 监听滚动和resize事件
+      const handleUpdate = () => updateTriggerRect()
+      window.addEventListener('scroll', handleUpdate, true)
+      window.addEventListener('resize', handleUpdate)
+      return () => {
+        window.removeEventListener('scroll', handleUpdate, true)
+        window.removeEventListener('resize', handleUpdate)
+      }
+    }
+  }, [isOpen])
 
   // --- BEGIN COMMENT ---
   // 🎯 全局点击监听器：点击组件外部时关闭菜单
@@ -166,42 +204,70 @@ export function DropdownMenuV2({
     toggleMenu()
   }
 
+  // --- BEGIN COMMENT ---
+  // 🎯 计算dropdown的固定位置
+  // --- END COMMENT ---
+  const getDropdownStyle = (): React.CSSProperties => {
+    if (!triggerRect) return {}
+    
+    const style: React.CSSProperties = {}
+    
+    if (placement === "bottom") {
+      style.top = triggerRect.bottom + 4 // 4px间距
+      style.left = triggerRect.right - minWidth // 右对齐
+    } else {
+      style.bottom = window.innerHeight - triggerRect.top + 4 // 4px间距
+      style.left = triggerRect.right - minWidth // 右对齐
+    }
+    
+    // 确保不会超出视窗边界
+    if (style.left && typeof style.left === 'number' && style.left < 8) {
+      style.left = 8
+    }
+    
+    return style
+  }
+
+  // --- BEGIN COMMENT ---
+  // 🎯 Dropdown内容 - 使用Portal渲染到body
+  // --- END COMMENT ---
+  const dropdownContent = isOpen && triggerRect && (
+    <div 
+      className={cn(
+        "fixed z-[9999]",
+        popoverContainerClassName
+      )}
+      style={getDropdownStyle()}
+    >
+      <div 
+        className={cn(
+          "rounded-md shadow-lg border backdrop-blur-sm",
+          // --- BEGIN COMMENT ---
+          // 🎯 使用更深的颜色以区别于sidebar背景
+          // --- END COMMENT ---
+          isDark 
+            ? "bg-stone-800/95 border-stone-600/80" 
+            : "bg-white/95 border-stone-300/80",
+          "py-1",
+          contentClassName
+        )}
+        style={{ minWidth: `${minWidth}px` }}
+      >
+        {children}
+      </div>
+    </div>
+  )
+
   return (
     <DropdownMenuV2Context.Provider value={{ closeMenu }}>
       <div className="relative" ref={containerRef}>
         {/* Trigger */}
-        <div onClick={handleTriggerClick}>
+        <div ref={triggerRef} onClick={handleTriggerClick}>
           {trigger}
         </div>
 
-        {/* Dropdown Menu */}
-        {isOpen && (
-          <div className={cn(
-            "absolute z-50",
-            // --- BEGIN COMMENT ---
-            // 定位：右上角与trigger接壤
-            // --- END COMMENT ---
-            placement === "bottom" ? "top-full right-0 mt-1" : "bottom-full right-0 mb-1",
-            popoverContainerClassName
-          )}>
-            <div 
-              className={cn(
-                "rounded-md shadow-lg border backdrop-blur-sm",
-                // --- BEGIN COMMENT ---
-                // 🎯 使用更深的颜色以区别于sidebar背景
-                // --- END COMMENT ---
-                isDark 
-                  ? "bg-stone-800/95 border-stone-600/80" 
-                  : "bg-white/95 border-stone-300/80",
-                "py-1",
-                contentClassName
-              )}
-              style={{ minWidth: `${minWidth}px` }}
-            >
-              {children}
-            </div>
-          </div>
-        )}
+        {/* Dropdown Menu - 使用Portal渲染到body，完全避免层叠上下文问题 */}
+        {mounted && dropdownContent && createPortal(dropdownContent, document.body)}
       </div>
     </DropdownMenuV2Context.Provider>
   )

@@ -361,7 +361,6 @@ export function RecentsList({
                     >
                       重命名
                     </DropdownMenu.Item>
-                    <DropdownMenu.Divider />
                     <DropdownMenu.Item
                       icon={<Trash className="w-3.5 h-3.5" />}
                       danger

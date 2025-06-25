@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Zap, Bot, Plus, HeartOff, Heart, Edit, ChevronDown, ChevronRight } from "lucide-react"
+import { Zap, Bot, Plus, HeartOff, Heart, Edit, ChevronDown, ChevronRight, Pen, Trash } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useCurrentApp } from "@lib/hooks/use-current-app"
 import { useChatStore } from "@lib/stores/chat-store"
@@ -275,7 +275,6 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
            app.dify_apptype === 'text-generation' ? '开始文本生成' : 
            '开始对话'}
         </DropdownMenuV2.Item>
-        <DropdownMenuV2.Divider />
         <DropdownMenuV2.Item
           icon={<HeartOff className="w-3.5 h-3.5" />}
           onClick={() => {

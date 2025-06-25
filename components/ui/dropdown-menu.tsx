@@ -134,8 +134,9 @@ export function DropdownMenu({
       }
     }
     
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    // 使用capture模式监听所有滚动事件，包括容器内的滚动
+    window.addEventListener("scroll", handleScroll, true)
+    return () => window.removeEventListener("scroll", handleScroll, true)
   }, [isVisible, closeDropdown])
   
   // 处理ESC键关闭菜单
