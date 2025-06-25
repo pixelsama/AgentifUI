@@ -176,6 +176,11 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
     if (modelApps.length > 0 && !isCurrentAppModel && currentAppId && targetModelApp && targetModelApp.instance_id !== currentAppId) {
       console.log(`检测到非模型应用 ${currentAppId}，静默恢复到模型: ${targetModelApp.instance_id}`);
       
+      // --- BEGIN COMMENT ---
+      // 🎯 修复：在静默切换前先记录到localStorage，确保首次登录时也能正确保存模型选择
+      // --- END COMMENT ---
+      setLastUsedModel(targetModelApp.instance_id);
+      
       // 静默切换，不显示loading状态，不强制跳转
       switchToSpecificApp(targetModelApp.instance_id).catch(error => {
         console.warn('静默恢复模型失败:', error);
