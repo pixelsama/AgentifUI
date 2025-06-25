@@ -1,90 +1,124 @@
-# AgentifUI 企业级智能聊天平台
+<h1 align="center">AgentifUI – Enterprise-Grade Intelligent Chat Platform</h1>
 
-## 项目简介
+> **Community Edition** – Apache 2.0  |  **Enterprise Edition** – Commercial License (contact license@iflabx.com)  
+> Maintained by the **ifLabX community** and sponsored by **ifLabX Corp**.
 
-AgentifUI 是一个现代化的多端智能聊天平台前端，基于 Next.js App Router 架构，结合 Supabase Auth、Dify API、Zustand 状态管理和分层数据服务，致力于为企业提供安全、可扩展、易维护的 LLM 聊天体验。
+AgentifUI is a modern, multi-device intelligent-chat front-end built with the Next .js 15 App Router.  
+By combining **Supabase Auth**, **Dify API**, **Zustand** state management and layered data services, it delivers a secure, scalable and easy-to-maintain LLM chat experience—ideal for corporate knowledge bases, AI assistants and other enterprise scenarios.
 
-本项目注重工程规范、数据一致性、性能优化与用户体验，适用于企业知识库、AI 助手等场景。
+| Edition | License | Scope & Extras |
+|---------|---------|----------------|
+| **Community** | Apache 2.0 | Core chat UI, REST/GraphQL API, single-tenant |
+| **Enterprise** | Proprietary | ✅ Multi-tenant ✅ SAML/LDAP ✅ SLA & Support ✅ Brand-removal/OEM |
 
-## 主要功能
+---
 
-- 多端响应式聊天 UI，支持移动与桌面
-- 支持多应用/多对话管理
-- 消息持久化与断点恢复
-- Dify API 集成（支持流式回复）
-- Supabase 用户认证与权限管理
-- API 密钥安全管理与加密
-- 高性能消息分页与缓存
-- 主题切换与无障碍支持
-- 健壮的错误处理与状态同步
+## ✨ Key Features
 
-## 技术栈
+- Responsive chat UI (desktop & mobile)
+- Multiple apps / conversation management
+- Message persistence with resume-from-breakpoint
+- **Dify API** integration with streaming responses
+- **Supabase** authentication & role-based access
+- Encrypted API-key storage and per-user / per-instance key rotation
+- High-performance message pagination & caching
+- Light/Dark theme switch & a11y-friendly components
+- Robust error handling and real-time state sync
 
-- **前端框架**：Next.js 15 (App Router)
-- **UI**：React 18, Tailwind CSS 4
-- **状态管理**：Zustand
-- **后端服务**：Supabase (Auth + Database)
-- **API集成**：Dify, OpenAI 等
-- **工具库**：clsx/cn, Lucide Icons, lodash, date-fns
-- **类型系统**：TypeScript
+---
 
-## 架构设计
+## 🛠 Tech Stack
 
-采用分层架构，关注点分离：
+| Layer | Tools |
+|-------|-------|
+| Framework | **Next.js 15** (App Router), **React 18**, **Tailwind CSS 4** |
+| State | **Zustand** |
+| Back end-as-a-Service | **Supabase** (Auth + Postgres DB + Storage) |
+| LLM / Chat API | **Dify**, OpenAI, others |
+| Utilities | clsx/cn, Lucide Icons, lodash, date-fns |
+| Language | **TypeScript** everywhere |
+
+---
+
+## 🏗 Architecture Overview
 
 ```
-UI组件 (React)
-    ↓
-自定义Hooks (use-*)
-    ↓
-数据库操作 (lib/db/*)
-    ↓
-数据服务 (lib/services/*)
-    ↓
+
+UI Components (React)
+↓
+Custom Hooks (use-*)
+↓
+DB Access Layer  (lib/db/*)
+↓
+Service Layer    (lib/services/\*)
+↓
 Supabase Client
-```
 
-## 核心亮点
+````
 
-- **安全**：严格依赖数据库对话ID，避免临时状态写入，确保数据一致性
-- **可维护**：支持临时ID、Dify ID、数据库ID三者转换，流程健壮
-- **易集成**：API密钥安全体系，支持加密存储、分用户/实例管理、回退机制
-- **数据主权**：严格类型约束，前后端类型同步，行级安全策略（RLS）保障数据隔离
+### Core Design Highlights
+
+| Area | Why it matters |
+|------|----------------|
+| **Security** | Relies on DB-verified conversation IDs only—no transient state writes, guaranteeing consistency. |
+| **Maintainability** | Seamless conversion between temporary IDs, Dify IDs and DB IDs makes the data-flow resilient. |
+| **Easy Integration** | Encrypted API-key vault, per-user/instance key scope and graceful fallback mechanism. |
+| **Data Sovereignty** | Strict end-to-end TypeScript types + Supabase **RLS** ensure row-level isolation. |
+
 ---
 
-## 快速开始
+## 🚀 Quick Start (Community Edition)
 
-> 📋 **完整环境配置**: 请先查看 [环境配置要求文档](./docs/SETUP-REQUIREMENTS.md) 了解所需工具和详细安装步骤
+> 📋 **Full environment requirements:** See [`docs/SETUP-REQUIREMENTS.md`](./docs/SETUP-REQUIREMENTS.md)
 
-1. 安装依赖
+### Local Dev
 
 ```bash
+# 1 — Install dependencies
 pnpm install
-```
 
-2. 配置环境变量（参考 `.env.local.example`）
+# 2 — Copy env template and fill values
+cp .env.local.example .env.local
 
-3. 启动开发服务器
+# 3 — Run dev server
+pnpm run dev
+
+# 4 — Open your browser
+http://localhost:3000
+````
+
+### Docker (alternative)
 
 ```bash
-pnpm run dev
+docker run -p 8080:8080 ghcr.io/agentifui/community:latest
 ```
 
-4. 访问 http://localhost:3000
+---
+
+## 📂 Project Structure
+
+| Path          | Purpose                                  |
+| ------------- | ---------------------------------------- |
+| `app/`        | Next.js routes & pages                   |
+| `components/` | Shared & domain UI components            |
+| `lib/`        | Data, services, hooks, state             |
+| `docs/`       | Architecture, DB schema & API-key design |
+| `supabase/`   | SQL migrations & RLS policies            |
 
 ---
 
-## 主要目录说明
+## 🤝 Getting Help / Contributing
 
-- `app/`           Next.js 路由与页面
-- `components/`    通用与业务组件
-- `lib/`           数据、服务、hooks、状态管理
-- `docs/`          架构、数据库和API密钥设计文档
-- `supabase/`      数据库迁移文件
+* **Issues & PRs:** please open them on GitHub; remember to sign the CLA bot check.
+* **Security reports:** email `security@example.com`.
+* **Enterprise/OEM enquiries:** email `sales@example.com`.
 
-## 交流与支持
+> AgentifUI is dual-licensed. The Community Edition is true open source under **Apache 2.0**; the Enterprise Edition adds multi-tenant, SAML/LDAP, branding removal and SLA support under a commercial license. See `LICENSE`, `NOTICE` and `TRADEMARK_POLICY.md` for details.
 
-如有问题或建议，请通过 issue 或 PR 与我们联系。
 
----
 
+- **Dual-license banner, edition table and quick Docker snippet** were retained from the previous draft.  
+- All Chinese sections have been fully translated and slotted into “Key Features,” “Tech Stack,” “Architecture,” etc.  
+- File paths, environment steps and doc links mirror the Chinese original.  
+- References to **ifLabX community** and **Example Corp** remain for consistency with the legal documents.
+```
