@@ -1,6 +1,7 @@
 <h1 align="center">AgentifUI – Enterprise-Grade Intelligent Chat Platform</h1>
 
-> **Community Edition** – Apache 2.0  |  **Enterprise Edition** – Commercial License (contact license@iflabx.com)  
+> **Community Edition** – Apache 2.0
+> **Enterprise Edition** – Commercial License (contact license@iflabx.com)  
 > Maintained by the **ifLabX community** and sponsored by **ifLabX Corp**.
 
 AgentifUI is a modern, multi-device intelligent-chat front-end built with the Next .js 15 App Router.  
