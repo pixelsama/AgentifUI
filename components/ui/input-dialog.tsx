@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { cn } from '@lib/utils';
 import { useMobile } from '@lib/hooks';
 import { useTheme } from '@lib/hooks/use-theme';
-import { X, Edit } from 'lucide-react';
+import { X, Pen } from 'lucide-react';
 
 interface InputDialogProps {
   isOpen: boolean;
@@ -217,7 +217,7 @@ export function InputDialog({
                 ? 'bg-stone-700/50 text-stone-400 ring-stone-700/50' 
                 : 'bg-stone-100 text-stone-500 ring-stone-200/50'
             )}>
-              <Edit className="w-6 h-6" />
+              <Pen className="w-6 h-6" />
             </div>
             
             <h3 className={cn(
@@ -376,7 +376,7 @@ export function InputDialog({
                 ? 'bg-stone-700/50 text-stone-400 ring-stone-700/50' 
                 : 'bg-stone-100 text-stone-500 ring-stone-200/50'
             )}>
-              <Edit className="w-8 h-8" />
+              <Pen className="w-8 h-8" />
             </div>
             
             <h3 className={cn(
