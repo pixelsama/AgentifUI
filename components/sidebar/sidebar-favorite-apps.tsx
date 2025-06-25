@@ -119,15 +119,12 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
       
       console.log('[FavoriteApps] 立即跳转路由:', targetPath)
       
-      // 🎯 关键优化：立即跳转，不等待任何异步操作
-      // 页面级的加载逻辑会处理应用切换
+      // 🎯 修复竞态条件：只跳转路由，让目标页面自己处理应用切换
+      // 避免同时调用 switchToSpecificApp 导致的 localStorage 状态闪烁
+      // 这与应用市场的行为保持一致
       router.push(targetPath)
       
-      // 🎯 后台静默切换应用，不阻塞UI
-      // 如果失败，页面会通过自己的逻辑处理
-      switchToSpecificApp(app.instanceId).catch(error => {
-        console.warn('[FavoriteApps] 后台应用切换失败，页面将自行处理:', error)
-      })
+      // 🎯 移除后台应用切换调用，避免与目标页面的切换逻辑产生竞态条件
       
       console.log('[FavoriteApps] 路由跳转已发起，页面接管后续处理')
 
@@ -166,10 +163,8 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
       console.log('[FavoriteApps] 发起新对话，跳转到:', targetPath)
       router.push(targetPath)
       
-      // 后台处理应用切换
-      switchToSpecificApp(app.instanceId).catch(error => {
-        console.warn('[FavoriteApps] 发起新对话时应用切换失败，页面将处理:', error)
-      })
+      // 🎯 移除后台应用切换调用，避免竞态条件
+      // 让目标页面自己处理应用切换
 
     } catch (error) {
       console.error('[FavoriteApps] 发起新对话失败:', error)
