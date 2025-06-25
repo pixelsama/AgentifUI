@@ -22,6 +22,7 @@ interface AdaptiveKeyBadgeProps {
  * - 短文字（1-2字符）使用固定正方形
  * - 长文字（3+字符）使用自适应宽度 + 内边距
  * - 保持视觉一致性和可读性
+ * - 优化垂直居中对齐
  */
 export function AdaptiveKeyBadge({
   keyText,
@@ -31,11 +32,14 @@ export function AdaptiveKeyBadge({
 }: AdaptiveKeyBadgeProps) {
   const isLongText = keyText.length > 2
   
-  // 基础样式
+  // 基础样式 - 添加垂直居中优化
   const baseClasses = cn(
     "inline-flex items-center justify-center",
     "font-medium rounded border select-none",
-    "transition-all duration-75"
+    "transition-all duration-75",
+    // --- 垂直居中优化 ---
+    "leading-none", // 明确设置行高为1，避免默认行高影响
+    "font-sans", // 使用无衬线字体确保更好的小尺寸渲染
   )
   
   // 尺寸配置
@@ -78,7 +82,16 @@ export function AdaptiveKeyBadge({
         themeClasses,
         className
       )}
-      style={size === 'sm' ? { boxShadow: config.shadow } : undefined}
+      style={{
+        // --- 内联样式优化垂直居中 ---
+        ...(size === 'sm' ? { boxShadow: config.shadow } : {}),
+        fontSizeAdjust: 'none', // 禁用字体大小调整，避免影响垂直对齐
+        textAlign: 'center',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        lineHeight: '1', // 强制行高为1
+      }}
     >
       {keyText}
     </span>

@@ -4,7 +4,9 @@ import React from "react"
 import { cn } from "@lib/utils"
 import { useMobile } from "@lib/hooks"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
+import { useSettingsColors } from "@lib/hooks/use-settings-colors"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
+import { usePathname } from "next/navigation"
 import { DesktopUserAvatar } from "./desktop-user-avatar"
 import { ConversationTitleButton } from "./conversation-title-button"
 import { WorkflowHistoryButton } from "./workflow-history-button"
@@ -17,11 +19,13 @@ import { WorkflowHistoryButton } from "./workflow-history-button"
  * - 右上角显示用户头像按钮，点击弹出下拉菜单
  * - 左侧显示当前对话标题按钮（仅在历史对话页面）
  * - 布局会根据侧边栏的展开/收起状态动态调整左边距
- * - 在设置页面自动适配设置页面的背景色
+ * - 在设置页面自动适配设置页面的背景色，实现完全融入效果
  */
 export function NavBar() {
   const isMobile = useMobile()
-  const { colors } = useThemeColors()
+  const pathname = usePathname()
+  const { colors: themeColors } = useThemeColors()
+  const { colors: settingsColors } = useSettingsColors()
   const { isExpanded } = useSidebarStore()
 
   if (isMobile) {
@@ -29,10 +33,14 @@ export function NavBar() {
   }
 
   // --- BEGIN COMMENT ---
-  // 🎯 统一navbar背景色，所有页面使用相同的背景色确保一致性
-  // Settings页面也使用主背景色，而不是页面背景色
+  // 🎯 根据当前页面路径选择合适的背景色
+  // Settings页面使用settings专门的背景色，其他页面使用主题背景色
+  // 确保navbar与页面完全融入，无违和感
   // --- END COMMENT ---
-  const backgroundColor = colors.mainBackground.tailwind
+  const isSettingsPage = pathname?.startsWith('/settings')
+  const backgroundColor = isSettingsPage 
+    ? settingsColors.pageBackground.tailwind 
+    : themeColors.mainBackground.tailwind
 
   // --- BEGIN COMMENT ---
   // 计算左边距：桌面端始终为sidebar留出空间
