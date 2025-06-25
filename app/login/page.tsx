@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { LoginForm } from '@components/auth/login-form';
-import { AuthRedirectGuard } from '@components/auth/auth-redirect-guard';
 import { useSearchParams } from 'next/navigation';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
@@ -90,59 +89,57 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthRedirectGuard redirectTo="/chat" redirectMessage="您已登录，正在为您跳转到对话页面...">
-      <main className={`min-h-screen w-full flex flex-col items-center justify-center gap-4 py-12 px-4 sm:px-6 lg:px-8 ${colors.bgColor} font-serif`}>
-        {registered && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <Alert className={`max-w-md border-l-4 ${colors.alertBg} ${colors.alertBorder}`}>
-              <CheckCircle className={`h-4 w-4 ${colors.iconColor}`} />
-              <AlertDescription className={`${colors.alertText} font-serif`}>
-                注册成功！请查看您的邮箱以验证账户，然后登录。
-              </AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-        {resetSuccess === 'success' && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <Alert className={`max-w-md border-l-4 ${colors.alertBg} ${colors.alertBorder}`}>
-              <CheckCircle className={`h-4 w-4 ${colors.iconColor}`} />
-              <AlertDescription className={`${colors.alertText} font-serif`}>
-                密码重置成功！请使用新密码登录。
-              </AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-        {oauthError && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <Alert className={`max-w-md border-l-4 ${colors.errorAlertBg} ${colors.errorAlertBorder}`}>
-              <AlertTriangle className={`h-4 w-4 ${colors.errorIconColor}`} />
-              <AlertDescription className={`${colors.errorAlertText} font-serif`}>
-                {getErrorMessage(oauthError)}
-              </AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
+    <main className={`min-h-screen w-full flex flex-col items-center justify-center gap-4 py-12 px-4 sm:px-6 lg:px-8 ${colors.bgColor} font-serif`}>
+      {registered && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="w-full max-w-md"
         >
-          <LoginForm />
+          <Alert className={`max-w-md border-l-4 ${colors.alertBg} ${colors.alertBorder}`}>
+            <CheckCircle className={`h-4 w-4 ${colors.iconColor}`} />
+            <AlertDescription className={`${colors.alertText} font-serif`}>
+              注册成功！请查看您的邮箱以验证账户，然后登录。
+            </AlertDescription>
+          </Alert>
         </motion.div>
-      </main>
-    </AuthRedirectGuard>
+      )}
+      {resetSuccess === 'success' && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Alert className={`max-w-md border-l-4 ${colors.alertBg} ${colors.alertBorder}`}>
+            <CheckCircle className={`h-4 w-4 ${colors.iconColor}`} />
+            <AlertDescription className={`${colors.alertText} font-serif`}>
+              密码重置成功！请使用新密码登录。
+            </AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
+      {oauthError && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Alert className={`max-w-md border-l-4 ${colors.errorAlertBg} ${colors.errorAlertBorder}`}>
+            <AlertTriangle className={`h-4 w-4 ${colors.errorIconColor}`} />
+            <AlertDescription className={`${colors.errorAlertText} font-serif`}>
+              {getErrorMessage(oauthError)}
+            </AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-md"
+      >
+        <LoginForm />
+      </motion.div>
+    </main>
   );
 }

@@ -80,16 +80,19 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = pathname.startsWith('/auth')
   const isApiRoute = pathname.startsWith('/api')
   const isAdminRoute = pathname.startsWith('/admin')
+  
+  // 认证相关页面定义（已登录用户不应该访问的页面）
+  const isAuthPage = pathname === '/login' || 
+                     pathname.startsWith('/register') ||
+                     pathname === '/forgot-password' ||
+                     pathname === '/reset-password' ||
+                     pathname === '/phone-login'
+  
   const isPublicRoute = pathname === '/' || 
                          pathname === '/about' || 
-                         pathname === '/login' || 
                          pathname.startsWith('/sso/processing') ||
-                         (process.env.NEXT_PUBLIC_SSO_ONLY_MODE !== 'true' && (
-                           pathname === '/phone-login' || 
-                           pathname.startsWith('/register') ||
-                           pathname === '/forgot-password' ||
-                           pathname === '/reset-password'
-                         ))
+                         (process.env.NEXT_PUBLIC_SSO_ONLY_MODE !== 'true' && isAuthPage) ||
+                         (process.env.NEXT_PUBLIC_SSO_ONLY_MODE === 'true' && pathname === '/login')
   
   // 启用路由保护逻辑，确保未登录用户无法访问受保护的路由
   if (!user && !isAuthRoute && !isApiRoute && !isPublicRoute) {
@@ -118,9 +121,10 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (user && isAuthRoute) {
-    console.log(`[Middleware] User logged in, redirecting auth route ${pathname} to /`)
-    return NextResponse.redirect(new URL('/', request.url))
+  // 已登录用户访问认证页面时重定向到聊天页面
+  if (user && isAuthPage) {
+    console.log(`[Middleware] User logged in, redirecting auth page ${pathname} to /chat`)
+    return NextResponse.redirect(new URL('/chat', request.url))
   }
 
   return response

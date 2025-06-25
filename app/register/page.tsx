@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { RegisterForm } from '@components/auth/register-form';
-import { AuthRedirectGuard } from '@components/auth/auth-redirect-guard';
 import { useTheme } from '@lib/hooks/use-theme';
 
 export default function RegisterPage() {
@@ -33,21 +32,15 @@ export default function RegisterPage() {
   };
 
   return (
-    <AuthRedirectGuard 
-      redirectTo="/chat" 
-      redirectMessage="您已登录，正在为您跳转到对话页面..." 
-      checkSSO={true}
-    >
-      <main className={`min-h-screen w-full flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ${colors.bgColor} font-serif`}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="w-full max-w-md"
-        >
-          <RegisterForm />
-        </motion.div>
-      </main>
-    </AuthRedirectGuard>
+    <main className={`min-h-screen w-full flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ${colors.bgColor} font-serif`}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-md"
+      >
+        <RegisterForm />
+      </motion.div>
+    </main>
   );
 }
