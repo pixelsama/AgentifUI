@@ -355,8 +355,12 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
       {displayApps.length > 0 && (
         <div className="space-y-1 px-3 pt-1">
           {displayApps.map((app, index) => {
-            // 使用路由判断应用是否被选中
-            const isSelected = isAppActive(app)
+            // 🎯 修复跨页面切换延迟：在路由跳转期间允许sidebar store状态立即生效
+            // 1. 如果sidebar store中选中了这个应用，立即显示为选中（路由跳转期间）
+            // 2. 如果在非应用页面且store中没选中，确保不显示选中状态
+            const isInAppPage = window.location.pathname.startsWith('/apps/')
+            const isSelectedByStore = selectedType === 'app' && selectedId === app.instanceId
+            const isSelected = isSelectedByStore || (isInAppPage && isAppActive(app))
             // 检查当前应用是否正在点击中
             const isClicking = clickingAppId === app.instanceId
             // 计算是否是扩展项（超过前3个的应用）
