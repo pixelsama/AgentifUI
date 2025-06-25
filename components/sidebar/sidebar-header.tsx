@@ -1,6 +1,6 @@
 "use client"
 import React from "react"
-import { ArrowRightToLine, ArrowLeftToLine, CirclePlus, MessageCirclePlus, Edit3, Edit, SquarePen, Pen, Feather, LayoutGrid } from "lucide-react"
+import { ArrowRightToLine, ArrowLeftToLine, CirclePlus, MessageCirclePlus, Edit3, Edit, SquarePen, Pen, Feather, LayoutGrid, Clock } from "lucide-react"
 import { SidebarButton } from "./sidebar-button"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { cn } from "@lib/utils"
@@ -329,6 +329,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           disableLockBehavior={true}
           onClick={handleNewChat}
           aria-label="新对话"
+          variant="transparent"
           className={cn(
             "group font-medium transition-all duration-150 ease-out",
             "flex items-center justify-between w-full"
@@ -373,11 +374,64 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
             disableLockBehavior={true}
             onClick={handleNewChat}
             aria-label="新对话"
+            variant="transparent"
             className={cn(
               "group font-medium transition-all duration-150 ease-out"
             )}
           >
             <span className="font-serif">新对话</span>
+          </SidebarButton>
+        </TooltipWrapper>
+      )}
+
+      {/* 🎯 历史对话按钮 - 提升重要性，与新对话按钮并列 */}
+      {isExpanded ? (
+        <SidebarButton
+          icon={<Clock className={cn(
+            "h-5 w-5 transition-all duration-150 ease-out",
+            isDark
+              ? "text-gray-300 group-hover:text-white"
+              : "text-stone-600 group-hover:text-stone-800"
+          )} />}
+          disableLockBehavior={true}
+          onClick={() => {
+            router.push('/chat/recents');
+          }}
+          aria-label="历史对话"
+          variant="transparent"
+          className={cn(
+            "group font-medium transition-all duration-150 ease-out",
+            "flex items-center justify-between w-full"
+          )}
+        >
+          <span className="font-serif">历史对话</span>
+        </SidebarButton>
+      ) : (
+        <TooltipWrapper
+          content="历史对话"
+          id="sidebar-header-recents-tooltip"
+          placement="right"
+          size="sm"
+          showArrow={false}
+        >
+          <SidebarButton
+            icon={<Clock className={cn(
+              "h-5 w-5 transition-all duration-150 ease-out",
+              isDark
+                ? "text-gray-300 group-hover:text-white"
+                : "text-stone-600 group-hover:text-stone-800"
+            )} />}
+            disableLockBehavior={true}
+            onClick={() => {
+              router.push('/chat/recents');
+            }}
+            aria-label="历史对话"
+            variant="transparent"
+            className={cn(
+              "group font-medium transition-all duration-150 ease-out"
+            )}
+          >
+            <span className="font-serif">历史对话</span>
           </SidebarButton>
         </TooltipWrapper>
       )}
@@ -396,6 +450,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
             router.push('/apps');
           }}
           aria-label="应用市场"
+          variant="transparent"
           className={cn(
             "group font-medium transition-all duration-150 ease-out",
             "flex items-center justify-between w-full"
@@ -442,6 +497,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               router.push('/apps');
             }}
             aria-label="应用市场"
+            variant="transparent"
             className={cn(
               "group font-medium transition-all duration-150 ease-out"
             )}

@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Zap, Bot, Plus, HeartOff, Heart, Edit } from "lucide-react"
+import { Zap, Bot, Plus, HeartOff, Heart, Edit, ChevronDown, ChevronRight } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useCurrentApp } from "@lib/hooks/use-current-app"
 import { useChatStore } from "@lib/stores/chat-store"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { useFavoriteAppsStore } from "@lib/stores/favorite-apps-store"
+import { useThemeColors } from "@lib/hooks/use-theme-colors"
 import { SidebarListButton } from "./sidebar-list-button"
 import { MoreButtonV2 } from "@components/ui/more-button-v2"
 import { DropdownMenuV2 } from "@components/ui/dropdown-menu-v2"
@@ -32,11 +33,17 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
   const { switchToSpecificApp } = useCurrentApp()
   const { clearMessages } = useChatStore()
   const { isExpanded, selectItem, selectedType, selectedId } = useSidebarStore()
+  const { colors } = useThemeColors()
   const {
     favoriteApps,
     removeFavoriteApp,
     loadFavoriteApps,
-    isLoading
+    isLoading,
+    // --- BEGIN COMMENT ---
+    // 🎯 新增：展开/关闭状态管理
+    // --- END COMMENT ---
+    isExpanded: isAppsExpanded,
+    toggleExpanded
   } = useFavoriteAppsStore()
 
   // 下拉菜单状态管理
@@ -56,8 +63,12 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
     }
   }, [isExpanded, openDropdownId])
 
-  // 限制显示最多5个常用应用
-  const displayApps = favoriteApps.slice(0, 5)
+  // --- BEGIN COMMENT ---
+  // 根据展开状态决定显示数量：关闭时显示3个，展开时显示所有
+  // --- END COMMENT ---
+  const displayApps = isAppsExpanded 
+    ? favoriteApps 
+    : favoriteApps.slice(0, 3)
 
   // 判断应用是否处于选中状态 - 参考chat list的实现
   const isAppActive = React.useCallback((app: FavoriteApp) => {
@@ -292,14 +303,44 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
   if (!contentVisible) return null
 
   return (
-    <div className="flex flex-col space-y-1">
-      {/* 标题 - 与近期对话标题样式完全一致 */}
+    <div className="flex flex-col">
+      {/* --- BEGIN COMMENT ---
+      粘性标题：保持原有样式，只添加粘性定位
+      --- END COMMENT --- */}
       {displayApps.length > 0 && (
         <div className={cn(
-          "flex items-center px-2 py-1 text-xs font-medium font-serif",
-          isDark ? "text-stone-400" : "text-stone-500"
-        )}>
-          常用应用
+          "sticky top-0 z-40 px-2 py-1",
+          // --- BEGIN COMMENT ---
+          // 使用与sidebar相同的背景色，确保粘性效果完美，无悬停效果
+          // 确保z-index足够高，完全覆盖下方内容，避免透明效果
+          // --- END COMMENT ---
+          colors.sidebarBackground.tailwind,
+          favoriteApps.length > 3 && "cursor-pointer"
+        )}
+        onClick={favoriteApps.length > 3 ? toggleExpanded : undefined}
+        >
+          <div className="flex items-center">
+            {/* --- BEGIN COMMENT ---
+            标题文字和展开按钮紧凑布局：去掉数字组件，按钮紧贴文字
+            --- END COMMENT --- */}
+            <span className={cn(
+              "text-xs font-medium font-serif leading-none",
+              isDark ? "text-stone-400" : "text-stone-500"
+            )}>
+              常用应用
+            </span>
+            
+            {/* --- BEGIN COMMENT ---
+            展开按钮：仅在有超过3个应用时显示，紧贴文字
+            --- END COMMENT --- */}
+            {favoriteApps.length > 3 && (
+              <ChevronRight className={cn(
+                "w-2.5 h-2.5 ml-0.5 transition-transform duration-200",
+                isAppsExpanded && "rotate-90",
+                isDark ? "text-stone-400/70" : "text-stone-500/70"
+              )} />
+            )}
+          </div>
         </div>
       )}
 
@@ -313,17 +354,30 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
         </div>
       )}
 
-      {/* 应用列表 - 贴边显示，与近期对话列表样式一致 */}
+      {/* --- BEGIN COMMENT ---
+      应用列表：添加顶部间距，保持与标题的分离
+      --- END COMMENT --- */}
       {displayApps.length > 0 && (
-        <div className="space-y-1 px-2">
-          {displayApps.map((app) => {
+        <div className="space-y-1 px-2 pt-1">
+          {displayApps.map((app, index) => {
             // 使用路由判断应用是否被选中
             const isSelected = isAppActive(app)
-            // 🎯 新增：检查当前应用是否正在点击中
+            // 检查当前应用是否正在点击中
             const isClicking = clickingAppId === app.instanceId
-
+            // 计算是否是扩展项（超过前3个的应用）
+            const isExtendedItem = index >= 3
+            
             return (
-              <div className="group relative" key={app.instanceId}>
+              <div 
+                className={cn(
+                  "group relative transition-opacity duration-300",
+                  // --- BEGIN COMMENT ---
+                  // 简单的fade in/out效果
+                  // --- END COMMENT ---
+                  isExtendedItem && !isAppsExpanded ? "opacity-0 pointer-events-none" : "opacity-100"
+                )}
+                key={app.instanceId}
+              >
                 <SidebarListButton
                   icon={getAppIcon(app)}
                   onClick={() => handleAppClick(app)}
@@ -351,9 +405,13 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
                     "transition-all duration-200 ease-in-out",
                     // 🎯 点击时的特殊样式
                     isClicking && "opacity-75 cursor-wait",
+                    // --- BEGIN COMMENT ---
+                    // 🎨 统一悬停效果：与侧边栏所有区域保持完全一致
+                    // 使用与功能按钮相同的 stone-300/stone-600 + shadow
+                    // --- END COMMENT ---
                     isDark
-                      ? "text-gray-300 hover:text-gray-100 hover:bg-stone-700/50"
-                      : "text-gray-700 hover:text-gray-900 hover:bg-stone-100"
+                      ? "text-gray-300 hover:text-gray-100 hover:bg-stone-600 hover:shadow-md"
+                      : "text-gray-700 hover:text-gray-900 hover:bg-stone-300 hover:shadow-md"
                   )}
                 >
                   <div className="flex-1 min-w-0 flex items-center">
@@ -377,50 +435,8 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
         </div>
       )}
 
-      {/* 🎨 优化：查看全部常用应用按钮 - 保持与列表项对齐 */}
-      {favoriteApps.length > 0 && (
-        <div className="px-2">
-          <div className="mt-1">
-            <SidebarListButton
-              icon={
-                <Heart className={cn(
-                  "h-4 w-4",
-                  isDark
-                    ? "text-stone-300"
-                    : "text-stone-600"
-                )} />
-              }
-              disableHover={!!openDropdownId}
-              onClick={() => {
-                router.push('/apps?category=常用应用')
-              }}
-              className={cn(
-                "w-full group font-medium",
-                // 🎨 现代化样式：更好的对比度和视觉层次
-                isDark 
-                  ? "text-stone-300 hover:text-white bg-stone-800/40 hover:bg-stone-700/60 border border-stone-700/60 hover:border-stone-600" 
-                  : "text-stone-600 hover:text-stone-800 bg-stone-100/40 hover:bg-stone-200/60 border border-stone-300/60 hover:border-stone-400"
-              )}
-            >
-              <div className="flex items-center justify-between w-full">
-              <span className="text-xs font-medium font-serif">
-                  {favoriteApps.length > 5 ? '查看全部常用' : '查看常用应用'}
-                </span>
-                {favoriteApps.length > 1 && (
-                  <span className={cn(
-                    "px-1.5 py-0.5 rounded-full text-[10px] font-bold",
-                    isDark
-                      ? "bg-stone-600/30 text-stone-200"
-                      : "bg-stone-300/50 text-stone-700"
-                  )}>
-                    {favoriteApps.length}
-              </span>
-                )}
-              </div>
-            </SidebarListButton>
-          </div>
-        </div>
-      )}
+
+
     </div>
   )
 } 

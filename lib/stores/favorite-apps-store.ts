@@ -16,6 +16,10 @@ interface FavoriteAppsState {
   favoriteApps: FavoriteApp[]
   isLoading: boolean
   error: string | null
+  // --- BEGIN COMMENT ---
+  // 🎯 新增：展开/关闭状态，默认关闭
+  // --- END COMMENT ---
+  isExpanded: boolean
 
   // 操作方法
   addFavoriteApp: (app: Omit<FavoriteApp, 'addedAt' | 'lastUsedAt'>) => void
@@ -28,6 +32,11 @@ interface FavoriteAppsState {
   // 🎯 新增：简单的后台同步方法，非阻塞更新
   // --- END COMMENT ---
   syncWithAppList: (apps: any[]) => void
+  // --- BEGIN COMMENT ---
+  // 🎯 新增：展开/关闭切换方法
+  // --- END COMMENT ---
+  toggleExpanded: () => void
+  setExpanded: (expanded: boolean) => void
 }
 
 export const useFavoriteAppsStore = create<FavoriteAppsState>()(
@@ -36,6 +45,10 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
       favoriteApps: [],
       isLoading: false,
       error: null,
+      // --- BEGIN COMMENT ---
+      // 🎯 默认关闭状态
+      // --- END COMMENT ---
+      isExpanded: false,
 
       addFavoriteApp: (app) => {
         const now = new Date().toISOString()
@@ -65,7 +78,9 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
             return {
               favoriteApps: [...state.favoriteApps, newApp]
                 .sort((a, b) => new Date(b.lastUsedAt).getTime() - new Date(a.lastUsedAt).getTime())
-                .slice(0, 10) // 最多保留10个常用应用
+                // --- BEGIN COMMENT ---
+                // 🎯 移除数量限制，允许用户收藏任意数量的应用
+                // --- END COMMENT ---
             }
           }
         })
@@ -162,6 +177,14 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
           console.log(`[FavoriteApps] 同步完成 - 更新信息: ${hasInfoChanges}, 清理应用: ${hasRemovedApps}`)
           set({ favoriteApps: validFavoriteApps })
         }
+      },
+
+      toggleExpanded: () => {
+        set((state) => ({ isExpanded: !state.isExpanded }))
+      },
+
+      setExpanded: (expanded: boolean) => {
+        set({ isExpanded: expanded })
       }
     }),
     {

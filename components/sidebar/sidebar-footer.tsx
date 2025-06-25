@@ -23,12 +23,13 @@ export function SidebarFooter() {
         isExpanded ? (
           <SidebarButton
             icon={<Sliders className={cn(
-              "h-5 w-5 transition-transform duration-300 group-hover:scale-110",
+              "h-5 w-5 transition-transform duration-300",
             )} />}
             onClick={() => {
               router.push('/settings')
             }}
             aria-label="设置"
+            variant="transparent"
             className="group"
           >
             <span className="font-serif">设置</span>
@@ -43,12 +44,13 @@ export function SidebarFooter() {
           >
             <SidebarButton
               icon={<Sliders className={cn(
-                "h-5 w-5 transition-transform duration-300 group-hover:scale-110",
+                "h-5 w-5 transition-transform duration-300",
               )} />}
               onClick={() => {
                 router.push('/settings')
               }}
               aria-label="设置"
+              variant="transparent"
               className="group"
             >
               <span className="font-serif">设置</span>

@@ -13,6 +13,7 @@ interface SidebarButtonProps extends React.HTMLAttributes<HTMLDivElement> {
   isDisabled?: boolean 
   children?: React.ReactNode
   disableLockBehavior?: boolean
+  variant?: 'default' | 'transparent' // 新增：控制悬停效果样式
 }
 
 export function SidebarButton({ 
@@ -25,6 +26,7 @@ export function SidebarButton({
   isDisabled = false,
   children,
   disableLockBehavior = false,
+  variant = 'default',
   ...props 
 }: SidebarButtonProps) {
   const { isExpanded } = useSidebarStore()
@@ -71,13 +73,17 @@ export function SidebarButton({
         isDisabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
         !isDark && !isDisabled && [
           "text-stone-600",
-          "hover:bg-stone-300 hover:shadow-md",
+          variant === 'transparent' 
+            ? "hover:bg-stone-300/80" 
+            : "hover:bg-stone-300 hover:shadow-md",
           active && "bg-stone-300 shadow-sm border-stone-400/80",
         ],
         !isDark && isDisabled && ["text-stone-400"],
         isDark && !isDisabled && [
           "text-gray-200",
-          "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50",
+          variant === 'transparent' 
+            ? "hover:bg-stone-600/60" 
+            : "hover:bg-stone-600 hover:shadow-md hover:border-stone-500/50",
           active && "bg-stone-700 shadow-sm border-stone-600",
         ],
         isDark && isDisabled && ["text-gray-500"],

@@ -18,6 +18,7 @@ import { DropdownMenuV2 } from "@components/ui/dropdown-menu-v2"
 import { TypeWriter } from "@components/ui/typewriter"
 import { usePendingConversationStore } from "@lib/stores/pending-conversation-store"
 import { ConfirmDialog, InputDialog } from '@components/ui'
+import { useThemeColors } from '@lib/hooks/use-theme-colors'
 
 interface SidebarChatListProps {
   isDark: boolean
@@ -37,6 +38,7 @@ export function SidebarChatList({
   const { isExpanded } = useSidebarStore() 
   const isMobile = useMobile()
   const router = useRouter()
+  const { colors } = useThemeColors()
   const { 
     conversations, 
     isLoading: isLoadingConversations, 
@@ -388,17 +390,35 @@ export function SidebarChatList({
   // const showSkeleton = isLoadingConversations && conversations.length === 0 && prevLoadedConversations.length === 0;
   // const showSkeleton = false;
 
+  // --- BEGIN COMMENT ---
+  // 🎯 修复：当没有对话时完全隐藏，与常用应用保持一致
+  // --- END COMMENT ---
+  const hasAnyConversations = pendingChats.length > 0 || visibleUnpinnedChats.length > 0
+  
+  if (!isLoadingConversations && !hasAnyConversations) {
+    return null
+  }
+
   return (
     <>
       <div className="flex flex-col space-y-1">
         {/* --- BEGIN COMMENT ---
-        // 近期对话标题栏 - 移除图标，确保文字靠左贴边
+        // 近期对话粘性标题栏：模仿常用应用的样式，添加粘性定位
         // --- END COMMENT --- */}
         <div className={cn(
-          "flex items-center px-2 py-1 text-xs font-medium font-serif", /* 减小内边距，确保文字靠左贴边 */
-          isDark ? "text-stone-400" : "text-stone-500"
+          "sticky top-0 z-40 flex items-center px-2 py-1 text-xs font-medium font-serif",
+          // --- BEGIN COMMENT ---
+          // 使用与sidebar相同的背景色，确保粘性效果完美
+          // 确保z-index足够高，完全覆盖下方内容
+          // --- END COMMENT ---
+          colors.sidebarBackground.tailwind
         )}>
-          近期对话
+          <span className={cn(
+            "text-xs font-medium font-serif leading-none",
+            isDark ? "text-stone-400" : "text-stone-500"
+          )}>
+            近期对话
+          </span>
         </div>
         
         {/* 显示骨架屏 */}
@@ -406,7 +426,7 @@ export function SidebarChatList({
         
         {/* --- 待处理对话列表 --- */}
         {pendingChats.length > 0 && (
-          <div className="mb-1.5"> {/* 减小底部边距 */}
+          <div className="mb-1.5 pt-1"> {/* 减小底部边距，添加顶部间距 */}
             <div className="space-y-0.5 px-2"> {/* 减小列表项之间的间距 */}
               {pendingChats.map(chat => {
                 const itemIsLoading = chat.pendingStatus === 'creating' || 
@@ -461,7 +481,7 @@ export function SidebarChatList({
         )}
         
         {/* --- 已保存对话列表 --- */}
-        <div>
+        <div className="pt-1"> {/* 添加顶部间距，与粘性标题分离 */}
           <div className="space-y-0.5 px-2"> {/* 减小列表项之间的间距 */}
             {visibleUnpinnedChats.map(chat => {
               // --- BEGIN COMMENT ---
@@ -512,46 +532,9 @@ export function SidebarChatList({
                 );
             })}
             
-            {/* 🎨 优化：查看全部历史按钮 - 保持与列表项对齐 */}
-            {hasMoreChats && (
-              <div className="mt-1">
-                <SidebarListButton
-                  icon={
-                    <Clock className={cn(
-                      "h-4 w-4",
-                      isDark
-                        ? "text-stone-300"
-                        : "text-stone-600"
-                    )} />
-                  }
-                  disableHover={!!openDropdownId}
-                  onClick={() => {
-                    router.push('/chat/recents')
-                  }}
-                  className={cn(
-                    "w-full group font-medium",
-                    // 🎨 现代化样式：更好的对比度和视觉层次
-                    isDark 
-                      ? "text-stone-300 hover:text-white bg-stone-800/40 hover:bg-stone-700/60 border border-stone-700/60 hover:border-stone-600" 
-                      : "text-stone-600 hover:text-stone-800 bg-stone-100/40 hover:bg-stone-200/60 border border-stone-300/60 hover:border-stone-400"
-                  )}
-                >
-                  <div className="flex items-center justify-between w-full">
-                  <span className="text-xs font-medium font-serif">查看全部历史</span>
-                    <div className={cn(
-                      "w-4 h-4 flex items-center justify-center rounded transition-all duration-200",
-                      isDark
-                        ? "text-stone-400 group-hover:text-stone-300"
-                        : "text-stone-500 group-hover:text-stone-600"
-                    )}>
-                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                </SidebarListButton>
-              </div>
-            )}
+            {/* --- BEGIN COMMENT ---
+            🎯 移除查看全部历史按钮，已提升到Header区域
+            --- END COMMENT --- */}
           </div>
         </div>
       </div>

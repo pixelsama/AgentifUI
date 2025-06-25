@@ -100,18 +100,14 @@ export function SidebarContent() {
 
   return (
     <div className="relative flex-1 overflow-hidden">
-      {/* Top Divider - Animates opacity based on contentVisible, add invisible for robust hiding */}
-      <div className={cn(
-        "absolute top-0 left-0 right-0 h-px z-10",
-        "transition-opacity duration-150 ease-in-out",
-        isDark ? "bg-gray-700/60" : "bg-gray-200/50",
-        contentVisible ? "opacity-100" : "opacity-0 invisible"
-      )} />
+      {/* --- BEGIN COMMENT ---
+      删除顶部分割线：移除dark模式下的横线分割
+      --- END COMMENT --- */}
       
       {/* Scrollable Content Area */}
       <div
         className={cn(
-          "absolute inset-0 flex flex-col overflow-y-auto pb-4 pt-4",
+          "absolute inset-0 flex flex-col overflow-y-auto pb-4",
           "scrollbar-thin scrollbar-track-transparent",
           isDark ? "scrollbar-thumb-gray-600" : "scrollbar-thumb-accent",
           // 在移动端上不应用动画效果，直接显示
@@ -129,16 +125,18 @@ export function SidebarContent() {
             : "hidden" // 折叠时直接隐藏
         )}
       >
-        {/* 常用应用区域 */}
-        <div className="mb-4">
-          <SidebarFavoriteApps 
-            isDark={isDark ?? false}
-            contentVisible={contentVisible}
-          />
-        </div>
+        {/* --- BEGIN COMMENT ---
+        常用应用区域：直接放置，无额外包装，支持粘性滚动
+        --- END COMMENT --- */}
+        <SidebarFavoriteApps 
+          isDark={isDark ?? false}
+          contentVisible={contentVisible}
+        />
 
-        {/* 对话列表区域 */}
-        <div className="flex-1 min-h-0">
+        {/* --- BEGIN COMMENT ---
+        对话列表区域：添加顶部间距，与常用应用分开
+        --- END COMMENT --- */}
+        <div className="flex-1 min-h-0 mt-4">
           <SidebarChatList 
             isDark={isDark ?? false}
             contentVisible={contentVisible}
@@ -149,13 +147,9 @@ export function SidebarContent() {
         </div>
       </div>
 
-      {/* Bottom Divider - Animates opacity based on contentVisible, add invisible for robust hiding */}
-      <div className={cn(
-        "absolute bottom-0 left-0 right-0 h-px z-10",
-        "transition-opacity duration-150 ease-in-out",
-        isDark ? "bg-gray-700/60" : "bg-gray-200/50",
-        contentVisible ? "opacity-100" : "opacity-0 invisible"
-      )} />
+      {/* --- BEGIN COMMENT ---
+      删除底部分割线：移除dark模式下的横线分割
+      --- END COMMENT --- */}
     </div>
   )
 } 
