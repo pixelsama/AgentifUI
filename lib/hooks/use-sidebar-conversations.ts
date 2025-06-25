@@ -20,7 +20,7 @@ const supabase = createClient();
  * @param limit 每页数量，默认20
  * @returns 会话列表、加载状态、错误信息和操作函数
  */
-export function useSidebarConversations(limit: number = 5) {
+export function useSidebarConversations(limit: number = 20) {
   // --- BEGIN COMMENT ---
   // 状态定义，使用更简化的状态管理
   // --- END COMMENT ---

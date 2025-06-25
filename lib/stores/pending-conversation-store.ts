@@ -356,7 +356,7 @@ export const usePendingConversationStore = create<PendingConversationState>((set
   // 🎯 新增：智能添加临时对话，支持"挤出"第五个对话的动态效果
   // 当对话总数达到限制时，自动移除最老的对话
   // --- END COMMENT ---
-  addPendingWithLimit: (tempId: string, initialTitle = "创建中...", maxConversations = 5, onNeedEviction) => {
+    addPendingWithLimit: (tempId: string, initialTitle = "创建中...", maxConversations = 20, onNeedEviction) => {
     set((state) => {
       const newMap = new Map(state.pendingConversations);
       

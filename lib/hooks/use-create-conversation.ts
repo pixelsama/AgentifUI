@@ -98,7 +98,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
       // --- BEGIN COMMENT ---
       // 🎯 使用新的addPendingWithLimit方法，支持自动"挤出"效果
       // --- END COMMENT ---
-      addPendingWithLimit(tempConvId, "创建中...", 5, (evictedCount) => {
+      addPendingWithLimit(tempConvId, "创建中...", 20, (evictedCount) => {
         console.log(`[useCreateConversation] 新对话创建触发挤出效果，预计挤出${evictedCount}个对话`);
         // 这里可以添加动画效果或通知用户
       }); 

@@ -111,16 +111,16 @@ export function SidebarChatList({
   }, [displayConversations]);
   
   // --- BEGIN COMMENT ---
-  // 使用数据库中的历史对话，默认已经限制为5个
-  // 使用 useSidebarConversations 获取的对话列表已经限制为5个
+  // 使用数据库中的历史对话，默认已经限制为20个
+  // 使用 useSidebarConversations 获取的对话列表已经限制为20个
   // --- END COMMENT ---
   const visibleUnpinnedChats = unpinnedChats;
   
   // --- BEGIN COMMENT ---
-  // 判断是否有更多历史对话（超过5个）
+  // 判断是否有更多历史对话（超过20个）
   // 使用 useCombinedConversations 返回的 total 属性
   // --- END COMMENT ---
-  const hasMoreChats = displayConversations.length === 5 || unpinnedChats.length === 5;
+  const hasMoreChats = displayConversations.length === 20 || unpinnedChats.length === 20;
   
   const handleRename = React.useCallback(async (chatId: string) => {
     const conversation = conversations.find(c => c.id === chatId);

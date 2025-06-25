@@ -51,14 +51,14 @@ export interface CombinedConversation extends Partial<Conversation> {
  */
 export function useCombinedConversations() {
   // --- BEGIN COMMENT ---
-  // 🎯 挤出机制：获取6个数据库对话，这样当有新对话创建时，总数会超过5个，触发挤出逻辑
+  // 🎯 挤出机制：获取20个数据库对话，这样当有新对话创建时，总数会超过20个，触发挤出逻辑
   // --- END COMMENT ---
   const {
     conversations: dbConversations,
     isLoading: isDbLoading,
     error: dbError,
     refresh: refreshDbConversations
-  } = useSidebarConversations(6);
+  } = useSidebarConversations(20);
 
   // --- BEGIN COMMENT ---
   // 获取当前登录用户ID
@@ -171,12 +171,12 @@ export function useCombinedConversations() {
     });
 
     // --- BEGIN COMMENT ---
-    // 🎯 新增：限制总对话数量为5个，实现"挤出"效果
+    // 🎯 新增：限制总对话数量为20个，实现"挤出"效果
     // 当有新的临时对话时，自动移除超出限制的最老对话
     // --- END COMMENT ---
-    const MAX_CONVERSATIONS = 5;
+    const MAX_CONVERSATIONS = 20;
     if (finalConversations.length > MAX_CONVERSATIONS) {
-      // 保留前5个对话（包括活跃的临时对话）
+      // 保留前20个对话（包括活跃的临时对话）
       const keptConversations = finalConversations.slice(0, MAX_CONVERSATIONS);
       const evictedConversations = finalConversations.slice(MAX_CONVERSATIONS);
       
