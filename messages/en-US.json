@@ -196,7 +196,11 @@
         }
       },
       "buttonText": "Start Exploring",
-      "copyright": "© {year} AgentifUI. Explore the future of large model applications."
+      "copyright": {
+        "prefix": "© {year} ",
+        "linkText": "AgentifUI",
+        "suffix": ". Explore the future of large model applications."
+      }
     }
   },
   "errors": {

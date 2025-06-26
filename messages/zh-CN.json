@@ -196,7 +196,11 @@
         }
       },
       "buttonText": "开始探索",
-      "copyright": "© {year} AgentifUI. 探索大模型应用的未来。"
+      "copyright": {
+        "prefix": "© {year} ",
+        "linkText": "AgentifUI",
+        "suffix": ". 探索大模型应用的未来。"
+      }
     }
   },
   "errors": {

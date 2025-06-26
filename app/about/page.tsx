@@ -281,7 +281,16 @@ export default function AboutPage() {
           )}
         >
           <p>
-            {t('copyright', { year: new Date().getFullYear() })}
+            {t('copyright.prefix', { year: new Date().getFullYear() })}
+            <a 
+              href="https://github.com/ifLabX/AgentifUI"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline hover:opacity-80 transition-all duration-200"
+            >
+              {t('copyright.linkText')}
+            </a>
+            {t('copyright.suffix')}
           </p>
         </motion.div>
       </div>
