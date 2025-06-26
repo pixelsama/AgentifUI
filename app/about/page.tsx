@@ -6,16 +6,15 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@components/ui/button';
 import { createClient } from '@lib/supabase/client';
 import { useTheme } from '@lib/hooks/use-theme';
-import { getAboutConfig, defaultAboutConfig, type AboutPageConfig } from '@lib/config/about-config';
+import { useTranslations } from 'next-intl';
 import { cn } from '@lib/utils';
 
 export default function AboutPage() {
   const router = useRouter();
   const { isDark } = useTheme();
+  const t = useTranslations('pages.about');
   const [mounted, setMounted] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [aboutConfig, setAboutConfig] = useState<AboutPageConfig>(defaultAboutConfig);
-  const [configLoaded, setConfigLoaded] = useState(false);
   
   // 确保客户端渲染一致性
   useEffect(() => {
@@ -96,26 +95,13 @@ export default function AboutPage() {
       setCurrentUser(user);
     };
 
-    const loadConfig = async () => {
-      try {
-        const config = await getAboutConfig();
-        setAboutConfig(config);
-      } catch (error) {
-        console.error('Failed to load about config:', error);
-        // 加载失败时使用默认配置
-      } finally {
-        setConfigLoaded(true);
-      }
-    };
-
     checkUser();
-    loadConfig();
   }, []);
 
   // --- BEGIN COMMENT ---
-  // 在配置加载完成和客户端挂载完成前显示加载状态，避免时序问题
+  // 在客户端挂载完成前显示加载状态，避免时序问题
   // --- END COMMENT ---
-  if (!mounted || !configLoaded) {
+  if (!mounted) {
     return (
       <main className="min-h-screen w-full py-4 px-4 sm:py-6 sm:px-6 lg:px-8 overflow-x-hidden">
         <div className="max-w-5xl mx-auto">
@@ -124,13 +110,39 @@ export default function AboutPage() {
               "text-lg",
               isDark ? "text-stone-400" : "text-stone-600"
             )}>
-              加载中...
+              {t('loading')}
             </div>
           </div>
         </div>
       </main>
     );
   }
+
+  // --- BEGIN COMMENT ---
+  // 构建价值观卡片数据
+  // --- END COMMENT ---
+  const valueCards = [
+    {
+      id: 'innovation',
+      title: t('values.items.innovation.title'),
+      description: t('values.items.innovation.description')
+    },
+    {
+      id: 'security',
+      title: t('values.items.security.title'),
+      description: t('values.items.security.description')
+    },
+    {
+      id: 'flexibility',
+      title: t('values.items.flexibility.title'),
+      description: t('values.items.flexibility.description')
+    },
+    {
+      id: 'knowledge',
+      title: t('values.items.knowledge.title'),
+      description: t('values.items.knowledge.description')
+    }
+  ];
 
   return (
     <main className="min-h-screen w-full py-4 px-4 sm:py-6 sm:px-6 lg:px-8 overflow-x-hidden">
@@ -152,7 +164,7 @@ export default function AboutPage() {
               `${colors.titleGradient}`
             )}
           >
-            {aboutConfig.title}
+            {t('title')}
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -164,7 +176,7 @@ export default function AboutPage() {
               colors.textColor
             )}
           >
-            {aboutConfig.subtitle}
+            {t('subtitle')}
           </motion.p>
         </motion.section>
 
@@ -180,13 +192,13 @@ export default function AboutPage() {
             "text-xl sm:text-2xl",
             colors.headingColor
           )}>
-            我们的使命
+            {t('mission.title')}
           </h2>
           <p className={cn(
             "text-sm sm:text-base lg:text-lg leading-relaxed",
             colors.paragraphColor
           )}>
-            {aboutConfig.mission}
+            {t('mission.description')}
           </p>
         </motion.section>
 
@@ -202,10 +214,10 @@ export default function AboutPage() {
             "text-xl sm:text-2xl",
             colors.headingColor
           )}>
-            我们的价值观
+            {t('values.title')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {aboutConfig.valueCards.map((value, index) => (
+            {valueCards.map((value, index) => (
               <motion.div 
                 key={value.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -253,7 +265,7 @@ export default function AboutPage() {
             )}
             onClick={handleExploreClick}
           >
-            {aboutConfig.buttonText}
+            {t('buttonText')}
           </Button>
         </motion.section>
         
@@ -269,7 +281,7 @@ export default function AboutPage() {
           )}
         >
           <p>
-            {aboutConfig.copyrightText}
+            {t('copyright', { year: new Date().getFullYear() })}
           </p>
         </motion.div>
       </div>
