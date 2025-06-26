@@ -212,6 +212,54 @@
     "serverError": "Error del servidor",
     "unauthorized": "Acceso no autorizado"
   },
+  "navbar": {
+    "user": {
+      "userMenu": "Menú de Usuario",
+      "login": "Iniciar Sesión",
+      "logout": "Cerrar Sesión",
+      "loggingOut": "Cerrando sesión...",
+      "register": "Crear Cuenta",
+      "history": "Historial de Chat",
+      "settings": "Configuración",
+      "about": "Acerca de",
+      "admin": "Panel de Administración",
+      "noOrganization": "Sin organización",
+      "loginPrompt": "Inicia sesión para acceder a más funciones",
+      "loginDescription": "Accede a tu historial de chat y configuración personal"
+    },
+    "conversation": {
+      "newChat": "Nuevo Chat",
+      "creating": "Creando...",
+      "loading": "Cargando...",
+      "rename": "Renombrar",
+      "delete": "Eliminar",
+      "star": "Agregar a Favoritos",
+      "unstar": "Quitar de Favoritos",
+      "appsMarket": "Mercado de Apps",
+      "renameDialog": {
+        "title": "Renombrar Conversación",
+        "placeholder": "Introduce el nuevo nombre de la conversación",
+        "confirm": "Confirmar Renombrar"
+      },
+      "deleteDialog": {
+        "title": "Eliminar Conversación",
+        "message": "¿Estás seguro de que quieres eliminar la conversación \"{title}\"? Esta acción no se puede deshacer.",
+        "confirm": "Confirmar Eliminación"
+      },
+      "createInProgress": "La conversación se está creando, inténtalo de nuevo más tarde.",
+      "incompleteInfo": "La información de la conversación está incompleta, no se puede continuar.",
+      "renameFailed": "Error al renombrar la conversación.",
+      "deleteFailed": "Error al eliminar la conversación.",
+      "operationError": "Error en la operación, inténtalo de nuevo más tarde."
+    },
+    "workflow": {
+      "history": "Historial",
+      "closeHistory": "Cerrar Historial",
+      "viewHistory": "Ver Historial",
+      "closeHistoryShort": "Cerrar Historial",
+      "historyShort": "Historial"
+    }
+  },
   "sidebar": {
     "expand": "Expandir",
     "collapse": "Contraer",

@@ -4,6 +4,7 @@ import React, { useRef } from "react"
 import { cn } from "@lib/utils"
 import { User } from "lucide-react" // 默认图标
 import { useDropdownStore } from "@lib/stores/ui/dropdown-store"
+import { useTranslations } from 'next-intl'
 
 interface UserAvatarDisplayProps {
   // 未来可以传入 src 用于显示图片头像
@@ -20,13 +21,17 @@ interface UserAvatarDisplayProps {
  * 设计风格与应用的石色(stone)主题保持一致，同时有足够对比度
  */
 export function AvatarButton({ 
-  alt = "用户头像", 
+  alt, 
   onClick,
   dropdownId,
   isDark // 接收 isDark prop
 }: UserAvatarDisplayProps) {
+  const t = useTranslations('navbar.user')
   const avatarRef = useRef<HTMLButtonElement>(null)
   const { toggleDropdown, isOpen, activeDropdownId } = useDropdownStore()
+  
+  // 使用翻译作为默认值
+  const defaultAlt = alt || t('userMenu')
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
@@ -91,7 +96,7 @@ export function AvatarButton({
         "mt-1", // 保持上边距
         "cursor-pointer hover:scale-105" // 添加悬停指针和缩放效果
       )}
-      aria-label={alt}
+      aria-label={defaultAlt}
       data-more-button-id={`${dropdownId}-trigger`}
     >
       {/* 未来可以替换为 <Image /> 组件显示用户头像 */}

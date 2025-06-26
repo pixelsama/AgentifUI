@@ -6,6 +6,7 @@ import { useThemeColors } from "@lib/hooks/use-theme-colors";
 import { useLogout } from "@lib/hooks/use-logout";
 import { useProfile } from "@lib/hooks/use-profile";
 import { useRouter } from "next/navigation";
+import { useTranslations } from 'next-intl';
 import { Settings, LogOut, Clock, UserCircle, Info, Shield, Sliders, Wrench } from "lucide-react";
 
 // 直接从localStorage获取主题设置
@@ -32,6 +33,7 @@ export function DesktopUserAvatar() {
     const { colors, isDark } = useThemeColors();
     const { logout } = useLogout();
     const router = useRouter();
+    const t = useTranslations('navbar.user');
     
     // 使用useProfile hook获取用户信息，自动处理缓存和认证状态同步
     const { profile } = useProfile();
@@ -144,17 +146,17 @@ export function DesktopUserAvatar() {
     const menuItems = [
         {
             icon: Clock,
-            label: "历史对话",
+            label: t('history'),
             action: () => router.push("/chat/history"),
         },
         {
             icon: Sliders,
-            label: "设置",
+            label: t('settings'),
             action: () => router.push("/settings"),
         },
         {
             icon: Info,
-            label: "关于",
+            label: t('about'),
             action: () => router.push("/about"),
         },
     ];
@@ -163,7 +165,7 @@ export function DesktopUserAvatar() {
     const adminMenuItems = [
         {
             icon: Wrench,
-            label: "管理后台",
+            label: t('admin'),
             action: () => router.push("/admin"),
         },
     ];
@@ -174,13 +176,13 @@ export function DesktopUserAvatar() {
         : menuItems;
 
     const isLoggedIn = !!profile;
-    const userName = profile?.full_name || profile?.username || "用户";
+    const userName = profile?.full_name || profile?.username || t('userMenu');
     // --- BEGIN COMMENT ---
     // 格式B显示：企业名称 (部门)，如果没有部门则只显示企业名称
     // --- END COMMENT ---
     const userCompany = profile?.organization?.name 
         ? `${profile.organization.name}${profile?.department ? ` (${profile.department})` : ''}`
-        : "无企业关联";
+        : t('noOrganization');
     const avatarUrl = profile?.avatar_url;
 
     // 使用当前主题状态而不是hook，避免闪烁
@@ -201,7 +203,7 @@ export function DesktopUserAvatar() {
                     alignItems: "center",
                     justifyContent: "center",
                 }}
-                aria-label={isLoggedIn ? "用户菜单" : "登录"}
+                aria-label={isLoggedIn ? t('userMenu') : t('login')}
             >
                 {isLoggedIn ? (
                     <>
@@ -395,7 +397,7 @@ export function DesktopUserAvatar() {
                                 onMouseLeave={() => setHoveredItem(null)}
                             >
                                 <LogOut className="h-4 w-4" />
-                                <span className="text-sm font-serif">退出登录</span>
+                                <span className="text-sm font-serif">{t('logout')}</span>
                             </button>
                         </>
                     ) : (
@@ -416,9 +418,9 @@ export function DesktopUserAvatar() {
                                         color: effectiveTheme ? "#a8a29e" : "#78716c",
                                     }}
                                 />
-                                <p className="font-medium font-serif">登录以使用更多功能</p>
+                                <p className="font-medium font-serif">{t('loginPrompt')}</p>
                                 <p className="text-sm mt-1 opacity-75 font-serif">
-                                    访问您的对话历史和个人设置
+                                    {t('loginDescription')}
                                 </p>
                             </div>
 
@@ -434,7 +436,7 @@ export function DesktopUserAvatar() {
                                     onMouseEnter={() => setHoveredItem("login")}
                                     onMouseLeave={() => setHoveredItem(null)}
                                 >
-                                    登录
+                                    {t('login')}
                                 </button>
 
                                 <button
@@ -452,7 +454,7 @@ export function DesktopUserAvatar() {
                                     onMouseEnter={() => setHoveredItem("register")}
                                     onMouseLeave={() => setHoveredItem(null)}
                                 >
-                                    注册新账户
+                                    {t('register')}
                                 </button>
                             </div>
                         </div>

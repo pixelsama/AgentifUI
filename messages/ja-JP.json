@@ -165,8 +165,8 @@
       }
     },
     "admin": {
-      "title": "管理ダッシュボード",
-      "users": "ユーザー管理",
+      "title": "管理パネル",
+      "users": "ユーザー管理", 
       "organizations": "組織管理",
       "analytics": "分析"
     },
@@ -211,6 +211,54 @@
     "notFound": "ページが見つかりません",
     "serverError": "サーバーエラー",
     "unauthorized": "未認証アクセス"
+  },
+  "navbar": {
+    "user": {
+      "userMenu": "ユーザーメニュー",
+      "login": "ログイン",
+      "logout": "ログアウト",
+      "loggingOut": "ログアウト中...",
+      "register": "アカウント作成",
+      "history": "チャット履歴",
+      "settings": "設定",
+      "about": "について",
+      "admin": "管理パネル",
+      "noOrganization": "組織なし",
+      "loginPrompt": "ログインしてより多くの機能をご利用ください",
+      "loginDescription": "チャット履歴と個人設定にアクセス"
+    },
+    "conversation": {
+      "newChat": "新しいチャット",
+      "creating": "作成中...",
+      "loading": "読み込み中...",
+      "rename": "名前を変更",
+      "delete": "削除",
+      "star": "お気に入りに追加",
+      "unstar": "お気に入りから削除",
+      "appsMarket": "アプリマーケット",
+      "renameDialog": {
+        "title": "会話の名前を変更",
+        "placeholder": "新しい会話名を入力",
+        "confirm": "名前変更を確認"
+      },
+      "deleteDialog": {
+        "title": "会話を削除",
+        "message": "会話 \"{title}\" を削除してもよろしいですか？この操作は元に戻せません。",
+        "confirm": "削除を確認"
+      },
+      "createInProgress": "会話を作成中です。後でもう一度お試しください。",
+      "incompleteInfo": "会話情報が不完全です。操作を続行できません。",
+      "renameFailed": "会話の名前変更に失敗しました。",
+      "deleteFailed": "会話の削除に失敗しました。",
+      "operationError": "操作に失敗しました。後でもう一度お試しください。"
+    },
+    "workflow": {
+      "history": "履歴",
+      "closeHistory": "履歴を閉じる",
+      "viewHistory": "履歴を表示",
+      "closeHistoryShort": "履歴を閉じる",
+      "historyShort": "履歴"
+    }
   },
   "sidebar": {
     "expand": "展開",

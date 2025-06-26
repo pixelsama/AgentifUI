@@ -19,6 +19,7 @@ import { useFavoriteAppsStore } from '@lib/stores/favorite-apps-store';
 // 导入聊天接口Hook以获取对话关联的应用ID
 // --- END COMMENT ---
 import { useChatInterface } from '@lib/hooks/use-chat-interface';
+import { useTranslations } from 'next-intl';
 
 interface ConversationTitleButtonProps {
   className?: string;
@@ -31,6 +32,7 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
   const { currentConversationId } = useChatStore();
   const { isExpanded, selectItem } = useSidebarStore();
   const { conversations, refresh } = useCombinedConversations();
+  const t = useTranslations('navbar.conversation');
   // --- BEGIN COMMENT ---
   // 🎯 新增：获取完整对话列表，用于查找历史对话标题
   // --- END COMMENT ---
@@ -157,7 +159,7 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
   const getDisplayTitle = () => {
     // 🎯 新增：处理对话创建中的状态
     if (!finalConversation) {
-      return conversationAppId ? '创建中...' : '新对话';
+      return conversationAppId ? t('creating') : t('newChat');
     }
     
     // 检查是否需要显示打字机效果
@@ -166,7 +168,7 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
       
       // 如果正在打字，显示当前打字进度
       if (typewriterState.isTyping) {
-        return typewriterState.displayTitle || finalConversation.title || '新对话';
+        return typewriterState.displayTitle || finalConversation.title || t('newChat');
       }
       
       // 如果打字完成，显示目标标题
@@ -176,7 +178,7 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
     }
     
     // 默认显示对话标题
-    return finalConversation.title || '新对话';
+    return finalConversation.title || t('newChat');
   };
   
   const conversationTitle = getDisplayTitle();
@@ -196,14 +198,14 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
 
   const handleRenameConfirm = async (newTitle: string) => {
     if (!currentConversationId || !finalConversation) {
-      alert("对话正在创建中，请稍后再试。");
+      alert(t('createInProgress'));
       setShowRenameDialog(false);
       return;
     }
     
     const supabasePK = finalConversation?.supabase_pk;
     if (!supabasePK) {
-      alert("对话信息不完整，无法重命名。");
+      alert(t('incompleteInfo'));
       setShowRenameDialog(false);
       return;
     }
@@ -231,11 +233,11 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
         setShowRenameDialog(false);
       } else {
         console.error('重命名对话失败:', result.error);
-        alert('重命名会话失败。');
+        alert(t('renameFailed'));
       }
     } catch (error) {
       console.error('重命名对话操作出错:', error);
-      alert('操作出错，请稍后再试。');
+      alert(t('operationError'));
     } finally {
       setIsOperating(false);
     }
@@ -251,14 +253,14 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
 
   const handleDeleteConfirm = async () => {
     if (!currentConversationId || !finalConversation) {
-      alert("对话正在创建中，请稍后再试。");
+      alert(t('createInProgress'));
       setShowDeleteDialog(false);
       return;
     }
     
     const supabasePK = finalConversation?.supabase_pk;
     if (!supabasePK) {
-      alert("对话信息不完整，无法删除。");
+      alert(t('incompleteInfo'));
       setShowDeleteDialog(false);
       return;
     }
@@ -279,11 +281,11 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
         window.location.href = '/chat/new';
       } else {
         console.error('删除对话失败:', result.error);
-        alert('删除会话失败。');
+        alert(t('deleteFailed'));
       }
     } catch (error) {
       console.error('删除对话操作出错:', error);
-      alert('操作出错，请稍后再试。');
+      alert(t('operationError'));
     } finally {
       setIsOperating(false);
       setShowDeleteDialog(false);
@@ -404,7 +406,7 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
               : "hover:bg-stone-200 text-stone-600 hover:text-stone-900"
           )}
         >
-          应用市场
+          {t('appsMarket')}
         </button>
       </div>
     );
@@ -461,7 +463,7 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
                   "w-3 h-3 rounded-full animate-pulse mr-2 inline-block",
                   isDark ? "bg-stone-500" : "bg-stone-400"
                 )} />
-                加载中...
+                {t('loading')}
               </>
             ) : (
               conversationTitle
@@ -536,7 +538,7 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
                 )}
               >
                 <Pen className="w-4 h-4 flex-shrink-0" />
-                <span>重命名</span>
+                <span>{t('rename')}</span>
               </button>
               
               {/* 删除选项 */}
@@ -559,7 +561,7 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
                 )}
               >
                 <Trash className="w-4 h-4 flex-shrink-0" />
-                <span>删除对话</span>
+                <span>{t('delete')}</span>
               </button>
             </div>
           </>
@@ -573,11 +575,11 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
         isOpen={showRenameDialog}
         onClose={() => !isOperating && setShowRenameDialog(false)}
         onConfirm={handleRenameConfirm}
-        title="重命名对话"
-        label="对话名称"
-        placeholder="输入新的对话名称"
+        title={t('renameDialog.title')}
+        label={t('renameDialog.title')}
+        placeholder={t('renameDialog.placeholder')}
         defaultValue={conversationTitle}
-        confirmText="确认重命名"
+        confirmText={t('renameDialog.confirm')}
         isLoading={isOperating}
         maxLength={50}
       />
@@ -589,9 +591,9 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
         isOpen={showDeleteDialog}
         onClose={() => !isOperating && setShowDeleteDialog(false)}
         onConfirm={handleDeleteConfirm}
-        title="删除对话"
-        message={`确定要删除会话 "${conversationTitle}" 吗？此操作无法撤销。`}
-        confirmText="确认删除"
+        title={t('deleteDialog.title')}
+        message={t('deleteDialog.message', { title: conversationTitle })}
+        confirmText={t('deleteDialog.confirm')}
         variant="danger"
         icon="delete"
         isLoading={isOperating}

@@ -165,8 +165,8 @@
       }
     },
     "admin": {
-      "title": "Admin Dashboard",
-      "users": "User Management",
+      "title": "Admin Panel",
+      "users": "User Management", 
       "organizations": "Organization Management",
       "analytics": "Analytics"
     },
@@ -211,6 +211,54 @@
     "notFound": "Page not found",
     "serverError": "Server error",
     "unauthorized": "Unauthorized access"
+  },
+  "navbar": {
+    "user": {
+      "userMenu": "User Menu",
+      "login": "Login",
+      "logout": "Logout",
+      "loggingOut": "Signing out...",
+      "register": "Create Account",
+      "history": "Chat History",
+      "settings": "Settings",
+      "about": "About",
+      "admin": "Admin Panel",
+      "noOrganization": "No organization",
+      "loginPrompt": "Login to access more features",
+      "loginDescription": "Access your chat history and personal settings"
+    },
+    "conversation": {
+      "newChat": "New Chat",
+      "creating": "Creating...",
+      "loading": "Loading...",
+      "rename": "Rename",
+      "delete": "Delete",
+      "star": "Add to Favorites",
+      "unstar": "Remove from Favorites",
+      "appsMarket": "Apps Market",
+      "renameDialog": {
+        "title": "Rename Conversation",
+        "placeholder": "Enter new conversation name",
+        "confirm": "Confirm Rename"
+      },
+      "deleteDialog": {
+        "title": "Delete Conversation",
+        "message": "Are you sure you want to delete conversation \"{title}\"? This action cannot be undone.",
+        "confirm": "Confirm Delete"
+      },
+      "createInProgress": "Conversation is being created, please try again later.",
+      "incompleteInfo": "Conversation information is incomplete, cannot proceed.",
+      "renameFailed": "Failed to rename conversation.",
+      "deleteFailed": "Failed to delete conversation.",
+      "operationError": "Operation failed, please try again later."
+    },
+    "workflow": {
+      "history": "History",
+      "closeHistory": "Close History",
+      "viewHistory": "View History",
+      "closeHistoryShort": "Close History",
+      "historyShort": "History"
+    }
   },
   "sidebar": {
     "expand": "Expand",

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@lib/utils"
 import { useTheme } from "@lib/hooks/use-theme"
 import { useWorkflowHistoryStore } from "@lib/stores/workflow-history-store"
+import { useTranslations } from 'next-intl'
 import { History } from "lucide-react"
 
 /**
@@ -16,6 +17,7 @@ export function WorkflowHistoryButton() {
   const { isDark } = useTheme()
   const pathname = usePathname()
   const { showHistory, toggleHistory } = useWorkflowHistoryStore()
+  const t = useTranslations('navbar.workflow')
   
   // 检查是否在工作流或文本生成页面
   const isWorkflowPage = pathname?.includes('/apps/workflow/') || pathname?.includes('/apps/text-generation/')
@@ -38,11 +40,11 @@ export function WorkflowHistoryButton() {
             ? "text-stone-300 hover:text-stone-100 hover:bg-stone-700/80 border border-stone-600"
             : "text-stone-700 hover:text-stone-900 hover:bg-stone-100 border border-stone-300"
       )}
-      title={showHistory ? "关闭历史记录" : "查看历史记录"}
+      title={showHistory ? t('closeHistory') : t('viewHistory')}
     >
       <History className="h-4 w-4" />
       <span className="hidden sm:inline">
-        {showHistory ? "关闭历史" : "历史记录"}
+        {showHistory ? t('closeHistoryShort') : t('historyShort')}
       </span>
     </button>
   )
