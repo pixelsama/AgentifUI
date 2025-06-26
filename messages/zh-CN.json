@@ -44,7 +44,11 @@
           "description": "支持私有化部署，保障数据安全，基于Dify后端提供稳定可靠的服务"
         }
       },
-      "copyright": "© {year} AgentifUI. 探索AI的无限可能。"
+      "copyright": {
+        "prefix": "© {year} ",
+        "linkText": "AgentifUI",
+        "suffix": ". 探索AI的无限可能。"
+      }
     },
     "chat": {
       "newChat": "新对话",

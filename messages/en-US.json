@@ -44,7 +44,11 @@
           "description": "Support for private deployment, ensuring data security, providing stable and reliable services based on Dify backend"
         }
       },
-      "copyright": "© {year} AgentifUI. Explore the infinite possibilities of AI."
+      "copyright": {
+        "prefix": "© {year} ",
+        "linkText": "AgentifUI",
+        "suffix": ". Explore the infinite possibilities of AI."
+      }
     },
     "chat": {
       "newChat": "New Chat",
