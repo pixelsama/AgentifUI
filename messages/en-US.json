@@ -1,27 +1,9 @@
 {
   "common": {
     "ui": {
-      "submit": "Submit",
       "cancel": "Cancel",
-      "save": "Save",
-      "delete": "Delete",
-      "edit": "Edit",
-      "close": "Close",
       "back": "Back",
-      "next": "Next",
-      "search": "Search",
       "loading": "Loading..."
-    },
-    "navigation": {
-      "home": "Home",
-      "chat": "Chat",
-      "apps": "Apps",
-      "admin": "Admin",
-      "settings": "Settings",
-      "about": "About",
-      "login": "Login",
-      "logout": "Logout",
-      "register": "Register"
     }
   },
   "pages": {
