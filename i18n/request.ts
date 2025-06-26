@@ -17,6 +17,15 @@ export default getRequestConfig(async () => {
 
   return {
     locale: finalLocale,
-    messages: (await import(`../messages/${finalLocale}.json`)).default
+    messages: (await import(`../messages/${finalLocale}.json`)).default,
+    // --- BEGIN COMMENT ---
+    // 提供统一的当前时间，避免服务端客户端不一致的hydration问题
+    // 这是next-intl推荐的做法，确保日期格式化的一致性
+    // --- END COMMENT ---
+    now: new Date()
+    // --- BEGIN COMMENT ---
+    // 时区处理：不在这里硬编码时区，让format.dateTime使用用户的本地时区
+    // 如果需要特定时区，可以在组件中通过timeZone参数指定
+    // --- END COMMENT ---
   };
 }); 

@@ -14,16 +14,10 @@ interface WelcomeScreenProps {
   username?: string | null
 }
 
-// 北京时间获取方式
+// 根据用户本地时间获取问候语
 const getTimeBasedGreeting = (t: (key: string) => string) => {
   const now = new Date();
-  const beijingTime = new Intl.DateTimeFormat('zh-CN', {
-    timeZone: 'Asia/Shanghai',
-    hour: 'numeric',
-    hour12: false
-  }).format(now);
-  
-  const hour = parseInt(beijingTime);
+  const hour = now.getHours();
   
   if (hour >= 6 && hour < 12) {
     return t('greeting.morning');

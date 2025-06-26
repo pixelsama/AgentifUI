@@ -9,7 +9,7 @@ import { Profile as ExtendedProfile } from "@lib/hooks/use-profile";
 import { updateUserProfile } from "@lib/db/profiles";
 import { updateProfileCache } from "@lib/hooks/use-profile";
 import { User, Mail, AtSign, Calendar, Check, AlertCircle, Building2 } from "lucide-react";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useFormatter } from 'next-intl';
 
 // --- BEGIN COMMENT ---
 // 个人资料表单组件
@@ -27,6 +27,7 @@ interface ProfileFormProps {
 export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
   const { colors, isDark } = useSettingsColors();
   const t = useTranslations('pages.settings.profileSettings');
+  const format = useFormatter();
   
   // --- BEGIN COMMENT ---
   // 检查是否为SSO单点登录模式
@@ -134,22 +135,24 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
 
   // --- BEGIN COMMENT ---
   // 格式化日期显示
-  // 根据当前语言环境动态选择本地化格式
+  // 使用next-intl的useFormatter钩子，实现真正的国际化日期格式化
+  // 自动根据当前语言环境选择合适的格式，无需硬编码
   // --- END COMMENT ---
   const formatDate = (dateString: string | null) => {
     if (!dateString) return t('status.notRecorded');
-    const date = new Date(dateString);
     
-    // 根据当前语言环境选择合适的本地化格式
-    const locale = typeof window !== 'undefined' 
-      ? (document.cookie.includes('NEXT_LOCALE=en-US') ? 'en-US' : 'zh-CN')
-      : 'zh-CN';
-    
-    return date.toLocaleDateString(locale, {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    try {
+      const date = new Date(dateString);
+      // 使用next-intl的dateTime格式化，会根据当前locale自动选择合适的格式
+      return format.dateTime(date, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.warn('日期格式化失败:', error);
+      return t('status.notRecorded');
+    }
   };
 
   return (
