@@ -26,6 +26,18 @@ export const SUPPORTED_LANGUAGES = {
     nativeName: 'English',
     flag: '🇺🇸',
     code: 'en-US'
+  },
+  'es-ES': {
+    name: 'Spanish (Spain)',
+    nativeName: 'Español',
+    flag: '🇪🇸',
+    code: 'es-ES'
+  },
+  'ja-JP': {
+    name: 'Japanese',
+    nativeName: '日本語',
+    flag: '🇯🇵',
+    code: 'ja-JP'
   }
 } as const;
 

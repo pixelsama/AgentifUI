@@ -1,0 +1,249 @@
+{
+  "common": {
+    "ui": {
+      "submit": "Enviar",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "close": "Cerrar",
+      "back": "Volver",
+      "next": "Siguiente",
+      "search": "Buscar",
+      "loading": "Cargando..."
+    },
+    "navigation": {
+      "home": "Inicio",
+      "chat": "Chat",
+      "apps": "Aplicaciones",
+      "admin": "Administrador",
+      "settings": "Configuración",
+      "about": "Acerca de",
+      "login": "Iniciar sesión",
+      "logout": "Cerrar sesión",
+      "register": "Registrarse"
+    }
+  },
+  "pages": {
+    "home": {
+      "title": "AgentifUI",
+      "subtitle": "Explora las posibilidades infinitas de la IA y crea nuevas experiencias inteligentes",
+      "getStarted": "Comenzar",
+      "learnMore": "Saber más",
+      "features": {
+        "feature1": {
+          "title": "Integración de Modelos Grandes",
+          "description": "Soporte para múltiples proveedores de modelos incluyendo OpenAI, Anthropic, Dify, etc., satisfaciendo diferentes necesidades empresariales"
+        },
+        "feature2": {
+          "title": "Mejora de Conocimiento RAG",
+          "description": "Integra tecnología de Generación Aumentada por Recuperación (RAG) para habilitar bases de conocimiento privadas y conciencia contextual"
+        },
+        "feature3": {
+          "title": "Despliegue Empresarial",
+          "description": "Soporte para despliegue privado, garantizando la seguridad de datos, proporcionando servicios estables y confiables basados en backend Dify"
+        }
+      },
+      "copyright": {
+        "prefix": "© {year} ",
+        "linkText": "AgentifUI",
+        "suffix": ". Explora las posibilidades infinitas de la IA."
+      }
+    },
+    "chat": {
+      "newChat": "Nuevo Chat",
+      "sendMessage": "Enviar",
+      "inputPlaceholder": "Escribe tu mensaje...",
+      "noMessages": "Aún no hay mensajes",
+      "typing": "Escribiendo...",
+      "greeting": {
+        "morning": "Buenos días",
+        "afternoon": "Buenas tardes",
+        "evening": "Buenas tardes",
+        "night": "Se está haciendo tarde"
+      },
+      "recentChats": "Chats Recientes",
+      "historyChats": "Historial de Chats"
+    },
+    "auth": {
+      "loginTitle": "Iniciar Sesión",
+      "registerTitle": "Registrarse",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "noAccount": "¿No tienes una cuenta?",
+      "hasAccount": "¿Ya tienes una cuenta?"
+    },
+    "settings": {
+      "title": "Configuración",
+      "profile": "Perfil",
+      "account": "Cuenta",
+      "appearance": "Apariencia",
+      "language": "Idioma",
+      "navigation": {
+        "overview": "Resumen",
+        "profileNav": "Perfil",
+        "accountNav": "Configuración de Cuenta",
+        "appearanceNav": "Apariencia",
+        "languageNav": "Idioma"
+      },
+      "descriptions": {
+        "overview": "Gestiona tus preferencias personales y personaliza tu experiencia de la aplicación",
+        "profileDesc": "Actualiza información personal, avatar y configuración de cuenta",
+        "accountDesc": "Gestiona la seguridad de tu cuenta e información de inicio de sesión",
+        "appearanceDesc": "Personaliza temas, colores y diseño de interfaz",
+        "languageDesc": "Elige tu idioma de visualización preferido y configuración regional"
+      },
+      "accountSettings": {
+        "title": "Configuración de Cuenta",
+        "accountInfo": "Información de Cuenta",
+        "loginEmail": "Correo de Inicio de Sesión",
+        "authMethod": "Método de Autenticación",
+        "emailPasswordAuth": "Correo y Contraseña",
+        "securitySettings": "Configuración de Seguridad",
+        "logoutAccount": "Cerrar sesión de la cuenta actual",
+        "confirmLogout": "¿Estás seguro de que quieres cerrar sesión?",
+        "confirmLogoutBtn": "Confirmar Cierre de Sesión",
+        "logout": "Cerrar Sesión",
+        "loggingOut": "Cerrando sesión...",
+        "loadAccountError": "Error al cargar información de cuenta",
+        "retry": "Reintentar",
+        "deleteAccount": "Eliminar Cuenta"
+      },
+      "profileSettings": {
+        "title": "Perfil",
+        "accountInfo": "Información de Cuenta",
+        "organization": "Organización",
+        "registrationTime": "Tiempo de Registro",
+        "accountRole": "Rol de Cuenta",
+        "lastLogin": "Último Inicio de Sesión",
+        "editProfile": "Editar Perfil",
+        "name": "Nombre",
+        "nickname": "Nombre de Usuario",
+        "avatarUrl": "URL del Avatar",
+        "profileUpdated": "Perfil actualizado exitosamente",
+        "updateFailed": "Error al actualizar perfil",
+        "saving": "Guardando...",
+        "saveChanges": "Guardar Cambios",
+        "namePlaceholder": "Ingresa tu nombre",
+        "usernamePlaceholder": "Ingresa tu nombre de usuario",
+        "avatarPlaceholder": "Ingresa URL de imagen de avatar",
+        "avatarHint": "Ingresa una URL de imagen válida, se recomiendan imágenes cuadradas",
+        "roles": {
+          "admin": "Administrador",
+          "manager": "Gerente",
+          "user": "Usuario"
+        },
+        "status": {
+          "notRecorded": "No registrado",
+          "notSet": "No establecido",
+          "noOrganization": "Sin organización"
+        },
+        "loadProfileError": "Error al cargar perfil"
+      },
+      "appearanceSettings": {
+        "title": "Configuración de Apariencia",
+        "theme": "Tema",
+        "themeDescription": "Elige tu modo de visualización preferido",
+        "themes": {
+          "light": "Modo Claro",
+          "dark": "Modo Oscuro",
+          "system": "Seguir Sistema"
+        },
+        "preview": {
+          "light": "Claro",
+          "dark": "Oscuro",
+          "system": "Sistema"
+        }
+      },
+      "languageSettings": {
+        "title": "Configuración de Idioma",
+        "language": "Idioma",
+        "languageDescription": "Elige tu idioma de visualización preferido",
+        "currentLanguage": "Idioma Actual",
+        "switchLanguage": "Cambiar Idioma"
+      }
+    },
+    "admin": {
+      "title": "Panel de Administración",
+      "users": "Gestión de Usuarios",
+      "organizations": "Gestión de Organizaciones",
+      "analytics": "Analíticas"
+    },
+    "about": {
+      "title": "Acerca de AgentifUI",
+      "subtitle": "Conectando IA con empresas, creando nuevas experiencias con modelos de lenguaje grandes",
+      "loading": "Cargando...",
+      "mission": {
+        "title": "Nuestra Misión",
+        "description": "AgentifUI se compromete a aprovechar el poder de los modelos de lenguaje grandes para proporcionar soluciones de aplicación innovadoras para empresas. Integramos capacidades de múltiples proveedores de modelos y proporcionamos servicios estables y confiables basados en backend Dify, ayudando a las organizaciones a utilizar completamente el valor de la tecnología IA."
+      },
+      "values": {
+        "title": "Nuestros Valores",
+        "items": {
+          "innovation": {
+            "title": "Innovación Técnica",
+            "description": "Integrar continuamente tecnologías de modelos grandes de vanguardia para proporcionar soluciones IA líderes para empresas"
+          },
+          "security": {
+            "title": "Seguridad de Datos",
+            "description": "Soporte para despliegue privado y medidas estrictas de protección de datos para garantizar la seguridad y privacidad de los datos empresariales"
+          },
+          "flexibility": {
+            "title": "Personalización Flexible",
+            "description": "Proporcionar soluciones altamente personalizables para satisfacer necesidades específicas de diferentes industrias y escenarios"
+          },
+          "knowledge": {
+            "title": "Mejora de Conocimiento",
+            "description": "Integrar bases de conocimiento privadas a través de tecnología RAG para mejorar las capacidades de conciencia contextual del modelo"
+          }
+        }
+      },
+      "buttonText": "Comenzar a Explorar",
+      "copyright": {
+        "prefix": "© {year} ",
+        "linkText": "AgentifUI",
+        "suffix": ". Explora el futuro de las aplicaciones de modelos grandes."
+      }
+    }
+  },
+  "errors": {
+    "notFound": "Página no encontrada",
+    "serverError": "Error del servidor",
+    "unauthorized": "Acceso no autorizado"
+  },
+  "sidebar": {
+    "expand": "Expandir",
+    "collapse": "Contraer",
+    "newChat": "Nuevo Chat",
+    "historyChats": "Historial de Chats",
+    "appsMarket": "Mercado de Aplicaciones",
+    "settings": "Configuración",
+    "recentChats": "Chats Recientes",
+    "moreOptions": "Más Opciones",
+    "rename": "Renombrar",
+    "deleteChat": "Eliminar Chat",
+    "untitled": "Sin título",
+    "creating": "Creando...",
+    "favoriteApps": "Aplicaciones Favoritas",
+    "loading": "Cargando...",
+    "startWorkflow": "Iniciar Flujo de Trabajo",
+    "startTextGeneration": "Iniciar Generación de Texto",
+    "startChat": "Iniciar Chat",
+    "hideApp": "Ocultar Aplicación",
+    "renameDialog": {
+      "title": "Renombrar Conversación",
+      "label": "Nombre de Conversación",
+      "placeholder": "Ingresa nuevo nombre de conversación",
+      "confirmText": "Confirmar Renombrar"
+    },
+    "deleteDialog": {
+      "confirmText": "Confirmar Eliminar",
+      "confirmMessage": "¿Estás seguro de que quieres eliminar la conversación \"{title}\"? Esta acción no se puede deshacer."
+    },
+    "syncingMessage": "Los datos de conversación se están sincronizando, por favor intenta {action} más tarde.",
+    "operationFailed": "Operación fallida, por favor intenta de nuevo más tarde.",
+    "saveFailed": "Error al guardar conversación",
+    "createFailed": "Error al crear conversación"
+  }
+} 

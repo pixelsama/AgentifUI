@@ -1,0 +1,249 @@
+{
+  "common": {
+    "ui": {
+      "submit": "送信",
+      "cancel": "キャンセル",
+      "save": "保存",
+      "delete": "削除",
+      "edit": "編集",
+      "close": "閉じる",
+      "back": "戻る",
+      "next": "次へ",
+      "search": "検索",
+      "loading": "読み込み中..."
+    },
+    "navigation": {
+      "home": "ホーム",
+      "chat": "チャット",
+      "apps": "アプリ",
+      "admin": "管理",
+      "settings": "設定",
+      "about": "について",
+      "login": "ログイン",
+      "logout": "ログアウト",
+      "register": "登録"
+    }
+  },
+  "pages": {
+    "home": {
+      "title": "AgentifUI",
+      "subtitle": "AIの無限の可能性を探求し、インテリジェントな新体験を創造",
+      "getStarted": "始める",
+      "learnMore": "詳しく見る",
+      "features": {
+        "feature1": {
+          "title": "大規模モデル統合",
+          "description": "OpenAI、Anthropic、Difyなど複数のモデルプロバイダーをサポートし、様々な企業ニーズに対応"
+        },
+        "feature2": {
+          "title": "RAG知識強化",
+          "description": "検索拡張生成（RAG）技術を統合し、プライベート知識ベースとコンテキスト認識を実現"
+        },
+        "feature3": {
+          "title": "エンタープライズ展開",
+          "description": "プライベート展開をサポートし、データセキュリティを保証、Difyバックエンドに基づく安定した信頼性の高いサービスを提供"
+        }
+      },
+      "copyright": {
+        "prefix": "© {year} ",
+        "linkText": "AgentifUI",
+        "suffix": "。AIの無限の可能性を探求。"
+      }
+    },
+    "chat": {
+      "newChat": "新しいチャット",
+      "sendMessage": "送信",
+      "inputPlaceholder": "メッセージを入力...",
+      "noMessages": "まだメッセージがありません",
+      "typing": "入力中...",
+      "greeting": {
+        "morning": "おはようございます",
+        "afternoon": "こんにちは",
+        "evening": "こんばんは",
+        "night": "遅い時間ですね"
+      },
+      "recentChats": "最近のチャット",
+      "historyChats": "チャット履歴"
+    },
+    "auth": {
+      "loginTitle": "ログイン",
+      "registerTitle": "登録",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "forgotPassword": "パスワードを忘れましたか？",
+      "noAccount": "アカウントをお持ちでないですか？",
+      "hasAccount": "すでにアカウントをお持ちですか？"
+    },
+    "settings": {
+      "title": "設定",
+      "profile": "プロフィール",
+      "account": "アカウント",
+      "appearance": "外観",
+      "language": "言語",
+      "navigation": {
+        "overview": "概要",
+        "profileNav": "プロフィール",
+        "accountNav": "アカウント設定",
+        "appearanceNav": "外観",
+        "languageNav": "言語"
+      },
+      "descriptions": {
+        "overview": "個人設定を管理し、アプリ体験をカスタマイズ",
+        "profileDesc": "個人情報、アバター、アカウント設定を更新",
+        "accountDesc": "アカウントセキュリティとログイン情報を管理",
+        "appearanceDesc": "テーマ、色、インターフェースレイアウトをカスタマイズ",
+        "languageDesc": "お好みの表示言語と地域設定を選択"
+      },
+      "accountSettings": {
+        "title": "アカウント設定",
+        "accountInfo": "アカウント情報",
+        "loginEmail": "ログインメール",
+        "authMethod": "認証方法",
+        "emailPasswordAuth": "メール・パスワード",
+        "securitySettings": "セキュリティ設定",
+        "logoutAccount": "現在のアカウントからログアウト",
+        "confirmLogout": "本当にログアウトしますか？",
+        "confirmLogoutBtn": "ログアウト確認",
+        "logout": "ログアウト",
+        "loggingOut": "ログアウト中...",
+        "loadAccountError": "アカウント情報の読み込みエラー",
+        "retry": "再試行",
+        "deleteAccount": "アカウント削除"
+      },
+      "profileSettings": {
+        "title": "プロフィール",
+        "accountInfo": "アカウント情報",
+        "organization": "組織",
+        "registrationTime": "登録日時",
+        "accountRole": "アカウント役割",
+        "lastLogin": "最終ログイン",
+        "editProfile": "プロフィール編集",
+        "name": "名前",
+        "nickname": "ユーザー名",
+        "avatarUrl": "アバターURL",
+        "profileUpdated": "プロフィールが正常に更新されました",
+        "updateFailed": "プロフィールの更新に失敗しました",
+        "saving": "保存中...",
+        "saveChanges": "変更を保存",
+        "namePlaceholder": "お名前を入力してください",
+        "usernamePlaceholder": "ユーザー名を入力してください",
+        "avatarPlaceholder": "アバター画像のURLを入力してください",
+        "avatarHint": "有効な画像URLを入力してください。正方形の画像を推奨します",
+        "roles": {
+          "admin": "管理者",
+          "manager": "マネージャー",
+          "user": "ユーザー"
+        },
+        "status": {
+          "notRecorded": "未記録",
+          "notSet": "未設定",
+          "noOrganization": "組織なし"
+        },
+        "loadProfileError": "プロフィールの読み込みエラー"
+      },
+      "appearanceSettings": {
+        "title": "外観設定",
+        "theme": "テーマ",
+        "themeDescription": "お好みの表示モードを選択",
+        "themes": {
+          "light": "ライトモード",
+          "dark": "ダークモード",
+          "system": "システムに従う"
+        },
+        "preview": {
+          "light": "ライト",
+          "dark": "ダーク",
+          "system": "システム"
+        }
+      },
+      "languageSettings": {
+        "title": "言語設定",
+        "language": "言語",
+        "languageDescription": "お好みの表示言語を選択",
+        "currentLanguage": "現在の言語",
+        "switchLanguage": "言語を切り替える"
+      }
+    },
+    "admin": {
+      "title": "管理ダッシュボード",
+      "users": "ユーザー管理",
+      "organizations": "組織管理",
+      "analytics": "分析"
+    },
+    "about": {
+      "title": "AgentifUIについて",
+      "subtitle": "AIと企業を繋ぎ、大規模言語モデルで新しい体験を創造",
+      "loading": "読み込み中...",
+      "mission": {
+        "title": "私たちの使命",
+        "description": "AgentifUIは大規模言語モデルの力を活用し、企業に革新的なアプリケーションソリューションを提供することに取り組んでいます。複数のモデルプロバイダーの能力を統合し、Difyバックエンドに基づく安定した信頼性の高いサービスを提供し、組織がAI技術の価値を最大限に活用できるよう支援します。"
+      },
+      "values": {
+        "title": "私たちの価値観",
+        "items": {
+          "innovation": {
+            "title": "技術革新",
+            "description": "最先端の大規模モデル技術を継続的に統合し、企業に最先端のAIソリューションを提供"
+          },
+          "security": {
+            "title": "データセキュリティ",
+            "description": "プライベート展開と厳格なデータ保護措置をサポートし、企業データのセキュリティとプライバシーを保証"
+          },
+          "flexibility": {
+            "title": "柔軟なカスタマイズ",
+            "description": "高度にカスタマイズ可能なソリューションを提供し、異なる業界とシナリオの特定のニーズに対応"
+          },
+          "knowledge": {
+            "title": "知識強化",
+            "description": "RAG技術を通じてプライベート知識ベースを統合し、モデルのコンテキスト認識能力を強化"
+          }
+        }
+      },
+      "buttonText": "探索を始める",
+      "copyright": {
+        "prefix": "© {year} ",
+        "linkText": "AgentifUI",
+        "suffix": "。大規模モデルアプリケーションの未来を探求。"
+      }
+    }
+  },
+  "errors": {
+    "notFound": "ページが見つかりません",
+    "serverError": "サーバーエラー",
+    "unauthorized": "未認証アクセス"
+  },
+  "sidebar": {
+    "expand": "展開",
+    "collapse": "折りたたむ",
+    "newChat": "新しいチャット",
+    "historyChats": "チャット履歴",
+    "appsMarket": "アプリマーケット",
+    "settings": "設定",
+    "recentChats": "最近のチャット",
+    "moreOptions": "その他のオプション",
+    "rename": "名前を変更",
+    "deleteChat": "チャットを削除",
+    "untitled": "無題",
+    "creating": "作成中...",
+    "favoriteApps": "お気に入りアプリ",
+    "loading": "読み込み中...",
+    "startWorkflow": "ワークフローを開始",
+    "startTextGeneration": "テキスト生成を開始",
+    "startChat": "チャットを開始",
+    "hideApp": "アプリを非表示",
+    "renameDialog": {
+      "title": "会話の名前を変更",
+      "label": "会話名",
+      "placeholder": "新しい会話名を入力",
+      "confirmText": "名前変更を確認"
+    },
+    "deleteDialog": {
+      "confirmText": "削除を確認",
+      "confirmMessage": "会話 \"{title}\" を削除してもよろしいですか？この操作は元に戻せません。"
+    },
+    "syncingMessage": "会話データが同期中です。後で{action}を試してください。",
+    "operationFailed": "操作に失敗しました。後でもう一度お試しください。",
+    "saveFailed": "会話の保存に失敗しました",
+    "createFailed": "会話の作成に失敗しました"
+  }
+} 
