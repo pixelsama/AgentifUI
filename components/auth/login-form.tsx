@@ -106,9 +106,9 @@ export function LoginForm() {
       {/* --- END COMMENT --- */}
       <div className="space-y-6">
         {/* --- BEGIN COMMENT --- */}
-        {/* 北信科SSO登录区域 */}
+        {/* 条件渲染：仅在SSO专用模式下显示北信科SSO登录 */}
         {/* --- END COMMENT --- */}
-        <BistuSSOCard returnUrl="/chat" />
+        {ssoOnlyMode && <BistuSSOCard returnUrl="/chat" />}
 
         {/* --- BEGIN COMMENT --- */}
         {/* 条件渲染：仅在非SSO专用模式下显示社交登录 */}
@@ -122,8 +122,8 @@ export function LoginForm() {
           </>
         )}
 
-        {/* --- BEGIN COMMENT --- */}
-        {/* 分割线 - 始终显示 */}
+                {/* --- BEGIN COMMENT --- */}
+        {/* 分割线：根据模式调整显示文本 */}
         {/* --- END COMMENT --- */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
@@ -137,7 +137,7 @@ export function LoginForm() {
               "px-2 font-serif",
               isDark ? "bg-stone-900 text-gray-400" : "bg-stone-50 text-gray-500"
             )}>
-              或使用邮箱密码
+              {ssoOnlyMode ? "或使用邮箱密码" : "使用邮箱密码登录"}
             </span>
           </div>
         </div>
