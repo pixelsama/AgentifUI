@@ -139,6 +139,60 @@
         "checkAndCorrectErrors": "Por favor revise y corrija los errores marcados en el formulario",
         "defaultAppName": "Chat IA",
         "defaultDescription": "Por favor ingrese su pregunta para iniciar una conversación inteligente"
+      },
+      "floatingController": {
+        "showTracker": "Mostrar Rastreador de Nodos",
+        "hideTracker": "Ocultar Rastreador de Nodos"
+      },
+      "nodeTracker": {
+        "title": "Progreso de Ejecución de Nodos",
+        "starting": "Iniciando Chatflow",
+        "noRecords": "Sin registros de ejecución de nodos",
+        "waitingUpdate": "Esperando actualización del estado del nodo...",
+        "showProgress": "El progreso de ejecución de nodos se mostrará después de iniciar la conversación"
+      },
+      "executionBar": {
+        "status": {
+          "iterating": "Iterando",
+          "iterationCompleted": "Iteración Completa",
+          "iterationFailed": "Iteración Fallida",
+          "waitingIteration": "Esperando Iteración",
+          "looping": "En Bucle",
+          "loopCompleted": "Bucle Completo",
+          "loopFailed": "Bucle Fallido",
+          "waitingLoop": "Esperando Bucle",
+          "executing": "Ejecutando",
+          "completed": "Completado",
+          "failed": "Fallido",
+          "waiting": "Esperando",
+          "unknown": "Desconocido",
+          "executing_": "Ejecutando..."
+        },
+        "nodeTypes": {
+          "start": "Nodo de Inicio",
+          "llm": "Inferencia LLM",
+          "knowledgeRetrieval": "Recuperación de Conocimiento",
+          "questionClassifier": "Clasificador de Preguntas",
+          "ifElse": "Rama Condicional",
+          "code": "Ejecución de Código",
+          "templateTransform": "Transformación de Plantilla",
+          "variableAssigner": "Asignador de Variables",
+          "variableAggregator": "Agregador de Variables",
+          "documentExtractor": "Extractor de Documentos",
+          "parameterExtractor": "Extractor de Parámetros",
+          "httpRequest": "Solicitud HTTP",
+          "listOperator": "Operador de Lista",
+          "iteration": "Iteración de Bucle",
+          "end": "Nodo Final",
+          "node": "Nodo"
+        },
+        "progressType": {
+          "iteration": "Progreso de Iteración",
+          "branch": "Progreso de Rama"
+        },
+        "branch": {
+          "label": "Rama"
+        }
       }
     },
     "workflow": {
@@ -194,6 +248,58 @@
         "app": "Cargando aplicación...",
         "validating": "Validando configuración de aplicación...",
         "default": "Cargando..."
+      },
+      "market": {
+        "categories": {
+          "all": "Todos",
+          "favorite": "Popular",
+          "writing": "Escritura",
+          "translation": "Traducción",
+          "programming": "Programación",
+          "codeGeneration": "Generación de Código",
+          "analysis": "Análisis",
+          "summary": "Resumen",
+          "conversation": "Conversación",
+          "assistant": "Asistente",
+          "textGeneration": "Generación de Texto",
+          "document": "Documento",
+          "dataAnalysis": "Análisis de Datos",
+          "development": "Desarrollo",
+          "generation": "Generación",
+          "conversationModel": "Modelo de Conversación",
+          "reasoningModel": "Modelo de Razonamiento",
+          "documentModel": "Modelo de Documento",
+          "multimodal": "Multimodal",
+          "highPrecision": "Alta Precisión",
+          "fastResponse": "Rápido",
+          "localDeployment": "Local",
+          "enterprise": "Empresarial",
+          "private": "Privado",
+          "tools": "Herramientas",
+          "general": "General",
+          "professional": "Profesional"
+        },
+        "search": {
+          "placeholder": "Buscar aplicaciones..."
+        },
+        "viewMode": {
+          "grid": "Cuadrícula",
+          "list": "Lista"
+        },
+        "appCard": {
+          "noDescription": "Sin descripción",
+          "defaultType": "Aplicación"
+        },
+        "header": {
+          "title": "Mercado de Aplicaciones",
+          "totalApps": "{count} aplicaciones en total",
+          "categoryApps": "{category} · {count} aplicaciones",
+          "totalLabel": "{count} total"
+        },
+        "categoryKeys": {
+          "all": "Todos",
+          "commonApps": "Aplicaciones Populares"
+        }
       }
     },
     "auth": {

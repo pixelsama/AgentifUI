@@ -139,6 +139,60 @@
         "checkAndCorrectErrors": "Please check and correct the errors marked in the form",
         "defaultAppName": "AI Chat",
         "defaultDescription": "Please enter your question to start an intelligent conversation"
+      },
+      "floatingController": {
+        "showTracker": "Show Node Tracker",
+        "hideTracker": "Hide Node Tracker"
+      },
+      "nodeTracker": {
+        "title": "Node Execution Progress",
+        "starting": "Starting Chatflow",
+        "noRecords": "No node execution records",
+        "waitingUpdate": "Waiting for node status update...",
+        "showProgress": "Node execution progress will be shown after starting conversation"
+      },
+      "executionBar": {
+        "status": {
+          "iterating": "Iterating",
+          "iterationCompleted": "Iteration Complete",
+          "iterationFailed": "Iteration Failed",
+          "waitingIteration": "Waiting Iteration",
+          "looping": "Looping",
+          "loopCompleted": "Loop Complete",
+          "loopFailed": "Loop Failed",
+          "waitingLoop": "Waiting Loop",
+          "executing": "Executing",
+          "completed": "Completed",
+          "failed": "Failed",
+          "waiting": "Waiting",
+          "unknown": "Unknown",
+          "executing_": "Executing..."
+        },
+        "nodeTypes": {
+          "start": "Start Node",
+          "llm": "LLM Inference",
+          "knowledgeRetrieval": "Knowledge Retrieval",
+          "questionClassifier": "Question Classifier",
+          "ifElse": "Conditional Branch",
+          "code": "Code Execution",
+          "templateTransform": "Template Transform",
+          "variableAssigner": "Variable Assigner",
+          "variableAggregator": "Variable Aggregator",
+          "documentExtractor": "Document Extractor",
+          "parameterExtractor": "Parameter Extractor",
+          "httpRequest": "HTTP Request",
+          "listOperator": "List Operator",
+          "iteration": "Loop Iteration",
+          "end": "End Node",
+          "node": "Node"
+        },
+        "progressType": {
+          "iteration": "Iteration Progress",
+          "branch": "Branch Progress"
+        },
+        "branch": {
+          "label": "Branch"
+        }
       }
     },
     "workflow": {
@@ -194,6 +248,58 @@
         "app": "Loading app...",
         "validating": "Validating app configuration...",
         "default": "Loading..."
+      },
+      "market": {
+        "categories": {
+          "all": "All",
+          "favorite": "Popular",
+          "writing": "Writing",
+          "translation": "Translation",
+          "programming": "Programming",
+          "codeGeneration": "Code Generation",
+          "analysis": "Analysis",
+          "summary": "Summary",
+          "conversation": "Conversation",
+          "assistant": "Assistant",
+          "textGeneration": "Text Generation",
+          "document": "Document",
+          "dataAnalysis": "Data Analysis",
+          "development": "Development",
+          "generation": "Generation",
+          "conversationModel": "Conversation Model",
+          "reasoningModel": "Reasoning Model",
+          "documentModel": "Document Model",
+          "multimodal": "Multimodal",
+          "highPrecision": "High Precision",
+          "fastResponse": "Fast",
+          "localDeployment": "Local",
+          "enterprise": "Enterprise",
+          "private": "Private",
+          "tools": "Tools",
+          "general": "General",
+          "professional": "Professional"
+        },
+        "search": {
+          "placeholder": "Search apps..."
+        },
+        "viewMode": {
+          "grid": "Grid",
+          "list": "List"
+        },
+        "appCard": {
+          "noDescription": "No description",
+          "defaultType": "App"
+        },
+        "header": {
+          "title": "App Market",
+          "totalApps": "{count} apps in total",
+          "categoryApps": "{category} · {count} apps",
+          "totalLabel": "{count} total"
+        },
+        "categoryKeys": {
+          "all": "All",
+          "commonApps": "Popular Apps"
+        }
       }
     },
     "auth": {

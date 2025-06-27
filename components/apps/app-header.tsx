@@ -3,6 +3,7 @@
 import { Package } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
+import { useTranslations } from 'next-intl'
 
 interface AppHeaderProps {
   totalApps: number
@@ -12,6 +13,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ totalApps, filteredApps, selectedCategory }: AppHeaderProps) {
   const { colors, isDark } = useThemeColors()
+  const t = useTranslations('pages.apps.market')
 
   return (
     <div className="mb-6">
@@ -29,7 +31,7 @@ export function AppHeader({ totalApps, filteredApps, selectedCategory }: AppHead
             "text-2xl font-bold font-serif",
             colors.mainText.tailwind
           )}>
-            应用市场
+            {t('header.title')}
           </h1>
         </div>
       </div>
@@ -40,17 +42,17 @@ export function AppHeader({ totalApps, filteredApps, selectedCategory }: AppHead
         isDark ? "text-stone-400" : "text-stone-600"
       )}>
         <span>
-          {selectedCategory === "全部" 
-            ? `共 ${totalApps} 个应用` 
-            : `${selectedCategory} · ${filteredApps} 个应用`
+          {selectedCategory === t('categoryKeys.all')
+            ? t('header.totalApps', { count: totalApps })
+            : t('header.categoryApps', { category: selectedCategory, count: filteredApps })
           }
         </span>
-        {selectedCategory !== "全部" && filteredApps !== totalApps && (
+        {selectedCategory !== t('categoryKeys.all') && filteredApps !== totalApps && (
           <span className={cn(
             "text-xs px-2 py-0.5 rounded",
             isDark ? "bg-stone-800 text-stone-400" : "bg-stone-100 text-stone-600"
           )}>
-            共 {totalApps} 个
+            {t('header.totalLabel', { count: totalApps })}
           </span>
         )}
       </div>

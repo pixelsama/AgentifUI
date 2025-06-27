@@ -139,6 +139,60 @@
         "checkAndCorrectErrors": "请检查并修正表单中标记的错误信息",
         "defaultAppName": "AI 对话",
         "defaultDescription": "请输入您的问题，开始智能对话"
+      },
+      "floatingController": {
+        "showTracker": "显示节点跟踪器",
+        "hideTracker": "隐藏节点跟踪器"
+      },
+      "nodeTracker": {
+        "title": "节点执行进度",
+        "starting": "正在启动 Chatflow",
+        "noRecords": "暂无节点执行记录",
+        "waitingUpdate": "等待节点状态更新...",
+        "showProgress": "开始对话后将显示节点执行进度"
+      },
+      "executionBar": {
+        "status": {
+          "iterating": "正在迭代",
+          "iterationCompleted": "迭代完成",
+          "iterationFailed": "迭代失败",
+          "waitingIteration": "等待迭代",
+          "looping": "正在循环",
+          "loopCompleted": "循环完成",
+          "loopFailed": "循环失败",
+          "waitingLoop": "等待循环",
+          "executing": "正在执行",
+          "completed": "处理完成",
+          "failed": "处理失败",
+          "waiting": "等待处理",
+          "unknown": "未知状态",
+          "executing_": "执行中..."
+        },
+        "nodeTypes": {
+          "start": "开始节点",
+          "llm": "LLM 推理",
+          "knowledgeRetrieval": "知识检索",
+          "questionClassifier": "问题分类器",
+          "ifElse": "条件分支",
+          "code": "代码执行",
+          "templateTransform": "模板转换",
+          "variableAssigner": "变量赋值",
+          "variableAggregator": "变量聚合器",
+          "documentExtractor": "文档提取器",
+          "parameterExtractor": "参数提取器",
+          "httpRequest": "HTTP 请求",
+          "listOperator": "列表操作",
+          "iteration": "循环迭代",
+          "end": "结束节点",
+          "node": "节点"
+        },
+        "progressType": {
+          "iteration": "迭代进度",
+          "branch": "分支进度"
+        },
+        "branch": {
+          "label": "分支"
+        }
       }
     },
     "workflow": {
@@ -194,6 +248,58 @@
         "app": "正在加载应用...",
         "validating": "正在验证应用配置...",
         "default": "加载中..."
+      },
+      "market": {
+        "categories": {
+          "all": "全部",
+          "favorite": "常用",
+          "writing": "写作",
+          "translation": "翻译",
+          "programming": "编程",
+          "codeGeneration": "代码生成",
+          "analysis": "分析",
+          "summary": "总结",
+          "conversation": "对话",
+          "assistant": "助手",
+          "textGeneration": "文本生成",
+          "document": "文档",
+          "dataAnalysis": "数据分析",
+          "development": "开发",
+          "generation": "生成",
+          "conversationModel": "对话模型",
+          "reasoningModel": "推理模型",
+          "documentModel": "文档模型",
+          "multimodal": "多模态",
+          "highPrecision": "高精度",
+          "fastResponse": "快速",
+          "localDeployment": "本地",
+          "enterprise": "企业",
+          "private": "私有",
+          "tools": "工具",
+          "general": "通用",
+          "professional": "专业"
+        },
+        "search": {
+          "placeholder": "搜索应用..."
+        },
+        "viewMode": {
+          "grid": "网格",
+          "list": "列表"
+        },
+        "appCard": {
+          "noDescription": "暂无描述",
+          "defaultType": "应用"
+        },
+        "header": {
+          "title": "应用市场",
+          "totalApps": "共 {count} 个应用",
+          "categoryApps": "{category} · {count} 个应用",
+          "totalLabel": "共 {count} 个"
+        },
+        "categoryKeys": {
+          "all": "全部",
+          "commonApps": "常用应用"
+        }
       }
     },
     "auth": {

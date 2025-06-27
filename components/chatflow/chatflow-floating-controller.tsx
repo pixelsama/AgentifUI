@@ -5,6 +5,7 @@ import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
 import { Workflow } from 'lucide-react'
 import { useChatflowExecutionStore } from '@lib/stores/chatflow-execution-store'
+import { useTranslations } from 'next-intl'
 
 interface ChatflowFloatingControllerProps {
   isVisible: boolean
@@ -30,6 +31,7 @@ export function ChatflowFloatingController({
   className 
 }: ChatflowFloatingControllerProps) {
   const { isDark } = useTheme()
+  const t = useTranslations('pages.chatflow.floatingController')
   
   // 从 store 获取执行状态
   const nodes = useChatflowExecutionStore(state => state.nodes)
@@ -67,7 +69,7 @@ export function ChatflowFloatingController({
             ? "bg-stone-800 border border-stone-700 text-stone-200 hover:bg-stone-700" 
             : "bg-white border border-stone-200 text-stone-700 hover:bg-stone-50"
         )}
-        title={isTrackerVisible ? "隐藏节点跟踪器" : "显示节点跟踪器"}
+        title={isTrackerVisible ? t('hideTracker') : t('showTracker')}
       >
         <Workflow className={cn("h-5 w-5", getStatusColor())} />
       </button>

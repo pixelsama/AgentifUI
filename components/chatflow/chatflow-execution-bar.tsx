@@ -6,6 +6,7 @@ import { cn } from '@lib/utils'
 import { Loader2, Clock, CheckCircle, XCircle, AlertCircle, RotateCcw, GitBranch, Zap } from 'lucide-react'
 import type { ChatflowNode, ChatflowIteration, ChatflowParallelBranch } from '@lib/stores/chatflow-execution-store'
 import { useChatflowExecutionStore } from '@lib/stores/chatflow-execution-store'
+import { useTranslations } from 'next-intl'
 
 interface ChatflowExecutionBarProps {
   node: ChatflowNode
@@ -26,6 +27,7 @@ interface ChatflowExecutionBarProps {
  */
 export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecutionBarProps) {
   const { isDark } = useTheme()
+  const t = useTranslations('pages.chatflow.executionBar')
   const [isVisible, setIsVisible] = useState(false)
   const [elapsedTime, setElapsedTime] = useState(0)
   
@@ -110,79 +112,79 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
     if (node.isIterationNode) {
       switch (node.status) {
         case 'running':
-          return '正在迭代'
+          return t('status.iterating')
         case 'completed':
-          return '迭代完成'
+          return t('status.iterationCompleted')
         case 'failed':
-          return '迭代失败'
+          return t('status.iterationFailed')
         default:
-          return '等待迭代'
+          return t('status.waitingIteration')
       }
     }
     
     if (node.isLoopNode) {
       switch (node.status) {
         case 'running':
-          return '正在循环'
+          return t('status.looping')
         case 'completed':
-          return '循环完成'
+          return t('status.loopCompleted')
         case 'failed':
-          return '循环失败'
+          return t('status.loopFailed')
         default:
-          return '等待循环'
+          return t('status.waitingLoop')
       }
     }
     
     switch (node.status) {
       case 'running':
-        return '正在执行'
+        return t('status.executing')
       case 'completed':
-        return '处理完成'
+        return t('status.completed')
       case 'failed':
-        return '处理失败'
+        return t('status.failed')
       case 'pending':
-        return '等待处理'
+        return t('status.waiting')
       default:
-        return '未知状态'
+        return t('status.unknown')
     }
   }
   
   const getNodeTitle = () => {
-    // 根据节点类型返回友好的中文名称
+    // 根据节点类型返回友好的名称
     switch (node.type) {
       case 'start':
-        return '开始节点'
+        return t('nodeTypes.start')
       case 'llm':
-        return 'LLM 推理'
+        return t('nodeTypes.llm')
       case 'knowledge-retrieval':
-        return '知识检索'
+        return t('nodeTypes.knowledgeRetrieval')
       case 'question-classifier':
-        return '问题分类器'
+        return t('nodeTypes.questionClassifier')
       case 'if-else':
-        return '条件分支'
+        return t('nodeTypes.ifElse')
       case 'code':
-        return '代码执行'
+        return t('nodeTypes.code')
       case 'template-transform':
-        return '模板转换'
+        return t('nodeTypes.templateTransform')
       case 'variable-assigner':
-        return '变量赋值'
+        return t('nodeTypes.variableAssigner')
       case 'variable-aggregator':
-        return '变量聚合器'
+        return t('nodeTypes.variableAggregator')
       case 'document-extractor':
-        return '文档提取器'
+        return t('nodeTypes.documentExtractor')
       case 'parameter-extractor':
-        return '参数提取器'
+        return t('nodeTypes.parameterExtractor')
       case 'http-request':
-        return 'HTTP 请求'
+        return t('nodeTypes.httpRequest')
       case 'list-operator':
-        return '列表操作'
+        return t('nodeTypes.listOperator')
       case 'iteration':
       case 'loop':
-        return '循环迭代'
+        return t('nodeTypes.iteration')
       case 'end':
-        return '结束节点'
+        return t('nodeTypes.end')
       default:
-        return node.title || `节点 ${index + 1}`
+        return node.title || `${t('nodeTypes.node')} ${index + 1}`
     }
   }
   
@@ -418,6 +420,7 @@ interface ParallelBranchItemProps {
 }
 
 function ParallelBranchItem({ branch, index, isDark }: ParallelBranchItemProps) {
+  const t = useTranslations('pages.chatflow.executionBar')
   const [elapsedTime, setElapsedTime] = useState(0)
   
   useEffect(() => {
@@ -481,13 +484,13 @@ function ParallelBranchItem({ branch, index, isDark }: ParallelBranchItemProps) 
             "text-sm font-medium",
             isDark ? "text-stone-200" : "text-stone-800"
           )}>
-            分支 {String.fromCharCode(65 + branch.index)}
+            {t('branch.label')} {String.fromCharCode(65 + branch.index)}
           </span>
           <span className={cn(
             "text-xs",
             isDark ? "text-stone-400" : "text-stone-600"
           )}>
-            {branch.description || '执行中...'}
+            {branch.description || t('status.executing_')}
           </span>
         </div>
       </div>
@@ -515,6 +518,7 @@ interface ProgressBarProps {
 }
 
 function ProgressBar({ current, total, type, isDark }: ProgressBarProps) {
+  const t = useTranslations('pages.chatflow.executionBar')
   const percentage = total > 0 ? (current / total) * 100 : 0
   
   return (
@@ -524,7 +528,7 @@ function ProgressBar({ current, total, type, isDark }: ProgressBarProps) {
           "text-xs font-medium font-serif",
           isDark ? "text-stone-300" : "text-stone-700"
         )}>
-          {type === 'iteration' ? '迭代进度' : '分支进度'}
+          {type === 'iteration' ? t('progressType.iteration') : t('progressType.branch')}
         </span>
         <span className={cn(
           "text-xs font-serif",

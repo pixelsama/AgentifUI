@@ -6,6 +6,7 @@ import { cn } from '@lib/utils'
 import { ChatflowExecutionBar } from './chatflow-execution-bar'
 import { useChatflowExecutionStore } from '@lib/stores/chatflow-execution-store'
 import { Workflow, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface ChatflowNodeTrackerProps {
   isVisible: boolean
@@ -24,6 +25,7 @@ interface ChatflowNodeTrackerProps {
  */
 export function ChatflowNodeTracker({ isVisible, className }: ChatflowNodeTrackerProps) {
   const { isDark } = useTheme()
+  const t = useTranslations('pages.chatflow.nodeTracker')
   
   // 从 store 获取节点状态
   const nodes = useChatflowExecutionStore(state => state.nodes)
@@ -115,7 +117,7 @@ export function ChatflowNodeTracker({ isVisible, className }: ChatflowNodeTracke
             "text-sm font-medium font-serif",
             isDark ? "text-stone-200" : "text-stone-800"
           )}>
-            节点执行进度
+            {t('title')}
           </span>
         </div>
         
@@ -143,13 +145,13 @@ export function ChatflowNodeTracker({ isVisible, className }: ChatflowNodeTracke
                   "text-sm font-medium font-serif",
                   isDark ? "text-stone-200" : "text-stone-800"
                 )}>
-                  {isExecuting ? "正在启动 Chatflow" : "暂无节点执行记录"}
+                  {isExecuting ? t('starting') : t('noRecords')}
                 </div>
                 <div className={cn(
                   "text-xs font-serif",
                   isDark ? "text-stone-400" : "text-stone-600"
                 )}>
-                  {isExecuting ? "等待节点状态更新..." : "开始对话后将显示节点执行进度"}
+                  {isExecuting ? t('waitingUpdate') : t('showProgress')}
                 </div>
               </div>
             </div>

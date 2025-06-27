@@ -1,10 +1,12 @@
 "use client"
 
+import React from 'react'
 import { Star, ArrowRight, Cpu, Blocks, Heart } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
 import { getDifyAppTypeInfo } from "@lib/types/dify-app-types"
 import { useFavoriteAppsStore } from "@lib/stores/favorite-apps-store"
+import { useTranslations } from 'next-intl'
 
 interface AppInstance {
   instanceId: string
@@ -35,6 +37,7 @@ interface AppCardProps {
 export function AppCard({ app, viewMode, onClick }: AppCardProps) {
   const { colors, isDark } = useThemeColors()
   const { addFavoriteApp, removeFavoriteApp, isFavorite } = useFavoriteAppsStore()
+  const t = useTranslations('pages.apps.market')
 
   // 获取Dify应用类型信息
   const difyAppType = app.config?.app_metadata?.dify_apptype || app.difyAppType
@@ -187,7 +190,7 @@ export function AppCard({ app, viewMode, onClick }: AppCardProps) {
               "text-xs line-clamp-2 font-serif leading-relaxed",
               isDark ? "text-stone-400" : "text-stone-600"
             )}>
-              {app.description || "暂无描述"}
+              {app.description || t('appCard.noDescription')}
             </p>
           </div>
 
@@ -197,7 +200,7 @@ export function AppCard({ app, viewMode, onClick }: AppCardProps) {
               "font-serif",
               isDark ? "text-stone-500" : "text-stone-500"
             )}>
-              {difyTypeInfo?.label || "应用"}
+              {difyTypeInfo?.label || t('appCard.defaultType')}
             </span>
             
             <ArrowRight className={cn(
@@ -238,7 +241,7 @@ export function AppCard({ app, viewMode, onClick }: AppCardProps) {
               "text-xs line-clamp-1 font-serif",
               isDark ? "text-stone-400" : "text-stone-600"
             )}>
-              {app.description || "暂无描述"}
+              {app.description || t('appCard.noDescription')}
             </p>
           </div>
           

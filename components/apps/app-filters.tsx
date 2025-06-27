@@ -4,6 +4,7 @@ import { Search, Grid3x3, List, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
 import { useRef, useState, useEffect } from "react"
+import { useTranslations } from 'next-intl'
 
 interface AppFiltersProps {
   searchTerm: string
@@ -25,6 +26,7 @@ export function AppFilters({
   onViewModeChange
 }: AppFiltersProps) {
   const { colors, isDark } = useThemeColors()
+  const t = useTranslations('pages.apps.market')
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -72,60 +74,58 @@ export function AppFilters({
   // 预定义常见标签的图标映射，提供更好的视觉体验
   // --- END COMMENT ---
   const getCategoryDisplay = (category: string) => {
-    if (category === '全部') {
-      return { icon: '🏪', label: '全部' }
+    if (category === t('categoryKeys.all')) {
+      return { icon: '🏪', label: t('categories.all') }
     }
-    if (category === '常用应用') {
-      return { icon: '⭐', label: '常用' }
-    }
-    
-    // --- BEGIN COMMENT ---
-    // 🎯 基于tag的图标映射 - 更贴近用户使用场景
-    // 完整覆盖admin配置中的预定义标签 + 常见自定义标签
-    // --- END COMMENT ---
-    const tagIconMap: Record<string, { icon: string; label: string }> = {
-      // --- 功能分类（核心应用场景） ---
-      '写作': { icon: '✍️', label: '写作' },
-      '翻译': { icon: '🌐', label: '翻译' },
-      '代码': { icon: '💻', label: '编程' },
-      '代码生成': { icon: '🔧', label: '代码生成' },
-      '分析': { icon: '📊', label: '分析' },
-      '总结': { icon: '📝', label: '总结' },
-      '对话': { icon: '💬', label: '对话' },
-      '助手': { icon: '🤖', label: '助手' },
-      
-      // --- 应用场景（admin配置中的应用场景分类） ---
-      '文本生成': { icon: '📄', label: '文本生成' },
-      '文档': { icon: '📋', label: '文档' },
-      '数据分析': { icon: '📈', label: '数据分析' },
-      '开发': { icon: '⚙️', label: '开发' },
-      '生成': { icon: '✨', label: '生成' },
-      
-      // --- 模型类型（admin配置中的模型类型分类） ---
-      '对话模型': { icon: '💭', label: '对话模型' },
-      '推理模型': { icon: '🧠', label: '推理模型' },
-      '文档模型': { icon: '📚', label: '文档模型' },
-      '多模态': { icon: '🎨', label: '多模态' },
-      
-      // --- 技术特性（admin配置中的技术特性分类） ---
-      '高精度': { icon: '🎯', label: '高精度' },
-      '快速响应': { icon: '⚡', label: '快速' },
-      '本地部署': { icon: '🏠', label: '本地' },
-      '本地': { icon: '🏠', label: '本地' }, // 同义词映射
-      '企业级': { icon: '🏢', label: '企业' },
-      '私有': { icon: '🔒', label: '私有' },
-      
-      // --- 通用标签 ---
-      '工具': { icon: '🛠️', label: '工具' },
-      '通用': { icon: '🔄', label: '通用' },
-      '专业': { icon: '⭐', label: '专业' }
+    if (category === t('categoryKeys.commonApps')) {
+      return { icon: '⭐', label: t('categories.favorite') }
     }
     
     // --- BEGIN COMMENT ---
-    // 🎯 如果没有预定义映射，使用默认的标签图标
-    // 确保所有自定义标签都有合适的显示效果
+    // 🎯 创建分类映射函数 - 避免使用中文作为对象键
+    // 通过翻译键来匹配分类，确保代码的国际化友好性
     // --- END COMMENT ---
-    return tagIconMap[category] || { icon: '🏷️', label: category }
+    const getCategoryMapping = (cat: string) => {
+      // 功能分类（核心应用场景）
+      if (cat === t('categories.writing')) return { icon: '✍️', label: t('categories.writing') }
+      if (cat === t('categories.translation')) return { icon: '🌐', label: t('categories.translation') }
+      if (cat === t('categories.programming')) return { icon: '💻', label: t('categories.programming') }
+      if (cat === t('categories.codeGeneration')) return { icon: '🔧', label: t('categories.codeGeneration') }
+      if (cat === t('categories.analysis')) return { icon: '📊', label: t('categories.analysis') }
+      if (cat === t('categories.summary')) return { icon: '📝', label: t('categories.summary') }
+      if (cat === t('categories.conversation')) return { icon: '💬', label: t('categories.conversation') }
+      if (cat === t('categories.assistant')) return { icon: '🤖', label: t('categories.assistant') }
+      
+      // 应用场景（admin配置中的应用场景分类）
+      if (cat === t('categories.textGeneration')) return { icon: '📄', label: t('categories.textGeneration') }
+      if (cat === t('categories.document')) return { icon: '📋', label: t('categories.document') }
+      if (cat === t('categories.dataAnalysis')) return { icon: '📈', label: t('categories.dataAnalysis') }
+      if (cat === t('categories.development')) return { icon: '⚙️', label: t('categories.development') }
+      if (cat === t('categories.generation')) return { icon: '✨', label: t('categories.generation') }
+      
+      // 模型类型（admin配置中的模型类型分类）
+      if (cat === t('categories.conversationModel')) return { icon: '💭', label: t('categories.conversationModel') }
+      if (cat === t('categories.reasoningModel')) return { icon: '🧠', label: t('categories.reasoningModel') }
+      if (cat === t('categories.documentModel')) return { icon: '📚', label: t('categories.documentModel') }
+      if (cat === t('categories.multimodal')) return { icon: '🎨', label: t('categories.multimodal') }
+      
+      // 技术特性（admin配置中的技术特性分类）
+      if (cat === t('categories.highPrecision')) return { icon: '🎯', label: t('categories.highPrecision') }
+      if (cat === t('categories.fastResponse')) return { icon: '⚡', label: t('categories.fastResponse') }
+      if (cat === t('categories.localDeployment')) return { icon: '🏠', label: t('categories.localDeployment') }
+      if (cat === t('categories.enterprise')) return { icon: '🏢', label: t('categories.enterprise') }
+      if (cat === t('categories.private')) return { icon: '🔒', label: t('categories.private') }
+      
+      // 通用标签
+      if (cat === t('categories.tools')) return { icon: '🛠️', label: t('categories.tools') }
+      if (cat === t('categories.general')) return { icon: '🔄', label: t('categories.general') }
+      if (cat === t('categories.professional')) return { icon: '⭐', label: t('categories.professional') }
+      
+      // 默认情况
+      return { icon: '🏷️', label: category }
+    }
+    
+    return getCategoryMapping(category)
   }
 
   return (
@@ -138,7 +138,7 @@ export function AppFilters({
         )} />
         <input
           type="text"
-          placeholder="搜索应用..."
+          placeholder={t('search.placeholder')}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           className={cn(
@@ -260,7 +260,7 @@ export function AppFilters({
             )}
           >
             <Grid3x3 className="w-4 h-4" />
-            <span className="hidden sm:inline">网格</span>
+            <span className="hidden sm:inline">{t('viewMode.grid')}</span>
           </button>
           <button
             onClick={() => onViewModeChange('list')}
@@ -274,7 +274,7 @@ export function AppFilters({
             )}
           >
             <List className="w-4 h-4" />
-            <span className="hidden sm:inline">列表</span>
+            <span className="hidden sm:inline">{t('viewMode.list')}</span>
           </button>
         </div>
       </div>

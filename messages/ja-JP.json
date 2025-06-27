@@ -139,6 +139,60 @@
         "checkAndCorrectErrors": "フォーム内のマークされたエラーを確認して修正してください",
         "defaultAppName": "AI チャット",
         "defaultDescription": "質問を入力してインテリジェントな会話を開始してください"
+      },
+      "floatingController": {
+        "showTracker": "ノードトラッカーを表示",
+        "hideTracker": "ノードトラッカーを非表示"
+      },
+      "nodeTracker": {
+        "title": "ノード実行進捗",
+        "starting": "Chatflow開始中",
+        "noRecords": "ノード実行記録なし",
+        "waitingUpdate": "ノードステータス更新を待機中...",
+        "showProgress": "会話開始後にノード実行進捗が表示されます"
+      },
+      "executionBar": {
+        "status": {
+          "iterating": "反復中",
+          "iterationCompleted": "反復完了",
+          "iterationFailed": "反復失敗",
+          "waitingIteration": "反復待機",
+          "looping": "ループ中",
+          "loopCompleted": "ループ完了",
+          "loopFailed": "ループ失敗",
+          "waitingLoop": "ループ待機",
+          "executing": "実行中",
+          "completed": "完了",
+          "failed": "失敗",
+          "waiting": "待機中",
+          "unknown": "不明",
+          "executing_": "実行中..."
+        },
+        "nodeTypes": {
+          "start": "開始ノード",
+          "llm": "LLM推論",
+          "knowledgeRetrieval": "知識検索",
+          "questionClassifier": "質問分類器",
+          "ifElse": "条件分岐",
+          "code": "コード実行",
+          "templateTransform": "テンプレート変換",
+          "variableAssigner": "変数割り当て",
+          "variableAggregator": "変数集約器",
+          "documentExtractor": "文書抽出器",
+          "parameterExtractor": "パラメータ抽出器",
+          "httpRequest": "HTTPリクエスト",
+          "listOperator": "リスト操作",
+          "iteration": "ループ反復",
+          "end": "終了ノード",
+          "node": "ノード"
+        },
+        "progressType": {
+          "iteration": "反復進捗",
+          "branch": "分岐進捗"
+        },
+        "branch": {
+          "label": "分岐"
+        }
       }
     },
     "workflow": {
@@ -194,6 +248,58 @@
         "app": "アプリを読み込み中...",
         "validating": "アプリ設定を検証中...",
         "default": "読み込み中..."
+      },
+      "market": {
+        "categories": {
+          "all": "すべて",
+          "favorite": "人気",
+          "writing": "執筆",
+          "translation": "翻訳",
+          "programming": "プログラミング",
+          "codeGeneration": "コード生成",
+          "analysis": "分析",
+          "summary": "要約",
+          "conversation": "会話",
+          "assistant": "アシスタント",
+          "textGeneration": "テキスト生成",
+          "document": "文書",
+          "dataAnalysis": "データ分析",
+          "development": "開発",
+          "generation": "生成",
+          "conversationModel": "会話モデル",
+          "reasoningModel": "推論モデル",
+          "documentModel": "文書モデル",
+          "multimodal": "マルチモーダル",
+          "highPrecision": "高精度",
+          "fastResponse": "高速",
+          "localDeployment": "ローカル",
+          "enterprise": "エンタープライズ",
+          "private": "プライベート",
+          "tools": "ツール",
+          "general": "汎用",
+          "professional": "プロフェッショナル"
+        },
+        "search": {
+          "placeholder": "アプリを検索..."
+        },
+        "viewMode": {
+          "grid": "グリッド",
+          "list": "リスト"
+        },
+        "appCard": {
+          "noDescription": "説明なし",
+          "defaultType": "アプリ"
+        },
+        "header": {
+          "title": "アプリマーケット",
+          "totalApps": "合計 {count} 個のアプリ",
+          "categoryApps": "{category} · {count} 個のアプリ",
+          "totalLabel": "合計 {count} 個"
+        },
+        "categoryKeys": {
+          "all": "すべて",
+          "commonApps": "人気アプリ"
+        }
       }
     },
     "auth": {
