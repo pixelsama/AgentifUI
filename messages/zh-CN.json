@@ -433,13 +433,210 @@
       }
     },
     "auth": {
-      "loginTitle": "登录",
-      "registerTitle": "注册",
-      "email": "邮箱",
-      "password": "密码",
-      "forgotPassword": "忘记密码？",
-      "noAccount": "还没有账户？",
-      "hasAccount": "已有账户？"
+      "login": {
+        "title": "登录",
+        "subtitle": "欢迎使用智能助手",
+        "emailLabel": "邮箱",
+        "passwordLabel": "密码",
+        "emailPlaceholder": "your@email.com",
+        "passwordPlaceholder": "••••••••",
+        "loginButton": "登录",
+        "forgotPasswordLink": "忘记密码？",
+        "phoneLoginLink": "📱 使用手机号验证码登录",
+        "noAccountText": "还没有账号？",
+        "registerLink": "立即注册",
+        "showPassword": "显示密码",
+        "hidePassword": "隐藏密码",
+        "orSeparator": "使用邮箱密码登录",
+        "orSeparatorSso": "或使用邮箱密码",
+        "alerts": {
+          "registered": "注册成功！请查看您的邮箱以验证账户，然后登录。",
+          "resetSuccess": "密码重置成功！请使用新密码登录。"
+        },
+        "errors": {
+          "oauthFailed": "OAuth登录失败，请重试或使用其他登录方式",
+          "ssoCallbackFailed": "SSO认证回调处理失败，请重新尝试登录",
+          "ticketValidationFailed": "SSO票据验证失败，请重新登录",
+          "invalidEmployeeNumber": "学工号格式不正确，请联系管理员",
+          "userCreationFailed": "账户创建失败，这可能是由于账户数据不一致导致的。请尝试重新登录，如果问题持续存在，请联系管理员",
+          "accountDataInconsistent": "账户数据不一致，系统正在尝试自动修复。请稍等片刻后重新登录",
+          "profileCreationFailed": "用户档案创建失败，请联系管理员协助解决",
+          "ssoProviderNotFound": "SSO服务配置错误，请联系管理员",
+          "missingTicket": "认证参数缺失，请重新登录",
+          "default": "登录过程中出现错误，请稍后重试",
+          "loginFailed": "登录失败，请检查您的邮箱和密码"
+        }
+      },
+      "register": {
+        "title": "注册",
+        "subtitle": "加入 AgentifUI，开启 AI 智能之旅",
+        "nameLabel": "姓名",
+        "usernameLabel": "昵称",
+        "usernameOptional": "(可选)",
+        "emailLabel": "邮箱",
+        "passwordLabel": "密码",
+        "confirmPasswordLabel": "确认密码",
+        "namePlaceholder": "输入您的姓名",
+        "usernamePlaceholder": "选择一个用户名",
+        "emailPlaceholder": "your@email.com",
+        "passwordPlaceholder": "••••••••",
+        "createAccountButton": "创建账户",
+        "phoneLoginLink": "📱 使用手机号验证码登录",
+        "hasAccountText": "已有账户？",
+        "loginLink": "立即登录",
+        "showPassword": "显示密码",
+        "hidePassword": "隐藏密码",
+        "showConfirmPassword": "显示确认密码",
+        "hideConfirmPassword": "隐藏确认密码",
+        "orSeparator": "或使用邮箱密码",
+        "errors": {
+          "nameRequired": "请输入姓名",
+          "emailRequired": "请输入邮箱地址",
+          "passwordTooShort": "密码长度至少6位",
+          "passwordMismatch": "两次输入的密码不一致",
+          "usernameInvalid": "昵称只能包含字母、数字、下划线和连字符，长度2-20位",
+          "emailExists": "该邮箱已被注册，请使用其他邮箱或直接登录",
+          "passwordWeak": "密码强度不够，请使用更复杂的密码",
+          "emailInvalid": "邮箱格式不正确，请检查后重试",
+          "registerFailed": "注册失败，请稍后再试"
+        }
+      },
+      "phoneLoginPage": {
+        "title": "AgentifUI",
+        "subtitle": "智能对话，触手可及",
+        "orSeparator": "或者",
+        "emailLoginLink": "使用邮箱密码登录",
+        "registerLink": "还没有账号？立即注册",
+        "termsText": "登录即表示您同意我们的",
+        "termsLink": "服务条款",
+        "privacyLink": "隐私政策",
+        "andText": "和"
+      },
+      "ssoProcessing": {
+        "title": "SSO 登录",
+        "loading": "加载中..."
+      },
+      "forgotPassword": {
+        "title": "忘记密码",
+        "subtitle": "输入您的邮箱地址，我们将发送重置密码链接",
+        "emailLabel": "邮箱地址",
+        "emailPlaceholder": "your@email.com",
+        "sendButton": "发送重置链接",
+        "sendingButton": "发送中...",
+        "backToLogin": "返回登录",
+        "success": {
+          "title": "邮件已发送",
+          "message": "我们已向 {email} 发送了重置密码链接",
+          "instructions": "请检查您的邮箱（包括垃圾邮件文件夹）并点击链接重置密码。",
+          "noEmail": "如果您没有收到邮件，请检查邮箱地址是否正确或稍后重试。"
+        },
+        "errors": {
+          "emailRequired": "请输入有效的邮箱地址",
+          "rateLimited": "发送过于频繁，请稍后再试",
+          "sendFailed": "发送失败，请稍后再试"
+        }
+      },
+      "resetPassword": {
+        "title": "重置密码",
+        "subtitle": "请输入您的新密码",
+        "verifying": "验证中",
+        "verifyingSubtitle": "正在验证重置链接...",
+        "invalidTitle": "链接无效",
+        "invalidSubtitle": "重置密码链接已过期或无效",
+        "successTitle": "密码重置成功",
+        "successSubtitle": "您的密码已成功重置",
+        "passwordLabel": "新密码",
+        "confirmPasswordLabel": "确认密码",
+        "passwordPlaceholder": "输入新密码",
+        "confirmPasswordPlaceholder": "再次输入新密码",
+        "resetButton": "重置密码",
+        "resettingButton": "重置中...",
+        "showPassword": "显示新密码",
+        "hidePassword": "隐藏新密码",
+        "showConfirmPassword": "显示确认密码",
+        "hideConfirmPassword": "隐藏确认密码",
+        "passwordHint": "密码需包含大小写字母、数字，至少8位",
+        "backToLogin": "前往登录",
+        "retryReset": "重新申请重置密码",
+        "successMessage": "您现在可以使用新密码登录您的账户。",
+        "errors": {
+          "passwordRequired": "请输入新密码",
+          "passwordTooShort": "密码长度至少6位",
+          "passwordMismatch": "两次输入的密码不一致",
+          "passwordWeak": "密码强度不够，请使用更复杂的密码",
+          "sessionExpired": "会话已过期，请重新申请重置密码",
+          "resetFailed": "密码重置失败，请稍后再试",
+          "linkInvalid": "重置链接验证失败",
+          "linkExpired": "重置链接无效或已过期，请重新申请重置密码",
+          "verifyFailed": "验证失败，请重新申请重置密码"
+        }
+      },
+      "phoneLogin": {
+        "title": "手机号登录",
+        "subtitle": "使用手机号接收验证码登录",
+        "otpSubtitle": "请输入收到的6位验证码",
+        "phoneLabel": "手机号",
+        "otpLabel": "验证码",
+        "phonePlaceholder": "13812345678",
+        "otpPlaceholder": "请输入6位验证码",
+        "sendOtpButton": "发送验证码",
+        "sendingButton": "发送中...",
+        "verifyButton": "确认验证码",
+        "verifyingButton": "验证中...",
+        "resendButton": "重新发送验证码",
+        "changePhoneButton": "修改手机号",
+        "otpSentTo": "验证码已发送至 +86{phone}",
+        "errors": {
+          "phoneRequired": "请输入手机号",
+          "phoneInvalid": "请输入正确的中国大陆手机号",
+          "otpRequired": "请输入验证码",
+          "otpInvalid": "验证码应为6位数字",
+          "sendFailed": "发送验证码失败，请稍后重试",
+          "verifyFailed": "验证码错误，请重新输入"
+        },
+        "success": {
+          "otpSent": "验证码已发送，请查收短信",
+          "verifySuccess": "验证成功！正在登录..."
+        }
+      },
+      "sso": {
+        "bistu": {
+          "title": "北京信息科技大学统一认证",
+          "subtitle": "使用您的学工号和密码登录",
+          "button": "使用北信科统一认证登录",
+          "simpleButton": "🏛️ 北信科统一认证",
+          "jumpingButton": "正在跳转...",
+          "helpText": "首次登录将自动创建账户",
+          "contactText": "如有问题请联系系统管理员",
+          "startError": "启动SSO登录失败，请稍后重试"
+        },
+        "processing": {
+          "title": "SSO 登录",
+          "processing": "正在处理SSO登录...",
+          "welcome": "欢迎 {name}，正在建立会话...",
+          "verifying": "正在验证身份...",
+          "sessionCheck": "正在验证会话...",
+          "success": "登录成功！正在跳转...",
+          "failed": "登录失败",
+          "redirecting": "3秒后将自动跳转到登录页面...",
+          "errors": {
+            "missingParams": "SSO参数缺失或无效",
+            "userDataNotFound": "SSO用户数据未找到",
+            "sessionExpired": "SSO会话已过期，请重新登录",
+            "loginFailed": "SSO登录失败",
+            "sessionValidationFailed": "会话验证失败",
+            "noValidSessionData": "服务器未返回有效会话数据",
+            "processingFailed": "SSO处理失败"
+          }
+        }
+      },
+      "social": {
+        "github": {
+          "login": "使用 GitHub 登录",
+          "register": "使用 GitHub 注册",
+          "failed": "GitHub 登录失败"
+        }
+      }
     },
     "settings": {
       "title": "设置",

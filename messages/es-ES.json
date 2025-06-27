@@ -433,13 +433,210 @@
       }
     },
     "auth": {
-      "loginTitle": "Iniciar Sesión",
-      "registerTitle": "Registrarse",
-      "email": "Correo electrónico",
-      "password": "Contraseña",
-      "forgotPassword": "¿Olvidaste tu contraseña?",
-      "noAccount": "¿No tienes una cuenta?",
-      "hasAccount": "¿Ya tienes una cuenta?"
+      "login": {
+        "title": "Iniciar Sesión",
+        "subtitle": "Bienvenido al Asistente Inteligente",
+        "emailLabel": "Correo Electrónico",
+        "passwordLabel": "Contraseña",
+        "emailPlaceholder": "tu@correo.com",
+        "passwordPlaceholder": "••••••••",
+        "loginButton": "Iniciar Sesión",
+        "forgotPasswordLink": "¿Olvidaste tu contraseña?",
+        "phoneLoginLink": "📱 Iniciar sesión con verificación por teléfono",
+        "noAccountText": "¿No tienes una cuenta?",
+        "registerLink": "Regístrate ahora",
+        "showPassword": "Mostrar contraseña",
+        "hidePassword": "Ocultar contraseña",
+        "orSeparator": "Iniciar sesión con correo y contraseña",
+        "orSeparatorSso": "O usar correo y contraseña",
+        "alerts": {
+          "registered": "¡Registro exitoso! Por favor verifica tu correo electrónico para confirmar tu cuenta, luego inicia sesión.",
+          "resetSuccess": "¡Restablecimiento de contraseña exitoso! Por favor inicia sesión con tu nueva contraseña."
+        },
+        "errors": {
+          "oauthFailed": "Error en el inicio de sesión OAuth, por favor inténtalo de nuevo o usa otros métodos de inicio de sesión",
+          "ssoCallbackFailed": "Error en el procesamiento del callback de autenticación SSO, por favor intenta iniciar sesión nuevamente",
+          "ticketValidationFailed": "Error en la validación del ticket SSO, por favor inicia sesión nuevamente",
+          "invalidEmployeeNumber": "El formato del número de empleado es incorrecto, por favor contacta al administrador",
+          "userCreationFailed": "Error en la creación de la cuenta, esto puede deberse a datos de cuenta inconsistentes. Por favor intenta iniciar sesión nuevamente, si el problema persiste, contacta al administrador",
+          "accountDataInconsistent": "Los datos de la cuenta son inconsistentes, el sistema está intentando reparar automáticamente. Por favor espera un momento e inicia sesión nuevamente",
+          "profileCreationFailed": "Error en la creación del perfil de usuario, por favor contacta al administrador para asistencia",
+          "ssoProviderNotFound": "Error en la configuración del servicio SSO, por favor contacta al administrador",
+          "missingTicket": "Parámetros de autenticación faltantes, por favor inicia sesión nuevamente",
+          "default": "Ocurrió un error durante el inicio de sesión, por favor inténtalo más tarde",
+          "loginFailed": "Error en el inicio de sesión, por favor verifica tu correo electrónico y contraseña"
+        }
+      },
+      "register": {
+        "title": "Registrarse",
+        "subtitle": "Únete a AgentifUI y comienza tu viaje de IA",
+        "nameLabel": "Nombre Completo",
+        "usernameLabel": "Nombre de Usuario",
+        "usernameOptional": "(opcional)",
+        "emailLabel": "Correo Electrónico",
+        "passwordLabel": "Contraseña",
+        "confirmPasswordLabel": "Confirmar Contraseña",
+        "namePlaceholder": "Ingresa tu nombre completo",
+        "usernamePlaceholder": "Elige un nombre de usuario",
+        "emailPlaceholder": "tu@correo.com",
+        "passwordPlaceholder": "••••••••",
+        "createAccountButton": "Crear Cuenta",
+        "phoneLoginLink": "📱 Iniciar sesión con verificación por teléfono",
+        "hasAccountText": "¿Ya tienes una cuenta?",
+        "loginLink": "Inicia sesión ahora",
+        "showPassword": "Mostrar contraseña",
+        "hidePassword": "Ocultar contraseña",
+        "showConfirmPassword": "Mostrar confirmar contraseña",
+        "hideConfirmPassword": "Ocultar confirmar contraseña",
+        "orSeparator": "O usar correo y contraseña",
+        "errors": {
+          "nameRequired": "Por favor ingresa tu nombre completo",
+          "emailRequired": "Por favor ingresa tu dirección de correo electrónico",
+          "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+          "passwordMismatch": "Las contraseñas no coinciden",
+          "usernameInvalid": "El nombre de usuario solo puede contener letras, números, guiones bajos y guiones, de 2-20 caracteres",
+          "emailExists": "Este correo electrónico ya está registrado, por favor usa otro correo o inicia sesión directamente",
+          "passwordWeak": "La contraseña no es lo suficientemente fuerte, por favor usa una contraseña más compleja",
+          "emailInvalid": "El formato del correo electrónico es incorrecto, por favor verifica e inténtalo de nuevo",
+          "registerFailed": "Error en el registro, por favor inténtalo más tarde"
+        }
+      },
+      "phoneLoginPage": {
+        "title": "AgentifUI",
+        "subtitle": "Conversación inteligente al alcance de tus dedos",
+        "orSeparator": "O",
+        "emailLoginLink": "Iniciar sesión con correo y contraseña",
+        "registerLink": "¿No tienes una cuenta? Regístrate ahora",
+        "termsText": "Al iniciar sesión, aceptas nuestros",
+        "termsLink": "Términos de Servicio",
+        "privacyLink": "Política de Privacidad",
+        "andText": "y"
+      },
+      "ssoProcessing": {
+        "title": "Inicio de Sesión SSO",
+        "loading": "Cargando..."
+      },
+      "forgotPassword": {
+        "title": "Olvidé mi Contraseña",
+        "subtitle": "Ingresa tu dirección de correo electrónico y te enviaremos un enlace para restablecer tu contraseña",
+        "emailLabel": "Dirección de Correo Electrónico",
+        "emailPlaceholder": "tu@correo.com",
+        "sendButton": "Enviar Enlace de Restablecimiento",
+        "sendingButton": "Enviando...",
+        "backToLogin": "Volver al Inicio de Sesión",
+        "success": {
+          "title": "Correo Enviado",
+          "message": "Hemos enviado un enlace de restablecimiento de contraseña a {email}",
+          "instructions": "Por favor revisa tu correo electrónico (incluyendo la carpeta de spam) y haz clic en el enlace para restablecer tu contraseña.",
+          "noEmail": "Si no recibes el correo, por favor verifica que la dirección de correo sea correcta o inténtalo más tarde."
+        },
+        "errors": {
+          "emailRequired": "Por favor ingresa una dirección de correo electrónico válida",
+          "rateLimited": "Demasiadas solicitudes, por favor inténtalo más tarde",
+          "sendFailed": "Error al enviar, por favor inténtalo más tarde"
+        }
+      },
+      "resetPassword": {
+        "title": "Restablecer Contraseña",
+        "subtitle": "Por favor ingresa tu nueva contraseña",
+        "verifying": "Verificando",
+        "verifyingSubtitle": "Verificando enlace de restablecimiento...",
+        "invalidTitle": "Enlace Inválido",
+        "invalidSubtitle": "El enlace de restablecimiento de contraseña ha expirado o es inválido",
+        "successTitle": "Restablecimiento de Contraseña Exitoso",
+        "successSubtitle": "Tu contraseña ha sido restablecida exitosamente",
+        "passwordLabel": "Nueva Contraseña",
+        "confirmPasswordLabel": "Confirmar Contraseña",
+        "passwordPlaceholder": "Ingresa nueva contraseña",
+        "confirmPasswordPlaceholder": "Ingresa nueva contraseña nuevamente",
+        "resetButton": "Restablecer Contraseña",
+        "resettingButton": "Restableciendo...",
+        "showPassword": "Mostrar nueva contraseña",
+        "hidePassword": "Ocultar nueva contraseña",
+        "showConfirmPassword": "Mostrar confirmar contraseña",
+        "hideConfirmPassword": "Ocultar confirmar contraseña",
+        "passwordHint": "La contraseña debe contener letras mayúsculas y minúsculas, números, al menos 8 caracteres",
+        "backToLogin": "Ir al Inicio de Sesión",
+        "retryReset": "Solicitar restablecimiento de contraseña nuevamente",
+        "successMessage": "Ahora puedes iniciar sesión en tu cuenta con la nueva contraseña.",
+        "errors": {
+          "passwordRequired": "Por favor ingresa una nueva contraseña",
+          "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+          "passwordMismatch": "Las contraseñas no coinciden",
+          "passwordWeak": "La contraseña no es lo suficientemente fuerte, por favor usa una contraseña más compleja",
+          "sessionExpired": "La sesión ha expirado, por favor solicita el restablecimiento de contraseña nuevamente",
+          "resetFailed": "Error en el restablecimiento de contraseña, por favor inténtalo más tarde",
+          "linkInvalid": "Error en la verificación del enlace de restablecimiento",
+          "linkExpired": "El enlace de restablecimiento es inválido o ha expirado, por favor solicita el restablecimiento de contraseña nuevamente",
+          "verifyFailed": "Error en la verificación, por favor solicita el restablecimiento de contraseña nuevamente"
+        }
+      },
+      "phoneLogin": {
+        "title": "Inicio de Sesión por Teléfono",
+        "subtitle": "Inicia sesión usando tu número de teléfono para recibir código de verificación",
+        "otpSubtitle": "Por favor ingresa el código de verificación de 6 dígitos que recibiste",
+        "phoneLabel": "Número de Teléfono",
+        "otpLabel": "Código de Verificación",
+        "phonePlaceholder": "13812345678",
+        "otpPlaceholder": "Ingresa código de 6 dígitos",
+        "sendOtpButton": "Enviar Código de Verificación",
+        "sendingButton": "Enviando...",
+        "verifyButton": "Verificar Código",
+        "verifyingButton": "Verificando...",
+        "resendButton": "Reenviar Código de Verificación",
+        "changePhoneButton": "Cambiar Número de Teléfono",
+        "otpSentTo": "Código de verificación enviado a +86{phone}",
+        "errors": {
+          "phoneRequired": "Por favor ingresa tu número de teléfono",
+          "phoneInvalid": "Por favor ingresa un número de teléfono válido de China continental",
+          "otpRequired": "Por favor ingresa el código de verificación",
+          "otpInvalid": "El código de verificación debe ser de 6 dígitos",
+          "sendFailed": "Error al enviar el código de verificación, por favor inténtalo más tarde",
+          "verifyFailed": "El código de verificación es incorrecto, por favor ingrésalo nuevamente"
+        },
+        "success": {
+          "otpSent": "Código de verificación enviado, por favor revisa tu SMS",
+          "verifySuccess": "¡Verificación exitosa! Iniciando sesión..."
+        }
+      },
+      "sso": {
+        "bistu": {
+          "title": "Autenticación Unificada de la Universidad de Ciencia y Tecnología de la Información de Beijing",
+          "subtitle": "Inicia sesión con tu ID de estudiante/empleado y contraseña",
+          "button": "Iniciar sesión con Autenticación Unificada BISTU",
+          "simpleButton": "🏛️ Autenticación Unificada BISTU",
+          "jumpingButton": "Redirigiendo...",
+          "helpText": "La cuenta se creará automáticamente en el primer inicio de sesión",
+          "contactText": "Por favor contacta al administrador del sistema si tienes alguna pregunta",
+          "startError": "Error al iniciar el inicio de sesión SSO, por favor inténtalo más tarde"
+        },
+        "processing": {
+          "title": "Inicio de Sesión SSO",
+          "processing": "Procesando inicio de sesión SSO...",
+          "welcome": "Bienvenido {name}, estableciendo sesión...",
+          "verifying": "Verificando identidad...",
+          "sessionCheck": "Verificando sesión...",
+          "success": "¡Inicio de sesión exitoso! Redirigiendo...",
+          "failed": "Error en el inicio de sesión",
+          "redirecting": "Se redirigirá automáticamente a la página de inicio de sesión en 3 segundos...",
+          "errors": {
+            "missingParams": "Parámetros SSO faltantes o inválidos",
+            "userDataNotFound": "Datos de usuario SSO no encontrados",
+            "sessionExpired": "Sesión SSO expirada, por favor inicia sesión nuevamente",
+            "loginFailed": "Error en el inicio de sesión SSO",
+            "sessionValidationFailed": "Error en la validación de sesión",
+            "noValidSessionData": "El servidor no devolvió datos de sesión válidos",
+            "processingFailed": "Error en el procesamiento SSO"
+          }
+        }
+      },
+      "social": {
+        "github": {
+          "login": "Iniciar sesión con GitHub",
+          "register": "Registrarse con GitHub",
+          "failed": "Error en el inicio de sesión con GitHub"
+        }
+      }
     },
     "settings": {
       "title": "Configuración",

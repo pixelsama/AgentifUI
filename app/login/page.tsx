@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 import { useTheme } from '@lib/hooks/use-theme';
+import { useTranslations } from 'next-intl';
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const resetSuccess = searchParams.get('reset');
   const oauthError = searchParams.get('error');
   const { isDark } = useTheme();
+  const t = useTranslations('pages.auth.login');
   const [mounted, setMounted] = useState(false);
   
   // 确保客户端渲染一致性
@@ -66,25 +68,25 @@ export default function LoginPage() {
   const getErrorMessage = (error: string) => {
     switch (error) {
       case 'oauth_failed':
-        return 'OAuth登录失败，请重试或使用其他登录方式';
+        return t('errors.oauthFailed');
       case 'sso_callback_failed':
-        return 'SSO认证回调处理失败，请重新尝试登录';
+        return t('errors.ssoCallbackFailed');
       case 'ticket_validation_failed':
-        return 'SSO票据验证失败，请重新登录';
+        return t('errors.ticketValidationFailed');
       case 'invalid_employee_number':
-        return '学工号格式不正确，请联系管理员';
+        return t('errors.invalidEmployeeNumber');
       case 'user_creation_failed':
-        return '账户创建失败，这可能是由于账户数据不一致导致的。请尝试重新登录，如果问题持续存在，请联系管理员';
+        return t('errors.userCreationFailed');
       case 'account_data_inconsistent':
-        return '账户数据不一致，系统正在尝试自动修复。请稍等片刻后重新登录';
+        return t('errors.accountDataInconsistent');
       case 'profile_creation_failed':
-        return '用户档案创建失败，请联系管理员协助解决';
+        return t('errors.profileCreationFailed');
       case 'sso_provider_not_found':
-        return 'SSO服务配置错误，请联系管理员';
+        return t('errors.ssoProviderNotFound');
       case 'missing_ticket':
-        return '认证参数缺失，请重新登录';
+        return t('errors.missingTicket');
       default:
-        return '登录过程中出现错误，请稍后重试';
+        return t('errors.default');
     }
   };
 
@@ -99,7 +101,7 @@ export default function LoginPage() {
           <Alert className={`max-w-md border-l-4 ${colors.alertBg} ${colors.alertBorder}`}>
             <CheckCircle className={`h-4 w-4 ${colors.iconColor}`} />
             <AlertDescription className={`${colors.alertText} font-serif`}>
-              注册成功！请查看您的邮箱以验证账户，然后登录。
+              {t('alerts.registered')}
             </AlertDescription>
           </Alert>
         </motion.div>
@@ -113,7 +115,7 @@ export default function LoginPage() {
           <Alert className={`max-w-md border-l-4 ${colors.alertBg} ${colors.alertBorder}`}>
             <CheckCircle className={`h-4 w-4 ${colors.iconColor}`} />
             <AlertDescription className={`${colors.alertText} font-serif`}>
-              密码重置成功！请使用新密码登录。
+              {t('alerts.resetSuccess')}
             </AlertDescription>
           </Alert>
         </motion.div>

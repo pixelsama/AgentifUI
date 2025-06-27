@@ -9,10 +9,14 @@ import { cn } from '@lib/utils';
 import { useTheme } from '@lib/hooks/use-theme';
 import { SocialAuthButtons } from './social-auth-buttons';
 import { Eye, EyeOff } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export function RegisterForm() {
   const router = useRouter();
   const supabase = createClient();
+  const { isDark } = useTheme();
+  const t = useTranslations('pages.auth.register');
+  
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -24,7 +28,6 @@ export function RegisterForm() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { isDark } = useTheme();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -39,28 +42,28 @@ export function RegisterForm() {
     
     // 表单验证
     if (!formData.name.trim()) {
-      setError('请输入姓名');
+      setError(t('errors.nameRequired'));
       return;
     }
     
     if (!formData.email.trim()) {
-      setError('请输入邮箱地址');
+      setError(t('errors.emailRequired'));
       return;
     }
     
     if (formData.password.length < 6) {
-      setError('密码长度至少6位');
+      setError(t('errors.passwordTooShort'));
       return;
     }
     
     if (formData.password !== formData.confirmPassword) {
-      setError('两次输入的密码不一致');
+      setError(t('errors.passwordMismatch'));
       return;
     }
     
     // 验证用户名格式（如果提供）
     if (formData.username.trim() && !/^[a-zA-Z0-9_-]{2,20}$/.test(formData.username.trim())) {
-      setError('昵称只能包含字母、数字、下划线和连字符，长度2-20位');
+      setError(t('errors.usernameInvalid'));
       return;
     }
     
@@ -83,11 +86,11 @@ export function RegisterForm() {
       if (signUpError) {
         // 处理常见的注册错误
         if (signUpError.message.includes('already registered')) {
-          throw new Error('该邮箱已被注册，请使用其他邮箱或直接登录');
+          throw new Error(t('errors.emailExists'));
         } else if (signUpError.message.includes('Password should be')) {
-          throw new Error('密码强度不够，请使用更复杂的密码');
+          throw new Error(t('errors.passwordWeak'));
         } else if (signUpError.message.includes('Invalid email')) {
-          throw new Error('邮箱格式不正确，请检查后重试');
+          throw new Error(t('errors.emailInvalid'));
         } else {
           throw signUpError;
         }
@@ -102,7 +105,7 @@ export function RegisterForm() {
         router.push('/login?registered=true');
       }
     } catch (err: any) {
-      setError(err.message || '注册失败，请稍后再试');
+      setError(err.message || t('errors.registerFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -114,12 +117,12 @@ export function RegisterForm() {
       isDark ? "bg-stone-900 border-stone-800" : "bg-stone-50 border-stone-200"
     )}>
       <div className="text-center">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text text-transparent font-serif">注册</h2>
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text text-transparent font-serif">{t('title')}</h2>
         <p className={cn(
           "mt-2 text-sm font-serif",
           isDark ? "text-gray-400" : "text-gray-600"
         )}>
-          加入 AgentifUI，开启 AI 智能之旅
+          {t('subtitle')}
         </p>
       </div>
 
@@ -152,7 +155,7 @@ export function RegisterForm() {
               "px-2 font-serif",
               isDark ? "bg-stone-900 text-gray-400" : "bg-stone-50 text-gray-500"
             )}>
-              或使用邮箱密码
+              {t('orSeparator')}
             </span>
           </div>
         </div>
@@ -164,7 +167,7 @@ export function RegisterForm() {
                 "block text-sm font-medium mb-1 font-serif",
                 isDark ? "text-gray-300" : "text-gray-700"
               )}>
-                姓名
+                {t('nameLabel')}
               </label>
               <input
                 id="name"
@@ -178,7 +181,7 @@ export function RegisterForm() {
                   "block w-full px-4 py-3 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
                   isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
                 )}
-                placeholder="输入您的姓名"
+                placeholder={t('namePlaceholder')}
               />
             </div>
             
@@ -187,7 +190,7 @@ export function RegisterForm() {
                 "block text-sm font-medium mb-1 font-serif",
                 isDark ? "text-gray-300" : "text-gray-700"
               )}>
-                昵称 <span className="text-gray-500 text-xs font-serif">(可选)</span>
+                {t('usernameLabel')} <span className="text-gray-500 text-xs font-serif">{t('usernameOptional')}</span>
               </label>
               <input
                 id="username"
@@ -200,7 +203,7 @@ export function RegisterForm() {
                   "block w-full px-4 py-3 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
                   isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
                 )}
-                placeholder="选择一个用户名"
+                placeholder={t('usernamePlaceholder')}
               />
             </div>
             
@@ -209,7 +212,7 @@ export function RegisterForm() {
                 "block text-sm font-medium mb-1 font-serif",
                 isDark ? "text-gray-300" : "text-gray-700"
               )}>
-                邮箱
+                {t('emailLabel')}
               </label>
               <input
                 id="email"
@@ -223,7 +226,7 @@ export function RegisterForm() {
                   "block w-full px-4 py-3 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
                   isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
                 )}
-                placeholder="your@email.com"
+                placeholder={t('emailPlaceholder')}
               />
             </div>
 
@@ -232,7 +235,7 @@ export function RegisterForm() {
                 "block text-sm font-medium mb-1 font-serif",
                 isDark ? "text-gray-300" : "text-gray-700"
               )}>
-                密码
+                {t('passwordLabel')}
               </label>
               <div className="relative">
                 <input
@@ -247,7 +250,7 @@ export function RegisterForm() {
                     "block w-full px-4 py-3 pr-12 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
                     isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
                   )}
-                  placeholder="••••••••"
+                  placeholder={t('passwordPlaceholder')}
                 />
                 <button
                   type="button"
@@ -256,7 +259,7 @@ export function RegisterForm() {
                     "absolute inset-y-0 right-0 flex items-center pr-3 text-sm leading-5 focus:outline-none transition-colors",
                     isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-500 hover:text-stone-600"
                   )}
-                  aria-label={showPassword ? "隐藏密码" : "显示密码"}
+                  aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                 >
                   {showPassword ? (
                     <Eye className="h-5 w-5" />
@@ -272,7 +275,7 @@ export function RegisterForm() {
                 "block text-sm font-medium mb-1 font-serif",
                 isDark ? "text-gray-300" : "text-gray-700"
               )}>
-                确认密码
+                {t('confirmPasswordLabel')}
               </label>
               <div className="relative">
                 <input
@@ -287,7 +290,7 @@ export function RegisterForm() {
                     "block w-full px-4 py-3 pr-12 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
                     isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
                   )}
-                  placeholder="••••••••"
+                  placeholder={t('passwordPlaceholder')}
                 />
                 <button
                   type="button"
@@ -296,7 +299,7 @@ export function RegisterForm() {
                     "absolute inset-y-0 right-0 flex items-center pr-3 text-sm leading-5 focus:outline-none transition-colors",
                     isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-500 hover:text-stone-600"
                   )}
-                  aria-label={showConfirmPassword ? "隐藏确认密码" : "显示确认密码"}
+                  aria-label={showConfirmPassword ? t('hideConfirmPassword') : t('showConfirmPassword')}
                 >
                   {showConfirmPassword ? (
                     <Eye className="h-5 w-5" />
@@ -315,7 +318,7 @@ export function RegisterForm() {
               className="w-full h-12 text-base font-serif"
               variant="gradient"
             >
-              创建账户
+              {t('createAccountButton')}
             </Button>
           </div>
         </form>
@@ -329,7 +332,7 @@ export function RegisterForm() {
             "text-sm font-medium font-serif hover:underline",
             isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-600 hover:text-stone-700"
           )}>
-            📱 使用手机号验证码登录
+            {t('phoneLoginLink')}
           </Link>
         </div>
         
@@ -337,12 +340,12 @@ export function RegisterForm() {
           "text-sm font-serif",
           isDark ? "text-gray-400" : "text-gray-600"
         )}>
-          已有账户？{' '}
+          {t('hasAccountText')}{' '}
           <Link href="/login" className={cn(
             "font-medium font-serif",
             isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-700 hover:text-stone-600"
           )}>
-            立即登录
+            {t('loginLink')}
           </Link>
         </p>
       </div>

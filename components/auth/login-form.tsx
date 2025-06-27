@@ -11,11 +11,13 @@ import { SocialAuthButtons } from './social-auth-buttons';
 import { BistuSSOCard } from './bistu-sso-button';
 import { Eye, EyeOff } from 'lucide-react';
 import { clearCacheOnLogin } from '@lib/utils/cache-cleanup';
+import { useTranslations } from 'next-intl';
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isDark } = useTheme();
+  const t = useTranslations('pages.auth.login');
   
   // --- BEGIN COMMENT ---
   // 检查是否启用北信科专用模式
@@ -69,7 +71,7 @@ export function LoginForm() {
       router.refresh(); // 刷新页面以更新用户状态
     } catch (err: any) {
       console.error('[登录] 邮箱密码登录失败:', err);
-      setError(err.message || '登录失败，请检查您的邮箱和密码');
+      setError(err.message || t('errors.loginFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -81,12 +83,12 @@ export function LoginForm() {
       isDark ? "bg-stone-900 border-stone-800" : "bg-stone-50 border-stone-200"
     )}>
       <div className="text-center">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text text-transparent font-serif">登录</h2>
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text text-transparent font-serif">{t('title')}</h2>
         <p className={cn(
           "mt-2 text-sm font-serif",
           isDark ? "text-gray-400" : "text-gray-600"
         )}>
-          欢迎使用智能助手
+          {t('subtitle')}
         </p>
       </div>
 
@@ -137,7 +139,7 @@ export function LoginForm() {
               "px-2 font-serif",
               isDark ? "bg-stone-900 text-gray-400" : "bg-stone-50 text-gray-500"
             )}>
-              {ssoOnlyMode ? "或使用邮箱密码" : "使用邮箱密码登录"}
+              {ssoOnlyMode ? t('orSeparatorSso') : t('orSeparator')}
             </span>
           </div>
         </div>
@@ -153,7 +155,7 @@ export function LoginForm() {
                     "block text-sm font-medium mb-1 font-serif",
                     isDark ? "text-gray-300" : "text-gray-700"
                   )}>
-                    邮箱
+                    {t('emailLabel')}
                   </label>
                   <input
                     id="email"
@@ -165,7 +167,7 @@ export function LoginForm() {
                       "block w-full px-4 py-3 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
                       isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
                     )}
-                    placeholder="your@email.com"
+                    placeholder={t('emailPlaceholder')}
                     value={formData.email}
                     onChange={handleChange}
                   />
@@ -176,7 +178,7 @@ export function LoginForm() {
                     "block text-sm font-medium mb-1 font-serif",
                     isDark ? "text-gray-300" : "text-gray-700"
                   )}>
-                    密码
+                    {t('passwordLabel')}
                   </label>
                   <div className="relative">
                     <input
@@ -189,7 +191,7 @@ export function LoginForm() {
                         "block w-full px-4 py-3 pr-12 border rounded-lg shadow-sm placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
                         isDark ? "bg-stone-800 border-stone-700 text-white" : "bg-white border-stone-300"
                       )}
-                      placeholder="••••••••"
+                      placeholder={t('passwordPlaceholder')}
                       value={formData.password}
                       onChange={handleChange}
                     />
@@ -200,7 +202,7 @@ export function LoginForm() {
                         "absolute inset-y-0 right-0 flex items-center pr-3 text-sm leading-5 focus:outline-none transition-colors",
                         isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-500 hover:text-stone-600"
                       )}
-                      aria-label={showPassword ? "隐藏密码" : "显示密码"}
+                      aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                     >
                       {showPassword ? (
                         <Eye className="h-5 w-5" />
@@ -222,7 +224,7 @@ export function LoginForm() {
                       "font-medium font-serif",
                       isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-700 hover:text-stone-600"
                     )}>
-                      忘记密码？
+                      {t('forgotPasswordLink')}
                     </Link>
                   </div>
                 </div>
@@ -235,7 +237,7 @@ export function LoginForm() {
                   className="w-full h-12 text-base font-serif"
                   variant="gradient"
                 >
-                  登录
+                  {t('loginButton')}
                 </Button>
               </div>
             </form>
@@ -253,7 +255,7 @@ export function LoginForm() {
                     "text-sm font-medium font-serif hover:underline",
                     isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-600 hover:text-stone-700"
                   )}>
-                    📱 使用手机号验证码登录
+                    {t('phoneLoginLink')}
                   </Link>
                 </div>
                 
@@ -261,12 +263,12 @@ export function LoginForm() {
                   "text-sm font-serif",
                   isDark ? "text-gray-400" : "text-gray-600"
                 )}>
-                  还没有账号？{' '}
+                  {t('noAccountText')}{' '}
                   <Link href="/register" className={cn(
                     "font-medium font-serif",
                     isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-700 hover:text-stone-600"
                   )}>
-                    立即注册
+                    {t('registerLink')}
                   </Link>
                 </p>
               </div>

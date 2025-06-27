@@ -6,6 +6,7 @@ import { Loader2, Phone, MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
+import { useTranslations } from 'next-intl'
 
 export default function PhoneAuth() {
   const [phone, setPhone] = useState('')
@@ -14,18 +15,19 @@ export default function PhoneAuth() {
   const [loading, setLoading] = useState(false)
   const { isDark } = useTheme()
   const supabase = createClient()
+  const t = useTranslations('pages.auth.phoneLogin')
 
   // --- 发送验证码 ---
   const sendOTP = async () => {
     if (!phone.trim()) {
-      toast.error('请输入手机号')
+      toast.error(t('errors.phoneRequired'))
       return
     }
 
     // 验证手机号格式（中国手机号）
     const phoneRegex = /^1[3-9]\d{9}$/
     if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
-      toast.error('请输入正确的中国大陆手机号')
+      toast.error(t('errors.phoneInvalid'))
       return
     }
 
@@ -38,11 +40,11 @@ export default function PhoneAuth() {
 
       if (error) throw error
 
-      toast.success('验证码已发送，请查收短信')
+      toast.success(t('success.otpSent'))
       setStep('otp')
     } catch (error: any) {
       console.error('发送验证码失败:', error)
-      toast.error(error.message || '发送验证码失败，请稍后重试')
+      toast.error(error.message || t('errors.sendFailed'))
     } finally {
       setLoading(false)
     }
@@ -51,12 +53,12 @@ export default function PhoneAuth() {
   // --- 验证OTP ---
   const verifyOTP = async () => {
     if (!otp.trim()) {
-      toast.error('请输入验证码')
+      toast.error(t('errors.otpRequired'))
       return
     }
 
     if (otp.length !== 6) {
-      toast.error('验证码应为6位数字')
+      toast.error(t('errors.otpInvalid'))
       return
     }
 
@@ -71,13 +73,13 @@ export default function PhoneAuth() {
 
       if (error) throw error
 
-      toast.success('验证成功！正在登录...')
+      toast.success(t('success.verifySuccess'))
       
       // 登录成功后重定向
       window.location.href = '/chat'
     } catch (error: any) {
       console.error('验证失败:', error)
-      toast.error(error.message || '验证码错误，请重新输入')
+      toast.error(error.message || t('errors.verifyFailed'))
     } finally {
       setLoading(false)
     }
@@ -98,15 +100,15 @@ export default function PhoneAuth() {
       <div className="text-center">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text text-transparent font-serif flex items-center justify-center gap-2">
           <Phone className="h-6 w-6 text-stone-600" />
-          手机号登录
+          {t('title')}
         </h2>
         <p className={cn(
           "mt-2 text-sm font-serif",
           isDark ? "text-gray-400" : "text-gray-600"
         )}>
           {step === 'phone' 
-            ? '使用手机号接收验证码登录' 
-            : '请输入收到的6位验证码'
+            ? t('subtitle')
+            : t('otpSubtitle')
           }
         </p>
       </div>
@@ -119,7 +121,7 @@ export default function PhoneAuth() {
               <label htmlFor="phone" className={cn(
                 "block text-sm font-medium mb-1 font-serif",
                 isDark ? "text-gray-300" : "text-gray-700"
-              )}>手机号</label>
+              )}>{t('phoneLabel')}</label>
               <div className="flex">
                 <span className={cn(
                   "inline-flex items-center px-3 text-sm border border-r-0 rounded-l-lg font-serif",
@@ -132,7 +134,7 @@ export default function PhoneAuth() {
                 <input
                   id="phone"
                   type="tel"
-                  placeholder="13812345678"
+                  placeholder={t('phonePlaceholder')}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
                   className={cn(
@@ -158,12 +160,12 @@ export default function PhoneAuth() {
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  发送中...
+                  {t('sendingButton')}
                 </>
               ) : (
                 <>
                   <MessageSquare className="h-4 w-4" />
-                  发送验证码
+                  {t('sendOtpButton')}
                 </>
               )}
             </button>
@@ -175,11 +177,11 @@ export default function PhoneAuth() {
               <label htmlFor="otp" className={cn(
                 "block text-sm font-medium mb-1 font-serif",
                 isDark ? "text-gray-300" : "text-gray-700"
-              )}>验证码</label>
+              )}>{t('otpLabel')}</label>
               <input
                 id="otp"
                 type="text"
-                placeholder="请输入6位验证码"
+                placeholder={t('otpPlaceholder')}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 className={cn(
@@ -195,7 +197,7 @@ export default function PhoneAuth() {
                 "mt-1 text-sm font-serif",
                 isDark ? "text-gray-400" : "text-gray-600"
               )}>
-                验证码已发送至 +86{phone}
+                {t('otpSentTo', { phone })}
               </p>
             </div>
 
@@ -211,10 +213,10 @@ export default function PhoneAuth() {
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  验证中...
+                  {t('verifyingButton')}
                 </>
               ) : (
-                '确认验证码'
+                t('verifyButton')
               )}
             </button>
 
@@ -229,7 +231,7 @@ export default function PhoneAuth() {
                   : "border-stone-300 text-gray-700 hover:bg-stone-50"
               )}
             >
-              重新发送验证码
+              {t('resendButton')}
             </button>
 
             {/* --- 返回修改手机号 --- */}
@@ -243,7 +245,7 @@ export default function PhoneAuth() {
                   : "text-gray-600 hover:text-gray-700 hover:bg-stone-50"
               )}
             >
-              修改手机号
+              {t('changePhoneButton')}
             </button>
           </>
         )}

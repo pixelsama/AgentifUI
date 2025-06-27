@@ -8,14 +8,17 @@ import { createClient } from '../../lib/supabase/client';
 import { ArrowLeft, Mail } from 'lucide-react';
 import { cn } from '@lib/utils';
 import { useTheme } from '@lib/hooks/use-theme';
+import { useTranslations } from 'next-intl';
 
 export function ForgotPasswordForm() {
   const router = useRouter();
+  const { isDark } = useTheme();
+  const t = useTranslations('pages.auth.forgotPassword');
+  
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isEmailSent, setIsEmailSent] = useState(false);
-  const { isDark } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,9 +44,9 @@ export function ForgotPasswordForm() {
       if (error) {
         // --- 处理常见错误情况 ---
         if (error.message.includes('Invalid email')) {
-          throw new Error('请输入有效的邮箱地址');
+          throw new Error(t('errors.emailRequired'));
         } else if (error.message.includes('rate limit')) {
-          throw new Error('发送过于频繁，请稍后再试');
+          throw new Error(t('errors.rateLimited'));
         } else {
           throw error;
         }
@@ -52,7 +55,7 @@ export function ForgotPasswordForm() {
       // --- 发送成功 ---
       setIsEmailSent(true);
     } catch (err: any) {
-      setError(err.message || '发送失败，请稍后再试');
+      setError(err.message || t('errors.sendFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -89,16 +92,13 @@ export function ForgotPasswordForm() {
               "text-xl sm:text-2xl font-bold text-stone-900 font-serif",
               isDark ? "bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text text-transparent" : ""
             )}>
-              邮件已发送
+              {t('success.title')}
             </h2>
             <p className={cn(
               "mt-2 text-sm font-serif",
               isDark ? "text-stone-400" : "text-stone-600"
             )}>
-              我们已向 <span className={cn(
-                "font-medium font-serif",
-                isDark ? "text-stone-300" : "text-stone-700"
-              )}>{email}</span> 发送了重置密码链接
+              {t('success.message', { email })}
             </p>
           </div>
 
@@ -106,8 +106,8 @@ export function ForgotPasswordForm() {
             "p-4 rounded-lg text-sm border-l-4 font-serif",
             isDark ? "bg-stone-800/50 text-stone-300 border-stone-600" : "bg-stone-50 text-stone-700 border-stone-400"
           )}>
-            <p>请检查您的邮箱（包括垃圾邮件文件夹）并点击链接重置密码。</p>
-            <p className="mt-2">如果您没有收到邮件，请检查邮箱地址是否正确或稍后重试。</p>
+            <p>{t('success.instructions')}</p>
+            <p className="mt-2">{t('success.noEmail')}</p>
           </div>
 
           <div className="text-center">
@@ -119,7 +119,7 @@ export function ForgotPasswordForm() {
               )}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              返回登录
+              {t('backToLogin')}
             </Link>
           </div>
         </div>
@@ -142,13 +142,13 @@ export function ForgotPasswordForm() {
             "text-xl sm:text-2xl font-bold text-stone-900 font-serif",
             isDark ? "bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text text-transparent" : ""
           )}>
-            忘记密码
+            {t('title')}
           </h2>
           <p className={cn(
             "mt-2 text-sm font-serif",
             isDark ? "text-stone-400" : "text-stone-600"
           )}>
-            输入您的邮箱地址，我们将发送重置密码链接
+            {t('subtitle')}
           </p>
         </div>
 
@@ -167,7 +167,7 @@ export function ForgotPasswordForm() {
               "block text-sm font-medium mb-1 font-serif",
               isDark ? "text-stone-300" : "text-stone-700"
             )}>
-              邮箱地址
+              {t('emailLabel')}
             </label>
             <input
               id="email"
@@ -181,7 +181,7 @@ export function ForgotPasswordForm() {
                 "appearance-none relative block w-full px-3 py-2 border placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
                 isDark ? "bg-stone-800 border-stone-700 text-white" : "border-gray-300 text-gray-900"
               )}
-              placeholder="your@email.com"
+              placeholder={t('emailPlaceholder')}
             />
           </div>
 
@@ -193,7 +193,7 @@ export function ForgotPasswordForm() {
               isDark ? "bg-stone-800 hover:bg-stone-700" : "bg-stone-500 hover:bg-stone-600"
             )}
           >
-            {isLoading ? '发送中...' : '发送重置链接'}
+            {isLoading ? t('sendingButton') : t('sendButton')}
           </button>
         </form>
 
@@ -206,7 +206,7 @@ export function ForgotPasswordForm() {
             )}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            返回登录
+            {t('backToLogin')}
           </Link>
         </div>
       </div>

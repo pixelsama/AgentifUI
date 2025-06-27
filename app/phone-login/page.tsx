@@ -4,9 +4,11 @@ import PhoneAuth from '@components/auth/phone-auth'
 import Link from 'next/link'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
+import { useTranslations } from 'next-intl'
 
 export default function PhoneLoginPage() {
   const { isDark } = useTheme()
+  const t = useTranslations('pages.auth.phoneLoginPage')
   
   return (
     <div className={cn(
@@ -22,13 +24,13 @@ export default function PhoneLoginPage() {
             "text-3xl font-bold tracking-tight font-serif",
             isDark ? "text-gray-100" : "text-gray-900"
           )}>
-            AgentifUI
+            {t('title')}
           </h1>
           <p className={cn(
             "text-sm font-serif",
             isDark ? "text-gray-400" : "text-gray-600"
           )}>
-            智能对话，触手可及
+            {t('subtitle')}
           </p>
         </div>
 
@@ -55,7 +57,7 @@ export default function PhoneLoginPage() {
                     ? "bg-stone-900 text-gray-400" 
                     : "bg-stone-50 text-gray-500"
                 )}>
-                  或者
+                  {t('orSeparator')}
                 </span>
               </div>
             </div>
@@ -70,7 +72,7 @@ export default function PhoneLoginPage() {
                     : "text-stone-600 hover:text-stone-700"
                 )}
               >
-                使用邮箱密码登录
+                {t('emailLoginLink')}
               </Link>
               <Link 
                 href="/register" 
@@ -81,7 +83,7 @@ export default function PhoneLoginPage() {
                     : "text-gray-600 hover:text-gray-700"
                 )}
               >
-                还没有账号？立即注册
+                {t('registerLink')}
               </Link>
             </div>
           </div>
@@ -92,19 +94,19 @@ export default function PhoneLoginPage() {
           "text-xs text-center font-serif",
           isDark ? "text-gray-500" : "text-gray-500"
         )}>
-          登录即表示您同意我们的{' '}
+          {t('termsText')}{' '}
           <Link href="/terms" className={cn(
             "underline",
             isDark ? "hover:text-gray-400" : "hover:text-gray-700"
           )}>
-            服务条款
+            {t('termsLink')}
           </Link>{' '}
-          和{' '}
+          {t('andText')}{' '}
           <Link href="/privacy" className={cn(
             "underline",
             isDark ? "hover:text-gray-400" : "hover:text-gray-700"
           )}>
-            隐私政策
+            {t('privacyLink')}
           </Link>
         </p>
       </div>

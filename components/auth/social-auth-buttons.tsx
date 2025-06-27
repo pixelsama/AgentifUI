@@ -5,6 +5,7 @@ import { createClient } from '@lib/supabase/client';
 import { Button } from '@components/ui/button';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
+import { useTranslations } from 'next-intl';
 
 // --- BEGIN COMMENT ---
 // 社交登录图标组件
@@ -48,6 +49,8 @@ export function SocialAuthButtons({
   className 
 }: SocialAuthButtonsProps) {
   const { isDark } = useTheme();
+  const t = useTranslations('pages.auth.social.github');
+  
   const [isLoading, setIsLoading] = useState({
     github: false,
   });
@@ -89,7 +92,7 @@ export function SocialAuthButtons({
       // --- END COMMENT ---
     } catch (err: any) {
       console.error(`GitHub 登录失败:`, err);
-      setError(err.message || 'GitHub 登录失败');
+      setError(err.message || t('failed'));
       setIsLoading(prev => ({ ...prev, [provider]: false }));
     }
   };
@@ -113,7 +116,7 @@ export function SocialAuthButtons({
         variant="outline"
         size="lg"
         className={cn(
-          "w-full h-12 font-serif flex items-center justify-center gap-3 relative",
+          "w-full h-12 font-serif flex items-center justify-center gap-3 relative cursor-pointer",
           isDark 
             ? "border-stone-700 bg-stone-800 hover:bg-stone-700 text-white" 
             : "border-stone-300 bg-white hover:bg-stone-50 text-stone-700"
@@ -123,7 +126,7 @@ export function SocialAuthButtons({
         isLoading={isLoading.github}
       >
         {!isLoading.github && <GitHubIcon className="w-5 h-5" />}
-        使用 GitHub {type === 'register' ? '注册' : '登录'}
+        {type === 'register' ? t('register') : t('login')}
       </Button>
     </div>
   );

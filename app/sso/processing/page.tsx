@@ -12,14 +12,16 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { createClient } from '@lib/supabase/client';
 import { cn } from '@lib/utils';
+import { useTranslations } from 'next-intl';
 
 export default function SSOProcessingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { colors, isDark } = useThemeColors();
+  const t = useTranslations('pages.auth.sso.processing');
   
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
-  const [message, setMessage] = useState('正在处理SSO登录...');
+  const [message, setMessage] = useState(t('processing'));
   const [error, setError] = useState<string>('');
   
   const hasProcessedRef = useRef(false);
@@ -46,10 +48,10 @@ export default function SSOProcessingPage() {
         console.log('SSO Processing - URL params:', { ssoLogin, welcome, redirectTo, userId, userEmail });
 
         if (ssoLogin !== 'success' || !userId || !userEmail) {
-          throw new Error('SSO参数缺失或无效');
+          throw new Error(t('errors.missingParams'));
         }
 
-        setMessage(`欢迎 ${welcome || '用户'}，正在建立会话...`);
+        setMessage(t('welcome', { name: welcome || 'User' }));
 
         // --- 读取SSO用户数据cookie ---
         const ssoUserCookie = document.cookie
@@ -57,17 +59,17 @@ export default function SSOProcessingPage() {
           .find(row => row.startsWith('sso_user_data='));
         
         if (!ssoUserCookie) {
-          throw new Error('SSO用户数据未找到');
+          throw new Error(t('errors.userDataNotFound'));
         }
         
         const ssoUserData = JSON.parse(decodeURIComponent(ssoUserCookie.split('=')[1]));
         
         // --- 检查数据是否过期 ---
         if (Date.now() > ssoUserData.expiresAt) {
-          throw new Error('SSO会话已过期，请重新登录');
+          throw new Error(t('errors.sessionExpired'));
         }
 
-        setMessage('正在验证身份...');
+        setMessage(t('verifying'));
 
         // --- 调用SSO登录API ---
         const response = await fetch('/api/auth/sso-signin', {
@@ -84,20 +86,20 @@ export default function SSOProcessingPage() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || 'SSO登录失败');
+          throw new Error(errorData.message || t('errors.loginFailed'));
         }
 
         const { session } = await response.json();
         
         if (session) {
-          setMessage('正在验证会话...');
+          setMessage(t('sessionCheck'));
           
           // --- 验证会话是否真正建立 ---
           const supabase = createClient();
           const { data: { user }, error: getUserError } = await supabase.auth.getUser();
           
           if (getUserError || !user) {
-            throw new Error('会话验证失败');
+            throw new Error(t('errors.sessionValidationFailed'));
           }
           
           console.log('会话验证成功，用户ID:', user.id);
@@ -106,7 +108,7 @@ export default function SSOProcessingPage() {
           document.cookie = 'sso_user_data=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
           
           setStatus('success');
-          setMessage(`登录成功！正在跳转...`);
+          setMessage(t('success'));
           
           // --- 跳转到目标页面 ---
           setTimeout(() => {
@@ -114,13 +116,13 @@ export default function SSOProcessingPage() {
             router.replace(redirectTo);
           }, 1000);
         } else {
-          throw new Error('服务器未返回有效会话数据');
+          throw new Error(t('errors.noValidSessionData'));
         }
       } catch (err: any) {
         console.error('SSO处理失败:', err);
         setStatus('error');
-        setError(err.message || 'SSO处理失败');
-        setMessage('登录失败');
+        setError(err.message || t('errors.processingFailed'));
+        setMessage(t('failed'));
         
         // --- 清理可能存在的会话cookie ---
         document.cookie = 'sso_user_data=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
@@ -135,7 +137,7 @@ export default function SSOProcessingPage() {
     };
 
     handleSSOProcessing();
-  }, [searchParams, router]);
+  }, [searchParams, router, t]);
 
   return (
     <div className={cn(
@@ -149,7 +151,7 @@ export default function SSOProcessingPage() {
         {/* --- 标题 --- */}
         <div className="space-y-2">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text text-transparent">
-            SSO 登录
+            {t('title')}
           </h1>
         </div>
 
@@ -223,7 +225,7 @@ export default function SSOProcessingPage() {
               "text-xs mt-4",
               isDark ? "text-stone-400" : "text-stone-600"
             )}>
-              3秒后将自动跳转到登录页面...
+              {t('redirecting')}
             </p>
           )}
         </div>

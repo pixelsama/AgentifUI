@@ -433,13 +433,210 @@
       }
     },
     "auth": {
-      "loginTitle": "ログイン",
-      "registerTitle": "登録",
-      "email": "メールアドレス",
-      "password": "パスワード",
-      "forgotPassword": "パスワードを忘れましたか？",
-      "noAccount": "アカウントをお持ちでないですか？",
-      "hasAccount": "すでにアカウントをお持ちですか？"
+      "login": {
+        "title": "ログイン",
+        "subtitle": "インテリジェントアシスタントへようこそ",
+        "emailLabel": "メールアドレス",
+        "passwordLabel": "パスワード",
+        "emailPlaceholder": "your@email.com",
+        "passwordPlaceholder": "••••••••",
+        "loginButton": "ログイン",
+        "forgotPasswordLink": "パスワードを忘れましたか？",
+        "phoneLoginLink": "📱 電話番号による認証でログイン",
+        "noAccountText": "アカウントをお持ちでないですか？",
+        "registerLink": "今すぐ登録",
+        "showPassword": "パスワードを表示",
+        "hidePassword": "パスワードを非表示",
+        "orSeparator": "メールアドレスとパスワードでログイン",
+        "orSeparatorSso": "またはメールアドレスとパスワードを使用",
+        "alerts": {
+          "registered": "登録が完了しました！メールアドレスを確認してアカウントを認証し、ログインしてください。",
+          "resetSuccess": "パスワードリセットが完了しました！新しいパスワードでログインしてください。"
+        },
+        "errors": {
+          "oauthFailed": "OAuth ログインに失敗しました。再試行するか、他のログイン方法をお試しください",
+          "ssoCallbackFailed": "SSO認証コールバック処理に失敗しました。再度ログインをお試しください",
+          "ticketValidationFailed": "SSOチケット検証に失敗しました。再度ログインしてください",
+          "invalidEmployeeNumber": "従業員番号の形式が正しくありません。管理者にお問い合わせください",
+          "userCreationFailed": "アカウント作成に失敗しました。これはアカウントデータの不整合によるものかもしれません。再度ログインをお試しください。問題が続く場合は管理者にお問い合わせください",
+          "accountDataInconsistent": "アカウントデータに不整合があります。システムが自動修復を試行中です。しばらくお待ちいただき、再度ログインしてください",
+          "profileCreationFailed": "ユーザープロフィール作成に失敗しました。管理者にサポートをお問い合わせください",
+          "ssoProviderNotFound": "SSOサービス設定エラーです。管理者にお問い合わせください",
+          "missingTicket": "認証パラメータが不足しています。再度ログインしてください",
+          "default": "ログイン中にエラーが発生しました。後でもう一度お試しください",
+          "loginFailed": "ログインに失敗しました。メールアドレスとパスワードをご確認ください"
+        }
+      },
+      "register": {
+        "title": "登録",
+        "subtitle": "AgentifUIに参加して、AIの旅を始めましょう",
+        "nameLabel": "氏名",
+        "usernameLabel": "ユーザー名",
+        "usernameOptional": "（任意）",
+        "emailLabel": "メールアドレス",
+        "passwordLabel": "パスワード",
+        "confirmPasswordLabel": "パスワード確認",
+        "namePlaceholder": "氏名を入力してください",
+        "usernamePlaceholder": "ユーザー名を選択してください",
+        "emailPlaceholder": "your@email.com",
+        "passwordPlaceholder": "••••••••",
+        "createAccountButton": "アカウント作成",
+        "phoneLoginLink": "📱 電話番号による認証でログイン",
+        "hasAccountText": "すでにアカウントをお持ちですか？",
+        "loginLink": "今すぐログイン",
+        "showPassword": "パスワードを表示",
+        "hidePassword": "パスワードを非表示",
+        "showConfirmPassword": "確認パスワードを表示",
+        "hideConfirmPassword": "確認パスワードを非表示",
+        "orSeparator": "またはメールアドレスとパスワードを使用",
+        "errors": {
+          "nameRequired": "氏名を入力してください",
+          "emailRequired": "メールアドレスを入力してください",
+          "passwordTooShort": "パスワードは6文字以上である必要があります",
+          "passwordMismatch": "パスワードが一致しません",
+          "usernameInvalid": "ユーザー名には文字、数字、アンダースコア、ハイフンのみ使用でき、2〜20文字である必要があります",
+          "emailExists": "このメールアドレスは既に登録されています。別のメールアドレスを使用するか、直接ログインしてください",
+          "passwordWeak": "パスワードの強度が不足しています。より複雑なパスワードをお使いください",
+          "emailInvalid": "メールアドレスの形式が正しくありません。確認して再試行してください",
+          "registerFailed": "登録に失敗しました。後でもう一度お試しください"
+        }
+      },
+      "phoneLoginPage": {
+        "title": "AgentifUI",
+        "subtitle": "インテリジェント会話があなたの手に",
+        "orSeparator": "または",
+        "emailLoginLink": "メールアドレスとパスワードでログイン",
+        "registerLink": "アカウントをお持ちでないですか？今すぐ登録",
+        "termsText": "ログインすることで、当社の",
+        "termsLink": "利用規約",
+        "privacyLink": "プライバシーポリシー",
+        "andText": "および"
+      },
+      "ssoProcessing": {
+        "title": "SSO ログイン",
+        "loading": "読み込み中..."
+      },
+      "forgotPassword": {
+        "title": "パスワードを忘れた",
+        "subtitle": "メールアドレスを入力していただければ、パスワードリセットリンクを送信いたします",
+        "emailLabel": "メールアドレス",
+        "emailPlaceholder": "your@email.com",
+        "sendButton": "リセットリンクを送信",
+        "sendingButton": "送信中...",
+        "backToLogin": "ログインに戻る",
+        "success": {
+          "title": "メール送信完了",
+          "message": "{email} にパスワードリセットリンクを送信しました",
+          "instructions": "メール（迷惑メールフォルダを含む）をご確認いただき、リンクをクリックしてパスワードをリセットしてください。",
+          "noEmail": "メールが届かない場合は、メールアドレスが正しいかご確認いただくか、後でもう一度お試しください。"
+        },
+        "errors": {
+          "emailRequired": "有効なメールアドレスを入力してください",
+          "rateLimited": "リクエストが多すぎます。後でもう一度お試しください",
+          "sendFailed": "送信に失敗しました。後でもう一度お試しください"
+        }
+      },
+      "resetPassword": {
+        "title": "パスワードリセット",
+        "subtitle": "新しいパスワードを入力してください",
+        "verifying": "確認中",
+        "verifyingSubtitle": "リセットリンクを確認中...",
+        "invalidTitle": "無効なリンク",
+        "invalidSubtitle": "パスワードリセットリンクが期限切れまたは無効です",
+        "successTitle": "パスワードリセット成功",
+        "successSubtitle": "パスワードが正常にリセットされました",
+        "passwordLabel": "新しいパスワード",
+        "confirmPasswordLabel": "パスワード確認",
+        "passwordPlaceholder": "新しいパスワードを入力",
+        "confirmPasswordPlaceholder": "新しいパスワードを再入力",
+        "resetButton": "パスワードリセット",
+        "resettingButton": "リセット中...",
+        "showPassword": "新しいパスワードを表示",
+        "hidePassword": "新しいパスワードを非表示",
+        "showConfirmPassword": "確認パスワードを表示",
+        "hideConfirmPassword": "確認パスワードを非表示",
+        "passwordHint": "パスワードには大文字と小文字、数字を含む8文字以上が必要です",
+        "backToLogin": "ログインへ",
+        "retryReset": "パスワードリセットを再申請",
+        "successMessage": "新しいパスワードでアカウントにログインできるようになりました。",
+        "errors": {
+          "passwordRequired": "新しいパスワードを入力してください",
+          "passwordTooShort": "パスワードは6文字以上である必要があります",
+          "passwordMismatch": "パスワードが一致しません",
+          "passwordWeak": "パスワードの強度が不足しています。より複雑なパスワードをお使いください",
+          "sessionExpired": "セッションが期限切れです。パスワードリセットを再申請してください",
+          "resetFailed": "パスワードリセットに失敗しました。後でもう一度お試しください",
+          "linkInvalid": "リセットリンクの確認に失敗しました",
+          "linkExpired": "リセットリンクが無効または期限切れです。パスワードリセットを再申請してください",
+          "verifyFailed": "確認に失敗しました。パスワードリセットを再申請してください"
+        }
+      },
+      "phoneLogin": {
+        "title": "電話番号ログイン",
+        "subtitle": "電話番号を使用して認証コードを受信してログイン",
+        "otpSubtitle": "受信した6桁の認証コードを入力してください",
+        "phoneLabel": "電話番号",
+        "otpLabel": "認証コード",
+        "phonePlaceholder": "13812345678",
+        "otpPlaceholder": "6桁のコードを入力",
+        "sendOtpButton": "認証コードを送信",
+        "sendingButton": "送信中...",
+        "verifyButton": "コードを確認",
+        "verifyingButton": "確認中...",
+        "resendButton": "認証コードを再送信",
+        "changePhoneButton": "電話番号を変更",
+        "otpSentTo": "認証コードを +86{phone} に送信しました",
+        "errors": {
+          "phoneRequired": "電話番号を入力してください",
+          "phoneInvalid": "有効な中国本土の電話番号を入力してください",
+          "otpRequired": "認証コードを入力してください",
+          "otpInvalid": "認証コードは6桁である必要があります",
+          "sendFailed": "認証コードの送信に失敗しました。後でもう一度お試しください",
+          "verifyFailed": "認証コードが正しくありません。再入力してください"
+        },
+        "success": {
+          "otpSent": "認証コードが送信されました。SMSをご確認ください",
+          "verifySuccess": "認証成功！ログイン中..."
+        }
+      },
+      "sso": {
+        "bistu": {
+          "title": "北京情報科技大学統一認証",
+          "subtitle": "学籍番号/職員番号とパスワードでログイン",
+          "button": "北京情報科技大学統一認証でログイン",
+          "simpleButton": "🏛️ 北京情報科技大学統一認証",
+          "jumpingButton": "リダイレクト中...",
+          "helpText": "初回ログイン時にアカウントが自動作成されます",
+          "contactText": "ご質問がございましたらシステム管理者にお問い合わせください",
+          "startError": "SSOログインの開始に失敗しました。後でもう一度お試しください"
+        },
+        "processing": {
+          "title": "SSO ログイン",
+          "processing": "SSOログインを処理中...",
+          "welcome": "ようこそ {name} さん、セッションを確立中...",
+          "verifying": "身元を確認中...",
+          "sessionCheck": "セッションを確認中...",
+          "success": "ログイン成功！リダイレクト中...",
+          "failed": "ログイン失敗",
+          "redirecting": "3秒後に自動的にログインページにリダイレクトします...",
+          "errors": {
+            "missingParams": "SSOパラメータが不足または無効です",
+            "userDataNotFound": "SSOユーザーデータが見つかりません",
+            "sessionExpired": "SSOセッションが期限切れです。再度ログインしてください",
+            "loginFailed": "SSOログインに失敗しました",
+            "sessionValidationFailed": "セッション検証に失敗しました",
+            "noValidSessionData": "サーバーから有効なセッションデータが返されませんでした",
+            "processingFailed": "SSO処理に失敗しました"
+          }
+        }
+      },
+      "social": {
+        "github": {
+          "login": "GitHub でログイン",
+          "register": "GitHub で登録",
+          "failed": "GitHub ログインに失敗しました"
+        }
+      }
     },
     "settings": {
       "title": "設定",

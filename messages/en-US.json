@@ -433,13 +433,210 @@
       }
     },
     "auth": {
-      "loginTitle": "Login",
-      "registerTitle": "Register",
-      "email": "Email",
-      "password": "Password",
-      "forgotPassword": "Forgot password?",
-      "noAccount": "Don't have an account?",
-      "hasAccount": "Already have an account?"
+      "login": {
+        "title": "Login",
+        "subtitle": "Welcome to Intelligent Assistant",
+        "emailLabel": "Email",
+        "passwordLabel": "Password",
+        "emailPlaceholder": "your@email.com",
+        "passwordPlaceholder": "••••••••",
+        "loginButton": "Login",
+        "forgotPasswordLink": "Forgot password?",
+        "phoneLoginLink": "📱 Login with phone verification",
+        "noAccountText": "Don't have an account?",
+        "registerLink": "Sign up now",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "orSeparator": "Login with email and password",
+        "orSeparatorSso": "Or use email and password",
+        "alerts": {
+          "registered": "Registration successful! Please check your email to verify your account, then login.",
+          "resetSuccess": "Password reset successful! Please login with your new password."
+        },
+        "errors": {
+          "oauthFailed": "OAuth login failed, please try again or use other login methods",
+          "ssoCallbackFailed": "SSO authentication callback failed, please try to login again",
+          "ticketValidationFailed": "SSO ticket validation failed, please login again",
+          "invalidEmployeeNumber": "Employee number format is incorrect, please contact administrator",
+          "userCreationFailed": "Account creation failed, this may be due to inconsistent account data. Please try to login again, if the problem persists, please contact administrator",
+          "accountDataInconsistent": "Account data is inconsistent, system is trying to automatically repair. Please wait a moment and login again",
+          "profileCreationFailed": "User profile creation failed, please contact administrator for assistance",
+          "ssoProviderNotFound": "SSO service configuration error, please contact administrator",
+          "missingTicket": "Authentication parameters missing, please login again",
+          "default": "An error occurred during login, please try again later",
+          "loginFailed": "Login failed, please check your email and password"
+        }
+      },
+      "register": {
+        "title": "Register",
+        "subtitle": "Join AgentifUI and start your AI journey",
+        "nameLabel": "Full Name",
+        "usernameLabel": "Username",
+        "usernameOptional": "(optional)",
+        "emailLabel": "Email",
+        "passwordLabel": "Password",
+        "confirmPasswordLabel": "Confirm Password",
+        "namePlaceholder": "Enter your full name",
+        "usernamePlaceholder": "Choose a username",
+        "emailPlaceholder": "your@email.com",
+        "passwordPlaceholder": "••••••••",
+        "createAccountButton": "Create Account",
+        "phoneLoginLink": "📱 Login with phone verification",
+        "hasAccountText": "Already have an account?",
+        "loginLink": "Sign in now",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "showConfirmPassword": "Show confirm password",
+        "hideConfirmPassword": "Hide confirm password",
+        "orSeparator": "Or use email and password",
+        "errors": {
+          "nameRequired": "Please enter your full name",
+          "emailRequired": "Please enter email address",
+          "passwordTooShort": "Password must be at least 6 characters",
+          "passwordMismatch": "Passwords do not match",
+          "usernameInvalid": "Username can only contain letters, numbers, underscores and hyphens, 2-20 characters long",
+          "emailExists": "This email is already registered, please use a different email or login directly",
+          "passwordWeak": "Password is not strong enough, please use a more complex password",
+          "emailInvalid": "Email format is incorrect, please check and try again",
+          "registerFailed": "Registration failed, please try again later"
+        }
+      },
+      "phoneLoginPage": {
+        "title": "AgentifUI",
+        "subtitle": "Intelligent conversation at your fingertips",
+        "orSeparator": "Or",
+        "emailLoginLink": "Login with email and password",
+        "registerLink": "Don't have an account? Sign up now",
+        "termsText": "By logging in, you agree to our",
+        "termsLink": "Terms of Service",
+        "privacyLink": "Privacy Policy",
+        "andText": "and"
+      },
+      "ssoProcessing": {
+        "title": "SSO Login",
+        "loading": "Loading..."
+      },
+      "forgotPassword": {
+        "title": "Forgot Password",
+        "subtitle": "Enter your email address and we'll send you a password reset link",
+        "emailLabel": "Email Address",
+        "emailPlaceholder": "your@email.com",
+        "sendButton": "Send Reset Link",
+        "sendingButton": "Sending...",
+        "backToLogin": "Back to Login",
+        "success": {
+          "title": "Email Sent",
+          "message": "We've sent a password reset link to {email}",
+          "instructions": "Please check your email (including spam folder) and click the link to reset your password.",
+          "noEmail": "If you don't receive the email, please check if the email address is correct or try again later."
+        },
+        "errors": {
+          "emailRequired": "Please enter a valid email address",
+          "rateLimited": "Too many requests, please try again later",
+          "sendFailed": "Failed to send, please try again later"
+        }
+      },
+      "resetPassword": {
+        "title": "Reset Password",
+        "subtitle": "Please enter your new password",
+        "verifying": "Verifying",
+        "verifyingSubtitle": "Verifying reset link...",
+        "invalidTitle": "Invalid Link",
+        "invalidSubtitle": "Password reset link has expired or is invalid",
+        "successTitle": "Password Reset Successful",
+        "successSubtitle": "Your password has been successfully reset",
+        "passwordLabel": "New Password",
+        "confirmPasswordLabel": "Confirm Password",
+        "passwordPlaceholder": "Enter new password",
+        "confirmPasswordPlaceholder": "Enter new password again",
+        "resetButton": "Reset Password",
+        "resettingButton": "Resetting...",
+        "showPassword": "Show new password",
+        "hidePassword": "Hide new password",
+        "showConfirmPassword": "Show confirm password",
+        "hideConfirmPassword": "Hide confirm password",
+        "passwordHint": "Password must contain uppercase and lowercase letters, numbers, at least 8 characters",
+        "backToLogin": "Go to Login",
+        "retryReset": "Request password reset again",
+        "successMessage": "You can now login to your account with the new password.",
+        "errors": {
+          "passwordRequired": "Please enter new password",
+          "passwordTooShort": "Password must be at least 6 characters",
+          "passwordMismatch": "Passwords do not match",
+          "passwordWeak": "Password is not strong enough, please use a more complex password",
+          "sessionExpired": "Session has expired, please request password reset again",
+          "resetFailed": "Password reset failed, please try again later",
+          "linkInvalid": "Reset link verification failed",
+          "linkExpired": "Reset link is invalid or expired, please request password reset again",
+          "verifyFailed": "Verification failed, please request password reset again"
+        }
+      },
+      "phoneLogin": {
+        "title": "Phone Login",
+        "subtitle": "Login using phone number to receive verification code",
+        "otpSubtitle": "Please enter the 6-digit verification code you received",
+        "phoneLabel": "Phone Number",
+        "otpLabel": "Verification Code",
+        "phonePlaceholder": "13812345678",
+        "otpPlaceholder": "Enter 6-digit code",
+        "sendOtpButton": "Send Verification Code",
+        "sendingButton": "Sending...",
+        "verifyButton": "Verify Code",
+        "verifyingButton": "Verifying...",
+        "resendButton": "Resend Verification Code",
+        "changePhoneButton": "Change Phone Number",
+        "otpSentTo": "Verification code sent to +86{phone}",
+        "errors": {
+          "phoneRequired": "Please enter phone number",
+          "phoneInvalid": "Please enter a valid Chinese mainland phone number",
+          "otpRequired": "Please enter verification code",
+          "otpInvalid": "Verification code should be 6 digits",
+          "sendFailed": "Failed to send verification code, please try again later",
+          "verifyFailed": "Verification code is incorrect, please re-enter"
+        },
+        "success": {
+          "otpSent": "Verification code has been sent, please check your SMS",
+          "verifySuccess": "Verification successful! Logging in..."
+        }
+      },
+      "sso": {
+        "bistu": {
+          "title": "Beijing Information Science & Technology University Unified Authentication",
+          "subtitle": "Login with your student/employee ID and password",
+          "button": "Login with BISTU Unified Authentication",
+          "simpleButton": "🏛️ BISTU Unified Authentication",
+          "jumpingButton": "Redirecting...",
+          "helpText": "Account will be created automatically on first login",
+          "contactText": "Please contact system administrator if you have any questions",
+          "startError": "Failed to start SSO login, please try again later"
+        },
+        "processing": {
+          "title": "SSO Login",
+          "processing": "Processing SSO login...",
+          "welcome": "Welcome {name}, establishing session...",
+          "verifying": "Verifying identity...",
+          "sessionCheck": "Verifying session...",
+          "success": "Login successful! Redirecting...",
+          "failed": "Login failed",
+          "redirecting": "Will automatically redirect to login page in 3 seconds...",
+          "errors": {
+            "missingParams": "SSO parameters missing or invalid",
+            "userDataNotFound": "SSO user data not found",
+            "sessionExpired": "SSO session expired, please login again",
+            "loginFailed": "SSO login failed",
+            "sessionValidationFailed": "Session validation failed",
+            "noValidSessionData": "Server did not return valid session data",
+            "processingFailed": "SSO processing failed"
+          }
+        }
+      },
+      "social": {
+        "github": {
+          "login": "Login with GitHub",
+          "register": "Register with GitHub",
+          "failed": "GitHub login failed"
+        }
+      }
     },
     "settings": {
       "title": "Settings",

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ResetPasswordForm } from '@components/auth/reset-password-form';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
+import { useTranslations } from 'next-intl';
 
 function ResetPasswordContent() {
   return <ResetPasswordForm />;
@@ -12,6 +13,7 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   const { isDark } = useTheme();
+  const t = useTranslations('loading');
   const [mounted, setMounted] = useState(false);
   
   // --- 确保客户端渲染一致性 ---
@@ -60,7 +62,7 @@ export default function ResetPasswordPage() {
                 )}></div>
               </div>
               <h2 className="text-3xl font-bold bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text text-transparent font-serif">
-                加载中...
+                {t('default')}
               </h2>
             </div>
           </div>

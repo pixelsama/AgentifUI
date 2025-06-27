@@ -10,6 +10,7 @@ import { Button } from '@components/ui/button';
 import { cn } from '@lib/utils';
 import { useTheme } from '@lib/hooks/use-theme';
 import { clearCacheOnLogin } from '@lib/utils/cache-cleanup';
+import { useTranslations } from 'next-intl';
 
 interface BistuSSOButtonProps {
   returnUrl?: string;
@@ -29,6 +30,7 @@ export function BistuSSOButton({
   children,
 }: BistuSSOButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslations('pages.auth.sso.bistu');
 
   const handleSSOLogin = async () => {
     try {
@@ -64,7 +66,7 @@ export function BistuSSOButton({
       // --- BEGIN COMMENT ---
       // 显示错误提示
       // --- END COMMENT ---
-      alert('启动SSO登录失败，请稍后重试');
+      alert(t('startError'));
     }
   };
 
@@ -117,7 +119,7 @@ export function BistuSSOButton({
       {/* --- BEGIN COMMENT --- */}
       {/* 按钮文本内容 */}
       {/* --- END COMMENT --- */}
-      {isLoading ? '正在跳转...' : (children || '使用北信科统一认证登录')}
+      {isLoading ? t('jumpingButton') : (children || t('button'))}
     </Button>
   );
 }
@@ -132,6 +134,8 @@ export function SimpleBistuSSOButton({
   returnUrl?: string; 
   className?: string; 
 }) {
+  const t = useTranslations('pages.auth.sso.bistu');
+  
   return (
     <BistuSSOButton
       returnUrl={returnUrl}
@@ -139,7 +143,7 @@ export function SimpleBistuSSOButton({
       variant="gradient"
     >
       <span className="text-sm font-serif">
-        🏛️ 北信科统一认证
+        {t('simpleButton')}
       </span>
     </BistuSSOButton>
   );
@@ -156,6 +160,7 @@ export function BistuSSOCard({
   className?: string; 
 }) {
   const { isDark } = useTheme();
+  const t = useTranslations('pages.auth.sso.bistu');
   
   return (
     <div className={cn(
@@ -175,13 +180,13 @@ export function BistuSSOCard({
             "text-lg font-semibold font-serif",
             isDark ? "text-stone-100" : "text-gray-900"
           )}>
-            北京信息科技大学统一认证
+            {t('title')}
           </h3>
           <p className={cn(
             "text-sm mt-1 font-serif",
             isDark ? "text-stone-300" : "text-gray-600"
           )}>
-            使用您的学工号和密码登录
+            {t('subtitle')}
           </p>
         </div>
 
@@ -200,8 +205,8 @@ export function BistuSSOCard({
           "text-xs font-serif",
           isDark ? "text-stone-400" : "text-gray-500"
         )}>
-          <p>首次登录将自动创建账户</p>
-          <p>如有问题请联系系统管理员</p>
+          <p>{t('helpText')}</p>
+          <p>{t('contactText')}</p>
         </div>
       </div>
     </div>

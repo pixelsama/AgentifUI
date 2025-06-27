@@ -8,10 +8,13 @@ import { createClient } from '../../lib/supabase/client';
 import { CheckCircle, AlertCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { cn } from '@lib/utils';
 import { useTheme } from '@lib/hooks/use-theme';
+import { useTranslations } from 'next-intl';
 
 export function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations('pages.auth.resetPassword');
+  
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: '',
@@ -59,7 +62,7 @@ export function ResetPasswordForm() {
           
           if (verifyError) {
             console.error('重置密码token验证失败:', verifyError);
-            setError(`重置链接验证失败: ${verifyError.message}`);
+            setError(t('errors.linkInvalid'));
             setIsTokenValid(false);
           } else {
             console.log('重置密码token验证成功:', data);
@@ -79,7 +82,7 @@ export function ResetPasswordForm() {
 
           if (sessionError) {
             console.error('会话设置失败:', sessionError);
-            setError(`重置链接验证失败: ${sessionError.message}`);
+            setError(t('errors.linkInvalid'));
             setIsTokenValid(false);
           } else {
             console.log('会话设置成功');
@@ -93,26 +96,26 @@ export function ResetPasswordForm() {
         
         if (userError) {
           console.error('获取用户信息失败:', userError);
-          setError('无法验证用户身份，请重新申请重置密码');
+          setError(t('errors.verifyFailed'));
           setIsTokenValid(false);
         } else if (user) {
           console.log('用户已认证:', user.email);
           setIsTokenValid(true);
         } else {
           console.log('用户未认证，且无有效的重置token');
-          setError('重置链接无效或已过期，请重新申请重置密码');
+          setError(t('errors.linkExpired'));
           setIsTokenValid(false);
         }
         
       } catch (err) {
         console.error('会话验证异常:', err);
-        setError('验证失败，请重新申请重置密码');
+        setError(t('errors.verifyFailed'));
         setIsTokenValid(false);
       }
     };
 
     checkUserSession();
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -127,17 +130,17 @@ export function ResetPasswordForm() {
 
   const validateForm = (): boolean => {
     if (!formData.password.trim()) {
-      setError('请输入新密码');
+      setError(t('errors.passwordRequired'));
       return false;
     }
     
     if (formData.password.length < 6) {
-      setError('密码长度至少6位');
+      setError(t('errors.passwordTooShort'));
       return false;
     }
     
     if (formData.password !== formData.confirmPassword) {
-      setError('两次输入的密码不一致');
+      setError(t('errors.passwordMismatch'));
       return false;
     }
     
@@ -163,9 +166,9 @@ export function ResetPasswordForm() {
       if (error) {
         // --- 处理常见错误 ---
         if (error.message.includes('Password should be')) {
-          throw new Error('密码强度不够，请使用更复杂的密码');
+          throw new Error(t('errors.passwordWeak'));
         } else if (error.message.includes('session')) {
-          throw new Error('会话已过期，请重新申请重置密码');
+          throw new Error(t('errors.sessionExpired'));
         } else {
           throw error;
         }
@@ -180,7 +183,7 @@ export function ResetPasswordForm() {
       }, 3000);
       
     } catch (err: any) {
-      setError(err.message || '密码重置失败，请稍后再试');
+      setError(err.message || t('errors.resetFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -204,12 +207,12 @@ export function ResetPasswordForm() {
                 isDark ? "bg-stone-600" : "bg-stone-300"
               )}></div>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-stone-900 font-serif">验证中</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-stone-900 font-serif">{t('verifying')}</h2>
             <p className={cn(
               "mt-2 text-sm font-serif",
               isDark ? "text-gray-400" : "text-gray-600"
             )}>
-              正在验证重置链接...
+              {t('verifyingSubtitle')}
             </p>
           </div>
         </div>
@@ -235,12 +238,12 @@ export function ResetPasswordForm() {
                 isDark ? "text-stone-400" : "text-stone-600"
               )} />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-stone-900 font-serif">链接无效</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-stone-900 font-serif">{t('invalidTitle')}</h2>
             <p className={cn(
               "mt-2 text-sm font-serif",
               isDark ? "text-stone-400" : "text-stone-600"
             )}>
-              重置密码链接已过期或无效
+              {t('invalidSubtitle')}
             </p>
           </div>
 
@@ -262,7 +265,7 @@ export function ResetPasswordForm() {
               )}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              重新申请重置密码
+              {t('retryReset')}
             </Link>
           </div>
         </div>
@@ -288,12 +291,12 @@ export function ResetPasswordForm() {
                 isDark ? "text-stone-400" : "text-stone-600"
               )} />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-stone-900 font-serif">密码重置成功</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-stone-900 font-serif">{t('successTitle')}</h2>
             <p className={cn(
               "mt-2 text-sm font-serif",
               isDark ? "text-stone-400" : "text-stone-600"
             )}>
-              您的密码已成功重置
+              {t('successSubtitle')}
             </p>
           </div>
 
@@ -301,7 +304,7 @@ export function ResetPasswordForm() {
             "p-4 rounded-lg text-sm border-l-4 font-serif",
             isDark ? "bg-stone-800/50 text-stone-300 border-stone-600" : "bg-stone-50 text-stone-700 border-stone-400"
           )}>
-            <p>您现在可以使用新密码登录您的账户。</p>
+            <p>{t('successMessage')}</p>
           </div>
 
           <div className="text-center">
@@ -313,7 +316,7 @@ export function ResetPasswordForm() {
               )}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              前往登录
+              {t('backToLogin')}
             </Link>
           </div>
         </div>
@@ -329,12 +332,12 @@ export function ResetPasswordForm() {
         isDark ? "bg-stone-900 border-stone-800" : "bg-stone-50 border-stone-200"
       )}>
         <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-stone-900 font-serif">重置密码</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-stone-900 font-serif">{t('title')}</h2>
           <p className={cn(
             "mt-2 text-sm font-serif",
             isDark ? "text-stone-400" : "text-stone-600"
           )}>
-            请输入您的新密码
+            {t('subtitle')}
           </p>
         </div>
 
@@ -353,7 +356,7 @@ export function ResetPasswordForm() {
               "block text-sm font-medium mb-1 font-serif",
               isDark ? "text-stone-300" : "text-stone-700"
             )}>
-              新密码
+              {t('passwordLabel')}
             </label>
             <div className="relative">
               <input
@@ -368,7 +371,7 @@ export function ResetPasswordForm() {
                   "appearance-none relative block w-full px-3 py-2 pr-12 border placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
                   isDark ? "bg-stone-800 border-stone-700 text-white" : "border-gray-300 text-gray-900"
                 )}
-                placeholder="输入新密码"
+                placeholder={t('passwordPlaceholder')}
               />
               <button
                 type="button"
@@ -377,7 +380,7 @@ export function ResetPasswordForm() {
                   "absolute inset-y-0 right-0 flex items-center pr-3 text-sm leading-5 focus:outline-none transition-colors",
                   isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-500 hover:text-stone-600"
                 )}
-                aria-label={showPassword ? "隐藏新密码" : "显示新密码"}
+                aria-label={showPassword ? t('hidePassword') : t('showPassword')}
               >
                 {showPassword ? (
                   <Eye className="h-5 w-5" />
@@ -391,7 +394,7 @@ export function ResetPasswordForm() {
                 "mt-1 text-xs font-serif",
                 isDark ? "text-stone-400" : "text-stone-500"
               )}>
-                密码需包含大小写字母、数字，至少8位
+                {t('passwordHint')}
               </p>
             )}
           </div>
@@ -401,7 +404,7 @@ export function ResetPasswordForm() {
               "block text-sm font-medium mb-1 font-serif",
               isDark ? "text-stone-300" : "text-stone-700"
             )}>
-              确认密码
+              {t('confirmPasswordLabel')}
             </label>
             <div className="relative">
               <input
@@ -416,7 +419,7 @@ export function ResetPasswordForm() {
                   "appearance-none relative block w-full px-3 py-2 pr-12 border placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent transition-all font-serif",
                   isDark ? "bg-stone-800 border-stone-700 text-white" : "border-gray-300 text-gray-900"
                 )}
-                placeholder="再次输入新密码"
+                placeholder={t('confirmPasswordPlaceholder')}
               />
               <button
                 type="button"
@@ -425,7 +428,7 @@ export function ResetPasswordForm() {
                   "absolute inset-y-0 right-0 flex items-center pr-3 text-sm leading-5 focus:outline-none transition-colors",
                   isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-500 hover:text-stone-600"
                 )}
-                aria-label={showConfirmPassword ? "隐藏确认密码" : "显示确认密码"}
+                aria-label={showConfirmPassword ? t('hideConfirmPassword') : t('showConfirmPassword')}
               >
                 {showConfirmPassword ? (
                   <EyeOff className="h-5 w-5" />
@@ -441,7 +444,7 @@ export function ResetPasswordForm() {
             disabled={isLoading || !formData.password || !formData.confirmPassword || !!error}
             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-stone-700 hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-stone-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-serif"
           >
-            {isLoading ? '重置中...' : '重置密码'}
+            {isLoading ? t('resettingButton') : t('resetButton')}
           </button>
         </form>
 
@@ -453,7 +456,7 @@ export function ResetPasswordForm() {
               isDark ? "text-stone-400 hover:text-stone-300" : "text-stone-700 hover:text-stone-600"
             )}
           >
-            返回登录
+            {t('backToLogin')}
           </Link>
         </div>
       </div>

@@ -433,13 +433,210 @@
       }
     },
     "auth": {
-      "loginTitle": "登入",
-      "registerTitle": "註冊",
-      "email": "電子郵件",
-      "password": "密碼",
-      "forgotPassword": "忘記密碼？",
-      "noAccount": "還沒有帳戶？",
-      "hasAccount": "已有帳戶？"
+      "login": {
+        "title": "登入",
+        "subtitle": "歡迎使用智慧助手",
+        "emailLabel": "電子郵件",
+        "passwordLabel": "密碼",
+        "emailPlaceholder": "your@email.com",
+        "passwordPlaceholder": "••••••••",
+        "loginButton": "登入",
+        "forgotPasswordLink": "忘記密碼？",
+        "phoneLoginLink": "📱 使用手機號碼驗證碼登入",
+        "noAccountText": "還沒有帳戶？",
+        "registerLink": "立即註冊",
+        "showPassword": "顯示密碼",
+        "hidePassword": "隱藏密碼",
+        "orSeparator": "使用電子郵件密碼登入",
+        "orSeparatorSso": "或使用電子郵件密碼",
+        "alerts": {
+          "registered": "註冊成功！請查看您的電子郵件以驗證帳戶，然後登入。",
+          "resetSuccess": "密碼重設成功！請使用新密碼登入。"
+        },
+        "errors": {
+          "oauthFailed": "OAuth登入失敗，請重試或使用其他登入方式",
+          "ssoCallbackFailed": "SSO認證回調處理失敗，請重新嘗試登入",
+          "ticketValidationFailed": "SSO票據驗證失敗，請重新登入",
+          "invalidEmployeeNumber": "學工號格式不正確，請聯絡管理員",
+          "userCreationFailed": "帳戶建立失敗，這可能是由於帳戶資料不一致導致的。請嘗試重新登入，如果問題持續存在，請聯絡管理員",
+          "accountDataInconsistent": "帳戶資料不一致，系統正在嘗試自動修復。請稍等片刻後重新登入",
+          "profileCreationFailed": "使用者檔案建立失敗，請聯絡管理員協助解決",
+          "ssoProviderNotFound": "SSO服務設定錯誤，請聯絡管理員",
+          "missingTicket": "認證參數缺失，請重新登入",
+          "default": "登入過程中出現錯誤，請稍後重試",
+          "loginFailed": "登入失敗，請檢查您的電子郵件和密碼"
+        }
+      },
+      "register": {
+        "title": "註冊",
+        "subtitle": "加入 AgentifUI，開啟 AI 智慧之旅",
+        "nameLabel": "姓名",
+        "usernameLabel": "暱稱",
+        "usernameOptional": "(可選)",
+        "emailLabel": "電子郵件",
+        "passwordLabel": "密碼",
+        "confirmPasswordLabel": "確認密碼",
+        "namePlaceholder": "輸入您的姓名",
+        "usernamePlaceholder": "選擇一個使用者名稱",
+        "emailPlaceholder": "your@email.com",
+        "passwordPlaceholder": "••••••••",
+        "createAccountButton": "建立帳戶",
+        "phoneLoginLink": "📱 使用手機號碼驗證碼登入",
+        "hasAccountText": "已有帳戶？",
+        "loginLink": "立即登入",
+        "showPassword": "顯示密碼",
+        "hidePassword": "隱藏密碼",
+        "showConfirmPassword": "顯示確認密碼",
+        "hideConfirmPassword": "隱藏確認密碼",
+        "orSeparator": "或使用電子郵件密碼",
+        "errors": {
+          "nameRequired": "請輸入姓名",
+          "emailRequired": "請輸入電子郵件地址",
+          "passwordTooShort": "密碼長度至少6位",
+          "passwordMismatch": "兩次輸入的密碼不一致",
+          "usernameInvalid": "暱稱只能包含字母、數字、底線和連字符，長度2-20位",
+          "emailExists": "該電子郵件已被註冊，請使用其他電子郵件或直接登入",
+          "passwordWeak": "密碼強度不夠，請使用更複雜的密碼",
+          "emailInvalid": "電子郵件格式不正確，請檢查後重試",
+          "registerFailed": "註冊失敗，請稍後再試"
+        }
+      },
+      "phoneLoginPage": {
+        "title": "AgentifUI",
+        "subtitle": "智慧對話，觸手可及",
+        "orSeparator": "或者",
+        "emailLoginLink": "使用電子郵件密碼登入",
+        "registerLink": "還沒有帳戶？立即註冊",
+        "termsText": "登入即表示您同意我們的",
+        "termsLink": "服務條款",
+        "privacyLink": "隱私政策",
+        "andText": "和"
+      },
+      "ssoProcessing": {
+        "title": "SSO 登入",
+        "loading": "載入中..."
+      },
+      "forgotPassword": {
+        "title": "忘記密碼",
+        "subtitle": "輸入您的電子郵件地址，我們將發送重設密碼連結",
+        "emailLabel": "電子郵件地址",
+        "emailPlaceholder": "your@email.com",
+        "sendButton": "發送重設連結",
+        "sendingButton": "發送中...",
+        "backToLogin": "返回登入",
+        "success": {
+          "title": "郵件已發送",
+          "message": "我們已向 {email} 發送了重設密碼連結",
+          "instructions": "請檢查您的電子郵件（包括垃圾郵件資料夾）並點擊連結重設密碼。",
+          "noEmail": "如果您沒有收到郵件，請檢查電子郵件地址是否正確或稍後重試。"
+        },
+        "errors": {
+          "emailRequired": "請輸入有效的電子郵件地址",
+          "rateLimited": "發送過於頻繁，請稍後再試",
+          "sendFailed": "發送失敗，請稍後再試"
+        }
+      },
+      "resetPassword": {
+        "title": "重設密碼",
+        "subtitle": "請輸入您的新密碼",
+        "verifying": "驗證中",
+        "verifyingSubtitle": "正在驗證重設連結...",
+        "invalidTitle": "連結無效",
+        "invalidSubtitle": "重設密碼連結已過期或無效",
+        "successTitle": "密碼重設成功",
+        "successSubtitle": "您的密碼已成功重設",
+        "passwordLabel": "新密碼",
+        "confirmPasswordLabel": "確認密碼",
+        "passwordPlaceholder": "輸入新密碼",
+        "confirmPasswordPlaceholder": "再次輸入新密碼",
+        "resetButton": "重設密碼",
+        "resettingButton": "重設中...",
+        "showPassword": "顯示新密碼",
+        "hidePassword": "隱藏新密碼",
+        "showConfirmPassword": "顯示確認密碼",
+        "hideConfirmPassword": "隱藏確認密碼",
+        "passwordHint": "密碼需包含大小寫字母、數字，至少8位",
+        "backToLogin": "前往登入",
+        "retryReset": "重新申請重設密碼",
+        "successMessage": "您現在可以使用新密碼登入您的帳戶。",
+        "errors": {
+          "passwordRequired": "請輸入新密碼",
+          "passwordTooShort": "密碼長度至少6位",
+          "passwordMismatch": "兩次輸入的密碼不一致",
+          "passwordWeak": "密碼強度不夠，請使用更複雜的密碼",
+          "sessionExpired": "會話已過期，請重新申請重設密碼",
+          "resetFailed": "密碼重設失敗，請稍後再試",
+          "linkInvalid": "重設連結驗證失敗",
+          "linkExpired": "重設連結無效或已過期，請重新申請重設密碼",
+          "verifyFailed": "驗證失敗，請重新申請重設密碼"
+        }
+      },
+      "phoneLogin": {
+        "title": "手機號碼登入",
+        "subtitle": "使用手機號碼接收驗證碼登入",
+        "otpSubtitle": "請輸入收到的6位驗證碼",
+        "phoneLabel": "手機號碼",
+        "otpLabel": "驗證碼",
+        "phonePlaceholder": "13812345678",
+        "otpPlaceholder": "請輸入6位驗證碼",
+        "sendOtpButton": "發送驗證碼",
+        "sendingButton": "發送中...",
+        "verifyButton": "確認驗證碼",
+        "verifyingButton": "驗證中...",
+        "resendButton": "重新發送驗證碼",
+        "changePhoneButton": "修改手機號碼",
+        "otpSentTo": "驗證碼已發送至 +86{phone}",
+        "errors": {
+          "phoneRequired": "請輸入手機號碼",
+          "phoneInvalid": "請輸入正確的中國大陸手機號碼",
+          "otpRequired": "請輸入驗證碼",
+          "otpInvalid": "驗證碼應為6位數字",
+          "sendFailed": "發送驗證碼失敗，請稍後重試",
+          "verifyFailed": "驗證碼錯誤，請重新輸入"
+        },
+        "success": {
+          "otpSent": "驗證碼已發送，請查收簡訊",
+          "verifySuccess": "驗證成功！正在登入..."
+        }
+      },
+      "sso": {
+        "bistu": {
+          "title": "北京資訊科技大學統一認證",
+          "subtitle": "使用您的學工號和密碼登入",
+          "button": "使用北信科統一認證登入",
+          "simpleButton": "🏛️ 北信科統一認證",
+          "jumpingButton": "正在跳轉...",
+          "helpText": "首次登入將自動建立帳戶",
+          "contactText": "如有問題請聯絡系統管理員",
+          "startError": "啟動SSO登入失敗，請稍後重試"
+        },
+        "processing": {
+          "title": "SSO 登入",
+          "processing": "正在處理SSO登入...",
+          "welcome": "歡迎 {name}，正在建立會話...",
+          "verifying": "正在驗證身份...",
+          "sessionCheck": "正在驗證會話...",
+          "success": "登入成功！正在跳轉...",
+          "failed": "登入失敗",
+          "redirecting": "3秒後將自動跳轉到登入頁面...",
+          "errors": {
+            "missingParams": "SSO參數缺失或無效",
+            "userDataNotFound": "SSO使用者資料未找到",
+            "sessionExpired": "SSO會話已過期，請重新登入",
+            "loginFailed": "SSO登入失敗",
+            "sessionValidationFailed": "會話驗證失敗",
+            "noValidSessionData": "伺服器未返回有效會話資料",
+            "processingFailed": "SSO處理失敗"
+          }
+        }
+      },
+      "social": {
+        "github": {
+          "login": "使用 GitHub 登入",
+          "register": "使用 GitHub 註冊",
+          "failed": "GitHub 登入失敗"
+        }
+      }
     },
     "settings": {
       "title": "設定",
