@@ -11,6 +11,7 @@ import { useMobile } from "@lib/hooks/use-mobile"
 import { useAttachmentStore } from "@lib/stores/attachment-store"
 import { ChatButton } from "./button"
 import { cn } from "@lib/utils"
+import { useTranslations } from 'next-intl'
 
 // 定义文件选择回调类型
 export type FileSelectCallback = (files: FileList | null, accept: string) => void
@@ -33,6 +34,7 @@ export const FileTypeSelector = ({
   const isMobile = useMobile()
   const [isOpen, setIsOpen] = useState(false)
   const attachmentFiles = useAttachmentStore((state) => state.files)
+  const t = useTranslations('pages.chat')
   
   // --- BEGIN COMMENT ---
   // 检查是否可以上传文件的逻辑
@@ -45,18 +47,18 @@ export const FileTypeSelector = ({
   // 生成tooltip内容
   const getTooltipContent = () => {
     if (!uploadConfig.enabled) {
-      return "该应用不支持上传文件"
+      return t('fileTypeSelector.notSupported')
     }
     if (uploadConfig.maxFiles === 0) {
-      return "文件上传数量限制为0"
+      return t('fileTypeSelector.noLimit')
     }
     if (!uploadConfig.hasFileTypes) {
-      return "未配置支持的文件类型"
+      return t('fileTypeSelector.noTypesConfigured')
     }
     if (hasReachedLimit) {
-      return `已达到最大文件数量限制 (${uploadConfig.maxFiles})`
+      return t('fileTypeSelector.maxFilesReached', { maxFiles: uploadConfig.maxFiles })
     }
-    return `添加附件 (${attachmentFiles.length}/${uploadConfig.maxFiles})`
+    return t('fileTypeSelector.addAttachment', { currentFiles: attachmentFiles.length, maxFiles: uploadConfig.maxFiles })
   }
   
   // 创建文件输入引用回调
@@ -156,21 +158,21 @@ export const FileTypeSelector = ({
             isDark ? "text-gray-400" : "text-gray-500"
           )}>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            <span>加载中...</span>
+            <span>{t('fileTypeSelector.loading')}</span>
           </div>
         ) : error ? (
           <div className={cn(
             "px-3 py-2 text-sm font-serif",
             isDark ? "text-red-300" : "text-red-500"
           )}>
-            加载文件类型失败
+            {t('fileTypeSelector.loadError')}
           </div>
         ) : fileTypes.length === 0 ? (
           <div className={cn(
             "px-3 py-2 text-sm font-serif text-center",
             isDark ? "text-gray-400" : "text-gray-500"
           )}>
-            未配置文件类型
+            {t('fileTypeSelector.noTypesConfigured')}
           </div>
         ) : (
           <>
@@ -182,16 +184,16 @@ export const FileTypeSelector = ({
               isDark ? "text-gray-400 border-gray-600" : "text-gray-500 border-gray-200"
             )}>
               {uploadConfig.maxFiles > 0 ? (
-                <>最多上传 {uploadConfig.maxFiles} 个文件</>
+                <>{t('fileTypeSelector.maxUpload', { maxFiles: uploadConfig.maxFiles })}</>
               ) : (
-                <>无上传限制</>
+                <>{t('fileTypeSelector.noUploadLimit')}</>
               )}
               {hasReachedLimit && (
                 <div className={cn(
                   "text-xs mt-1",
                   isDark ? "text-orange-400" : "text-orange-600"
                 )}>
-                  已达上限 ({attachmentFiles.length}/{uploadConfig.maxFiles})
+                  {t('fileTypeSelector.reachedLimit', { currentFiles: attachmentFiles.length, maxFiles: uploadConfig.maxFiles })}
                 </div>
               )}
             </div>

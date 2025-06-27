@@ -3,7 +3,10 @@
     "ui": {
       "cancel": "取消",
       "back": "返回",
-      "loading": "加载中..."
+      "loading": "加载中...",
+      "retry": "重试",
+      "remove": "移除",
+      "error": "错误"
     }
   },
   "pages": {
@@ -45,7 +48,153 @@
         "night": "夜深了"
       },
       "recentChats": "近期对话",
-      "historyChats": "历史对话"
+      "historyChats": "历史对话",
+      "input": {
+        "placeholder": "输入消息...",
+        "sendMessage": "发送消息",
+        "stopGeneration": "停止生成",
+        "attachFile": "附加文件",
+        "selectModel": "选择模型",
+        "noModelAvailable": "没有可用的模型",
+        "pleaseSelectModel": "请选择一个模型",
+        "sending": "发送中...",
+        "uploading": "上传中...",
+        "uploadFailed": "上传失败",
+        "retryUpload": "重试上传",
+        "removeFile": "移除文件",
+        "fileUploadError": "文件上传错误",
+        "messageSendFailed": "消息发送失败",
+        "unknownError": "未知错误",
+        "validatingConfig": "正在验证应用配置...",
+        "cannotSubmit": "无法提交",
+        "addAttachment": "添加附件",
+        "retryUploadTooltip": "重新上传",
+        "removeAttachment": "移除附件",
+        "scrollToBottom": "滚动到底部"
+      },
+      "fileUpload": {
+        "selectFileType": "选择文件类型",
+        "image": "图片",
+        "document": "文档",
+        "audio": "音频",
+        "video": "视频",
+        "custom": "自定义",
+        "uploadProgress": "上传进度",
+        "uploadComplete": "上传完成",
+        "uploadError": "上传失败",
+        "fileTooLarge": "文件过大",
+        "unsupportedFormat": "不支持的文件格式"
+      },
+      "fileTypeSelector": {
+        "notSupported": "该应用不支持上传文件",
+        "noLimit": "文件上传数量限制为0",
+        "noTypesConfigured": "未配置支持的文件类型",
+        "maxFilesReached": "已达到最大文件数量限制 ({maxFiles})",
+        "addAttachment": "添加附件 ({currentFiles}/{maxFiles})",
+        "loading": "加载中...",
+        "loadError": "加载文件类型失败",
+        "reachedLimit": "已达上限 ({currentFiles}/{maxFiles})",
+        "maxUpload": "最多上传 {maxFiles} 个文件",
+        "noUploadLimit": "无上传限制"
+      },
+      "modelSelector": {
+        "noModelsAvailable": "暂无可用模型",
+        "selectModel": "选择模型"
+      },
+      "messages": {
+        "assistant": "助手",
+        "user": "您",
+        "thinking": "思考中...",
+        "stopped": "已停止",
+        "completed": "完成",
+        "copyMessage": "复制消息",
+        "editMessage": "编辑消息",
+        "deleteMessage": "删除消息",
+        "regenerate": "重新生成",
+        "feedback": "反馈",
+        "like": "赞",
+        "dislike": "踩",
+        "copied": "已复制",
+        "copyFailed": "复制失败",
+        "imageLink": "图片链接",
+        "viewImage": "查看图片",
+        "clickToView": "点击查看"
+      }
+    },
+    "chatflow": {
+      "loading": {
+        "inputConfig": "正在加载输入配置..."
+      },
+      "form": {
+        "question": {
+          "label": "您的问题或需求",
+          "placeholder": "请详细描述您的问题或需求...",
+          "required": "请输入您的问题或需求",
+          "tooLong": "问题描述长度不能超过{maxLength}个字符"
+        },
+        "additionalInfo": "补充信息",
+        "reset": "重置表单",
+        "processing": "处理中...",
+        "startConversation": "开始对话",
+        "checkAndCorrectErrors": "请检查并修正表单中标记的错误信息",
+        "defaultAppName": "AI 对话",
+        "defaultDescription": "请输入您的问题，开始智能对话"
+      }
+    },
+    "workflow": {
+      "form": {
+        "inputPlaceholder": "请输入{label}",
+        "selectPlaceholder": "请选择{label}",
+        "rangeHint": "范围：{min} - {max}",
+        "minValueHint": "最小值：{min}",
+        "maxValueHint": "最大值：{max}",
+        "stepHint": "步长：{step}",
+        "precisionHint": "小数位数：{precision}"
+      }
+    },
+    "textGeneration": {
+      "status": {
+        "generating": "正在生成文本...",
+        "completed": "生成完成",
+        "failed": "生成失败",
+        "stopped": "已停止",
+        "waiting": "等待生成"
+      },
+      "progress": "进度: {percent}%",
+      "buttons": {
+        "copy": "复制文本",
+        "copied": "已复制",
+        "download": "下载文本",
+        "stop": "停止",
+        "retry": "重试",
+        "reset": "重置"
+      },
+      "emptyState": {
+        "title": "等待生成文本",
+        "description": "填写左侧表单并点击执行按钮开始文本生成"
+      },
+      "placeholder": {
+        "generating": "正在生成文本...",
+        "result": "生成的文本将在这里显示"
+      },
+      "streamingIndicator": "正在生成",
+      "stats": {
+        "characters": "字符数: {count}",
+        "words": "词数: {count}",
+        "tokensUsed": "Token 使用: {count}"
+      }
+    },
+    "apps": {
+      "startChatWith": "与 {appName} 开始对话...",
+      "continueChatWith": "与 {appName} 继续对话...",
+      "defaultApp": "应用",
+      "loadFailed": "应用加载失败",
+      "backToMarket": "返回应用市场",
+      "loading": {
+        "app": "正在加载应用...",
+        "validating": "正在验证应用配置...",
+        "default": "加载中..."
+      }
     },
     "auth": {
       "loginTitle": "登录",

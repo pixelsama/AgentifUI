@@ -6,6 +6,7 @@ import { AttachmentFile, useAttachmentStore } from "@lib/stores/attachment-store
 import { XIcon, FileTextIcon, CheckCircle2Icon, RotateCcw } from "lucide-react"
 import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
 import { Spinner } from "@components/ui/spinner"
+import { useTranslations } from 'next-intl'
 
 /**
  * 单个附件预览项的 Props 定义
@@ -68,6 +69,7 @@ const CircularProgress: React.FC<{ progress: number; size?: number; strokeWidth?
  */
 export const AttachmentPreviewItem: React.FC<AttachmentPreviewItemProps> = ({ attachment, isDark = false, onRetry }) => {
   const removeFile = useAttachmentStore((state) => state.removeFile)
+  const t = useTranslations('common.ui')
 
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -87,7 +89,7 @@ export const AttachmentPreviewItem: React.FC<AttachmentPreviewItemProps> = ({ at
         return <CheckCircle2Icon className={cn("w-4 h-4", isDark ? "text-stone-400" : "text-stone-500")} />
       case 'error':
         return (
-          <TooltipWrapper content="重新上传" placement="top" id={`retry-att-${attachment.id}`} size="sm" showArrow={false}>
+          <TooltipWrapper content={t('retry')} placement="top" id={`retry-att-${attachment.id}`} size="sm" showArrow={false}>
             <button 
               type="button"
               onClick={handleRetryClick}
@@ -99,7 +101,7 @@ export const AttachmentPreviewItem: React.FC<AttachmentPreviewItemProps> = ({ at
                 "focus:outline-none",
                 "transition-colors duration-150"
               )}
-              aria-label="重试上传"
+              aria-label={t('retry')}
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -122,7 +124,7 @@ export const AttachmentPreviewItem: React.FC<AttachmentPreviewItemProps> = ({ at
           : "bg-stone-100 border border-stone-200",
         attachment.status === 'error' && (isDark ? "border-red-500/30" : "border-red-400/30")
       )}
-      title={attachment.error ? `错误: ${attachment.error}` : attachment.name}
+      title={attachment.error ? `${t('error')}: ${attachment.error}` : attachment.name}
     >
       <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center relative">
         <StatusIcon />
@@ -147,7 +149,7 @@ export const AttachmentPreviewItem: React.FC<AttachmentPreviewItemProps> = ({ at
         </p>
       </div>
 
-      <TooltipWrapper content="移除附件" placement="top" id={`remove-att-${attachment.id}`} size="sm" showArrow={false}>
+      <TooltipWrapper content={t('remove')} placement="top" id={`remove-att-${attachment.id}`} size="sm" showArrow={false}>
         <button
           type="button"
           onClick={handleRemove}
@@ -157,7 +159,7 @@ export const AttachmentPreviewItem: React.FC<AttachmentPreviewItemProps> = ({ at
               ? "bg-stone-700/80 hover:bg-stone-600/80 text-stone-300 hover:text-white" 
               : "bg-stone-300/50 hover:bg-stone-400/70 text-stone-600 hover:text-black",
           )}
-          aria-label="移除附件"
+          aria-label={t('remove')}
         >
           <XIcon className="w-4 h-4" />
         </button>

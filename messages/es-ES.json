@@ -3,7 +3,10 @@
     "ui": {
       "cancel": "Cancelar",
       "back": "Volver",
-      "loading": "Cargando..."
+      "loading": "Cargando...",
+      "retry": "Reintentar",
+      "remove": "Eliminar",
+      "error": "Error"
     }
   },
   "pages": {
@@ -45,7 +48,153 @@
         "night": "Se está haciendo tarde"
       },
       "recentChats": "Chats Recientes",
-      "historyChats": "Historial de Chats"
+      "historyChats": "Historial de Chats",
+      "input": {
+        "placeholder": "Escribe tu mensaje...",
+        "sendMessage": "Enviar mensaje",
+        "stopGeneration": "Detener generación",
+        "attachFile": "Adjuntar archivo",
+        "selectModel": "Seleccionar modelo",
+        "noModelAvailable": "No hay modelos disponibles",
+        "pleaseSelectModel": "Por favor selecciona un modelo",
+        "sending": "Enviando...",
+        "uploading": "Subiendo...",
+        "uploadFailed": "Error al subir",
+        "retryUpload": "Reintentar subida",
+        "removeFile": "Eliminar archivo",
+        "fileUploadError": "Error al subir archivo",
+        "messageSendFailed": "Error al enviar mensaje",
+        "unknownError": "Error desconocido",
+        "validatingConfig": "Validando configuración de aplicación...",
+        "cannotSubmit": "No se puede enviar",
+        "addAttachment": "Agregar adjunto",
+        "retryUploadTooltip": "Reintentar subida",
+        "removeAttachment": "Eliminar adjunto",
+        "scrollToBottom": "Desplazar al final"
+      },
+      "fileUpload": {
+        "selectFileType": "Seleccionar tipo de archivo",
+        "image": "Imagen",
+        "document": "Documento",
+        "audio": "Audio",
+        "video": "Video",
+        "custom": "Personalizado",
+        "uploadProgress": "Progreso de subida",
+        "uploadComplete": "Subida completa",
+        "uploadError": "Error de subida",
+        "fileTooLarge": "Archivo demasiado grande",
+        "unsupportedFormat": "Formato de archivo no soportado"
+      },
+      "fileTypeSelector": {
+        "notSupported": "Esta aplicación no admite cargas de archivos",
+        "noLimit": "El límite de carga de archivos es 0",
+        "noTypesConfigured": "No hay tipos de archivo compatibles configurados",
+        "maxFilesReached": "Límite máximo de archivos alcanzado ({maxFiles})",
+        "addAttachment": "Agregar adjunto ({currentFiles}/{maxFiles})",
+        "loading": "Cargando...",
+        "loadError": "Error al cargar tipos de archivo",
+        "reachedLimit": "Límite alcanzado ({currentFiles}/{maxFiles})",
+        "maxUpload": "Subir hasta {maxFiles} archivos",
+        "noUploadLimit": "Sin límite de carga"
+      },
+      "modelSelector": {
+        "noModelsAvailable": "No hay modelos disponibles",
+        "selectModel": "Seleccionar modelo"
+      },
+      "messages": {
+        "assistant": "Asistente",
+        "user": "Tú",
+        "thinking": "Pensando...",
+        "stopped": "Detenido",
+        "completed": "Completado",
+        "copyMessage": "Copiar mensaje",
+        "editMessage": "Editar mensaje",
+        "deleteMessage": "Eliminar mensaje",
+        "regenerate": "Regenerar",
+        "feedback": "Comentarios",
+        "like": "Me gusta",
+        "dislike": "No me gusta",
+        "copied": "Copiado",
+        "copyFailed": "Error al copiar",
+        "imageLink": "Enlace de imagen",
+        "viewImage": "Ver imagen",
+        "clickToView": "Haz clic para ver"
+      }
+    },
+    "chatflow": {
+      "loading": {
+        "inputConfig": "Cargando configuración de entrada..."
+      },
+      "form": {
+        "question": {
+          "label": "Su Pregunta o Solicitud",
+          "placeholder": "Por favor describa su pregunta o solicitud en detalle...",
+          "required": "Por favor ingrese su pregunta o solicitud",
+          "tooLong": "La descripción de la pregunta no puede exceder {maxLength} caracteres"
+        },
+        "additionalInfo": "Información Adicional",
+        "reset": "Restablecer Formulario",
+        "processing": "Procesando...",
+        "startConversation": "Iniciar Conversación",
+        "checkAndCorrectErrors": "Por favor revise y corrija los errores marcados en el formulario",
+        "defaultAppName": "Chat IA",
+        "defaultDescription": "Por favor ingrese su pregunta para iniciar una conversación inteligente"
+      }
+    },
+    "workflow": {
+      "form": {
+        "inputPlaceholder": "Por favor ingrese {label}",
+        "selectPlaceholder": "Por favor seleccione {label}",
+        "rangeHint": "Rango: {min} - {max}",
+        "minValueHint": "Valor mínimo: {min}",
+        "maxValueHint": "Valor máximo: {max}",
+        "stepHint": "Paso: {step}",
+        "precisionHint": "Lugares decimales: {precision}"
+      }
+    },
+    "textGeneration": {
+      "status": {
+        "generating": "Generando texto...",
+        "completed": "Generación completada",
+        "failed": "Error en la generación",
+        "stopped": "Detenido",
+        "waiting": "Esperando generar"
+      },
+      "progress": "Progreso: {percent}%",
+      "buttons": {
+        "copy": "Copiar texto",
+        "copied": "Copiado",
+        "download": "Descargar texto",
+        "stop": "Detener",
+        "retry": "Reintentar",
+        "reset": "Restablecer"
+      },
+      "emptyState": {
+        "title": "Esperando generar texto",
+        "description": "Complete el formulario de la izquierda y haga clic en el botón ejecutar para comenzar la generación de texto"
+      },
+      "placeholder": {
+        "generating": "Generando texto...",
+        "result": "El texto generado se mostrará aquí"
+      },
+      "streamingIndicator": "Generando",
+      "stats": {
+        "characters": "Caracteres: {count}",
+        "words": "Palabras: {count}",
+        "tokensUsed": "Tokens utilizados: {count}"
+      }
+    },
+    "apps": {
+      "startChatWith": "Comenzar a chatear con {appName}...",
+      "continueChatWith": "Continuar chateando con {appName}...",
+      "defaultApp": "Aplicación",
+      "loadFailed": "Error al cargar la aplicación",
+      "backToMarket": "Volver al Mercado de Aplicaciones",
+      "loading": {
+        "app": "Cargando aplicación...",
+        "validating": "Validando configuración de aplicación...",
+        "default": "Cargando..."
+      }
     },
     "auth": {
       "loginTitle": "Iniciar Sesión",

@@ -3,7 +3,10 @@
     "ui": {
       "cancel": "Cancel",
       "back": "Back",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "retry": "Retry",
+      "remove": "Remove",
+      "error": "Error"
     }
   },
   "pages": {
@@ -45,7 +48,153 @@
         "night": "It's getting late"
       },
       "recentChats": "Recent Chats",
-      "historyChats": "Chat History"
+      "historyChats": "Chat History",
+      "input": {
+        "placeholder": "Type your message...",
+        "sendMessage": "Send message",
+        "stopGeneration": "Stop generation",
+        "attachFile": "Attach file",
+        "selectModel": "Select model",
+        "noModelAvailable": "No models available",
+        "pleaseSelectModel": "Please select a model",
+        "sending": "Sending...",
+        "uploading": "Uploading...",
+        "uploadFailed": "Upload failed",
+        "retryUpload": "Retry upload",
+        "removeFile": "Remove file",
+        "fileUploadError": "File upload error",
+        "messageSendFailed": "Message send failed",
+        "unknownError": "Unknown error",
+        "validatingConfig": "Validating app configuration...",
+        "cannotSubmit": "Cannot submit",
+        "addAttachment": "Add attachment",
+        "retryUploadTooltip": "Retry upload",
+        "removeAttachment": "Remove attachment",
+        "scrollToBottom": "Scroll to bottom"
+      },
+      "fileUpload": {
+        "selectFileType": "Select file type",
+        "image": "Image",
+        "document": "Document",
+        "audio": "Audio",
+        "video": "Video",
+        "custom": "Custom",
+        "uploadProgress": "Upload progress",
+        "uploadComplete": "Upload complete",
+        "uploadError": "Upload error",
+        "fileTooLarge": "File too large",
+        "unsupportedFormat": "Unsupported file format"
+      },
+      "fileTypeSelector": {
+        "notSupported": "This app does not support file uploads",
+        "noLimit": "File upload limit is 0",
+        "noTypesConfigured": "No supported file types configured",
+        "maxFilesReached": "Maximum file limit reached ({maxFiles})",
+        "addAttachment": "Add attachment ({currentFiles}/{maxFiles})",
+        "loading": "Loading...",
+        "loadError": "Failed to load file types",
+        "reachedLimit": "Limit reached ({currentFiles}/{maxFiles})",
+        "maxUpload": "Upload up to {maxFiles} files",
+        "noUploadLimit": "No upload limit"
+      },
+      "modelSelector": {
+        "noModelsAvailable": "No models available",
+        "selectModel": "Select model"
+      },
+      "messages": {
+        "assistant": "Assistant",
+        "user": "You",
+        "thinking": "Thinking...",
+        "stopped": "Stopped",
+        "completed": "Completed",
+        "copyMessage": "Copy message",
+        "editMessage": "Edit message",
+        "deleteMessage": "Delete message",
+        "regenerate": "Regenerate",
+        "feedback": "Feedback",
+        "like": "Like",
+        "dislike": "Dislike",
+        "copied": "Copied",
+        "copyFailed": "Copy failed",
+        "imageLink": "Image link",
+        "viewImage": "View image",
+        "clickToView": "Click to view"
+      }
+    },
+    "chatflow": {
+      "loading": {
+        "inputConfig": "Loading input configuration..."
+      },
+      "form": {
+        "question": {
+          "label": "Your Question or Request",
+          "placeholder": "Please describe your question or request in detail...",
+          "required": "Please enter your question or request",
+          "tooLong": "Question description cannot exceed {maxLength} characters"
+        },
+        "additionalInfo": "Additional Information",
+        "reset": "Reset Form",
+        "processing": "Processing...",
+        "startConversation": "Start Conversation",
+        "checkAndCorrectErrors": "Please check and correct the errors marked in the form",
+        "defaultAppName": "AI Chat",
+        "defaultDescription": "Please enter your question to start an intelligent conversation"
+      }
+    },
+    "workflow": {
+      "form": {
+        "inputPlaceholder": "Please enter {label}",
+        "selectPlaceholder": "Please select {label}",
+        "rangeHint": "Range: {min} - {max}",
+        "minValueHint": "Minimum value: {min}",
+        "maxValueHint": "Maximum value: {max}",
+        "stepHint": "Step: {step}",
+        "precisionHint": "Decimal places: {precision}"
+      }
+    },
+    "textGeneration": {
+      "status": {
+        "generating": "Generating text...",
+        "completed": "Generation completed",
+        "failed": "Generation failed",
+        "stopped": "Stopped",
+        "waiting": "Waiting to generate"
+      },
+      "progress": "Progress: {percent}%",
+      "buttons": {
+        "copy": "Copy text",
+        "copied": "Copied",
+        "download": "Download text",
+        "stop": "Stop",
+        "retry": "Retry",
+        "reset": "Reset"
+      },
+      "emptyState": {
+        "title": "Waiting to generate text",
+        "description": "Fill out the form on the left and click the execute button to start text generation"
+      },
+      "placeholder": {
+        "generating": "Generating text...",
+        "result": "Generated text will be displayed here"
+      },
+      "streamingIndicator": "Generating",
+      "stats": {
+        "characters": "Characters: {count}",
+        "words": "Words: {count}",
+        "tokensUsed": "Tokens used: {count}"
+      }
+    },
+    "apps": {
+      "startChatWith": "Start chatting with {appName}...",
+      "continueChatWith": "Continue chatting with {appName}...",
+      "defaultApp": "App",
+      "loadFailed": "App failed to load",
+      "backToMarket": "Back to App Market",
+      "loading": {
+        "app": "Loading app...",
+        "validating": "Validating app configuration...",
+        "default": "Loading..."
+      }
     },
     "auth": {
       "loginTitle": "Login",

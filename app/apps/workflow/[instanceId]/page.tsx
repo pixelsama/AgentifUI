@@ -10,6 +10,7 @@ import { useSidebarStore } from '@lib/stores/sidebar-store'
 import { useThemeColors } from '@lib/hooks/use-theme-colors'
 import { cn } from '@lib/utils'
 import { Loader2, Blocks } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface WorkflowPageProps {
   params: Promise<{
@@ -34,6 +35,7 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { colors, isDark } = useThemeColors()
+  const t = useTranslations('pages.apps')
   
   // --- 应用相关状态 ---
   const { apps, fetchApps } = useAppListStore()
@@ -145,7 +147,7 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
             "text-xl font-semibold mb-2 font-serif",
             isDark ? "text-stone-300" : "text-stone-700"
           )}>
-            应用加载失败
+            {t('loadFailed')}
           </h2>
           <p className={cn(
             "mb-4 font-serif",
@@ -162,7 +164,7 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
                 : "bg-stone-200 hover:bg-stone-300 text-stone-800"
             )}
           >
-            返回应用市场
+            {t('backToMarket')}
           </button>
         </div>
       </div>
@@ -186,9 +188,9 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
             "font-serif",
             isDark ? "text-stone-400" : "text-stone-500"
           )}>
-            {isInitializing ? '正在加载应用...' : 
-             isValidating ? '正在验证应用配置...' : 
-             '加载中...'}
+            {isInitializing ? t('loading.app') : 
+             isValidating ? t('loading.validating') : 
+             t('loading.default')}
           </p>
         </div>
       </div>

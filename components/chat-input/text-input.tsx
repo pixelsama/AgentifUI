@@ -4,6 +4,7 @@ import { useRef, useCallback, useEffect, forwardRef } from "react"
 import { cn } from "@lib/utils"
 import { INITIAL_INPUT_HEIGHT } from "@lib/stores/chat-layout-store"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
+import { useTranslations } from 'next-intl'
 
 interface ChatTextInputProps {
   value: string
@@ -24,7 +25,7 @@ export const ChatTextInput = forwardRef<HTMLTextAreaElement, ChatTextInputProps>
   value,
   onChange,
   onKeyDown,
-  placeholder = "输入消息...",
+  placeholder,
   maxHeight = 180,
   isDark = false,
   className,
@@ -34,6 +35,9 @@ export const ChatTextInput = forwardRef<HTMLTextAreaElement, ChatTextInputProps>
   disabled,
   readOnly,
 }, ref) => {
+  const t = useTranslations('pages.chat')
+  const defaultPlaceholder = placeholder || t('input.placeholder')
+  
   // 获取主题颜色
   const { colors } = useThemeColors()
   
@@ -107,7 +111,7 @@ export const ChatTextInput = forwardRef<HTMLTextAreaElement, ChatTextInputProps>
         requestAnimationFrame(updateHeight);
       }}
       onKeyDown={onKeyDown}
-      placeholder={placeholder}
+              placeholder={defaultPlaceholder}
       rows={1}
       className={cn(
         "w-full resize-none border-0 bg-transparent focus:ring-0 focus:outline-none",

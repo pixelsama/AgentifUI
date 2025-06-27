@@ -10,6 +10,7 @@ import rehypeKatex from "rehype-katex"
 import rehypeRaw from "rehype-raw"
 import "katex/dist/katex.min.css"
 import type { Components } from "react-markdown"
+import { useTranslations } from 'next-intl'
 // --- BEGIN MODIFIED COMMENT ---
 // 导入原子化的 Markdown 组件和思考块相关组件
 // 导入引用资源组件
@@ -205,6 +206,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(({
   className 
 }) => {
   const { isDark } = useTheme();
+  const t = useTranslations('pages.chat');
 
   const { hasThinkBlock, thinkContent, mainContent, thinkClosed } = useMemo(() => 
     extractThinkContent(content),
@@ -402,7 +404,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(({
       if (hasImageChild) {
         // 如果链接包含图片，使用特殊的图片链接样式
         const imageChild = node.children.find((child: any) => child.tagName === 'img');
-        const alt = imageChild?.properties?.alt || '图片链接';
+        const alt = imageChild?.properties?.alt || t('messages.imageLink');
         
         return (
           <a 
@@ -415,7 +417,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(({
             )}
             target="_blank" 
             rel="noopener noreferrer"
-            title={`点击查看: ${alt}`}
+            title={`${t('messages.clickToView')}: ${alt}`}
             {...props}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -460,13 +462,13 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(({
           )}
           target="_blank" 
           rel="noopener noreferrer"
-          title={alt || "查看图片"}
+          title={alt || t('messages.viewImage')}
           {...props}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          {alt || "图片链接"}
+          {alt || t('messages.imageLink')}
         </a>
       );
     }

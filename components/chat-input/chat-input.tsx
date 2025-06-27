@@ -25,6 +25,7 @@ import { AttachmentFile } from "@lib/stores/attachment-store"
 import { useNotificationStore } from "@lib/stores/ui/notification-store"
 import { FileTypeSelector } from "./file-type-selector"
 import { useChatInputRouteSync } from "@lib/hooks/use-chat-input-route-sync"
+import { useTranslations } from 'next-intl'
 
 // 创建一个全局焦点管理器
 interface FocusManagerState {
@@ -36,12 +37,12 @@ interface FocusManagerState {
 // 使用Zustand存储输入框引用，确保跨组件共享
 export const useFocusManager = create<FocusManagerState>((set, get) => ({
   inputRef: null,
-  
+
   // 注册输入框引用
   registerRef: (ref) => {
     set({ inputRef: ref });
   },
-  
+
   // 聚焦到输入框
   focusInput: () => {
     const { inputRef } = get();
@@ -84,7 +85,7 @@ interface ChatInputProps {
 
 export const ChatInput = ({
   className,
-  placeholder = "输入消息...",
+  placeholder,
   maxHeight = 300, // 定义输入框最大高度
   onSubmit,
   onStop,
@@ -96,37 +97,39 @@ export const ChatInput = ({
   requireModelValidation = true,
   showModelSelector = true
 }: ChatInputProps) => {
+  const t = useTranslations('pages.chat')
+  const defaultPlaceholder = placeholder || t('input.placeholder')
   const { widthClass } = useChatWidth()
   const { setInputHeight } = useChatLayoutStore()
   const {
-    message, 
-    setMessage, 
+    message,
+    setMessage,
     clearMessage,
-    isComposing, 
+    isComposing,
     setIsComposing,
     isWelcomeScreen,
     isDark
   } = useChatInputStore()
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 新增：本地提交状态，防止重复点击
   // --- END COMMENT ---
   const [isLocalSubmitting, setIsLocalSubmitting] = useState(false)
-  
+
   // 附件状态
   const { files: attachments, addFiles, clearFiles: clearAttachments, updateFileStatus, updateFileUploadedId } = useAttachmentStore()
   // 本地状态，存储附件栏和文本框的各自高度
   const [attachmentBarHeight, setAttachmentBarHeight] = useState(0)
   const [textAreaHeight, setTextAreaHeight] = useState(INITIAL_INPUT_HEIGHT)
-  
+
   // 使用高度重置钩子
   useInputHeightReset(isWelcomeScreen)
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 新增：路由同步Hook，确保输入框内容按路由隔离
   // --- END COMMENT ---
   useChatInputRouteSync()
-  
+
   // 创建输入框引用
   const inputRef = useCallback((node: HTMLTextAreaElement | null) => {
     if (node) {
@@ -146,14 +149,14 @@ export const ChatInput = ({
   // 回调函数，用于处理文本输入框高度变化
   const handleTextHeightChange = useCallback((newObservedHeight: number) => {
     const newCalculatedTextAreaHeight = Math.max(newObservedHeight, INITIAL_INPUT_HEIGHT);
-    
+
     // 更新本地 textAreaHeight 状态 (setTextAreaHeight 会自动处理重复值)
-    setTextAreaHeight(newCalculatedTextAreaHeight); 
+    setTextAreaHeight(newCalculatedTextAreaHeight);
 
     // 计算新的总输入高度
     // attachmentBarHeight 是 ChatInput 的本地状态，在 handleAttachmentBarHeightChange 中更新
-    const newTotalInputHeight = newCalculatedTextAreaHeight + attachmentBarHeight; 
-    
+    const newTotalInputHeight = newCalculatedTextAreaHeight + attachmentBarHeight;
+
     // 只有当计算出的总高度与 store 中的当前总高度不同时，才更新 store
     if (currentLayoutInputHeight !== newTotalInputHeight) {
       setInputHeight(newTotalInputHeight);
@@ -178,16 +181,16 @@ export const ChatInput = ({
   // --- BEGIN 中文注释 --- 用户ID 应用ID信息 ---
   const { session } = useSupabaseAuth();
   const activeUserId = session?.user?.id;
-  const { 
-    currentAppId, 
-    isLoading: isLoadingAppId, 
+  const {
+    currentAppId,
+    isLoading: isLoadingAppId,
     isValidating: isValidatingAppConfig, // 新增：验证状态
     isValidatingForMessage: isValidatingForMessageOnly, // 🎯 新增：专门用于消息发送的验证状态
     error: errorLoadingAppId,
     hasCurrentApp,
     isReady: isAppReady
   } = useCurrentApp();
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 检查是否有可用的模型以及是否选择了有效模型
   // 只有在需要模型验证时才进行检查
@@ -198,14 +201,14 @@ export const ChatInput = ({
     return metadata?.app_type === 'model';
   });
   const hasAvailableModels = availableModels.length > 0;
-  
+
   // 检查当前选择的模型是否有效
   // --- BEGIN COMMENT ---
   // 🎯 修复：使用instance_id进行匹配，因为currentAppId存储的是instance_id而不是UUID
   // --- END COMMENT ---
   const currentSelectedModel = availableModels.find(app => app.instance_id === currentAppId);
   const hasValidSelectedModel = !!currentSelectedModel;
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 修复：只有在需要模型验证且显示模型选择器时才检查模型状态
   // 历史对话不显示模型选择器，因此不需要模型验证
@@ -219,7 +222,7 @@ export const ChatInput = ({
   // 使用ref来避免在清空过程中重复触发
   // --- END COMMENT ---
   const previousIsWaitingRef = useRef(isWaiting);
-  
+
   useEffect(() => {
     // 只有当isWaiting从false变为true时才清空（验证成功并开始等待响应）
     if (isWaiting && !previousIsWaitingRef.current) {
@@ -232,7 +235,7 @@ export const ChatInput = ({
       // --- END COMMENT ---
       setIsLocalSubmitting(false);
     }
-    
+
     // 更新previous值
     previousIsWaitingRef.current = isWaiting;
   }, [isWaiting, clearMessage, clearAttachments]);
@@ -251,13 +254,13 @@ export const ChatInput = ({
     let savedMessage = "";
     let savedAttachments: AttachmentFile[] = [];
     // --- END 中文注释 ---
-    
+
     try {
       // --- BEGIN COMMENT ---
       // 🎯 立即设置本地提交状态，防止重复点击
       // --- END COMMENT ---
       setIsLocalSubmitting(true);
-      
+
       // 1. 暂存当前状态 (在调用 onSubmit 前)
       savedMessage = message;
       savedAttachments = useAttachmentStore.getState().files;
@@ -283,15 +286,15 @@ export const ChatInput = ({
         // 🎯 修复：不再在这里清空，而是通过监听isWaiting状态变化来清空
         // 这样在验证成功后立即清空，而不是等待整个流式响应结束
         // --- END COMMENT ---
-        
+
         // --- BEGIN 中文注释 --- 调用提交函数，清空操作由useEffect监听isWaiting状态变化处理
         await onSubmit(savedMessage, filesToSend);
         // --- END 中文注释 ---
-        
+
         // --- BEGIN COMMENT ---
         // 🎯 修复：清空操作已移到useEffect中，这里不再需要
         // --- END COMMENT ---
-        
+
         console.log("[ChatInput] 提交成功");
       } else {
         // 如果因为消息为空不能提交，理论上按钮已禁用，但以防万一
@@ -308,7 +311,7 @@ export const ChatInput = ({
       useAttachmentStore.getState().setFiles(savedAttachments);
       // 调用通知 Store 显示错误消息
       useNotificationStore.getState().showNotification(
-        `消息发送失败: ${(error as Error)?.message || '未知错误'}`,
+        `${t('input.messageSendFailed')}: ${(error as Error)?.message || t('input.unknownError')}`,
         'error',
         3000 // 持续 3 秒
       );
@@ -337,10 +340,10 @@ export const ChatInput = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey && !isComposing) {
       e.preventDefault();
-      
+
       // --- BEGIN 中文注释 ---
       // 在回车提交前，进行与按钮禁用逻辑完全一致的检查
-      const shouldBlockSubmit = 
+      const shouldBlockSubmit =
         isLocalSubmitting || // 🎯 新增：正在本地提交中
         isWaiting || // 正在等待响应
         isValidatingAppConfig || // 🎯 新增：正在验证配置
@@ -370,7 +373,7 @@ export const ChatInput = ({
   // 消息变化时自动聚焦，但避免在流式输出或输入法组合过程中触发
   useEffect(() => {
     // isComposing 状态从 store 中订阅，确保使用最新值
-    const currentIsComposing = useChatInputStore.getState().isComposing; 
+    const currentIsComposing = useChatInputStore.getState().isComposing;
     if (message && !isProcessing && !isWaitingForResponse && !currentIsComposing) {
       useFocusManager.getState().focusInput();
     }
@@ -401,7 +404,7 @@ export const ChatInput = ({
       const timer = setTimeout(() => {
         useFocusManager.getState().focusInput();
       }, 150);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isWelcomeScreen]);
@@ -416,11 +419,11 @@ export const ChatInput = ({
       const timer = setTimeout(() => {
         useFocusManager.getState().focusInput();
       }, 150); // 150ms延迟，确保过渡动画完成
-      
+
       return () => clearTimeout(timer);
     }
   }, [externalIsWelcomeScreen]);
-  
+
   // --- BEGIN 中文注释 --- 文件类型选择处理 ---
   // 处理文件类型选择后的文件上传
   const handleFileSelect = (files: FileList | null, accept: string) => {
@@ -439,26 +442,26 @@ export const ChatInput = ({
         // --- END COMMENT ---
         const appIdToUse = currentAppId || 'chat-input-warning-no-app-id';
         const userIdToUse = session?.user?.id || 'chat-input-warning-no-user-id'; // 使用匿名用户ID
-        
+
         uploadDifyFile(appIdToUse, file, userIdToUse, (progress) => {
           // 更新进度
           updateFileStatus(fileId, 'uploading', progress);
         })
-        .then((response) => {
-          // 上传成功
-          updateFileUploadedId(fileId, response.id);
-          console.log(`[ChatInput] 文件上传成功: ${fileId} -> ${response.id}`);
-        })
-        .catch((error) => {
-          // 上传失败
-          updateFileStatus(fileId, 'error', undefined, error.message || '上传失败');
-          console.error(`[ChatInput] 文件上传失败: ${fileId}`, error);
-        });
+          .then((response) => {
+            // 上传成功
+            updateFileUploadedId(fileId, response.id);
+            console.log(`[ChatInput] 文件上传成功: ${fileId} -> ${response.id}`);
+          })
+          .catch((error) => {
+            // 上传失败
+            updateFileStatus(fileId, 'error', undefined, error.message || t('input.uploadFailed'));
+            console.error(`[ChatInput] 文件上传失败: ${fileId}`, error);
+          });
       });
     }
   };
   // --- END 中文注释 ---
-  
+
   // --- 重试上传逻辑 ---
   const handleRetryUpload = useCallback(async (fileId: string) => {
     console.log(`[ChatInput] Retrying upload for file ID: ${fileId}`);
@@ -467,12 +470,12 @@ export const ChatInput = ({
 
     if (!attachment) {
       console.error(`[ChatInput] Cannot retry: Attachment with ID ${fileId} not found.`);
-      useNotificationStore.getState().showNotification(`无法重试：未找到文件 ${fileId}`, 'error');
+      useNotificationStore.getState().showNotification(`${t('input.retryUpload')}: ${t('input.fileUploadError')} ${fileId}`, 'error');
       return;
     }
 
     // 1. 重置状态为 uploading
-    updateFileStatus(fileId, 'uploading', 0); 
+    updateFileStatus(fileId, 'uploading', 0);
 
     // 2. 重新调用上传服务
     try {
@@ -481,11 +484,11 @@ export const ChatInput = ({
       // --- END COMMENT ---
       const appIdToUse = currentAppId || 'chat-input-warning-no-app-id';
       const userIdToUse = session?.user?.id || 'chat-input-warning-no-user-id'; // 使用匿名用户ID
-      
+
       const response = await uploadDifyFile(
-        appIdToUse, 
+        appIdToUse,
         attachment.file, // 使用原始 File 对象
-        userIdToUse, 
+        userIdToUse,
         (progress) => {
           // 更新进度回调
           updateFileStatus(fileId, 'uploading', progress);
@@ -496,10 +499,10 @@ export const ChatInput = ({
       console.log(`[ChatInput] 重试上传成功: ${fileId} -> ${response.id}`);
     } catch (error) {
       // 重试失败，再次标记为 error
-      updateFileStatus(fileId, 'error', undefined, (error as Error).message || '重试上传失败');
+      updateFileStatus(fileId, 'error', undefined, (error as Error).message || t('input.retryUpload'));
       console.error(`[ChatInput] 重试上传失败: ${fileId}`, error);
       useNotificationStore.getState().showNotification(
-        `文件 ${attachment.name} 重试上传失败: ${(error as Error)?.message || '未知错误'}`,
+        `${t('input.fileUploadError')} ${attachment.name}: ${(error as Error)?.message || t('input.unknownError')}`,
         'error'
       );
     }
@@ -508,7 +511,7 @@ export const ChatInput = ({
   // --- 计算按钮禁用状态 (依赖 store) ---
   const isUploading = attachments.some(f => f.status === 'uploading');
   const hasError = attachments.some(f => f.status === 'error');
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 修改：只有消息发送时的验证才显示spinner
   // 应用切换时的验证不影响输入框状态
@@ -520,12 +523,12 @@ export const ChatInput = ({
   // 这样可以确保在页面组件中控制欢迎屏幕的显示状态
   // --- END COMMENT ---
   const effectiveIsWelcomeScreen = externalIsWelcomeScreen || isWelcomeScreen;
-  
+
   return (
-    <ChatContainer 
-      isWelcomeScreen={effectiveIsWelcomeScreen} 
-      isDark={isDark} 
-      className={className} 
+    <ChatContainer
+      isWelcomeScreen={effectiveIsWelcomeScreen}
+      isDark={isDark}
+      className={className}
       widthClass={widthClass}
       isTransitioningToWelcome={isTransitioningToWelcome}
     >
@@ -543,7 +546,7 @@ export const ChatInput = ({
           value={message}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={defaultPlaceholder}
           maxHeight={maxHeight}
           isDark={isDark}
           onCompositionStart={handleCompositionStart}
@@ -559,10 +562,10 @@ export const ChatInput = ({
             <FileTypeSelector
               onFileSelect={handleFileSelect}
               disabled={isUploading || isProcessing}
-              ariaLabel="添加附件"
+              ariaLabel={t('input.addAttachment')}
             />
           </div>
-          
+
           {/* --- BEGIN COMMENT ---
           中间区域：应用选择器按钮，可以向左延伸
           --- END COMMENT --- */}
@@ -591,17 +594,17 @@ export const ChatInput = ({
               }
               isDark={isDark}
               ariaLabel={
-                isLocalSubmitting ? "正在发送消息..." :
-                isValidatingConfig ? "正在验证应用配置..." : 
-                isProcessing ? "停止生成" : 
-                isUploading ? "正在上传..." : 
-                hasError ? "部分附件上传失败" : 
-                !canSubmitWithModel ? (
-                  requireModelValidation 
-                    ? (!hasAvailableModels ? "没有可用模型" : "请选择一个模型")
-                    : "无法提交"
-                ) :
-                "发送消息"
+                isLocalSubmitting ? t('input.sending') :
+                  isValidatingConfig ? t('input.validatingConfig') :
+                    isProcessing ? t('input.stopGeneration') :
+                      isUploading ? t('input.uploading') :
+                        hasError ? t('input.uploadFailed') :
+                          !canSubmitWithModel ? (
+                            requireModelValidation
+                              ? (!hasAvailableModels ? t('input.noModelAvailable') : t('input.pleaseSelectModel'))
+                              : t('input.cannotSubmit')
+                          ) :
+                            t('input.sendMessage')
               }
               forceActiveStyle={isLocalSubmitting || isWaiting || isValidatingConfig}
             />

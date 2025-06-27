@@ -3,7 +3,10 @@
     "ui": {
       "cancel": "キャンセル",
       "back": "戻る",
-      "loading": "読み込み中..."
+      "loading": "読み込み中...",
+      "retry": "再試行",
+      "remove": "削除",
+      "error": "エラー"
     }
   },
   "pages": {
@@ -45,7 +48,153 @@
         "night": "遅い時間ですね"
       },
       "recentChats": "最近のチャット",
-      "historyChats": "チャット履歴"
+      "historyChats": "チャット履歴",
+      "input": {
+        "placeholder": "メッセージを入力...",
+        "sendMessage": "メッセージを送信",
+        "stopGeneration": "生成を停止",
+        "attachFile": "ファイルを添付",
+        "selectModel": "モデルを選択",
+        "noModelAvailable": "利用可能なモデルがありません",
+        "pleaseSelectModel": "モデルを選択してください",
+        "sending": "送信中...",
+        "uploading": "アップロード中...",
+        "uploadFailed": "アップロード失敗",
+        "retryUpload": "アップロードを再試行",
+        "removeFile": "ファイルを削除",
+        "fileUploadError": "ファイルアップロードエラー",
+        "messageSendFailed": "メッセージ送信失敗",
+        "unknownError": "不明なエラー",
+        "validatingConfig": "アプリ設定を検証中...",
+        "cannotSubmit": "送信できません",
+        "addAttachment": "添付ファイルを追加",
+        "retryUploadTooltip": "アップロードを再試行",
+        "removeAttachment": "添付ファイルを削除",
+        "scrollToBottom": "最下部にスクロール"
+      },
+      "fileUpload": {
+        "selectFileType": "ファイルタイプを選択",
+        "image": "画像",
+        "document": "ドキュメント",
+        "audio": "音声",
+        "video": "動画",
+        "custom": "カスタム",
+        "uploadProgress": "アップロード進行状況",
+        "uploadComplete": "アップロード完了",
+        "uploadError": "アップロードエラー",
+        "fileTooLarge": "ファイルが大きすぎます",
+        "unsupportedFormat": "サポートされていないファイル形式"
+      },
+      "fileTypeSelector": {
+        "notSupported": "このアプリはファイルアップロードをサポートしていません",
+        "noLimit": "ファイルアップロード制限は0です",
+        "noTypesConfigured": "サポートされているファイルタイプが設定されていません",
+        "maxFilesReached": "最大ファイル数制限に達しました ({maxFiles})",
+        "addAttachment": "添付ファイルを追加 ({currentFiles}/{maxFiles})",
+        "loading": "読み込み中...",
+        "loadError": "ファイルタイプの読み込みに失敗しました",
+        "reachedLimit": "制限に達しました ({currentFiles}/{maxFiles})",
+        "maxUpload": "最大{maxFiles}個のファイルをアップロード",
+        "noUploadLimit": "アップロード制限なし"
+      },
+      "modelSelector": {
+        "noModelsAvailable": "利用可能なモデルがありません",
+        "selectModel": "モデルを選択"
+      },
+      "messages": {
+        "assistant": "アシスタント",
+        "user": "あなた",
+        "thinking": "思考中...",
+        "stopped": "停止",
+        "completed": "完了",
+        "copyMessage": "メッセージをコピー",
+        "editMessage": "メッセージを編集",
+        "deleteMessage": "メッセージを削除",
+        "regenerate": "再生成",
+        "feedback": "フィードバック",
+        "like": "いいね",
+        "dislike": "よくない",
+        "copied": "コピーしました",
+        "copyFailed": "コピー失敗",
+        "imageLink": "画像リンク",
+        "viewImage": "画像を表示",
+        "clickToView": "クリックして表示"
+      }
+    },
+    "chatflow": {
+      "loading": {
+        "inputConfig": "入力設定を読み込み中..."
+      },
+      "form": {
+        "question": {
+          "label": "ご質問またはご要望",
+          "placeholder": "ご質問やご要望を詳しくお聞かせください...",
+          "required": "ご質問またはご要望を入力してください",
+          "tooLong": "質問の説明は{maxLength}文字を超えることはできません"
+        },
+        "additionalInfo": "追加情報",
+        "reset": "フォームをリセット",
+        "processing": "処理中...",
+        "startConversation": "会話を開始",
+        "checkAndCorrectErrors": "フォーム内のマークされたエラーを確認して修正してください",
+        "defaultAppName": "AI チャット",
+        "defaultDescription": "質問を入力してインテリジェントな会話を開始してください"
+      }
+    },
+    "workflow": {
+      "form": {
+        "inputPlaceholder": "{label}を入力してください",
+        "selectPlaceholder": "{label}を選択してください",
+        "rangeHint": "範囲：{min} - {max}",
+        "minValueHint": "最小値：{min}",
+        "maxValueHint": "最大値：{max}",
+        "stepHint": "ステップ：{step}",
+        "precisionHint": "小数点以下桁数：{precision}"
+      }
+    },
+    "textGeneration": {
+      "status": {
+        "generating": "テキスト生成中...",
+        "completed": "生成完了",
+        "failed": "生成失敗",
+        "stopped": "停止済み",
+        "waiting": "生成待機中"
+      },
+      "progress": "進捗: {percent}%",
+      "buttons": {
+        "copy": "テキストをコピー",
+        "copied": "コピー済み",
+        "download": "テキストをダウンロード",
+        "stop": "停止",
+        "retry": "再試行",
+        "reset": "リセット"
+      },
+      "emptyState": {
+        "title": "テキスト生成待機中",
+        "description": "左側のフォームに入力し、実行ボタンをクリックしてテキスト生成を開始してください"
+      },
+      "placeholder": {
+        "generating": "テキスト生成中...",
+        "result": "生成されたテキストがここに表示されます"
+      },
+      "streamingIndicator": "生成中",
+      "stats": {
+        "characters": "文字数: {count}",
+        "words": "単語数: {count}",
+        "tokensUsed": "使用トークン: {count}"
+      }
+    },
+    "apps": {
+      "startChatWith": "{appName}とのチャットを開始...",
+      "continueChatWith": "{appName}とのチャットを続行...",
+      "defaultApp": "アプリ",
+      "loadFailed": "アプリの読み込みに失敗しました",
+      "backToMarket": "アプリマーケットに戻る",
+      "loading": {
+        "app": "アプリを読み込み中...",
+        "validating": "アプリ設定を検証中...",
+        "default": "読み込み中..."
+      }
     },
     "auth": {
       "loginTitle": "ログイン",

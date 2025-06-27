@@ -28,6 +28,7 @@ import { useMobile } from '@lib/hooks';
 import { cn } from '@lib/utils';
 import { NavBar } from '@components/nav-bar/nav-bar';
 import { useProfile } from '@lib/hooks/use-profile';
+import { useTranslations } from 'next-intl';
 
 // --- BEGIN COMMENT ---
 // 🎯 新增：Chatflow 相关导入
@@ -42,6 +43,7 @@ export default function ChatPage() {
   const params = useParams<{ conversationId: string }>();
   const conversationIdFromUrl = params.conversationId;
   const pathname = usePathname();
+  const t = useTranslations('pages.chat.input');
   
   // --- BEGIN COMMENT ---
   // 获取sidebar状态和mobile状态，用于计算backdrop边距
@@ -258,7 +260,7 @@ export default function ChatPage() {
         
         <ChatInput
           onSubmit={handleSubmit}
-          placeholder="输入消息，按Enter发送..."
+          placeholder={t('placeholder')}
           isProcessing={isProcessing}
           isWaiting={isWaitingForResponse}
           onStop={handleStopProcessing}

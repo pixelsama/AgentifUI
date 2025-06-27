@@ -6,6 +6,7 @@ import { cn } from '@lib/utils'
 import { CustomSelect } from './custom-select'
 import { FileUploadField } from './file-upload-field'
 import type { DifyTextInputControl, DifyNumberInputControl, DifyParagraphControl, DifySelectControl, DifyFileInputControl } from '@lib/services/dify/types'
+import { useTranslations } from 'next-intl'
 
 interface FormFieldProps {
   type: 'text-input' | 'number' | 'paragraph' | 'select' | 'file' | 'file-list'
@@ -28,6 +29,7 @@ interface FormFieldProps {
  */
 export function FormField({ type, config, value, onChange, error, instanceId }: FormFieldProps) {
   const { isDark } = useTheme()
+  const t = useTranslations('pages.workflow.form')
   
   const baseInputClasses = cn(
     "w-full px-4 py-3 rounded-xl border-2 font-serif transition-all duration-300",
@@ -59,7 +61,7 @@ export function FormField({ type, config, value, onChange, error, instanceId }: 
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={`请输入${config.label}`}
+            placeholder={t('inputPlaceholder', { label: config.label })}
             maxLength={textConfig.max_length || undefined}
             className={baseInputClasses}
           />
@@ -95,7 +97,7 @@ export function FormField({ type, config, value, onChange, error, instanceId }: 
                 onChange(inputValue)
               }
             }}
-            placeholder={`请输入${config.label}`}
+            placeholder={t('inputPlaceholder', { label: config.label })}
             min={numberConfig.min}
             max={numberConfig.max}
             step={numberConfig.step || 1}
@@ -110,7 +112,7 @@ export function FormField({ type, config, value, onChange, error, instanceId }: 
           <textarea
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={`请输入${config.label}`}
+            placeholder={t('inputPlaceholder', { label: config.label })}
             rows={6}
             maxLength={hasMaxLength || undefined}
             className={cn(
@@ -128,7 +130,7 @@ export function FormField({ type, config, value, onChange, error, instanceId }: 
             value={value}
             onChange={onChange}
             options={selectConfig.options}
-            placeholder={`请选择${config.label}`}
+            placeholder={t('selectPlaceholder', { label: config.label })}
             error={error}
           />
         )
@@ -188,19 +190,19 @@ export function FormField({ type, config, value, onChange, error, instanceId }: 
     const hints: string[] = []
     
     if (numberConfig.min !== undefined && numberConfig.max !== undefined) {
-      hints.push(`范围：${numberConfig.min} - ${numberConfig.max}`)
+      hints.push(t('rangeHint', { min: numberConfig.min, max: numberConfig.max }))
     } else if (numberConfig.min !== undefined) {
-      hints.push(`最小值：${numberConfig.min}`)
+      hints.push(t('minValueHint', { min: numberConfig.min }))
     } else if (numberConfig.max !== undefined) {
-      hints.push(`最大值：${numberConfig.max}`)
+      hints.push(t('maxValueHint', { max: numberConfig.max }))
     }
     
     if (numberConfig.step && numberConfig.step !== 1) {
-      hints.push(`步长：${numberConfig.step}`)
+      hints.push(t('stepHint', { step: numberConfig.step }))
     }
     
     if (numberConfig.precision !== undefined) {
-      hints.push(`小数位数：${numberConfig.precision}`)
+      hints.push(t('precisionHint', { precision: numberConfig.precision }))
     }
     
     return hints.length > 0 ? hints.join('，') : null

@@ -6,7 +6,8 @@ import { useMobile, useChatWidth, useChatInterface, useWelcomeScreen, useChatScr
 import { cn } from "@lib/utils"
 import { 
   Loader2,
-  Blocks
+  Blocks,
+  MessageSquare
 } from "lucide-react"
 import { useCurrentApp } from "@lib/hooks/use-current-app"
 import { useChatStore } from "@lib/stores/chat-store"
@@ -25,6 +26,7 @@ import { ChatInput } from "@components/chat-input"
 import { useProfile } from "@lib/hooks/use-profile"
 import { NavBar } from "@components/nav-bar/nav-bar"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
+import { useTranslations } from 'next-intl'
 
 export default function AppDetailPage() {
   const { colors, isDark } = useThemeColors()
@@ -34,6 +36,7 @@ export default function AppDetailPage() {
   const params = useParams()
   const pathname = usePathname()
   const instanceId = params.instanceId as string
+  const t = useTranslations('pages.apps')
   
   // --- BEGIN COMMENT ---
   // 获取用户资料，用于欢迎界面显示
@@ -428,7 +431,7 @@ export default function AppDetailPage() {
         --- END COMMENT --- */}
         <ChatInput
           onSubmit={handleSubmit}
-          placeholder={`与 ${currentApp.display_name || '应用'} 开始对话...`}
+          placeholder={t('startChatWith', { appName: currentApp.display_name || t('defaultApp') })}
           isProcessing={isProcessing}
           isWaiting={isWaitingForResponse}
           onStop={handleStopProcessing}

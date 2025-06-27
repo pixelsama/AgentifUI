@@ -25,6 +25,7 @@ import { ChatInput } from "@components/chat-input"
 import { useProfile } from "@lib/hooks/use-profile"
 import { NavBar } from "@components/nav-bar/nav-bar"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
+import { useTranslations } from 'next-intl'
 
 export default function AppDetailPage() {
   const { colors, isDark } = useThemeColors()
@@ -34,6 +35,7 @@ export default function AppDetailPage() {
   const params = useParams()
   const pathname = usePathname()
   const instanceId = params.instanceId as string
+  const t = useTranslations('pages.apps')
   
   // --- BEGIN COMMENT ---
   // 获取用户资料，用于欢迎界面显示
@@ -313,7 +315,7 @@ export default function AppDetailPage() {
             "text-xl font-semibold mb-2 font-serif",
             isDark ? "text-stone-300" : "text-stone-700"
           )}>
-            应用加载失败
+            {t('loadFailed')}
           </h2>
           <p className={cn(
             "mb-4 font-serif",
@@ -330,7 +332,7 @@ export default function AppDetailPage() {
                 : "bg-stone-200 hover:bg-stone-300 text-stone-800"
             )}
           >
-            返回应用市场
+            {t('backToMarket')}
           </button>
         </div>
       </div>
@@ -356,9 +358,9 @@ export default function AppDetailPage() {
             "font-serif",
             isDark ? "text-stone-400" : "text-stone-500"
           )}>
-            {isInitializing ? '正在加载应用...' : 
-             (isValidating && !isValidatingForMessage) ? '正在验证应用配置...' : 
-             '加载中...'}
+            {isInitializing ? t('loading.app') : 
+             (isValidating && !isValidatingForMessage) ? t('loading.validating') : 
+             t('loading.default')}
           </p>
         </div>
       </div>
@@ -428,7 +430,7 @@ export default function AppDetailPage() {
         --- END COMMENT --- */}
         <ChatInput
           onSubmit={handleSubmit}
-          placeholder={`与 ${currentApp.display_name || '应用'} 开始对话...`}
+          placeholder={t('startChatWith', { appName: currentApp.display_name || t('defaultApp') })}
           isProcessing={isProcessing}
           isWaiting={isWaitingForResponse}
           onStop={handleStopProcessing}

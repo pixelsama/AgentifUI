@@ -1,8 +1,12 @@
-import { ArrowDown } from 'lucide-react'
+"use client"
+
+import React from "react"
+import { ChevronDown } from "lucide-react"
 import { useChatScrollStore } from '@lib/stores/chat-scroll-store'
 import { useThemeColors } from '@lib/hooks/use-theme-colors'
 import { usePathname } from 'next/navigation'
 import { cn } from '@lib/utils'
+import { useTranslations } from 'next-intl'
 
 // --- BEGIN COMMENT ---
 // ScrollToBottomButton 组件
@@ -13,6 +17,7 @@ export const ScrollToBottomButton = () => {
   const { colors, isDark } = useThemeColors();
   const resetScrollState = useChatScrollStore((state) => state.resetScrollState);
   const pathname = usePathname();
+  const t = useTranslations('pages.chat.input');
 
   // --- BEGIN COMMENT ---
   // 🎯 简化的渲染条件：
@@ -60,10 +65,10 @@ export const ScrollToBottomButton = () => {
       style={{
         bottom: bottomOffset,
       }}
-      aria-label="滚动到底部"
+      aria-label={t('scrollToBottom')}
     >
-      {/* 使用 ArrowDown 图标并减小尺寸 */}
-      <ArrowDown className="h-4 w-4" />
+      {/* 使用 ChevronDown 图标并减小尺寸 */}
+      <ChevronDown className="h-4 w-4" />
     </button>
   );
 };

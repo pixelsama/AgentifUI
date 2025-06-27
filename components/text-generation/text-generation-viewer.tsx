@@ -16,6 +16,7 @@ import {
   XCircle,
   Clock
 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface TextGenerationViewerProps {
   isExecuting: boolean
@@ -51,6 +52,7 @@ export function TextGenerationViewer({
   const { isDark } = useTheme()
   const [copied, setCopied] = useState(false)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
+  const t = useTranslations('pages.textGeneration')
   
   // --- 自动滚动到底部 ---
   useEffect(() => {
@@ -68,7 +70,7 @@ export function TextGenerationViewer({
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
-      console.error('复制失败:', error)
+      console.error('Copy failed:', error)
     }
   }
   
@@ -92,7 +94,7 @@ export function TextGenerationViewer({
     if (isExecuting || isStreaming) {
       return {
         icon: <Loader2 className="h-5 w-5 animate-spin text-blue-500" />,
-        text: '正在生成文本...',
+        text: t('status.generating'),
         color: 'text-blue-600'
       }
     }
@@ -100,7 +102,7 @@ export function TextGenerationViewer({
     if (currentExecution?.status === 'completed') {
       return {
         icon: <CheckCircle className="h-5 w-5 text-green-500" />,
-        text: '生成完成',
+        text: t('status.completed'),
         color: 'text-green-600'
       }
     }
@@ -108,7 +110,7 @@ export function TextGenerationViewer({
     if (currentExecution?.status === 'failed') {
       return {
         icon: <XCircle className="h-5 w-5 text-red-500" />,
-        text: '生成失败',
+        text: t('status.failed'),
         color: 'text-red-600'
       }
     }
@@ -116,14 +118,14 @@ export function TextGenerationViewer({
     if (currentExecution?.status === 'stopped') {
       return {
         icon: <Square className="h-5 w-5 text-orange-500" />,
-        text: '已停止',
+        text: t('status.stopped'),
         color: 'text-orange-600'
       }
     }
     
     return {
       icon: <FileText className="h-5 w-5 text-stone-400" />,
-      text: '等待生成',
+      text: t('status.waiting'),
       color: 'text-stone-500'
     }
   }
@@ -153,7 +155,7 @@ export function TextGenerationViewer({
                   "text-sm font-serif",
                   isDark ? "text-stone-400" : "text-stone-600"
                 )}>
-                  进度: {Math.round(progress)}%
+                  {t('progress', { percent: Math.round(progress) })}
                 </div>
               )}
             </div>
@@ -172,7 +174,7 @@ export function TextGenerationViewer({
                       ? "hover:bg-stone-700 text-stone-300 hover:text-stone-200"
                       : "hover:bg-stone-200 text-stone-600 hover:text-stone-800"
                   )}
-                  title={copied ? "已复制" : "复制文本"}
+                  title={copied ? t('buttons.copied') : t('buttons.copy')}
                 >
                   <Copy className="h-4 w-4" />
                 </button>
@@ -185,7 +187,7 @@ export function TextGenerationViewer({
                       ? "hover:bg-stone-700 text-stone-300 hover:text-stone-200"
                       : "hover:bg-stone-200 text-stone-600 hover:text-stone-800"
                   )}
-                  title="下载文本"
+                  title={t('buttons.download')}
                 >
                   <Download className="h-4 w-4" />
                 </button>
@@ -202,7 +204,7 @@ export function TextGenerationViewer({
                 )}
               >
                 <Square className="h-4 w-4 mr-1" />
-                停止
+                {t('buttons.stop')}
               </button>
             )}
             
@@ -215,7 +217,7 @@ export function TextGenerationViewer({
                 )}
               >
                 <RefreshCw className="h-4 w-4 mr-1" />
-                重试
+                {t('buttons.retry')}
               </button>
             )}
             
@@ -230,7 +232,7 @@ export function TextGenerationViewer({
                 )}
               >
                 <RotateCcw className="h-4 w-4 mr-1" />
-                重置
+                {t('buttons.reset')}
               </button>
             )}
           </div>
@@ -272,13 +274,13 @@ export function TextGenerationViewer({
                   "text-lg font-semibold font-serif",
                   isDark ? "text-stone-200" : "text-stone-800"
                 )}>
-                  等待生成文本
+                  {t('emptyState.title')}
                 </h3>
                 <p className={cn(
                   "text-sm font-serif max-w-md",
                   isDark ? "text-stone-400" : "text-stone-600"
                 )}>
-                  填写左侧表单并点击执行按钮开始文本生成
+                  {t('emptyState.description')}
                 </p>
               </div>
             </div>
@@ -295,7 +297,7 @@ export function TextGenerationViewer({
                 "font-serif text-base leading-relaxed",
                 isDark ? "text-stone-200" : "text-stone-800"
               )}
-              placeholder={isExecuting ? "正在生成文本..." : "生成的文本将在这里显示"}
+              placeholder={isExecuting ? t('placeholder.generating') : t('placeholder.result')}
             />
             
             {/* 流式生成指示器 */}
@@ -321,7 +323,7 @@ export function TextGenerationViewer({
                     "bg-blue-500"
                   )} style={{ animationDelay: '300ms' }} />
                 </div>
-                <span className="text-sm font-serif">正在生成</span>
+                <span className="text-sm font-serif">{t('streamingIndicator')}</span>
               </div>
             )}
           </div>
@@ -339,7 +341,7 @@ export function TextGenerationViewer({
               "font-serif",
               isDark ? "text-stone-400" : "text-stone-600"
             )}>
-              字符数: {generatedText.length} | 词数: {generatedText.split(/\s+/).filter(word => word.length > 0).length}
+              {t('stats.characters', { count: generatedText.length })}, {t('stats.words', { count: generatedText.split(/\s+/).filter(word => word.length > 0).length })}
             </div>
             
             {currentExecution?.total_tokens && (
@@ -347,7 +349,7 @@ export function TextGenerationViewer({
                 "font-serif",
                 isDark ? "text-stone-400" : "text-stone-600"
               )}>
-                Token 使用: {currentExecution.total_tokens}
+                {t('stats.tokensUsed', { count: currentExecution.total_tokens })}
               </div>
             )}
           </div>

@@ -8,6 +8,7 @@ import { useChatStore } from '@lib/stores/chat-store';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 // --- BEGIN COMMENT ---
 // 🎯 多提供商支持：模型选择器现在支持来自不同提供商的模型
@@ -37,6 +38,7 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
   // 获取全局焦点管理器
   // --- END COMMENT ---
   const { focusInput } = useFocusManager();
+  const t = useTranslations('pages.chat.modelSelector');
 
   // --- BEGIN COMMENT ---
   // 获取可用的app列表
@@ -208,11 +210,11 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
     
     // 没有可用模型
     if (modelApps.length === 0) {
-      return { isLoading: false, name: "暂无可用模型" };
+      return { isLoading: false, name: t('noModelsAvailable') };
     }
     
     // 默认状态
-    return { isLoading: false, name: "选择模型" };
+    return { isLoading: false, name: t('selectModel') };
   };
 
   const displayState = getDisplayState();
@@ -355,7 +357,7 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
                 "px-3 py-2 text-sm font-serif",
                 isDark ? "text-stone-400" : "text-stone-500"
               )}>
-                暂无可用模型
+                {t('noModelsAvailable')}
               </div>
             ) : (
               modelApps.map(app => (

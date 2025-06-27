@@ -10,6 +10,7 @@ import { validateFormData } from "@components/workflow/workflow-input-form/valid
 import type { DifyUserInputFormItem } from "@lib/services/dify/types"
 import { Send, RotateCcw, Loader2, Workflow } from "lucide-react"
 import { useCurrentApp } from "@lib/hooks/use-current-app"
+import { useTranslations } from 'next-intl'
 
 interface ChatflowInputAreaProps {
   instanceId: string
@@ -40,6 +41,7 @@ export function ChatflowInputArea({
   const { colors, isDark } = useThemeColors()
   const { widthClass, paddingClass } = useChatWidth()
   const { currentAppInstance } = useCurrentApp()
+  const t = useTranslations('pages.chatflow')
   
   // --- 状态管理 ---
   const [query, setQuery] = useState("")
@@ -177,13 +179,13 @@ export function ChatflowInputArea({
     
     // 验证查询字段（必填）
     if (!query.trim()) {
-      newErrors.query = "请输入您的问题或需求"
+      newErrors.query = t('form.question.required')
     } else {
       // 检查查询字段长度限制（如果有的话）
       // 注意：这里我们设置一个合理的默认最大长度，防止过长的输入
       const maxQueryLength = 2000 // 设置合理的查询最大长度
       if (query.length > maxQueryLength) {
-        newErrors.query = `问题描述长度不能超过${maxQueryLength}个字符`
+        newErrors.query = t('form.question.tooLong', { maxLength: maxQueryLength })
       }
     }
     
@@ -273,7 +275,7 @@ export function ChatflowInputArea({
               "text-sm font-serif",
               isDark ? "text-stone-400" : "text-stone-500"
             )}>
-              正在加载输入配置...
+              {t('loading.inputConfig')}
             </p>
           </div>
         </div>
@@ -321,13 +323,13 @@ export function ChatflowInputArea({
                 "text-2xl font-bold font-serif",
                 isDark ? "text-stone-200" : "text-stone-800"
               )}>
-                {currentAppInstance?.display_name || "AI 对话"}
+                {currentAppInstance?.display_name || t('form.defaultAppName')}
               </h1>
               <p className={cn(
                 "font-serif max-w-md mx-auto leading-relaxed",
                 isDark ? "text-stone-400" : "text-stone-600"
               )}>
-                {currentAppInstance?.description || "请输入您的问题，开始智能对话"}
+                {currentAppInstance?.description || t('form.defaultDescription')}
               </p>
             </div>
           </div>
@@ -346,7 +348,7 @@ export function ChatflowInputArea({
                 "text-base font-semibold font-serif",
                 isDark ? "text-stone-200" : "text-stone-800"
               )}>
-                您的问题或需求 <span className="text-red-500 ml-1">*</span>
+                {t('form.question.label')} <span className="text-red-500 ml-1">*</span>
               </label>
             </div>
             
@@ -357,7 +359,7 @@ export function ChatflowInputArea({
                 onKeyDown={handleQueryKeyDown}
                 onCompositionStart={handleCompositionStart}
                 onCompositionEnd={handleCompositionEnd}
-                placeholder="请详细描述您的问题或需求..."
+                placeholder={t('form.question.placeholder')}
                 rows={4}
                 className={cn(
                   "w-full px-5 py-4 rounded-xl border-2 resize-none font-serif",
@@ -400,7 +402,7 @@ export function ChatflowInputArea({
                     ? "bg-stone-800 text-stone-400 border-stone-700"
                     : "bg-stone-100 text-stone-600 border-stone-200"
                 )}>
-                  补充信息
+                  {t('form.additionalInfo')}
                 </span>
                 <div className={cn(
                   "flex-1 h-px bg-gradient-to-r from-transparent to-transparent",
@@ -489,7 +491,7 @@ export function ChatflowInputArea({
                 )}
               >
                 <RotateCcw className="h-4 w-4" />
-                重置表单
+                {t('form.reset')}
               </button>
               
               {/* 提交按钮 */}
@@ -515,12 +517,12 @@ export function ChatflowInputArea({
                 {isProcessing || isWaiting ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span>处理中...</span>
+                    <span>{t('form.processing')}</span>
                   </>
                 ) : (
                   <>
                     <Send className="h-5 w-5" />
-                    <span>开始对话</span>
+                    <span>{t('form.startConversation')}</span>
                   </>
                 )}
               </button>
@@ -540,7 +542,7 @@ export function ChatflowInputArea({
                     "text-sm font-serif",
                     isDark ? "text-red-300" : "text-red-700"
                   )}>
-                    请检查并修正表单中标记的错误信息
+                    {t('form.checkAndCorrectErrors')}
                   </p>
                 </div>
               </div>
