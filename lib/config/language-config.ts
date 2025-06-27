@@ -6,7 +6,6 @@
 export interface LanguageInfo {
   name: string;
   nativeName: string;
-  flag: string;
   code: string;
 }
 
@@ -16,29 +15,30 @@ export interface LanguageInfo {
 // --- END COMMENT ---
 export const SUPPORTED_LANGUAGES = {
   'zh-CN': {
-    name: 'Chinese (Simplified)',
+    name: 'Simplified Chinese',
     nativeName: '简体中文',
-    flag: '🇨🇳',
     code: 'zh-CN'
+  },
+  'zh-TW': {
+    name: 'Traditional Chinese',
+    nativeName: '繁體中文',
+    code: 'zh-TW'
   },
   'en-US': {
     name: 'English (US)',
     nativeName: 'English',
-    flag: '🇺🇸',
     code: 'en-US'
-  },
-  'es-ES': {
-    name: 'Spanish (Spain)',
-    nativeName: 'Español',
-    flag: '🇪🇸',
-    code: 'es-ES'
   },
   'ja-JP': {
     name: 'Japanese',
     nativeName: '日本語',
-    flag: '🇯🇵',
     code: 'ja-JP'
-  }
+  },
+  'es-ES': {
+    name: 'Spanish (Spain)',
+    nativeName: 'Español',
+    code: 'es-ES'
+  },
 } as const;
 
 export type SupportedLocale = keyof typeof SUPPORTED_LANGUAGES;

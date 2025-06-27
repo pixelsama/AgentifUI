@@ -79,6 +79,16 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
   };
 
   // --- BEGIN COMMENT ---
+  // 获取选中指示器的颜色 - 使用stone风格的primary色彩
+  // --- END COMMENT ---
+  const getIndicatorColor = () => {
+    if (isDark) {
+      return "bg-stone-300";
+    }
+    return "bg-stone-700";
+  };
+
+  // --- BEGIN COMMENT ---
   // 获取当前语言信息
   // --- END COMMENT ---
   const currentLanguageInfo = getLanguageInfo(currentLocale);
@@ -103,7 +113,6 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
           {/* 语言预览区域 */}
           <div className="h-24 mb-4 rounded-md flex items-center justify-center bg-gradient-to-r from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">{currentLanguageInfo.flag}</span>
               <span className="text-lg font-medium font-serif text-gray-900 dark:text-gray-100">
                 {currentLanguageInfo.nativeName}
               </span>
@@ -144,13 +153,12 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
                     currentLocale === locale && "bg-stone-100/70 dark:bg-stone-700/70"
                   )}
                 >
-                  <span className="text-lg">{info.flag}</span>
                   <div className="flex-1">
                     <div className="text-sm font-medium">{info.nativeName}</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">{info.name}</div>
                   </div>
                   {currentLocale === locale && (
-                    <div className="w-2 h-2 rounded-full bg-blue-500" />
+                    <div className={cn("w-2 h-2 rounded-full", getIndicatorColor())} />
                   )}
                 </button>
               ))}
@@ -182,7 +190,6 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
             getButtonColors()
           )}
         >
-          <span className="text-lg">{currentLanguageInfo.flag}</span>
           <span className="text-sm font-medium hidden sm:inline">
             {currentLanguageInfo.nativeName}
           </span>
@@ -213,10 +220,9 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
                     currentLocale === locale && "bg-stone-100/70 dark:bg-stone-700/70"
                   )}
                 >
-                  <span className="text-lg">{info.flag}</span>
                   <span className="text-sm font-medium">{info.nativeName}</span>
                   {currentLocale === locale && (
-                    <div className="ml-auto w-2 h-2 rounded-full bg-blue-500" />
+                    <div className={cn("ml-auto w-2 h-2 rounded-full", getIndicatorColor())} />
                   )}
                 </button>
               ))}
@@ -241,7 +247,6 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
           getButtonColors()
         )}
       >
-        <span className="text-base">{currentLanguageInfo.flag}</span>
         <span className="text-sm font-medium hidden md:inline">
           {currentLanguageInfo.nativeName}
         </span>
@@ -272,10 +277,9 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
                   currentLocale === locale && "bg-stone-100/70 dark:bg-stone-700/70"
                 )}
               >
-                <span className="text-base">{info.flag}</span>
                 <span className="text-sm font-medium">{info.nativeName}</span>
                 {currentLocale === locale && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500" />
+                  <div className={cn("ml-auto w-1.5 h-1.5 rounded-full", getIndicatorColor())} />
                 )}
               </button>
             ))}

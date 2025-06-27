@@ -1,0 +1,771 @@
+{
+  "common": {
+    "ui": {
+      "cancel": "取消",
+      "back": "返回",
+      "loading": "載入中...",
+      "retry": "重試",
+      "remove": "移除",
+      "error": "錯誤"
+    }
+  },
+  "pages": {
+    "home": {
+      "title": "AgentifUI",
+      "subtitle": "探索AI的無限可能，打造智慧新體驗",
+      "getStarted": "立即開始",
+      "learnMore": "了解更多",
+      "features": {
+        "feature1": {
+          "title": "大模型整合",
+          "description": "支援多種模型供應商，包括OpenAI、Anthropic、Dify等，滿足不同企業需求"
+        },
+        "feature2": {
+          "title": "RAG知識增強",
+          "description": "整合檢索增強生成(RAG)技術，實現私有知識庫和上下文感知"
+        },
+        "feature3": {
+          "title": "企業級部署",
+          "description": "支援私有化部署，保障資料安全，基於Dify後端提供穩定可靠的服務"
+        }
+      },
+      "copyright": {
+        "prefix": "© {year} ",
+        "linkText": "AgentifUI",
+        "suffix": ". 探索AI的無限可能。"
+      }
+    },
+    "chat": {
+      "newChat": "新對話",
+      "sendMessage": "發送",
+      "inputPlaceholder": "輸入您的訊息...",
+      "noMessages": "還沒有訊息",
+      "typing": "正在輸入...",
+      "greeting": {
+        "morning": "早上好",
+        "afternoon": "下午好",
+        "evening": "晚上好",
+        "night": "夜深了"
+      },
+      "recentChats": "近期對話",
+      "historyChats": "歷史對話",
+      "input": {
+        "placeholder": "輸入訊息...",
+        "sendMessage": "發送訊息",
+        "stopGeneration": "停止生成",
+        "attachFile": "附加檔案",
+        "selectModel": "選擇模型",
+        "noModelAvailable": "沒有可用的模型",
+        "pleaseSelectModel": "請選擇一個模型",
+        "sending": "發送中...",
+        "uploading": "上傳中...",
+        "uploadFailed": "上傳失敗",
+        "retryUpload": "重試上傳",
+        "removeFile": "移除檔案",
+        "fileUploadError": "檔案上傳錯誤",
+        "messageSendFailed": "訊息發送失敗",
+        "unknownError": "未知錯誤",
+        "validatingConfig": "正在驗證應用設定...",
+        "cannotSubmit": "無法提交",
+        "addAttachment": "新增附件",
+        "retryUploadTooltip": "重新上傳",
+        "removeAttachment": "移除附件",
+        "scrollToBottom": "滾動到底部"
+      },
+      "fileUpload": {
+        "selectFileType": "選擇檔案類型",
+        "image": "圖片",
+        "document": "文件",
+        "audio": "音訊",
+        "video": "影片",
+        "custom": "自訂",
+        "uploadProgress": "上傳進度",
+        "uploadComplete": "上傳完成",
+        "uploadError": "上傳失敗",
+        "fileTooLarge": "檔案過大",
+        "unsupportedFormat": "不支援的檔案格式"
+      },
+      "fileTypeSelector": {
+        "notSupported": "該應用不支援上傳檔案",
+        "noLimit": "檔案上傳數量限制為0",
+        "noTypesConfigured": "未設定支援的檔案類型",
+        "maxFilesReached": "已達到最大檔案數量限制 ({maxFiles})",
+        "addAttachment": "新增附件 ({currentFiles}/{maxFiles})",
+        "loading": "載入中...",
+        "loadError": "載入檔案類型失敗",
+        "reachedLimit": "已達上限 ({currentFiles}/{maxFiles})",
+        "maxUpload": "最多上傳 {maxFiles} 個檔案",
+        "noUploadLimit": "無上傳限制"
+      },
+      "modelSelector": {
+        "noModelsAvailable": "暫無可用模型",
+        "selectModel": "選擇模型"
+      },
+      "messages": {
+        "assistant": "助理",
+        "user": "您",
+        "thinking": "思考中...",
+        "stopped": "已停止",
+        "completed": "完成",
+        "copyMessage": "複製訊息",
+        "editMessage": "編輯訊息",
+        "deleteMessage": "刪除訊息",
+        "regenerate": "重新生成",
+        "feedback": "回饋",
+        "like": "讚",
+        "dislike": "踩",
+        "copied": "已複製",
+        "copyFailed": "複製失敗",
+        "imageLink": "圖片連結",
+        "viewImage": "檢視圖片",
+        "clickToView": "點擊檢視"
+      }
+    },
+    "chatflow": {
+      "loading": {
+        "inputConfig": "正在載入輸入設定..."
+      },
+      "form": {
+        "question": {
+          "label": "您的問題或需求",
+          "placeholder": "請詳細描述您的問題或需求...",
+          "required": "請輸入您的問題或需求",
+          "tooLong": "問題描述長度不能超過{maxLength}個字元"
+        },
+        "additionalInfo": "補充資訊",
+        "reset": "重設表單",
+        "processing": "處理中...",
+        "startConversation": "開始對話",
+        "checkAndCorrectErrors": "請檢查並修正表單中標記的錯誤資訊",
+        "defaultAppName": "AI 對話",
+        "defaultDescription": "請輸入您的問題，開始智慧對話"
+      },
+      "floatingController": {
+        "showTracker": "顯示節點追蹤器",
+        "hideTracker": "隱藏節點追蹤器"
+      },
+      "nodeTracker": {
+        "title": "節點執行進度",
+        "starting": "正在啟動 Chatflow",
+        "noRecords": "暫無節點執行記錄",
+        "waitingUpdate": "等待節點狀態更新...",
+        "showProgress": "開始對話後將顯示節點執行進度"
+      },
+      "executionBar": {
+        "status": {
+          "iterating": "正在迭代",
+          "iterationCompleted": "迭代完成",
+          "iterationFailed": "迭代失敗",
+          "waitingIteration": "等待迭代",
+          "looping": "正在循環",
+          "loopCompleted": "循環完成",
+          "loopFailed": "循環失敗",
+          "waitingLoop": "等待循環",
+          "executing": "正在執行",
+          "completed": "處理完成",
+          "failed": "處理失敗",
+          "waiting": "等待處理",
+          "unknown": "未知狀態",
+          "executing_": "執行中..."
+        },
+        "nodeTypes": {
+          "start": "開始節點",
+          "llm": "LLM 推理",
+          "knowledgeRetrieval": "知識檢索",
+          "questionClassifier": "問題分類器",
+          "ifElse": "條件分支",
+          "code": "程式碼執行",
+          "templateTransform": "範本轉換",
+          "variableAssigner": "變數賦值",
+          "variableAggregator": "變數聚合器",
+          "documentExtractor": "文件提取器",
+          "parameterExtractor": "參數提取器",
+          "httpRequest": "HTTP 請求",
+          "listOperator": "清單操作",
+          "iteration": "循環迭代",
+          "end": "結束節點",
+          "node": "節點"
+        },
+        "progressType": {
+          "iteration": "迭代進度",
+          "branch": "分支進度"
+        },
+        "branch": {
+          "label": "分支"
+        }
+      }
+    },
+    "workflow": {
+      "form": {
+        "inputPlaceholder": "請輸入{label}",
+        "selectPlaceholder": "請選擇{label}",
+        "rangeHint": "範圍：{min} - {max}",
+        "minValueHint": "最小值：{min}",
+        "maxValueHint": "最大值：{max}",
+        "stepHint": "步長：{step}",
+        "precisionHint": "小數位數：{precision}",
+        "defaultLabel": "輸入文字",
+        "loading": "正在載入表單設定...",
+        "noFormConfig": "該應用未設定輸入表單",
+        "reset": "重設表單",
+        "executing": "執行中...",
+        "startExecution": "開始執行"
+      },
+      "status": {
+        "running": "工作流程執行中",
+        "completed": "執行完成",
+        "failed": "執行失敗",
+        "stopped": "執行已停止",
+        "pending": "等待執行",
+        "unknown": "未知",
+        "totalTime": "總耗時: {time}s"
+      },
+      "nodeStatus": {
+        "iterating": "正在迭代...",
+        "iterationCompleted": "迭代完成",
+        "iterationFailed": "迭代失敗",
+        "waitingIteration": "等待迭代",
+        "looping": "正在循環",
+        "loopCompleted": "循環完成",
+        "loopFailed": "循環失敗",
+        "waitingLoop": "等待循環",
+        "parallelRunning": "並行執行中...",
+        "parallelCompleted": "並行完成",
+        "parallelFailed": "並行失敗",
+        "waitingParallel": "等待並行執行",
+        "executing": "正在執行...",
+        "nodeCompleted": "執行完成",
+        "nodeFailed": "執行失敗",
+        "nodePending": "等待執行",
+        "nodeUnknown": "未知狀態"
+      },
+      "nodeTypes": {
+        "start": "開始節點",
+        "llm": "LLM 推理",
+        "knowledgeRetrieval": "知識檢索",
+        "questionClassifier": "問題分類器",
+        "ifElse": "條件分支",
+        "code": "程式碼執行",
+        "templateTransform": "範本轉換",
+        "variableAssigner": "變數賦值",
+        "variableAggregator": "變數聚合器",
+        "documentExtractor": "文件提取器",
+        "parameterExtractor": "參數提取器",
+        "httpRequest": "HTTP 請求",
+        "listOperator": "清單操作",
+        "iteration": "循環迭代",
+        "parallel": "並行分支",
+        "end": "結束節點"
+      },
+      "buttons": {
+        "retry": "重試",
+        "close": "關閉",
+        "copy": "複製結果",
+        "copied": "已複製",
+        "download": "下載結果",
+        "retryUpload": "重新上傳",
+        "removeFile": "移除檔案",
+        "viewResult": "檢視結果",
+        "stop": "停止",
+        "reset": "重設"
+      },
+      "history": {
+        "showHistory": "檢視歷史記錄",
+        "hideHistory": "關閉歷史記錄",
+        "noDetailData": "該執行記錄暫無詳細結果資料，但可以檢視基本資訊",
+        "title": "執行歷史",
+        "selected": "已選 {count} 項",
+        "batchDelete": "批次刪除",
+        "deleteSelected": "刪除選中的 {count} 項",
+        "cancelSelection": "取消選擇",
+        "loading": "正在載入歷史記錄...",
+        "noRecords": "暫無執行記錄",
+        "getDetailFailed": "取得執行詳情失敗",
+        "unknownError": "未知錯誤"
+      },
+      "fileUpload": {
+        "uploading": "正在上傳檔案...",
+        "dropOrClick": "拖曳檔案到此處或點擊上傳",
+        "uploadFailed": "上傳失敗",
+        "supportAllTypes": "支援上傳各種檔案類型",
+        "supportTypes": "支援上傳：{types}",
+        "fileTypes": {
+          "image": "圖片",
+          "document": "文件",
+          "audio": "音訊",
+          "video": "影片",
+          "custom": "其他檔案"
+        },
+        "uploaded": "已上傳",
+        "maxFiles": "最多上傳 {maxFiles} 個檔案 (剩餘 {remaining} 個)",
+        "maxFileSize": "單個檔案最大 {size}MB",
+        "maxFilesReached": "已達到最大檔案數量限制 ({current}/{max})",
+        "selectedFiles": "已選檔案"
+      },
+      "tabs": {
+        "inputForm": "輸入表單",
+        "executionStatus": "執行狀態",
+        "history": "歷史記錄"
+      },
+      "resultViewer": {
+        "title": "工作流程執行結果",
+        "noData": "無結果資料",
+        "copy": "複製結果",
+        "copied": "已複製",
+        "download": "下載結果"
+      }
+    },
+    "textGeneration": {
+      "status": {
+        "generating": "正在生成文字...",
+        "completed": "生成完成",
+        "failed": "生成失敗",
+        "stopped": "已停止",
+        "waiting": "等待生成"
+      },
+      "progress": "進度: {percent}%",
+      "buttons": {
+        "copy": "複製文字",
+        "copied": "已複製",
+        "download": "下載文字",
+        "stop": "停止",
+        "retry": "重試",
+        "reset": "重設"
+      },
+      "emptyState": {
+        "title": "等待生成文字",
+        "description": "填寫左側表單並點擊執行按鈕開始文字生成"
+      },
+      "placeholder": {
+        "generating": "正在生成文字...",
+        "result": "生成的文字將在這裡顯示"
+      },
+      "streamingIndicator": "正在生成",
+      "stats": {
+        "characters": "字元數: {count}",
+        "words": "詞數: {count}",
+        "tokensUsed": "Token 使用: {count}"
+      }
+    },
+    "apps": {
+      "startChatWith": "與 {appName} 開始對話...",
+      "continueChatWith": "與 {appName} 繼續對話...",
+      "defaultApp": "應用程式",
+      "loadFailed": "應用程式載入失敗",
+      "backToMarket": "返回應用程式市場",
+      "loading": {
+        "app": "正在載入應用程式...",
+        "validating": "正在驗證應用程式設定...",
+        "default": "載入中..."
+      },
+      "errors": {
+        "appNotFound": "應用程式不存在",
+        "initializationFailed": "初始化失敗",
+        "appLoadFailed": "應用程式載入失敗"
+      },
+      "status": {
+        "loadingApp": "正在載入應用程式...",
+        "validatingConfig": "正在驗證應用程式設定...",
+        "loading": "載入中..."
+      },
+      "buttons": {
+        "backToMarket": "返回應用程式市場"
+      },
+      "market": {
+        "categories": {
+          "all": "全部",
+          "favorite": "常用",
+          "writing": "寫作",
+          "translation": "翻譯",
+          "programming": "程式設計",
+          "codeGeneration": "程式碼生成",
+          "analysis": "分析",
+          "summary": "總結",
+          "conversation": "對話",
+          "assistant": "助理",
+          "textGeneration": "文字生成",
+          "document": "文件",
+          "dataAnalysis": "資料分析",
+          "development": "開發",
+          "generation": "生成",
+          "conversationModel": "對話模型",
+          "reasoningModel": "推理模型",
+          "documentModel": "文件模型",
+          "multimodal": "多模態",
+          "highPrecision": "高精度",
+          "fastResponse": "快速",
+          "localDeployment": "本地",
+          "enterprise": "企業",
+          "private": "私有",
+          "tools": "工具",
+          "general": "通用",
+          "professional": "專業"
+        },
+        "search": {
+          "placeholder": "搜尋應用程式..."
+        },
+        "tryAdjustSearch": "嘗試調整搜尋條件或瀏覽其他分類",
+        "viewMode": {
+          "grid": "網格",
+          "list": "清單"
+        },
+        "appCard": {
+          "noDescription": "暫無描述",
+          "defaultType": "應用程式"
+        },
+        "header": {
+          "title": "應用程式市場",
+          "totalApps": "共 {count} 個應用程式",
+          "categoryApps": "{category} · {count} 個應用程式",
+          "totalLabel": "共 {count} 個"
+        },
+        "categoryKeys": {
+          "all": "全部",
+          "commonApps": "常用應用程式"
+        },
+        "unknownAppType": "未知的Dify應用程式類型",
+        "useDefaultRoute": "使用預設路由",
+        "routeJump": "路由跳轉",
+        "app": "應用程式",
+        "type": "類型",
+        "path": "路徑",
+        "openAppFailed": "開啟應用程式失敗"
+      }
+    },
+    "auth": {
+      "loginTitle": "登入",
+      "registerTitle": "註冊",
+      "email": "電子郵件",
+      "password": "密碼",
+      "forgotPassword": "忘記密碼？",
+      "noAccount": "還沒有帳戶？",
+      "hasAccount": "已有帳戶？"
+    },
+    "settings": {
+      "title": "設定",
+      "profile": "個人資料",
+      "account": "帳戶",
+      "appearance": "外觀",
+      "language": "語言",
+      "navigation": {
+        "overview": "概覽",
+        "profileNav": "個人資料",
+        "accountNav": "帳號設定",
+        "appearanceNav": "外觀",
+        "languageNav": "語言"
+      },
+      "descriptions": {
+        "overview": "管理您的個人偏好，自訂應用程式體驗",
+        "profileDesc": "更新個人資訊、頭像和帳號設定",
+        "accountDesc": "管理您的帳號安全和登入資訊",
+        "appearanceDesc": "自訂主題、顏色和介面配置",
+        "languageDesc": "選擇您偏好的顯示語言和地區設定"
+      },
+      "accountSettings": {
+        "title": "帳號設定",
+        "accountInfo": "帳號資訊",
+        "loginEmail": "登入電子郵件",
+        "authMethod": "認證方式",
+        "emailPasswordAuth": "電子郵件密碼",
+        "securitySettings": "安全設定",
+        "logoutAccount": "登出目前帳號",
+        "confirmLogout": "確定要登出嗎？",
+        "confirmLogoutBtn": "確認登出",
+        "logout": "登出",
+        "loggingOut": "登出中...",
+        "loadAccountError": "載入帳號資訊時發生錯誤",
+        "retry": "重試",
+        "deleteAccount": "刪除帳號"
+      },
+      "profileSettings": {
+        "title": "個人資料",
+        "accountInfo": "帳戶資訊",
+        "organization": "所屬企業",
+        "registrationTime": "註冊時間",
+        "accountRole": "帳戶角色",
+        "lastLogin": "上次登入",
+        "editProfile": "編輯個人資料",
+        "name": "姓名",
+        "nickname": "暱稱",
+        "avatarUrl": "頭像URL",
+        "profileUpdated": "個人資料已更新",
+        "updateFailed": "更新資料失敗",
+        "saving": "儲存中...",
+        "saveChanges": "儲存修改",
+        "namePlaceholder": "請輸入您的姓名",
+        "usernamePlaceholder": "請輸入您的使用者名稱",
+        "avatarPlaceholder": "請輸入頭像圖片URL",
+        "avatarHint": "輸入有效的圖片URL，建議使用正方形圖片",
+        "roles": {
+          "admin": "管理員",
+          "manager": "經理",
+          "user": "一般使用者"
+        },
+        "status": {
+          "notRecorded": "未記錄",
+          "notSet": "未設定",
+          "noOrganization": "無企業關聯"
+        },
+        "loadProfileError": "載入資料時發生錯誤"
+      },
+      "appearanceSettings": {
+        "title": "外觀設定",
+        "theme": "主題",
+        "themeDescription": "選擇您偏好的顯示模式",
+        "themes": {
+          "light": "淺色模式",
+          "dark": "深色模式",
+          "system": "跟隨系統"
+        },
+        "preview": {
+          "light": "亮色",
+          "dark": "暗色",
+          "system": "系統"
+        }
+      },
+      "languageSettings": {
+        "title": "語言設定",
+        "language": "語言",
+        "languageDescription": "選擇您偏好的顯示語言",
+        "currentLanguage": "目前語言",
+        "switchLanguage": "切換語言"
+      }
+    },
+    "admin": {
+      "title": "管理後台",
+      "users": "使用者管理",
+      "organizations": "組織管理",
+      "analytics": "資料分析"
+    },
+    "about": {
+      "title": "關於 AgentifUI",
+      "subtitle": "連接 AI 與企業，打造大模型應用新體驗",
+      "loading": "載入中...",
+      "mission": {
+        "title": "我們的使命",
+        "description": "AgentifUI 致力於利用大型語言模型的力量，為企業提供創新的應用解決方案。我們整合了多種模型供應商的能力，並基於 Dify 後端提供穩定、可靠的服務，幫助組織充分利用 AI 技術的價值。"
+      },
+      "values": {
+        "title": "我們的價值觀",
+        "items": {
+          "innovation": {
+            "title": "技術創新",
+            "description": "持續整合前沿的大模型技術，為企業提供領先的 AI 解決方案"
+          },
+          "security": {
+            "title": "資料安全",
+            "description": "支援私有化部署和嚴格的資料保護措施，確保企業資料的安全與隱私"
+          },
+          "flexibility": {
+            "title": "靈活客製",
+            "description": "提供高度可客製的解決方案，滿足不同行業和情境的特定需求"
+          },
+          "knowledge": {
+            "title": "知識增強",
+            "description": "透過 RAG 技術實現私有知識庫的整合，增強模型的上下文感知能力"
+          }
+        }
+      },
+      "buttonText": "開始探索",
+      "copyright": {
+        "prefix": "© {year} ",
+        "linkText": "AgentifUI",
+        "suffix": ". 探索大模型應用的未來。"
+      }
+    }
+  },
+  "errors": {
+    "notFound": "頁面未找到",
+    "serverError": "伺服器錯誤",
+    "unauthorized": "未授權存取"
+  },
+  "navbar": {
+    "user": {
+      "userMenu": "使用者選單",
+      "login": "登入",
+      "logout": "登出",
+      "loggingOut": "登出中...",
+      "register": "註冊新帳戶",
+      "history": "歷史對話",
+      "settings": "設定",
+      "about": "關於",
+      "admin": "管理後台",
+      "noOrganization": "無企業關聯",
+      "loginPrompt": "登入以使用更多功能",
+      "loginDescription": "存取您的對話歷史和個人設定"
+    },
+    "conversation": {
+      "newChat": "新對話",
+      "creating": "建立中...",
+      "loading": "載入中...",
+      "rename": "重新命名",
+      "delete": "刪除",
+      "star": "收藏",
+      "unstar": "取消收藏",
+      "appsMarket": "應用程式市場",
+      "renameDialog": {
+        "title": "重新命名對話",
+        "placeholder": "輸入新的對話名稱",
+        "confirmText": "確認重新命名"
+      },
+      "deleteDialog": {
+        "title": "刪除對話",
+        "message": "確定要刪除會話 \"{title}\" 嗎？此操作無法復原。",
+        "confirmText": "確認刪除"
+      },
+      "createInProgress": "對話正在建立中，請稍後再試。",
+      "incompleteInfo": "對話資訊不完整，無法操作。",
+      "renameFailed": "重新命名會話失敗。",
+      "deleteFailed": "刪除會話失敗。",
+      "operationError": "操作出錯，請稍後再試。"
+    },
+    "workflow": {
+      "history": "歷史記錄",
+      "closeHistory": "關閉歷史記錄",
+      "viewHistory": "檢視歷史記錄",
+      "closeHistoryShort": "關閉歷史",
+      "historyShort": "歷史記錄"
+    }
+  },
+  "sidebar": {
+    "expand": "展開",
+    "collapse": "收起",
+    "newChat": "新對話",
+    "historyChats": "歷史對話",
+    "appsMarket": "應用程式市場",
+    "settings": "設定",
+    "recentChats": "近期對話",
+    "moreOptions": "更多選項",
+    "rename": "重新命名",
+    "delete": "刪除對話",
+    "untitled": "無標題",
+    "creating": "建立中...",
+    "favoriteApps": "常用應用程式",
+    "loading": "載入中...",
+    "startWorkflow": "開始工作流程",
+    "startTextGeneration": "開始文字生成",
+    "startChat": "開始對話",
+    "hideApp": "隱藏該應用程式",
+    "renameDialog": {
+      "title": "重新命名對話",
+      "label": "對話名稱",
+      "placeholder": "輸入新的對話名稱",
+      "confirmText": "確認重新命名"
+    },
+    "deleteDialog": {
+      "title": "刪除對話",
+      "message": "確定要刪除會話 \"{title}\" 嗎？此操作無法復原。",
+      "confirmText": "確認刪除"
+    },
+    "syncingMessage": "對話資料正在同步中，請稍後再嘗試{action}。",
+    "operationFailed": "操作失敗，請稍後再試。",
+    "saveFailed": "儲存對話失敗",
+    "createFailed": "建立對話失敗"
+  },
+  "loading": {
+    "default": "載入中...",
+    "app": "正在載入應用程式...",
+    "appList": "載入應用程式清單...",
+    "messages": "載入更多訊息...",
+    "moreMessages": "載入更多歷史訊息",
+    "retry": "重試",
+    "failed": "載入失敗",
+    "loadingFailed": "載入訊息失敗: {error}",
+    "spinner": "載入中"
+  },
+  "dynamicTitle": {
+    "base": "AgentifUI",
+    "settings": {
+      "main": "設定",
+      "profile": "個人資料",
+      "account": "帳號設定",
+      "appearance": "外觀設定",
+      "language": "語言設定"
+    },
+    "admin": {
+      "main": "管理後台",
+      "users": "使用者管理",
+      "organizations": "組織管理",
+      "apiConfig": "API設定",
+      "security": "安全設定",
+      "analytics": "資料分析",
+      "content": "關於與通知"
+    },
+    "auth": {
+      "login": "登入",
+      "register": "註冊",
+      "phoneLogin": "手機號碼登入",
+      "resetPassword": "重設密碼",
+      "forgotPassword": "忘記密碼",
+      "ssoProcessing": "SSO登入處理中"
+    },
+    "apps": {
+      "market": "應用程式市場",
+      "agent": "Agent應用程式",
+      "chatbot": "Chatbot應用程式",
+      "chatflow": "Chatflow應用程式",
+      "workflow": "Workflow應用程式",
+      "textGeneration": "文字生成應用程式",
+      "details": "應用程式詳情",
+      "loading": "載入應用程式..."
+    },
+    "chat": {
+      "main": "聊天",
+      "new": "新對話",
+      "history": "歷史對話",
+      "loading": "載入對話...",
+      "notFound": "對話不存在"
+    },
+    "about": "關於"
+  },
+  "history": {
+    "title": "歷史對話",
+    "loading": "會話記錄載入中...",
+    "noRecords": "暫無會話歷史",
+    "totalCount": "共找到 {total} 個對話",
+    "searchResults": "搜尋結果：{count} 個對話",
+    "totalRecords": "共 {total} 個對話",
+    "searchPlaceholder": "搜尋聊天歷史...",
+    "newChat": "新對話",
+    "noMessagePreview": "無訊息預覽",
+    "batchDelete": "批次刪除",
+    "exitSelection": "退出選擇",
+    "selectAll": "全選",
+    "deselectAll": "取消全選",
+    "selected": "已選擇 {count} / {total} 個對話",
+    "deleteCount": "刪除 ({count})",
+    "deleting": "刪除中...",
+    "cancel": "取消",
+    "rename": "重新命名",
+    "delete": "刪除對話",
+    "moreOptions": "更多選項",
+    "noSearchResults": "未找到符合的對話",
+    "searchHint": "請嘗試其他搜尋詞",
+    "noHistoryTitle": "暫無聊天歷史",
+    "noHistoryDesc": "開始一個新對話吧",
+    "renameDialog": {
+      "title": "重新命名對話",
+      "label": "對話名稱",
+      "placeholder": "輸入新的對話名稱",
+      "confirmText": "確認重新命名"
+    },
+    "deleteDialog": {
+      "title": "刪除對話",
+      "message": "確定要刪除對話 \"{title}\" 嗎？此操作無法復原。",
+      "confirmText": "確認刪除"
+    },
+    "batchDeleteDialog": {
+      "title": "批次刪除對話",
+      "message": "確定要刪除選中的 {count} 個對話嗎？此操作無法復原。",
+      "confirmText": "刪除",
+      "cancelText": "取消"
+    },
+    "operations": {
+      "renameFailed": "對話重新命名失敗",
+      "deleteFailed": "對話刪除失敗",
+      "batchDeleteSuccess": "成功刪除 {success} 個對話，{failed} 個刪除失敗",
+      "batchDeleteFailed": "刪除失敗，請稍後重試",
+      "error": "操作出錯，請稍後再試"
+    }
+  }
+} 

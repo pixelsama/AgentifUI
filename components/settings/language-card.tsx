@@ -30,7 +30,6 @@ export function LanguageCard({ language, currentLanguage, onClick }: LanguageCar
           : "bg-gradient-to-r from-blue-100 to-green-100 border border-stone-200"
       )}>
         <div className="flex items-center gap-3">
-          <span className="text-3xl">{languageInfo.flag}</span>
           <div className="text-center">
             <div className={cn(
               "font-medium text-lg font-serif",
