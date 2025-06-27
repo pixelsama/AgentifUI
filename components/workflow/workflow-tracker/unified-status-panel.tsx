@@ -4,6 +4,7 @@ import React from 'react'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
 import { Play, Square, RefreshCw, RotateCcw, Clock, CheckCircle, XCircle, Eye } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface UnifiedStatusPanelProps {
   isExecuting: boolean
@@ -40,6 +41,8 @@ export function UnifiedStatusPanel({
   showResultButton = true
 }: UnifiedStatusPanelProps) {
   const { isDark } = useTheme()
+  const t = useTranslations('pages.workflow.status')
+  const tButtons = useTranslations('pages.workflow.buttons')
   
   const getOverallStatus = () => {
     if (isExecuting) return 'running'
@@ -56,31 +59,31 @@ export function UnifiedStatusPanel({
       case 'running':
         return {
           icon: <Clock className="h-5 w-5 animate-pulse" />,
-          text: '工作流执行中',
+          text: t('running'),
           color: 'text-yellow-500'
         }
       case 'completed':
         return {
           icon: <CheckCircle className="h-5 w-5" />,
-          text: '执行完成',
+          text: t('completed'),
           color: isDark ? 'text-stone-300' : 'text-stone-600'
         }
       case 'failed':
         return {
           icon: <XCircle className="h-5 w-5" />,
-          text: '执行失败',
+          text: t('failed'),
           color: 'text-red-500'
         }
       case 'stopped':
         return {
           icon: <Square className="h-5 w-5" />,
-          text: '执行已停止',
+          text: t('stopped'),
           color: 'text-stone-500'
         }
       default:
         return {
           icon: <Play className="h-5 w-5" />,
-          text: '等待执行',
+                      text: t('pending'),
           color: 'text-stone-400'
         }
     }
@@ -122,7 +125,7 @@ export function UnifiedStatusPanel({
                 )}
               >
                 <Eye className="h-4 w-4" />
-                查看结果
+                {tButtons('viewResult')}
               </button>
             )}
             
@@ -139,7 +142,7 @@ export function UnifiedStatusPanel({
                 )}
               >
                 <Square className="h-3.5 w-3.5" />
-                停止
+                {tButtons('stop')}
               </button>
             )}
             
@@ -156,7 +159,7 @@ export function UnifiedStatusPanel({
                 )}
               >
                 <RefreshCw className="h-3.5 w-3.5" />
-                重试
+                {tButtons('retry')}
               </button>
             )}
             
@@ -173,7 +176,7 @@ export function UnifiedStatusPanel({
                 )}
               >
                 <RotateCcw className="h-3.5 w-3.5" />
-                重置
+                {tButtons('reset')}
               </button>
             )}
             </div>
@@ -191,7 +194,7 @@ export function UnifiedStatusPanel({
               isDark ? "bg-stone-700 text-stone-300" : "bg-stone-100 text-stone-700"
             )}>
               <Clock className="h-4 w-4" />
-              <span>总耗时: {currentExecution.elapsed_time}s</span>
+              <span>{t('totalTime', { time: currentExecution.elapsed_time })}</span>
             </div>
           )}
           

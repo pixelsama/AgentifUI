@@ -10,6 +10,7 @@ import { validateFormData } from './validation'
 import type { DifyUserInputFormItem } from '@lib/services/dify/types'
 import type { DifyParametersSimplifiedConfig } from '@lib/types/dify-parameters'
 import { Play, Loader2, AlertCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface WorkflowInputFormProps {
   instanceId: string
@@ -35,52 +36,53 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
   ({ instanceId, onExecute, isExecuting }, ref) => {
     const { isDark } = useTheme()
     const { currentAppInstance, ensureAppReady } = useCurrentApp()
-    
+    const t = useTranslations('pages.workflow.form')
+
     // --- 状态管理 ---
     const [formData, setFormData] = useState<Record<string, any>>({})
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [isLoading, setIsLoading] = useState(true)
     const [appConfig, setAppConfig] = useState<any>(null)
     const [initialFormData, setInitialFormData] = useState<Record<string, any>>({})
-    
+
     // --- 初始化应用配置 ---
     useEffect(() => {
       const initializeApp = async () => {
         try {
           setIsLoading(true)
           console.log('[表单初始化] 开始加载应用配置，instanceId:', instanceId)
-          
+
           // 直接从数据库获取指定 instanceId 的配置
           try {
             // 导入数据库查询函数
             const { createClient } = await import('@lib/supabase/client')
             const supabase = createClient()
-            
+
             // 查询指定的服务实例
             const { data: serviceInstance, error } = await supabase
               .from('service_instances')
               .select('*')
               .eq('instance_id', instanceId)
               .single()
-            
+
             if (error || !serviceInstance) {
               throw new Error(`未找到 instanceId 为 ${instanceId} 的服务实例`)
             }
-            
+
             console.log('[表单初始化] 找到服务实例:', serviceInstance)
             setAppConfig(serviceInstance.config)
-            
+
             // 初始化表单默认值
             const difyParams = serviceInstance.config?.dify_parameters as DifyParametersSimplifiedConfig
             const userInputForm = difyParams?.user_input_form || []
             const initialData: Record<string, any> = {}
-            
+
             console.log('[表单初始化] 解析到的 user_input_form:', userInputForm)
-            
+
             userInputForm.forEach((formItem: DifyUserInputFormItem) => {
               const fieldType = Object.keys(formItem)[0]
               const fieldConfig = formItem[fieldType as keyof typeof formItem]
-              
+
               if (fieldConfig) {
                 // 根据字段类型设置默认值
                 if (fieldType === 'file' || fieldType === 'file-list') {
@@ -94,13 +96,13 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
                 }
               }
             })
-            
+
             setFormData(initialData)
             setInitialFormData(initialData)
-            
+
           } catch (configError) {
             console.warn('[表单初始化] 无法获取应用配置，使用默认配置:', configError)
-            
+
             // 设置默认配置，允许用户继续使用
             const defaultConfig = {
               dify_parameters: {
@@ -108,7 +110,7 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
                   {
                     paragraph: {
                       type: 'paragraph',
-                      label: '输入文本',
+                      label: t('defaultLabel'),
                       variable: 'input_text',
                       required: true,
                       default: ''
@@ -117,17 +119,17 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
                 ]
               }
             }
-            
+
             setAppConfig(defaultConfig)
-            
+
             const defaultFormData = { input_text: '' }
             setFormData(defaultFormData)
             setInitialFormData(defaultFormData)
           }
-          
+
         } catch (error) {
           console.error('[表单初始化] 初始化失败:', error)
-          
+
           // 即使完全失败，也提供基本的表单
           const fallbackConfig = {
             dify_parameters: {
@@ -135,7 +137,7 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
                 {
                   paragraph: {
                     type: 'paragraph',
-                    label: '输入文本',
+                    label: t('defaultLabel'),
                     variable: 'input_text',
                     required: true,
                     default: ''
@@ -145,26 +147,26 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
             }
           }
           setAppConfig(fallbackConfig)
-          
+
           const fallbackFormData = { input_text: '' }
           setFormData(fallbackFormData)
           setInitialFormData(fallbackFormData)
-          
+
         } finally {
           setIsLoading(false)
         }
       }
-      
+
       initializeApp()
     }, [instanceId])
-    
+
     // --- 表单字段更新 ---
     const handleFieldChange = (variable: string, value: any) => {
       setFormData(prev => ({
         ...prev,
         [variable]: value
       }))
-      
+
       // 清除该字段的错误
       if (errors[variable]) {
         setErrors(prev => {
@@ -174,38 +176,38 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
         })
       }
     }
-    
+
     // --- 表单重置 ---
     const handleReset = () => {
       setFormData({ ...initialFormData })
       setErrors({})
     }
-    
+
     // --- 表单提交 ---
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault()
-      
+
       if (isExecuting) return
-      
+
       // 验证表单
       const userInputForm = appConfig?.dify_parameters?.user_input_form || []
       const validationErrors = validateFormData(formData, userInputForm)
-      
+
       if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors)
         return
       }
-      
+
       // 清除错误并执行
       setErrors({})
       await onExecute(formData)
     }
-    
+
     // --- 暴露重置方法给父组件 ---
     React.useImperativeHandle(ref, () => ({
       resetForm: handleReset
     }), [handleReset])
-    
+
     // --- 加载状态 ---
     if (isLoading) {
       return (
@@ -219,16 +221,16 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
               "text-sm font-serif",
               isDark ? "text-stone-400" : "text-stone-600"
             )}>
-              正在加载表单配置...
+              {t('loading')}
             </p>
           </div>
         </div>
       )
     }
-    
+
     // --- 获取表单配置 ---
     const userInputForm = appConfig?.dify_parameters?.user_input_form || []
-    
+
     if (userInputForm.length === 0) {
       return (
         <div className="h-full flex items-center justify-center">
@@ -241,13 +243,13 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
               "text-sm font-serif",
               isDark ? "text-stone-400" : "text-stone-600"
             )}>
-              该应用未配置输入表单
+              {t('noFormConfig')}
             </p>
           </div>
         </div>
       )
     }
-    
+
     return (
       <div className="h-full flex flex-col">
         {/* --- 表单内容 --- */}
@@ -256,9 +258,9 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
             {userInputForm.map((formItem: DifyUserInputFormItem, index: number) => {
               const fieldType = Object.keys(formItem)[0]
               const fieldConfig = formItem[fieldType as keyof typeof formItem]
-              
+
               if (!fieldConfig) return null
-              
+
               // 文件上传字段特殊处理
               if (fieldType === 'file' || fieldType === 'file-list') {
                 return (
@@ -274,7 +276,7 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
                   />
                 )
               }
-              
+
               // 其他字段类型
               return (
                 <FormField
@@ -288,12 +290,12 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
               )
             })}
           </div>
-          
+
           {/* --- 表单操作按钮 --- */}
           <div className={cn(
             "flex-shrink-0 pt-6 mt-4 border-t bg-gradient-to-t",
-            isDark 
-              ? "border-stone-700" 
+            isDark
+              ? "border-stone-700"
               : "border-stone-200"
           )}>
             <div className="flex gap-3">
@@ -313,9 +315,9 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
                     : "border-stone-300 text-stone-700 hover:bg-stone-100 hover:text-stone-800"
                 )}
               >
-                重置表单
+                {t('reset')}
               </button>
-              
+
               {/* 执行按钮 */}
               <button
                 type="submit"
@@ -334,12 +336,12 @@ export const WorkflowInputForm = React.forwardRef<WorkflowInputFormRef, Workflow
                 {isExecuting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    执行中...
+                    {t('executing')}
                   </>
                 ) : (
                   <>
                     <Play className="h-4 w-4" />
-                    开始执行
+                    {t('startExecution')}
                   </>
                 )}
               </button>

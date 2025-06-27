@@ -8,12 +8,12 @@ import { WorkflowInputForm, WorkflowInputFormRef } from './workflow-input-form'
 import { WorkflowTracker } from './workflow-tracker'
 import { ExecutionHistory } from './execution-history'
 import { ResultViewer } from './workflow-tracker/result-viewer'
-import { HistoryButton } from '@components/workflow/history-button'
 import { MobileTabSwitcher } from '@components/workflow/mobile-tab-switcher'
 import { ResizableSplitPane } from '@components/ui/resizable-split-pane'
 import { useWorkflowHistoryStore } from '@lib/stores/workflow-history-store'
 import { useWorkflowExecution } from '@lib/hooks/use-workflow-execution'
 import { AlertCircle, RefreshCw, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface WorkflowLayoutProps {
   instanceId: string
@@ -33,6 +33,7 @@ type MobileTab = 'form' | 'tracker' | 'history'
 export function WorkflowLayout({ instanceId }: WorkflowLayoutProps) {
   const { isDark } = useTheme()
   const isMobile = useMobile()
+  const t = useTranslations('pages.workflow.buttons')
   
   // --- 新的工作流执行系统 ---
   const {
@@ -156,7 +157,7 @@ export function WorkflowLayout({ instanceId }: WorkflowLayoutProps) {
                 ? "hover:bg-red-800/50 text-red-300 hover:text-red-200"
                 : "hover:bg-red-200/50 text-red-700 hover:text-red-800"
             )}
-            title="重试"
+            title={t('retry')}
           >
             <RefreshCw className="h-4 w-4" />
           </button>
@@ -169,7 +170,7 @@ export function WorkflowLayout({ instanceId }: WorkflowLayoutProps) {
               ? "hover:bg-red-800/50 text-red-300 hover:text-red-200"
               : "hover:bg-red-200/50 text-red-700 hover:text-red-800"
           )}
-          title="关闭"
+          title={t('close')}
         >
           <X className="h-4 w-4" />
         </button>

@@ -203,7 +203,7 @@ export default function AppDetailPage() {
         const targetApp = latestApps.find(app => app.instance_id === instanceId)
         if (!targetApp) {
           console.error('[AppDetail] 应用不存在:', instanceId)
-          setInitError('应用不存在')
+          setInitError(t('errors.appNotFound'))
           return
         }
         
@@ -237,7 +237,7 @@ export default function AppDetailPage() {
         
       } catch (error) {
         console.error('[AppDetail] 初始化失败:', error)
-        setInitError(error instanceof Error ? error.message : '初始化失败')
+        setInitError(error instanceof Error ? error.message : t('errors.initializationFailed'))
       } finally {
         // --- BEGIN COMMENT ---
         // 🎯 确保在所有情况下都清除初始化状态
@@ -315,7 +315,7 @@ export default function AppDetailPage() {
             "text-xl font-semibold mb-2 font-serif",
             isDark ? "text-stone-300" : "text-stone-700"
           )}>
-            {t('loadFailed')}
+            {t('errors.appLoadFailed')}
           </h2>
           <p className={cn(
             "mb-4 font-serif",
@@ -332,7 +332,7 @@ export default function AppDetailPage() {
                 : "bg-stone-200 hover:bg-stone-300 text-stone-800"
             )}
           >
-            {t('backToMarket')}
+            {t('buttons.backToMarket')}
           </button>
         </div>
       </div>
@@ -358,9 +358,9 @@ export default function AppDetailPage() {
             "font-serif",
             isDark ? "text-stone-400" : "text-stone-500"
           )}>
-            {isInitializing ? t('loading.app') : 
-             (isValidating && !isValidatingForMessage) ? t('loading.validating') : 
-             t('loading.default')}
+            {isInitializing ? t('status.loadingApp') : 
+             (isValidating && !isValidatingForMessage) ? t('status.validatingConfig') : 
+             t('status.loading')}
           </p>
         </div>
       </div>

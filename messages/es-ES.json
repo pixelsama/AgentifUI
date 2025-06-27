@@ -203,7 +203,116 @@
         "minValueHint": "Valor mínimo: {min}",
         "maxValueHint": "Valor máximo: {max}",
         "stepHint": "Paso: {step}",
-        "precisionHint": "Lugares decimales: {precision}"
+        "precisionHint": "Lugares decimales: {precision}",
+        "defaultLabel": "Texto de entrada",
+        "loading": "Cargando configuración del formulario...",
+        "noFormConfig": "Esta aplicación no tiene formulario de entrada configurado",
+        "reset": "Restablecer formulario",
+        "executing": "Ejecutando...",
+        "startExecution": "Iniciar ejecución"
+      },
+      "status": {
+        "running": "Flujo de trabajo ejecutándose",
+        "completed": "Ejecución completada",
+        "failed": "Ejecución fallida",
+        "stopped": "Ejecución detenida",
+        "pending": "Esperando ejecución",
+        "unknown": "Desconocido",
+        "totalTime": "Tiempo total: {time}s"
+      },
+      "nodeStatus": {
+        "iterating": "Iterando...",
+        "iterationCompleted": "Iteración completada",
+        "iterationFailed": "Iteración fallida",
+        "waitingIteration": "Esperando iteración",
+        "looping": "En bucle",
+        "loopCompleted": "Bucle completado",
+        "loopFailed": "Bucle fallido",
+        "waitingLoop": "Esperando bucle",
+        "parallelRunning": "Ejecución paralela...",
+        "parallelCompleted": "Paralelo completado",
+        "parallelFailed": "Paralelo fallido",
+        "waitingParallel": "Esperando ejecución paralela",
+        "executing": "Ejecutando...",
+        "nodeCompleted": "Ejecución completada",
+        "nodeFailed": "Ejecución fallida",
+        "nodePending": "Esperando ejecución",
+        "nodeUnknown": "Estado desconocido"
+      },
+      "nodeTypes": {
+        "start": "Nodo de Inicio",
+        "llm": "Inferencia LLM",
+        "knowledgeRetrieval": "Recuperación de Conocimiento",
+        "questionClassifier": "Clasificador de Preguntas",
+        "ifElse": "Rama Condicional",
+        "code": "Ejecución de Código",
+        "templateTransform": "Transformación de Plantilla",
+        "variableAssigner": "Asignador de Variables",
+        "variableAggregator": "Agregador de Variables",
+        "documentExtractor": "Extractor de Documentos",
+        "parameterExtractor": "Extractor de Parámetros",
+        "httpRequest": "Solicitud HTTP",
+        "listOperator": "Operador de Lista",
+        "iteration": "Iteración de Bucle",
+        "parallel": "Rama Paralela",
+        "end": "Nodo Final"
+      },
+      "buttons": {
+        "retry": "Reintentar",
+        "close": "Cerrar",
+        "copy": "Copiar resultado",
+        "copied": "Copiado",
+        "download": "Descargar resultado",
+        "retryUpload": "Reintentar subida",
+        "removeFile": "Eliminar archivo",
+        "viewResult": "Ver resultado",
+        "stop": "Detener",
+        "reset": "Restablecer"
+      },
+      "history": {
+        "showHistory": "Ver historial",
+        "hideHistory": "Cerrar historial",
+        "noDetailData": "Este registro de ejecución no tiene datos de resultado detallados, pero puede ver información básica",
+        "title": "Historial de Ejecución",
+        "selected": "{count} seleccionados",
+        "batchDelete": "Eliminar en lote",
+        "deleteSelected": "Eliminar {count} elementos seleccionados",
+        "cancelSelection": "Cancelar selección",
+        "loading": "Cargando historial de ejecución...",
+        "noRecords": "Sin registros de ejecución",
+        "getDetailFailed": "Error al obtener detalles de ejecución",
+        "unknownError": "Error desconocido"
+      },
+      "fileUpload": {
+        "uploading": "Subiendo archivo...",
+        "dropOrClick": "Arrastra archivos aquí o haz clic para subir",
+        "uploadFailed": "Error en la subida",
+        "supportAllTypes": "Soporte para subir varios tipos de archivos",
+        "supportTypes": "Soporte para subir: {types}",
+        "fileTypes": {
+          "image": "Imagen",
+          "document": "Documento",
+          "audio": "Audio",
+          "video": "Video",
+          "custom": "Otros archivos"
+        },
+        "uploaded": "Subido",
+        "maxFiles": "Subir hasta {maxFiles} archivos ({remaining} restantes)",
+        "maxFileSize": "Tamaño máximo de archivo {size}MB",
+        "maxFilesReached": "Límite máximo de archivos alcanzado ({current}/{max})",
+        "selectedFiles": "Archivos seleccionados"
+      },
+      "tabs": {
+        "inputForm": "Formulario de Entrada",
+        "executionStatus": "Estado de Ejecución",
+        "history": "Historial"
+      },
+      "resultViewer": {
+        "title": "Resultado de Ejecución del Flujo de Trabajo",
+        "noData": "Sin datos de resultado",
+        "copy": "Copiar resultado",
+        "copied": "Copiado",
+        "download": "Descargar resultado"
       }
     },
     "textGeneration": {
@@ -248,6 +357,19 @@
         "app": "Cargando aplicación...",
         "validating": "Validando configuración de aplicación...",
         "default": "Cargando..."
+      },
+      "errors": {
+        "appNotFound": "Aplicación no encontrada",
+        "initializationFailed": "Error de inicialización",
+        "appLoadFailed": "Error al cargar la aplicación"
+      },
+      "status": {
+        "loadingApp": "Cargando aplicación...",
+        "validatingConfig": "Validando configuración de aplicación...",
+        "loading": "Cargando..."
+      },
+      "buttons": {
+        "backToMarket": "Volver al Mercado de Aplicaciones"
       },
       "market": {
         "categories": {
@@ -299,7 +421,14 @@
         "categoryKeys": {
           "all": "Todos",
           "commonApps": "Aplicaciones Populares"
-        }
+        },
+        "unknownAppType": "Tipo de aplicación Dify desconocido",
+        "useDefaultRoute": "Usar ruta por defecto",
+        "routeJump": "Salto de ruta",
+        "app": "Aplicación",
+        "type": "Tipo",
+        "path": "Ruta",
+        "openAppFailed": "Error al abrir la aplicación"
       }
     },
     "auth": {

@@ -21,6 +21,7 @@ import {
 // 这样可以显示来自不同提供商的应用市场应用
 // --- END COMMENT ---
 import type { AppInstance } from "@components/apps/types"
+import { useTranslations } from "next-intl"
 
 export default function AppsPage() {
   const router = useRouter()
@@ -29,12 +30,12 @@ export default function AppsPage() {
   const isMobile = useMobile()
   const { addFavoriteApp, favoriteApps } = useFavoriteAppsStore()
   const { selectItem } = useSidebarStore()
-  
+  const t = useTranslations('pages.apps.market')
   // 🎯 使用真实的应用列表数据，替代硬编码
   const { apps: rawApps, fetchApps, isLoading } = useAppListStore()
   
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("全部")
+  const [selectedCategory, setSelectedCategory] = useState(t('categoryKeys.all'))
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   // --- BEGIN COMMENT ---
@@ -68,7 +69,7 @@ export default function AppsPage() {
   const updateURLParams = (category?: string, search?: string) => {
     const params = new URLSearchParams()
     
-    if (category && category !== "全部") {
+    if (category && category !== t('categoryKeys.all')) {
       params.set('category', encodeURIComponent(category))
     }
     
@@ -106,15 +107,8 @@ export default function AppsPage() {
         return metadata.app_type === 'marketplace' || metadata.is_marketplace_app === true
       }
       
-      // 如果没有元数据配置，根据名称进行启发式判断
-      const appName = (app.display_name || app.instance_id).toLowerCase()
-      const marketplaceKeywords = ['翻译', 'translate', '代码', 'code', '助手', 'assistant', '工具', 'tool', '生成', 'generate', '写作', 'writing']
-      const modelKeywords = ['gpt', 'claude', 'gemini', 'llama', 'qwen', '通义', '模型', 'model']
-      
-      const isLikelyMarketplace = marketplaceKeywords.some(keyword => appName.includes(keyword))
-      const isLikelyModel = modelKeywords.some(keyword => appName.includes(keyword))
-      
-      return isLikelyMarketplace || (!isLikelyModel && !appName.includes('chat') && !appName.includes('对话'))
+      // 如果没有元数据配置，则不显示
+      return false
     })
     .map(app => {
       const metadata = app.config?.app_metadata
@@ -126,7 +120,7 @@ export default function AppsPage() {
       let description = metadata?.brief_description || app.description || difyParams?.opening_statement
       
       if (!description) {
-        description = '暂无描述'
+        description = t('appCard.noDescription')
       }
       
       return {
@@ -143,54 +137,15 @@ export default function AppsPage() {
       }
     })
 
-  // --- BEGIN COMMENT ---
-  // 🎯 基于tags的动态分类生成（保持原有逻辑）
-  // --- END COMMENT ---
-  const getDynamicCategories = () => {
-    const categories = ['全部']
-    
-    if (favoriteApps.length > 0) {
-      categories.push('常用应用')
-    }
-    
-    const tagUsageMap = new Map<string, number>()
-    
-    apps.forEach(app => {
-      const tags = app.tags || []
-      tags.forEach(tag => {
-        tagUsageMap.set(tag, (tagUsageMap.get(tag) || 0) + 1)
-      })
-    })
-    
-    const tagPriorityOrder = [
-      '写作', '翻译', '代码', '代码生成', '分析', '总结',
-      '文本生成', '对话', '助手', '文档', '数据分析',
-      '多模态', '对话模型', '推理模型', '文档模型',
-      '本地', '企业级', '快速响应', '高精度', '通用', '专业',
-      '工具'
-    ]
-    
-    const minUsageThreshold = 1
-    
-    tagPriorityOrder.forEach(tag => {
-      const usageCount = tagUsageMap.get(tag) || 0
-      if (usageCount >= minUsageThreshold) {
-        categories.push(tag)
-        tagUsageMap.delete(tag)
-      }
-    })
-    
-    const remainingTags = Array.from(tagUsageMap.entries())
-      .filter(([_, count]) => count >= minUsageThreshold)
-      .sort((a, b) => b[1] - a[1])
-      .map(([tag, _]) => tag)
-    
-    categories.push(...remainingTags)
-    
-    return categories
-  }
-
-  const categories = getDynamicCategories()
+  // 🎯 动态分类逻辑：只有存在常用应用时才显示常用应用分类
+  const hasCommonApps = apps.some(app => {
+    const isFavorite = favoriteApps.some(fav => fav.instanceId === app.instanceId)
+    return app.isPopular || isFavorite
+  })
+  
+  const categories = hasCommonApps 
+    ? [t('categoryKeys.all'), t('categoryKeys.commonApps')]
+    : [t('categoryKeys.all')]
 
   // 🎯 应用过滤逻辑（保持原有逻辑）
   const filteredApps = apps.filter(app => {
@@ -200,10 +155,12 @@ export default function AppsPage() {
     
     let matchesCategory = false
     
-    if (selectedCategory === "全部") {
+    if (selectedCategory === t('categoryKeys.all')) {
       matchesCategory = true
-    } else if (selectedCategory === "常用应用") {
-      matchesCategory = favoriteApps.some(fav => fav.instanceId === app.instanceId)
+    } else if (selectedCategory === t('categoryKeys.commonApps')) {
+      // 🎯 常用应用过滤逻辑：基于isPopular标记或收藏状态
+      const isFavorite = favoriteApps.some(fav => fav.instanceId === app.instanceId)
+      matchesCategory = app.isPopular || isFavorite
     } else {
       const appTags = app.tags || []
       matchesCategory = appTags.includes(selectedCategory)
@@ -220,21 +177,7 @@ export default function AppsPage() {
     if (aIsFavorite && !bIsFavorite) return -1
     if (!aIsFavorite && bIsFavorite) return 1
     
-    const getTagPriority = (tags: string[] = []) => {
-      const coreTags = ['写作', '翻译', '代码', '对话', '助手']
-      const professionalTags = ['分析', '总结', '文本生成', '数据分析']
-      
-      if (tags.some(tag => coreTags.includes(tag))) return 1
-      if (tags.some(tag => professionalTags.includes(tag))) return 2
-      return 3
-    }
-    
-    const aPriority = getTagPriority(a.tags)
-    const bPriority = getTagPriority(b.tags)
-    
-    if (aPriority !== bPriority) {
-      return aPriority - bPriority
-    }
+    // 移除硬编码的标签优先级逻辑
     
     return a.displayName.localeCompare(b.displayName)
   })
@@ -263,15 +206,15 @@ export default function AppsPage() {
           routePath = `/apps/text-generation/${app.instanceId}`
           break
         default:
-          console.warn(`未知的Dify应用类型: ${difyAppType}，使用默认路由`)
+          console.warn(`${t('unknownAppType')}: ${difyAppType}，${t('useDefaultRoute')}`)
           routePath = `/apps/chatbot/${app.instanceId}`
       }
       
-      console.log(`[路由跳转] 应用: ${app.displayName}, 类型: ${difyAppType}, 路径: ${routePath}`)
+      console.log(`[${t('routeJump')}] ${t('app')}: ${app.displayName}, ${t('type')}: ${difyAppType}, ${t('path')}: ${routePath}`)
       
       router.push(routePath)
     } catch (error) {
-      console.error('打开应用失败:', error)
+      console.error(`${t('openAppFailed')}:`, error)
     }
   }
 

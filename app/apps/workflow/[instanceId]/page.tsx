@@ -82,7 +82,7 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
         const targetApp = latestApps.find(app => app.instance_id === instanceId)
         if (!targetApp) {
           console.error('[工作流页面] 应用不存在:', instanceId)
-          setInitError('应用不存在')
+          setInitError(t('errors.appNotFound'))
           return
         }
         
@@ -109,7 +109,7 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
         
       } catch (error) {
         console.error('[工作流页面] 初始化失败:', error)
-        setInitError(error instanceof Error ? error.message : '初始化失败')
+        setInitError(error instanceof Error ? error.message : t('errors.initializationFailed'))
       } finally {
         setIsInitializing(false)
       }
@@ -118,7 +118,7 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
     if (instanceId) {
       initializeApp()
     }
-  }, [instanceId, apps.length, currentAppId, fetchApps, switchToSpecificApp, selectItem])
+  }, [instanceId, apps.length, currentAppId, fetchApps, switchToSpecificApp, selectItem, t])
   
   // --- 页面卸载时清除选中状态 ---
   useEffect(() => {
@@ -147,7 +147,7 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
             "text-xl font-semibold mb-2 font-serif",
             isDark ? "text-stone-300" : "text-stone-700"
           )}>
-            {t('loadFailed')}
+            {t('errors.appLoadFailed')}
           </h2>
           <p className={cn(
             "mb-4 font-serif",
@@ -164,7 +164,7 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
                 : "bg-stone-200 hover:bg-stone-300 text-stone-800"
             )}
           >
-            {t('backToMarket')}
+            {t('buttons.backToMarket')}
           </button>
         </div>
       </div>
@@ -188,9 +188,9 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
             "font-serif",
             isDark ? "text-stone-400" : "text-stone-500"
           )}>
-            {isInitializing ? t('loading.app') : 
-             isValidating ? t('loading.validating') : 
-             t('loading.default')}
+            {isInitializing ? t('status.loadingApp') : 
+             isValidating ? t('status.validatingConfig') : 
+             t('status.loading')}
           </p>
         </div>
       </div>

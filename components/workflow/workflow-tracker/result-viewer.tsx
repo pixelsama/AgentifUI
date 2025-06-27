@@ -12,12 +12,13 @@ import remarkMath from "remark-math"
 import rehypeKatex from "rehype-katex"
 import rehypeRaw from "rehype-raw"
 import "katex/dist/katex.min.css"
-import { 
+import {
   InlineCode,
   CodeBlock,
   MarkdownTableContainer,
   MarkdownBlockquote,
 } from "@components/chat/markdown-block"
+import { useTranslations } from 'next-intl'
 
 interface ResultViewerProps {
   result: any
@@ -34,17 +35,18 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
   const { isDark } = useTheme()
   const [isVisible, setIsVisible] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
-  
+  const t = useTranslations('pages.workflow.resultViewer')
+
   // --- 组件挂载时触发进入动画 ---
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 50)
     return () => clearTimeout(timer)
   }, [])
-  
+
   // --- 格式化结果数据 ---
   const formatResult = (data: any): { content: string; isMarkdown: boolean } => {
-    if (!data) return { content: '无结果数据', isMarkdown: false }
-    
+    if (!data) return { content: t('noData'), isMarkdown: false }
+
     try {
       // 如果数据已经是字符串，检查是否是JSON字符串
       if (typeof data === 'string') {
@@ -56,21 +58,21 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
           return { content: data, isMarkdown: true }
         }
       }
-      
+
       // 检查是否有result1、result2等字段（工作流结果模式）
       const resultKeys = Object.keys(data).filter(key => key.startsWith('result'))
       if (resultKeys.length > 0) {
         // 优先使用第一个result字段
         const firstResultKey = resultKeys[0]
         const resultContent = data[firstResultKey]
-        
+
         if (typeof resultContent === 'string') {
           // 移除think块内容，只保留主要内容
           let cleanContent = resultContent
-          
+
           // 移除<think>...</think>块
           cleanContent = cleanContent.replace(/<think>[\s\S]*?<\/think>/g, '')
-          
+
           // 检查是否包含markdown
           if (cleanContent.includes('```') || cleanContent.includes('#') || cleanContent.includes('**')) {
             return { content: cleanContent.trim(), isMarkdown: true }
@@ -79,7 +81,7 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
           }
         }
       }
-      
+
       // 如果有text字段，优先显示text内容
       if (data.text && typeof data.text === 'string') {
         // 检查是否包含markdown代码块
@@ -91,12 +93,12 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
           return { content: data.text, isMarkdown: false }
         }
       }
-      
+
       // 如果有outputs字段，优先显示outputs
       if (data.outputs && typeof data.outputs === 'object') {
         return { content: JSON.stringify(data.outputs, null, 2), isMarkdown: false }
       }
-      
+
       // 否则显示完整数据
       return { content: JSON.stringify(data, null, 2), isMarkdown: false }
     } catch (error) {
@@ -104,15 +106,15 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
       return { content: String(data), isMarkdown: false }
     }
   }
-  
+
   const { content: formattedContent, isMarkdown } = formatResult(result)
-  
+
   // --- Markdown组件配置 ---
   const markdownComponents: any = {
     code({ node, className, children, ...props }: any) {
       const match = /language-(\w+)/.exec(className || '')
       const language = match ? match[1] : null
-      
+
       if (language) {
         // 代码块
         return (
@@ -166,13 +168,13 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
       return <hr className={cn("my-4 border-t", isDark ? "border-gray-700" : "border-gray-300")} {...props} />
     }
   }
-  
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(formattedContent)
       setIsCopied(true)
       console.log('[结果查看器] 结果已复制到剪贴板')
-      
+
       // 2秒后重置状态
       setTimeout(() => {
         setIsCopied(false)
@@ -181,7 +183,7 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
       console.error('[结果查看器] 复制失败:', error)
     }
   }
-  
+
   const handleDownload = () => {
     const blob = new Blob([formattedContent], { type: isMarkdown ? 'text/markdown' : 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -193,13 +195,13 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
   }
-  
+
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose()
     }
   }
-  
+
   // --- 键盘事件监听 ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -207,22 +209,22 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
         onClose()
       }
     }
-    
+
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
-  
+
   return (
     <>
       {/* 背景遮罩 */}
-      <div 
+      <div
         className={cn(
           "fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300",
           isVisible ? "opacity-100" : "opacity-0"
         )}
         onClick={handleBackdropClick}
       />
-      
+
       {/* 弹窗内容 */}
       <div className="fixed inset-4 z-50 flex items-center justify-center">
         <div className={cn(
@@ -240,20 +242,20 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
                 "text-xl font-bold font-serif",
                 isDark ? "text-stone-100" : "text-stone-900"
               )}>
-                执行结果
+                {t('title')}
               </h2>
               <p className={cn(
                 "text-sm font-serif mt-1",
                 isDark ? "text-stone-400" : "text-stone-600"
               )}>
-                {execution?.title || '工作流执行结果'}
+                {execution?.title || t('title')}
               </p>
             </div>
-            
+
             <div className="flex items-center gap-2">
               {/* 复制按钮 */}
               <TooltipWrapper
-                content={isCopied ? "已复制" : "复制结果"}
+                content={isCopied ? t('copied') : t('copy')}
                 id="result-viewer-copy-btn"
                 placement="bottom"
                 size="sm"
@@ -270,7 +272,7 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
                     "focus:outline-none"
                   )}
                   style={{ transform: 'translateZ(0)' }}
-                  aria-label={isCopied ? "已复制" : "复制结果"}
+                  aria-label={isCopied ? t('copied') : t('copy')}
                 >
                   {isCopied ? (
                     <FiCheck className="h-4 w-4" />
@@ -279,10 +281,10 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
                   )}
                 </button>
               </TooltipWrapper>
-              
+
               {/* 下载按钮 */}
               <TooltipWrapper
-                content="下载结果"
+                content={t('download')}
                 id="workflow-result-viewer-download-btn"
                 placement="bottom"
                 size="sm"
@@ -297,12 +299,12 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
                       ? "hover:bg-stone-700 text-stone-400 hover:text-stone-300"
                       : "hover:bg-stone-100 text-stone-600 hover:text-stone-700"
                   )}
-                  aria-label="下载结果"
+                  aria-label={t('download')}
                 >
                   <Download className="h-4 w-4" />
                 </button>
               </TooltipWrapper>
-              
+
               {/* 关闭按钮 */}
               <button
                 onClick={onClose}
@@ -317,7 +319,7 @@ export function ResultViewer({ result, execution, onClose }: ResultViewerProps) 
               </button>
             </div>
           </div>
-          
+
           {/* 内容区域 */}
           <div className="p-6 overflow-y-auto max-h-[calc(100vh-12rem)]">
             {isMarkdown ? (

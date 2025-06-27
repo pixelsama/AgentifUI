@@ -4,6 +4,7 @@ import React from 'react'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
 import { Clock, CheckCircle, XCircle, Circle, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface NodeProgressProps {
   node: {
@@ -25,6 +26,7 @@ interface NodeProgressProps {
  */
 export function NodeProgress({ node, index, isLast }: NodeProgressProps) {
   const { isDark } = useTheme()
+  const t = useTranslations('pages.workflow.nodeStatus')
   
   const getStatusIcon = () => {
     switch (node.status) {
@@ -111,10 +113,10 @@ export function NodeProgress({ node, index, isLast }: NodeProgressProps) {
             node.status === 'failed' ? (isDark ? "text-red-400" : "text-red-600") :
             isDark ? "text-stone-400" : "text-stone-500"
           )}>
-            {node.status === 'running' && '正在执行...'}
-            {node.status === 'completed' && '执行完成'}
-            {node.status === 'failed' && '执行失败'}
-            {node.status === 'pending' && '等待执行'}
+                         {node.status === 'running' && t('executing')}
+             {node.status === 'completed' && t('nodeCompleted')}
+             {node.status === 'failed' && t('nodeFailed')}
+             {node.status === 'pending' && t('nodePending')}
           </p>
         </div>
       </div>

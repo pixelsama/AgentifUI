@@ -203,7 +203,116 @@
         "minValueHint": "最小値：{min}",
         "maxValueHint": "最大値：{max}",
         "stepHint": "ステップ：{step}",
-        "precisionHint": "小数点以下桁数：{precision}"
+        "precisionHint": "小数点以下桁数：{precision}",
+        "defaultLabel": "入力テキスト",
+        "loading": "フォーム設定を読み込み中...",
+        "noFormConfig": "このアプリには入力フォームが設定されていません",
+        "reset": "フォームをリセット",
+        "executing": "実行中...",
+        "startExecution": "実行開始"
+      },
+      "status": {
+        "running": "ワークフロー実行中",
+        "completed": "実行完了",
+        "failed": "実行失敗",
+        "stopped": "実行停止",
+        "pending": "実行待機中",
+        "unknown": "不明",
+        "totalTime": "総時間: {time}秒"
+      },
+      "nodeStatus": {
+        "iterating": "反復中...",
+        "iterationCompleted": "反復完了",
+        "iterationFailed": "反復失敗",
+        "waitingIteration": "反復待機中",
+        "looping": "ループ中",
+        "loopCompleted": "ループ完了",
+        "loopFailed": "ループ失敗",
+        "waitingLoop": "ループ待機中",
+        "parallelRunning": "並列実行中...",
+        "parallelCompleted": "並列完了",
+        "parallelFailed": "並列失敗",
+        "waitingParallel": "並列実行待機中",
+        "executing": "実行中...",
+        "nodeCompleted": "実行完了",
+        "nodeFailed": "実行失敗",
+        "nodePending": "実行待機中",
+        "nodeUnknown": "不明なステータス"
+      },
+      "nodeTypes": {
+        "start": "開始ノード",
+        "llm": "LLM推論",
+        "knowledgeRetrieval": "知識検索",
+        "questionClassifier": "質問分類器",
+        "ifElse": "条件分岐",
+        "code": "コード実行",
+        "templateTransform": "テンプレート変換",
+        "variableAssigner": "変数割り当て",
+        "variableAggregator": "変数集約器",
+        "documentExtractor": "文書抽出器",
+        "parameterExtractor": "パラメータ抽出器",
+        "httpRequest": "HTTPリクエスト",
+        "listOperator": "リスト操作",
+        "iteration": "ループ反復",
+        "parallel": "並列分岐",
+        "end": "終了ノード"
+      },
+      "buttons": {
+        "retry": "再試行",
+        "close": "閉じる",
+        "copy": "結果をコピー",
+        "copied": "コピー済み",
+        "download": "結果をダウンロード",
+        "retryUpload": "アップロードを再試行",
+        "removeFile": "ファイルを削除",
+        "viewResult": "結果を表示",
+        "stop": "停止",
+        "reset": "リセット"
+      },
+      "history": {
+        "showHistory": "履歴を表示",
+        "hideHistory": "履歴を閉じる",
+        "noDetailData": "この実行記録には詳細な結果データがありませんが、基本情報は表示できます",
+        "title": "実行履歴",
+        "selected": "{count}個選択済み",
+        "batchDelete": "一括削除",
+        "deleteSelected": "選択した{count}個を削除",
+        "cancelSelection": "選択をキャンセル",
+        "loading": "実行履歴を読み込み中...",
+        "noRecords": "実行記録がありません",
+        "getDetailFailed": "実行詳細の取得に失敗しました",
+        "unknownError": "不明なエラー"
+      },
+      "fileUpload": {
+        "uploading": "ファイルをアップロード中...",
+        "dropOrClick": "ファイルをここにドラッグするかクリックしてアップロード",
+        "uploadFailed": "アップロード失敗",
+        "supportAllTypes": "様々なファイルタイプのアップロードをサポート",
+        "supportTypes": "アップロード可能: {types}",
+        "fileTypes": {
+          "image": "画像",
+          "document": "ドキュメント",
+          "audio": "音声",
+          "video": "動画",
+          "custom": "その他のファイル"
+        },
+        "uploaded": "アップロード済み",
+        "maxFiles": "最大{maxFiles}個のファイルをアップロード（残り{remaining}個）",
+        "maxFileSize": "最大ファイルサイズ{size}MB",
+        "maxFilesReached": "最大ファイル数制限に達しました（{current}/{max}）",
+        "selectedFiles": "選択されたファイル"
+      },
+      "tabs": {
+        "inputForm": "入力フォーム",
+        "executionStatus": "実行ステータス",
+        "history": "履歴"
+      },
+      "resultViewer": {
+        "title": "ワークフロー実行結果",
+        "noData": "結果データなし",
+        "copy": "結果をコピー",
+        "copied": "コピー済み",
+        "download": "結果をダウンロード"
       }
     },
     "textGeneration": {
@@ -248,6 +357,19 @@
         "app": "アプリを読み込み中...",
         "validating": "アプリ設定を検証中...",
         "default": "読み込み中..."
+      },
+      "errors": {
+        "appNotFound": "アプリが見つかりません",
+        "initializationFailed": "初期化に失敗しました",
+        "appLoadFailed": "アプリの読み込みに失敗しました"
+      },
+      "status": {
+        "loadingApp": "アプリを読み込み中...",
+        "validatingConfig": "アプリ設定を検証中...",
+        "loading": "読み込み中..."
+      },
+      "buttons": {
+        "backToMarket": "アプリマーケットに戻る"
       },
       "market": {
         "categories": {
@@ -299,7 +421,14 @@
         "categoryKeys": {
           "all": "すべて",
           "commonApps": "人気アプリ"
-        }
+        },
+        "unknownAppType": "不明なDifyアプリタイプ",
+        "useDefaultRoute": "デフォルトルートを使用",
+        "routeJump": "ルートジャンプ",
+        "app": "アプリ",
+        "type": "タイプ",
+        "path": "パス",
+        "openAppFailed": "アプリを開くのに失敗しました"
       }
     },
     "auth": {

@@ -4,6 +4,7 @@ import React from 'react'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
 import { History } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface HistoryButtonProps {
   onClick: () => void
@@ -18,6 +19,7 @@ interface HistoryButtonProps {
  */
 export function HistoryButton({ onClick, isActive, className }: HistoryButtonProps) {
   const { isDark } = useTheme()
+  const t = useTranslations('pages.workflow.history')
   
   return (
     <button
@@ -34,7 +36,7 @@ export function HistoryButton({ onClick, isActive, className }: HistoryButtonPro
             : "bg-white text-stone-600 hover:bg-stone-50",
         className
       )}
-      title={isActive ? "关闭历史记录" : "查看历史记录"}
+      title={isActive ? t('hideHistory') : t('showHistory')}
     >
       <History className="h-5 w-5" />
     </button>

@@ -5,6 +5,7 @@ import { useTheme } from '@lib/hooks/use-theme'
 import { useThemeColors } from '@lib/hooks/use-theme-colors'
 import { cn } from '@lib/utils'
 import { CheckCircle, XCircle, Clock, ChevronRight, Check, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface ExecutionItemProps {
   execution: any
@@ -22,6 +23,7 @@ interface ExecutionItemProps {
 export function ExecutionItem({ execution, onClick, isMultiSelectMode, isSelected, isLoading }: ExecutionItemProps) {
   const { isDark } = useTheme()
   const { colors } = useThemeColors()
+  const t = useTranslations('pages.workflow.status')
   
   const getStatusIcon = () => {
     switch (execution.status) {
@@ -48,13 +50,13 @@ export function ExecutionItem({ execution, onClick, isMultiSelectMode, isSelecte
   const getStatusText = () => {
     switch (execution.status) {
       case 'completed':
-        return '已完成'
+        return t('completed')
       case 'failed':
-        return '已失败'
+        return t('failed')
       case 'running':
-        return '执行中'
+        return t('running')
       default:
-        return '未知'
+        return t('unknown')
     }
   }
   

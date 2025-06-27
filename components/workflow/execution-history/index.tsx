@@ -8,6 +8,7 @@ import { ExecutionItem } from './execution-item'
 import { X, History, Search, Loader2, Trash2, Check } from 'lucide-react'
 import { useWorkflowExecutionStore } from '@lib/stores/workflow-execution-store'
 import type { AppExecution } from '@lib/types/database'
+import { useTranslations } from 'next-intl'
 
 interface ExecutionHistoryProps {
   instanceId: string
@@ -29,6 +30,7 @@ interface ExecutionHistoryProps {
  */
 export function ExecutionHistory({ instanceId, onClose, isMobile, onViewResult }: ExecutionHistoryProps) {
   const { colors, isDark } = useThemeColors()
+  const t = useTranslations('pages.workflow.history')
   const [isLoading, setIsLoading] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
@@ -201,7 +203,7 @@ export function ExecutionHistory({ instanceId, onClose, isMobile, onViewResult }
           // 如果没有outputs，创建一个包含基本信息的结果对象
           if (!executionResult || Object.keys(executionResult).length === 0) {
             executionResult = {
-              message: '该执行记录暂无详细结果数据，但可以查看基本信息',
+              message: t('noDetailData'),
               status: fullExecution.status,
               executionId: fullExecution.id,
               title: fullExecution.title,
@@ -220,8 +222,8 @@ export function ExecutionHistory({ instanceId, onClose, isMobile, onViewResult }
         } else {
           // 显示错误结果
           const errorResult = {
-            error: '获取执行详情失败',
-            message: result.error?.message || '未知错误',
+            error: t('getDetailFailed'),
+            message: result.error?.message || t('unknownError'),
             status: 'error'
           }
           onViewResult(errorResult, execution)
@@ -231,8 +233,8 @@ export function ExecutionHistory({ instanceId, onClose, isMobile, onViewResult }
         console.error('获取执行详情失败:', error)
         // 显示错误结果
         const errorResult = {
-          error: '获取执行详情失败',
-          message: error instanceof Error ? error.message : '未知错误',
+          error: t('getDetailFailed'),
+          message: error instanceof Error ? error.message : t('unknownError'),
           status: 'error'
         }
         onViewResult(errorResult, execution)
@@ -274,7 +276,7 @@ export function ExecutionHistory({ instanceId, onClose, isMobile, onViewResult }
                 "text-base font-semibold font-serif",
                 colors.mainText.tailwind
               )}>
-                执行历史
+                {t('title')}
               </h2>
               {/* 选中计数 */}
               {isMultiSelectMode && selectedIds.size > 0 && (
@@ -282,7 +284,7 @@ export function ExecutionHistory({ instanceId, onClose, isMobile, onViewResult }
                   "text-sm font-serif px-2 py-1 rounded-md",
                   isDark ? "bg-stone-700 text-stone-300" : "bg-stone-100 text-stone-600"
                 )}>
-                  已选 {selectedIds.size} 项
+                  {t('selected', { count: selectedIds.size })}
                 </span>
               )}
             </div>
@@ -299,7 +301,7 @@ export function ExecutionHistory({ instanceId, onClose, isMobile, onViewResult }
                       ? "hover:bg-stone-700/50 text-stone-400 hover:text-stone-300"
                       : "hover:bg-stone-200/50 text-stone-600 hover:text-stone-700"
                   )}
-                  title="批量删除"
+                  title={t('batchDelete')}
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -318,7 +320,7 @@ export function ExecutionHistory({ instanceId, onClose, isMobile, onViewResult }
                           ? "hover:bg-red-700/50 text-red-400 hover:text-red-300"
                           : "hover:bg-red-100/50 text-red-600 hover:text-red-700"
                     )}
-                    title={`删除选中的 ${selectedIds.size} 项`}
+                    title={t('deleteSelected', { count: selectedIds.size })}
                   >
                     {isDeleting ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -340,7 +342,7 @@ export function ExecutionHistory({ instanceId, onClose, isMobile, onViewResult }
                         ? "hover:bg-stone-700/50 text-stone-400 hover:text-stone-300"
                         : "hover:bg-stone-200/50 text-stone-600 hover:text-stone-700"
                     )}
-                    title="取消选择"
+                    title={t('cancelSelection')}
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -391,7 +393,7 @@ export function ExecutionHistory({ instanceId, onClose, isMobile, onViewResult }
                   isDark ? "text-stone-500" : "text-stone-500",
                   isVisible ? "opacity-100" : "opacity-0"
                 )}>
-                  正在加载历史记录...
+                  {t('loading')}
                 </div>
               </div>
             </div>
@@ -402,7 +404,7 @@ export function ExecutionHistory({ instanceId, onClose, isMobile, onViewResult }
                 isDark ? "text-stone-500" : "text-stone-500",
                 isVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
               )}>
-                暂无执行记录
+                {t('noRecords')}
               </div>
             </div>
           ) : (

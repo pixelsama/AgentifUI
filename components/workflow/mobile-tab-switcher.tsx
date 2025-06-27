@@ -4,6 +4,7 @@ import React from 'react'
 import { useTheme } from '@lib/hooks/use-theme'
 import { cn } from '@lib/utils'
 import { FileText, Activity, History } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 type MobileTab = 'form' | 'tracker' | 'history'
 
@@ -20,25 +21,26 @@ interface MobileTabSwitcherProps {
  */
 export function MobileTabSwitcher({ activeTab, onTabChange, hasHistory }: MobileTabSwitcherProps) {
   const { isDark } = useTheme()
-  
+  const t = useTranslations('pages.workflow.tabs')
+
   const tabs = [
     {
       id: 'form' as const,
-      label: '输入表单',
+      label: t('inputForm'),
       icon: FileText
     },
     {
       id: 'tracker' as const,
-      label: '执行状态',
+      label: t('executionStatus'),
       icon: Activity
     },
     {
       id: 'history' as const,
-      label: '历史记录',
+      label: t('history'),
       icon: History
     }
   ]
-  
+
   return (
     <div className={cn(
       "flex border-b",
@@ -47,7 +49,7 @@ export function MobileTabSwitcher({ activeTab, onTabChange, hasHistory }: Mobile
       {tabs.map((tab) => {
         const Icon = tab.icon
         const isActive = activeTab === tab.id
-        
+
         return (
           <button
             key={tab.id}

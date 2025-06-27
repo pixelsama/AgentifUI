@@ -10,6 +10,7 @@ import { Spinner } from "@components/ui/spinner"
 import { TooltipWrapper } from "@components/ui/tooltip-wrapper"
 import { uploadDifyFile } from "@lib/services/dify/file-service"
 import type { DifyFileUploadResponse } from "@lib/services/dify/types"
+import { useTranslations } from 'next-intl'
 
 // --- BEGIN COMMENT ---
 // 定义上传文件的状态接口，与聊天输入组件保持一致
@@ -50,6 +51,7 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
   const { isDark } = useTheme()
   const { session } = useSupabaseAuth()
   const { currentAppId } = useCurrentApp()
+  const t = useTranslations('pages.workflow.fileUpload')
   const fileInputRef = useRef<HTMLInputElement>(null)
   
   // --- BEGIN COMMENT ---
@@ -189,7 +191,7 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
       updateFileStatus(uploadFile.id, 'success', 100, undefined, response.id)
       
     } catch (error) {
-      const errorMessage = (error as Error).message || '上传失败'
+      const errorMessage = (error as Error).message || t('uploadFailed')
       updateFileStatus(uploadFile.id, 'error', undefined, errorMessage)
       console.error(`[工作流文件上传] 上传失败: ${uploadFile.name}`, error)
     }
@@ -280,36 +282,36 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
     const types = config.allowed_file_types
     if (!types || types.length === 0) {
       return {
-        hint: '支持上传各种文件类型',
+        hint: t('supportAllTypes'),
         accept: undefined
       }
     }
     
     const typeMap: Record<string, { name: string; accept: string }> = {
       'image': { 
-        name: '图片', 
+        name: t('fileTypes.image'), 
         accept: 'image/*,.jpg,.jpeg,.png,.gif,.bmp,.svg,.webp,.ico,.tiff,.tif'
       },
       'document': { 
-        name: '文档', 
+        name: t('fileTypes.document'), 
         accept: ".txt,.md,.mdx,.markdown,.pdf,.html,.xlsx,.xls,.doc,.docx,.csv,.eml,.msg,.pptx,.ppt,.xml,.epub"
       },
       'audio': { 
-        name: '音频', 
+        name: t('fileTypes.audio'), 
         accept: 'audio/*,.mp3,.wav,.flac,.aac,.ogg,.wma,.m4a,.opus'
       },
       'video': { 
-        name: '视频', 
+        name: t('fileTypes.video'), 
         accept: 'video/*,.mp4,.avi,.mkv,.mov,.wmv,.flv,.webm,.m4v,.3gp'
       },
-      'custom': { name: '其他文件', accept: '*/*' }
+      'custom': { name: t('fileTypes.custom'), accept: '*/*' }
     }
     
     const supportedTypes = types.map((type: string) => typeMap[type]?.name || type).filter(Boolean)
     const acceptStrings = types.map((type: string) => typeMap[type]?.accept).filter(Boolean)
     
     return {
-      hint: supportedTypes.length > 0 ? `支持上传：${supportedTypes.join('、')}` : '支持上传各种文件类型',
+      hint: supportedTypes.length > 0 ? t('supportTypes', { types: supportedTypes.join('、') }) : t('supportAllTypes'),
       accept: acceptStrings.length > 0 ? acceptStrings.join(',') : undefined
     }
   }
@@ -320,7 +322,7 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
   const getFileSizeHint = () => {
     const maxSize = config.max_file_size_mb
     if (maxSize) {
-      return `单个文件最大 ${maxSize}MB`
+      return t('maxFileSize', { size: maxSize })
     }
     return ''
   }
@@ -346,7 +348,7 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
                   ? "bg-stone-700 text-stone-400"
                   : "bg-stone-100 text-stone-600"
               )}>
-                {successCount}/{maxFiles} 已上传
+                {successCount}/{maxFiles} {t('uploaded')}
               </span>
             )}
           </label>
@@ -402,14 +404,14 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
                 "text-base font-semibold font-serif",
                 isDark ? "text-stone-200" : "text-stone-800"
               )}>
-                {isUploading ? "正在上传文件..." : "拖拽文件到此处或点击上传"}
+                {isUploading ? t('uploading') : t('dropOrClick')}
               </p>
               
               <div className={cn(
                 "text-sm font-serif space-y-1",
                 isDark ? "text-stone-400" : "text-stone-600"
               )}>
-                <p>最多上传 {maxFiles} 个文件 (剩余 {maxFiles - uploadFiles.length} 个)</p>
+                <p>{t('maxFiles', { maxFiles, remaining: maxFiles - uploadFiles.length })}</p>
                 <p>{fileTypeInfo.hint}</p>
                 {getFileSizeHint() && <p>{getFileSizeHint()}</p>}
               </div>
@@ -431,7 +433,7 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
             "text-sm font-serif",
             isDark ? "text-amber-300" : "text-amber-700"
           )}>
-            已达到最大文件数量限制 ({uploadFiles.length}/{maxFiles})
+            {t('maxFilesReached', { current: uploadFiles.length, max: maxFiles })}
           </p>
         </div>
       )}
@@ -461,7 +463,7 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
                 ? "bg-stone-800 text-stone-400 border-stone-700"
                 : "bg-stone-100 text-stone-600 border-stone-200"
             )}>
-              已选文件
+              {t('selectedFiles')}
             </span>
             <div className={cn(
               "flex-1 h-px bg-gradient-to-r from-transparent to-transparent",
@@ -503,7 +505,7 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
                       )} />
                     )}
                     {uploadFile.status === 'error' && (
-                      <TooltipWrapper content="重新上传" placement="top" id={`retry-${uploadFile.id}`} size="sm" showArrow={false}>
+                      <TooltipWrapper content={t('retryUpload')} placement="top" id={`retry-${uploadFile.id}`} size="sm" showArrow={false}>
                         <button 
                           type="button"
                           onClick={() => handleRetryUpload(uploadFile.id)}
@@ -514,7 +516,7 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
                               ? "text-red-400 hover:bg-red-800/50"
                               : "text-red-600 hover:bg-red-200"
                           )}
-                          aria-label="重试上传"
+                          aria-label={t('retryUpload')}
                         >
                           <RotateCcw className="w-5 h-5" />
                         </button>
@@ -564,7 +566,7 @@ export function FileUploadField({ config, value, onChange, error, label, instanc
                 </div>
                 
                 {/* 删除按钮 */}
-                <TooltipWrapper content="移除文件" placement="top" id={`remove-${uploadFile.id}`} size="sm" showArrow={false}>
+                <TooltipWrapper content={t('removeFile')} placement="top" id={`remove-${uploadFile.id}`} size="sm" showArrow={false}>
                   <button
                     type="button"
                     onClick={() => handleRemoveFile(uploadFile.id)}

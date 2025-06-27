@@ -203,7 +203,116 @@
         "minValueHint": "Minimum value: {min}",
         "maxValueHint": "Maximum value: {max}",
         "stepHint": "Step: {step}",
-        "precisionHint": "Decimal places: {precision}"
+        "precisionHint": "Decimal places: {precision}",
+        "defaultLabel": "Input text",
+        "loading": "Loading form configuration...",
+        "noFormConfig": "This app has no input form configured",
+        "reset": "Reset form",
+        "executing": "Executing...",
+        "startExecution": "Start execution"
+      },
+      "status": {
+        "running": "Workflow executing",
+        "completed": "Execution completed",
+        "failed": "Execution failed",
+        "stopped": "Execution stopped",
+        "pending": "Waiting for execution",
+        "unknown": "Unknown",
+        "totalTime": "Total time: {time}s"
+      },
+      "nodeStatus": {
+        "iterating": "Iterating...",
+        "iterationCompleted": "Iteration completed",
+        "iterationFailed": "Iteration failed",
+        "waitingIteration": "Waiting for iteration",
+        "looping": "Looping",
+        "loopCompleted": "Loop completed",
+        "loopFailed": "Loop failed",
+        "waitingLoop": "Waiting for loop",
+        "parallelRunning": "Parallel executing...",
+        "parallelCompleted": "Parallel completed",
+        "parallelFailed": "Parallel failed",
+        "waitingParallel": "Waiting for parallel execution",
+        "executing": "Executing...",
+        "nodeCompleted": "Execution completed",
+        "nodeFailed": "Execution failed",
+        "nodePending": "Waiting for execution",
+        "nodeUnknown": "Unknown status"
+      },
+      "nodeTypes": {
+        "start": "Start Node",
+        "llm": "LLM Inference",
+        "knowledgeRetrieval": "Knowledge Retrieval",
+        "questionClassifier": "Question Classifier",
+        "ifElse": "Conditional Branch",
+        "code": "Code Execution",
+        "templateTransform": "Template Transform",
+        "variableAssigner": "Variable Assigner",
+        "variableAggregator": "Variable Aggregator",
+        "documentExtractor": "Document Extractor",
+        "parameterExtractor": "Parameter Extractor",
+        "httpRequest": "HTTP Request",
+        "listOperator": "List Operator",
+        "iteration": "Loop Iteration",
+        "parallel": "Parallel Branch",
+        "end": "End Node"
+      },
+      "buttons": {
+        "retry": "Retry",
+        "close": "Close",
+        "copy": "Copy result",
+        "copied": "Copied",
+        "download": "Download result",
+        "retryUpload": "Retry upload",
+        "removeFile": "Remove file",
+        "viewResult": "View result",
+        "stop": "Stop",
+        "reset": "Reset"
+      },
+      "history": {
+        "showHistory": "View history",
+        "hideHistory": "Close history",
+        "noDetailData": "This execution record has no detailed result data, but you can view basic information",
+        "title": "Execution History",
+        "selected": "{count} selected",
+        "batchDelete": "Batch delete",
+        "deleteSelected": "Delete selected {count} items",
+        "cancelSelection": "Cancel selection",
+        "loading": "Loading execution history...",
+        "noRecords": "No execution records",
+        "getDetailFailed": "Failed to get execution details",
+        "unknownError": "Unknown error"
+      },
+      "fileUpload": {
+        "uploading": "Uploading file...",
+        "dropOrClick": "Drag files here or click to upload",
+        "uploadFailed": "Upload failed",
+        "supportAllTypes": "Support uploading various file types",
+        "supportTypes": "Support uploading: {types}",
+        "fileTypes": {
+          "image": "Image",
+          "document": "Document",
+          "audio": "Audio",
+          "video": "Video",
+          "custom": "Other files"
+        },
+        "uploaded": "Uploaded",
+        "maxFiles": "Upload up to {maxFiles} files ({remaining} remaining)",
+        "maxFileSize": "Maximum file size {size}MB",
+        "maxFilesReached": "Maximum file limit reached ({current}/{max})",
+        "selectedFiles": "Selected files"
+      },
+      "tabs": {
+        "inputForm": "Input Form",
+        "executionStatus": "Execution Status",
+        "history": "History"
+      },
+      "resultViewer": {
+        "title": "Workflow Execution Result",
+        "noData": "No result data",
+        "copy": "Copy result",
+        "copied": "Copied",
+        "download": "Download result"
       }
     },
     "textGeneration": {
@@ -248,6 +357,19 @@
         "app": "Loading app...",
         "validating": "Validating app configuration...",
         "default": "Loading..."
+      },
+      "errors": {
+        "appNotFound": "App not found",
+        "initializationFailed": "Initialization failed",
+        "appLoadFailed": "App failed to load"
+      },
+      "status": {
+        "loadingApp": "Loading app...",
+        "validatingConfig": "Validating app configuration...",
+        "loading": "Loading..."
+      },
+      "buttons": {
+        "backToMarket": "Back to App Market"
       },
       "market": {
         "categories": {
@@ -299,7 +421,14 @@
         "categoryKeys": {
           "all": "All",
           "commonApps": "Popular Apps"
-        }
+        },
+        "unknownAppType": "Unknown Dify app type",
+        "useDefaultRoute": "Use default route",
+        "routeJump": "Route jump",
+        "app": "App",
+        "type": "Type",
+        "path": "Path",
+        "openAppFailed": "Failed to open app"
       }
     },
     "auth": {
