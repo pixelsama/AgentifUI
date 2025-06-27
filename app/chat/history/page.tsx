@@ -6,6 +6,7 @@ import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { useEffect } from "react"
 import { useTheme } from "@lib/hooks/use-theme"
 import { cn } from "@lib/utils"
+import { useTranslations } from 'next-intl'
 
 // --- BEGIN COMMENT ---
 // 历史对话页面
@@ -16,13 +17,14 @@ import { cn } from "@lib/utils"
 export default function HistoryPage() {
   const { isExpanded } = useSidebarStore()
   const { isDark } = useTheme()
+  const t = useTranslations()
   
   // --- BEGIN COMMENT ---
   // 🎯 移除重复的 setMounted 调用，现在由全局 ClientLayout 统一管理
   // --- END COMMENT ---
   useEffect(() => {
     // 设置页面标题
-    document.title = "历史对话 | AgentifUI"
+    // 标题管理由DynamicTitle组件统一处理，无需手动设置
   }, [])
 
   return (

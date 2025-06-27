@@ -2,9 +2,11 @@
 
 import { cn } from "@lib/utils"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
+import { useTranslations } from 'next-intl'
 
 export function AppLoading() {
   const { colors, isDark } = useThemeColors()
+  const t = useTranslations('loading')
 
   return (
     <div className={cn(
@@ -18,7 +20,7 @@ export function AppLoading() {
             "ml-3 font-serif",
             isDark ? "text-stone-400" : "text-stone-600"
           )}>
-            加载应用列表...
+            {t('appList')}
           </span>
         </div>
       </div>

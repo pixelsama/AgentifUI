@@ -3,6 +3,7 @@
 import React from "react"
 import { cn } from "@lib/utils"
 import { useTheme } from "@lib/hooks/use-theme"
+import { useTranslations } from 'next-intl'
 
 interface SpinnerProps {
   size?: "sm" | "md" | "lg"
@@ -11,6 +12,7 @@ interface SpinnerProps {
 
 export function Spinner({ size = "md", className }: SpinnerProps) {
   const { isDark } = useTheme()
+  const t = useTranslations('loading')
   
   const sizeClasses = {
     sm: "h-3 w-3 border-[1.5px]",
@@ -28,7 +30,7 @@ export function Spinner({ size = "md", className }: SpinnerProps) {
           : "border-gray-200 border-t-gray-600",
         className
       )}
-      aria-label="加载中"
+      aria-label={t('spinner')}
     />
   )
 } 

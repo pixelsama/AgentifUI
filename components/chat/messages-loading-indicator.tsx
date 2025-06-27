@@ -6,6 +6,7 @@ import { useEffect, useState, useRef } from 'react';
 import { cn } from '@lib/utils';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { LoadingState } from '@lib/hooks/use-conversation-messages';
+import { useTranslations } from 'next-intl';
 
 interface MessagesLoadingIndicatorProps {
   loadingState: LoadingState;
@@ -23,6 +24,7 @@ export function MessagesLoadingIndicator({
   onRetry
 }: MessagesLoadingIndicatorProps) {
   const { colors, isDark } = useThemeColors();
+  const t = useTranslations('loading');
   const [isAtTop, setIsAtTop] = useState(false);
   
   // --- BEGIN COMMENT ---
@@ -85,7 +87,7 @@ export function MessagesLoadingIndicator({
           isDark ? "bg-red-900 text-red-100" : "bg-red-100 text-red-800",
           "mb-3"
         )}>
-          <p>加载消息失败: {error.message}</p>
+          <p>{t('loadingFailed', { error: error.message })}</p>
         </div>
         <button
           onClick={onRetry}
@@ -95,7 +97,7 @@ export function MessagesLoadingIndicator({
             colors.buttonHover.tailwind
           )}
         >
-          重试
+          {t('retry')}
         </button>
       </div>
     );
@@ -110,7 +112,7 @@ export function MessagesLoadingIndicator({
           colors.sidebarBackground.tailwind
         )}>
           <LoadingSpinner />
-          <span className="text-sm">加载更多消息...</span>
+          <span className="text-sm">{t('messages')}</span>
         </div>
       </div>
     );
@@ -129,7 +131,7 @@ export function MessagesLoadingIndicator({
             "transition-colors duration-200"
           )}
         >
-          加载更多历史消息
+          {t('moreMessages')}
         </button>
       </div>
     );

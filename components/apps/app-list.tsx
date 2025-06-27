@@ -4,6 +4,7 @@ import { Blocks } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useThemeColors } from "@lib/hooks/use-theme-colors"
 import { AppCard } from "./app-card"
+import { useTranslations } from 'next-intl'
 
 interface AppInstance {
   instanceId: string
@@ -33,6 +34,7 @@ interface AppListProps {
 
 export function AppList({ apps, viewMode, onAppClick }: AppListProps) {
   const { colors, isDark } = useThemeColors()
+  const t = useTranslations('pages.apps')
 
   if (apps.length === 0) {
     return (
@@ -50,13 +52,13 @@ export function AppList({ apps, viewMode, onAppClick }: AppListProps) {
           "text-base font-semibold mb-1 font-serif",
           colors.mainText.tailwind
         )}>
-          未找到应用
+          {t('errors.appNotFound')}
         </h3>
         <p className={cn(
           "text-sm font-serif",
           isDark ? "text-stone-400" : "text-stone-600"
         )}>
-          尝试调整搜索条件或浏览其他分类
+          {t('market.tryAdjustSearch')}
         </p>
       </div>
     )

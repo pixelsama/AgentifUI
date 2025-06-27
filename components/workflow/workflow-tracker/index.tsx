@@ -9,6 +9,7 @@ import { ResultViewer } from './result-viewer'
 import { Play, Loader2 } from 'lucide-react'
 // --- 集成真实的节点状态 ---
 import { useWorkflowExecutionStore } from '@lib/stores/workflow-execution-store'
+import { useTranslations } from 'next-intl'
 
 interface WorkflowTrackerProps {
   isExecuting: boolean
@@ -40,6 +41,7 @@ export function WorkflowTracker({
   onReset
 }: WorkflowTrackerProps) {
   const { isDark } = useTheme()
+  const t = useTranslations('workflow')
   const [showResult, setShowResult] = useState(false)
   
   // --- 从store获取真实的节点状态 ---
@@ -157,13 +159,13 @@ export function WorkflowTracker({
                   "text-lg font-semibold font-serif",
                   isDark ? "text-stone-200" : "text-stone-800"
                 )}>
-                  等待执行
+                  {t('status.pending')}
                 </h3>
                 <p className={cn(
                   "text-sm font-serif",
                   isDark ? "text-stone-400" : "text-stone-600"
                 )}>
-                  填写左侧表单并点击执行按钮开始工作流
+                  {t('form.startExecution')}
                 </p>
               </div>
             </div>
@@ -176,7 +178,7 @@ export function WorkflowTracker({
                 "text-lg font-semibold font-serif",
                 isDark ? "text-stone-200" : "text-stone-800"
               )}>
-                执行进度
+                {t('form.executing')}
               </h3>
             </div>
             
@@ -196,13 +198,13 @@ export function WorkflowTracker({
                       "font-medium font-serif",
                       isDark ? "text-stone-200" : "text-stone-800"
                     )}>
-                      工作流执行中
+                      {t('status.running')}
                     </div>
                     <div className={cn(
                       "text-sm font-serif",
                       isDark ? "text-stone-400" : "text-stone-600"
                     )}>
-                      等待接收节点状态...
+                      {t('nodeStatus.waitingParallel')}
                     </div>
                   </div>
                 </div>

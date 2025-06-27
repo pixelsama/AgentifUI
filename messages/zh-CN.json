@@ -404,6 +404,7 @@
         "search": {
           "placeholder": "搜索应用..."
         },
+        "tryAdjustSearch": "尝试调整搜索条件或浏览其他分类",
         "viewMode": {
           "grid": "网格",
           "list": "列表"
@@ -605,12 +606,12 @@
       "renameDialog": {
         "title": "重命名对话",
         "placeholder": "输入新的对话名称",
-        "confirm": "确认重命名"
+        "confirmText": "确认重命名"
       },
       "deleteDialog": {
         "title": "删除对话",
         "message": "确定要删除会话 \"{title}\" 吗？此操作无法撤销。",
-        "confirm": "确认删除"
+        "confirmText": "确认删除"
       },
       "createInProgress": "对话正在创建中，请稍后再试。",
       "incompleteInfo": "对话信息不完整，无法操作。",
@@ -636,7 +637,7 @@
     "recentChats": "近期对话",
     "moreOptions": "更多选项",
     "rename": "重命名",
-    "deleteChat": "删除对话",
+    "delete": "删除对话",
     "untitled": "无标题",
     "creating": "创建中...",
     "favoriteApps": "常用应用",
@@ -652,12 +653,119 @@
       "confirmText": "确认重命名"
     },
     "deleteDialog": {
-      "confirmText": "确认删除",
-      "confirmMessage": "确定要删除会话 \"{title}\" 吗？此操作无法撤销。"
+      "title": "删除对话",
+      "message": "确定要删除会话 \"{title}\" 吗？此操作无法撤销。",
+      "confirmText": "确认删除"
     },
     "syncingMessage": "对话数据正在同步中，请稍后再尝试{action}。",
     "operationFailed": "操作失败，请稍后再试。",
     "saveFailed": "保存对话失败",
     "createFailed": "创建对话失败"
+  },
+  "loading": {
+    "default": "加载中...",
+    "app": "正在加载应用...",
+    "appList": "加载应用列表...",
+    "messages": "加载更多消息...",
+    "moreMessages": "加载更多历史消息",
+    "retry": "重试",
+    "failed": "加载失败",
+    "loadingFailed": "加载消息失败: {error}",
+    "spinner": "加载中"
+  },
+  "dynamicTitle": {
+    "base": "AgentifUI",
+    "settings": {
+      "main": "设置",
+      "profile": "个人资料",
+      "account": "账号设置",
+      "appearance": "外观设置",
+      "language": "语言设置"
+    },
+    "admin": {
+      "main": "管理后台",
+      "users": "用户管理",
+      "organizations": "组织管理",
+      "apiConfig": "API配置",
+      "security": "安全设置",
+      "analytics": "数据分析",
+      "content": "关于与通知"
+    },
+    "auth": {
+      "login": "登录",
+      "register": "注册",
+      "phoneLogin": "手机号登录",
+      "resetPassword": "重置密码",
+      "forgotPassword": "忘记密码",
+      "ssoProcessing": "SSO登录处理中"
+    },
+    "apps": {
+      "market": "应用市场",
+      "agent": "Agent应用",
+      "chatbot": "Chatbot应用",
+      "chatflow": "Chatflow应用",
+      "workflow": "Workflow应用",
+      "textGeneration": "文本生成应用",
+      "details": "应用详情",
+      "loading": "加载应用..."
+    },
+    "chat": {
+      "main": "聊天",
+      "new": "新对话",
+      "history": "历史对话",
+      "loading": "加载对话...",
+      "notFound": "对话不存在"
+    },
+    "about": "关于"
+  },
+  "history": {
+    "title": "历史对话",
+    "loading": "会话记录加载中...",
+    "noRecords": "暂无会话历史",
+    "totalCount": "共找到 {total} 个对话",
+    "searchResults": "搜索结果：{count} 个对话",
+    "totalRecords": "共 {total} 个对话",
+    "searchPlaceholder": "搜索聊天历史...",
+    "newChat": "新对话",
+    "noMessagePreview": "无消息预览",
+    "batchDelete": "批量删除",
+    "exitSelection": "退出选择",
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
+    "selected": "已选择 {count} / {total} 个对话",
+    "deleteCount": "删除 ({count})",
+    "deleting": "删除中...",
+    "cancel": "取消",
+    "rename": "重命名",
+    "delete": "删除对话",
+    "moreOptions": "更多选项",
+    "noSearchResults": "未找到匹配的对话",
+    "searchHint": "请尝试其他搜索词",
+    "noHistoryTitle": "暂无聊天历史",
+    "noHistoryDesc": "开始一个新对话吧",
+    "renameDialog": {
+      "title": "重命名对话",
+      "label": "对话名称",
+      "placeholder": "输入新的对话名称",
+      "confirmText": "确认重命名"
+    },
+    "deleteDialog": {
+      "title": "删除对话",
+      "message": "确定要删除对话 \"{title}\" 吗？此操作无法撤销。",
+      "confirmText": "确认删除"
+    },
+    "batchDeleteDialog": {
+      "title": "批量删除对话",
+      "message": "确定要删除选中的 {count} 个对话吗？此操作无法撤销。",
+      "confirmText": "删除",
+      "cancelText": "取消"
+    },
+    "operations": {
+      "renameFailed": "对话重命名失败",
+      "deleteFailed": "对话删除失败",
+      "batchDeleteSuccess": "成功删除 {success} 个对话，{failed} 个删除失败",
+      "batchDeleteFailed": "删除失败，请稍后重试",
+      "error": "操作出错，请稍后再试"
+    }
   }
 }

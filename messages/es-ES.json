@@ -404,6 +404,7 @@
         "search": {
           "placeholder": "Buscar aplicaciones..."
         },
+        "tryAdjustSearch": "Intenta ajustar los criterios de búsqueda o navegar por otras categorías",
         "viewMode": {
           "grid": "Cuadrícula",
           "list": "Lista"
@@ -605,12 +606,12 @@
       "renameDialog": {
         "title": "Renombrar Conversación",
         "placeholder": "Introduce el nuevo nombre de la conversación",
-        "confirm": "Confirmar Renombrar"
+        "confirmText": "Confirmar Renombrar"
       },
       "deleteDialog": {
         "title": "Eliminar Conversación",
         "message": "¿Estás seguro de que quieres eliminar la conversación \"{title}\"? Esta acción no se puede deshacer.",
-        "confirm": "Confirmar Eliminación"
+        "confirmText": "Confirmar Eliminación"
       },
       "createInProgress": "La conversación se está creando, inténtalo de nuevo más tarde.",
       "incompleteInfo": "La información de la conversación está incompleta, no se puede continuar.",
@@ -636,7 +637,7 @@
     "recentChats": "Chats Recientes",
     "moreOptions": "Más Opciones",
     "rename": "Renombrar",
-    "deleteChat": "Eliminar Chat",
+    "delete": "Eliminar Chat",
     "untitled": "Sin título",
     "creating": "Creando...",
     "favoriteApps": "Aplicaciones Favoritas",
@@ -652,12 +653,119 @@
       "confirmText": "Confirmar Renombrar"
     },
     "deleteDialog": {
-      "confirmText": "Confirmar Eliminar",
-      "confirmMessage": "¿Estás seguro de que quieres eliminar la conversación \"{title}\"? Esta acción no se puede deshacer."
+      "title": "Eliminar Conversación",
+      "message": "¿Estás seguro de que quieres eliminar la conversación \"{title}\"? Esta acción no se puede deshacer.",
+      "confirmText": "Confirmar Eliminar"
     },
     "syncingMessage": "Los datos de conversación se están sincronizando, por favor intenta {action} más tarde.",
     "operationFailed": "Operación fallida, por favor intenta de nuevo más tarde.",
     "saveFailed": "Error al guardar conversación",
     "createFailed": "Error al crear conversación"
+  },
+  "loading": {
+    "default": "Cargando...",
+    "app": "Cargando aplicación...",
+    "appList": "Cargando lista de aplicaciones...",
+    "messages": "Cargando más mensajes...",
+    "moreMessages": "Cargar más mensajes históricos",
+    "retry": "Reintentar",
+    "failed": "Error al cargar",
+    "loadingFailed": "Error al cargar mensajes: {error}",
+    "spinner": "Cargando"
+  },
+  "dynamicTitle": {
+    "base": "AgentifUI",
+    "settings": {
+      "main": "Configuración",
+      "profile": "Perfil",
+      "account": "Configuración de Cuenta",
+      "appearance": "Configuración de Apariencia",
+      "language": "Configuración de Idioma"
+    },
+    "admin": {
+      "main": "Panel de Administración",
+      "users": "Gestión de Usuarios",
+      "organizations": "Gestión de Organizaciones",
+      "apiConfig": "Configuración de API",
+      "security": "Configuración de Seguridad",
+      "analytics": "Análisis de Datos",
+      "content": "Acerca de y Notificaciones"
+    },
+    "auth": {
+      "login": "Iniciar Sesión",
+      "register": "Registrarse",
+      "phoneLogin": "Iniciar Sesión con Teléfono",
+      "resetPassword": "Restablecer Contraseña",
+      "forgotPassword": "Olvidé mi Contraseña",
+      "ssoProcessing": "Procesando Inicio de Sesión SSO"
+    },
+    "apps": {
+      "market": "Mercado de Aplicaciones",
+      "agent": "Aplicación Agent",
+      "chatbot": "Aplicación Chatbot",
+      "chatflow": "Aplicación Chatflow",
+      "workflow": "Aplicación Workflow",
+      "textGeneration": "Aplicación de Generación de Texto",
+      "details": "Detalles de la Aplicación",
+      "loading": "Cargando Aplicación..."
+    },
+    "chat": {
+      "main": "Chat",
+      "new": "Nuevo Chat",
+      "history": "Historial de Chat",
+      "loading": "Cargando Chat...",
+      "notFound": "Chat No Encontrado"
+    },
+    "about": "Acerca de"
+  },
+  "history": {
+    "title": "Historial de Chat",
+    "loading": "Cargando registros de conversación...",
+    "noRecords": "Sin historial de conversaciones",
+    "totalCount": "Se encontraron {total} conversaciones",
+    "searchResults": "Resultados de búsqueda: {count} conversaciones",
+    "totalRecords": "Total {total} conversaciones",
+    "searchPlaceholder": "Buscar historial de chat...",
+    "newChat": "Nuevo Chat",
+    "noMessagePreview": "Sin vista previa del mensaje",
+    "batchDelete": "Eliminar en Lote",
+    "exitSelection": "Salir de Selección",
+    "selectAll": "Seleccionar Todo",
+    "deselectAll": "Deseleccionar Todo",
+    "selected": "Seleccionadas {count} / {total} conversaciones",
+    "deleteCount": "Eliminar ({count})",
+    "deleting": "Eliminando...",
+    "cancel": "Cancelar",
+    "rename": "Renombrar",
+    "delete": "Eliminar Conversación",
+    "moreOptions": "Más Opciones",
+    "noSearchResults": "No se encontraron conversaciones coincidentes",
+    "searchHint": "Intenta usar términos de búsqueda diferentes",
+    "noHistoryTitle": "Sin historial de chat",
+    "noHistoryDesc": "Inicia una nueva conversación",
+    "renameDialog": {
+      "title": "Renombrar Conversación",
+      "label": "Nombre de Conversación",
+      "placeholder": "Ingresa nuevo nombre de conversación",
+      "confirmText": "Confirmar Renombrar"
+    },
+    "deleteDialog": {
+      "title": "Eliminar Conversación",
+      "message": "¿Estás seguro de que quieres eliminar la conversación \"{title}\"? Esta acción no se puede deshacer.",
+      "confirmText": "Confirmar Eliminar"
+    },
+    "batchDeleteDialog": {
+      "title": "Eliminar Conversaciones en Lote",
+      "message": "¿Estás seguro de que quieres eliminar las {count} conversaciones seleccionadas? Esta acción no se puede deshacer.",
+      "confirmText": "Eliminar",
+      "cancelText": "Cancelar"
+    },
+    "operations": {
+      "renameFailed": "Error al renombrar conversación",
+      "deleteFailed": "Error al eliminar conversación",
+      "batchDeleteSuccess": "Se eliminaron exitosamente {success} conversaciones, {failed} fallaron",
+      "batchDeleteFailed": "Eliminación falló, inténtalo de nuevo más tarde",
+      "error": "Operación falló, inténtalo de nuevo más tarde"
+    }
   }
 } 

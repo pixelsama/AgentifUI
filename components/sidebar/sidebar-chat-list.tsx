@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation"
 // formatDistanceToNow and zhCN are not needed if we only show title
 // import { formatDistanceToNow } from "date-fns" 
 // import { zhCN } from "date-fns/locale" 
-import { MoreButtonV2 } from "@components/ui/more-button-v2" 
+import { MoreButtonV2 } from "@components/ui/more-button-v2"
 import { DropdownMenuV2 } from "@components/ui/dropdown-menu-v2"
 import { TypeWriter } from "@components/ui/typewriter"
 import { usePendingConversationStore } from "@lib/stores/pending-conversation-store"
@@ -29,31 +29,31 @@ interface SidebarChatListProps {
   clickingChatId?: string | null
 }
 
-export function SidebarChatList({ 
-  isDark, 
+export function SidebarChatList({
+  isDark,
   contentVisible,
   selectedId,
   onSelectChat,
   clickingChatId = null
 }: SidebarChatListProps) {
-  const { isExpanded } = useSidebarStore() 
+  const { isExpanded } = useSidebarStore()
   const isMobile = useMobile()
   const router = useRouter()
   const { colors } = useThemeColors()
   const t = useTranslations('sidebar')
-  const { 
-    conversations, 
-    isLoading: isLoadingConversations, 
-    error, 
-    refresh 
+  const {
+    conversations,
+    isLoading: isLoadingConversations,
+    error,
+    refresh
   } = useCombinedConversations()
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 新增：打字机效果相关Actions
   // --- END COMMENT ---
   const updateTypewriterDisplay = usePendingConversationStore((state) => state.updateTypewriterDisplay);
   const completeTitleTypewriter = usePendingConversationStore((state) => state.completeTitleTypewriter);
-  
+
   // --- BEGIN COMMENT ---
   // Dialog状态管理
   // --- END COMMENT ---
@@ -61,15 +61,15 @@ export function SidebarChatList({
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [isOperating, setIsOperating] = React.useState(false);
   const [selectedConversation, setSelectedConversation] = React.useState<CombinedConversation | null>(null);
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 新增：下拉菜单状态管理
   // 记录当前打开的下拉菜单对应的对话ID
   // --- END COMMENT ---
   const [openDropdownId, setOpenDropdownId] = React.useState<string | null>(null);
-  
+
   const [prevLoadedConversations, setPrevLoadedConversations] = React.useState<CombinedConversation[]>([]);
-  
+
   // --- BEGIN COMMENT ---
   // 当对话列表成功加载时，保存当前状态
   // --- END COMMENT ---
@@ -78,84 +78,84 @@ export function SidebarChatList({
       setPrevLoadedConversations(conversations);
     }
   }, [isLoadingConversations, conversations]);
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 检测对话列表变化，识别被挤出的对话（瞬间消失效果）
   // --- END COMMENT ---
   React.useEffect(() => {
     const prevIds = new Set(prevLoadedConversations.map(conv => conv.id));
     const currentIds = new Set(conversations.map(conv => conv.id));
-    
+
     // 找出在之前列表中存在但在当前列表中不存在的对话ID
     const disappearedIds = Array.from(prevIds).filter(id => !currentIds.has(id));
-    
+
     if (disappearedIds.length > 0) {
       console.log(`[SidebarChatList] 🎯 检测到${disappearedIds.length}个对话被挤出:`, disappearedIds);
       // 瞬间挤出效果：对话直接从列表中消失
     }
   }, [conversations, prevLoadedConversations]);
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 显示逻辑：直接显示当前对话列表（瞬间挤出效果）
   // --- END COMMENT ---
   const displayConversations = React.useMemo(() => {
-    return (isLoadingConversations && conversations.length === 0 && prevLoadedConversations.length > 0) 
-      ? prevLoadedConversations 
+    return (isLoadingConversations && conversations.length === 0 && prevLoadedConversations.length > 0)
+      ? prevLoadedConversations
       : conversations;
   }, [isLoadingConversations, conversations, prevLoadedConversations]);
-  
+
   const unpinnedChats = React.useMemo(() => {
     return displayConversations.filter(chat => !chat.isPending);
   }, [displayConversations]);
-  
+
   const pendingChats = React.useMemo(() => {
     return displayConversations.filter(chat => chat.isPending === true);
   }, [displayConversations]);
-  
+
   // --- BEGIN COMMENT ---
   // 使用数据库中的历史对话，默认已经限制为20个
   // 使用 useSidebarConversations 获取的对话列表已经限制为20个
   // --- END COMMENT ---
   const visibleUnpinnedChats = unpinnedChats;
-  
+
   // --- BEGIN COMMENT ---
   // 判断是否有更多历史对话（超过20个）
   // 使用 useCombinedConversations 返回的 total 属性
   // --- END COMMENT ---
   const hasMoreChats = displayConversations.length === 20 || unpinnedChats.length === 20;
-  
+
   const handleRename = React.useCallback(async (chatId: string) => {
     const conversation = conversations.find(c => c.id === chatId);
     if (!conversation) return;
-    
+
     setSelectedConversation(conversation);
     setShowRenameDialog(true);
   }, [conversations]);
-  
+
   const handleRenameConfirm = React.useCallback(async (newTitle: string) => {
     if (!selectedConversation) return;
-    
+
     const supabasePK = selectedConversation.supabase_pk;
     if (!supabasePK) {
       alert(t('syncingMessage'));
       setShowRenameDialog(false);
       return;
     }
-    
+
     setIsOperating(true);
     try {
       const { renameConversation } = await import('@lib/db/conversations');
       const result = await renameConversation(supabasePK, newTitle.trim());
-      
+
       if (result.success) {
         // --- BEGIN COMMENT ---
         // 重命名成功后直接更新页面标题，无需刷新页面
         // --- END COMMENT ---
         if (selectedId === selectedConversation.id) {
           const baseTitle = 'AgentifUI';
-          document.title = `${newTitle.trim()} | ${baseTitle}`;
+          // 标题管理由DynamicTitle组件统一处理，无需手动设置
         }
-        
+
         refresh();
         // --- BEGIN COMMENT ---
         // 触发全局同步事件，通知所有组件数据已更新
@@ -173,30 +173,30 @@ export function SidebarChatList({
       setIsOperating(false);
     }
   }, [selectedConversation, selectedId, refresh]);
-  
+
   const handleDelete = React.useCallback(async (chatId: string) => {
     const conversation = conversations.find(c => c.id === chatId);
     if (!conversation) return;
-    
+
     setSelectedConversation(conversation);
     setShowDeleteDialog(true);
   }, [conversations]);
-  
+
   const handleDeleteConfirm = React.useCallback(async () => {
     if (!selectedConversation) return;
-    
+
     const supabasePK = selectedConversation.supabase_pk;
     if (!supabasePK) {
       alert(t('syncingMessage'));
       setShowDeleteDialog(false);
       return;
     }
-    
+
     setIsOperating(true);
     try {
       const { deleteConversation } = await import('@lib/db/conversations');
       const result = await deleteConversation(supabasePK);
-      
+
       if (result.success) {
         refresh();
         // --- BEGIN COMMENT ---
@@ -237,22 +237,22 @@ export function SidebarChatList({
   const isChatActive = React.useCallback((chat: CombinedConversation) => {
     // 首先检查是否有选中的ID
     if (!selectedId) return false;
-    
+
     // 获取当前路由路径
     const pathname = window.location.pathname;
-    
+
     // 检查当前路由是否是聊天页面
     // 当路由以 /chat/ 开头时，才考虑聊天项的选中状态
     // 当路由是 /chat/history 时，不考虑聊天项的选中状态
     if (!pathname.startsWith('/chat/')) return false;
     if (pathname === '/chat/history') return false;
-    
+
     // 直接ID匹配
     if (chat.id === selectedId) return true;
-    
+
     // 临时ID匹配（处理从temp-xxx切换到正式ID的情况）
     if (chat.tempId && selectedId.includes(chat.tempId)) return true;
-    
+
     // 确保不会有误匹配
     return false;
   }, [selectedId]);
@@ -264,11 +264,11 @@ export function SidebarChatList({
   React.useEffect(() => {
     if (!contentVisible) {
       // 查找所有需要打字机效果的对话
-      const chatsNeedingTypewriter = pendingChats.filter(chat => 
-        chat.titleTypewriterState?.shouldStartTyping && 
+      const chatsNeedingTypewriter = pendingChats.filter(chat =>
+        chat.titleTypewriterState?.shouldStartTyping &&
         chat.titleTypewriterState?.targetTitle
       );
-      
+
       // 直接完成所有打字机效果
       chatsNeedingTypewriter.forEach(chat => {
         completeTitleTypewriter(chat.id);
@@ -277,7 +277,7 @@ export function SidebarChatList({
   }, [contentVisible, pendingChats, completeTitleTypewriter]);
 
   if (!contentVisible) return null;
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 修改渲染逻辑，集成TypeWriter组件实现打字机效果
   // 使用统一的结构和高度，避免切换时的布局跳动
@@ -285,14 +285,14 @@ export function SidebarChatList({
   // --- END COMMENT ---
   const renderChatItemContent = (chat: CombinedConversation, isItemLoading: boolean) => {
     const title = chat.title || t('untitled');
-    
+
     // --- BEGIN COMMENT ---
     // 🎯 检查是否需要使用打字机效果
     // --- END COMMENT ---
-    const shouldUseTypewriter = chat.isPending && 
-                               chat.titleTypewriterState?.shouldStartTyping && 
-                               chat.titleTypewriterState?.targetTitle;
-    
+    const shouldUseTypewriter = chat.isPending &&
+      chat.titleTypewriterState?.shouldStartTyping &&
+      chat.titleTypewriterState?.targetTitle;
+
     // 所有状态下使用相同的高度和结构，确保一致性
     return (
       <div className="flex items-center h-4 w-full"> {/* 增加高度为 h-4，防止字母下降部被裁切 */}
@@ -324,7 +324,7 @@ export function SidebarChatList({
       </div>
     );
   };
-  
+
   // --- BEGIN COMMENT ---
   // 修改 createMoreActions 函数，确保临时 ID 和真正对话 ID 之间切换时布局保持一致
   // 对于临时 ID 的对话，返回禁用状态的 more button 而不是 null，保持布局一致
@@ -336,14 +336,14 @@ export function SidebarChatList({
     const isTempChat = !chat.id || chat.id.startsWith('temp-');
     const isMenuOpen = openDropdownId === chat.id;
     const isItemSelected = isChatActive(chat);
-    
+
     // --- BEGIN COMMENT ---
     // 🎯 处理下拉菜单状态变化
     // --- END COMMENT ---
     const handleMenuOpenChange = (isOpen: boolean) => {
       setOpenDropdownId(isOpen ? chat.id : null);
     };
-    
+
     return (
       <DropdownMenuV2
         placement="bottom"
@@ -369,7 +369,7 @@ export function SidebarChatList({
           onClick={() => handleRename(chat.id)}
           disabled={itemIsLoading || !canPerformActions || isTempChat}
         >
-{t('rename')}
+          {t('rename')}
         </DropdownMenuV2.Item>
         <DropdownMenuV2.Item
           icon={<Trash className="w-3.5 h-3.5" />}
@@ -377,7 +377,7 @@ export function SidebarChatList({
           onClick={() => handleDelete(chat.id)}
           disabled={itemIsLoading || !canPerformActions || isTempChat}
         >
-{t('deleteChat')}
+          {t('delete')}
         </DropdownMenuV2.Item>
       </DropdownMenuV2>
     );
@@ -395,7 +395,7 @@ export function SidebarChatList({
   // 🎯 修复：当没有对话时完全隐藏，与常用应用保持一致
   // --- END COMMENT ---
   const hasAnyConversations = pendingChats.length > 0 || visibleUnpinnedChats.length > 0
-  
+
   if (!isLoadingConversations && !hasAnyConversations) {
     return null
   }
@@ -418,32 +418,32 @@ export function SidebarChatList({
             "text-xs font-medium font-serif leading-none",
             isDark ? "text-stone-400" : "text-stone-500"
           )}>
-{t('recentChats')}
+            {t('recentChats')}
           </span>
         </div>
-        
+
         {/* 显示骨架屏 */}
         {/* {showSkeleton && <ChatSkeleton isDark={isDark} count={5} />} */}
-        
+
         {/* --- 待处理对话列表 --- */}
         {pendingChats.length > 0 && (
           <div className="mb-1.5 pt-1"> {/* 减小底部边距，添加顶部间距 */}
             <div className="space-y-0.5 px-3"> {/* 减小列表项之间的间距 */}
               {pendingChats.map(chat => {
-                const itemIsLoading = chat.pendingStatus === 'creating' || 
-                                   chat.pendingStatus === 'title_fetching' || 
-                                   chat.pendingStatus === 'streaming_message';
+                const itemIsLoading = chat.pendingStatus === 'creating' ||
+                  chat.pendingStatus === 'title_fetching' ||
+                  chat.pendingStatus === 'streaming_message';
                 // --- BEGIN COMMENT ---
                 // 使用辅助函数判断项目是否应该处于选中状态
                 // 处理临时ID和正式ID之间的转换情况
                 // --- END COMMENT ---
                 const isActive = isChatActive(chat);
-                
+
                 return (
-                  <div 
+                  <div
                     className="group relative"
                     key={chat.tempId || chat.id}
-                  > 
+                  >
                     {/* 使用新的 SidebarListButton 替代 SidebarButton */}
                     <SidebarListButton
                       icon={<SidebarChatIcon size="sm" isDark={isDark} />}
@@ -459,11 +459,11 @@ export function SidebarChatList({
                           // 🎯 当有菜单打开时，禁用group-hover效果，避免其他item的more button在悬停时显示
                           // 但当前打开菜单的item的more button应该保持显示
                           // --- END COMMENT ---
-                          itemIsLoading 
+                          itemIsLoading
                             ? "pointer-events-none" // 禁用交互但保持占位
                             : openDropdownId === chat.id
                               ? "opacity-100" // 当前打开菜单的item，more button保持显示
-                              : openDropdownId 
+                              : openDropdownId
                                 ? "opacity-0" // 有其他菜单打开时，此item的more button不显示
                                 : "opacity-0 group-hover:opacity-100 focus-within:opacity-100" // 正常状态下的悬停显示
                         )}>
@@ -480,7 +480,7 @@ export function SidebarChatList({
             </div>
           </div>
         )}
-        
+
         {/* --- 已保存对话列表 --- */}
         <div className="pt-1"> {/* 添加顶部间距，与粘性标题分离 */}
           <div className="space-y-0.5 px-3"> {/* 减小列表项之间的间距 */}
@@ -493,46 +493,46 @@ export function SidebarChatList({
               // 🎯 新增：检查当前对话是否正在点击中
               const isClicking = clickingChatId === chat.id;
               // 🎯 修复：点击状态不应该影响内容渲染，只影响图标显示
-              const itemIsLoading = false; 
+              const itemIsLoading = false;
 
-                                            return (
-                <div 
+              return (
+                <div
                   className="group relative"
                   key={chat.id}
                 >
-                    {/* 使用新的 SidebarListButton 替代 SidebarButton */}
-                    <SidebarListButton
-                      icon={<SidebarChatIcon size="sm" isDark={isDark} />}
-                      active={isActive}
-                      onClick={() => onSelectChat(chat.id)}
-                      isLoading={isClicking}
-                      hasOpenDropdown={openDropdownId === chat.id}
-                      disableHover={!!openDropdownId || isClicking}
-                      moreActionsTrigger={
-                        <div className={cn(
-                          "transition-opacity",
-                          // --- BEGIN COMMENT ---
-                          // 🎯 当有菜单打开时，禁用group-hover效果，避免其他item的more button在悬停时显示
-                          // 但当前打开菜单的item的more button应该保持显示
-                          // --- END COMMENT ---
-                          isClicking
-                            ? "opacity-0 pointer-events-none" // 🎯 点击时隐藏more button，避免干扰
-                            : openDropdownId === chat.id
-                              ? "opacity-100" // 当前打开菜单的item，more button保持显示
-                              : openDropdownId 
-                                ? "opacity-0" // 有其他菜单打开时，此item的more button不显示
-                                : "opacity-0 group-hover:opacity-100 focus-within:opacity-100" // 正常状态下的悬停显示
-                        )}>
+                  {/* 使用新的 SidebarListButton 替代 SidebarButton */}
+                  <SidebarListButton
+                    icon={<SidebarChatIcon size="sm" isDark={isDark} />}
+                    active={isActive}
+                    onClick={() => onSelectChat(chat.id)}
+                    isLoading={isClicking}
+                    hasOpenDropdown={openDropdownId === chat.id}
+                    disableHover={!!openDropdownId || isClicking}
+                    moreActionsTrigger={
+                      <div className={cn(
+                        "transition-opacity",
+                        // --- BEGIN COMMENT ---
+                        // 🎯 当有菜单打开时，禁用group-hover效果，避免其他item的more button在悬停时显示
+                        // 但当前打开菜单的item的more button应该保持显示
+                        // --- END COMMENT ---
+                        isClicking
+                          ? "opacity-0 pointer-events-none" // 🎯 点击时隐藏more button，避免干扰
+                          : openDropdownId === chat.id
+                            ? "opacity-100" // 当前打开菜单的item，more button保持显示
+                            : openDropdownId
+                              ? "opacity-0" // 有其他菜单打开时，此item的more button不显示
+                              : "opacity-0 group-hover:opacity-100 focus-within:opacity-100" // 正常状态下的悬停显示
+                      )}>
                         {createMoreActions(chat, itemIsLoading)}
                       </div>
                     }
-                    >
-                      {renderChatItemContent(chat, itemIsLoading)}
-                    </SidebarListButton>
-                  </div>
-                );
+                  >
+                    {renderChatItemContent(chat, itemIsLoading)}
+                  </SidebarListButton>
+                </div>
+              );
             })}
-            
+
             {/* --- BEGIN COMMENT ---
             🎯 移除查看全部历史按钮，已提升到Header区域
             --- END COMMENT --- */}
@@ -563,8 +563,8 @@ export function SidebarChatList({
         isOpen={showDeleteDialog}
         onClose={() => !isOperating && setShowDeleteDialog(false)}
         onConfirm={handleDeleteConfirm}
-        title={t('deleteChat')}
-        message={t('deleteDialog.confirmMessage', { title: selectedConversation?.title || t('untitled') })}
+        title={t('deleteDialog.title')}
+        message={t('deleteDialog.message', { title: selectedConversation?.title || t('untitled') })}
         confirmText={t('deleteDialog.confirmText')}
         variant="danger"
         icon="delete"

@@ -220,7 +220,7 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
         // 重命名成功后更新页面标题
         // --- END COMMENT ---
         const baseTitle = 'AgentifUI';
-        document.title = `${newTitle.trim()} | ${baseTitle}`;
+        // 标题管理由DynamicTitle组件统一处理，无需手动设置
         
         // 标题更新后会通过refresh()和conversationEvents.emit()自动同步
         
@@ -579,7 +579,7 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
         label={t('renameDialog.title')}
         placeholder={t('renameDialog.placeholder')}
         defaultValue={conversationTitle}
-        confirmText={t('renameDialog.confirm')}
+        confirmText={t('renameDialog.confirmText')}
         isLoading={isOperating}
         maxLength={50}
       />
@@ -593,7 +593,7 @@ export function ConversationTitleButton({ className }: ConversationTitleButtonPr
         onConfirm={handleDeleteConfirm}
         title={t('deleteDialog.title')}
         message={t('deleteDialog.message', { title: conversationTitle })}
-        confirmText={t('deleteDialog.confirm')}
+        confirmText={t('deleteDialog.confirmText')}
         variant="danger"
         icon="delete"
         isLoading={isOperating}

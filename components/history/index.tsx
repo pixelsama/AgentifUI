@@ -17,6 +17,7 @@ import { useChatWidth } from "@lib/hooks/use-chat-width"
 import { conversationEvents } from "@lib/hooks/use-combined-conversations"
 import { ConfirmDialog } from "@components/ui"
 import { useChatInterface } from '@lib/hooks/use-chat-interface'
+import { useTranslations } from 'next-intl'
 
 // --- BEGIN COMMENT ---
 // 历史对话页面组件
@@ -25,6 +26,7 @@ import { useChatInterface } from '@lib/hooks/use-chat-interface'
 export function History() {
   const { isDark } = useTheme()
   const { colors } = useThemeColors()
+  const t = useTranslations('history')
   const [searchQuery, setSearchQuery] = React.useState("")
   const router = useRouter()
   const { widthClass, paddingClass } = useChatWidth()
@@ -170,14 +172,17 @@ export function History() {
         setIsSelectionMode(false)
         
         if (successCount < selectedConversations.size) {
-          alert(`成功删除 ${successCount} 个对话，${selectedConversations.size - successCount} 个删除失败。`)
+          alert(t('operations.batchDeleteSuccess', { 
+            success: successCount, 
+            failed: selectedConversations.size - successCount 
+          }))
         }
       } else {
-        alert('删除失败，请稍后再试。')
+        alert(t('operations.batchDeleteFailed'))
       }
     } catch (error) {
       console.error('批量删除失败:', error)
-      alert('删除操作出错，请稍后再试。')
+      alert(t('operations.operationError'))
     } finally {
       setIsBatchDeleting(false)
       setShowBatchDeleteDialog(false)
@@ -214,7 +219,7 @@ export function History() {
       useSidebarStore.getState().selectItem('chat', null, true)
       
       // 设置标题
-      document.title = '新对话 | AgentifUI'
+      // 标题管理由DynamicTitle组件统一处理，无需手动设置
     }, 100)
   }
   
@@ -253,7 +258,7 @@ export function History() {
                 "text-2xl font-bold font-serif",
                 isDark ? "text-stone-100" : "text-stone-800"
               )}>
-                历史对话
+                {t('title')}
               </h1>
               {/* --- BEGIN COMMENT ---
               // 显示对话总数的美观文字
@@ -268,12 +273,12 @@ export function History() {
                       "w-3 h-3 rounded-full animate-pulse mr-2 inline-block font-serif",
                       isDark ? "bg-stone-600" : "bg-stone-400"
                     )} />
-                    正在加载对话记录...
+                    {t('loading')}
                   </span>
                 ) : total > 0 ? (
-                  `共找到 ${total} 个历史对话`
+                  t('totalCount', { total })
                 ) : (
-                  "暂无历史对话记录"
+                  t('noRecords')
                 )}
               </div>
             </div>
@@ -297,7 +302,7 @@ export function History() {
                   )}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  {isSelectionMode ? "退出选择" : "批量删除"}
+                  {isSelectionMode ? t('exitSelection') : t('batchDelete')}
                 </button>
               )}
               
@@ -314,7 +319,7 @@ export function History() {
                 )}
               >
                 <Edit className="h-4 w-4 mr-2" />
-                新对话
+                {t('newChat')}
               </button>
             </div>
           </div>
@@ -334,7 +339,7 @@ export function History() {
             </div>
             <input
               type="text"
-              placeholder="搜索历史对话..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={handleSearchChange}
               className={cn(
@@ -392,10 +397,10 @@ export function History() {
         isOpen={showBatchDeleteDialog}
         onClose={() => setShowBatchDeleteDialog(false)}
         onConfirm={handleBatchDeleteConfirm}
-        title="批量删除对话"
-        message={`确定要删除选中的 ${selectedConversations.size} 个对话吗？此操作无法撤销。`}
-        confirmText="删除"
-        cancelText="取消"
+        title={t('batchDeleteDialog.title')}
+        message={t('batchDeleteDialog.message', { count: selectedConversations.size })}
+        confirmText={t('batchDeleteDialog.confirmText')}
+        cancelText={t('batchDeleteDialog.cancelText')}
         variant="danger"
         isLoading={isBatchDeleting}
       />

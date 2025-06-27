@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useChatStore } from '@lib/stores/chat-store'
 import { useCombinedConversations } from '@lib/hooks/use-combined-conversations'
 import { useAppListStore } from '@lib/stores/app-list-store'
+import { useTranslations } from 'next-intl'
 
 /**
  * 动态标题组件 - 重构版本
@@ -17,6 +18,9 @@ import { useAppListStore } from '@lib/stores/app-list-store'
  * 4. 分离关注点：将标题计算逻辑与状态监听分离
  */
 export function DynamicTitle() {
+  // --- 国际化翻译 ---
+  const t = useTranslations('dynamicTitle')
+  
   // --- 状态获取 ---
   const pathname = usePathname()
   const currentConversationId = useChatStore(state => state.currentConversationId)
@@ -44,34 +48,35 @@ export function DynamicTitle() {
   const updateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
   
   // 基础应用名称
-  const baseTitle = 'AgentifUI'
+  const baseTitle = t('base')
   
   // --- 辅助函数：获取设置页面标题 ---
   const getSettingsTitle = useCallback((path: string): string => {
-    if (path === '/settings') return '设置 | ' + baseTitle
-    if (path === '/settings/profile') return '个人资料 | ' + baseTitle
-    if (path === '/settings/account') return '账号设置 | ' + baseTitle
-    if (path === '/settings/appearance') return '外观设置 | ' + baseTitle
+    if (path === '/settings') return `${t('settings.main')} | ${baseTitle}`
+    if (path === '/settings/profile') return `${t('settings.profile')} | ${baseTitle}`
+    if (path === '/settings/account') return `${t('settings.account')} | ${baseTitle}`
+    if (path === '/settings/appearance') return `${t('settings.appearance')} | ${baseTitle}`
+    if (path === '/settings/language') return `${t('settings.language')} | ${baseTitle}`
     
     const settingName = path.split('/').pop() || ''
     const formattedName = settingName.charAt(0).toUpperCase() + settingName.slice(1)
-    return `设置 - ${formattedName} | ${baseTitle}`
-  }, [baseTitle])
+    return `${t('settings.main')} - ${formattedName} | ${baseTitle}`
+  }, [baseTitle, t])
   
   // --- 辅助函数：获取管理页面标题 ---
   const getAdminTitle = useCallback((path: string): string => {
-    if (path === '/admin') return '管理后台 | ' + baseTitle
-    if (path === '/admin/users') return '用户管理 | ' + baseTitle
-    if (path === '/admin/organizations') return '组织管理 | ' + baseTitle
-    if (path === '/admin/api-config') return 'API配置 | ' + baseTitle
-    if (path === '/admin/security') return '安全设置 | ' + baseTitle
-    if (path === '/admin/analytics') return '数据分析 | ' + baseTitle
-    if (path === '/admin/content') return '关于与通知 | ' + baseTitle
+    if (path === '/admin') return `${t('admin.main')} | ${baseTitle}`
+    if (path === '/admin/users') return `${t('admin.users')} | ${baseTitle}`
+    if (path === '/admin/organizations') return `${t('admin.organizations')} | ${baseTitle}`
+    if (path === '/admin/api-config') return `${t('admin.apiConfig')} | ${baseTitle}`
+    if (path === '/admin/security') return `${t('admin.security')} | ${baseTitle}`
+    if (path === '/admin/analytics') return `${t('admin.analytics')} | ${baseTitle}`
+    if (path === '/admin/content') return `${t('admin.content')} | ${baseTitle}`
     
     const adminSection = path.split('/').pop() || ''
     const formattedName = adminSection.charAt(0).toUpperCase() + adminSection.slice(1)
-    return `管理后台 - ${formattedName} | ${baseTitle}`
-  }, [baseTitle])
+    return `${t('admin.main')} - ${formattedName} | ${baseTitle}`
+  }, [baseTitle, t])
   
   // --- 辅助函数：获取应用标题 ---
   const getAppTitle = useCallback((
@@ -94,14 +99,14 @@ export function DynamicTitle() {
       
       if (isLoading) {
         return { 
-          title: '加载应用... | ' + baseTitle, 
+          title: `${t('apps.loading')} | ${baseTitle}`, 
           isStable: false 
         }
       }
     }
     
     return { title: baseTitle, isStable: false }
-  }, [baseTitle])
+  }, [baseTitle, t])
   
   // --- 辅助函数：获取聊天标题 ---
   const getChatTitle = useCallback((
@@ -114,7 +119,7 @@ export function DynamicTitle() {
     )
     
     if (currentChat) {
-      const chatTitle = currentChat.title || '新对话'
+      const chatTitle = currentChat.title || t('chat.new')
       return { 
         title: `${chatTitle} | ${baseTitle}`, 
         isStable: true 
@@ -123,13 +128,13 @@ export function DynamicTitle() {
     
     if (isLoading) {
       return { 
-        title: '加载对话... | ' + baseTitle, 
+        title: `${t('chat.loading')} | ${baseTitle}`, 
         isStable: false 
       }
     }
     
     return { title: baseTitle, isStable: false }
-  }, [baseTitle])
+  }, [baseTitle, t])
   
   // --- 标题计算逻辑 ---
   const calculateTitle = useCallback((
@@ -154,15 +159,15 @@ export function DynamicTitle() {
       }
       
       if (currentPath?.startsWith('/login')) {
-        return { title: '登录 | ' + baseTitle, priority: 1, isStable: true }
+        return { title: `${t('auth.login')} | ${baseTitle}`, priority: 1, isStable: true }
       }
       
       if (currentPath?.startsWith('/register')) {
-        return { title: '注册 | ' + baseTitle, priority: 1, isStable: true }
+        return { title: `${t('auth.register')} | ${baseTitle}`, priority: 1, isStable: true }
       }
       
       if (currentPath?.startsWith('/phone-login')) {
-        return { title: '手机号登录 | ' + baseTitle, priority: 1, isStable: true }
+        return { title: `${t('auth.phoneLogin')} | ${baseTitle}`, priority: 1, isStable: true }
       }
       
       if (currentPath?.startsWith('/admin')) {
@@ -171,25 +176,25 @@ export function DynamicTitle() {
       }
       
       if (currentPath?.startsWith('/reset-password')) {
-        return { title: '重置密码 | ' + baseTitle, priority: 1, isStable: true }
+        return { title: `${t('auth.resetPassword')} | ${baseTitle}`, priority: 1, isStable: true }
       }
       
       if (currentPath?.startsWith('/about')) {
-        return { title: '关于 | ' + baseTitle, priority: 1, isStable: true }
+        return { title: `${t('about')} | ${baseTitle}`, priority: 1, isStable: true }
       }
       
       if (currentPath?.startsWith('/forgot-password')) {
-        return { title: '忘记密码 | ' + baseTitle, priority: 1, isStable: true }
+        return { title: `${t('auth.forgotPassword')} | ${baseTitle}`, priority: 1, isStable: true }
       }
       
       if (currentPath?.startsWith('/sso/processing')) {
-        return { title: 'SSO登录处理中 | ' + baseTitle, priority: 1, isStable: true }
+        return { title: `${t('auth.ssoProcessing')} | ${baseTitle}`, priority: 1, isStable: true }
       }
       
       // --- 应用相关标题 ---
       if (currentPath?.startsWith('/apps')) {
         if (currentPath === '/apps') {
-          return { title: '应用市场 | ' + baseTitle, priority: 2, isStable: true }
+          return { title: `${t('apps.market')} | ${baseTitle}`, priority: 2, isStable: true }
         }
         
         // 应用详情页面 - 增强匹配逻辑
@@ -211,28 +216,28 @@ export function DynamicTitle() {
         
         // 根据应用类型提供更具体的fallback标题
         if (currentPath.includes('/agent/')) {
-          return { title: 'Agent应用 | ' + baseTitle, priority: 90, isStable: false }
+          return { title: `${t('apps.agent')} | ${baseTitle}`, priority: 90, isStable: false }
         } else if (currentPath.includes('/chatbot/')) {
-          return { title: 'Chatbot应用 | ' + baseTitle, priority: 90, isStable: false }
+          return { title: `${t('apps.chatbot')} | ${baseTitle}`, priority: 90, isStable: false }
         } else if (currentPath.includes('/chatflow/')) {
-          return { title: 'Chatflow应用 | ' + baseTitle, priority: 90, isStable: false }
+          return { title: `${t('apps.chatflow')} | ${baseTitle}`, priority: 90, isStable: false }
         } else if (currentPath.includes('/workflow/')) {
-          return { title: 'Workflow应用 | ' + baseTitle, priority: 90, isStable: false }
+          return { title: `${t('apps.workflow')} | ${baseTitle}`, priority: 90, isStable: false }
         } else if (currentPath.includes('/text-generation/')) {
-          return { title: '文本生成应用 | ' + baseTitle, priority: 90, isStable: false }
+          return { title: `${t('apps.textGeneration')} | ${baseTitle}`, priority: 90, isStable: false }
         }
         
-        return { title: '应用详情 | ' + baseTitle, priority: 95, isStable: false }
+        return { title: `${t('apps.details')} | ${baseTitle}`, priority: 95, isStable: false }
       }
       
       // --- 聊天相关标题 ---
       if (currentPath?.startsWith('/chat')) {
         if (currentPath === '/chat/new') {
-          return { title: '新对话 | ' + baseTitle, priority: 2, isStable: true }
+          return { title: `${t('chat.new')} | ${baseTitle}`, priority: 2, isStable: true }
         }
         
         if (currentPath === '/chat/history') {
-          return { title: '历史对话 | ' + baseTitle, priority: 2, isStable: true }
+          return { title: `${t('chat.history')} | ${baseTitle}`, priority: 2, isStable: true }
         }
         
         if (conversationId) {
@@ -242,7 +247,7 @@ export function DynamicTitle() {
             isConvLoading
           )
           
-          if (chatTitle.title !== baseTitle && !chatTitle.title.includes('加载中')) {
+          if (chatTitle.title !== baseTitle && !chatTitle.title.includes(t('chat.loading'))) {
             // 成功获取到对话标题，缓存它
             stableStateRef.current.lastValidConversationTitle = chatTitle.title
             stableStateRef.current.lastKnownConversationId = conversationId
@@ -265,20 +270,20 @@ export function DynamicTitle() {
           
           // 对话数据仍在加载中，使用温和的加载提示
           if (isConvLoading) {
-            return { title: '加载对话... | ' + baseTitle, priority: 95, isStable: false }
+            return { title: `${t('chat.loading')} | ${baseTitle}`, priority: 95, isStable: false }
           }
           
           // 完全找不到对话
-          return { title: '对话不存在 | ' + baseTitle, priority: 98, isStable: false }
+          return { title: `${t('chat.notFound')} | ${baseTitle}`, priority: 98, isStable: false }
         }
         
         // 在聊天页面但没有具体对话ID，默认情况
         if (currentPath === '/chat') {
-          return { title: '聊天 | ' + baseTitle, priority: 3, isStable: true }
+          return { title: `${t('chat.main')} | ${baseTitle}`, priority: 3, isStable: true }
         }
         
         // 其他聊天子页面
-        return { title: '聊天 | ' + baseTitle, priority: 4, isStable: true }
+        return { title: `${t('chat.main')} | ${baseTitle}`, priority: 4, isStable: true }
       }
       
       // --- 默认首页 ---
@@ -360,11 +365,11 @@ export function DynamicTitle() {
   // --- 组件卸载时重置标题 ---
   useEffect(() => {
     return () => {
-      if (document.title.includes('加载中') || document.title.includes('加载')) {
+      if (document.title.includes(t('chat.loading')) || document.title.includes(t('apps.loading'))) {
         document.title = baseTitle
       }
     }
-  }, [baseTitle])
+  }, [baseTitle, t])
   
   return null
 }

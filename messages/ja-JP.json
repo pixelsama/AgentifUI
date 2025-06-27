@@ -404,6 +404,7 @@
         "search": {
           "placeholder": "アプリを検索..."
         },
+        "tryAdjustSearch": "検索条件を調整するか、他のカテゴリを閲覧してください",
         "viewMode": {
           "grid": "グリッド",
           "list": "リスト"
@@ -605,12 +606,12 @@
       "renameDialog": {
         "title": "会話の名前を変更",
         "placeholder": "新しい会話名を入力",
-        "confirm": "名前変更を確認"
+        "confirmText": "名前変更を確認"
       },
       "deleteDialog": {
         "title": "会話を削除",
         "message": "会話 \"{title}\" を削除してもよろしいですか？この操作は元に戻せません。",
-        "confirm": "削除を確認"
+        "confirmText": "削除を確認"
       },
       "createInProgress": "会話を作成中です。後でもう一度お試しください。",
       "incompleteInfo": "会話情報が不完全です。操作を続行できません。",
@@ -636,7 +637,7 @@
     "recentChats": "最近のチャット",
     "moreOptions": "その他のオプション",
     "rename": "名前を変更",
-    "deleteChat": "チャットを削除",
+    "delete": "チャットを削除",
     "untitled": "無題",
     "creating": "作成中...",
     "favoriteApps": "お気に入りアプリ",
@@ -652,12 +653,119 @@
       "confirmText": "名前変更を確認"
     },
     "deleteDialog": {
-      "confirmText": "削除を確認",
-      "confirmMessage": "会話 \"{title}\" を削除してもよろしいですか？この操作は元に戻せません。"
+      "title": "会話を削除",
+      "message": "会話 \"{title}\" を削除してもよろしいですか？この操作は元に戻せません。",
+      "confirmText": "削除を確認"
     },
     "syncingMessage": "会話データが同期中です。後で{action}を試してください。",
     "operationFailed": "操作に失敗しました。後でもう一度お試しください。",
     "saveFailed": "会話の保存に失敗しました",
     "createFailed": "会話の作成に失敗しました"
+  },
+  "loading": {
+    "default": "読み込み中...",
+    "app": "アプリを読み込み中...",
+    "appList": "アプリリストを読み込み中...",
+    "messages": "メッセージをさらに読み込み中...",
+    "moreMessages": "履歴メッセージをさらに読み込む",
+    "retry": "再試行",
+    "failed": "読み込み失敗",
+    "loadingFailed": "メッセージの読み込みに失敗しました: {error}",
+    "spinner": "読み込み中"
+  },
+  "dynamicTitle": {
+    "base": "AgentifUI",
+    "settings": {
+      "main": "設定",
+      "profile": "プロフィール",
+      "account": "アカウント設定",
+      "appearance": "外観設定",
+      "language": "言語設定"
+    },
+    "admin": {
+      "main": "管理パネル",
+      "users": "ユーザー管理",
+      "organizations": "組織管理",
+      "apiConfig": "API設定",
+      "security": "セキュリティ設定",
+      "analytics": "データ分析",
+      "content": "概要と通知"
+    },
+    "auth": {
+      "login": "ログイン",
+      "register": "登録",
+      "phoneLogin": "電話番号ログイン",
+      "resetPassword": "パスワードリセット",
+      "forgotPassword": "パスワードを忘れた",
+      "ssoProcessing": "SSOログイン処理中"
+    },
+    "apps": {
+      "market": "アプリマーケット",
+      "agent": "エージェントアプリ",
+      "chatbot": "チャットボットアプリ",
+      "chatflow": "チャットフローアプリ",
+      "workflow": "ワークフローアプリ",
+      "textGeneration": "テキスト生成アプリ",
+      "details": "アプリ詳細",
+      "loading": "アプリ読み込み中..."
+    },
+    "chat": {
+      "main": "チャット",
+      "new": "新しいチャット",
+      "history": "チャット履歴",
+      "loading": "チャット読み込み中...",
+      "notFound": "チャットが見つかりません"
+    },
+    "about": "概要"
+  },
+  "history": {
+    "title": "チャット履歴",
+    "loading": "会話記録を読み込み中...",
+    "noRecords": "会話履歴がありません",
+    "totalCount": "{total}個の会話が見つかりました",
+    "searchResults": "検索結果: {count}個の会話",
+    "totalRecords": "合計{total}個の会話",
+    "searchPlaceholder": "チャット履歴を検索...",
+    "newChat": "新しいチャット",
+    "noMessagePreview": "メッセージプレビューなし",
+    "batchDelete": "一括削除",
+    "exitSelection": "選択を終了",
+    "selectAll": "すべて選択",
+    "deselectAll": "すべて選択解除",
+    "selected": "{count} / {total}個の会話を選択",
+    "deleteCount": "削除 ({count})",
+    "deleting": "削除中...",
+    "cancel": "キャンセル",
+    "rename": "名前を変更",
+    "delete": "会話を削除",
+    "moreOptions": "その他のオプション",
+    "noSearchResults": "一致する会話が見つかりません",
+    "searchHint": "別の検索語句をお試しください",
+    "noHistoryTitle": "チャット履歴がありません",
+    "noHistoryDesc": "新しい会話を始めましょう",
+    "renameDialog": {
+      "title": "会話の名前を変更",
+      "label": "会話名",
+      "placeholder": "新しい会話名を入力",
+      "confirmText": "名前変更を確認"
+    },
+    "deleteDialog": {
+      "title": "会話を削除",
+      "message": "会話 \"{title}\" を削除してもよろしいですか？この操作は元に戻せません。",
+      "confirmText": "削除を確認"
+    },
+    "batchDeleteDialog": {
+      "title": "会話を一括削除",
+      "message": "選択した{count}個の会話を削除してもよろしいですか？この操作は元に戻せません。",
+      "confirmText": "削除",
+      "cancelText": "キャンセル"
+    },
+    "operations": {
+      "renameFailed": "会話の名前変更に失敗しました",
+      "deleteFailed": "会話の削除に失敗しました",
+      "batchDeleteSuccess": "{success}個の会話を正常に削除しました。{failed}個の削除に失敗しました",
+      "batchDeleteFailed": "削除に失敗しました。後でもう一度お試しください",
+      "error": "操作に失敗しました。後でもう一度お試しください"
+    }
   }
 } 

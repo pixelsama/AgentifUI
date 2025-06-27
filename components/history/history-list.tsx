@@ -5,12 +5,12 @@ import { MessageSquare, Clock, Trash, Edit, Search, MoreHorizontal, Pen } from "
 import { cn } from "@lib/utils"
 import { useTheme } from "@lib/hooks/use-theme"
 import { Conversation } from "@lib/types/database"
-import { format } from "date-fns"
-import { zhCN } from "date-fns/locale"
+
 import { useDropdownStore } from "@lib/stores/ui/dropdown-store"
 import { DropdownMenu } from "@components/ui/dropdown-menu"
 import { ConfirmDialog, InputDialog } from '@components/ui'
 import { conversationEvents } from '@lib/hooks/use-combined-conversations'
+import { useTranslations, useFormatter } from 'next-intl'
 
 // --- BEGIN COMMENT ---
 // 历史对话列表组件
@@ -48,6 +48,8 @@ export function HistoryList({
   onSelectConversation
 }: HistoryListProps): React.ReactElement {
   const { isDark } = useTheme()
+  const t = useTranslations('history')
+  const format = useFormatter()
   const listRef = React.useRef<HTMLDivElement>(null)
   
   // --- BEGIN COMMENT ---
@@ -81,16 +83,9 @@ export function HistoryList({
       
       if (success) {
         // --- BEGIN COMMENT ---
-        // 重命名成功后，如果当前页面标题包含旧标题，则更新为新标题
-        // 与侧边栏聊天列表保持一致的逻辑
+        // 重命名成功后，刷新列表以显示新标题
+        // 标题管理由DynamicTitle组件统一处理，无需手动设置
         // --- END COMMENT ---
-        const currentTitle = document.title;
-        const oldTitle = selectedConversation.title || '新对话';
-        const baseTitle = 'AgentifUI';
-        
-        if (currentTitle.includes(oldTitle)) {
-          document.title = `${newTitle.trim()} | ${baseTitle}`;
-        }
         
         // 刷新列表以显示新标题
         onRefresh();
@@ -100,10 +95,10 @@ export function HistoryList({
         conversationEvents.emit();
         setShowRenameDialog(false);
       } else {
-        alert('重命名会话失败。');
+        alert(t('operations.renameFailed'));
       }
     } catch (error) {
-      alert('操作出错，请稍后再试。');
+      alert(t('operations.error'));
     } finally {
       setIsOperating(false);
     }
@@ -135,24 +130,36 @@ export function HistoryList({
         conversationEvents.emit();
         setShowDeleteDialog(false);
       } else {
-        alert('删除会话失败。');
+        alert(t('operations.deleteFailed'));
       }
     } catch (error) {
-      alert('操作出错，请稍后再试。');
+      alert(t('operations.error'));
     } finally {
       setIsOperating(false);
     }
   }
   
   // --- BEGIN COMMENT ---
-  // 格式化日期
+  // 格式化日期显示
+  // 使用next-intl的useFormatter钩子，实现真正的国际化日期格式化
+  // 自动根据当前语言环境选择合适的格式，无需硬编码
   // --- END COMMENT ---
   const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    
     try {
-      const date = new Date(dateString)
-      return format(date, 'yyyy年MM月dd日 HH:mm', { locale: zhCN })
-    } catch (e) {
-      return dateString
+      const date = new Date(dateString);
+      // 使用next-intl的dateTime格式化，会根据当前locale自动选择合适的格式
+      return format.dateTime(date, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.warn('日期格式化失败:', error);
+      return dateString;
     }
   }
   
@@ -161,39 +168,9 @@ export function HistoryList({
   // --- END COMMENT ---
   const handleConversationItemClick = (conversation: Conversation) => {
     const conversationId = conversation.external_id || conversation.id || ''
-    const title = conversation.title || '新对话'
+    const title = conversation.title || t('newChat')
     const baseTitle = 'AgentifUI'
     const fullTitle = `${title} | ${baseTitle}`
-    
-    // --- BEGIN COMMENT ---
-    // 立即设置页面标题
-    // --- END COMMENT ---
-    document.title = fullTitle
-    
-    // --- BEGIN COMMENT ---
-    // 设置一个保护机制，防止其他组件在短时间内覆盖这个标题
-    // 使用一个定时器来持续监控和保护标题
-    // --- END COMMENT ---
-    let protectionCount = 0
-    const maxProtectionAttempts = 10 // 最多保护10次
-    const protectionInterval = 100 // 每100ms检查一次
-    
-    const protectTitle = () => {
-      if (protectionCount >= maxProtectionAttempts) {
-        return // 停止保护
-      }
-      
-      if (document.title !== fullTitle) {
-        console.log(`[HistoryTitle] 检测到标题被覆盖，恢复为: ${fullTitle}`)
-        document.title = fullTitle
-      }
-      
-      protectionCount++
-      setTimeout(protectTitle, protectionInterval)
-    }
-    
-    // 开始保护标题
-    setTimeout(protectTitle, protectionInterval)
     
     // 调用父组件的点击处理函数
     onConversationClick(conversationId)
@@ -203,8 +180,8 @@ export function HistoryList({
   // 渲染对话项
   // --- END COMMENT ---
   const renderConversationItem = (conversation: Conversation) => {
-    const title = conversation.title || '新对话'
-    const preview = conversation.last_message_preview || '无消息预览'
+    const title = conversation.title || t('newChat')
+    const preview = conversation.last_message_preview || t('noMessagePreview')
     const date = conversation.updated_at ? formatDate(conversation.updated_at) : ''
     const conversationId = conversation.id
     const isSelected = conversationId ? selectedConversations.has(conversationId) : false
@@ -340,7 +317,7 @@ export function HistoryList({
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     )}
                     data-more-button-id={`history-dropdown-${conversation.id}`}
-                    aria-label="更多选项"
+                    aria-label={t('moreOptions')}
                   >
                     <MoreHorizontal className="w-4 h-4" />
                   </button>
@@ -359,7 +336,7 @@ export function HistoryList({
                       onClick={() => handleRename(conversation)}
                       className="cursor-pointer"
                     >
-                      重命名
+                      {t('rename')}
                     </DropdownMenu.Item>
                     <DropdownMenu.Item
                       icon={<Trash className="w-3.5 h-3.5" />}
@@ -367,7 +344,7 @@ export function HistoryList({
                       onClick={() => handleDelete(conversation)}
                       className="cursor-pointer"
                     >
-                      删除对话
+                      {t('delete')}
                     </DropdownMenu.Item>
                   </DropdownMenu>
                 </div>
@@ -415,14 +392,14 @@ export function HistoryList({
             {searchQuery ? (
               <>
                 <Search className="h-12 w-12 mb-4 opacity-50" />
-                <p className="text-lg font-medium">没有找到匹配的对话</p>
-                <p className="text-sm mt-2">尝试使用不同的搜索词</p>
+                <p className="text-lg font-medium">{t('noSearchResults')}</p>
+                <p className="text-sm mt-2">{t('searchHint')}</p>
               </>
             ) : (
               <>
                 <MessageSquare className="h-12 w-12 mb-4 opacity-50" />
-                <p className="text-lg font-medium">暂无历史对话</p>
-                <p className="text-sm mt-2">开始一个新对话吧</p>
+                <p className="text-lg font-medium">{t('noHistoryTitle')}</p>
+                <p className="text-sm mt-2">{t('noHistoryDesc')}</p>
               </>
             )}
           </div>
@@ -442,8 +419,8 @@ export function HistoryList({
                 <Clock className="h-4 w-4 mr-2" />
                 <span className="text-sm">
                   {searchQuery ? 
-                    `搜索结果：${conversations.length} 个对话` : 
-                    `共 ${total} 个历史对话`
+                    t('searchResults', { count: conversations.length }) : 
+                    t('totalRecords', { total })
                   }
                 </span>
               </div>
@@ -459,11 +436,11 @@ export function HistoryList({
         isOpen={showRenameDialog}
         onClose={() => !isOperating && setShowRenameDialog(false)}
         onConfirm={handleRenameConfirm}
-        title="重命名对话"
-        label="对话名称"
-        placeholder="输入新的对话名称"
-        defaultValue={selectedConversation?.title || '新对话'}
-        confirmText="确认重命名"
+        title={t('renameDialog.title')}
+        label={t('renameDialog.label')}
+        placeholder={t('renameDialog.placeholder')}
+        defaultValue={selectedConversation?.title || t('newChat')}
+        confirmText={t('renameDialog.confirmText')}
         isLoading={isOperating}
         maxLength={50}
       />
@@ -475,9 +452,9 @@ export function HistoryList({
         isOpen={showDeleteDialog}
         onClose={() => !isOperating && setShowDeleteDialog(false)}
         onConfirm={handleDeleteConfirm}
-        title="删除对话"
-        message={`确定要删除会话 "${selectedConversation?.title || '新对话'}" 吗？此操作无法撤销。`}
-        confirmText="确认删除"
+        title={t('deleteDialog.title')}
+        message={t('deleteDialog.message', { title: selectedConversation?.title || t('newChat') })}
+        confirmText={t('deleteDialog.confirmText')}
         variant="danger"
         icon="delete"
         isLoading={isOperating}

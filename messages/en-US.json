@@ -404,6 +404,7 @@
         "search": {
           "placeholder": "Search apps..."
         },
+        "tryAdjustSearch": "Try adjusting search criteria or browse other categories",
         "viewMode": {
           "grid": "Grid",
           "list": "List"
@@ -603,19 +604,19 @@
       "unstar": "Remove from Favorites",
       "appsMarket": "Apps Market",
       "renameDialog": {
-        "title": "Rename Conversation",
-        "placeholder": "Enter new conversation name",
-        "confirm": "Confirm Rename"
+        "title": "Rename Chat",
+        "placeholder": "Enter new chat name",
+        "confirmText": "Confirm Rename"
       },
       "deleteDialog": {
-        "title": "Delete Conversation",
-        "message": "Are you sure you want to delete conversation \"{title}\"? This action cannot be undone.",
-        "confirm": "Confirm Delete"
+        "title": "Delete Chat",
+        "message": "Are you sure you want to delete chat \"{title}\"? This action cannot be undone.",
+        "confirmText": "Confirm Delete"
       },
-      "createInProgress": "Conversation is being created, please try again later.",
-      "incompleteInfo": "Conversation information is incomplete, cannot proceed.",
-      "renameFailed": "Failed to rename conversation.",
-      "deleteFailed": "Failed to delete conversation.",
+      "createInProgress": "Chat is being created, please try again later.",
+      "incompleteInfo": "Chat information is incomplete, cannot proceed.",
+      "renameFailed": "Failed to rename chat.",
+      "deleteFailed": "Failed to delete chat.",
       "operationError": "Operation failed, please try again later."
     },
     "workflow": {
@@ -636,7 +637,7 @@
     "recentChats": "Recent Chats",
     "moreOptions": "More Options",
     "rename": "Rename",
-    "deleteChat": "Delete Chat",
+    "delete": "Delete Chat",
     "untitled": "Untitled",
     "creating": "Creating...",
     "favoriteApps": "Favorite Apps",
@@ -646,18 +647,125 @@
     "startChat": "Start Chat",
     "hideApp": "Hide App",
     "renameDialog": {
-      "title": "Rename Conversation",
-      "label": "Conversation Name",
-      "placeholder": "Enter new conversation name",
+      "title": "Rename Chat",
+      "label": "Chat Name",
+      "placeholder": "Enter new chat name",
       "confirmText": "Confirm Rename"
     },
     "deleteDialog": {
-      "confirmText": "Confirm Delete",
-      "confirmMessage": "Are you sure you want to delete conversation \"{title}\"? This action cannot be undone."
+      "title": "Delete Chat",
+      "message": "Are you sure you want to delete chat \"{title}\"? This action cannot be undone.",
+      "confirmText": "Confirm Delete"
     },
-    "syncingMessage": "Conversation data is syncing, please try to {action} later.",
+    "syncingMessage": "Chat data is syncing, please try to {action} later.",
     "operationFailed": "Operation failed, please try again later.",
-    "saveFailed": "Failed to save conversation",
-    "createFailed": "Failed to create conversation"
+    "saveFailed": "Failed to save chat",
+    "createFailed": "Failed to create chat"
+  },
+  "loading": {
+    "default": "Loading...",
+    "app": "Loading app...",
+    "appList": "Loading app list...",
+    "messages": "Loading more messages...",
+    "moreMessages": "Load more history messages",
+    "retry": "Retry",
+    "failed": "Loading failed",
+    "loadingFailed": "Failed to load messages: {error}",
+    "spinner": "Loading"
+  },
+  "dynamicTitle": {
+    "base": "AgentifUI",
+    "settings": {
+      "main": "Settings",
+      "profile": "Profile",
+      "account": "Account Settings",
+      "appearance": "Appearance Settings",
+      "language": "Language Settings"
+    },
+    "admin": {
+      "main": "Admin Panel",
+      "users": "User Management",
+      "organizations": "Organization Management",
+      "apiConfig": "API Configuration",
+      "security": "Security Settings",
+      "analytics": "Data Analytics",
+      "content": "About & Notifications"
+    },
+    "auth": {
+      "login": "Login",
+      "register": "Register",
+      "phoneLogin": "Phone Login",
+      "resetPassword": "Reset Password",
+      "forgotPassword": "Forgot Password",
+      "ssoProcessing": "SSO Login Processing"
+    },
+    "apps": {
+      "market": "App Market",
+      "agent": "Agent App",
+      "chatbot": "Chatbot App",
+      "chatflow": "Chatflow App",
+      "workflow": "Workflow App",
+      "textGeneration": "Text Generation App",
+      "details": "App Details",
+      "loading": "Loading App..."
+    },
+    "chat": {
+      "main": "Chat",
+      "new": "New Chat",
+      "history": "Chat History",
+      "loading": "Loading Chat...",
+      "notFound": "Chat Not Found"
+    },
+    "about": "About"
+  },
+  "history": {
+    "title": "Chat History",
+    "loading": "Loading conversation records...",
+    "noRecords": "No conversation history",
+    "totalCount": "Found {total} conversations",
+    "searchResults": "Search results: {count} conversations",
+    "totalRecords": "Total {total} conversations",
+    "searchPlaceholder": "Search chat history...",
+    "newChat": "New Chat",
+    "noMessagePreview": "No message preview",
+    "batchDelete": "Batch Delete",
+    "exitSelection": "Exit Selection",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "selected": "Selected {count} / {total} conversations",
+    "deleteCount": "Delete ({count})",
+    "deleting": "Deleting...",
+    "cancel": "Cancel",
+    "rename": "Rename",
+    "delete": "Delete Chat",
+    "moreOptions": "More Options",
+    "noSearchResults": "No matching conversations found",
+    "searchHint": "Try using different search terms",
+    "noHistoryTitle": "No chat history",
+    "noHistoryDesc": "Start a new conversation",
+    "renameDialog": {
+      "title": "Rename Chat",
+      "label": "Chat Name",
+      "placeholder": "Enter new chat name",
+      "confirmText": "Confirm Rename"
+    },
+    "deleteDialog": {
+      "title": "Delete Chat",
+      "message": "Are you sure you want to delete chat \"{title}\"? This action cannot be undone.",
+      "confirmText": "Confirm Delete"
+    },
+    "batchDeleteDialog": {
+      "title": "Batch Delete Chats",
+      "message": "Are you sure you want to delete the selected {count} chats? This action cannot be undone.",
+      "confirmText": "Delete",
+      "cancelText": "Cancel"
+    },
+    "operations": {
+      "renameFailed": "Failed to rename chat",
+      "deleteFailed": "Failed to delete chat",
+      "batchDeleteSuccess": "Successfully deleted {success} conversations, {failed} failed to delete",
+      "batchDeleteFailed": "Deletion failed, please try again later",
+      "error": "Operation failed, please try again later"
+    }
   }
 }

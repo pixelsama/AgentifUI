@@ -4,6 +4,7 @@ import * as React from "react"
 import { Check, Trash2, X, Square, CheckSquare } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useTheme } from "@lib/hooks/use-theme"
+import { useTranslations } from 'next-intl'
 
 // --- BEGIN COMMENT ---
 // 历史对话选择操作栏组件
@@ -33,6 +34,7 @@ export function HistorySelectionBar({
   isDeleting = false
 }: HistorySelectionBarProps) {
   const { isDark } = useTheme()
+  const t = useTranslations('history')
   
   // --- BEGIN COMMENT ---
   // 如果不在选择模式且没有选中项，则不显示操作栏
@@ -77,7 +79,7 @@ export function HistorySelectionBar({
                 <Square className="h-3.5 w-3.5" />
               )}
               <span>
-                {allSelected ? "取消全选" : "全选"}
+                {allSelected ? t('deselectAll') : t('selectAll')}
               </span>
             </button>
             
@@ -87,7 +89,7 @@ export function HistorySelectionBar({
                 "text-xs font-serif",
                 isDark ? "text-stone-400" : "text-stone-500"
               )}>
-                已选择 <span className="font-medium">{selectedCount}</span> / {totalCount} 个对话
+                {t('selected', { count: selectedCount, total: totalCount })}
               </div>
             )}
           </div>
@@ -112,7 +114,7 @@ export function HistorySelectionBar({
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>
-                  {isDeleting ? "删除中..." : `删除 (${selectedCount})`}
+                  {isDeleting ? t('deleting') : t('deleteCount', { count: selectedCount })}
                 </span>
               </button>
             )}
@@ -131,7 +133,7 @@ export function HistorySelectionBar({
               )}
             >
               <X className="h-3.5 w-3.5" />
-              <span>取消</span>
+              <span>{t('cancel')}</span>
             </button>
           </div>
         </div>
