@@ -2,8 +2,8 @@
 
 本文档详细描述了 AgentifUI 平台的数据库设计，包括表结构、关系、安全机制和特性。本文档与当前数据库状态完全同步，包含所有已应用的迁移文件。
 
-**文档更新日期**: 2025-06-24 
-**数据库版本**: 包含至 20250624090857_ensure_rls_enabled_for_api_tables.sql 的所有迁移
+**文档更新日期**: 2025-06-27
+**数据库版本**: 包含至 20250627000001_remove_protocol_templates_typescript_refactor.sql 的所有迁移
 
 ## 目录
 
@@ -327,31 +327,16 @@
 }
 ```
 
-#### sso_protocol_templates
+**SSO协议模板配置 (TypeScript管理)：**
 
-存储SSO协议配置模板，为不同协议提供标准配置模板和验证规则。
+SSO协议模板现通过TypeScript配置文件管理：`@lib/config/sso-protocol-definitions.ts`
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 模板ID | 主键，用于管理API的模板操作 |
-| protocol | sso_protocol | 协议类型 | NOT NULL，必须与sso_providers.protocol枚举值一致 |
-| name | TEXT | 模板名称 | NOT NULL,用于管理界面选择协议时展示 |
-| description | TEXT | 协议描述 | 说明协议特性、适用场景和配置要点 |
-| config_schema | JSONB | 配置验证规则 | NOT NULL，JSON Schema格式，用于验证sso_providers.settings字段 |
-| default_settings | JSONB | 默认配置模板 | NOT NULL，创建新提供商时作为初始配置使用 |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT NOW() |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT NOW() |
-
-**协议模板特性：**
-- **标准化配置**：为CAS、OIDC、SAML协议提供标准配置模板
-- **配置验证**：通过JSON Schema验证配置的合法性
-- **简化创建**：新建SSO提供商时可直接使用模板配置
-- **权限控制**：只有管理员可以访问和管理协议模板（RLS策略保护）
-
-**预置协议模板：**
-- **CAS 2.0/3.0**：中央认证服务协议，广泛用于高校统一认证系统
-- **OpenID Connect**：基于OAuth 2.0的身份认证协议，支持现代Web应用
-- **SAML 2.0**：安全断言标记语言，企业级SSO标准
+- **类型安全**：通过TypeScript接口定义提供编译时类型检查
+- **标准配置模板**：为CAS、OIDC、SAML协议提供标准配置模板
+- **配置验证规则**：包含JSON Schema格式的配置验证规则
+- **默认设置**：提供各协议的默认配置模板，用于创建新提供商时的初始配置
+- **开发体验优化**：配置修改无需数据库迁移，支持版本控制和代码审查
+- **系统简化**：移除数据库表依赖，减少系统复杂度，提升维护效率
 
 #### domain_sso_mappings
 
@@ -911,6 +896,17 @@ VALUES ('00000000-0000-0000-0000-000000000001');
   - **协议模板系统**：新增 `sso_protocol_templates` 表，为CAS、OIDC、SAML协议提供标准配置模板和验证规则
   - **向后兼容**：自动迁移现有北信科配置到新的统一结构，确保无缝升级
   - **管理员权限控制**：协议模板表启用RLS，确保只有管理员可以访问和管理协议模板
+
+### 2025-06-27 SSO协议模板重构 - TypeScript配置管理
+- `20250627000001_remove_protocol_templates_typescript_refactor.sql`: 删除SSO协议模板表，改用TypeScript配置文件管理
+
+  **重构特性：**
+  - **TypeScript配置管理**：将协议模板从数据库迁移到TypeScript配置文件(`@lib/config/sso-protocol-definitions.ts`)
+  - **类型安全保证**：通过TypeScript接口定义提供编译时类型检查，避免运行时配置错误
+  - **简化系统架构**：移除数据库表依赖，减少系统复杂度，提升维护效率
+  - **开发体验优化**：配置修改无需数据库迁移，支持版本控制和代码审查
+  - **安全迁移**：包含完整的存在性检查和清理验证，确保迁移过程安全可靠
+  - **向后兼容**：保留所有SSO提供商功能，仅协议模板管理方式变更
 - `20250609214200_remove_deprecated_admin_views.sql`: 移除过时管理员视图
 - `20250609214300_fix_admin_users_function_types.sql`: 修复管理员用户函数类型
 - `20250609214400_fix_phone_column_type.sql`: 修复手机号列类型
@@ -948,6 +944,16 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 - ✅ service_instances表RLS状态: true  
 - ✅ providers表RLS状态: true
 - ✅ 所有API相关表的RLS都已正确启用
+
+### 2025-06-27 最新迁移文件 - SSO协议模板重构
+- `20250627000001_remove_protocol_templates_typescript_refactor.sql`: SSO协议模板TypeScript重构迁移
+
+  **迁移特性：**
+  - **表删除验证**：智能检查表存在性，避免不必要的操作
+  - **完整清理**：删除表、RLS策略、触发器等所有相关组件
+  - **迁移验证**：包含完整的迁移结果验证，确保清理彻底
+  - **错误处理**：如清理不完整则抛出异常，保证迁移可靠性
+  - **信息输出**：提供详细的迁移进度和结果通知
 
 ## 最新迁移详情
 
@@ -1159,20 +1165,6 @@ SSO认证系统支持多种认证方式：
       |               |                |       |               |
       v               |                |       |               |
 +---------------+       |                |       |               |
-| sso_protocol_templates |             |       |               |
-+---------------+       |                |       |               |
-| id            |       |                |       |               |
-| protocol      |       |                |       |               |
-| name          |       |                |       |               |
-| description   |       |                |       |               |
-| config_schema |       |                |       |               |
-| default_settings |    |                |       |               |
-| created_at    |       |                |       |               |
-| updated_at    |       |                |       |               |
-+---------------+       |                |       |               |
-      |               |                |       |               |
-      |               v                v               |
-+---------------+               +---------------+       |
 | domain_sso_mappings|               | api_keys      |       |
 +---------------+               | id            |       |
 | id            |               | provider_id   |       |

@@ -2,8 +2,8 @@
 
 本文档记录了AgentifUI项目中的数据库结构、功能和使用方法。本文档与当前数据库状态完全同步。
 
-**文档更新日期**: 2025-06-20  
-**数据库版本**: 包含至 20250620131421_extend_sso_providers_table.sql 的所有迁移
+**文档更新日期**: 2025-06-27  
+**数据库版本**: 包含至 20250627000001_remove_protocol_templates_typescript_refactor.sql 的所有迁移
 
 ## 当前系统状态
 
@@ -21,7 +21,7 @@
 - ✅ **SSO类型转换修复**: 修复了create_sso_user函数中的UUID类型转换问题，确保SSO用户创建功能正常
 - ✅ **数据库稳定性**: 修复了profiles表RLS策略无限递归问题，确保系统正常运行
 - ✅ **动态SSO配置管理**: 扩展SSO提供商表，支持UI配置、协议模板和统一配置结构
-- ✅ **SSO协议模板系统**: 新增协议模板表，为CAS、OIDC、SAML协议提供标准配置模板
+- ✅ **SSO协议模板系统**: 使用TypeScript配置文件管理SSO协议模板，提升类型安全性和开发体验
 
 ## 数据库概述
 
@@ -349,12 +349,12 @@ CREATE POLICY "组织管理员可以管理部门应用权限" ON department_app_
    - `button_text` 字段：登录按钮显示文本，为空时使用name字段值
    - `settings` 字段：统一的JSONB配置结构，包含protocol_config、security、ui三个主要部分
 
-2. `sso_protocol_templates` 表：
-   - 主要字段：`id`, `protocol`, `name`, `description`, `config_schema`, `default_settings`, `created_at`, `updated_at`
-   - 存储SSO协议的标准配置模板，为不同协议提供默认配置和验证规则
-   - 支持CAS、OIDC、SAML协议的标准模板
-   - `config_schema` 字段：JSON Schema格式的配置验证规则
-   - `default_settings` 字段：协议的默认配置模板，用于创建新提供商时的初始配置
+2. **SSO协议模板配置** (TypeScript管理)：
+   - 协议模板现通过TypeScript配置文件管理：`@lib/config/sso-protocol-definitions.ts`
+   - 支持CAS、OIDC、SAML协议的标准配置模板和验证规则
+   - 提供类型安全的协议配置定义和默认设置
+   - 简化系统架构，提升开发体验和类型安全性
+   - 配置文件包含各协议的JSON Schema验证规则和默认配置模板
 
 3. `domain_sso_mappings` 表：
    - 主要字段：`id`, `domain`, `sso_provider_id`, `enabled`, `created_at`, `updated_at`
@@ -730,6 +730,16 @@ if (!isAdmin) return <AccessDenied />;
   - **协议模板系统**：新增 `sso_protocol_templates` 表，为CAS、OIDC、SAML协议提供标准配置模板和验证规则
   - **向后兼容**：自动迁移现有北信科配置到新的统一结构，确保无缝升级
   - **管理员权限控制**：协议模板表启用RLS，确保只有管理员可以访问和管理协议模板
+
+### 2025-06-27 SSO协议模板重构 - TypeScript配置管理
+- `/supabase/migrations/20250627000001_remove_protocol_templates_typescript_refactor.sql`: 删除SSO协议模板表，改用TypeScript配置文件管理
+  
+  **重构特性：**
+  - **TypeScript配置管理**：将协议模板从数据库迁移到TypeScript配置文件(`@lib/config/sso-protocol-definitions.ts`)
+  - **类型安全保证**：通过TypeScript接口定义提供编译时类型检查，避免运行时配置错误
+  - **简化系统架构**：移除数据库表依赖，减少系统复杂度，提升维护效率
+  - **开发体验优化**：配置修改无需数据库迁移，支持版本控制和代码审查
+  - **安全迁移**：包含完整的存在性检查和清理验证，确保迁移过程安全可靠
 
 ### 2025-06-24 RLS安全增强 - API表行级安全策略检查
 - `/supabase/migrations/20250624090857_ensure_rls_enabled_for_api_tables.sql`: 确保API相关表启用RLS，智能检查和条件启用
