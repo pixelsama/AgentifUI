@@ -4,10 +4,12 @@ import { Menu } from "lucide-react"
 import { cn } from "@lib/utils"
 import { useSidebarStore } from "@lib/stores/sidebar-store"
 import { useTheme } from "@lib/hooks/use-theme"
+import { useTranslations } from "next-intl"
 
 export function MobileNavButton() {
   const { isExpanded, showMobileNav } = useSidebarStore()
   const { isDark } = useTheme()
+  const t = useTranslations("mobile.navigation")
   
   // 如果侧边栏已展开，直接返回null，不渲染按钮
   if (isExpanded) {
@@ -17,7 +19,7 @@ export function MobileNavButton() {
   return (
     <button
       type="button"
-      aria-label="打开菜单"
+      aria-label={t("openMenu")}
       onClick={showMobileNav}
       className={cn(
         "fixed top-4 left-4 z-50 md:hidden", // 仅在移动设备上显示，固定在左上角

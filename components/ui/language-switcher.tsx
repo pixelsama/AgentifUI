@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@lib/utils';
 import { useTheme } from '@lib/hooks/use-theme';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Globe } from 'lucide-react';
 import { 
   SUPPORTED_LANGUAGES, 
   SupportedLocale, 
@@ -190,6 +191,7 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
             getButtonColors()
           )}
         >
+          <Globe className="h-4 w-4" />
           <span className="text-sm font-medium hidden sm:inline">
             {currentLanguageInfo.nativeName}
           </span>

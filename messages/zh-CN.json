@@ -662,6 +662,32 @@
     "saveFailed": "保存对话失败",
     "createFailed": "创建对话失败"
   },
+  "mobile": {
+    "navigation": {
+      "openMenu": "打开菜单",
+      "openUserMenu": "打开用户菜单"
+    },
+    "user": {
+      "defaultUser": "用户",
+      "loginRegister": "登录/注册",
+      "noOrganization": "无企业关联",
+      "avatarAlt": "{userName}的头像",
+      "loginPrompt": "登录以使用更多功能"
+    },
+    "bottomSheet": {
+      "userMenu": "用户菜单",
+      "account": "账户"
+    },
+    "menu": {
+      "history": "历史对话",
+      "settings": "设置",
+      "lightMode": "亮色模式",
+      "darkMode": "暗色模式",
+      "logout": "退出登录",
+      "login": "登录",
+      "register": "注册新账户"
+    }
+  },
   "loading": {
     "default": "加载中...",
     "app": "正在加载应用...",

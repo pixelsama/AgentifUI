@@ -662,6 +662,32 @@
     "saveFailed": "Error al guardar conversación",
     "createFailed": "Error al crear conversación"
   },
+  "mobile": {
+    "navigation": {
+      "openMenu": "Abrir Menú",
+      "openUserMenu": "Abrir Menú de Usuario"
+    },
+    "user": {
+      "defaultUser": "Usuario",
+      "loginRegister": "Iniciar Sesión/Registrarse",
+      "noOrganization": "Sin organización",
+      "avatarAlt": "Avatar de {userName}",
+      "loginPrompt": "Inicia sesión para acceder a más funciones"
+    },
+    "bottomSheet": {
+      "userMenu": "Menú de Usuario",
+      "account": "Cuenta"
+    },
+    "menu": {
+      "history": "Historial de Chat",
+      "settings": "Configuración",
+      "lightMode": "Modo Claro",
+      "darkMode": "Modo Oscuro",
+      "logout": "Cerrar Sesión",
+      "login": "Iniciar Sesión",
+      "register": "Crear Cuenta"
+    }
+  },
   "loading": {
     "default": "Cargando...",
     "app": "Cargando aplicación...",

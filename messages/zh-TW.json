@@ -662,6 +662,32 @@
     "saveFailed": "儲存對話失敗",
     "createFailed": "建立對話失敗"
   },
+  "mobile": {
+    "navigation": {
+      "openMenu": "開啟選單",
+      "openUserMenu": "開啟使用者選單"
+    },
+    "user": {
+      "defaultUser": "使用者",
+      "loginRegister": "登入/註冊",
+      "noOrganization": "無企業關聯",
+      "avatarAlt": "{userName}的頭像",
+      "loginPrompt": "登入以使用更多功能"
+    },
+    "bottomSheet": {
+      "userMenu": "使用者選單",
+      "account": "帳戶"
+    },
+    "menu": {
+      "history": "歷史對話",
+      "settings": "設定",
+      "lightMode": "亮色模式",
+      "darkMode": "暗色模式",
+      "logout": "退出登入",
+      "login": "登入",
+      "register": "註冊新帳戶"
+    }
+  },
   "loading": {
     "default": "載入中...",
     "app": "正在載入應用程式...",

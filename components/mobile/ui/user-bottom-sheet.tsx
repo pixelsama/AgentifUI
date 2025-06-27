@@ -4,10 +4,11 @@ import React from "react"
 import { BottomSheet } from "./bottom-sheet"
 import { cn } from "@lib/utils"
 import { useTheme } from "@lib/hooks/use-theme"
-import { Settings, Sun, Moon, LogOut, User, Clock, Shield, UserCircle } from "lucide-react"
+import { Sliders, Sun, Moon, LogOut, Clock, UserCircle } from "lucide-react"
 import { useLogout } from "@lib/hooks/use-logout"
 import { useRouter } from "next/navigation"
 import { useProfile } from "@lib/hooks/use-profile"
+import { useTranslations } from "next-intl"
 
 interface UserBottomSheetProps {
   isOpen: boolean
@@ -29,13 +30,16 @@ export function UserBottomSheet({
   const { isDark, toggleTheme } = useTheme()
   const { logout } = useLogout()
   const router = useRouter()
+  const t = useTranslations("mobile.user")
+  const tBottomSheet = useTranslations("mobile.bottomSheet")
+  const tMenu = useTranslations("mobile.menu")
   
   // 使用 useProfile hook 获取用户信息
   const { profile } = useProfile()
   
   // 从 profile 中提取用户信息
-  const userName = profile?.full_name || profile?.username || "用户"
-  const userCompany = profile?.organization?.name || "无企业关联"
+  const userName = profile?.full_name || profile?.username || t("defaultUser")
+  const userCompany = profile?.organization?.name || t("noOrganization")
   const avatarUrl = profile?.avatar_url
   
   // 生成用户头像的首字母
@@ -118,7 +122,7 @@ export function UserBottomSheet({
     <BottomSheet
       isOpen={isOpen}
       onClose={onClose}
-      title={isLoggedIn ? "用户菜单" : "账户"}
+      title={isLoggedIn ? tBottomSheet("userMenu") : tBottomSheet("account")}
     >
       {isLoggedIn ? (
         <div className="flex flex-col">
@@ -132,7 +136,7 @@ export function UserBottomSheet({
             {avatarUrl ? (
               <img
                 src={avatarUrl}
-                alt={`${userName}的头像`}
+                alt={t("avatarAlt", { userName })}
                 className="w-12 h-12 rounded-full object-cover shadow-md"
                 onError={(e) => {
                   // 头像加载失败时隐藏图片
@@ -175,7 +179,7 @@ export function UserBottomSheet({
           )}>
             {renderMenuItem(
               <Clock className="w-5 h-5" />,
-              "历史对话",
+              tMenu("history"),
               () => {
                 router.push('/chat/history')
                 onClose()
@@ -183,8 +187,8 @@ export function UserBottomSheet({
             )}
             
             {renderMenuItem(
-              <Settings className="w-5 h-5" />,
-              "设置",
+              <Sliders className="w-5 h-5" />,
+              tMenu("settings"),
               () => {
                 router.push('/settings')
                 onClose()
@@ -195,14 +199,8 @@ export function UserBottomSheet({
               isDark
                 ? <Sun className="w-5 h-5 text-yellow-400" />
                 : <Moon className="w-5 h-5" />,
-              isDark ? "亮色模式" : "暗色模式",
+              isDark ? tMenu("lightMode") : tMenu("darkMode"),
               toggleTheme
-            )}
-            
-            {renderMenuItem(
-              <Shield className="w-5 h-5" />,
-              "隐私政策",
-              () => console.log("隐私政策")
             )}
           </div>
           
@@ -215,7 +213,7 @@ export function UserBottomSheet({
           )}>
             {renderMenuItem(
               <LogOut className="w-5 h-5" />,
-              "退出登录",
+              tMenu("logout"),
               handleLogout,
               true
             )}
@@ -231,7 +229,7 @@ export function UserBottomSheet({
               "w-16 h-16 mx-auto mb-3",
               isDark ? "text-stone-400" : "text-stone-500"
             )} />
-            <p className="font-serif">登录以使用更多功能</p>
+            <p className="font-serif">{t("loginPrompt")}</p>
           </div>
           
           <button
@@ -243,22 +241,22 @@ export function UserBottomSheet({
                 : "bg-blue-500 hover:bg-blue-600 text-white",
               "shadow-sm transition-colors duration-200"
             )}
-          >
-            登录
-          </button>
+                      >
+              {tMenu("login")}
+            </button>
           
-          <button
-            onClick={handleRegister}
-            className={cn(
-              "w-full py-3 px-4 rounded-lg font-medium text-center font-serif",
-              isDark 
-                ? "bg-stone-700 hover:bg-stone-600 text-stone-200" 
-                : "bg-stone-200 hover:bg-stone-300 text-stone-700",
-              "shadow-sm transition-colors duration-200"
-            )}
-          >
-            注册新账户
-          </button>
+            <button
+              onClick={handleRegister}
+              className={cn(
+                "w-full py-3 px-4 rounded-lg font-medium text-center font-serif",
+                isDark 
+                  ? "bg-stone-700 hover:bg-stone-600 text-stone-200" 
+                  : "bg-stone-200 hover:bg-stone-300 text-stone-700",
+                "shadow-sm transition-colors duration-200"
+              )}
+            >
+              {tMenu("register")}
+            </button>
         </div>
       )}
     </BottomSheet>

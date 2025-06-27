@@ -662,6 +662,32 @@
     "saveFailed": "Failed to save chat",
     "createFailed": "Failed to create chat"
   },
+  "mobile": {
+    "navigation": {
+      "openMenu": "Open Menu",
+      "openUserMenu": "Open User Menu"
+    },
+    "user": {
+      "defaultUser": "User",
+      "loginRegister": "Login/Register",
+      "noOrganization": "No organization",
+      "avatarAlt": "{userName}'s avatar",
+      "loginPrompt": "Login to access more features"
+    },
+    "bottomSheet": {
+      "userMenu": "User Menu",
+      "account": "Account"
+    },
+    "menu": {
+      "history": "Chat History",
+      "settings": "Settings",
+      "lightMode": "Light Mode",
+      "darkMode": "Dark Mode",
+      "logout": "Logout",
+      "login": "Login",
+      "register": "Create Account"
+    }
+  },
   "loading": {
     "default": "Loading...",
     "app": "Loading app...",

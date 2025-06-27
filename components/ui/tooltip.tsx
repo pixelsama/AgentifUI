@@ -333,7 +333,7 @@ export function Tooltip({
           >
             <div
               className={cn(
-                "relative pointer-events-auto max-w-xs whitespace-nowrap",
+                "relative pointer-events-auto max-w-sm break-words",
                 "backdrop-blur-sm bg-opacity-95 shadow-md border border-gray-200/10",
                 sizeStyles.container,
                 isDark ? "bg-gray-800 text-gray-100" : "bg-gray-800 text-gray-100",

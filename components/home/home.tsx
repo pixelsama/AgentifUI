@@ -88,8 +88,9 @@ export function Home() {
         {/* --- BEGIN COMMENT ---
         右上角工具栏：管理员按钮（左）+ 语言切换器（右）
         使用绝对定位，响应式设计
+        移动端隐藏，避免布局问题
         --- END COMMENT --- */}
-        <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-3">
+        <div className="hidden sm:flex fixed top-4 right-4 lg:top-6 lg:right-6 z-50 flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-3">
           <AdminButton />
           <LanguageSwitcher variant="floating" />
         </div>
