@@ -2,7 +2,15 @@
 
 import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { cn } from '@lib/utils';
-import { Globe, KeyRound, Palette, Shield, Sliders, User } from 'lucide-react';
+import {
+  Globe,
+  KeyRound,
+  Palette,
+  Shield,
+  Sliders,
+  User,
+  UserCog,
+} from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -24,11 +32,6 @@ export const getSettingsNavItems = (t: any) => [
     icon: User,
   },
   {
-    title: t('navigation.accountNav'),
-    href: '/settings/account',
-    icon: KeyRound,
-  },
-  {
     title: t('navigation.appearanceNav'),
     href: '/settings/appearance',
     icon: Palette,
@@ -37,6 +40,11 @@ export const getSettingsNavItems = (t: any) => [
     title: t('navigation.languageNav'),
     href: '/settings/language',
     icon: Globe,
+  },
+  {
+    title: t('navigation.accountNav'),
+    href: '/settings/account',
+    icon: UserCog,
   },
 ];
 

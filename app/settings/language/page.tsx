@@ -1,6 +1,6 @@
 'use client';
 
-import { LanguageCard } from '@components/settings/language-card';
+import { LanguageCard } from '@components/settings';
 import {
   SUPPORTED_LANGUAGES,
   SupportedLocale,

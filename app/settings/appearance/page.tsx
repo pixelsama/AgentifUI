@@ -1,6 +1,6 @@
 'use client';
 
-import { ThemeCard } from '@components/settings/theme-card';
+import { ThemeCard } from '@components/settings';
 import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { useTheme } from '@lib/hooks/use-theme';
 import { motion } from 'framer-motion';

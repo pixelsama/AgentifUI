@@ -1,6 +1,6 @@
 'use client';
 
-import { getSettingsNavItems } from '@components/settings/settings-sidebar';
+import { getSettingsNavItems } from '@components/settings/navigation/settings-sidebar';
 import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { cn } from '@lib/utils';
 import { motion } from 'framer-motion';
