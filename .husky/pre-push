@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "🔍 Running TypeScript type check before push..."
+npx tsc --noEmit || exit 1
+echo "✅ TypeScript check passed!" 
