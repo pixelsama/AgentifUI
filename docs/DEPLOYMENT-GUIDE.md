@@ -122,7 +122,7 @@ echo "==================="
 
 ```bash
 # 在项目根目录执行
-cp .env.local.example .env.local 2>/dev/null || touch .env.local
+cp .env.example .env.local 2>/dev/null || touch .env.local
 ```
 
 ### 2. 配置环境变量

@@ -79,7 +79,7 @@ Supabase Client
 pnpm install
 
 # 2 — Copy env template and fill values
-cp .env.local.example .env.local
+cp .env.example .env.local
 
 # 3 — Run dev server
 pnpm run dev
