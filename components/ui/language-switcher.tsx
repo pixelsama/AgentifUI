@@ -1,17 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
-import { cn } from '@lib/utils';
-import { useTheme } from '@lib/hooks/use-theme';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Globe } from 'lucide-react';
-import { 
-  SUPPORTED_LANGUAGES, 
-  SupportedLocale, 
+import {
+  SUPPORTED_LANGUAGES,
+  SupportedLocale,
+  getLanguageInfo,
   setLanguageCookie,
-  getLanguageInfo
 } from '@lib/config/language-config';
+import { useTheme } from '@lib/hooks/use-theme';
+import { cn } from '@lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Globe } from 'lucide-react';
+
+import { useEffect, useState } from 'react';
+
+import { useLocale, useTranslations } from 'next-intl';
 
 // --- BEGIN COMMENT ---
 // 现代化语言切换器组件
@@ -24,7 +26,9 @@ interface LanguageSwitcherProps {
   variant?: 'floating' | 'navbar' | 'settings';
 }
 
-export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps) {
+export function LanguageSwitcher({
+  variant = 'floating',
+}: LanguageSwitcherProps) {
   const { isDark } = useTheme();
   const currentLocale = useLocale() as SupportedLocale;
   const t = useTranslations('pages.settings.languageSettings');
@@ -36,10 +40,10 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
   const handleLanguageChange = async (locale: SupportedLocale) => {
     // 设置 Cookie
     setLanguageCookie(locale);
-    
+
     // 关闭下拉菜单
     setIsOpen(false);
-    
+
     // 刷新页面以应用新语言
     window.location.reload();
   };
@@ -64,9 +68,9 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
   // --- END COMMENT ---
   const getButtonColors = () => {
     if (isDark) {
-      return "bg-stone-800/50 hover:bg-stone-600/60 text-gray-200 border-stone-600/30";
+      return 'bg-stone-800/50 hover:bg-stone-600/60 text-gray-200 border-stone-600/30';
     }
-    return "bg-stone-200/50 hover:bg-stone-300/80 text-stone-600 border-stone-400/30";
+    return 'bg-stone-200/50 hover:bg-stone-300/80 text-stone-600 border-stone-400/30';
   };
 
   // --- BEGIN COMMENT ---
@@ -74,9 +78,9 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
   // --- END COMMENT ---
   const getDropdownColors = () => {
     if (isDark) {
-      return "bg-stone-900/95 border-stone-600/30 text-gray-200";
+      return 'bg-stone-900/95 border-stone-600/30 text-gray-200';
     }
-    return "bg-white/95 border-stone-400/30 text-stone-600";
+    return 'bg-white/95 border-stone-400/30 text-stone-600';
   };
 
   // --- BEGIN COMMENT ---
@@ -84,9 +88,9 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
   // --- END COMMENT ---
   const getIndicatorColor = () => {
     if (isDark) {
-      return "bg-stone-300";
+      return 'bg-stone-300';
     }
-    return "bg-stone-700";
+    return 'bg-stone-700';
   };
 
   // --- BEGIN COMMENT ---
@@ -103,28 +107,34 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "w-full p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md",
+            'w-full cursor-pointer rounded-lg border-2 p-4 transition-all hover:shadow-md',
             isOpen
-              ? "border-primary ring-2 ring-primary/20"
+              ? 'border-primary ring-primary/20 ring-2'
               : isDark
-                ? "border-stone-700"
-                : "border-stone-200"
+                ? 'border-stone-700'
+                : 'border-stone-200'
           )}
         >
           {/* 语言预览区域 */}
-          <div className="h-24 mb-4 rounded-md flex items-center justify-center bg-gradient-to-r from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30">
+          <div className="mb-4 flex h-24 items-center justify-center rounded-md bg-gradient-to-r from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30">
             <div className="flex items-center gap-3">
-              <span className="text-lg font-medium font-serif text-gray-900 dark:text-gray-100">
+              <span className="font-serif text-lg font-medium text-gray-900 dark:text-gray-100">
                 {currentLanguageInfo.nativeName}
               </span>
             </div>
           </div>
-          
+
           {/* 语言名称 */}
-          <p className={cn(
-            "text-sm font-medium text-center font-serif",
-            isOpen ? "text-primary" : isDark ? "text-stone-200" : "text-stone-900"
-          )}>
+          <p
+            className={cn(
+              'text-center font-serif text-sm font-medium',
+              isOpen
+                ? 'text-primary'
+                : isDark
+                  ? 'text-stone-200'
+                  : 'text-stone-900'
+            )}
+          >
             {t('currentLanguage')}
           </p>
         </button>
@@ -137,29 +147,39 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
               className={cn(
-                "absolute top-full mt-2 left-0 right-0 rounded-lg border backdrop-blur-sm z-50",
-                "shadow-lg",
+                'absolute top-full right-0 left-0 z-50 mt-2 rounded-lg border backdrop-blur-sm',
+                'shadow-lg',
                 getDropdownColors()
               )}
             >
               {Object.entries(SUPPORTED_LANGUAGES).map(([locale, info]) => (
                 <button
                   key={locale}
-                  onClick={() => handleLanguageChange(locale as SupportedLocale)}
+                  onClick={() =>
+                    handleLanguageChange(locale as SupportedLocale)
+                  }
                   className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer",
-                    "hover:bg-stone-100/50 dark:hover:bg-stone-700/50",
-                    "transition-colors duration-150 font-serif",
-                    "first:rounded-t-lg last:rounded-b-lg",
-                    currentLocale === locale && "bg-stone-100/70 dark:bg-stone-700/70"
+                    'flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left',
+                    'hover:bg-stone-100/50 dark:hover:bg-stone-700/50',
+                    'font-serif transition-colors duration-150',
+                    'first:rounded-t-lg last:rounded-b-lg',
+                    currentLocale === locale &&
+                      'bg-stone-100/70 dark:bg-stone-700/70'
                   )}
                 >
                   <div className="flex-1">
                     <div className="text-sm font-medium">{info.nativeName}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">{info.name}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {info.name}
+                    </div>
                   </div>
                   {currentLocale === locale && (
-                    <div className={cn("w-2 h-2 rounded-full", getIndicatorColor())} />
+                    <div
+                      className={cn(
+                        'h-2 w-2 rounded-full',
+                        getIndicatorColor()
+                      )}
+                    />
                   )}
                 </button>
               ))}
@@ -185,14 +205,14 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg border backdrop-blur-sm",
-            "transition-colors duration-200 cursor-pointer font-serif h-10",
-            "shadow-sm hover:shadow-md",
+            'flex items-center gap-2 rounded-lg border px-4 py-2 backdrop-blur-sm',
+            'h-10 cursor-pointer font-serif transition-colors duration-200',
+            'shadow-sm hover:shadow-md',
             getButtonColors()
           )}
         >
           <Globe className="h-4 w-4" />
-          <span className="text-sm font-medium hidden sm:inline">
+          <span className="hidden text-sm font-medium sm:inline">
             {currentLanguageInfo.nativeName}
           </span>
         </button>
@@ -205,26 +225,34 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
               className={cn(
-                "absolute top-full mt-2 right-0 w-36 rounded-lg border backdrop-blur-sm z-50",
-                "shadow-lg",
+                'absolute top-full right-0 z-50 mt-2 w-36 rounded-lg border backdrop-blur-sm',
+                'shadow-lg',
                 getDropdownColors()
               )}
             >
               {Object.entries(SUPPORTED_LANGUAGES).map(([locale, info]) => (
                 <button
                   key={locale}
-                  onClick={() => handleLanguageChange(locale as SupportedLocale)}
+                  onClick={() =>
+                    handleLanguageChange(locale as SupportedLocale)
+                  }
                   className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer",
-                    "hover:bg-stone-100/50 dark:hover:bg-stone-700/50",
-                    "transition-colors duration-150 font-serif",
-                    "first:rounded-t-lg last:rounded-b-lg",
-                    currentLocale === locale && "bg-stone-100/70 dark:bg-stone-700/70"
+                    'flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left',
+                    'hover:bg-stone-100/50 dark:hover:bg-stone-700/50',
+                    'font-serif transition-colors duration-150',
+                    'first:rounded-t-lg last:rounded-b-lg',
+                    currentLocale === locale &&
+                      'bg-stone-100/70 dark:bg-stone-700/70'
                   )}
                 >
                   <span className="text-sm font-medium">{info.nativeName}</span>
                   {currentLocale === locale && (
-                    <div className={cn("ml-auto w-2 h-2 rounded-full", getIndicatorColor())} />
+                    <div
+                      className={cn(
+                        'ml-auto h-2 w-2 rounded-full',
+                        getIndicatorColor()
+                      )}
+                    />
                   )}
                 </button>
               ))}
@@ -243,13 +271,13 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-md border",
-          "transition-colors duration-200 cursor-pointer font-serif h-10",
-          "shadow-sm hover:shadow-md",
+          'flex items-center gap-2 rounded-md border px-3 py-1.5',
+          'h-10 cursor-pointer font-serif transition-colors duration-200',
+          'shadow-sm hover:shadow-md',
           getButtonColors()
         )}
       >
-        <span className="text-sm font-medium hidden md:inline">
+        <span className="hidden text-sm font-medium md:inline">
           {currentLanguageInfo.nativeName}
         </span>
       </button>
@@ -262,8 +290,8 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              "absolute top-full mt-2 right-0 w-32 rounded-lg border backdrop-blur-sm z-50",
-              "shadow-lg",
+              'absolute top-full right-0 z-50 mt-2 w-32 rounded-lg border backdrop-blur-sm',
+              'shadow-lg',
               getDropdownColors()
             )}
           >
@@ -272,16 +300,22 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
                 key={locale}
                 onClick={() => handleLanguageChange(locale as SupportedLocale)}
                 className={cn(
-                  "w-full flex items-center gap-2 px-3 py-2 text-left cursor-pointer",
-                  "hover:bg-stone-100/50 dark:hover:bg-stone-700/50",
-                  "transition-colors duration-150 font-serif",
-                  "first:rounded-t-lg last:rounded-b-lg",
-                  currentLocale === locale && "bg-stone-100/70 dark:bg-stone-700/70"
+                  'flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left',
+                  'hover:bg-stone-100/50 dark:hover:bg-stone-700/50',
+                  'font-serif transition-colors duration-150',
+                  'first:rounded-t-lg last:rounded-b-lg',
+                  currentLocale === locale &&
+                    'bg-stone-100/70 dark:bg-stone-700/70'
                 )}
               >
                 <span className="text-sm font-medium">{info.nativeName}</span>
                 {currentLocale === locale && (
-                  <div className={cn("ml-auto w-1.5 h-1.5 rounded-full", getIndicatorColor())} />
+                  <div
+                    className={cn(
+                      'ml-auto h-1.5 w-1.5 rounded-full',
+                      getIndicatorColor()
+                    )}
+                  />
                 )}
               </button>
             ))}
@@ -290,4 +324,4 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
       </AnimatePresence>
     </div>
   );
-} 
+}

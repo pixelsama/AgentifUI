@@ -1,29 +1,31 @@
 /**
  * 聊天列表骨架屏组件
- * 
+ *
  * 在加载对话列表时显示的骨架屏效果
  */
+import { cn } from '@lib/utils';
 
-import * as React from "react"
-import { cn } from "@lib/utils"
+import * as React from 'react';
 
 interface ChatSkeletonProps {
-  isDark: boolean
-  count?: number
+  isDark: boolean;
+  count?: number;
 }
 
 export function ChatSkeleton({ isDark, count = 5 }: ChatSkeletonProps) {
   return (
-    <div className="space-y-1 mb-2">
-      {Array(count).fill(0).map((_, index) => (
-        <ChatSkeletonItem key={`skeleton-${index}`} isDark={isDark} />
-      ))}
+    <div className="mb-2 space-y-1">
+      {Array(count)
+        .fill(0)
+        .map((_, index) => (
+          <ChatSkeletonItem key={`skeleton-${index}`} isDark={isDark} />
+        ))}
     </div>
-  )
+  );
 }
 
 interface ChatSkeletonItemProps {
-  isDark: boolean
+  isDark: boolean;
 }
 
 export function ChatSkeletonItem({ isDark }: ChatSkeletonItemProps) {
@@ -33,16 +35,20 @@ export function ChatSkeletonItem({ isDark }: ChatSkeletonItemProps) {
   // --- END COMMENT ---
   return (
     <div className="group relative px-3">
-      <div className="flex items-center h-9 rounded-md">
-        <div className={cn(
-          "flex-shrink-0 w-5 h-5 rounded-full mr-3 animate-pulse",
-          isDark ? "bg-stone-600" : "bg-stone-400"
-        )} />
-        <div className={cn(
-          "h-4 w-[70%] rounded-md animate-pulse",
-          isDark ? "bg-stone-600" : "bg-stone-400"
-        )} />
+      <div className="flex h-9 items-center rounded-md">
+        <div
+          className={cn(
+            'mr-3 h-5 w-5 flex-shrink-0 animate-pulse rounded-full',
+            isDark ? 'bg-stone-600' : 'bg-stone-400'
+          )}
+        />
+        <div
+          className={cn(
+            'h-4 w-[70%] animate-pulse rounded-md',
+            isDark ? 'bg-stone-600' : 'bg-stone-400'
+          )}
+        />
       </div>
     </div>
-  )
+  );
 }

@@ -1,12 +1,14 @@
-"use client"
+'use client';
 
-import { History } from "@components/history"
-import { NavBar } from "@components/nav-bar"
-import { useSidebarStore } from "@lib/stores/sidebar-store"
-import { useEffect } from "react"
-import { useTheme } from "@lib/hooks/use-theme"
-import { cn } from "@lib/utils"
-import { useTranslations } from 'next-intl'
+import { History } from '@components/history';
+import { NavBar } from '@components/nav-bar';
+import { useTheme } from '@lib/hooks/use-theme';
+import { useSidebarStore } from '@lib/stores/sidebar-store';
+import { cn } from '@lib/utils';
+
+import { useEffect } from 'react';
+
+import { useTranslations } from 'next-intl';
 
 // --- BEGIN COMMENT ---
 // 历史对话页面
@@ -15,30 +17,32 @@ import { useTranslations } from 'next-intl'
 // 参考 settings 页面的实现，保持简单的挂载逻辑
 // --- END COMMENT ---
 export default function HistoryPage() {
-  const { isExpanded } = useSidebarStore()
-  const { isDark } = useTheme()
-  const t = useTranslations()
-  
+  const { isExpanded } = useSidebarStore();
+  const { isDark } = useTheme();
+  const t = useTranslations();
+
   // --- BEGIN COMMENT ---
   // 🎯 移除重复的 setMounted 调用，现在由全局 ClientLayout 统一管理
   // --- END COMMENT ---
   useEffect(() => {
     // 设置页面标题
     // 标题管理由DynamicTitle组件统一处理，无需手动设置
-  }, [])
+  }, []);
 
   return (
     <>
       {/* --- 添加导航栏 --- */}
       <NavBar />
-      
-      <div className={cn(
-        "h-full w-full overflow-hidden",
-        // --- 为navbar留出顶部空间 ---
-        "pt-12"
-      )}>
+
+      <div
+        className={cn(
+          'h-full w-full overflow-hidden',
+          // --- 为navbar留出顶部空间 ---
+          'pt-12'
+        )}
+      >
         <History />
       </div>
     </>
-  )
+  );
 }

@@ -2,9 +2,9 @@
 // 北京信息科技大学SSO注销处理
 // 处理用户注销请求，清除本地会话并重定向到CAS注销页面
 // --- END COMMENT ---
+import { createBistuCASService } from '@lib/services/sso/bistu-cas-service';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createBistuCASService } from '@lib/services/sso/bistu-cas-service';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     // --- END COMMENT ---
     const searchParams = request.nextUrl.searchParams;
     const returnUrl = searchParams.get('returnUrl');
-    
+
     // --- BEGIN COMMENT ---
     // 验证returnUrl的安全性
     // --- END COMMENT ---
@@ -25,10 +25,12 @@ export async function GET(request: NextRequest) {
       // 只允许相对路径或指定域名
       // --- END COMMENT ---
       const allowedUrls = ['/login', '/', '/about'];
-      const isValidUrl = returnUrl.startsWith('/') && allowedUrls.some(url => 
-        returnUrl === url || returnUrl.startsWith(url + '?')
-      );
-      
+      const isValidUrl =
+        returnUrl.startsWith('/') &&
+        allowedUrls.some(
+          url => returnUrl === url || returnUrl.startsWith(url + '?')
+        );
+
       if (isValidUrl) {
         safeReturnUrl = `${request.nextUrl.origin}${returnUrl}`;
       } else {
@@ -40,19 +42,21 @@ export async function GET(request: NextRequest) {
     // 创建CAS服务实例
     // --- END COMMENT ---
     const casService = createBistuCASService();
-    
+
     // --- BEGIN COMMENT ---
     // 生成CAS注销URL
     // --- END COMMENT ---
     const logoutUrl = casService.generateLogoutURL(safeReturnUrl);
-    
-    console.log(`Redirecting to CAS logout: ${logoutUrl.replace(/service=[^&]+/, 'service=***')}`);
+
+    console.log(
+      `Redirecting to CAS logout: ${logoutUrl.replace(/service=[^&]+/, 'service=***')}`
+    );
 
     // --- BEGIN COMMENT ---
     // 创建响应并清除本地会话
     // --- END COMMENT ---
     const response = NextResponse.redirect(logoutUrl);
-    
+
     // --- BEGIN COMMENT ---
     // 清除所有相关的cookie和会话数据
     // 注意：localStorage缓存清理由前端useLogout hook处理
@@ -80,16 +84,18 @@ export async function GET(request: NextRequest) {
     // 记录注销日志
     // --- END COMMENT ---
     console.log('SSO logout: local session cleared, redirecting to CAS logout');
-    
+
     return response;
   } catch (error) {
     console.error('SSO logout failed:', error);
-    
+
     // --- BEGIN COMMENT ---
     // 注销失败，仍然清除本地会话并重定向到登录页面
     // --- END COMMENT ---
-    const response = NextResponse.redirect(new URL('/login?message=注销完成', request.url));
-    
+    const response = NextResponse.redirect(
+      new URL('/login?message=注销完成', request.url)
+    );
+
     // --- BEGIN COMMENT ---
     // 即使出错也要清除本地会话
     // --- END COMMENT ---
@@ -113,7 +119,7 @@ export async function POST(request: NextRequest) {
   // POST请求通常用于前端Ajax调用
   // 返回JSON响应而不是重定向
   // --- END COMMENT ---
-  
+
   try {
     console.log('SSO logout via POST request');
 
@@ -132,7 +138,7 @@ export async function POST(request: NextRequest) {
     // 创建CAS服务实例
     // --- END COMMENT ---
     const casService = createBistuCASService();
-    
+
     // --- BEGIN COMMENT ---
     // 验证returnUrl
     // --- END COMMENT ---
@@ -140,7 +146,7 @@ export async function POST(request: NextRequest) {
     if (returnUrl && returnUrl.startsWith('/')) {
       safeReturnUrl = `${request.nextUrl.origin}${returnUrl}`;
     }
-    
+
     // --- BEGIN COMMENT ---
     // 生成注销URL
     // --- END COMMENT ---
@@ -170,11 +176,14 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('SSO POST logout failed:', error);
-    
-    return NextResponse.json({
-      success: false,
-      error: 'logout_failed',
-      message: '注销处理失败',
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'logout_failed',
+        message: '注销处理失败',
+      },
+      { status: 500 }
+    );
   }
-} 
+}

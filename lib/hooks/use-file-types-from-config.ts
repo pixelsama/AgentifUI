@@ -1,56 +1,60 @@
-"use client"
+'use client';
 
-import React from "react"
-import { useMemo } from "react"
-import { FILE_TYPE_CONFIG, FileTypeKey } from "@lib/constants/file-types"
-import { useCurrentAppStore } from "@lib/stores/current-app-store"
+import { FILE_TYPE_CONFIG, FileTypeKey } from '@lib/constants/file-types';
+import { useCurrentAppStore } from '@lib/stores/current-app-store';
+
+import React from 'react';
+import { useMemo } from 'react';
 
 // 定义文件类型接口
 export interface FileType {
-  title: string
-  extensions: string[]
-  icon: React.ReactNode
-  acceptString: string
-  maxSize: string // 添加文件大小限制
+  title: string;
+  extensions: string[];
+  icon: React.ReactNode;
+  acceptString: string;
+  maxSize: string; // 添加文件大小限制
 }
 
 // 定义文件上传配置接口
 export interface FileUploadConfig {
-  enabled: boolean // 是否启用文件上传
-  maxFiles: number // 最大文件数量
-  supportedMethods: ('local_file' | 'remote_url')[] // 支持的上传方式
-  hasFileTypes: boolean // 是否有启用的文件类型
-  allowedExtensions: string[] // 🎯 新增：数据库中实际支持的文件扩展名
+  enabled: boolean; // 是否启用文件上传
+  maxFiles: number; // 最大文件数量
+  supportedMethods: ('local_file' | 'remote_url')[]; // 支持的上传方式
+  hasFileTypes: boolean; // 是否有启用的文件类型
+  allowedExtensions: string[]; // 🎯 新增：数据库中实际支持的文件扩展名
 }
 
 // 生成文件选择器接受的格式字符串
 const generateAcceptString = (extensions: string[]): string => {
-  return extensions.map(ext => `.${ext}`).join(",")
-}
+  return extensions.map(ext => `.${ext}`).join(',');
+};
 
 // 🎯 英文到中文的文件类型映射
 // 数据库中存储的是英文关键字，需要映射到文件类型配置中的中文关键字
 const FILE_TYPE_MAPPING: Record<string, FileTypeKey> = {
-  'document': '文档',
-  'image': '图片', 
-  'audio': '音频',
-  'video': '视频',
-  'custom': '其他文件类型'
-}
+  document: '文档',
+  image: '图片',
+  audio: '音频',
+  video: '视频',
+  custom: '其他文件类型',
+};
 
 // 从配置获取文件类型的钩子 - 修复字段解析逻辑
 // 适配实际的数据库配置结构：file_upload.enabled + allowed_file_types数组
 export function useFileTypesFromConfig() {
-  const { currentAppInstance } = useCurrentAppStore()
+  const { currentAppInstance } = useCurrentAppStore();
 
   const { fileTypes, uploadConfig } = useMemo(() => {
     // 🎯 新增：调试日志，帮助排查配置传递问题
-    console.log('[useFileTypesFromConfig] 当前应用实例:', currentAppInstance)
-    console.log('[useFileTypesFromConfig] 文件上传配置:', currentAppInstance?.config?.dify_parameters?.file_upload)
-    
+    console.log('[useFileTypesFromConfig] 当前应用实例:', currentAppInstance);
+    console.log(
+      '[useFileTypesFromConfig] 文件上传配置:',
+      currentAppInstance?.config?.dify_parameters?.file_upload
+    );
+
     // 如果没有当前应用实例，返回默认禁用状态
     if (!currentAppInstance?.config?.dify_parameters?.file_upload) {
-      console.log('[useFileTypesFromConfig] 未找到文件上传配置，返回禁用状态')
+      console.log('[useFileTypesFromConfig] 未找到文件上传配置，返回禁用状态');
       return {
         fileTypes: [],
         uploadConfig: {
@@ -58,20 +62,21 @@ export function useFileTypesFromConfig() {
           maxFiles: 0,
           supportedMethods: [],
           hasFileTypes: false,
-          allowedExtensions: []
-        }
-      }
+          allowedExtensions: [],
+        },
+      };
     }
 
-    const fileUploadConfig = currentAppInstance.config.dify_parameters.file_upload
-    
+    const fileUploadConfig =
+      currentAppInstance.config.dify_parameters.file_upload;
+
     // 🎯 关键修复：检查新的配置结构
     // file_upload.enabled + allowed_file_types数组，而不是分别的image/document/audio/video对象
     // 使用类型断言来访问实际的数据库结构字段
-    const actualConfig = fileUploadConfig as any // 类型断言，因为实际结构与类型定义不匹配
-    
+    const actualConfig = fileUploadConfig as any; // 类型断言，因为实际结构与类型定义不匹配
+
     if (!actualConfig.enabled) {
-      console.log('[useFileTypesFromConfig] 文件上传未启用')
+      console.log('[useFileTypesFromConfig] 文件上传未启用');
       return {
         fileTypes: [],
         uploadConfig: {
@@ -79,42 +84,48 @@ export function useFileTypesFromConfig() {
           maxFiles: 0,
           supportedMethods: [],
           hasFileTypes: false,
-          allowedExtensions: []
-        }
-      }
+          allowedExtensions: [],
+        },
+      };
     }
 
-    const enabledTypes: FileType[] = []
-    const maxFiles = actualConfig.number_limits || 0
-    const supportedMethods: ('local_file' | 'remote_url')[] = [...(actualConfig.allowed_file_upload_methods || [])]
-    const allowedFileTypes = actualConfig.allowed_file_types || []
-    const allowedExtensions = actualConfig.allowed_file_extensions || []
+    const enabledTypes: FileType[] = [];
+    const maxFiles = actualConfig.number_limits || 0;
+    const supportedMethods: ('local_file' | 'remote_url')[] = [
+      ...(actualConfig.allowed_file_upload_methods || []),
+    ];
+    const allowedFileTypes = actualConfig.allowed_file_types || [];
+    const allowedExtensions = actualConfig.allowed_file_extensions || [];
 
     console.log('[useFileTypesFromConfig] 解析配置:', {
       enabled: actualConfig.enabled,
       maxFiles,
       supportedMethods,
       allowedFileTypes,
-      allowedExtensions
-    })
+      allowedExtensions,
+    });
 
     // 🎯 根据allowed_file_types数组生成启用的文件类型
     allowedFileTypes.forEach((fileTypeKey: string) => {
-      const chineseKey = FILE_TYPE_MAPPING[fileTypeKey] || fileTypeKey
-      const config = FILE_TYPE_CONFIG[chineseKey as FileTypeKey]
+      const chineseKey = FILE_TYPE_MAPPING[fileTypeKey] || fileTypeKey;
+      const config = FILE_TYPE_CONFIG[chineseKey as FileTypeKey];
       if (config) {
         enabledTypes.push({
           title: chineseKey,
           extensions: [...config.extensions],
-          icon: React.createElement(config.icon, { className: "h-4 w-4" }),
+          icon: React.createElement(config.icon, { className: 'h-4 w-4' }),
           acceptString: generateAcceptString(config.extensions),
-          maxSize: config.maxSize
-        })
-        console.log(`[useFileTypesFromConfig] 添加文件类型: ${fileTypeKey} -> ${chineseKey}`)
+          maxSize: config.maxSize,
+        });
+        console.log(
+          `[useFileTypesFromConfig] 添加文件类型: ${fileTypeKey} -> ${chineseKey}`
+        );
       } else {
-        console.warn(`[useFileTypesFromConfig] 未知的文件类型: ${fileTypeKey} (映射到 ${chineseKey})`)
+        console.warn(
+          `[useFileTypesFromConfig] 未知的文件类型: ${fileTypeKey} (映射到 ${chineseKey})`
+        );
       }
-    })
+    });
 
     // 生成上传配置对象
     const uploadConfig: FileUploadConfig = {
@@ -122,21 +133,21 @@ export function useFileTypesFromConfig() {
       maxFiles,
       supportedMethods,
       hasFileTypes: enabledTypes.length > 0,
-      allowedExtensions
-    }
+      allowedExtensions,
+    };
 
     console.log('[useFileTypesFromConfig] 最终配置:', {
       fileTypesCount: enabledTypes.length,
-      uploadConfig
-    })
+      uploadConfig,
+    });
 
-    return { fileTypes: enabledTypes, uploadConfig }
-  }, [currentAppInstance])
+    return { fileTypes: enabledTypes, uploadConfig };
+  }, [currentAppInstance]);
 
   return {
     fileTypes,
     uploadConfig,
     isLoading: false, // 不需要异步加载，直接从store获取
-    error: null
-  }
-} 
+    error: null,
+  };
+}

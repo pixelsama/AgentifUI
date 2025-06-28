@@ -1,1 +1,1 @@
-export * from './typewriter-store' 
+export * from './typewriter-store';

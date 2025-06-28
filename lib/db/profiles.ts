@@ -1,15 +1,19 @@
 /**
  * 用户资料相关的数据库查询函数
- * 
+ *
  * 本文件包含与用户资料表(profiles)相关的所有数据库操作
  * 更新为使用统一的数据服务和Result类型
  */
-
+import { CacheKeys, cacheService } from '@lib/services/db/cache-service';
 import { dataService } from '@lib/services/db/data-service';
-import { cacheService, CacheKeys } from '@lib/services/db/cache-service';
-import { realtimeService, SubscriptionKeys, SubscriptionConfigs } from '@lib/services/db/realtime-service';
-import { Result, success, failure } from '@lib/types/result';
+import {
+  SubscriptionConfigs,
+  SubscriptionKeys,
+  realtimeService,
+} from '@lib/services/db/realtime-service';
 import { Profile } from '@lib/types/database';
+import { Result, failure, success } from '@lib/types/result';
+
 import { createClient } from '../supabase/client';
 
 // 保持与现有代码的兼容性，同时使用新的数据服务
@@ -24,7 +28,9 @@ export async function getCurrentUserProfile(): Promise<Result<Profile | null>> {
   // 首先获取当前用户ID，然后查询用户资料
   // 使用新的数据服务和缓存机制
   // --- END COMMENT ---
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     return success(null);
@@ -38,7 +44,9 @@ export async function getCurrentUserProfile(): Promise<Result<Profile | null>> {
  * @param userId 用户ID
  * @returns 用户资料对象的Result，如果未找到则返回null
  */
-export async function getUserProfileById(userId: string): Promise<Result<Profile | null>> {
+export async function getUserProfileById(
+  userId: string
+): Promise<Result<Profile | null>> {
   return dataService.findOne<Profile>(
     'profiles',
     { id: userId },
@@ -50,7 +58,7 @@ export async function getUserProfileById(userId: string): Promise<Result<Profile
       onUpdate: () => {
         // 用户资料更新时清除缓存
         cacheService.delete(CacheKeys.userProfile(userId));
-      }
+      },
     }
   );
 }
@@ -60,7 +68,9 @@ export async function getUserProfileById(userId: string): Promise<Result<Profile
  * @param username 用户名
  * @returns 用户资料对象的Result，如果未找到则返回null
  */
-export async function getUserProfileByUsername(username: string): Promise<Result<Profile | null>> {
+export async function getUserProfileByUsername(
+  username: string
+): Promise<Result<Profile | null>> {
   return dataService.findOne<Profile>(
     'profiles',
     { username },
@@ -103,10 +113,14 @@ export async function updateUserProfile(
   // --- END COMMENT ---
   const updateData = {
     ...updates,
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
   };
 
-  const result = await dataService.update<Profile>('profiles', userId, updateData);
+  const result = await dataService.update<Profile>(
+    'profiles',
+    userId,
+    updateData
+  );
 
   // 清除相关缓存
   if (result.success) {
@@ -126,14 +140,10 @@ export async function updateUserProfile(
  * @returns 是否设置成功的Result
  */
 export async function setUserAsAdmin(userId: string): Promise<Result<boolean>> {
-  const result = await dataService.update<Profile>(
-    'profiles',
-    userId,
-    {
-      role: 'admin',
-      updated_at: new Date().toISOString()
-    }
-  );
+  const result = await dataService.update<Profile>('profiles', userId, {
+    role: 'admin',
+    updated_at: new Date().toISOString(),
+  });
 
   if (result.success) {
     // 清除相关缓存
@@ -189,7 +199,9 @@ export async function getCurrentUserProfileLegacy(): Promise<Profile | null> {
  * 根据ID获取用户资料（兼容版本）
  * @deprecated 请使用 getUserProfileById() 并处理Result类型
  */
-export async function getUserProfileByIdLegacy(userId: string): Promise<Profile | null> {
+export async function getUserProfileByIdLegacy(
+  userId: string
+): Promise<Profile | null> {
   const result = await getUserProfileById(userId);
   return result.success ? result.data : null;
 }
@@ -198,7 +210,9 @@ export async function getUserProfileByIdLegacy(userId: string): Promise<Profile 
  * 根据用户名获取用户资料（兼容版本）
  * @deprecated 请使用 getUserProfileByUsername() 并处理Result类型
  */
-export async function getUserProfileByUsernameLegacy(username: string): Promise<Profile | null> {
+export async function getUserProfileByUsernameLegacy(
+  username: string
+): Promise<Profile | null> {
   const result = await getUserProfileByUsername(username);
   return result.success ? result.data : null;
 }
@@ -247,7 +261,14 @@ export async function isUserAdminLegacy(userId: string): Promise<boolean> {
  * @param userId 用户ID
  * @returns 用户所属企业的信息Result，如果未关联企业则返回null
  */
-export async function getUserOrganization(userId: string): Promise<Result<{ organization: any; role: string; department: string | null; job_title: string | null } | null>> {
+export async function getUserOrganization(userId: string): Promise<
+  Result<{
+    organization: any;
+    role: string;
+    department: string | null;
+    job_title: string | null;
+  } | null>
+> {
   try {
     // --- BEGIN COMMENT ---
     // 查询用户在org_members表中的记录，同时联查organizations表
@@ -255,7 +276,8 @@ export async function getUserOrganization(userId: string): Promise<Result<{ orga
     // --- END COMMENT ---
     const { data, error } = await supabase
       .from('org_members')
-      .select(`
+      .select(
+        `
         role,
         department,
         job_title,
@@ -265,26 +287,27 @@ export async function getUserOrganization(userId: string): Promise<Result<{ orga
           logo_url,
           created_at
         )
-      `)
+      `
+      )
       .eq('user_id', userId)
       .maybeSingle(); // 使用 maybeSingle 而不是 single，避免无数据时报错
-    
+
     if (error) {
       // 静默处理企业查询错误，避免影响主流程
       console.warn(`获取用户企业信息时发生错误: ${error.message}`, error);
       return success(null);
     }
-    
+
     // 如果没有数据或组织信息为空
     if (!data || !data.organizations) {
       return success(null);
     }
-    
+
     return success({
       organization: data.organizations,
       role: data.role,
       department: data.department,
-      job_title: data.job_title
+      job_title: data.job_title,
     });
   } catch (err) {
     // 静默处理异常，不影响用户资料的获取
@@ -297,7 +320,12 @@ export async function getUserOrganization(userId: string): Promise<Result<{ orga
  * 获取用户的企业信息（兼容版本）
  * @deprecated 请使用 getUserOrganization() 并处理Result类型
  */
-export async function getUserOrganizationLegacy(userId: string): Promise<{ organization: any; role: string; department: string | null; job_title: string | null } | null> {
+export async function getUserOrganizationLegacy(userId: string): Promise<{
+  organization: any;
+  role: string;
+  department: string | null;
+  job_title: string | null;
+} | null> {
   const result = await getUserOrganization(userId);
   return result.success ? result.data : null;
 }

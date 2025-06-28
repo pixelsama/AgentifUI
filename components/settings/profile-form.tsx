@@ -1,15 +1,25 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { cn } from "@lib/utils";
-import { useSettingsColors } from "@lib/hooks/use-settings-colors";
-import { Profile as DatabaseProfile } from "@lib/types/database";
-import { Profile as ExtendedProfile } from "@lib/hooks/use-profile";
-import { updateUserProfile } from "@lib/db/profiles";
-import { updateProfileCache } from "@lib/hooks/use-profile";
-import { User, Mail, AtSign, Calendar, Check, AlertCircle, Building2 } from "lucide-react";
-import { useTranslations, useFormatter } from 'next-intl';
+import { updateUserProfile } from '@lib/db/profiles';
+import { Profile as ExtendedProfile } from '@lib/hooks/use-profile';
+import { updateProfileCache } from '@lib/hooks/use-profile';
+import { useSettingsColors } from '@lib/hooks/use-settings-colors';
+import { Profile as DatabaseProfile } from '@lib/types/database';
+import { cn } from '@lib/utils';
+import { motion } from 'framer-motion';
+import {
+  AlertCircle,
+  AtSign,
+  Building2,
+  Calendar,
+  Check,
+  Mail,
+  User,
+} from 'lucide-react';
+
+import { useState } from 'react';
+
+import { useFormatter, useTranslations } from 'next-intl';
 
 // --- BEGIN COMMENT ---
 // 个人资料表单组件
@@ -18,9 +28,9 @@ import { useTranslations, useFormatter } from 'next-intl';
 // --- END COMMENT ---
 interface ProfileFormProps {
   profile: DatabaseProfile &
-  ExtendedProfile & {
-    auth_last_sign_in_at?: string;
-  };
+    ExtendedProfile & {
+      auth_last_sign_in_at?: string;
+    };
   onSuccess?: () => void;
 }
 
@@ -28,21 +38,21 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
   const { colors, isDark } = useSettingsColors();
   const t = useTranslations('pages.settings.profileSettings');
   const format = useFormatter();
-  
+
   // --- BEGIN COMMENT ---
   // 检查是否为SSO单点登录模式
   // 在SSO模式下，限制某些字段的编辑
   // --- END COMMENT ---
   const isSSOOnlyMode = process.env.NEXT_PUBLIC_SSO_ONLY_MODE === 'true';
-  
+
   const [formData, setFormData] = useState({
-    full_name: profile.full_name || "",
-    username: profile.username || "",
-    avatar_url: profile.avatar_url || "",
+    full_name: profile.full_name || '',
+    username: profile.username || '',
+    avatar_url: profile.avatar_url || '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{
-    type: "success" | "error";
+    type: 'success' | 'error';
     text: string;
   } | null>(null);
 
@@ -54,13 +64,13 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    
+
     // SSO模式下不允许修改姓名字段
     if (isSSOOnlyMode && name === 'full_name') {
       return;
     }
-    
-    setFormData((prev) => ({
+
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
@@ -107,12 +117,12 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
           organization_role: profile.organization_role,
           department: profile.department,
           job_title: profile.job_title,
-          auth_last_sign_in_at: profile.auth_last_sign_in_at
+          auth_last_sign_in_at: profile.auth_last_sign_in_at,
         };
         updateProfileCache(extendedProfile, profile.id);
 
         setMessage({
-          type: "success",
+          type: 'success',
           text: t('profileUpdated'),
         });
 
@@ -125,7 +135,7 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       }
     } catch (error: any) {
       setMessage({
-        type: "error",
+        type: 'error',
         text: error.message || t('updateFailed'),
       });
     } finally {
@@ -140,14 +150,14 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
   // --- END COMMENT ---
   const formatDate = (dateString: string | null) => {
     if (!dateString) return t('status.notRecorded');
-    
+
     try {
       const date = new Date(dateString);
       // 使用next-intl的dateTime格式化，会根据当前locale自动选择合适的格式
       return format.dateTime(date, {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       });
     } catch (error) {
       console.warn('日期格式化失败:', error);
@@ -163,20 +173,20 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className={cn(
-            "p-4 rounded-lg mb-6 flex items-center",
-            message.type === "success"
+            'mb-6 flex items-center rounded-lg p-4',
+            message.type === 'success'
               ? isDark
-                ? "bg-green-900/20 text-green-300 border border-green-800"
-                : "bg-green-50 text-green-700 border border-green-200"
+                ? 'border border-green-800 bg-green-900/20 text-green-300'
+                : 'border border-green-200 bg-green-50 text-green-700'
               : isDark
-                ? "bg-red-900/20 text-red-300 border border-red-800"
-                : "bg-red-50 text-red-700 border border-red-200"
+                ? 'border border-red-800 bg-red-900/20 text-red-300'
+                : 'border border-red-200 bg-red-50 text-red-700'
           )}
         >
-          {message.type === "success" ? (
-            <Check className="w-5 h-5 mr-2 flex-shrink-0" />
+          {message.type === 'success' ? (
+            <Check className="mr-2 h-5 w-5 flex-shrink-0" />
           ) : (
-            <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+            <AlertCircle className="mr-2 h-5 w-5 flex-shrink-0" />
           )}
           <span className="font-serif">{message.text}</span>
         </motion.div>
@@ -185,33 +195,46 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       {/* 账户信息卡片 */}
       <div
         className={cn(
-          "mb-8 p-4 rounded-lg border",
+          'mb-8 rounded-lg border p-4',
           colors.borderColor.tailwind,
           colors.buttonBackground.tailwind
         )}
       >
         <h3
-          className={cn("text-lg font-medium mb-4 font-serif", colors.textColor.tailwind)}
+          className={cn(
+            'mb-4 font-serif text-lg font-medium',
+            colors.textColor.tailwind
+          )}
         >
           {t('accountInfo')}
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="flex items-center">
             <Building2
-              className={cn("w-5 h-5 mr-3", colors.secondaryTextColor.tailwind)}
+              className={cn('mr-3 h-5 w-5', colors.secondaryTextColor.tailwind)}
             />
             <div>
-              <p className={cn("text-sm font-serif", colors.secondaryTextColor.tailwind)}>
+              <p
+                className={cn(
+                  'font-serif text-sm',
+                  colors.secondaryTextColor.tailwind
+                )}
+              >
                 {t('organization')}
               </p>
-              <p className={cn("font-serif", colors.textColor.tailwind)}>
+              <p className={cn('font-serif', colors.textColor.tailwind)}>
                 {profile.organization?.name || t('status.noOrganization')}
                 {/* --- BEGIN COMMENT --- */}
                 {/* 显示部门信息，格式B：用户名 (部门) */}
                 {/* --- END COMMENT --- */}
                 {profile.department && (
-                  <span className={cn("text-sm ml-2", colors.secondaryTextColor.tailwind)}>
+                  <span
+                    className={cn(
+                      'ml-2 text-sm',
+                      colors.secondaryTextColor.tailwind
+                    )}
+                  >
                     ({profile.department})
                   </span>
                 )}
@@ -221,13 +244,18 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
 
           <div className="flex items-center">
             <Calendar
-              className={cn("w-5 h-5 mr-3", colors.secondaryTextColor.tailwind)}
+              className={cn('mr-3 h-5 w-5', colors.secondaryTextColor.tailwind)}
             />
             <div>
-              <p className={cn("text-sm font-serif", colors.secondaryTextColor.tailwind)}>
+              <p
+                className={cn(
+                  'font-serif text-sm',
+                  colors.secondaryTextColor.tailwind
+                )}
+              >
                 {t('registrationTime')}
               </p>
-              <p className={cn("font-serif", colors.textColor.tailwind)}>
+              <p className={cn('font-serif', colors.textColor.tailwind)}>
                 {formatDate(profile.created_at)}
               </p>
             </div>
@@ -235,27 +263,41 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
 
           <div className="flex items-center">
             <User
-              className={cn("w-5 h-5 mr-3", colors.secondaryTextColor.tailwind)}
+              className={cn('mr-3 h-5 w-5', colors.secondaryTextColor.tailwind)}
             />
             <div>
-              <p className={cn("text-sm font-serif", colors.secondaryTextColor.tailwind)}>
+              <p
+                className={cn(
+                  'font-serif text-sm',
+                  colors.secondaryTextColor.tailwind
+                )}
+              >
                 {t('accountRole')}
               </p>
-              <p className={cn("font-serif", colors.textColor.tailwind)}>
-                {profile.role === "admin" ? t('roles.admin') : profile.role === "manager" ? t('roles.manager') : t('roles.user')}
+              <p className={cn('font-serif', colors.textColor.tailwind)}>
+                {profile.role === 'admin'
+                  ? t('roles.admin')
+                  : profile.role === 'manager'
+                    ? t('roles.manager')
+                    : t('roles.user')}
               </p>
             </div>
           </div>
 
           <div className="flex items-center">
             <Calendar
-              className={cn("w-5 h-5 mr-3", colors.secondaryTextColor.tailwind)}
+              className={cn('mr-3 h-5 w-5', colors.secondaryTextColor.tailwind)}
             />
             <div>
-              <p className={cn("text-sm font-serif", colors.secondaryTextColor.tailwind)}>
+              <p
+                className={cn(
+                  'font-serif text-sm',
+                  colors.secondaryTextColor.tailwind
+                )}
+              >
                 {t('lastLogin')}
               </p>
-              <p className={cn("font-serif", colors.textColor.tailwind)}>
+              <p className={cn('font-serif', colors.textColor.tailwind)}>
                 {profile.auth_last_sign_in_at
                   ? formatDate(profile.auth_last_sign_in_at)
                   : t('status.notRecorded')}
@@ -267,7 +309,12 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
 
       {/* 个人资料表单 */}
       <div className="space-y-6">
-        <h3 className={cn("text-lg font-medium font-serif", colors.textColor.tailwind)}>
+        <h3
+          className={cn(
+            'font-serif text-lg font-medium',
+            colors.textColor.tailwind
+          )}
+        >
           {isSSOOnlyMode ? t('title') : t('editProfile')}
         </h3>
 
@@ -276,7 +323,7 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
           <label
             htmlFor="full_name"
             className={cn(
-              "block text-sm font-medium font-serif",
+              'block font-serif text-sm font-medium',
               colors.textColor.tailwind
             )}
           >
@@ -289,17 +336,20 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
             // --- END COMMENT ---
             <div
               className={cn(
-                "flex items-center",
-                "w-full px-4 py-3 rounded-lg",
-                "border",
+                'flex items-center',
+                'w-full rounded-lg px-4 py-3',
+                'border',
                 colors.borderColor.tailwind,
-                isDark ? "bg-gray-800/50" : "bg-gray-50/50"
+                isDark ? 'bg-gray-800/50' : 'bg-gray-50/50'
               )}
             >
               <User
-                className={cn("w-5 h-5 mr-3", colors.secondaryTextColor.tailwind)}
+                className={cn(
+                  'mr-3 h-5 w-5',
+                  colors.secondaryTextColor.tailwind
+                )}
               />
-              <span className={cn("font-serif", colors.textColor.tailwind)}>
+              <span className={cn('font-serif', colors.textColor.tailwind)}>
                 {profile.full_name || t('status.notSet')}
               </span>
             </div>
@@ -309,16 +359,19 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
             // --- END COMMENT ---
             <div
               className={cn(
-                "flex items-center",
-                "w-full px-4 py-2 rounded-lg",
-                "transition-all duration-200",
-                "border",
+                'flex items-center',
+                'w-full rounded-lg px-4 py-2',
+                'transition-all duration-200',
+                'border',
                 colors.buttonBackground.tailwind,
                 colors.buttonBorder.tailwind
               )}
             >
               <User
-                className={cn("w-5 h-5 mr-2", colors.secondaryTextColor.tailwind)}
+                className={cn(
+                  'mr-2 h-5 w-5',
+                  colors.secondaryTextColor.tailwind
+                )}
               />
               <input
                 id="full_name"
@@ -327,8 +380,8 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
                 value={formData.full_name}
                 onChange={handleChange}
                 className={cn(
-                  "w-full bg-transparent",
-                  "outline-none",
+                  'w-full bg-transparent',
+                  'outline-none',
                   colors.textColor.tailwind
                 )}
                 placeholder={t('namePlaceholder')}
@@ -342,7 +395,7 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
           <label
             htmlFor="username"
             className={cn(
-              "block text-sm font-medium font-serif",
+              'block font-serif text-sm font-medium',
               colors.textColor.tailwind
             )}
           >
@@ -350,16 +403,16 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
           </label>
           <div
             className={cn(
-              "flex items-center",
-              "w-full px-4 py-2 rounded-lg",
-              "transition-all duration-200",
-              "border",
+              'flex items-center',
+              'w-full rounded-lg px-4 py-2',
+              'transition-all duration-200',
+              'border',
               colors.buttonBackground.tailwind,
               colors.buttonBorder.tailwind
             )}
           >
             <AtSign
-              className={cn("w-5 h-5 mr-2", colors.secondaryTextColor.tailwind)}
+              className={cn('mr-2 h-5 w-5', colors.secondaryTextColor.tailwind)}
             />
             <input
               id="username"
@@ -368,8 +421,8 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
               value={formData.username}
               onChange={handleChange}
               className={cn(
-                "w-full bg-transparent",
-                "outline-none",
+                'w-full bg-transparent',
+                'outline-none',
                 colors.textColor.tailwind
               )}
               placeholder={t('usernamePlaceholder')}
@@ -383,7 +436,7 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
             <label
               htmlFor="avatar_url"
               className={cn(
-                "block text-sm font-medium font-serif",
+                'block font-serif text-sm font-medium',
                 colors.textColor.tailwind
               )}
             >
@@ -391,10 +444,10 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
             </label>
             <div
               className={cn(
-                "flex items-center",
-                "w-full px-4 py-2 rounded-lg",
-                "transition-all duration-200",
-                "border",
+                'flex items-center',
+                'w-full rounded-lg px-4 py-2',
+                'transition-all duration-200',
+                'border',
                 colors.buttonBackground.tailwind,
                 colors.buttonBorder.tailwind
               )}
@@ -406,14 +459,19 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
                 value={formData.avatar_url}
                 onChange={handleChange}
                 className={cn(
-                  "w-full bg-transparent",
-                  "outline-none",
+                  'w-full bg-transparent',
+                  'outline-none',
                   colors.textColor.tailwind
                 )}
                 placeholder={t('avatarPlaceholder')}
               />
             </div>
-            <p className={cn("text-xs font-serif", colors.secondaryTextColor.tailwind)}>
+            <p
+              className={cn(
+                'font-serif text-xs',
+                colors.secondaryTextColor.tailwind
+              )}
+            >
               {t('avatarHint')}
             </p>
           </div>
@@ -424,14 +482,14 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
           type="submit"
           disabled={isSubmitting}
           className={cn(
-            "w-full px-4 py-3 rounded-lg",
-            "transition-all duration-200",
-            "mt-8",
-            "cursor-pointer",
+            'w-full rounded-lg px-4 py-3',
+            'transition-all duration-200',
+            'mt-8',
+            'cursor-pointer',
             colors.primaryButtonBackground.tailwind,
             colors.primaryButtonText.tailwind,
             colors.primaryButtonHover.tailwind,
-            "disabled:opacity-50 disabled:cursor-not-allowed"
+            'disabled:cursor-not-allowed disabled:opacity-50'
           )}
         >
           {isSubmitting ? t('saving') : t('saveChanges')}

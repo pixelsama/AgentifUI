@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
 import { cn } from '@lib/utils';
+
+import { useEffect, useRef, useState } from 'react';
 
 interface TypeWriterProps {
   text: string;
@@ -10,13 +11,13 @@ interface TypeWriterProps {
   waitingEffect?: boolean; // 是否显示等待效果（shimmer）
 }
 
-export function TypeWriter({ 
-  text, 
-  speed = 50, 
-  delay = 0, 
+export function TypeWriter({
+  text,
+  speed = 50,
+  delay = 0,
   className,
   onComplete,
-  waitingEffect = false
+  waitingEffect = false,
 }: TypeWriterProps) {
   const [displayedText, setDisplayedText] = useState('');
   const [isWaiting, setIsWaiting] = useState(false);
@@ -36,9 +37,11 @@ export function TypeWriter({
 
   const isContinuation = (newText: string, lastCompletedText: string) => {
     if (!lastCompletedText) return false;
-    
+
     const cleanLastText = lastCompletedText.replace(/\.\.\.$/, '');
-    return newText.startsWith(cleanLastText) && newText.length > cleanLastText.length;
+    return (
+      newText.startsWith(cleanLastText) && newText.length > cleanLastText.length
+    );
   };
 
   const startTyping = (targetText: string, startFrom = 0) => {
@@ -47,49 +50,52 @@ export function TypeWriter({
     indexRef.current = startFrom;
     setIsWaiting(false);
     setIsComplete(false); // 重置完成状态
-    
+
     setDisplayedText(targetText);
-    
+
     if (startFrom > 0) {
       setRevealProgress((startFrom / targetText.length) * 100);
     } else {
       setRevealProgress(0);
     }
-    
+
     const typeNextChar = () => {
       const currentTarget = targetTextRef.current;
       const currentIndex = indexRef.current;
-      
+
       if (currentIndex < currentTarget.length) {
         const progress = ((currentIndex + 1) / currentTarget.length) * 100;
         setRevealProgress(progress);
         indexRef.current++;
-        
+
         timeoutRef.current = setTimeout(typeNextChar, speed);
       } else {
         // 🎯 打字完成：确保完全显示
         setRevealProgress(100);
         setIsComplete(true); // 标记为完成
         lastCompletedTextRef.current = currentTarget;
-        
+
         if (waitingEffect && currentTarget.endsWith('...')) {
           setIsWaiting(true);
         }
-        
+
         if (onComplete) {
           onComplete();
         }
       }
     };
 
-    timeoutRef.current = setTimeout(typeNextChar, startFrom === 0 ? delay : 200);
+    timeoutRef.current = setTimeout(
+      typeNextChar,
+      startFrom === 0 ? delay : 200
+    );
   };
 
   useEffect(() => {
     if (!text) return;
-    
+
     const lastCompleted = lastCompletedTextRef.current;
-    
+
     if (lastCompleted && isContinuation(text, lastCompleted)) {
       const cleanLastText = lastCompleted.replace(/\.\.\.$/, '');
       startTyping(text, cleanLastText.length);
@@ -97,7 +103,7 @@ export function TypeWriter({
       lastCompletedTextRef.current = '';
       startTyping(text, 0);
     }
-    
+
     return () => clearTimeouts();
   }, [text]);
 
@@ -111,14 +117,14 @@ export function TypeWriter({
       // ✅ 完成状态：全部文字完整显示
       return {
         WebkitMask: 'none',
-        mask: 'none'
+        mask: 'none',
       };
     }
-    
+
     // 🎨 进行中：带渐变效果
-    const solidEnd = Math.max(0, revealProgress - 8);  // 完全显示的部分
-    const fadeEnd = revealProgress;                    // 渐变结束点
-    
+    const solidEnd = Math.max(0, revealProgress - 8); // 完全显示的部分
+    const fadeEnd = revealProgress; // 渐变结束点
+
     return {
       WebkitMask: `linear-gradient(90deg, 
         black 0%, 
@@ -135,17 +141,17 @@ export function TypeWriter({
         rgba(0,0,0,0.2) ${fadeEnd}%, 
         transparent ${fadeEnd}%, 
         transparent 100%
-      )`
+      )`,
     };
   };
 
   return (
-    <span className={cn("inline-block", className)}>
-      <span 
+    <span className={cn('inline-block', className)}>
+      <span
         className={cn(
-          "transition-all duration-75 ease-out",
+          'transition-all duration-75 ease-out',
           className,
-          isWaiting && waitingEffect && "animate-pulse opacity-60"
+          isWaiting && waitingEffect && 'animate-pulse opacity-60'
         )}
         style={getMaskStyle()}
       >

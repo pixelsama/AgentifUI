@@ -19,13 +19,15 @@
 根据[Supabase官方文档](https://supabase.com/docs/guides/auth/passwords#resetting-a-password)：
 
 #### Step 1: 发送重置邮件
+
 ```javascript
 await supabase.auth.resetPasswordForEmail('user@example.com', {
   redirectTo: 'http://example.com/reset-password',
-})
+});
 ```
 
 #### Step 2: 处理重定向
+
 用户点击邮件链接后，会被重定向到指定URL，此时用户应该已经被认证。
 
 ### 邮件链接的格式
@@ -33,6 +35,7 @@ await supabase.auth.resetPasswordForEmail('user@example.com', {
 Supabase可能发送以下两种格式的链接：
 
 1. **新版本格式**（推荐）：
+
    ```
    http://localhost:3000/reset-password?type=recovery&token_hash=abcd1234
    ```
@@ -52,20 +55,20 @@ useEffect(() => {
   const checkUserSession = async () => {
     try {
       const supabase = createClient();
-      
+
       // --- 检查URL参数 ---
       const access_token = searchParams.get('access_token');
       const refresh_token = searchParams.get('refresh_token');
       const type = searchParams.get('type');
       const token_hash = searchParams.get('token_hash');
-      
+
       // --- 处理Supabase的重置密码重定向 ---
       if (type === 'recovery' && token_hash) {
         const { data, error: verifyError } = await supabase.auth.verifyOtp({
           type: 'recovery',
           token_hash: token_hash,
         });
-        
+
         if (verifyError) {
           setError(`重置链接验证失败: ${verifyError.message}`);
           setIsTokenValid(false);
@@ -74,7 +77,7 @@ useEffect(() => {
         }
         return;
       }
-      
+
       // --- 处理直接的access_token（兼容旧版本） ---
       if (access_token) {
         const { error: sessionError } = await supabase.auth.setSession({
@@ -90,10 +93,13 @@ useEffect(() => {
         }
         return;
       }
-      
+
       // --- 检查是否已有有效会话 ---
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
       if (userError) {
         setError('无法验证用户身份，请重新申请重置密码');
         setIsTokenValid(false);
@@ -103,7 +109,6 @@ useEffect(() => {
         setError('重置链接无效或已过期，请重新申请重置密码');
         setIsTokenValid(false);
       }
-      
     } catch (err) {
       setError('验证失败，请重新申请重置密码');
       setIsTokenValid(false);
@@ -141,6 +146,7 @@ supabase.auth.resetPasswordForEmail('your-email@example.com', {
 ### 2. 检查邮件链接
 
 查看邮件中的链接，确认URL参数格式：
+
 - 新格式：`?type=recovery&token_hash=...`
 - 旧格式：`?access_token=...&refresh_token=...`
 
@@ -163,7 +169,7 @@ supabase.auth.resetPasswordForEmail('your-email@example.com', {
 URL参数: ?type=recovery&token_hash=abc123
 URL参数解析:
 - access_token: null
-- refresh_token: null  
+- refresh_token: null
 - type: recovery
 - token_hash: abc123
 检测到Supabase重置密码链接，尝试验证token
@@ -192,4 +198,4 @@ URL参数解析:
 
 ---
 
-*最后更新: 2024年12月* 
+_最后更新: 2024年12月_

@@ -2,10 +2,10 @@ import { create } from 'zustand';
 
 // --- 文件附件定义 ---
 export interface MessageAttachment {
-  id: string;            // 附件ID
-  name: string;          // 文件名
-  size: number;          // 文件大小
-  type: string;          // MIME类型
+  id: string; // 附件ID
+  name: string; // 文件名
+  size: number; // 文件大小
+  type: string; // MIME类型
   upload_file_id: string; // 上传后的文件ID
 }
 
@@ -26,7 +26,7 @@ export interface ChatMessage {
   wasManuallyStopped?: boolean; // 标记是否被用户手动停止
   error?: string | null; // 消息相关的错误信息
   attachments?: MessageAttachment[]; // 消息附带的文件附件
-  
+
   // 消息持久化相关字段
   db_id?: string; // 数据库中的消息ID，保存成功后才有值
   persistenceStatus?: 'pending' | 'saving' | 'saved' | 'error'; // 持久化状态
@@ -117,7 +117,10 @@ interface ChatState {
    * @param id 消息ID
    * @param updates 要更新的属性
    */
-  updateMessage: (id: string, updates: Partial<Omit<ChatMessage, 'id' | 'isUser'>>) => void;
+  updateMessage: (
+    id: string,
+    updates: Partial<Omit<ChatMessage, 'id' | 'isUser'>>
+  ) => void;
 }
 
 // --- Store 实现 ---
@@ -130,75 +133,81 @@ export const useChatStore = create<ChatState>((set, get) => ({
   currentTaskId: null, // --- BEGIN COMMENT --- 初始化 Task ID 为 null --- END COMMENT ---
 
   // --- Action 实现 ---
-  addMessage: (messageData) => {
-    const id = `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-    const newMessage = { id, ...messageData }
-    
-    set((state) => ({
+  addMessage: messageData => {
+    const id = `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const newMessage = { id, ...messageData };
+
+    set(state => ({
       messages: [...state.messages, newMessage],
-      streamingMessageId: messageData.isStreaming ? id : state.streamingMessageId,
-    }))
-    
-    return newMessage
+      streamingMessageId: messageData.isStreaming
+        ? id
+        : state.streamingMessageId,
+    }));
+
+    return newMessage;
   },
 
   appendMessageChunk: (id, chunk) => {
-    set((state) => ({
-      messages: state.messages.map((message) =>
+    set(state => ({
+      messages: state.messages.map(message =>
         message.id === id ? { ...message, text: message.text + chunk } : message
       ),
-    }))
+    }));
   },
 
-  finalizeStreamingMessage: (id) => {
-    set((state) => ({
-      messages: state.messages.map((message) =>
+  finalizeStreamingMessage: id => {
+    set(state => ({
+      messages: state.messages.map(message =>
         message.id === id ? { ...message, isStreaming: false } : message
       ),
-      streamingMessageId: state.streamingMessageId === id ? null : state.streamingMessageId,
-    }))
+      streamingMessageId:
+        state.streamingMessageId === id ? null : state.streamingMessageId,
+    }));
   },
 
-  markAsManuallyStopped: (id) => {
-    set((state) => ({
-      messages: state.messages.map((message) =>
-        message.id === id ? { ...message, wasManuallyStopped: true, isStreaming: false } : message
+  markAsManuallyStopped: id => {
+    set(state => ({
+      messages: state.messages.map(message =>
+        message.id === id
+          ? { ...message, wasManuallyStopped: true, isStreaming: false }
+          : message
       ),
-      streamingMessageId: state.streamingMessageId === id ? null : state.streamingMessageId,
-    }))
+      streamingMessageId:
+        state.streamingMessageId === id ? null : state.streamingMessageId,
+    }));
   },
 
   setMessageError: (id, error) => {
-    set((state) => ({
-      messages: state.messages.map((message) =>
+    set(state => ({
+      messages: state.messages.map(message =>
         message.id === id ? { ...message, error } : message
       ),
-    }))
+    }));
   },
 
   clearMessages: () => {
     set(() => ({
       messages: [],
       streamingMessageId: null,
-    }))
+    }));
   },
 
-  setIsWaitingForResponse: (status) => {
+  setIsWaitingForResponse: status => {
     set(() => ({
       isWaitingForResponse: status,
-    }))
+    }));
   },
 
-  setCurrentConversationId: (conversationId) => {
+  setCurrentConversationId: conversationId => {
     set(() => ({
-      currentConversationId: conversationId
-    }))
+      currentConversationId: conversationId,
+    }));
   },
 
-  setCurrentTaskId: (taskId) => {
+  setCurrentTaskId: taskId => {
     set(() => ({
-      currentTaskId: taskId
-    }))
+      currentTaskId: taskId,
+    }));
   },
 
   // --- BEGIN COMMENT ---
@@ -206,14 +215,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
   // 特别是持久化相关的状态，如persistenceStatus和db_id
   // --- END COMMENT ---
   updateMessage: (id, updates) => {
-    set((state) => ({
-      messages: state.messages.map((message) =>
+    set(state => ({
+      messages: state.messages.map(message =>
         message.id === id ? { ...message, ...updates } : message
-      )
-    }))
-  }
+      ),
+    }));
+  },
 }));
-
 
 // --- BEGIN COMMENT ---
 // --- 导出常量 (如果项目需要) ---

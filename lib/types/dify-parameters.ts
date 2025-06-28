@@ -59,8 +59,8 @@ export interface DifySelectControl {
 /** 用户输入表单项 */
 export interface DifyUserInputFormItem {
   'text-input'?: DifyTextInputControl;
-  'paragraph'?: DifyParagraphControl;
-  'select'?: DifySelectControl;
+  paragraph?: DifyParagraphControl;
+  select?: DifySelectControl;
 }
 
 /** 图片上传配置 */
@@ -150,4 +150,4 @@ export interface DifyParametersSimplifiedConfig {
   user_input_form?: DifyUserInputFormItem[]; // 用户输入表单配置
   file_upload?: DifyFileUploadConfig; // 文件上传配置
   system_parameters?: DifySystemParameters; // 系统参数
-} 
+}

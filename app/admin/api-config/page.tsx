@@ -1,51 +1,54 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { useApiConfigStore, ServiceInstance } from '@lib/stores/api-config-store';
-import { useTheme } from '@lib/hooks/use-theme';
-import { useFormattedShortcut } from '@lib/hooks/use-platform-keys';
-import { KeyCombination } from '@components/ui/adaptive-key-badge';
-import { cn } from '@lib/utils';
-import DifyParametersPanel from '@components/admin/api-config/dify-parameters-panel';
-import type { DifyParametersSimplifiedConfig } from '@lib/types/dify-parameters';
-import {
-  Settings,
-  Plus,
-  Edit,
-  Trash2,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  Key,
-  Database,
-  Eye,
-  EyeOff,
-  Save,
-  X,
-  FileText,
-  Globe,
-  Zap,
-  Loader2,
-  Sliders,
-  Star,
-  RefreshCw,
-  Lightbulb
-} from 'lucide-react';
-import { DifyAppTypeSelector } from '@components/admin/api-config/dify-app-type-selector';
-import { ProviderManagementModal } from '@components/admin/api-config/provider-management-modal';
 import { CustomProviderSelector } from '@components/admin/api-config/custom-provider-selector';
-
-import { validateDifyFormData } from '@lib/services/dify/validation';
-import type { DifyAppType } from '@lib/types/dify-app-types';
+import { DifyAppTypeSelector } from '@components/admin/api-config/dify-app-type-selector';
+import DifyParametersPanel from '@components/admin/api-config/dify-parameters-panel';
+import { ProviderManagementModal } from '@components/admin/api-config/provider-management-modal';
+import { KeyCombination } from '@components/ui/adaptive-key-badge';
+import { useFormattedShortcut } from '@lib/hooks/use-platform-keys';
+import { useTheme } from '@lib/hooks/use-theme';
 // import { getDifyAppParameters } from '@lib/services/dify/app-service'; // 移除直接导入，改为动态导入保持一致性
 import type { DifyAppParametersResponse } from '@lib/services/dify/types';
+import { validateDifyFormData } from '@lib/services/dify/validation';
+import {
+  ServiceInstance,
+  useApiConfigStore,
+} from '@lib/stores/api-config-store';
+import type { DifyAppType } from '@lib/types/dify-app-types';
+import type { DifyParametersSimplifiedConfig } from '@lib/types/dify-parameters';
+import { cn } from '@lib/utils';
+import {
+  AlertCircle,
+  CheckCircle,
+  Database,
+  Edit,
+  Eye,
+  EyeOff,
+  FileText,
+  Globe,
+  Key,
+  Lightbulb,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Save,
+  Settings,
+  Sliders,
+  Star,
+  Trash2,
+  X,
+  XCircle,
+  Zap,
+} from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
+
+import React, { useEffect, useState } from 'react';
 
 interface ApiConfigPageProps {
-  selectedInstance?: ServiceInstance | null
-  showAddForm?: boolean
-  onClearSelection?: () => void
-  instances?: ServiceInstance[]
+  selectedInstance?: ServiceInstance | null;
+  showAddForm?: boolean;
+  onClearSelection?: () => void;
+  instances?: ServiceInstance[];
 }
 
 interface FeedbackState {
@@ -54,36 +57,56 @@ interface FeedbackState {
   severity: 'success' | 'error' | 'info' | 'warning';
 }
 
-const Toast = ({ feedback, onClose }: { feedback: FeedbackState; onClose: () => void }) => {
+const Toast = ({
+  feedback,
+  onClose,
+}: {
+  feedback: FeedbackState;
+  onClose: () => void;
+}) => {
   const { isDark } = useTheme();
-  
+
   useEffect(() => {
     if (feedback.open) {
       const timer = setTimeout(() => {
         onClose();
       }, 3000); // 3秒后自动关闭
-      
+
       return () => clearTimeout(timer);
     }
   }, [feedback.open, onClose]);
-  
+
   if (!feedback.open) return null;
-  
+
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-sm w-full mx-4">
-      <div className={cn(
-        "rounded-lg p-4 shadow-lg border animate-in slide-in-from-top-2",
-        feedback.severity === 'success' && "bg-green-500 text-white border-green-600",
-        feedback.severity === 'error' && "bg-red-500 text-white border-red-600",
-        feedback.severity === 'warning' && "bg-yellow-500 text-white border-yellow-600",
-        feedback.severity === 'info' && (isDark ? "bg-stone-800 text-stone-100 border-stone-700" : "bg-white text-stone-900 border-stone-200")
-      )}>
+    <div className="fixed top-4 left-1/2 z-50 mx-4 w-full max-w-sm -translate-x-1/2 transform">
+      <div
+        className={cn(
+          'animate-in slide-in-from-top-2 rounded-lg border p-4 shadow-lg',
+          feedback.severity === 'success' &&
+            'border-green-600 bg-green-500 text-white',
+          feedback.severity === 'error' &&
+            'border-red-600 bg-red-500 text-white',
+          feedback.severity === 'warning' &&
+            'border-yellow-600 bg-yellow-500 text-white',
+          feedback.severity === 'info' &&
+            (isDark
+              ? 'border-stone-700 bg-stone-800 text-stone-100'
+              : 'border-stone-200 bg-white text-stone-900')
+        )}
+      >
         <div className="flex items-center gap-2">
-          {feedback.severity === 'success' && <CheckCircle className="h-5 w-5" />}
+          {feedback.severity === 'success' && (
+            <CheckCircle className="h-5 w-5" />
+          )}
           {feedback.severity === 'error' && <XCircle className="h-5 w-5" />}
-          {feedback.severity === 'warning' && <AlertCircle className="h-5 w-5" />}
+          {feedback.severity === 'warning' && (
+            <AlertCircle className="h-5 w-5" />
+          )}
           {feedback.severity === 'info' && <AlertCircle className="h-5 w-5" />}
-          <span className="text-sm font-medium font-serif">{feedback.message}</span>
+          <span className="font-serif text-sm font-medium">
+            {feedback.message}
+          </span>
           <button onClick={onClose} className="ml-auto">
             <X className="h-4 w-4" />
           </button>
@@ -93,33 +116,34 @@ const Toast = ({ feedback, onClose }: { feedback: FeedbackState; onClose: () => 
   );
 };
 
-const InstanceForm = ({ 
-  instance, 
-  isEditing, 
-  onSave, 
-  onCancel, 
+const InstanceForm = ({
+  instance,
+  isEditing,
+  onSave,
+  onCancel,
   isProcessing,
   showFeedback,
-  defaultProviderId
+  defaultProviderId,
 }: {
-  instance: Partial<ServiceInstance> | null
-  isEditing: boolean
-  onSave: (data: any) => void
-  onCancel: () => void
-  isProcessing: boolean
-  showFeedback: (message: string, severity: 'success' | 'error' | 'info' | 'warning') => void
-  defaultProviderId?: string | null
+  instance: Partial<ServiceInstance> | null;
+  isEditing: boolean;
+  onSave: (data: any) => void;
+  onCancel: () => void;
+  isProcessing: boolean;
+  showFeedback: (
+    message: string,
+    severity: 'success' | 'error' | 'info' | 'warning'
+  ) => void;
+  defaultProviderId?: string | null;
 }) => {
   const { isDark } = useTheme();
   const { serviceInstances, apiKeys, providers } = useApiConfigStore();
-  
 
-  
   // --- BEGIN COMMENT ---
   // 新建模式下的提供商选择状态
   // --- END COMMENT ---
   const [selectedProviderId, setSelectedProviderId] = useState<string>('');
-  
+
   // --- BEGIN COMMENT ---
   // 监听提供商选择变化，自动更新API URL
   // --- END COMMENT ---
@@ -131,20 +155,24 @@ const InstanceForm = ({
           ...prev,
           config: {
             ...prev.config,
-            api_url: selectedProvider.base_url
-          }
+            api_url: selectedProvider.base_url,
+          },
         }));
       }
     }
   }, [selectedProviderId, providers, isEditing]);
-  
+
   // --- 获取当前实例的最新状态 ---
-  const currentInstance = instance ? serviceInstances.find(inst => inst.id === instance.id) : null;
+  const currentInstance = instance
+    ? serviceInstances.find(inst => inst.id === instance.id)
+    : null;
   const isCurrentDefault = currentInstance?.is_default || false;
-  
+
   // --- 检查当前实例是否已配置API密钥 ---
-  const hasApiKey = instance ? apiKeys.some(key => key.service_instance_id === instance.id) : false;
-  
+  const hasApiKey = instance
+    ? apiKeys.some(key => key.service_instance_id === instance.id)
+    : false;
+
   const [formData, setFormData] = useState({
     instance_id: instance?.instance_id || '',
     display_name: instance?.display_name || '',
@@ -154,14 +182,23 @@ const InstanceForm = ({
     config: {
       api_url: instance?.config?.api_url || '',
       app_metadata: {
-        app_type: (instance?.config?.app_metadata?.app_type as 'model' | 'marketplace') || 'model',
-        dify_apptype: (instance?.config?.app_metadata?.dify_apptype as 'chatbot' | 'agent' | 'chatflow' | 'workflow' | 'text-generation') || 'chatbot',
+        app_type:
+          (instance?.config?.app_metadata?.app_type as
+            | 'model'
+            | 'marketplace') || 'model',
+        dify_apptype:
+          (instance?.config?.app_metadata?.dify_apptype as
+            | 'chatbot'
+            | 'agent'
+            | 'chatflow'
+            | 'workflow'
+            | 'text-generation') || 'chatbot',
         tags: instance?.config?.app_metadata?.tags || [],
       },
-      dify_parameters: instance?.config?.dify_parameters || {}
-    }
+      dify_parameters: instance?.config?.dify_parameters || {},
+    },
   });
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 新增：基准数据状态，用于正确判断是否有未保存的更改
   // 当同步参数或重置表单时，需要更新这个基准数据
@@ -175,24 +212,33 @@ const InstanceForm = ({
     config: {
       api_url: instance?.config?.api_url || '',
       app_metadata: {
-        app_type: (instance?.config?.app_metadata?.app_type as 'model' | 'marketplace') || 'model',
-        dify_apptype: (instance?.config?.app_metadata?.dify_apptype as 'chatbot' | 'agent' | 'chatflow' | 'workflow' | 'text-generation') || 'chatbot',
+        app_type:
+          (instance?.config?.app_metadata?.app_type as
+            | 'model'
+            | 'marketplace') || 'model',
+        dify_apptype:
+          (instance?.config?.app_metadata?.dify_apptype as
+            | 'chatbot'
+            | 'agent'
+            | 'chatflow'
+            | 'workflow'
+            | 'text-generation') || 'chatbot',
         tags: instance?.config?.app_metadata?.tags || [],
       },
-      dify_parameters: instance?.config?.dify_parameters || {}
-    }
+      dify_parameters: instance?.config?.dify_parameters || {},
+    },
   });
-  
+
   const [showApiKey, setShowApiKey] = useState(false);
   const [showDifyPanel, setShowDifyPanel] = useState(false);
   const [setAsDefault, setSetAsDefault] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 新增：实时验证instance_id格式
   // --- END COMMENT ---
   const [instanceIdError, setInstanceIdError] = useState<string>('');
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 实时验证instance_id格式的函数
   // --- END COMMENT ---
@@ -201,43 +247,43 @@ const InstanceForm = ({
       setInstanceIdError('');
       return;
     }
-    
+
     const instanceId = value.trim();
-    
+
     // 检查是否包含空格
     if (instanceId.includes(' ')) {
       setInstanceIdError('不能包含空格（会影响URL路由）');
       return;
     }
-    
+
     // 检查是否包含其他需要URL编码的特殊字符
     const urlUnsafeChars = /[^a-zA-Z0-9\-_\.]/;
     if (urlUnsafeChars.test(instanceId)) {
       setInstanceIdError('只能包含字母、数字、连字符(-)、下划线(_)和点(.)');
       return;
     }
-    
+
     // 检查长度限制
     if (instanceId.length > 50) {
       setInstanceIdError('长度不能超过50个字符');
       return;
     }
-    
+
     // 检查是否以字母或数字开头
     if (!/^[a-zA-Z0-9]/.test(instanceId)) {
       setInstanceIdError('必须以字母或数字开头');
       return;
     }
-    
+
     // 所有验证通过
     setInstanceIdError('');
   };
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 获取保存快捷键信息
   // --- END COMMENT ---
   const saveShortcut = useFormattedShortcut('SAVE_SUBMIT');
-  
+
   useEffect(() => {
     const newData = {
       instance_id: instance?.instance_id || '',
@@ -248,25 +294,36 @@ const InstanceForm = ({
       config: {
         api_url: instance?.config?.api_url || '',
         app_metadata: {
-          app_type: (instance?.config?.app_metadata?.app_type as 'model' | 'marketplace') || 'model',
-          dify_apptype: (instance?.config?.app_metadata?.dify_apptype as 'chatbot' | 'agent' | 'chatflow' | 'workflow' | 'text-generation') || 'chatbot',
+          app_type:
+            (instance?.config?.app_metadata?.app_type as
+              | 'model'
+              | 'marketplace') || 'model',
+          dify_apptype:
+            (instance?.config?.app_metadata?.dify_apptype as
+              | 'chatbot'
+              | 'agent'
+              | 'chatflow'
+              | 'workflow'
+              | 'text-generation') || 'chatbot',
           tags: instance?.config?.app_metadata?.tags || [],
         },
-        dify_parameters: instance?.config?.dify_parameters || {}
-      }
+        dify_parameters: instance?.config?.dify_parameters || {},
+      },
     };
-    
+
     if (instance) {
       // --- BEGIN COMMENT ---
       // 编辑模式：如果API URL为空，使用提供商的base_url
       // --- END COMMENT ---
       if (!newData.config.api_url && instance.provider_id) {
-        const currentProvider = providers.find(p => p.id === instance.provider_id);
+        const currentProvider = providers.find(
+          p => p.id === instance.provider_id
+        );
         if (currentProvider && currentProvider.base_url) {
           newData.config.api_url = currentProvider.base_url;
         }
       }
-      
+
       setFormData(newData);
       setBaselineData(newData);
       // --- BEGIN COMMENT ---
@@ -281,21 +338,25 @@ const InstanceForm = ({
       const getInitialProviderId = () => {
         const activeProviders = providers.filter(p => p.is_active);
         if (activeProviders.length === 0) return '';
-        
+
         // 如果有筛选的提供商且该提供商是活跃的，优先使用
         if (defaultProviderId) {
-          const filteredProvider = activeProviders.find(p => p.id === defaultProviderId);
+          const filteredProvider = activeProviders.find(
+            p => p.id === defaultProviderId
+          );
           if (filteredProvider) return filteredProvider.id;
         }
-        
+
         if (activeProviders.length === 1) return activeProviders[0].id;
-        const difyProvider = activeProviders.find(p => p.name.toLowerCase() === 'dify');
+        const difyProvider = activeProviders.find(
+          p => p.name.toLowerCase() === 'dify'
+        );
         return difyProvider ? difyProvider.id : activeProviders[0].id;
       };
-      
+
       const initialProviderId = getInitialProviderId();
       setSelectedProviderId(initialProviderId);
-      
+
       const emptyData = {
         instance_id: '',
         display_name: '',
@@ -309,8 +370,8 @@ const InstanceForm = ({
             dify_apptype: 'chatbot' as const,
             tags: [],
           },
-          dify_parameters: {}
-        }
+          dify_parameters: {},
+        },
       };
       setFormData(emptyData);
       setBaselineData(emptyData);
@@ -320,10 +381,10 @@ const InstanceForm = ({
       setInstanceIdError('');
     }
   }, [instance, providers]);
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // --- BEGIN COMMENT ---
     // 🎯 检查实时验证错误
     // --- END COMMENT ---
@@ -331,7 +392,7 @@ const InstanceForm = ({
       showFeedback(`应用ID格式错误: ${instanceIdError}`, 'error');
       return;
     }
-    
+
     // --- BEGIN COMMENT ---
     // 🎯 新增：表单验证，确保Dify应用类型必填
     // --- END COMMENT ---
@@ -340,7 +401,7 @@ const InstanceForm = ({
       showFeedback(validationErrors.join(', '), 'error');
       return;
     }
-    
+
     // --- 自动设置 is_marketplace_app 字段与 app_type 保持一致 ---
     const dataToSave = {
       ...formData,
@@ -356,16 +417,17 @@ const InstanceForm = ({
           // 🎯 确保dify_apptype字段被保存
           // --- END COMMENT ---
           dify_apptype: formData.config.app_metadata.dify_apptype,
-          is_marketplace_app: formData.config.app_metadata.app_type === 'marketplace'
-        }
+          is_marketplace_app:
+            formData.config.app_metadata.app_type === 'marketplace',
+        },
       },
       setAsDefault,
       // --- BEGIN COMMENT ---
       // 新建模式下传递选择的提供商ID
       // --- END COMMENT ---
-      selectedProviderId: isEditing ? undefined : selectedProviderId
+      selectedProviderId: isEditing ? undefined : selectedProviderId,
     };
-    
+
     onSave(dataToSave);
   };
 
@@ -374,10 +436,10 @@ const InstanceForm = ({
       ...prev,
       config: {
         ...prev.config,
-        dify_parameters: difyConfig
-      }
+        dify_parameters: difyConfig,
+      },
     }));
-    
+
     // --- BEGIN COMMENT ---
     // 🎯 修复：Dify参数保存后也更新基准数据
     // --- END COMMENT ---
@@ -385,10 +447,10 @@ const InstanceForm = ({
       ...prev,
       config: {
         ...prev.config,
-        dify_parameters: difyConfig
-      }
+        dify_parameters: difyConfig,
+      },
     }));
-    
+
     setShowDifyPanel(false);
   };
 
@@ -405,7 +467,7 @@ const InstanceForm = ({
       showFeedback('请先填写API URL和API Key', 'warning');
       return;
     }
-    
+
     if (isEditing && !formData.instance_id) {
       showFeedback('请先填写应用ID', 'warning');
       return;
@@ -420,55 +482,64 @@ const InstanceForm = ({
       let difyParams: DifyAppParametersResponse | null = null;
       let actualInstanceId = formData.instance_id;
       let isAutoGenerated = false;
-      
+
       if (isEditing) {
         // 编辑模式：优先使用数据库配置
         try {
           console.log('[同步配置] 编辑模式：尝试使用数据库配置');
-          
+
           // 同时获取基本信息和参数
-          const { getDifyAppInfo, getDifyAppParameters } = await import('@lib/services/dify');
+          const { getDifyAppInfo, getDifyAppParameters } = await import(
+            '@lib/services/dify'
+          );
           appInfo = await getDifyAppInfo(formData.instance_id);
           difyParams = await getDifyAppParameters(formData.instance_id);
-          
         } catch (dbError) {
           console.log('[同步配置] 数据库配置失败，尝试使用表单配置:', dbError);
-          
+
           // --- BEGIN COMMENT ---
           // 🎯 改进：编辑模式下支持使用表单配置进行同步
           // 这样用户可以修改API Key后立即测试，无需先保存
           // --- END COMMENT ---
           if (!formData.config.api_url) {
-            throw new Error('API URL为空，无法同步配置。请填写API URL或检查数据库配置。');
+            throw new Error(
+              'API URL为空，无法同步配置。请填写API URL或检查数据库配置。'
+            );
           }
-          
+
           if (!formData.apiKey) {
-            throw new Error('API Key为空，无法同步配置。请在API密钥字段中输入新的密钥进行测试。');
+            throw new Error(
+              'API Key为空，无法同步配置。请在API密钥字段中输入新的密钥进行测试。'
+            );
           }
-          
+
           // 使用表单配置作为fallback
-          const { getDifyAppInfoWithConfig, getDifyAppParametersWithConfig } = await import('@lib/services/dify');
-          
+          const { getDifyAppInfoWithConfig, getDifyAppParametersWithConfig } =
+            await import('@lib/services/dify');
+
           // 同时获取基本信息和参数
           appInfo = await getDifyAppInfoWithConfig(formData.instance_id, {
             apiUrl: formData.config.api_url,
-            apiKey: formData.apiKey
+            apiKey: formData.apiKey,
           });
-          difyParams = await getDifyAppParametersWithConfig(formData.instance_id, {
-            apiUrl: formData.config.api_url,
-            apiKey: formData.apiKey
-          });
+          difyParams = await getDifyAppParametersWithConfig(
+            formData.instance_id,
+            {
+              apiUrl: formData.config.api_url,
+              apiKey: formData.apiKey,
+            }
+          );
         }
       } else {
         // 添加模式：直接使用表单配置
         console.log('[同步配置] 添加模式：使用表单配置');
-        
+
         // 检查表单配置是否完整
         if (!formData.config.api_url || !formData.apiKey) {
           showFeedback('请先填写API URL和API Key', 'warning');
           return;
         }
-        
+
         // --- BEGIN COMMENT ---
         // 🎯 改进：如果应用ID为空，自动生成临时UUID进行测试
         // 这样用户可以先测试API配置，无需预先想应用ID
@@ -476,61 +547,79 @@ const InstanceForm = ({
         if (!actualInstanceId) {
           actualInstanceId = uuidv4();
           isAutoGenerated = true;
-          console.log('[同步配置] 应用ID为空，自动生成临时ID:', actualInstanceId);
+          console.log(
+            '[同步配置] 应用ID为空，自动生成临时ID:',
+            actualInstanceId
+          );
         }
-        
+
         // 直接使用表单配置
-        const { getDifyAppInfoWithConfig, getDifyAppParametersWithConfig } = await import('@lib/services/dify');
-        
+        const { getDifyAppInfoWithConfig, getDifyAppParametersWithConfig } =
+          await import('@lib/services/dify');
+
         // 同时获取基本信息和参数
         appInfo = await getDifyAppInfoWithConfig(actualInstanceId, {
           apiUrl: formData.config.api_url,
-          apiKey: formData.apiKey
+          apiKey: formData.apiKey,
         });
         difyParams = await getDifyAppParametersWithConfig(actualInstanceId, {
           apiUrl: formData.config.api_url,
-          apiKey: formData.apiKey
+          apiKey: formData.apiKey,
         });
       }
-      
+
       // --- BEGIN COMMENT ---
       // 🎯 处理基本信息同步 - 去掉确认对话框，直接同步
       // --- END COMMENT ---
       const updatedFormData = { ...formData };
-      
+
       if (appInfo) {
         // --- BEGIN COMMENT ---
         // 🎯 改进：总是同步基本信息，但给用户选择权
         // 不再限制只有空字段才同步，提高同步功能的实用性
         // --- END COMMENT ---
-        
+
         // 同步display_name（如果有变化则询问用户）
         if (appInfo.name && appInfo.name !== formData.display_name) {
-          if (!formData.display_name || confirm(`是否将显示名称更新为："${appInfo.name}"？`)) {
+          if (
+            !formData.display_name ||
+            confirm(`是否将显示名称更新为："${appInfo.name}"？`)
+          ) {
             updatedFormData.display_name = appInfo.name;
           }
         }
-        
+
         // 同步description（如果有变化则询问用户）
-        if (appInfo.description && appInfo.description !== formData.description) {
-          if (!formData.description || confirm(`是否将描述更新为："${appInfo.description}"？`)) {
+        if (
+          appInfo.description &&
+          appInfo.description !== formData.description
+        ) {
+          if (
+            !formData.description ||
+            confirm(`是否将描述更新为："${appInfo.description}"？`)
+          ) {
             updatedFormData.description = appInfo.description;
           }
         }
-        
+
         // --- BEGIN COMMENT ---
         // 🎯 同步tags（append模式，不替换现有tags）
         // --- END COMMENT ---
         if (appInfo.tags && appInfo.tags.length > 0) {
           const currentTags = formData.config.app_metadata.tags || [];
-          const newTags = appInfo.tags.filter((tag: string) => !currentTags.includes(tag));
-          
+          const newTags = appInfo.tags.filter(
+            (tag: string) => !currentTags.includes(tag)
+          );
+
           if (newTags.length > 0) {
-            updatedFormData.config.app_metadata.tags = [...currentTags, ...newTags];
+            updatedFormData.config.app_metadata.tags = [
+              ...currentTags,
+              ...newTags,
+            ];
           }
         }
       }
-      
+
       // --- BEGIN COMMENT ---
       // 🎯 处理参数同步（保持原有逻辑）
       // --- END COMMENT ---
@@ -538,10 +627,13 @@ const InstanceForm = ({
         const simplifiedParams: DifyParametersSimplifiedConfig = {
           opening_statement: difyParams.opening_statement || '',
           suggested_questions: difyParams.suggested_questions || [],
-          suggested_questions_after_answer: difyParams.suggested_questions_after_answer || { enabled: false },
+          suggested_questions_after_answer:
+            difyParams.suggested_questions_after_answer || { enabled: false },
           speech_to_text: difyParams.speech_to_text || { enabled: false },
           text_to_speech: difyParams.text_to_speech || { enabled: false },
-          retriever_resource: difyParams.retriever_resource || { enabled: false },
+          retriever_resource: difyParams.retriever_resource || {
+            enabled: false,
+          },
           annotation_reply: difyParams.annotation_reply || { enabled: false },
           user_input_form: difyParams.user_input_form || [],
           file_upload: difyParams.file_upload || undefined,
@@ -549,13 +641,13 @@ const InstanceForm = ({
             file_size_limit: 15,
             image_file_size_limit: 10,
             audio_file_size_limit: 50,
-            video_file_size_limit: 100
-          }
+            video_file_size_limit: 100,
+          },
         };
-        
+
         updatedFormData.config.dify_parameters = simplifiedParams;
       }
-      
+
       // --- BEGIN COMMENT ---
       // 🎯 新增：如果是自动生成的ID，同步成功后自动填充到表单
       // --- END COMMENT ---
@@ -564,15 +656,15 @@ const InstanceForm = ({
         // 验证自动生成的ID
         validateInstanceId(actualInstanceId);
       }
-      
+
       // 更新表单数据
       setFormData(updatedFormData);
-      
+
       // --- BEGIN COMMENT ---
       // 🎯 同步成功后更新基准数据
       // --- END COMMENT ---
       setBaselineData(updatedFormData);
-      
+
       // --- BEGIN COMMENT ---
       // 🎯 添加数据验证，确保真正获取到数据才显示成功
       // --- END COMMENT ---
@@ -583,11 +675,13 @@ const InstanceForm = ({
       if (difyParams) {
         syncedItems.push('参数配置');
       }
-      
+
       if (syncedItems.length === 0) {
-        throw new Error('未能从 Dify API 获取到任何配置数据，请检查应用ID和API配置是否正确');
+        throw new Error(
+          '未能从 Dify API 获取到任何配置数据，请检查应用ID和API配置是否正确'
+        );
       }
-      
+
       // --- BEGIN COMMENT ---
       // 🎯 改进：根据是否自动生成ID提供不同的成功提示
       // --- END COMMENT ---
@@ -595,12 +689,12 @@ const InstanceForm = ({
       if (!isEditing && isAutoGenerated) {
         successMessage += ` 已自动生成应用ID：${actualInstanceId}`;
       }
-      
+
       showFeedback(successMessage, 'success');
-      
     } catch (error) {
       console.error('[同步配置] 同步失败:', error);
-      const errorMessage = error instanceof Error ? error.message : '同步配置失败';
+      const errorMessage =
+        error instanceof Error ? error.message : '同步配置失败';
       showFeedback(`同步失败: ${errorMessage}`, 'error');
     } finally {
       setIsSyncing(false);
@@ -609,39 +703,48 @@ const InstanceForm = ({
 
   return (
     <>
-      <div className={cn(
-        "rounded-xl border p-6 mb-6",
-        isDark ? "bg-stone-800 border-stone-600" : "bg-white border-stone-200"
-      )}>
-        <div className="flex items-center justify-between mb-6">
+      <div
+        className={cn(
+          'mb-6 rounded-xl border p-6',
+          isDark ? 'border-stone-600 bg-stone-800' : 'border-stone-200 bg-white'
+        )}
+      >
+        <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h3 className={cn(
-              "text-lg font-bold font-serif",
-              isDark ? "text-stone-100" : "text-stone-900"
-            )}>
+            <h3
+              className={cn(
+                'font-serif text-lg font-bold',
+                isDark ? 'text-stone-100' : 'text-stone-900'
+              )}
+            >
               {isEditing ? '编辑应用实例' : '添加应用实例'}
             </h3>
-            
+
             {/* --- BEGIN COMMENT --- */}
             {/* 🎯 新增：未保存更改提示 */}
             {/* --- END COMMENT --- */}
-            {(JSON.stringify(formData) !== JSON.stringify(baselineData) || formData.apiKey) && (
-              <div className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium font-serif",
-                "border border-dashed animate-pulse",
-                isDark 
-                  ? "bg-amber-900/20 border-amber-700/40 text-amber-300" 
-                  : "bg-amber-50 border-amber-300/60 text-amber-700"
-              )}>
-                <div className={cn(
-                  "w-2 h-2 rounded-full",
-                  isDark ? "bg-amber-400" : "bg-amber-500"
-                )} />
+            {(JSON.stringify(formData) !== JSON.stringify(baselineData) ||
+              formData.apiKey) && (
+              <div
+                className={cn(
+                  'flex items-center gap-2 rounded-full px-3 py-1.5 font-serif text-xs font-medium',
+                  'animate-pulse border border-dashed',
+                  isDark
+                    ? 'border-amber-700/40 bg-amber-900/20 text-amber-300'
+                    : 'border-amber-300/60 bg-amber-50 text-amber-700'
+                )}
+              >
+                <div
+                  className={cn(
+                    'h-2 w-2 rounded-full',
+                    isDark ? 'bg-amber-400' : 'bg-amber-500'
+                  )}
+                />
                 有未保存的更改
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center gap-3">
             {/* 设为默认应用按钮 */}
             {isEditing ? (
@@ -652,46 +755,57 @@ const InstanceForm = ({
                   onClick={() => {
                     // --- 简化逻辑：直接使用实时状态 ---
                     if (isCurrentDefault) {
-                      return // 已经是默认应用，无需操作
+                      return; // 已经是默认应用，无需操作
                     }
-                    
-                    if (confirm(`确定要将"${formData.display_name || '此应用'}"设置为默认应用吗？`)) {
+
+                    if (
+                      confirm(
+                        `确定要将"${formData.display_name || '此应用'}"设置为默认应用吗？`
+                      )
+                    ) {
                       // 直接调用store的方法
                       if (instance.id) {
-                        useApiConfigStore.getState().setDefaultInstance(instance.id)
+                        useApiConfigStore
+                          .getState()
+                          .setDefaultInstance(instance.id)
                           .then(() => {
-                            showFeedback('默认应用设置成功', 'success')
+                            showFeedback('默认应用设置成功', 'success');
                           })
-                          .catch((error) => {
-                            console.error('设置默认应用失败:', error)
-                            showFeedback('设置默认应用失败', 'error')
-                          })
+                          .catch(error => {
+                            console.error('设置默认应用失败:', error);
+                            showFeedback('设置默认应用失败', 'error');
+                          });
                       } else {
-                        showFeedback('实例ID不存在，无法设置为默认应用', 'error')
+                        showFeedback(
+                          '实例ID不存在，无法设置为默认应用',
+                          'error'
+                        );
                       }
                     }
                   }}
                   disabled={isCurrentDefault}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-2 rounded-lg transition-all",
-                    "border",
+                    'flex items-center gap-2 rounded-lg px-3 py-2 transition-all',
+                    'border',
                     isCurrentDefault
-                      ? "cursor-not-allowed opacity-60"
-                      : "cursor-pointer hover:scale-105",
+                      ? 'cursor-not-allowed opacity-60'
+                      : 'cursor-pointer hover:scale-105',
                     isCurrentDefault
                       ? isDark
-                        ? "border-stone-600/50 bg-stone-700/30 text-stone-400"
-                        : "border-stone-300/50 bg-stone-100/50 text-stone-500"
+                        ? 'border-stone-600/50 bg-stone-700/30 text-stone-400'
+                        : 'border-stone-300/50 bg-stone-100/50 text-stone-500'
                       : isDark
-                        ? "border-stone-600 bg-stone-700 hover:bg-stone-600 text-stone-300"
-                        : "border-stone-300 bg-stone-100 hover:bg-stone-200 text-stone-700"
+                        ? 'border-stone-600 bg-stone-700 text-stone-300 hover:bg-stone-600'
+                        : 'border-stone-300 bg-stone-100 text-stone-700 hover:bg-stone-200'
                   )}
                 >
-                  <Star className={cn(
-                    "h-4 w-4",
-                    isCurrentDefault && "fill-current"
-                  )} />
-                  <span className="text-sm font-medium font-serif">
+                  <Star
+                    className={cn(
+                      'h-4 w-4',
+                      isCurrentDefault && 'fill-current'
+                    )}
+                  />
+                  <span className="font-serif text-sm font-medium">
                     {isCurrentDefault ? '默认应用' : '设为默认'}
                   </span>
                 </button>
@@ -702,71 +816,77 @@ const InstanceForm = ({
                 type="button"
                 onClick={() => setSetAsDefault(!setAsDefault)}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-lg transition-all cursor-pointer",
-                  "border hover:scale-105",
+                  'flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 transition-all',
+                  'border hover:scale-105',
                   setAsDefault
                     ? isDark
-                      ? "border-stone-500 bg-stone-600 text-stone-200"
-                      : "border-stone-400 bg-stone-200 text-stone-800"
+                      ? 'border-stone-500 bg-stone-600 text-stone-200'
+                      : 'border-stone-400 bg-stone-200 text-stone-800'
                     : isDark
-                      ? "border-stone-600 bg-stone-700 hover:bg-stone-600 text-stone-300"
-                      : "border-stone-300 bg-stone-100 hover:bg-stone-200 text-stone-700"
+                      ? 'border-stone-600 bg-stone-700 text-stone-300 hover:bg-stone-600'
+                      : 'border-stone-300 bg-stone-100 text-stone-700 hover:bg-stone-200'
                 )}
               >
-                <Star className={cn(
-                  "h-4 w-4",
-                  setAsDefault && "fill-current"
-                )} />
-                <span className="text-sm font-medium font-serif">
+                <Star
+                  className={cn('h-4 w-4', setAsDefault && 'fill-current')}
+                />
+                <span className="font-serif text-sm font-medium">
                   {setAsDefault ? '将设为默认' : '设为默认'}
                 </span>
               </button>
             )}
-            
+
             {/* Dify参数配置按钮组 */}
-            <div className={cn(
-              "flex gap-2 p-2 rounded-lg",
-              isDark 
-                ? "bg-stone-800/50" 
-                : "bg-stone-100/50"
-            )}>
+            <div
+              className={cn(
+                'flex gap-2 rounded-lg p-2',
+                isDark ? 'bg-stone-800/50' : 'bg-stone-100/50'
+              )}
+            >
               <button
                 type="button"
                 onClick={() => setShowDifyPanel(true)}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg transition-all cursor-pointer",
-                  isDark 
-                    ? "bg-stone-700/50 hover:bg-stone-700 text-stone-300 hover:text-stone-200" 
-                    : "bg-white hover:bg-stone-50 text-stone-700 hover:text-stone-800 border border-stone-200"
+                  'flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 transition-all',
+                  isDark
+                    ? 'bg-stone-700/50 text-stone-300 hover:bg-stone-700 hover:text-stone-200'
+                    : 'border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 hover:text-stone-800'
                 )}
               >
                 <Sliders className="h-4 w-4" />
-                <span className="text-sm font-medium font-serif">Dify 参数配置</span>
+                <span className="font-serif text-sm font-medium">
+                  Dify 参数配置
+                </span>
               </button>
-              
+
               {/* --- BEGIN COMMENT --- */}
               {/* 🎯 新增：从 Dify API 同步参数按钮 */}
               {/* --- END COMMENT --- */}
               <button
                 type="button"
                 onClick={handleSyncFromDify}
-                disabled={isSyncing || (!isEditing && (!formData.config.api_url || !formData.apiKey))}
+                disabled={
+                  isSyncing ||
+                  (!isEditing && (!formData.config.api_url || !formData.apiKey))
+                }
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg transition-all cursor-pointer",
-                  isSyncing || (!isEditing && (!formData.config.api_url || !formData.apiKey))
+                  'flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 transition-all',
+                  isSyncing ||
+                    (!isEditing &&
+                      (!formData.config.api_url || !formData.apiKey))
                     ? isDark
-                      ? "bg-stone-800/50 text-stone-500 cursor-not-allowed"
-                      : "bg-stone-200/50 text-stone-400 cursor-not-allowed border border-stone-200"
+                      ? 'cursor-not-allowed bg-stone-800/50 text-stone-500'
+                      : 'cursor-not-allowed border border-stone-200 bg-stone-200/50 text-stone-400'
                     : isDark
-                      ? "bg-stone-700/50 hover:bg-stone-700 text-stone-300 hover:text-stone-200"
-                      : "bg-white hover:bg-stone-50 text-stone-700 hover:text-stone-800 border border-stone-200"
+                      ? 'bg-stone-700/50 text-stone-300 hover:bg-stone-700 hover:text-stone-200'
+                      : 'border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 hover:text-stone-800'
                 )}
                 title={
-                  isEditing 
-                    ? "从 Dify API 同步配置" 
-                    : (!formData.config.api_url || !formData.apiKey) 
-                      ? "请先填写API URL和API Key" 
-                      : "从 Dify API 同步配置（应用ID为空时将自动生成）"
+                  isEditing
+                    ? '从 Dify API 同步配置'
+                    : !formData.config.api_url || !formData.apiKey
+                      ? '请先填写API URL和API Key'
+                      : '从 Dify API 同步配置（应用ID为空时将自动生成）'
                 }
               >
                 {isSyncing ? (
@@ -774,45 +894,61 @@ const InstanceForm = ({
                 ) : (
                   <RefreshCw className="h-4 w-4" />
                 )}
-                <span className="text-sm font-medium font-serif">
+                <span className="font-serif text-sm font-medium">
                   {isSyncing ? '同步中...' : '同步配置'}
                 </span>
               </button>
             </div>
           </div>
         </div>
-        
-                {/* --- BEGIN COMMENT ---
+
+        {/* --- BEGIN COMMENT ---
         服务提供商选择/显示区域
         --- END COMMENT --- */}
-        <div className={cn(
-          "mb-6 p-4 rounded-lg border",
-          isDark ? "bg-stone-700/50 border-stone-600" : "bg-stone-50 border-stone-200"
-        )}>
+        <div
+          className={cn(
+            'mb-6 rounded-lg border p-4',
+            isDark
+              ? 'border-stone-600 bg-stone-700/50'
+              : 'border-stone-200 bg-stone-50'
+          )}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className={cn(
-                "text-sm font-medium font-serif",
-                isDark ? "text-stone-200" : "text-stone-800"
-              )}>
+              <h3
+                className={cn(
+                  'font-serif text-sm font-medium',
+                  isDark ? 'text-stone-200' : 'text-stone-800'
+                )}
+              >
                 服务提供商
               </h3>
-              <p className={cn(
-                "text-xs mt-1 font-serif",
-                isDark ? "text-stone-400" : "text-stone-600"
-              )}>
-                {isEditing ? '当前应用的服务提供商（不可修改）' : '选择服务提供商'}
+              <p
+                className={cn(
+                  'mt-1 font-serif text-xs',
+                  isDark ? 'text-stone-400' : 'text-stone-600'
+                )}
+              >
+                {isEditing
+                  ? '当前应用的服务提供商（不可修改）'
+                  : '选择服务提供商'}
               </p>
             </div>
-            
+
             {isEditing ? (
               // 编辑模式：只显示，不可修改
-              <div className={cn(
-                "px-3 py-1.5 rounded-md text-sm font-serif",
-                isDark ? "bg-stone-600 text-stone-200" : "bg-stone-200 text-stone-700"
-              )}>
+              <div
+                className={cn(
+                  'rounded-md px-3 py-1.5 font-serif text-sm',
+                  isDark
+                    ? 'bg-stone-600 text-stone-200'
+                    : 'bg-stone-200 text-stone-700'
+                )}
+              >
                 {(() => {
-                  const currentProvider = providers.find(p => p.id === instance?.provider_id);
+                  const currentProvider = providers.find(
+                    p => p.id === instance?.provider_id
+                  );
                   return currentProvider ? currentProvider.name : '未知提供商';
                 })()}
               </div>
@@ -831,36 +967,44 @@ const InstanceForm = ({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div>
-              <label className={cn(
-                "block text-sm font-medium mb-2 font-serif",
-                isDark ? "text-stone-300" : "text-stone-700"
-              )}>
+              <label
+                className={cn(
+                  'mb-2 block font-serif text-sm font-medium',
+                  isDark ? 'text-stone-300' : 'text-stone-700'
+                )}
+              >
                 应用 ID (instance_id) *
               </label>
               <div className="relative">
                 <input
                   type="text"
                   value={formData.instance_id}
-                  onChange={(e) => {
-                    setFormData(prev => ({ ...prev, instance_id: e.target.value }));
+                  onChange={e => {
+                    setFormData(prev => ({
+                      ...prev,
+                      instance_id: e.target.value,
+                    }));
                     validateInstanceId(e.target.value);
                   }}
                   className={cn(
-                    "w-full px-3 py-2 rounded-lg border font-serif",
-                    !isEditing && "pr-20", // 新建模式下为按钮留空间
-                    isDark 
-                      ? "bg-stone-700 border-stone-600 text-stone-100 placeholder-stone-400" 
-                      : "bg-white border-stone-300 text-stone-900 placeholder-stone-500",
-                    isEditing && (isDark ? "bg-stone-800 cursor-not-allowed" : "bg-stone-100 cursor-not-allowed"),
-                    instanceIdError && "border-red-500"
+                    'w-full rounded-lg border px-3 py-2 font-serif',
+                    !isEditing && 'pr-20', // 新建模式下为按钮留空间
+                    isDark
+                      ? 'border-stone-600 bg-stone-700 text-stone-100 placeholder-stone-400'
+                      : 'border-stone-300 bg-white text-stone-900 placeholder-stone-500',
+                    isEditing &&
+                      (isDark
+                        ? 'cursor-not-allowed bg-stone-800'
+                        : 'cursor-not-allowed bg-stone-100'),
+                    instanceIdError && 'border-red-500'
                   )}
                   placeholder="输入应用 ID"
                   required
                   disabled={isEditing}
                 />
-                
+
                 {/* --- BEGIN COMMENT --- */}
                 {/* 🎯 新增：UUID生成按钮（仅在新建模式下显示） */}
                 {/* --- END COMMENT --- */}
@@ -873,13 +1017,13 @@ const InstanceForm = ({
                       validateInstanceId(uuid);
                     }}
                     className={cn(
-                      "absolute right-2 top-1/2 transform -translate-y-1/2",
-                      "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all cursor-pointer",
-                      "border shadow-sm hover:shadow-md hover:scale-105",
-                      "font-medium font-serif",
-                      isDark 
-                        ? "bg-gradient-to-r from-stone-600 to-stone-700 hover:from-stone-500 hover:to-stone-600 text-stone-200 hover:text-white border-stone-500" 
-                        : "bg-gradient-to-r from-stone-100 to-stone-200 hover:from-stone-200 hover:to-stone-300 text-stone-700 hover:text-stone-800 border-stone-300"
+                      'absolute top-1/2 right-2 -translate-y-1/2 transform',
+                      'flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs transition-all',
+                      'border shadow-sm hover:scale-105 hover:shadow-md',
+                      'font-serif font-medium',
+                      isDark
+                        ? 'border-stone-500 bg-gradient-to-r from-stone-600 to-stone-700 text-stone-200 hover:from-stone-500 hover:to-stone-600 hover:text-white'
+                        : 'border-stone-300 bg-gradient-to-r from-stone-100 to-stone-200 text-stone-700 hover:from-stone-200 hover:to-stone-300 hover:text-stone-800'
                     )}
                     title="点击生成随机UUID作为应用ID"
                   >
@@ -889,52 +1033,65 @@ const InstanceForm = ({
                 )}
               </div>
               {isEditing && (
-                <p className={cn(
-                  "text-xs mt-1 font-serif",
-                  isDark ? "text-stone-400" : "text-stone-500"
-                )}>
+                <p
+                  className={cn(
+                    'mt-1 font-serif text-xs',
+                    isDark ? 'text-stone-400' : 'text-stone-500'
+                  )}
+                >
                   应用 ID 创建后不可修改
                 </p>
               )}
 
               {!isEditing && (
-                <p className={cn(
-                  "text-xs mt-1 font-serif",
-                  isDark ? "text-stone-400" : "text-stone-500"
-                )}>
+                <p
+                  className={cn(
+                    'mt-1 font-serif text-xs',
+                    isDark ? 'text-stone-400' : 'text-stone-500'
+                  )}
+                >
                   只能包含字母、数字、连字符(-)、下划线(_)和点(.)，不能包含空格。可先同步配置自动生成。
                 </p>
               )}
-              
+
               {/* --- BEGIN COMMENT --- */}
               {/* 🎯 新增：实时错误提示 */}
               {/* --- END COMMENT --- */}
               {instanceIdError && (
-                <p className={cn(
-                  "text-xs mt-1 font-serif text-red-500 flex items-center gap-1"
-                )}>
+                <p
+                  className={cn(
+                    'mt-1 flex items-center gap-1 font-serif text-xs text-red-500'
+                  )}
+                >
                   <AlertCircle className="h-3 w-3" />
                   {instanceIdError}
                 </p>
               )}
             </div>
-            
+
             <div>
-              <label className={cn(
-                "block text-sm font-medium mb-2 font-serif",
-                isDark ? "text-stone-300" : "text-stone-700"
-              )}>
+              <label
+                className={cn(
+                  'mb-2 block font-serif text-sm font-medium',
+                  isDark ? 'text-stone-300' : 'text-stone-700'
+                )}
+              >
                 显示名称 (display_name) *
               </label>
               <input
                 type="text"
                 value={formData.display_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, display_name: e.target.value }))}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    display_name: e.target.value,
+                  }))
+                }
                 className={cn(
-                  "w-full px-3 py-2 rounded-lg border font-serif",
-                  isDark 
-                    ? "bg-stone-700 border-stone-600 text-stone-100 placeholder-stone-400" 
-                    : "bg-white border-stone-300 text-stone-900 placeholder-stone-500"
+                  'w-full rounded-lg border px-3 py-2 font-serif',
+                  isDark
+                    ? 'border-stone-600 bg-stone-700 text-stone-100 placeholder-stone-400'
+                    : 'border-stone-300 bg-white text-stone-900 placeholder-stone-500'
                 )}
                 placeholder="输入显示名称"
                 required
@@ -945,68 +1102,96 @@ const InstanceForm = ({
           {/* --- BEGIN COMMENT --- */}
           {/* 🎯 API配置字段 - 移动到描述字段之前 */}
           {/* --- END COMMENT --- */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* --- BEGIN COMMENT ---
             API URL 输入框 - 禁用修改，显示供应商绑定逻辑
             --- END COMMENT --- */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className={cn(
-                  "text-sm font-medium font-serif",
-                  isDark ? "text-stone-300" : "text-stone-700"
-                )}>
+              <div className="mb-2 flex items-center justify-between">
+                <label
+                  className={cn(
+                    'font-serif text-sm font-medium',
+                    isDark ? 'text-stone-300' : 'text-stone-700'
+                  )}
+                >
                   API URL (config.api_url)
                 </label>
-                
+
                 {/* 供应商绑定提示标签 */}
-                <span className={cn(
-                  "inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium font-serif",
-                  isDark
-                    ? "bg-blue-900/20 border-blue-700/30 text-blue-300 border"
-                    : "bg-blue-50 border-blue-200 text-blue-700 border"
-                )}>
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full px-2 py-1 font-serif text-xs font-medium',
+                    isDark
+                      ? 'border border-blue-700/30 bg-blue-900/20 text-blue-300'
+                      : 'border border-blue-200 bg-blue-50 text-blue-700'
+                  )}
+                >
                   <Globe className="h-3 w-3" />
                   供应商绑定
                 </span>
               </div>
-              
+
               <input
                 type="url"
-                value={formData.config.api_url || (() => {
-                  if (isEditing && instance) {
-                    const currentProvider = providers.find(p => p.id === instance.provider_id);
-                    return currentProvider?.base_url || 'https://api.dify.ai/v1';
-                  } else {
-                    const selectedProvider = providers.find(p => p.id === selectedProviderId);
-                    return selectedProvider?.base_url || 'https://api.dify.ai/v1';
-                  }
-                })()}
-                disabled={true}  // 禁用 URL 修改
+                value={
+                  formData.config.api_url ||
+                  (() => {
+                    if (isEditing && instance) {
+                      const currentProvider = providers.find(
+                        p => p.id === instance.provider_id
+                      );
+                      return (
+                        currentProvider?.base_url || 'https://api.dify.ai/v1'
+                      );
+                    } else {
+                      const selectedProvider = providers.find(
+                        p => p.id === selectedProviderId
+                      );
+                      return (
+                        selectedProvider?.base_url || 'https://api.dify.ai/v1'
+                      );
+                    }
+                  })()
+                }
+                disabled={true} // 禁用 URL 修改
                 className={cn(
-                  "w-full px-3 py-2 rounded-lg border font-serif",
+                  'w-full rounded-lg border px-3 py-2 font-serif',
                   // 禁用状态样式
-                  "cursor-not-allowed opacity-75",
-                  isDark 
-                    ? "bg-stone-800/50 border-stone-600 text-stone-300" 
-                    : "bg-stone-100/50 border-stone-300 text-stone-600"
+                  'cursor-not-allowed opacity-75',
+                  isDark
+                    ? 'border-stone-600 bg-stone-800/50 text-stone-300'
+                    : 'border-stone-300 bg-stone-100/50 text-stone-600'
                 )}
                 placeholder="URL 将自动使用所选供应商的配置"
               />
-              
-              <div className={cn(
-                "text-xs mt-2 p-2 rounded-md font-serif",
-                isDark ? "bg-stone-800/50 text-stone-400" : "bg-stone-50 text-stone-600"
-              )}>
+
+              <div
+                className={cn(
+                  'mt-2 rounded-md p-2 font-serif text-xs',
+                  isDark
+                    ? 'bg-stone-800/50 text-stone-400'
+                    : 'bg-stone-50 text-stone-600'
+                )}
+              >
                 <div className="flex items-start gap-2">
-                  <Globe className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                  <Globe className="mt-0.5 h-3 w-3 flex-shrink-0" />
                   <div>
                     <ul className="space-y-1 text-xs">
-                      <li>• URL 与服务供应商绑定，修改请在"管理提供商"中操作</li>
+                      <li>
+                        • URL 与服务供应商绑定，修改请在"管理提供商"中操作
+                      </li>
                       {isEditing && instance && (
-                        <li>• 当前供应商: {(() => {
-                          const currentProvider = providers.find(p => p.id === instance.provider_id);
-                          return currentProvider ? currentProvider.name : '未知供应商';
-                        })()}</li>
+                        <li>
+                          • 当前供应商:{' '}
+                          {(() => {
+                            const currentProvider = providers.find(
+                              p => p.id === instance.provider_id
+                            );
+                            return currentProvider
+                              ? currentProvider.name
+                              : '未知供应商';
+                          })()}
+                        </li>
                       )}
                     </ul>
                   </div>
@@ -1015,50 +1200,58 @@ const InstanceForm = ({
             </div>
 
             <div>
-              <div className="flex items-start justify-between mb-2">
-                <label className={cn(
-                  "text-sm font-medium font-serif",
-                  isDark ? "text-stone-300" : "text-stone-700"
-                )}>
+              <div className="mb-2 flex items-start justify-between">
+                <label
+                  className={cn(
+                    'font-serif text-sm font-medium',
+                    isDark ? 'text-stone-300' : 'text-stone-700'
+                  )}
+                >
                   API 密钥 (key_value) {!isEditing && '*'}
                 </label>
-                
+
                 {/* --- API密钥配置状态标签 - 靠上对齐，避免挤压输入框 --- */}
                 {isEditing && (
-                  <span className={cn(
-                    "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium font-serif -mt-0.5",
-                    hasApiKey
-                      ? isDark
-                        ? "bg-green-900/20 border-green-700/30 text-green-300 border"
-                        : "bg-green-50 border-green-200 text-green-700 border"
-                      : isDark
-                        ? "bg-orange-900/20 border-orange-700/30 text-orange-300 border"
-                        : "bg-orange-50 border-orange-200 text-orange-700 border"
-                  )}>
+                  <span
+                    className={cn(
+                      '-mt-0.5 inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-serif text-xs font-medium',
+                      hasApiKey
+                        ? isDark
+                          ? 'border border-green-700/30 bg-green-900/20 text-green-300'
+                          : 'border border-green-200 bg-green-50 text-green-700'
+                        : isDark
+                          ? 'border border-orange-700/30 bg-orange-900/20 text-orange-300'
+                          : 'border border-orange-200 bg-orange-50 text-orange-700'
+                    )}
+                  >
                     <Key className="h-3 w-3" />
                     {hasApiKey ? '已配置' : '未配置'}
                   </span>
                 )}
               </div>
-              
+
               <div className="relative">
                 <input
-                  type={showApiKey ? "text" : "password"}
+                  type={showApiKey ? 'text' : 'password'}
                   value={formData.apiKey}
-                  onChange={(e) => setFormData(prev => ({ ...prev, apiKey: e.target.value }))}
+                  onChange={e =>
+                    setFormData(prev => ({ ...prev, apiKey: e.target.value }))
+                  }
                   className={cn(
-                    "w-full px-3 py-2 pr-10 rounded-lg border font-serif",
-                    isDark 
-                      ? "bg-stone-700 border-stone-600 text-stone-100 placeholder-stone-400" 
-                      : "bg-white border-stone-300 text-stone-900 placeholder-stone-500"
+                    'w-full rounded-lg border px-3 py-2 pr-10 font-serif',
+                    isDark
+                      ? 'border-stone-600 bg-stone-700 text-stone-100 placeholder-stone-400'
+                      : 'border-stone-300 bg-white text-stone-900 placeholder-stone-500'
                   )}
-                  placeholder={isEditing ? "留空则不更新 API 密钥" : "输入 API 密钥"}
+                  placeholder={
+                    isEditing ? '留空则不更新 API 密钥' : '输入 API 密钥'
+                  }
                   required={!isEditing}
                 />
                 <button
                   type="button"
                   onClick={() => setShowApiKey(!showApiKey)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                  className="absolute top-1/2 right-3 -translate-y-1/2 transform"
                 >
                   {showApiKey ? (
                     <Eye className="h-4 w-4 text-stone-500" />
@@ -1067,13 +1260,15 @@ const InstanceForm = ({
                   )}
                 </button>
               </div>
-              
+
               {/* --- 提示信息（仅在编辑模式且已配置时显示） --- */}
               {isEditing && hasApiKey && (
-                <p className={cn(
-                  "text-xs mt-1 font-serif",
-                  isDark ? "text-stone-400" : "text-stone-500"
-                )}>
+                <p
+                  className={cn(
+                    'mt-1 font-serif text-xs',
+                    isDark ? 'text-stone-400' : 'text-stone-500'
+                  )}
+                >
                   留空输入框将保持现有密钥不变
                 </p>
               )}
@@ -1088,15 +1283,17 @@ const InstanceForm = ({
               <button
                 type="button"
                 onClick={handleSyncFromDify}
-                disabled={isSyncing || !formData.config.api_url || !formData.apiKey}
-                className={cn(
-                  "px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 font-serif cursor-pointer",
+                disabled={
                   isSyncing || !formData.config.api_url || !formData.apiKey
-                    ? "opacity-50 cursor-not-allowed"
-                    : "cursor-pointer",
-                  isDark 
-                    ? "bg-stone-600 hover:bg-stone-500 text-white" 
-                    : "bg-stone-600 hover:bg-stone-700 text-white"
+                }
+                className={cn(
+                  'flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 font-serif font-medium transition-colors',
+                  isSyncing || !formData.config.api_url || !formData.apiKey
+                    ? 'cursor-not-allowed opacity-50'
+                    : 'cursor-pointer',
+                  isDark
+                    ? 'bg-stone-600 text-white hover:bg-stone-500'
+                    : 'bg-stone-600 text-white hover:bg-stone-700'
                 )}
               >
                 {isSyncing ? (
@@ -1110,20 +1307,24 @@ const InstanceForm = ({
           )}
 
           <div>
-            <label className={cn(
-              "block text-sm font-medium mb-2 font-serif",
-              isDark ? "text-stone-300" : "text-stone-700"
-            )}>
+            <label
+              className={cn(
+                'mb-2 block font-serif text-sm font-medium',
+                isDark ? 'text-stone-300' : 'text-stone-700'
+              )}
+            >
               描述 (description)
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, description: e.target.value }))
+              }
               className={cn(
-                "w-full px-3 py-2 rounded-lg border font-serif",
-                isDark 
-                  ? "bg-stone-700 border-stone-600 text-stone-100 placeholder-stone-400" 
-                  : "bg-white border-stone-300 text-stone-900 placeholder-stone-500"
+                'w-full rounded-lg border px-3 py-2 font-serif',
+                isDark
+                  ? 'border-stone-600 bg-stone-700 text-stone-100 placeholder-stone-400'
+                  : 'border-stone-300 bg-white text-stone-900 placeholder-stone-500'
               )}
               placeholder="输入应用描述"
               rows={3}
@@ -1131,64 +1332,76 @@ const InstanceForm = ({
           </div>
 
           <div>
-            <label className={cn(
-              "block text-sm font-medium mb-3 font-serif",
-              isDark ? "text-stone-300" : "text-stone-700"
-            )}>
+            <label
+              className={cn(
+                'mb-3 block font-serif text-sm font-medium',
+                isDark ? 'text-stone-300' : 'text-stone-700'
+              )}
+            >
               应用类型 (app_type) *
             </label>
             <div className="flex gap-4">
               <button
                 type="button"
-                onClick={() => setFormData(prev => ({
-                  ...prev,
-                  config: {
-                    ...prev.config,
-                    app_metadata: {
-                      ...prev.config.app_metadata,
-                      app_type: 'model'
-                    }
-                  }
-                }))}
+                onClick={() =>
+                  setFormData(prev => ({
+                    ...prev,
+                    config: {
+                      ...prev.config,
+                      app_metadata: {
+                        ...prev.config.app_metadata,
+                        app_type: 'model',
+                      },
+                    },
+                  }))
+                }
                 className={cn(
-                  "flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer",
+                  'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
                   formData.config.app_metadata.app_type === 'model'
                     ? isDark
-                      ? "border-stone-500 bg-stone-700/50"
-                      : "border-stone-400 bg-stone-100"
+                      ? 'border-stone-500 bg-stone-700/50'
+                      : 'border-stone-400 bg-stone-100'
                     : isDark
-                      ? "border-stone-600 hover:border-stone-500"
-                      : "border-stone-300 hover:border-stone-400"
+                      ? 'border-stone-600 hover:border-stone-500'
+                      : 'border-stone-300 hover:border-stone-400'
                 )}
               >
-                <div className={cn(
-                  "w-4 h-4 rounded-full border-2 flex items-center justify-center",
-                  formData.config.app_metadata.app_type === 'model'
-                    ? isDark
-                      ? "border-stone-400 bg-stone-400"
-                      : "border-stone-600 bg-stone-600"
-                    : isDark
-                      ? "border-stone-500"
-                      : "border-stone-400"
-                )}>
+                <div
+                  className={cn(
+                    'flex h-4 w-4 items-center justify-center rounded-full border-2',
+                    formData.config.app_metadata.app_type === 'model'
+                      ? isDark
+                        ? 'border-stone-400 bg-stone-400'
+                        : 'border-stone-600 bg-stone-600'
+                      : isDark
+                        ? 'border-stone-500'
+                        : 'border-stone-400'
+                  )}
+                >
                   {formData.config.app_metadata.app_type === 'model' && (
-                    <div className={cn(
-                      "w-2 h-2 rounded-full",
-                      isDark ? "bg-stone-800" : "bg-white"
-                    )} />
+                    <div
+                      className={cn(
+                        'h-2 w-2 rounded-full',
+                        isDark ? 'bg-stone-800' : 'bg-white'
+                      )}
+                    />
                   )}
                 </div>
                 <div>
-                  <div className={cn(
-                    "font-medium text-sm font-serif",
-                    isDark ? "text-stone-100" : "text-stone-900"
-                  )}>
+                  <div
+                    className={cn(
+                      'font-serif text-sm font-medium',
+                      isDark ? 'text-stone-100' : 'text-stone-900'
+                    )}
+                  >
                     模型 (Model)
                   </div>
-                  <div className={cn(
-                    "text-xs font-serif",
-                    isDark ? "text-stone-400" : "text-stone-600"
-                  )}>
+                  <div
+                    className={cn(
+                      'font-serif text-xs',
+                      isDark ? 'text-stone-400' : 'text-stone-600'
+                    )}
+                  >
                     用于模型切换
                   </div>
                 </div>
@@ -1196,64 +1409,76 @@ const InstanceForm = ({
 
               <button
                 type="button"
-                onClick={() => setFormData(prev => ({
-                  ...prev,
-                  config: {
-                    ...prev.config,
-                    app_metadata: {
-                      ...prev.config.app_metadata,
-                      app_type: 'marketplace'
-                    }
-                  }
-                }))}
+                onClick={() =>
+                  setFormData(prev => ({
+                    ...prev,
+                    config: {
+                      ...prev.config,
+                      app_metadata: {
+                        ...prev.config.app_metadata,
+                        app_type: 'marketplace',
+                      },
+                    },
+                  }))
+                }
                 className={cn(
-                  "flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer",
+                  'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
                   formData.config.app_metadata.app_type === 'marketplace'
                     ? isDark
-                      ? "border-stone-500 bg-stone-700/50"
-                      : "border-stone-400 bg-stone-100"
+                      ? 'border-stone-500 bg-stone-700/50'
+                      : 'border-stone-400 bg-stone-100'
                     : isDark
-                      ? "border-stone-600 hover:border-stone-500"
-                      : "border-stone-300 hover:border-stone-400"
+                      ? 'border-stone-600 hover:border-stone-500'
+                      : 'border-stone-300 hover:border-stone-400'
                 )}
               >
-                <div className={cn(
-                  "w-4 h-4 rounded-full border-2 flex items-center justify-center",
-                  formData.config.app_metadata.app_type === 'marketplace'
-                    ? isDark
-                      ? "border-stone-400 bg-stone-400"
-                      : "border-stone-600 bg-stone-600"
-                    : isDark
-                      ? "border-stone-500"
-                      : "border-stone-400"
-                )}>
+                <div
+                  className={cn(
+                    'flex h-4 w-4 items-center justify-center rounded-full border-2',
+                    formData.config.app_metadata.app_type === 'marketplace'
+                      ? isDark
+                        ? 'border-stone-400 bg-stone-400'
+                        : 'border-stone-600 bg-stone-600'
+                      : isDark
+                        ? 'border-stone-500'
+                        : 'border-stone-400'
+                  )}
+                >
                   {formData.config.app_metadata.app_type === 'marketplace' && (
-                    <div className={cn(
-                      "w-2 h-2 rounded-full",
-                      isDark ? "bg-stone-800" : "bg-white"
-                    )} />
+                    <div
+                      className={cn(
+                        'h-2 w-2 rounded-full',
+                        isDark ? 'bg-stone-800' : 'bg-white'
+                      )}
+                    />
                   )}
                 </div>
                 <div>
-                  <div className={cn(
-                    "font-medium text-sm font-serif",
-                    isDark ? "text-stone-100" : "text-stone-900"
-                  )}>
+                  <div
+                    className={cn(
+                      'font-serif text-sm font-medium',
+                      isDark ? 'text-stone-100' : 'text-stone-900'
+                    )}
+                  >
                     应用市场 (Marketplace)
                   </div>
-                  <div className={cn(
-                    "text-xs font-serif",
-                    isDark ? "text-stone-400" : "text-stone-600"
-                  )}>
+                  <div
+                    className={cn(
+                      'font-serif text-xs',
+                      isDark ? 'text-stone-400' : 'text-stone-600'
+                    )}
+                  >
                     用于应用市场
                   </div>
                 </div>
               </button>
             </div>
-            <p className={cn(
-              "text-xs mt-2 font-serif",
-              isDark ? "text-stone-400" : "text-stone-500"
-            )}>
+            <p
+              className={cn(
+                'mt-2 font-serif text-xs',
+                isDark ? 'text-stone-400' : 'text-stone-500'
+              )}
+            >
               选择"模型"类型的应用会出现在聊天界面的模型选择器中
             </p>
           </div>
@@ -1271,19 +1496,21 @@ const InstanceForm = ({
                   ...prev.config,
                   app_metadata: {
                     ...prev.config.app_metadata,
-                    dify_apptype: type
-                  }
-                }
-              }))
+                    dify_apptype: type,
+                  },
+                },
+              }));
             }}
           />
 
           {/* 应用标签配置 - 紧凑设计 */}
           <div>
-            <label className={cn(
-              "block text-sm font-medium mb-3 font-serif",
-              isDark ? "text-stone-300" : "text-stone-700"
-            )}>
+            <label
+              className={cn(
+                'mb-3 block font-serif text-sm font-medium',
+                isDark ? 'text-stone-300' : 'text-stone-700'
+              )}
+            >
               应用标签 (tags)
             </label>
             <div className="space-y-3">
@@ -1291,21 +1518,22 @@ const InstanceForm = ({
               <div className="space-y-3">
                 {/* 模型类型 */}
                 <div>
-                  <div className={cn(
-                    "text-xs font-medium mb-2 font-serif",
-                    isDark ? "text-stone-400" : "text-stone-600"
-                  )}>
+                  <div
+                    className={cn(
+                      'mb-2 font-serif text-xs font-medium',
+                      isDark ? 'text-stone-400' : 'text-stone-600'
+                    )}
+                  >
                     模型类型
                   </div>
                   <div className="grid grid-cols-4 gap-2">
-                    {[
-                      '对话模型', '推理模型', '文档模型', '多模态'
-                    ].map((tag) => (
+                    {['对话模型', '推理模型', '文档模型', '多模态'].map(tag => (
                       <button
                         key={tag}
                         type="button"
                         onClick={() => {
-                          const isSelected = formData.config.app_metadata.tags.includes(tag)
+                          const isSelected =
+                            formData.config.app_metadata.tags.includes(tag);
                           setFormData(prev => ({
                             ...prev,
                             config: {
@@ -1313,21 +1541,23 @@ const InstanceForm = ({
                               app_metadata: {
                                 ...prev.config.app_metadata,
                                 tags: isSelected
-                                  ? prev.config.app_metadata.tags.filter(t => t !== tag)
-                                  : [...prev.config.app_metadata.tags, tag]
-                              }
-                            }
-                          }))
+                                  ? prev.config.app_metadata.tags.filter(
+                                      t => t !== tag
+                                    )
+                                  : [...prev.config.app_metadata.tags, tag],
+                              },
+                            },
+                          }));
                         }}
                         className={cn(
-                          "px-2 py-1.5 rounded text-xs font-medium font-serif transition-colors cursor-pointer",
+                          'cursor-pointer rounded px-2 py-1.5 font-serif text-xs font-medium transition-colors',
                           formData.config.app_metadata.tags.includes(tag)
                             ? isDark
-                              ? "bg-stone-600 text-stone-200 border border-stone-500"
-                              : "bg-stone-200 text-stone-800 border border-stone-300"
+                              ? 'border border-stone-500 bg-stone-600 text-stone-200'
+                              : 'border border-stone-300 bg-stone-200 text-stone-800'
                             : isDark
-                              ? "bg-stone-700/50 text-stone-400 border border-stone-600 hover:bg-stone-700"
-                              : "bg-stone-50 text-stone-600 border border-stone-300 hover:bg-stone-100"
+                              ? 'border border-stone-600 bg-stone-700/50 text-stone-400 hover:bg-stone-700'
+                              : 'border border-stone-300 bg-stone-50 text-stone-600 hover:bg-stone-100'
                         )}
                       >
                         {tag}
@@ -1338,21 +1568,22 @@ const InstanceForm = ({
 
                 {/* 应用场景 */}
                 <div>
-                  <div className={cn(
-                    "text-xs font-medium mb-2 font-serif",
-                    isDark ? "text-stone-400" : "text-stone-600"
-                  )}>
+                  <div
+                    className={cn(
+                      'mb-2 font-serif text-xs font-medium',
+                      isDark ? 'text-stone-400' : 'text-stone-600'
+                    )}
+                  >
                     应用场景
                   </div>
                   <div className="grid grid-cols-4 gap-2">
-                    {[
-                      '文本生成', '代码生成', '数据分析', '翻译'
-                    ].map((tag) => (
+                    {['文本生成', '代码生成', '数据分析', '翻译'].map(tag => (
                       <button
                         key={tag}
                         type="button"
                         onClick={() => {
-                          const isSelected = formData.config.app_metadata.tags.includes(tag)
+                          const isSelected =
+                            formData.config.app_metadata.tags.includes(tag);
                           setFormData(prev => ({
                             ...prev,
                             config: {
@@ -1360,21 +1591,23 @@ const InstanceForm = ({
                               app_metadata: {
                                 ...prev.config.app_metadata,
                                 tags: isSelected
-                                  ? prev.config.app_metadata.tags.filter(t => t !== tag)
-                                  : [...prev.config.app_metadata.tags, tag]
-                              }
-                            }
-                          }))
+                                  ? prev.config.app_metadata.tags.filter(
+                                      t => t !== tag
+                                    )
+                                  : [...prev.config.app_metadata.tags, tag],
+                              },
+                            },
+                          }));
                         }}
                         className={cn(
-                          "px-2 py-1.5 rounded text-xs font-medium font-serif transition-colors cursor-pointer",
+                          'cursor-pointer rounded px-2 py-1.5 font-serif text-xs font-medium transition-colors',
                           formData.config.app_metadata.tags.includes(tag)
                             ? isDark
-                              ? "bg-stone-600 text-stone-200 border border-stone-500"
-                              : "bg-stone-200 text-stone-800 border border-stone-300"
+                              ? 'border border-stone-500 bg-stone-600 text-stone-200'
+                              : 'border border-stone-300 bg-stone-200 text-stone-800'
                             : isDark
-                              ? "bg-stone-700/50 text-stone-400 border border-stone-600 hover:bg-stone-700"
-                              : "bg-stone-50 text-stone-600 border border-stone-300 hover:bg-stone-100"
+                              ? 'border border-stone-600 bg-stone-700/50 text-stone-400 hover:bg-stone-700'
+                              : 'border border-stone-300 bg-stone-50 text-stone-600 hover:bg-stone-100'
                         )}
                       >
                         {tag}
@@ -1385,21 +1618,22 @@ const InstanceForm = ({
 
                 {/* 技术特性 */}
                 <div>
-                  <div className={cn(
-                    "text-xs font-medium mb-2 font-serif",
-                    isDark ? "text-stone-400" : "text-stone-600"
-                  )}>
+                  <div
+                    className={cn(
+                      'mb-2 font-serif text-xs font-medium',
+                      isDark ? 'text-stone-400' : 'text-stone-600'
+                    )}
+                  >
                     技术特性
                   </div>
                   <div className="grid grid-cols-4 gap-2">
-                    {[
-                      '高精度', '快速响应', '本地部署', '企业级'
-                    ].map((tag) => (
+                    {['高精度', '快速响应', '本地部署', '企业级'].map(tag => (
                       <button
                         key={tag}
                         type="button"
                         onClick={() => {
-                          const isSelected = formData.config.app_metadata.tags.includes(tag)
+                          const isSelected =
+                            formData.config.app_metadata.tags.includes(tag);
                           setFormData(prev => ({
                             ...prev,
                             config: {
@@ -1407,21 +1641,23 @@ const InstanceForm = ({
                               app_metadata: {
                                 ...prev.config.app_metadata,
                                 tags: isSelected
-                                  ? prev.config.app_metadata.tags.filter(t => t !== tag)
-                                  : [...prev.config.app_metadata.tags, tag]
-                              }
-                            }
-                          }))
+                                  ? prev.config.app_metadata.tags.filter(
+                                      t => t !== tag
+                                    )
+                                  : [...prev.config.app_metadata.tags, tag],
+                              },
+                            },
+                          }));
                         }}
                         className={cn(
-                          "px-2 py-1.5 rounded text-xs font-medium font-serif transition-colors cursor-pointer",
+                          'cursor-pointer rounded px-2 py-1.5 font-serif text-xs font-medium transition-colors',
                           formData.config.app_metadata.tags.includes(tag)
                             ? isDark
-                              ? "bg-stone-600 text-stone-200 border border-stone-500"
-                              : "bg-stone-200 text-stone-800 border border-stone-300"
+                              ? 'border border-stone-500 bg-stone-600 text-stone-200'
+                              : 'border border-stone-300 bg-stone-200 text-stone-800'
                             : isDark
-                              ? "bg-stone-700/50 text-stone-400 border border-stone-600 hover:bg-stone-700"
-                              : "bg-stone-50 text-stone-600 border border-stone-300 hover:bg-stone-100"
+                              ? 'border border-stone-600 bg-stone-700/50 text-stone-400 hover:bg-stone-700'
+                              : 'border border-stone-300 bg-stone-50 text-stone-600 hover:bg-stone-100'
                         )}
                       >
                         {tag}
@@ -1430,41 +1666,44 @@ const InstanceForm = ({
                   </div>
                 </div>
               </div>
-              
+
               {/* 自定义标签输入 - 更小的输入框 */}
               <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="自定义标签（回车添加）"
                   className={cn(
-                    "flex-1 px-2 py-1.5 rounded border font-serif text-xs",
-                    isDark 
-                      ? "bg-stone-700 border-stone-600 text-stone-100 placeholder-stone-400" 
-                      : "bg-white border-stone-300 text-stone-900 placeholder-stone-500"
+                    'flex-1 rounded border px-2 py-1.5 font-serif text-xs',
+                    isDark
+                      ? 'border-stone-600 bg-stone-700 text-stone-100 placeholder-stone-400'
+                      : 'border-stone-300 bg-white text-stone-900 placeholder-stone-500'
                   )}
-                  onKeyDown={(e) => {
+                  onKeyDown={e => {
                     if (e.key === 'Enter') {
-                      e.preventDefault()
-                      const input = e.target as HTMLInputElement
-                      const tag = input.value.trim()
-                      if (tag && !formData.config.app_metadata.tags.includes(tag)) {
+                      e.preventDefault();
+                      const input = e.target as HTMLInputElement;
+                      const tag = input.value.trim();
+                      if (
+                        tag &&
+                        !formData.config.app_metadata.tags.includes(tag)
+                      ) {
                         setFormData(prev => ({
                           ...prev,
                           config: {
                             ...prev.config,
                             app_metadata: {
                               ...prev.config.app_metadata,
-                              tags: [...prev.config.app_metadata.tags, tag]
-                            }
-                          }
-                        }))
-                        input.value = ''
+                              tags: [...prev.config.app_metadata.tags, tag],
+                            },
+                          },
+                        }));
+                        input.value = '';
                       }
                     }
                   }}
                 />
               </div>
-              
+
               {/* 已选标签显示 - 更小的标签 */}
               {formData.config.app_metadata.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
@@ -1472,10 +1711,10 @@ const InstanceForm = ({
                     <span
                       key={index}
                       className={cn(
-                        "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium font-serif",
-                        isDark 
-                          ? "bg-stone-700 text-stone-300 border border-stone-600" 
-                          : "bg-stone-100 text-stone-700 border border-stone-300"
+                        'inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-serif text-xs font-medium',
+                        isDark
+                          ? 'border border-stone-600 bg-stone-700 text-stone-300'
+                          : 'border border-stone-300 bg-stone-100 text-stone-700'
                       )}
                     >
                       {tag}
@@ -1488,14 +1727,16 @@ const InstanceForm = ({
                               ...prev.config,
                               app_metadata: {
                                 ...prev.config.app_metadata,
-                                tags: prev.config.app_metadata.tags.filter((_, i) => i !== index)
-                              }
-                            }
-                          }))
+                                tags: prev.config.app_metadata.tags.filter(
+                                  (_, i) => i !== index
+                                ),
+                              },
+                            },
+                          }));
                         }}
                         className={cn(
-                          "hover:bg-red-500 hover:text-white rounded-full p-0.5 transition-colors",
-                          isDark ? "text-stone-400" : "text-stone-500"
+                          'rounded-full p-0.5 transition-colors hover:bg-red-500 hover:text-white',
+                          isDark ? 'text-stone-400' : 'text-stone-500'
                         )}
                       >
                         <X className="h-2 w-2" />
@@ -1504,11 +1745,13 @@ const InstanceForm = ({
                   ))}
                 </div>
               )}
-              
-              <p className={cn(
-                "text-xs font-serif",
-                isDark ? "text-stone-400" : "text-stone-500"
-              )}>
+
+              <p
+                className={cn(
+                  'font-serif text-xs',
+                  isDark ? 'text-stone-400' : 'text-stone-500'
+                )}
+              >
                 标签用于应用分类和搜索
               </p>
             </div>
@@ -1519,10 +1762,10 @@ const InstanceForm = ({
               type="submit"
               disabled={isProcessing}
               className={cn(
-                "flex-1 py-2 px-4 rounded-lg font-medium disabled:opacity-50 transition-colors flex items-center justify-center gap-2 font-serif cursor-pointer",
-                isDark 
-                  ? "bg-stone-600 hover:bg-stone-500 text-stone-100" 
-                  : "bg-stone-800 hover:bg-stone-700 text-white"
+                'flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 font-serif font-medium transition-colors disabled:opacity-50',
+                isDark
+                  ? 'bg-stone-600 text-stone-100 hover:bg-stone-500'
+                  : 'bg-stone-800 text-white hover:bg-stone-700'
               )}
             >
               {isProcessing ? (
@@ -1532,7 +1775,7 @@ const InstanceForm = ({
               )}
               <span>{isProcessing ? '保存中...' : '保存'}</span>
               {!isProcessing && (
-                <KeyCombination 
+                <KeyCombination
                   keys={saveShortcut.symbols}
                   size="md"
                   isDark={isDark}
@@ -1544,10 +1787,10 @@ const InstanceForm = ({
               type="button"
               onClick={onCancel}
               className={cn(
-                "flex-1 py-2 px-4 rounded-lg font-medium transition-colors font-serif cursor-pointer",
-                isDark 
-                  ? "bg-stone-700 hover:bg-stone-600 text-stone-200" 
-                  : "bg-stone-200 hover:bg-stone-300 text-stone-800"
+                'flex-1 cursor-pointer rounded-lg px-4 py-2 font-serif font-medium transition-colors',
+                isDark
+                  ? 'bg-stone-700 text-stone-200 hover:bg-stone-600'
+                  : 'bg-stone-200 text-stone-800 hover:bg-stone-300'
               )}
             >
               取消
@@ -1569,151 +1812,185 @@ const InstanceForm = ({
 };
 
 export default function ApiConfigPage() {
-  const { isDark } = useTheme()
-  
+  const { isDark } = useTheme();
+
   const {
     serviceInstances: instances,
     providers,
     createAppInstance: addInstance,
     updateAppInstance: updateInstance,
-  } = useApiConfigStore()
-  
-  const [selectedInstance, setSelectedInstance] = useState<ServiceInstance | null>(null)
-  const [showAddForm, setShowAddForm] = useState(false)
+  } = useApiConfigStore();
+
+  const [selectedInstance, setSelectedInstance] =
+    useState<ServiceInstance | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState>({
     open: false,
     message: '',
-    severity: 'info'
-  })
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [showProviderModal, setShowProviderModal] = useState(false)
-  const [currentFilterProviderId, setCurrentFilterProviderId] = useState<string | null>(null)
+    severity: 'info',
+  });
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showProviderModal, setShowProviderModal] = useState(false);
+  const [currentFilterProviderId, setCurrentFilterProviderId] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     const handleSelectInstance = (event: CustomEvent) => {
-      const instance = event.detail as ServiceInstance
-      setSelectedInstance(instance)
-      setShowAddForm(false)
-    }
+      const instance = event.detail as ServiceInstance;
+      setSelectedInstance(instance);
+      setShowAddForm(false);
+    };
 
     const handleToggleAddForm = () => {
       if (showAddForm) {
-        setShowAddForm(false)
-        setSelectedInstance(null)
+        setShowAddForm(false);
+        setSelectedInstance(null);
       } else {
-        setSelectedInstance(null)
-        setShowAddForm(true)
+        setSelectedInstance(null);
+        setShowAddForm(true);
       }
-    }
+    };
 
     const handleInstanceDeleted = (event: CustomEvent) => {
-      const { instanceId } = event.detail
+      const { instanceId } = event.detail;
       if (selectedInstance?.instance_id === instanceId) {
-        setSelectedInstance(null)
-        setShowAddForm(false)
+        setSelectedInstance(null);
+        setShowAddForm(false);
       }
-    }
+    };
 
     const handleDefaultInstanceChanged = (event: CustomEvent) => {
-      const { instanceId } = event.detail
+      const { instanceId } = event.detail;
       // --- 始终显示成功提示，不管是否是当前选中的实例 ---
-      showFeedback('默认应用设置成功', 'success')
-      
+      showFeedback('默认应用设置成功', 'success');
+
       // --- 重新加载服务实例数据以更新UI状态 ---
       setTimeout(() => {
         // 给数据库操作一点时间完成
-        window.dispatchEvent(new CustomEvent('reloadInstances'))
-      }, 100)
-    }
+        window.dispatchEvent(new CustomEvent('reloadInstances'));
+      }, 100);
+    };
 
     const handleFilterChanged = (event: CustomEvent) => {
-      const { providerId } = event.detail
-      setCurrentFilterProviderId(providerId)
-    }
+      const { providerId } = event.detail;
+      setCurrentFilterProviderId(providerId);
+    };
 
-    window.addEventListener('selectInstance', handleSelectInstance as EventListener)
-    window.addEventListener('toggleAddForm', handleToggleAddForm)
-    window.addEventListener('instanceDeleted', handleInstanceDeleted as EventListener)
-    window.addEventListener('defaultInstanceChanged', handleDefaultInstanceChanged as EventListener)
-    window.addEventListener('filterChanged', handleFilterChanged as EventListener)
-    
+    window.addEventListener(
+      'selectInstance',
+      handleSelectInstance as EventListener
+    );
+    window.addEventListener('toggleAddForm', handleToggleAddForm);
+    window.addEventListener(
+      'instanceDeleted',
+      handleInstanceDeleted as EventListener
+    );
+    window.addEventListener(
+      'defaultInstanceChanged',
+      handleDefaultInstanceChanged as EventListener
+    );
+    window.addEventListener(
+      'filterChanged',
+      handleFilterChanged as EventListener
+    );
+
     return () => {
-      window.removeEventListener('selectInstance', handleSelectInstance as EventListener)
-      window.removeEventListener('toggleAddForm', handleToggleAddForm)
-      window.removeEventListener('instanceDeleted', handleInstanceDeleted as EventListener)
-      window.removeEventListener('defaultInstanceChanged', handleDefaultInstanceChanged as EventListener)
-      window.removeEventListener('filterChanged', handleFilterChanged as EventListener)
-    }
-  }, [showAddForm, selectedInstance])
+      window.removeEventListener(
+        'selectInstance',
+        handleSelectInstance as EventListener
+      );
+      window.removeEventListener('toggleAddForm', handleToggleAddForm);
+      window.removeEventListener(
+        'instanceDeleted',
+        handleInstanceDeleted as EventListener
+      );
+      window.removeEventListener(
+        'defaultInstanceChanged',
+        handleDefaultInstanceChanged as EventListener
+      );
+      window.removeEventListener(
+        'filterChanged',
+        handleFilterChanged as EventListener
+      );
+    };
+  }, [showAddForm, selectedInstance]);
 
-  const showFeedback = (message: string, severity: FeedbackState['severity'] = 'info') => {
-    setFeedback({ open: true, message, severity })
-  }
+  const showFeedback = (
+    message: string,
+    severity: FeedbackState['severity'] = 'info'
+  ) => {
+    setFeedback({ open: true, message, severity });
+  };
 
   const handleCloseFeedback = () => {
-    setFeedback({ open: false, message: '', severity: 'info' })
-  }
+    setFeedback({ open: false, message: '', severity: 'info' });
+  };
 
   const handleClearSelection = () => {
-    setSelectedInstance(null)
-    setShowAddForm(false)
-    window.dispatchEvent(new CustomEvent('addFormToggled', {
-      detail: { 
-        showAddForm: false,
-        selectedInstance: null
-      }
-    }))
-  }
+    setSelectedInstance(null);
+    setShowAddForm(false);
+    window.dispatchEvent(
+      new CustomEvent('addFormToggled', {
+        detail: {
+          showAddForm: false,
+          selectedInstance: null,
+        },
+      })
+    );
+  };
 
   // --- BEGIN COMMENT ---
   // Provider管理相关处理函数
   // --- END COMMENT ---
   const handleProviderChange = () => {
     // 重新加载providers数据
-    window.dispatchEvent(new CustomEvent('reloadProviders'))
-    showFeedback('提供商配置已更新', 'success')
-  }
+    window.dispatchEvent(new CustomEvent('reloadProviders'));
+    showFeedback('提供商配置已更新', 'success');
+  };
 
   useEffect(() => {
-    window.dispatchEvent(new CustomEvent('addFormToggled', {
-      detail: { 
-        showAddForm,
-        selectedInstance
-      }
-    }))
-  }, [showAddForm, selectedInstance])
+    window.dispatchEvent(
+      new CustomEvent('addFormToggled', {
+        detail: {
+          showAddForm,
+          selectedInstance,
+        },
+      })
+    );
+  }, [showAddForm, selectedInstance]);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex h-full flex-col">
       {/* --- 管理提供商按钮 --- */}
-      <div className="px-6 pt-6 pb-3 flex justify-end">
+      <div className="flex justify-end px-6 pt-6 pb-3">
         <button
           onClick={() => setShowProviderModal(true)}
           className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors text-sm font-medium",
-            "focus:outline-none focus:ring-2 focus:ring-offset-2",
-            "border shadow-sm",
-            isDark 
-              ? "bg-stone-600 hover:bg-stone-500 text-stone-100 hover:text-white border-stone-500 focus:ring-stone-400 shadow-stone-900/20" 
-              : "bg-stone-200 hover:bg-stone-300 text-stone-800 hover:text-stone-900 border-stone-300 focus:ring-stone-500 shadow-stone-200/50"
+            'flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
+            'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+            'border shadow-sm',
+            isDark
+              ? 'border-stone-500 bg-stone-600 text-stone-100 shadow-stone-900/20 hover:bg-stone-500 hover:text-white focus:ring-stone-400'
+              : 'border-stone-300 bg-stone-200 text-stone-800 shadow-stone-200/50 hover:bg-stone-300 hover:text-stone-900 focus:ring-stone-500'
           )}
         >
-          <Settings className="w-4 h-4" />
+          <Settings className="h-4 w-4" />
           <span className="font-serif">管理提供商</span>
         </button>
       </div>
 
       {showAddForm ? (
-        <div className="flex-1 overflow-y-auto p-6 min-h-0">
+        <div className="min-h-0 flex-1 overflow-y-auto p-6">
           <InstanceForm
             instance={null}
             isEditing={false}
             defaultProviderId={currentFilterProviderId}
-            onSave={(data) => {
-              setIsProcessing(true)
+            onSave={data => {
+              setIsProcessing(true);
               // --- 提取setAsDefault状态和其他数据 ---
-              const { setAsDefault, ...instanceData } = data
-              
+              const { setAsDefault, ...instanceData } = data;
+
               // --- 使用用户选择的提供商 ---
               const providerId = data.selectedProviderId;
               if (!providerId) {
@@ -1721,7 +1998,7 @@ export default function ApiConfigPage() {
                 setIsProcessing(false);
                 return;
               }
-              
+
               // 验证选择的提供商是否有效
               const selectedProvider = providers.find(p => p.id === providerId);
               if (!selectedProvider) {
@@ -1729,42 +2006,50 @@ export default function ApiConfigPage() {
                 setIsProcessing(false);
                 return;
               }
-              
+
               if (!selectedProvider.is_active) {
                 showFeedback('选择的服务提供商未激活', 'error');
                 setIsProcessing(false);
                 return;
               }
-              
-              addInstance({
-                ...instanceData,
-                provider_id: providerId
-              }, data.apiKey)
-                .then((newInstance) => {
-                  showFeedback('应用实例创建成功', 'success')
-                  
+
+              addInstance(
+                {
+                  ...instanceData,
+                  provider_id: providerId,
+                },
+                data.apiKey
+              )
+                .then(newInstance => {
+                  showFeedback('应用实例创建成功', 'success');
+
                   // --- 如果选择了设为默认，则在创建成功后设置为默认应用 ---
                   if (setAsDefault && newInstance?.id) {
-                    return useApiConfigStore.getState().setDefaultInstance(newInstance.id)
+                    return useApiConfigStore
+                      .getState()
+                      .setDefaultInstance(newInstance.id)
                       .then(() => {
-                        showFeedback('应用实例已设为默认应用', 'success')
+                        showFeedback('应用实例已设为默认应用', 'success');
                       })
-                      .catch((error) => {
-                        console.error('设置默认应用失败:', error)
-                        showFeedback('应用创建成功，但设置默认应用失败', 'warning')
-                      })
+                      .catch(error => {
+                        console.error('设置默认应用失败:', error);
+                        showFeedback(
+                          '应用创建成功，但设置默认应用失败',
+                          'warning'
+                        );
+                      });
                   }
                 })
                 .then(() => {
-                  handleClearSelection()
+                  handleClearSelection();
                 })
-                .catch((error) => {
-                  console.error('创建失败:', error)
-                  showFeedback('创建应用实例失败', 'error')
+                .catch(error => {
+                  console.error('创建失败:', error);
+                  showFeedback('创建应用实例失败', 'error');
                 })
                 .finally(() => {
-                  setIsProcessing(false)
-                })
+                  setIsProcessing(false);
+                });
             }}
             onCancel={handleClearSelection}
             isProcessing={isProcessing}
@@ -1772,55 +2057,59 @@ export default function ApiConfigPage() {
           />
         </div>
       ) : selectedInstance ? (
-        <div className="flex-1 overflow-y-auto p-6 min-h-0">
+        <div className="min-h-0 flex-1 overflow-y-auto p-6">
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className={cn(
-                  "text-xl font-bold font-serif",
-                  isDark ? "text-stone-100" : "text-stone-900"
-                )}>
+                <h2
+                  className={cn(
+                    'font-serif text-xl font-bold',
+                    isDark ? 'text-stone-100' : 'text-stone-900'
+                  )}
+                >
                   {selectedInstance.display_name}
                 </h2>
-                <p className={cn(
-                  "text-sm mt-1 font-serif",
-                  isDark ? "text-stone-400" : "text-stone-600"
-                )}>
+                <p
+                  className={cn(
+                    'mt-1 font-serif text-sm',
+                    isDark ? 'text-stone-400' : 'text-stone-600'
+                  )}
+                >
                   {selectedInstance.description || selectedInstance.instance_id}
                 </p>
               </div>
               <button
                 onClick={handleClearSelection}
                 className={cn(
-                  "p-2 rounded-lg transition-colors cursor-pointer",
-                  "focus:outline-none focus:ring-2 focus:ring-offset-2",
-                  isDark 
-                    ? "bg-stone-600 hover:bg-stone-500 text-stone-200 hover:text-stone-100 focus:ring-stone-500" 
-                    : "bg-stone-200 hover:bg-stone-300 text-stone-700 hover:text-stone-900 focus:ring-stone-400"
+                  'cursor-pointer rounded-lg p-2 transition-colors',
+                  'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+                  isDark
+                    ? 'bg-stone-600 text-stone-200 hover:bg-stone-500 hover:text-stone-100 focus:ring-stone-500'
+                    : 'bg-stone-200 text-stone-700 hover:bg-stone-300 hover:text-stone-900 focus:ring-stone-400'
                 )}
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
           </div>
-          
+
           <InstanceForm
             instance={selectedInstance}
             isEditing={true}
-            onSave={(data) => {
-              setIsProcessing(true)
+            onSave={data => {
+              setIsProcessing(true);
               updateInstance(selectedInstance.id, data, data.apiKey)
                 .then(() => {
-                  showFeedback('应用实例更新成功', 'success')
-                  handleClearSelection()
+                  showFeedback('应用实例更新成功', 'success');
+                  handleClearSelection();
                 })
-                .catch((error) => {
-                  console.error('更新失败:', error)
-                  showFeedback('更新应用实例失败', 'error')
+                .catch(error => {
+                  console.error('更新失败:', error);
+                  showFeedback('更新应用实例失败', 'error');
                 })
                 .finally(() => {
-                  setIsProcessing(false)
-                })
+                  setIsProcessing(false);
+                });
             }}
             onCancel={handleClearSelection}
             isProcessing={isProcessing}
@@ -1828,27 +2117,31 @@ export default function ApiConfigPage() {
           />
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center p-6">
+        <div className="flex flex-1 items-center justify-center p-6">
           <div className="text-center">
-            <Settings className="h-16 w-16 mx-auto mb-4 text-stone-400" />
-            <h3 className={cn(
-              "text-lg font-medium mb-2 font-serif",
-              isDark ? "text-stone-300" : "text-stone-700"
-            )}>
+            <Settings className="mx-auto mb-4 h-16 w-16 text-stone-400" />
+            <h3
+              className={cn(
+                'mb-2 font-serif text-lg font-medium',
+                isDark ? 'text-stone-300' : 'text-stone-700'
+              )}
+            >
               选择应用实例
             </h3>
-            <p className={cn(
-              "text-sm font-serif",
-              isDark ? "text-stone-400" : "text-stone-600"
-            )}>
+            <p
+              className={cn(
+                'font-serif text-sm',
+                isDark ? 'text-stone-400' : 'text-stone-600'
+              )}
+            >
               从左侧列表中选择一个应用实例来查看和编辑其配置，或点击添加按钮创建新的应用实例
             </p>
           </div>
         </div>
       )}
-      
+
       <Toast feedback={feedback} onClose={handleCloseFeedback} />
-      
+
       {/* --- Provider管理模态框 --- */}
       <ProviderManagementModal
         open={showProviderModal}
@@ -1856,5 +2149,5 @@ export default function ApiConfigPage() {
         onProviderChange={handleProviderChange}
       />
     </div>
-  )
+  );
 }

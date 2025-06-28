@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+
 import { RefObject } from 'react';
 
 // --- BEGIN COMMENT ---
@@ -38,58 +39,68 @@ export const useChatScrollStore = create<ChatScrollState>((set, get) => ({
   // --- BEGIN COMMENT ---
   // 实现状态更新方法。
   // --- END COMMENT ---
-  setUserScrolledUp: (scrolledUp) => {
+  setUserScrolledUp: scrolledUp => {
     if (get().userScrolledUp !== scrolledUp) {
       set({ userScrolledUp: scrolledUp });
     }
   },
-  setIsAtBottom: (isBottom) => {
+  setIsAtBottom: isBottom => {
     if (get().isAtBottom !== isBottom) {
       set({ isAtBottom: isBottom });
     }
   },
-  setScrollRef: (ref) => {
+  setScrollRef: ref => {
     if (get().scrollRef !== ref) {
       set({ scrollRef: ref });
     }
   },
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 优化：scrollToBottom 方法，更智能地处理状态更新
   // --- END COMMENT ---
   scrollToBottom: (behavior = 'auto', onScrollEnd) => {
     const { scrollRef } = get();
     if (scrollRef?.current) {
-      requestAnimationFrame(() => { 
+      requestAnimationFrame(() => {
         if (scrollRef.current) {
           scrollRef.current.scrollTo({
             top: scrollRef.current.scrollHeight,
-            behavior: behavior
+            behavior: behavior,
           });
-          
+
           // --- BEGIN COMMENT ---
           // 🎯 修复：延迟状态更新，让滚动事件处理器先执行
           // 这样可以避免覆盖用户的滚动意图
           // --- END COMMENT ---
-          setTimeout(() => {
-            // 重新检查当前滚动位置，而不是强制设置
-            if (scrollRef.current) {
-              const element = scrollRef.current;
-              const currentIsAtBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 50;
-              
-              // 只有确实滚动到底部时才更新状态
-              if (currentIsAtBottom) {
-                const currentState = get();
-                if (currentState.userScrolledUp !== false || currentState.isAtBottom !== true) {
-                  set({ userScrolledUp: false, isAtBottom: true });
+          setTimeout(
+            () => {
+              // 重新检查当前滚动位置，而不是强制设置
+              if (scrollRef.current) {
+                const element = scrollRef.current;
+                const currentIsAtBottom =
+                  element.scrollHeight -
+                    element.scrollTop -
+                    element.clientHeight <
+                  50;
+
+                // 只有确实滚动到底部时才更新状态
+                if (currentIsAtBottom) {
+                  const currentState = get();
+                  if (
+                    currentState.userScrolledUp !== false ||
+                    currentState.isAtBottom !== true
+                  ) {
+                    set({ userScrolledUp: false, isAtBottom: true });
+                  }
                 }
               }
-            }
-            
-            if (onScrollEnd) {
-              onScrollEnd();
-            }
-          }, behavior === 'smooth' ? 100 : 0); // 平滑滚动需要更多时间
+
+              if (onScrollEnd) {
+                onScrollEnd();
+              }
+            },
+            behavior === 'smooth' ? 100 : 0
+          ); // 平滑滚动需要更多时间
         } else {
           if (onScrollEnd) {
             onScrollEnd();
@@ -102,23 +113,23 @@ export const useChatScrollStore = create<ChatScrollState>((set, get) => ({
       }
     }
   },
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 优化：resetScrollState 方法，用于用户主动点击按钮时的重置
   // --- END COMMENT ---
-  resetScrollState: (onScrollEnd) => {
+  resetScrollState: onScrollEnd => {
     // --- BEGIN COMMENT ---
     // 用户主动重置，强制设置状态并滚动
     // --- END COMMENT ---
     set({ userScrolledUp: false, isAtBottom: true });
-    
+
     const { scrollRef } = get();
     if (scrollRef?.current) {
       requestAnimationFrame(() => {
         if (scrollRef.current) {
           scrollRef.current.scrollTo({
             top: scrollRef.current.scrollHeight,
-            behavior: 'auto' 
+            behavior: 'auto',
           });
           if (onScrollEnd) {
             onScrollEnd();
@@ -134,5 +145,5 @@ export const useChatScrollStore = create<ChatScrollState>((set, get) => ({
         onScrollEnd();
       }
     }
-  }
+  },
 }));

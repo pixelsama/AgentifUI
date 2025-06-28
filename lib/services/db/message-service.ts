@@ -1,17 +1,21 @@
 /**
  * 优化的数据库消息服务
- * 
+ *
  * 专门处理消息相关的数据操作，优化分页和排序逻辑
  * 使用数据库级别的排序，避免客户端复杂的排序逻辑
  */
-
-import { dataService } from './data-service';
-import { cacheService, CacheKeys } from './cache-service';
-import { realtimeService, SubscriptionKeys, SubscriptionConfigs } from './realtime-service';
-import { Result, success, failure } from '@lib/types/result';
-import { Message, MessageStatus } from '@lib/types/database';
 import { ChatMessage } from '@lib/stores/chat-store';
+import { Message, MessageStatus } from '@lib/types/database';
+import { Result, failure, success } from '@lib/types/result';
+
 import { extractMainContentForPreview } from '../../utils/index';
+import { CacheKeys, cacheService } from './cache-service';
+import { dataService } from './data-service';
+import {
+  SubscriptionConfigs,
+  SubscriptionKeys,
+  realtimeService,
+} from './realtime-service';
 
 export interface MessagePage {
   messages: Message[];
@@ -59,85 +63,91 @@ export class MessageService {
       cursor,
       direction = 'older',
       includeCount = false,
-      cache = true
+      cache = true,
     } = options;
 
-    const cacheKey = cache ? 
-      `conversation:messages:${conversationId}:${cursor ? `${cursor.substring(0, 8)}:${direction}:${limit}` : `initial:${limit}`}` : 
-      undefined;
+    const cacheKey = cache
+      ? `conversation:messages:${conversationId}:${cursor ? `${cursor.substring(0, 8)}:${direction}:${limit}` : `initial:${limit}`}`
+      : undefined;
 
-    return dataService.query(async () => {
-      // 解析游标
-      let cursorData: PaginationCursor | null = null;
-      if (cursor) {
-        try {
-          cursorData = JSON.parse(atob(cursor));
-        } catch (error) {
-          throw new Error('无效的分页游标');
+    return dataService.query(
+      async () => {
+        // 解析游标
+        let cursorData: PaginationCursor | null = null;
+        if (cursor) {
+          try {
+            cursorData = JSON.parse(atob(cursor));
+          } catch (error) {
+            throw new Error('无效的分页游标');
+          }
         }
-      }
 
-      // 构建查询
-      let query = dataService['supabase']
-        .from('messages')
-        .select('*')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: false })
-        .order('id', { ascending: false }); // 保证排序稳定性
+        // 构建查询
+        let query = dataService['supabase']
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', conversationId)
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false }); // 保证排序稳定性
 
-      // 应用游标条件
-      if (cursorData) {
-        if (direction === 'older') {
-          query = query.or(
-            `created_at.lt.${cursorData.timestamp},and(created_at.eq.${cursorData.timestamp},id.lt.${cursorData.id})`
-          );
-        } else {
-          query = query.or(
-            `created_at.gt.${cursorData.timestamp},and(created_at.eq.${cursorData.timestamp},id.gt.${cursorData.id})`
-          );
+        // 应用游标条件
+        if (cursorData) {
+          if (direction === 'older') {
+            query = query.or(
+              `created_at.lt.${cursorData.timestamp},and(created_at.eq.${cursorData.timestamp},id.lt.${cursorData.id})`
+            );
+          } else {
+            query = query.or(
+              `created_at.gt.${cursorData.timestamp},and(created_at.eq.${cursorData.timestamp},id.gt.${cursorData.id})`
+            );
+          }
         }
-      }
 
-      // 应用分页限制（+1 用于检查是否有更多数据）
-      query = query.limit(limit + 1);
+        // 应用分页限制（+1 用于检查是否有更多数据）
+        query = query.limit(limit + 1);
 
-      const { data: messages, error } = await query;
+        const { data: messages, error } = await query;
 
-      if (error) {
-        throw error;
-      }
+        if (error) {
+          throw error;
+        }
 
-      // 检查是否有更多数据
-      const hasMore = messages.length > limit;
-      const actualMessages = hasMore ? messages.slice(0, limit) : messages;
+        // 检查是否有更多数据
+        const hasMore = messages.length > limit;
+        const actualMessages = hasMore ? messages.slice(0, limit) : messages;
 
-      // 生成下一个游标
-      let nextCursor: string | undefined;
-      if (hasMore && actualMessages.length > 0) {
-        const lastMessage = actualMessages[actualMessages.length - 1];
-        const cursorObj: PaginationCursor = {
-          timestamp: lastMessage.created_at,
-          id: lastMessage.id
+        // 生成下一个游标
+        let nextCursor: string | undefined;
+        if (hasMore && actualMessages.length > 0) {
+          const lastMessage = actualMessages[actualMessages.length - 1];
+          const cursorObj: PaginationCursor = {
+            timestamp: lastMessage.created_at,
+            id: lastMessage.id,
+          };
+          nextCursor = btoa(JSON.stringify(cursorObj));
+        }
+
+        // 获取总数（如果需要）
+        let totalCount: number | undefined;
+        if (includeCount) {
+          const countResult = await dataService.count('messages', {
+            conversation_id: conversationId,
+          });
+          if (countResult.success) {
+            totalCount = countResult.data;
+          }
+        }
+
+        return {
+          messages: actualMessages,
+          hasMore,
+          nextCursor,
+          totalCount,
         };
-        nextCursor = btoa(JSON.stringify(cursorObj));
-      }
-
-      // 获取总数（如果需要）
-      let totalCount: number | undefined;
-      if (includeCount) {
-        const countResult = await dataService.count('messages', { conversation_id: conversationId });
-        if (countResult.success) {
-          totalCount = countResult.data;
-        }
-      }
-
-      return {
-        messages: actualMessages,
-        hasMore,
-        nextCursor,
-        totalCount
-      };
-    }, cacheKey, { cache });
+      },
+      cacheKey,
+      { cache }
+    );
   }
 
   /**
@@ -149,21 +159,23 @@ export class MessageService {
     options: { cache?: boolean } = {}
   ): Promise<Result<Message[]>> {
     const { cache = true } = options;
-    
+
     return dataService.findMany<Message>(
       'messages',
       { conversation_id: conversationId },
       { column: 'created_at', ascending: false },
       { offset: 0, limit },
-      { 
+      {
         cache,
         cacheTTL: 2 * 60 * 1000, // 2分钟缓存
         subscribe: true,
         subscriptionKey: SubscriptionKeys.conversationMessages(conversationId),
         onUpdate: () => {
           // 清除相关缓存
-          cacheService.deletePattern(`conversation:messages:${conversationId}:*`);
-        }
+          cacheService.deletePattern(
+            `conversation:messages:${conversationId}:*`
+          );
+        },
       }
     );
   }
@@ -186,7 +198,7 @@ export class MessageService {
       ...message,
       metadata: message.metadata || {},
       status: message.status || 'sent',
-      is_synced: true
+      is_synced: true,
     };
 
     // --- BEGIN COMMENT ---
@@ -196,7 +208,9 @@ export class MessageService {
     if (message.role === 'assistant') {
       return dataService.query(async () => {
         // 1. 保存消息
-        const { data: savedMessage, error: messageError } = await dataService['supabase']
+        const { data: savedMessage, error: messageError } = await dataService[
+          'supabase'
+        ]
           .from('messages')
           .insert(messageData)
           .select()
@@ -208,7 +222,7 @@ export class MessageService {
 
         // 2. 提取主要内容用于预览
         const mainContent = extractMainContentForPreview(message.content);
-        
+
         // 3. 生成预览文本（与原触发器保持一致的截断逻辑）
         let previewText = mainContent || message.content; // 如果提取失败，使用原始内容
         if (previewText.length > 100) {
@@ -220,7 +234,7 @@ export class MessageService {
           .from('conversations')
           .update({
             last_message_preview: previewText,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           })
           .eq('id', message.conversation_id);
 
@@ -230,7 +244,9 @@ export class MessageService {
         }
 
         // 5. 清除相关缓存
-        cacheService.deletePattern(`conversation:messages:${message.conversation_id}:*`);
+        cacheService.deletePattern(
+          `conversation:messages:${message.conversation_id}:*`
+        );
 
         return savedMessage;
       });
@@ -241,7 +257,9 @@ export class MessageService {
       const result = await dataService.create<Message>('messages', messageData);
 
       if (result.success) {
-        cacheService.deletePattern(`conversation:messages:${message.conversation_id}:*`);
+        cacheService.deletePattern(
+          `conversation:messages:${message.conversation_id}:*`
+        );
       }
 
       return result;
@@ -251,16 +269,18 @@ export class MessageService {
   /**
    * 批量保存消息
    */
-  async saveMessages(messages: Array<{
-    conversation_id: string;
-    user_id?: string | null;
-    role: 'user' | 'assistant' | 'system';
-    content: string;
-    metadata?: Record<string, any>;
-    status?: MessageStatus;
-    external_id?: string | null;
-    token_count?: number | null;
-  }>): Promise<Result<string[]>> {
+  async saveMessages(
+    messages: Array<{
+      conversation_id: string;
+      user_id?: string | null;
+      role: 'user' | 'assistant' | 'system';
+      content: string;
+      metadata?: Record<string, any>;
+      status?: MessageStatus;
+      external_id?: string | null;
+      token_count?: number | null;
+    }>
+  ): Promise<Result<string[]>> {
     if (!messages.length) {
       return success([]);
     }
@@ -270,7 +290,7 @@ export class MessageService {
         ...msg,
         metadata: msg.metadata || {},
         status: msg.status || 'sent',
-        is_synced: true
+        is_synced: true,
       }));
 
       const { data, error } = await dataService['supabase']
@@ -299,12 +319,16 @@ export class MessageService {
     messageId: string,
     status: MessageStatus
   ): Promise<Result<Message>> {
-    const result = await dataService.update<Message>('messages', messageId, { status });
+    const result = await dataService.update<Message>('messages', messageId, {
+      status,
+    });
 
     // 清除相关缓存（需要先获取消息的conversation_id）
     if (result.success) {
       const message = result.data;
-      cacheService.deletePattern(`conversation:messages:${message.conversation_id}:*`);
+      cacheService.deletePattern(
+        `conversation:messages:${message.conversation_id}:*`
+      );
     }
 
     return result;
@@ -323,7 +347,8 @@ export class MessageService {
     // 添加停止标记
     if (chatMessage.wasManuallyStopped && !baseMetadata.stopped_manually) {
       baseMetadata.stopped_manually = true;
-      baseMetadata.stopped_at = baseMetadata.stopped_at || new Date().toISOString();
+      baseMetadata.stopped_at =
+        baseMetadata.stopped_at || new Date().toISOString();
     }
 
     // 添加附件信息
@@ -336,13 +361,13 @@ export class MessageService {
 
     return {
       conversation_id: conversationId,
-      user_id: chatMessage.isUser ? (userId || null) : null,
+      user_id: chatMessage.isUser ? userId || null : null,
       role: chatMessage.role || (chatMessage.isUser ? 'user' : 'assistant'),
       content: chatMessage.text,
       metadata: baseMetadata,
       status: chatMessage.error ? 'error' : 'sent',
       external_id: chatMessage.dify_message_id || null,
-      token_count: chatMessage.token_count || null
+      token_count: chatMessage.token_count || null,
     };
   }
 
@@ -352,7 +377,7 @@ export class MessageService {
   dbMessageToChatMessage(dbMessage: Message): ChatMessage {
     // 从metadata中提取附件信息
     const attachments = dbMessage.metadata?.attachments || [];
-    
+
     return {
       id: `db-${dbMessage.id}`,
       text: dbMessage.content,
@@ -364,7 +389,7 @@ export class MessageService {
       metadata: dbMessage.metadata || {},
       wasManuallyStopped: dbMessage.metadata?.stopped_manually === true,
       token_count: dbMessage.token_count || undefined,
-      attachments: attachments.length > 0 ? attachments : undefined
+      attachments: attachments.length > 0 ? attachments : undefined,
     };
   }
 
@@ -381,7 +406,7 @@ export class MessageService {
       {
         conversation_id: conversationId,
         role,
-        content
+        content,
       },
       { cache: true, cacheTTL: 30 * 1000 } // 30秒缓存
     );
@@ -390,20 +415,26 @@ export class MessageService {
   /**
    * 获取消息统计信息
    */
-  async getMessageStats(conversationId: string): Promise<Result<{
-    total: number;
-    byRole: Record<string, number>;
-    lastMessageAt?: string;
-  }>> {
+  async getMessageStats(conversationId: string): Promise<
+    Result<{
+      total: number;
+      byRole: Record<string, number>;
+      lastMessageAt?: string;
+    }>
+  > {
     return dataService.query(async () => {
       // 获取总数
-      const totalResult = await dataService.count('messages', { conversation_id: conversationId });
+      const totalResult = await dataService.count('messages', {
+        conversation_id: conversationId,
+      });
       if (!totalResult.success) {
         throw totalResult.error;
       }
 
       // 获取按角色统计
-      const { data: roleStats, error: roleError } = await dataService['supabase']
+      const { data: roleStats, error: roleError } = await dataService[
+        'supabase'
+      ]
         .from('messages')
         .select('role')
         .eq('conversation_id', conversationId);
@@ -418,7 +449,9 @@ export class MessageService {
       });
 
       // 获取最后消息时间
-      const { data: lastMessage, error: lastError } = await dataService['supabase']
+      const { data: lastMessage, error: lastError } = await dataService[
+        'supabase'
+      ]
         .from('messages')
         .select('created_at')
         .eq('conversation_id', conversationId)
@@ -433,7 +466,7 @@ export class MessageService {
       return {
         total: totalResult.data,
         byRole,
-        lastMessageAt: lastMessage?.created_at
+        lastMessageAt: lastMessage?.created_at,
       };
     });
   }
@@ -443,7 +476,9 @@ export class MessageService {
    */
   clearMessageCache(conversationId?: string): number {
     if (conversationId) {
-      return cacheService.deletePattern(`conversation:messages:${conversationId}:*`);
+      return cacheService.deletePattern(
+        `conversation:messages:${conversationId}:*`
+      );
     } else {
       return cacheService.deletePattern('conversation:messages:*');
     }
@@ -451,4 +486,4 @@ export class MessageService {
 }
 
 // 导出单例实例
-export const messageService = MessageService.getInstance(); 
+export const messageService = MessageService.getInstance();

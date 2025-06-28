@@ -1,11 +1,11 @@
 /**
  * 统一的实时订阅管理服务
- * 
+ *
  * 管理Supabase实时订阅，避免重复订阅和内存泄漏
  * 提供订阅、取消订阅和管理功能
  */
-
 import { createClient } from '@lib/supabase/client';
+
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface SubscriptionConfig {
@@ -84,7 +84,7 @@ export class RealtimeService {
         event: config.event,
         schema: config.schema,
         table: config.table,
-        ...(config.filter && { filter: config.filter })
+        ...(config.filter && { filter: config.filter }),
       };
 
       // 配置订阅
@@ -95,7 +95,7 @@ export class RealtimeService {
       );
 
       // 订阅频道
-      channel.subscribe((status) => {
+      channel.subscribe(status => {
         console.log(`[实时订阅] ${key} 状态变化: ${status}`);
       });
 
@@ -103,7 +103,7 @@ export class RealtimeService {
         channel,
         handlers: new Set([handler]),
         config,
-        createdAt: Date.now()
+        createdAt: Date.now(),
       };
 
       this.subscriptions.set(key, subscription);
@@ -119,7 +119,10 @@ export class RealtimeService {
   /**
    * 移除特定的处理函数
    */
-  private unsubscribeHandler(key: string, handler: (payload: any) => void): void {
+  private unsubscribeHandler(
+    key: string,
+    handler: (payload: any) => void
+  ): void {
     const subscription = this.subscriptions.get(key);
     if (!subscription) return;
 
@@ -169,7 +172,7 @@ export class RealtimeService {
       total: this.subscriptions.size,
       byTable: {} as Record<string, number>,
       byEvent: {} as Record<string, number>,
-      oldestSubscription: undefined as { key: string; age: number } | undefined
+      oldestSubscription: undefined as { key: string; age: number } | undefined,
     };
 
     let oldestTimestamp = Date.now();
@@ -194,7 +197,7 @@ export class RealtimeService {
     if (oldestKey) {
       stats.oldestSubscription = {
         key: oldestKey,
-        age: Date.now() - oldestTimestamp
+        age: Date.now() - oldestTimestamp,
       };
     }
 
@@ -212,14 +215,16 @@ export class RealtimeService {
     handlerCount: number;
     age: number;
   }> {
-    return Array.from(this.subscriptions.entries()).map(([key, subscription]) => ({
-      key,
-      table: subscription.config.table,
-      event: subscription.config.event,
-      filter: subscription.config.filter,
-      handlerCount: subscription.handlers.size,
-      age: Date.now() - subscription.createdAt
-    }));
+    return Array.from(this.subscriptions.entries()).map(
+      ([key, subscription]) => ({
+        key,
+        table: subscription.config.table,
+        event: subscription.config.event,
+        filter: subscription.config.filter,
+        handlerCount: subscription.handlers.size,
+        age: Date.now() - subscription.createdAt,
+      })
+    );
   }
 
   /**
@@ -241,13 +246,14 @@ export const SubscriptionKeys = {
   // --- END COMMENT ---
   sidebarConversations: (userId: string) => `sidebar-conversations:${userId}`,
   allConversations: (userId: string) => `all-conversations:${userId}`,
-  
+
   // --- BEGIN COMMENT ---
   // 保持向后兼容性，现有代码可以继续使用
   // --- END COMMENT ---
   userConversations: (userId: string) => `user-conversations:${userId}`,
-  
-  conversationMessages: (conversationId: string) => `conversation-messages:${conversationId}`,
+
+  conversationMessages: (conversationId: string) =>
+    `conversation-messages:${conversationId}`,
   userProfile: (userId: string) => `user-profile:${userId}`,
   providers: () => 'providers',
   serviceInstances: () => 'service-instances',
@@ -260,32 +266,32 @@ export const SubscriptionConfigs = {
     event: '*',
     schema: 'public',
     table: 'conversations',
-    ...(userId && { filter: `user_id=eq.${userId}` })
+    ...(userId && { filter: `user_id=eq.${userId}` }),
   }),
-  
+
   messages: (conversationId?: string): SubscriptionConfig => ({
     event: '*',
     schema: 'public',
     table: 'messages',
-    ...(conversationId && { filter: `conversation_id=eq.${conversationId}` })
+    ...(conversationId && { filter: `conversation_id=eq.${conversationId}` }),
   }),
-  
+
   profiles: (userId?: string): SubscriptionConfig => ({
     event: 'UPDATE',
     schema: 'public',
     table: 'profiles',
-    ...(userId && { filter: `id=eq.${userId}` })
+    ...(userId && { filter: `id=eq.${userId}` }),
   }),
-  
+
   providers: (): SubscriptionConfig => ({
     event: '*',
     schema: 'public',
-    table: 'providers'
+    table: 'providers',
   }),
-  
+
   serviceInstances: (): SubscriptionConfig => ({
     event: '*',
     schema: 'public',
-    table: 'service_instances'
-  })
-}; 
+    table: 'service_instances',
+  }),
+};

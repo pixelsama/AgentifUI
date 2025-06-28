@@ -1,17 +1,18 @@
-"use client"
+'use client';
 
-import React, { useState, useEffect, useMemo } from "react"
-import { cn } from "@lib/utils"
-import { useCurrentApp } from "@lib/hooks/use-current-app"
-import { useWelcomeLayout } from "@lib/hooks/use-welcome-layout"
-import { useChatWidth } from "@lib/hooks"
-import { SuggestedQuestionButton } from "@components/ui/suggested-question-button"
-import { useChatInputStore } from "@lib/stores/chat-input-store"
-import { useTypewriterStore } from "@lib/stores/ui/typewriter-store"
+import { SuggestedQuestionButton } from '@components/ui/suggested-question-button';
+import { useChatWidth } from '@lib/hooks';
+import { useCurrentApp } from '@lib/hooks/use-current-app';
+import { useWelcomeLayout } from '@lib/hooks/use-welcome-layout';
+import { useChatInputStore } from '@lib/stores/chat-input-store';
+import { useTypewriterStore } from '@lib/stores/ui/typewriter-store';
+import { cn } from '@lib/utils';
+
+import React, { useEffect, useMemo, useState } from 'react';
 
 interface DynamicSuggestedQuestionsProps {
-  className?: string
-  onQuestionClick?: (messageText: string, files?: any[]) => Promise<void>
+  className?: string;
+  onQuestionClick?: (messageText: string, files?: any[]) => Promise<void>;
 }
 
 /**
@@ -19,67 +20,78 @@ interface DynamicSuggestedQuestionsProps {
  * 从数据库配置中获取推荐问题并渐进显示
  * 等待欢迎文字打字机完成后才开始渲染
  */
-export const DynamicSuggestedQuestions = ({ className, onQuestionClick }: DynamicSuggestedQuestionsProps) => {
-  const { widthClass, paddingClass } = useChatWidth()
-  const { currentAppInstance, isValidating, isLoading } = useCurrentApp()
-  const { setMessage } = useChatInputStore()
-  
+export const DynamicSuggestedQuestions = ({
+  className,
+  onQuestionClick,
+}: DynamicSuggestedQuestionsProps) => {
+  const { widthClass, paddingClass } = useChatWidth();
+  const { currentAppInstance, isValidating, isLoading } = useCurrentApp();
+  const { setMessage } = useChatInputStore();
+
   // --- BEGIN COMMENT ---
   // 🎯 监听打字机完成状态
   // --- END COMMENT ---
-  const { isWelcomeTypewriterComplete } = useTypewriterStore()
-  
+  const { isWelcomeTypewriterComplete } = useTypewriterStore();
+
   // --- BEGIN COMMENT ---
   // 使用智能布局系统获取推荐问题的位置
   // --- END COMMENT ---
-  const { suggestedQuestions: questionsPosition, needsCompactLayout } = useWelcomeLayout()
+  const { suggestedQuestions: questionsPosition, needsCompactLayout } =
+    useWelcomeLayout();
 
   // --- BEGIN COMMENT ---
   // 🎯 应用切换状态检测，与welcome-screen保持一致
   // --- END COMMENT ---
-  const [isAppSwitching, setIsAppSwitching] = useState(false)
-  const [displayQuestions, setDisplayQuestions] = useState<string[]>([])
-  const [shouldShowQuestions, setShouldShowQuestions] = useState(false)
+  const [isAppSwitching, setIsAppSwitching] = useState(false);
+  const [displayQuestions, setDisplayQuestions] = useState<string[]>([]);
+  const [shouldShowQuestions, setShouldShowQuestions] = useState(false);
 
   // --- BEGIN COMMENT ---
   // 🎯 应用切换检测逻辑，与welcome-screen完全一致
   // --- END COMMENT ---
   useEffect(() => {
-    const pathname = window.location.pathname
-    const isOnAppDetailPage = pathname.startsWith('/apps/') && pathname.split('/').length === 4
-    const isOnNewChatPage = pathname === '/chat/new'
-    
+    const pathname = window.location.pathname;
+    const isOnAppDetailPage =
+      pathname.startsWith('/apps/') && pathname.split('/').length === 4;
+    const isOnNewChatPage = pathname === '/chat/new';
+
     if (isOnAppDetailPage) {
-      const urlInstanceId = pathname.split('/')[3]
-      const currentInstanceId = currentAppInstance?.instance_id
-      
-      const isUrlAppMismatch = currentInstanceId && currentInstanceId !== urlInstanceId;
-      const isLoadingWithTargetApp = (isValidating || isLoading) && urlInstanceId;
+      const urlInstanceId = pathname.split('/')[3];
+      const currentInstanceId = currentAppInstance?.instance_id;
+
+      const isUrlAppMismatch =
+        currentInstanceId && currentInstanceId !== urlInstanceId;
+      const isLoadingWithTargetApp =
+        (isValidating || isLoading) && urlInstanceId;
       const isNoAppButHasTarget = !currentInstanceId && urlInstanceId;
-      
+
       if (isUrlAppMismatch || isLoadingWithTargetApp || isNoAppButHasTarget) {
-        setIsAppSwitching(true)
-      } else if (currentInstanceId === urlInstanceId && !isValidating && !isLoading) {
-        setIsAppSwitching(false)
+        setIsAppSwitching(true);
+      } else if (
+        currentInstanceId === urlInstanceId &&
+        !isValidating &&
+        !isLoading
+      ) {
+        setIsAppSwitching(false);
       }
     } else if (isOnNewChatPage) {
-      const appMetadata = currentAppInstance?.config?.app_metadata
-      const isModelApp = appMetadata?.app_type === 'model'
-      
+      const appMetadata = currentAppInstance?.config?.app_metadata;
+      const isModelApp = appMetadata?.app_type === 'model';
+
       if (currentAppInstance && !isModelApp) {
-        setIsAppSwitching(true)
+        setIsAppSwitching(true);
       } else if (isModelApp && !isValidating && !isLoading) {
-        setIsAppSwitching(false)
+        setIsAppSwitching(false);
       }
     } else {
-      setIsAppSwitching(false)
+      setIsAppSwitching(false);
     }
   }, [
-    currentAppInstance?.instance_id, 
+    currentAppInstance?.instance_id,
     currentAppInstance?.config?.app_metadata,
     isValidating,
-    isLoading
-  ])
+    isLoading,
+  ]);
 
   // --- BEGIN COMMENT ---
   // 🎯 获取推荐问题，等待打字机完成后才开始处理
@@ -108,13 +120,14 @@ export const DynamicSuggestedQuestions = ({ className, onQuestionClick }: Dynami
       setShouldShowQuestions(false);
       return;
     }
-    
+
     // --- BEGIN COMMENT ---
     // 🎯 路径一致性检查
     // --- END COMMENT ---
     const pathname = window.location.pathname;
-    const isOnAppDetailPage = pathname.startsWith('/apps/') && pathname.split('/').length === 4;
-    
+    const isOnAppDetailPage =
+      pathname.startsWith('/apps/') && pathname.split('/').length === 4;
+
     if (isOnAppDetailPage) {
       const urlInstanceId = pathname.split('/')[3];
       if (currentAppInstance.instance_id !== urlInstanceId) {
@@ -122,7 +135,7 @@ export const DynamicSuggestedQuestions = ({ className, onQuestionClick }: Dynami
         return;
       }
     }
-    
+
     // --- BEGIN COMMENT ---
     // 🎯 延迟处理：在打字机完成后稍等片刻再开始渲染推荐问题
     // --- END COMMENT ---
@@ -130,14 +143,19 @@ export const DynamicSuggestedQuestions = ({ className, onQuestionClick }: Dynami
       // --- BEGIN COMMENT ---
       // 🎯 从数据库config字段直接获取推荐问题
       // --- END COMMENT ---
-      const suggestedQuestions = currentAppInstance?.config?.dify_parameters?.suggested_questions;
-      
-      if (suggestedQuestions && Array.isArray(suggestedQuestions) && suggestedQuestions.length > 0) {
+      const suggestedQuestions =
+        currentAppInstance?.config?.dify_parameters?.suggested_questions;
+
+      if (
+        suggestedQuestions &&
+        Array.isArray(suggestedQuestions) &&
+        suggestedQuestions.length > 0
+      ) {
         // 过滤空字符串和无效问题
         const validQuestions = suggestedQuestions
           .filter(q => q && typeof q === 'string' && q.trim().length > 0)
           .map(q => q.trim());
-          
+
         if (validQuestions.length > 0) {
           setDisplayQuestions(validQuestions);
           setShouldShowQuestions(true);
@@ -150,16 +168,15 @@ export const DynamicSuggestedQuestions = ({ className, onQuestionClick }: Dynami
         setShouldShowQuestions(false);
       }
     }, 300); // 打字机完成后等待300ms再开始渲染
-    
+
     return () => clearTimeout(updateTimer);
-    
   }, [
     isWelcomeTypewriterComplete, // 🎯 核心依赖：打字机完成状态
     currentAppInstance?.config?.dify_parameters?.suggested_questions,
     currentAppInstance?.instance_id,
     isValidating,
     isLoading,
-    isAppSwitching
+    isAppSwitching,
   ]);
 
   // --- BEGIN COMMENT ---
@@ -168,16 +185,16 @@ export const DynamicSuggestedQuestions = ({ className, onQuestionClick }: Dynami
   // --- END COMMENT ---
   const layoutConfig = useMemo(() => {
     const count = displayQuestions.length;
-    
+
     if (count === 0) return null;
-    
+
     // --- BEGIN COMMENT ---
     // 使用flexbox布局，支持按钮内容自适应宽度并居中
     // 最多显示6个问题
     // --- END COMMENT ---
     return {
       maxDisplay: count > 6 ? 6 : count,
-      description: `${count}个问题-flexbox居中`
+      description: `${count}个问题-flexbox居中`,
     };
   }, [displayQuestions.length]);
 
@@ -211,12 +228,12 @@ export const DynamicSuggestedQuestions = ({ className, onQuestionClick }: Dynami
   const questionsToShow = displayQuestions.slice(0, layoutConfig.maxDisplay);
 
   return (
-    <div 
+    <div
       className={cn(
-        "w-full mx-auto",
+        'mx-auto w-full',
         widthClass,
         paddingClass,
-        "absolute left-1/2",
+        'absolute left-1/2',
         className
       )}
       style={questionsPosition}
@@ -224,16 +241,14 @@ export const DynamicSuggestedQuestions = ({ className, onQuestionClick }: Dynami
       {/* --- BEGIN COMMENT ---
       问题容器：使用flexbox布局，支持多行换行，每行都居中对齐
       --- END COMMENT --- */}
-      <div className="flex flex-wrap justify-center items-start gap-3">
+      <div className="flex flex-wrap items-start justify-center gap-3">
         {questionsToShow.map((question, index) => (
           <SuggestedQuestionButton
             key={`${currentAppInstance?.instance_id}-${index}`}
             question={question}
             onClick={handleQuestionClick}
             animationDelay={index * 100} // 每个问题间隔100ms显示
-            className={cn(
-              needsCompactLayout && "py-2 px-4 text-xs"
-            )}
+            className={cn(needsCompactLayout && 'px-4 py-2 text-xs')}
           />
         ))}
       </div>
@@ -242,17 +257,19 @@ export const DynamicSuggestedQuestions = ({ className, onQuestionClick }: Dynami
       如果有更多问题，显示提示
       --- END COMMENT --- */}
       {displayQuestions.length > layoutConfig.maxDisplay && (
-        <div className={cn(
-          "mt-3 text-center opacity-0 animate-fade-in",
-          "text-xs text-stone-500 font-serif"
-        )}
-        style={{
-          animationDelay: `${questionsToShow.length * 100 + 200}ms`,
-          animationFillMode: 'forwards'
-        }}>
+        <div
+          className={cn(
+            'animate-fade-in mt-3 text-center opacity-0',
+            'font-serif text-xs text-stone-500'
+          )}
+          style={{
+            animationDelay: `${questionsToShow.length * 100 + 200}ms`,
+            animationFillMode: 'forwards',
+          }}
+        >
           还有 {displayQuestions.length - layoutConfig.maxDisplay} 个问题...
         </div>
       )}
     </div>
-  )
-} 
+  );
+};

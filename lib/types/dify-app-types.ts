@@ -3,7 +3,12 @@
  * 基于Dify官方API文档的应用类型规范
  */
 
-export type DifyAppType = 'chatbot' | 'agent' | 'chatflow' | 'workflow' | 'text-generation';
+export type DifyAppType =
+  | 'chatbot'
+  | 'agent'
+  | 'chatflow'
+  | 'workflow'
+  | 'text-generation';
 
 export interface DifyAppTypeInfo {
   key: DifyAppType;
@@ -32,8 +37,8 @@ export const DIFY_APP_TYPES: Record<DifyAppType, DifyAppTypeInfo> = {
     features: ['对话', '文件上传', '语音转文字'],
     color: {
       primary: 'blue',
-      secondary: 'blue-100'
-    }
+      secondary: 'blue-100',
+    },
   },
   agent: {
     key: 'agent',
@@ -44,8 +49,8 @@ export const DIFY_APP_TYPES: Record<DifyAppType, DifyAppTypeInfo> = {
     features: ['对话', '工具调用', '推理链', '多轮任务'],
     color: {
       primary: 'purple',
-      secondary: 'purple-100'
-    }
+      secondary: 'purple-100',
+    },
   },
   chatflow: {
     key: 'chatflow',
@@ -56,8 +61,8 @@ export const DIFY_APP_TYPES: Record<DifyAppType, DifyAppTypeInfo> = {
     features: ['流程编排', '条件分支', '对话管理'],
     color: {
       primary: 'green',
-      secondary: 'green-100'
-    }
+      secondary: 'green-100',
+    },
   },
   workflow: {
     key: 'workflow',
@@ -68,8 +73,8 @@ export const DIFY_APP_TYPES: Record<DifyAppType, DifyAppTypeInfo> = {
     features: ['自动化', '批处理', '流程控制'],
     color: {
       primary: 'orange',
-      secondary: 'orange-100'
-    }
+      secondary: 'orange-100',
+    },
   },
   'text-generation': {
     key: 'text-generation',
@@ -80,9 +85,9 @@ export const DIFY_APP_TYPES: Record<DifyAppType, DifyAppTypeInfo> = {
     features: ['文本生成', '内容创作', '格式化输出'],
     color: {
       primary: 'pink',
-      secondary: 'pink-100'
-    }
-  }
+      secondary: 'pink-100',
+    },
+  },
 };
 
 /**
@@ -136,4 +141,4 @@ export function isWorkflowApp(type: DifyAppType): boolean {
  */
 export function isTextGenerationApp(type: DifyAppType): boolean {
   return type === 'text-generation';
-} 
+}

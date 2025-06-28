@@ -1,41 +1,44 @@
 /**
  * 部门应用权限服务
- * 
+ *
  * 提供部门级应用权限管理功能，包括：
  * - 获取用户可访问的应用列表
  * - 检查用户对特定应用的权限
  * - 管理部门应用权限配置
  * - 使用配额管理和统计
  */
-
 import { createClient } from '@lib/supabase/client';
-import type { 
-  DepartmentAppPermission, 
-  UserAccessibleApp, 
-  AppPermissionCheck
+import type {
+  AppPermissionCheck,
+  DepartmentAppPermission,
+  UserAccessibleApp,
 } from '@lib/types/database';
 
 // --- BEGIN COMMENT ---
 // 🎯 Result类型定义，用于统一错误处理
 // --- END COMMENT ---
-export type Result<T> = {
-  success: true;
-  data: T;
-} | {
-  success: false;
-  error: string;
-};
+export type Result<T> =
+  | {
+      success: true;
+      data: T;
+    }
+  | {
+      success: false;
+      error: string;
+    };
 
 /**
  * 获取用户可访问的应用列表
  * 基于用户所属部门的权限配置
  */
-export async function getUserAccessibleApps(userId: string): Promise<Result<UserAccessibleApp[]>> {
+export async function getUserAccessibleApps(
+  userId: string
+): Promise<Result<UserAccessibleApp[]>> {
   try {
     const supabase = createClient();
-    
+
     const { data, error } = await supabase.rpc('get_user_accessible_apps', {
-      p_user_id: userId
+      p_user_id: userId,
     });
 
     if (error) {
@@ -54,15 +57,15 @@ export async function getUserAccessibleApps(userId: string): Promise<Result<User
  * 检查用户对特定应用的访问权限
  */
 export async function checkUserAppPermission(
-  userId: string, 
+  userId: string,
   serviceInstanceId: string
 ): Promise<Result<AppPermissionCheck>> {
   try {
     const supabase = createClient();
-    
+
     const { data, error } = await supabase.rpc('check_user_app_permission', {
       p_user_id: userId,
-      p_service_instance_id: serviceInstanceId
+      p_service_instance_id: serviceInstanceId,
     });
 
     if (error) {
@@ -72,15 +75,15 @@ export async function checkUserAppPermission(
 
     // 数据库函数返回单行结果，需要取第一个元素
     const result = Array.isArray(data) ? data[0] : data;
-    
+
     if (!result) {
-      return { 
-        success: true, 
-        data: { 
-          has_access: false, 
-          quota_remaining: null, 
-          error_message: '权限检查失败' 
-        } 
+      return {
+        success: true,
+        data: {
+          has_access: false,
+          quota_remaining: null,
+          error_message: '权限检查失败',
+        },
       };
     }
 
@@ -95,15 +98,22 @@ export async function checkUserAppPermission(
  * 增加应用使用计数
  */
 export async function incrementAppUsage(
-  userId: string, 
+  userId: string,
   serviceInstanceId: string
-): Promise<Result<{ success: boolean; new_used_count: number; quota_remaining: number | null; error_message: string | null }>> {
+): Promise<
+  Result<{
+    success: boolean;
+    new_used_count: number;
+    quota_remaining: number | null;
+    error_message: string | null;
+  }>
+> {
   try {
     const supabase = createClient();
-    
+
     const { data, error } = await supabase.rpc('increment_app_usage', {
       p_user_id: userId,
-      p_service_instance_id: serviceInstanceId
+      p_service_instance_id: serviceInstanceId,
     });
 
     if (error) {
@@ -124,15 +134,16 @@ export async function incrementAppUsage(
  * 获取组织部门的应用权限列表
  */
 export async function getDepartmentAppPermissions(
-  orgId: string, 
+  orgId: string,
   department?: string
 ): Promise<Result<DepartmentAppPermission[]>> {
   try {
     const supabase = createClient();
-    
+
     let query = supabase
       .from('department_app_permissions')
-      .select(`
+      .select(
+        `
         *,
         service_instances!inner(
           id,
@@ -141,14 +152,17 @@ export async function getDepartmentAppPermissions(
           instance_id,
           visibility
         )
-      `)
+      `
+      )
       .eq('org_id', orgId);
 
     if (department) {
       query = query.eq('department', department);
     }
 
-    const { data, error } = await query.order('department').order('created_at', { ascending: false });
+    const { data, error } = await query
+      .order('department')
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('获取部门应用权限失败:', error);
@@ -173,20 +187,23 @@ export async function upsertDepartmentAppPermission(
 ): Promise<Result<DepartmentAppPermission>> {
   try {
     const supabase = createClient();
-    
+
     const { data, error } = await supabase
       .from('department_app_permissions')
-      .upsert({
-        org_id: orgId,
-        department,
-        service_instance_id: serviceInstanceId,
-        is_enabled: permission.is_enabled ?? true,
-        usage_quota: permission.usage_quota ?? null,
-        settings: permission.settings ?? {},
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'org_id,department,service_instance_id'
-      })
+      .upsert(
+        {
+          org_id: orgId,
+          department,
+          service_instance_id: serviceInstanceId,
+          is_enabled: permission.is_enabled ?? true,
+          usage_quota: permission.usage_quota ?? null,
+          settings: permission.settings ?? {},
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: 'org_id,department,service_instance_id',
+        }
+      )
       .select()
       .single();
 
@@ -212,7 +229,7 @@ export async function deleteDepartmentAppPermission(
 ): Promise<Result<boolean>> {
   try {
     const supabase = createClient();
-    
+
     const { error } = await supabase
       .from('department_app_permissions')
       .delete()
@@ -246,7 +263,7 @@ export async function batchSetDepartmentAppPermissions(
 ): Promise<Result<DepartmentAppPermission[]>> {
   try {
     const supabase = createClient();
-    
+
     const permissionData = permissions.map(p => ({
       org_id: orgId,
       department,
@@ -254,13 +271,13 @@ export async function batchSetDepartmentAppPermissions(
       is_enabled: p.isEnabled ?? true,
       usage_quota: p.usageQuota ?? null,
       settings: {},
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     }));
 
     const { data, error } = await supabase
       .from('department_app_permissions')
       .upsert(permissionData, {
-        onConflict: 'org_id,department,service_instance_id'
+        onConflict: 'org_id,department,service_instance_id',
       })
       .select();
 
@@ -284,21 +301,26 @@ export async function getDepartmentAppUsageStats(
   department?: string,
   startDate?: string,
   endDate?: string
-): Promise<Result<Array<{
-  department: string;
-  service_instance_id: string;
-  display_name: string;
-  used_count: number;
-  usage_quota: number | null;
-  quota_remaining: number | null;
-  usage_percentage: number | null;
-}>>> {
+): Promise<
+  Result<
+    Array<{
+      department: string;
+      service_instance_id: string;
+      display_name: string;
+      used_count: number;
+      usage_quota: number | null;
+      quota_remaining: number | null;
+      usage_percentage: number | null;
+    }>
+  >
+> {
   try {
     const supabase = createClient();
-    
+
     let query = supabase
       .from('department_app_permissions')
-      .select(`
+      .select(
+        `
         department,
         service_instance_id,
         used_count,
@@ -306,7 +328,8 @@ export async function getDepartmentAppUsageStats(
         service_instances!inner(
           display_name
         )
-      `)
+      `
+      )
       .eq('org_id', orgId)
       .eq('is_enabled', true);
 
@@ -323,17 +346,22 @@ export async function getDepartmentAppUsageStats(
 
     // 计算统计数据
     const stats = (data || []).map(item => {
-      const quotaRemaining = item.usage_quota ? Math.max(0, item.usage_quota - item.used_count) : null;
-      const usagePercentage = item.usage_quota ? Math.round((item.used_count / item.usage_quota) * 100) : null;
-      
+      const quotaRemaining = item.usage_quota
+        ? Math.max(0, item.usage_quota - item.used_count)
+        : null;
+      const usagePercentage = item.usage_quota
+        ? Math.round((item.used_count / item.usage_quota) * 100)
+        : null;
+
       return {
         department: item.department,
         service_instance_id: item.service_instance_id,
-        display_name: (item.service_instances as any)?.display_name || '未知应用',
+        display_name:
+          (item.service_instances as any)?.display_name || '未知应用',
         used_count: item.used_count,
         usage_quota: item.usage_quota,
         quota_remaining: quotaRemaining,
-        usage_percentage: usagePercentage
+        usage_percentage: usagePercentage,
       };
     });
 
@@ -350,7 +378,7 @@ export async function getDepartmentAppUsageStats(
 export async function resetMonthlyQuotas(): Promise<Result<number>> {
   try {
     const supabase = createClient();
-    
+
     const { data, error } = await supabase.rpc('reset_monthly_quotas');
 
     if (error) {
@@ -368,25 +396,29 @@ export async function resetMonthlyQuotas(): Promise<Result<number>> {
 /**
  * 获取用户部门信息
  */
-export async function getUserDepartmentInfo(userId: string): Promise<Result<{
-  orgId: string;
-  orgName: string;
-  department: string;
-  role: string;
-} | null>> {
+export async function getUserDepartmentInfo(userId: string): Promise<
+  Result<{
+    orgId: string;
+    orgName: string;
+    department: string;
+    role: string;
+  } | null>
+> {
   try {
     const supabase = createClient();
-    
+
     const { data, error } = await supabase
       .from('org_members')
-      .select(`
+      .select(
+        `
         org_id,
         department,
         role,
         organizations!inner(
           name
         )
-      `)
+      `
+      )
       .eq('user_id', userId)
       .single();
 
@@ -399,17 +431,17 @@ export async function getUserDepartmentInfo(userId: string): Promise<Result<{
       return { success: false, error: error.message };
     }
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       data: {
         orgId: data.org_id,
         orgName: (data.organizations as any).name,
         department: data.department || '',
-        role: data.role
-      }
+        role: data.role,
+      },
     };
   } catch (error) {
     console.error('获取用户部门信息异常:', error);
     return { success: false, error: '获取部门信息失败' };
   }
-} 
+}

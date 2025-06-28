@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { LoginForm } from '@components/auth/login-form';
-import { useSearchParams } from 'next/navigation';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
 import { useTheme } from '@lib/hooks/use-theme';
+import { motion } from 'framer-motion';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
+
+import { useEffect, useState } from 'react';
+
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
+
+import { Alert, AlertDescription } from '../../components/ui/alert';
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
@@ -17,12 +20,12 @@ export default function LoginPage() {
   const { isDark } = useTheme();
   const t = useTranslations('pages.auth.login');
   const [mounted, setMounted] = useState(false);
-  
+
   // 确保客户端渲染一致性
   useEffect(() => {
     setMounted(true);
   }, []);
-  
+
   // 根据主题获取颜色
   const getColors = () => {
     if (isDark) {
@@ -35,7 +38,7 @@ export default function LoginPage() {
         errorAlertBg: 'bg-red-900/30',
         errorAlertBorder: 'border-red-500',
         errorAlertText: 'text-red-400',
-        errorIconColor: 'text-red-400'
+        errorIconColor: 'text-red-400',
       };
     } else {
       return {
@@ -47,22 +50,24 @@ export default function LoginPage() {
         errorAlertBg: 'bg-red-50',
         errorAlertBorder: 'border-red-500',
         errorAlertText: 'text-red-700',
-        errorIconColor: 'text-red-500'
+        errorIconColor: 'text-red-500',
       };
     }
   };
-  
-  const colors = mounted ? getColors() : {
-    bgColor: '',
-    alertBg: '',
-    alertBorder: '',
-    alertText: '',
-    iconColor: '',
-    errorAlertBg: '',
-    errorAlertBorder: '',
-    errorAlertText: '',
-    errorIconColor: ''
-  };
+
+  const colors = mounted
+    ? getColors()
+    : {
+        bgColor: '',
+        alertBg: '',
+        alertBorder: '',
+        alertText: '',
+        iconColor: '',
+        errorAlertBg: '',
+        errorAlertBorder: '',
+        errorAlertText: '',
+        errorIconColor: '',
+      };
 
   // 获取错误消息
   const getErrorMessage = (error: string) => {
@@ -91,14 +96,18 @@ export default function LoginPage() {
   };
 
   return (
-    <main className={`min-h-screen w-full flex flex-col items-center justify-center gap-4 py-12 px-4 sm:px-6 lg:px-8 ${colors.bgColor} font-serif`}>
+    <main
+      className={`flex min-h-screen w-full flex-col items-center justify-center gap-4 px-4 py-12 sm:px-6 lg:px-8 ${colors.bgColor} font-serif`}
+    >
       {registered && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Alert className={`max-w-md border-l-4 ${colors.alertBg} ${colors.alertBorder}`}>
+          <Alert
+            className={`max-w-md border-l-4 ${colors.alertBg} ${colors.alertBorder}`}
+          >
             <CheckCircle className={`h-4 w-4 ${colors.iconColor}`} />
             <AlertDescription className={`${colors.alertText} font-serif`}>
               {t('alerts.registered')}
@@ -112,7 +121,9 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Alert className={`max-w-md border-l-4 ${colors.alertBg} ${colors.alertBorder}`}>
+          <Alert
+            className={`max-w-md border-l-4 ${colors.alertBg} ${colors.alertBorder}`}
+          >
             <CheckCircle className={`h-4 w-4 ${colors.iconColor}`} />
             <AlertDescription className={`${colors.alertText} font-serif`}>
               {t('alerts.resetSuccess')}
@@ -126,7 +137,9 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Alert className={`max-w-md border-l-4 ${colors.errorAlertBg} ${colors.errorAlertBorder}`}>
+          <Alert
+            className={`max-w-md border-l-4 ${colors.errorAlertBg} ${colors.errorAlertBorder}`}
+          >
             <AlertTriangle className={`h-4 w-4 ${colors.errorIconColor}`} />
             <AlertDescription className={`${colors.errorAlertText} font-serif`}>
               {getErrorMessage(oauthError)}

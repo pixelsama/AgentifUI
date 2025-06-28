@@ -54,6 +54,7 @@
 - **安全保障**: 所有操作都需要管理员权限验证
 
 **支持的管理功能：**
+
 - 查看所有用户的基本信息（姓名、用户名、头像等）
 - 查看用户的邮箱地址和手机号码
 - 查看用户的登录状态和最后登录时间
@@ -167,8 +168,8 @@ CREATE POLICY "用户可以查看自己的执行记录" ON app_executions
 CREATE POLICY "管理员可以查看所有执行记录" ON app_executions
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM profiles 
-      WHERE profiles.id = auth.uid() 
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
       AND profiles.role = 'admin'
     )
   );
@@ -362,16 +363,18 @@ CREATE POLICY "组织管理员可以管理部门应用权限" ON department_app_
 #### SSO用户管理函数
 
 **`find_user_by_employee_number(emp_num TEXT)`**
+
 - 根据学工号查找用户信息，专用于北信科SSO登录
 - 返回用户的完整profile信息，包括正确的枚举类型和TEXT类型字段
 - 使用SECURITY DEFINER模式确保权限安全
 - **最新修复**: 修正了返回类型中status字段的枚举类型匹配问题
 
 **`create_sso_user(emp_number TEXT, user_name TEXT, sso_provider_uuid UUID)`**
+
 - 为首次SSO登录用户创建账户
 - 自动设置认证来源为bistu_sso（TEXT类型）
 - 生成唯一用户名和完整用户信息
-- **最新修复 (2025-06-18)**: 
+- **最新修复 (2025-06-18)**:
   - 修复了sso_provider_id字段的UUID类型转换问题
   - 直接使用UUID类型值而非错误的TEXT转换
   - 解决了"column sso_provider_id is of type uuid but expression is of type text"错误
@@ -414,6 +417,7 @@ public.get_user_stats() RETURNS JSON
 ```
 
 返回包含以下信息的 JSON 对象：
+
 - `totalUsers`: 总用户数
 - `activeUsers`: 活跃用户数
 - `suspendedUsers`: 被暂停用户数
@@ -433,6 +437,7 @@ public.safe_batch_update_role(target_user_ids UUID[], target_role user_role) RET
 ```
 
 **安全特性：**
+
 - 权限验证：只有管理员可以执行
 - 自我保护：不能在批量操作中包含自己
 - 管理员保护：不能降级其他管理员
@@ -472,16 +477,19 @@ SELECT public.initialize_admin('user@example.com');
 #### 最新修复 (2025-06-22)
 
 **修复的问题**：
+
 - ✅ **初始化权限问题**：修复了系统初始化时无法创建第一个管理员的问题
 - ✅ **智能权限检查**：函数现在只在系统中没有任何管理员时才允许创建第一个管理员
 - ✅ **安全性保持**：一旦系统中有管理员，所有原有的权限检查机制完全保持不变
 
 **技术实现**：
+
 - 修改了 `validate_role_update` 触发器函数，添加了系统初始化检查逻辑
 - 在权限检查前先检查系统中是否存在管理员 (`admin_count = 0`)
 - 对现有系统零影响，只在初始化阶段生效
 
 **安全保障**：
+
 - 只有在系统中完全没有管理员时才允许创建第一个管理员
 - 一旦系统中有任何管理员，所有权限检查机制正常工作
 - 恶意用户无法绕过权限检查，系统安全性得到完全保障
@@ -502,6 +510,7 @@ if (!isAdmin) return <AccessDenied />;
 #### 触发器保护
 
 1. **角色更新保护触发器**：
+
    ```sql
    CREATE TRIGGER validate_role_update_trigger
      BEFORE UPDATE OF role ON profiles
@@ -639,10 +648,12 @@ if (!isAdmin) return <AccessDenied />;
 数据库结构和函数在以下迁移文件中定义：
 
 ### 基础结构
+
 - `/supabase/migrations/20250501000000_init.sql`: 初始化基础表结构和枚举类型
 - `/supabase/migrations/20250502000000_sso_config.sql`: SSO 认证配置
 
 ### 用户和权限管理
+
 - `/supabase/migrations/20250508134000_create_profile_trigger.sql`: 创建用户资料触发器
 - `/supabase/migrations/20250508140000_fix_profiles_schema.sql`: 修复用户资料表结构
 - `/supabase/migrations/20250508141000_profiles_schema.sql`: 用户资料表结构调整
@@ -660,6 +671,7 @@ if (!isAdmin) return <AccessDenied />;
 - `/supabase/migrations/20250530010000_add_role_update_protection.sql`: 添加角色更新保护机制和用户删除保护
 
 ### 最新组织权限管理系统 (2025-06-10)
+
 - `/supabase/migrations/20250610120000_add_org_app_permissions.sql`: 初始组织级权限系统
 - `/supabase/migrations/20250610120001_redesign_department_permissions.sql`: 重新设计的部门级权限系统
 - `/supabase/migrations/20250610130000_add_department_permission_management.sql`: 添加部门权限管理函数
@@ -676,6 +688,7 @@ if (!isAdmin) return <AccessDenied />;
 - `/supabase/migrations/20250610180000_fix_organization_select_for_users.sql`: 修复普通用户组织查看权限
 
 ### 用户管理安全机制 (2025-06-01)
+
 - `/supabase/migrations/20250601000100_fix_user_view_security.sql`: 修复用户管理视图安全问题，删除不安全的视图，创建安全的管理函数
 - `/supabase/migrations/20250601000200_fix_user_functions_quick.sql`: 快速修复用户管理函数结构问题
 - `/supabase/migrations/20250601000500_restore_admin_user_view.sql`: 重新创建安全的管理员用户视图（使用 security_invoker）
@@ -683,6 +696,7 @@ if (!isAdmin) return <AccessDenied />;
 - `/supabase/migrations/20250609214200_remove_deprecated_admin_views.sql`: 最终移除过时的管理员视图
 
 ### API 密钥管理
+
 - `/supabase/migrations/20250508165500_api_key_management.sql`: API 密钥管理
 - `/supabase/migrations/20250508181700_fix_api_keys_schema.sql`: 修复 API 密钥表结构
 - `/supabase/migrations/20250508182400_fix_api_key_encryption.sql`: 修复 API 密钥加密
@@ -692,24 +706,29 @@ if (!isAdmin) return <AccessDenied />;
 - `/supabase/migrations/20250529151827_add_set_default_service_instance_function.sql`: 添加设置默认服务实例的存储过程
 
 ### 对话和消息管理
+
 - `/supabase/migrations/20250513104549_extend_conversations_messages.sql`: 扩展对话和消息表
 - `/supabase/migrations/20250515132500_add_metadata_to_conversations.sql`: 添加元数据字段到对话表
 - `/supabase/migrations/20250521125100_add_message_trigger.sql`: 增加 messages 表触发器，自动维护同步状态和 last_message_preview
 - `/supabase/migrations/20250522193000_update_message_preview_format.sql`: 调整 conversations.last_message_preview 字段为 JSONB 格式
 
 ### 数据完整性和清理
+
 - `/supabase/migrations/20250524194000_improve_cascade_deletion.sql`: 改进级联删除逻辑，处理孤儿组织和 AI 配置问题
 
 ### 应用执行记录管理
+
 - `/supabase/migrations/20250601124105_add_app_executions_table.sql`: 添加应用执行记录表，支持工作流和文本生成应用的执行历史管理
 
 ### 部门应用权限管理
+
 - `/supabase/migrations/20250610120000_add_org_app_permissions.sql`: 初始组织级权限系统（已被替代）
 - `/supabase/migrations/20250610120001_redesign_department_permissions.sql`: 重新设计的部门级权限系统，实现精确的部门级应用权限控制
 - `/supabase/migrations/20250610130000_add_department_permission_management.sql`: 添加部门权限管理函数和同步工具
 - `/supabase/migrations/20250610140000_clean_virtual_department_permissions.sql`: **清空虚拟权限数据，确保只有手动配置的权限记录**
 
 ### 北信科SSO集成 (2025-06-17)
+
 - `/supabase/migrations/20250617185201_fix_enum_transaction_issue.sql`: 修复PostgreSQL枚举类型事务问题，添加CAS协议支持到sso_protocol枚举
 - `/supabase/migrations/20250617185202_add_bistu_sso_data.sql`: 北信科SSO完整集成，包括：
   - 在profiles表添加employee_number字段（学工号）
@@ -719,11 +738,13 @@ if (!isAdmin) return <AccessDenied />;
 - `/supabase/migrations/20250617190000_drop_sso_views.sql`: 清理SSO统计视图，简化数据库对象
 
 ### 2025-06-18 SSO类型修复 - UUID类型转换问题
+
 - `/supabase/migrations/20250618160000_fix_sso_uuid_type_conversion.sql`: 修复create_sso_user函数中的UUID类型转换问题，确保SSO用户创建功能正常工作
 
 ### 2025-06-20 SSO配置管理系统扩展 - 动态SSO配置和协议模板
+
 - `/supabase/migrations/20250620131421_extend_sso_providers_table.sql`: 扩展SSO提供商表，添加UI配置字段和协议模板系统，支持动态SSO配置管理
-  
+
   **主要功能增强：**
   - **UI配置字段**：添加 `display_order` 和 `button_text` 字段，支持登录页面按钮排序和自定义文本
   - **统一配置结构**：重构 `settings` 字段为标准化的JSONB结构，包含 protocol_config、security、ui 三个主要部分
@@ -732,8 +753,9 @@ if (!isAdmin) return <AccessDenied />;
   - **管理员权限控制**：协议模板表启用RLS，确保只有管理员可以访问和管理协议模板
 
 ### 2025-06-27 SSO协议模板重构 - TypeScript配置管理
+
 - `/supabase/migrations/20250627000001_remove_protocol_templates_typescript_refactor.sql`: 删除SSO协议模板表，改用TypeScript配置文件管理
-  
+
   **重构特性：**
   - **TypeScript配置管理**：将协议模板从数据库迁移到TypeScript配置文件(`@lib/config/sso-protocol-definitions.ts`)
   - **类型安全保证**：通过TypeScript接口定义提供编译时类型检查，避免运行时配置错误
@@ -742,6 +764,7 @@ if (!isAdmin) return <AccessDenied />;
   - **安全迁移**：包含完整的存在性检查和清理验证，确保迁移过程安全可靠
 
 ### 2025-06-24 RLS安全增强 - API表行级安全策略检查
+
 - `/supabase/migrations/20250624090857_ensure_rls_enabled_for_api_tables.sql`: 确保API相关表启用RLS，智能检查和条件启用
 
   **迁移特性：**

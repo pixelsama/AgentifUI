@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { createClient } from '@lib/supabase/client';
 import { Button } from '@components/ui/button';
 import { useTheme } from '@lib/hooks/use-theme';
+import { createClient } from '@lib/supabase/client';
 import { cn } from '@lib/utils';
+
+import { useState } from 'react';
+
 import { useTranslations } from 'next-intl';
 
 // --- BEGIN COMMENT ---
@@ -43,14 +45,14 @@ interface SocialAuthButtonsProps {
   className?: string;
 }
 
-export function SocialAuthButtons({ 
-  type = 'login', 
+export function SocialAuthButtons({
+  type = 'login',
   redirectTo = '/chat',
-  className 
+  className,
 }: SocialAuthButtonsProps) {
   const { isDark } = useTheme();
   const t = useTranslations('pages.auth.social.github');
-  
+
   const [isLoading, setIsLoading] = useState({
     github: false,
   });
@@ -65,7 +67,7 @@ export function SocialAuthButtons({
 
     try {
       const supabase = createClient();
-      
+
       // --- BEGIN COMMENT ---
       // 构建重定向URL，包含原始目标路径
       // --- END COMMENT ---
@@ -98,12 +100,14 @@ export function SocialAuthButtons({
   };
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn('space-y-3', className)}>
       {error && (
-        <div className={cn(
-          "p-3 rounded-lg text-sm border-l-4 border-red-500 font-serif",
-          isDark ? "bg-red-900/30 text-red-400" : "bg-red-50 text-red-700"
-        )}>
+        <div
+          className={cn(
+            'rounded-lg border-l-4 border-red-500 p-3 font-serif text-sm',
+            isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-700'
+          )}
+        >
           {error}
         </div>
       )}
@@ -116,18 +120,18 @@ export function SocialAuthButtons({
         variant="outline"
         size="lg"
         className={cn(
-          "w-full h-12 font-serif flex items-center justify-center gap-3 relative cursor-pointer",
-          isDark 
-            ? "border-stone-700 bg-stone-800 hover:bg-stone-700 text-white" 
-            : "border-stone-300 bg-white hover:bg-stone-50 text-stone-700"
+          'relative flex h-12 w-full cursor-pointer items-center justify-center gap-3 font-serif',
+          isDark
+            ? 'border-stone-700 bg-stone-800 text-white hover:bg-stone-700'
+            : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'
         )}
         onClick={() => handleSocialAuth('github')}
         disabled={isLoading.github}
         isLoading={isLoading.github}
       >
-        {!isLoading.github && <GitHubIcon className="w-5 h-5" />}
+        {!isLoading.github && <GitHubIcon className="h-5 w-5" />}
         {type === 'register' ? t('register') : t('login')}
       </Button>
     </div>
   );
-} 
+}

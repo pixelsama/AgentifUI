@@ -7,11 +7,11 @@ interface ChatLayoutState {
 }
 
 // 根据 chat-input/index.tsx 中的 textarea 样式，初始最小高度是 48px
-const INITIAL_INPUT_HEIGHT = 48; 
+const INITIAL_INPUT_HEIGHT = 48;
 
-export const useChatLayoutStore = create<ChatLayoutState>((set) => ({
+export const useChatLayoutStore = create<ChatLayoutState>(set => ({
   inputHeight: INITIAL_INPUT_HEIGHT, // 初始高度
-  setInputHeight: (height) => set({ inputHeight: height }),
+  setInputHeight: height => set({ inputHeight: height }),
   resetInputHeight: () => set({ inputHeight: INITIAL_INPUT_HEIGHT }),
 }));
 

@@ -1,6 +1,6 @@
 /**
  * 数据库类型定义
- * 
+ *
  * 本文件定义了与数据库表结构对应的TypeScript类型
  * 所有与数据库交互的代码都应使用这些类型，确保类型安全
  */
@@ -23,7 +23,13 @@ export type SsoProtocol = 'CAS' | 'SAML' | 'OAuth2' | 'OIDC';
 // 用于工作流和文本生成应用的执行记录管理
 // --- END COMMENT ---
 export type ExecutionType = 'workflow' | 'text-generation';
-export type ExecutionStatus = 'pending' | 'running' | 'completed' | 'failed' | 'stopped' | 'deleted';
+export type ExecutionStatus =
+  | 'pending'
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'stopped'
+  | 'deleted';
 
 // --- BEGIN COMMENT ---
 // 🎯 更新：用户Profile接口，新增employee_number字段
@@ -174,35 +180,40 @@ export interface ServiceInstanceConfig {
   app_metadata?: {
     // 应用类型：模型切换 | 应用市场
     app_type?: 'model' | 'marketplace';
-    
+
     // --- BEGIN COMMENT ---
     // 🎯 新增：Dify应用类型（必选字段）
     // 基于Dify官方API文档的五种应用类型
     // --- END COMMENT ---
-    dify_apptype?: 'chatbot' | 'agent' | 'chatflow' | 'workflow' | 'text-generation';
-    
+    dify_apptype?:
+      | 'chatbot'
+      | 'agent'
+      | 'chatflow'
+      | 'workflow'
+      | 'text-generation';
+
     // 是否为常用模型（用于优先预加载）
     is_common_model?: boolean;
-    
+
     // 是否为应用市场应用
     is_marketplace_app?: boolean;
-    
+
     // 应用标签（用于分类和搜索）
     tags?: string[];
-    
+
     // 模型类型（如果是模型类型的应用）
     model_type?: string;
-    
+
     // 应用图标URL
     icon_url?: string;
-    
+
     // 应用简介
     brief_description?: string;
-    
+
     // 其他自定义元数据
     [key: string]: any;
   };
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 新增：Dify应用参数配置（替代API调用）
   // 这些参数原本需要调用Dify API获取，现在可以直接在数据库中配置
@@ -211,10 +222,10 @@ export interface ServiceInstanceConfig {
   dify_parameters?: {
     // 开场白配置
     opening_statement?: string;
-    
+
     // 推荐问题列表
     suggested_questions?: string[];
-    
+
     // 文件上传配置
     file_upload?: {
       image?: {
@@ -239,7 +250,7 @@ export interface ServiceInstanceConfig {
       };
     };
   };
-  
+
   // 其他配置
   [key: string]: any;
 }
@@ -286,45 +297,45 @@ export interface ApiKey {
 export interface SsoProviderSettings {
   // 协议配置
   protocol_config: {
-    base_url: string;                    // SSO服务器基础URL
-    version?: string;                    // 协议版本（如CAS 2.0/3.0）
-    timeout?: number;                    // 请求超时时间（毫秒）
+    base_url: string; // SSO服务器基础URL
+    version?: string; // 协议版本（如CAS 2.0/3.0）
+    timeout?: number; // 请求超时时间（毫秒）
     endpoints: {
-      login: string;                     // 登录端点路径
-      logout: string;                    // 注销端点路径
-      validate: string;                  // 票据验证端点路径
-      validate_v3?: string;              // CAS 3.0验证端点（可选）
-      metadata?: string;                 // 元数据端点路径（SAML使用）
+      login: string; // 登录端点路径
+      logout: string; // 注销端点路径
+      validate: string; // 票据验证端点路径
+      validate_v3?: string; // CAS 3.0验证端点（可选）
+      metadata?: string; // 元数据端点路径（SAML使用）
     };
     attributes_mapping: {
-      employee_id: string;               // 工号字段映射
-      username: string;                  // 用户名字段映射
-      full_name: string;                 // 全名字段映射
-      email?: string;                    // 邮箱字段映射（可选）
+      employee_id: string; // 工号字段映射
+      username: string; // 用户名字段映射
+      full_name: string; // 全名字段映射
+      email?: string; // 邮箱字段映射（可选）
     };
     // 协议特定配置
-    scope?: string;                      // OIDC scope参数
-    response_type?: string;              // OIDC response_type参数
-    issuer?: string;                     // OIDC issuer URL
-    entity_id?: string;                  // SAML entity ID
-    sso_url?: string;                    // SAML SSO URL
+    scope?: string; // OIDC scope参数
+    response_type?: string; // OIDC response_type参数
+    issuer?: string; // OIDC issuer URL
+    entity_id?: string; // SAML entity ID
+    sso_url?: string; // SAML SSO URL
   };
-  
+
   // 安全配置
   security: {
-    require_https: boolean;              // 是否要求HTTPS连接
-    validate_certificates: boolean;      // 是否验证SSL证书
-    allowed_redirect_hosts?: string[];   // 允许的重定向主机白名单
+    require_https: boolean; // 是否要求HTTPS连接
+    validate_certificates: boolean; // 是否验证SSL证书
+    allowed_redirect_hosts?: string[]; // 允许的重定向主机白名单
   };
-  
+
   // UI配置
   ui: {
-    icon?: string;                       // 按钮图标（emoji或图片URL）
-    logo_url?: string;                   // 机构logo图片URL
-    description?: string;                // 详细描述文本
-    theme?: string;                      // 按钮主题：primary/secondary/default/outline
+    icon?: string; // 按钮图标（emoji或图片URL）
+    logo_url?: string; // 机构logo图片URL
+    description?: string; // 详细描述文本
+    theme?: string; // 按钮主题：primary/secondary/default/outline
   };
-  
+
   // 其他扩展配置
   [key: string]: any;
 }
@@ -337,13 +348,13 @@ export interface SsoProvider {
   id: string;
   name: string;
   protocol: SsoProtocol;
-  settings: SsoProviderSettings;         // 使用标准化配置结构
-  client_id: string | null;             // OAuth2/OIDC客户端ID（预留）
-  client_secret: string | null;         // OAuth2/OIDC客户端密钥（预留）
-  metadata_url: string | null;          // SAML元数据URL（预留）
+  settings: SsoProviderSettings; // 使用标准化配置结构
+  client_id: string | null; // OAuth2/OIDC客户端ID（预留）
+  client_secret: string | null; // OAuth2/OIDC客户端密钥（预留）
+  metadata_url: string | null; // SAML元数据URL（预留）
   enabled: boolean;
-  display_order: number;                 // 新增：登录页面显示顺序
-  button_text: string | null;           // 新增：登录按钮显示文本
+  display_order: number; // 新增：登录页面显示顺序
+  button_text: string | null; // 新增：登录按钮显示文本
   created_at: string;
   updated_at: string;
 }
@@ -354,10 +365,10 @@ export interface SsoProvider {
 // --- END COMMENT ---
 export interface SsoProtocolTemplate {
   id: string;
-  protocol: SsoProtocol;                 // 协议类型
-  name: string;                          // 模板显示名称
-  description: string | null;            // 协议详细描述
-  config_schema: Record<string, any>;    // JSON Schema格式的配置验证规则
+  protocol: SsoProtocol; // 协议类型
+  name: string; // 模板显示名称
+  description: string | null; // 协议详细描述
+  config_schema: Record<string, any>; // JSON Schema格式的配置验证规则
   default_settings: Record<string, any>; // 默认配置模板
   created_at: string;
   updated_at: string;

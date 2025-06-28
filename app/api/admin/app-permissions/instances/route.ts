@@ -1,17 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@lib/supabase/server'
+import { createClient } from '@lib/supabase/server';
+
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient();
 
     // --- BEGIN COMMENT ---
     // 获取当前用户信息，验证管理员权限
     // --- END COMMENT ---
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
-      return NextResponse.json({ error: '未授权访问' }, { status: 401 })
+      return NextResponse.json({ error: '未授权访问' }, { status: 401 });
     }
 
     // --- BEGIN COMMENT ---
@@ -21,10 +25,10 @@ export async function GET(request: NextRequest) {
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single()
+      .single();
 
     if (profile?.role !== 'admin') {
-      return NextResponse.json({ error: '需要管理员权限' }, { status: 403 })
+      return NextResponse.json({ error: '需要管理员权限' }, { status: 403 });
     }
 
     // --- BEGIN COMMENT ---
@@ -33,19 +37,18 @@ export async function GET(request: NextRequest) {
     const { data: instances, error } = await supabase
       .from('service_instances')
       .select('*')
-      .order('display_name')
+      .order('display_name');
 
     if (error) {
-      console.error('获取应用实例失败:', error)
-      return NextResponse.json({ error: '获取应用实例失败' }, { status: 500 })
+      console.error('获取应用实例失败:', error);
+      return NextResponse.json({ error: '获取应用实例失败' }, { status: 500 });
     }
 
     return NextResponse.json({
-      instances: instances || []
-    })
-
+      instances: instances || [],
+    });
   } catch (error) {
-    console.error('API错误:', error)
-    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 })
+    console.error('API错误:', error);
+    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
   }
-} 
+}

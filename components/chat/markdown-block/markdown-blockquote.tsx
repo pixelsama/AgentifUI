@@ -1,7 +1,9 @@
-"use client";
+'use client';
 
-import React from "react";
-import { cn } from "@lib/utils";
+import { cn } from '@lib/utils';
+
+import React from 'react';
+
 // 使用 CSS 变量而不是 React 状态或 Tailwind 类
 
 interface MarkdownBlockquoteProps {
@@ -25,13 +27,13 @@ export const MarkdownBlockquote: React.FC<MarkdownBlockquoteProps> = ({
   return (
     <blockquote
       className={cn(
-        "pl-4 pr-3 py-2 my-3 border-l-4 rounded-r-md shadow-sm leading-relaxed", // Added shadow and adjusted padding/margin
+        'my-3 rounded-r-md border-l-4 py-2 pr-3 pl-4 leading-relaxed shadow-sm', // Added shadow and adjusted padding/margin
         className
       )}
       style={{
         borderLeftColor: 'var(--md-blockquote-border)',
         backgroundColor: 'var(--md-blockquote-bg)',
-        color: 'var(--md-blockquote-text)'
+        color: 'var(--md-blockquote-text)',
       }}
     >
       {children}

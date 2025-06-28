@@ -2,7 +2,6 @@
 // lib/services/dify/file-service.ts
 // 实现与 Dify 文件上传 API 的交互逻辑。
 // --- END COMMENT ---
-
 import type { DifyFileUploadResponse } from './types';
 
 // --- BEGIN COMMENT ---
@@ -28,7 +27,9 @@ export async function uploadDifyFile(
   user: string,
   onProgress?: (progress: number) => void
 ): Promise<DifyFileUploadResponse> {
-  console.log(`[Dify File Service] Uploading file "${file.name}" for app ${appId}, user ${user}`);
+  console.log(
+    `[Dify File Service] Uploading file "${file.name}" for app ${appId}, user ${user}`
+  );
 
   // --- BEGIN COMMENT ---
   // 使用 XMLHttpRequest 以支持上传进度回调
@@ -46,7 +47,7 @@ export async function uploadDifyFile(
     // --- BEGIN COMMENT ---
     // 监听上传进度
     // --- END COMMENT ---
-    xhr.upload.onprogress = (event) => {
+    xhr.upload.onprogress = event => {
       if (event.lengthComputable && onProgress) {
         const percent = Math.round((event.loaded / event.total) * 100);
         onProgress(percent);
@@ -58,7 +59,9 @@ export async function uploadDifyFile(
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
             const result: DifyFileUploadResponse = JSON.parse(xhr.responseText);
-            console.log(`[Dify File Service] File "${file.name}" uploaded successfully. ID: ${result.id}`);
+            console.log(
+              `[Dify File Service] File "${file.name}" uploaded successfully. ID: ${result.id}`
+            );
             resolve(result);
           } catch (e) {
             reject(new Error('解析 Dify 文件上传响应失败'));
@@ -88,5 +91,5 @@ export async function uploadDifyFile(
   });
 }
 
-export {}
-// 添加一个空的 export {} 确保它被视为一个模块 
+export {};
+// 添加一个空的 export {} 确保它被视为一个模块

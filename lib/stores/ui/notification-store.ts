@@ -7,7 +7,11 @@ interface NotificationState {
   type: NotificationType;
   duration: number; // --- BEGIN MODIFIED COMMENT --- 单位：毫秒 --- END MODIFIED COMMENT ---
   isVisible: boolean;
-  showNotification: (message: string, type?: NotificationType, duration?: number) => void;
+  showNotification: (
+    message: string,
+    type?: NotificationType,
+    duration?: number
+  ) => void;
   hideNotification: () => void;
 }
 

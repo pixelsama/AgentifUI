@@ -1,15 +1,26 @@
 /**
  * 统一的数据服务层
- * 
+ *
  * 整合缓存、错误处理、重试逻辑和Result类型
  * 为所有数据库操作提供统一的接口
  */
-
 import { createClient } from '@lib/supabase/client';
-import { cacheService, CacheKeys } from './cache-service';
-import { realtimeService, SubscriptionKeys, SubscriptionConfigs } from './realtime-service';
-import { Result, success, failure, wrapAsync, DatabaseError } from '@lib/types/result';
+import {
+  DatabaseError,
+  Result,
+  failure,
+  success,
+  wrapAsync,
+} from '@lib/types/result';
+
 import type { PostgrestError } from '@supabase/supabase-js';
+
+import { CacheKeys, cacheService } from './cache-service';
+import {
+  SubscriptionConfigs,
+  SubscriptionKeys,
+  realtimeService,
+} from './realtime-service';
 
 interface QueryOptions {
   cache?: boolean;
@@ -52,7 +63,7 @@ export class DataService {
       cache = false,
       cacheTTL = 5 * 60 * 1000, // 5分钟
       retries = 3,
-      retryDelay = 1000
+      retryDelay = 1000,
     } = options;
 
     // 如果启用缓存且有缓存键
@@ -60,14 +71,16 @@ export class DataService {
       try {
         return success(await cacheService.get(cacheKey, operation, cacheTTL));
       } catch (error) {
-        return failure(error instanceof Error ? error : new Error(String(error)));
+        return failure(
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
     }
 
     // 不使用缓存时的重试逻辑
     for (let attempt = 1; attempt <= retries; attempt++) {
       const result = await wrapAsync(operation);
-      
+
       if (result.success) {
         return result;
       }
@@ -79,7 +92,10 @@ export class DataService {
 
       // 等待后重试
       await this.delay(retryDelay * attempt);
-      console.log(`[数据服务] 重试第 ${attempt} 次，错误:`, result.error.message);
+      console.log(
+        `[数据服务] 重试第 ${attempt} 次，错误:`,
+        result.error.message
+      );
     }
 
     return failure(new DatabaseError('查询失败，已达到最大重试次数', 'query'));
@@ -116,19 +132,23 @@ export class DataService {
     cacheKey?: string,
     options: QueryOptions = {}
   ): Promise<Result<T>> {
-    return this.query(async () => {
-      const { data, error } = await queryBuilder;
-      
-      if (error) {
-        throw new DatabaseError(
-          `${operation}失败: ${error.message}`,
-          operation,
-          error
-        );
-      }
+    return this.query(
+      async () => {
+        const { data, error } = await queryBuilder;
 
-      return data as T;
-    }, cacheKey, options);
+        if (error) {
+          throw new DatabaseError(
+            `${operation}失败: ${error.message}`,
+            operation,
+            error
+          );
+        }
+
+        return data as T;
+      },
+      cacheKey,
+      options
+    );
   }
 
   /**
@@ -142,15 +162,11 @@ export class DataService {
     const filterStr = Object.entries(filters)
       .map(([key, value]) => `${key}=${value}`)
       .join('&');
-    
+
     const cacheKey = options.cache ? `${table}:one:${filterStr}` : undefined;
-    
+
     const result = await this.executeQuery<T>(
-      this.supabase
-        .from(table)
-        .select('*')
-        .match(filters)
-        .maybeSingle(),
+      this.supabase.from(table).select('*').match(filters).maybeSingle(),
       `查询${table}`,
       cacheKey,
       options
@@ -181,10 +197,16 @@ export class DataService {
     const filterStr = Object.entries(filters)
       .map(([key, value]) => `${key}=${value}`)
       .join('&');
-    
-    const orderStr = orderBy ? `${orderBy.column}:${orderBy.ascending ? 'asc' : 'desc'}` : '';
-    const pageStr = pagination ? `${pagination.offset}:${pagination.limit}` : '';
-    const cacheKey = options.cache ? `${table}:many:${filterStr}:${orderStr}:${pageStr}` : undefined;
+
+    const orderStr = orderBy
+      ? `${orderBy.column}:${orderBy.ascending ? 'asc' : 'desc'}`
+      : '';
+    const pageStr = pagination
+      ? `${pagination.offset}:${pagination.limit}`
+      : '';
+    const cacheKey = options.cache
+      ? `${table}:many:${filterStr}:${orderStr}:${pageStr}`
+      : undefined;
 
     let query = this.supabase.from(table).select('*');
 
@@ -200,7 +222,10 @@ export class DataService {
 
     // 应用分页
     if (pagination) {
-      query = query.range(pagination.offset, pagination.offset + pagination.limit - 1);
+      query = query.range(
+        pagination.offset,
+        pagination.offset + pagination.limit - 1
+      );
     }
 
     const result = await this.executeQuery<T[]>(
@@ -231,11 +256,7 @@ export class DataService {
     options: QueryOptions = {}
   ): Promise<Result<T>> {
     const result = await this.executeQuery<T>(
-      this.supabase
-        .from(table)
-        .insert(data)
-        .select()
-        .single(),
+      this.supabase.from(table).insert(data).select().single(),
       `创建${table}`,
       undefined,
       options
@@ -259,12 +280,7 @@ export class DataService {
     options: QueryOptions = {}
   ): Promise<Result<T>> {
     const result = await this.executeQuery<T>(
-      this.supabase
-        .from(table)
-        .update(data)
-        .eq('id', id)
-        .select()
-        .single(),
+      this.supabase.from(table).update(data).eq('id', id).select().single(),
       `更新${table}`,
       undefined,
       options
@@ -287,10 +303,7 @@ export class DataService {
     options: QueryOptions = {}
   ): Promise<Result<void>> {
     const result = await this.executeQuery<void>(
-      this.supabase
-        .from(table)
-        .delete()
-        .eq('id', id),
+      this.supabase.from(table).delete().eq('id', id),
       `删除${table}`,
       undefined,
       options
@@ -315,9 +328,9 @@ export class DataService {
     const result = await this.executeQuery<T>(
       this.supabase
         .from(table)
-        .update({ 
-          status: 'deleted', 
-          updated_at: new Date().toISOString() 
+        .update({
+          status: 'deleted',
+          updated_at: new Date().toISOString(),
         })
         .eq('id', id)
         .select()
@@ -346,29 +359,35 @@ export class DataService {
     const filterStr = Object.entries(filters)
       .map(([key, value]) => `${key}=${value}`)
       .join('&');
-    
+
     const cacheKey = options.cache ? `${table}:count:${filterStr}` : undefined;
 
-    let query = this.supabase.from(table).select('*', { count: 'exact', head: true });
+    let query = this.supabase
+      .from(table)
+      .select('*', { count: 'exact', head: true });
 
     // 应用过滤器
     if (Object.keys(filters).length > 0) {
       query = query.match(filters);
     }
 
-    return this.query(async () => {
-      const { count, error } = await query;
-      
-      if (error) {
-        throw new DatabaseError(
-          `获取${table}数量失败: ${error.message}`,
-          'count',
-          error
-        );
-      }
+    return this.query(
+      async () => {
+        const { count, error } = await query;
 
-      return count || 0;
-    }, cacheKey, options);
+        if (error) {
+          throw new DatabaseError(
+            `获取${table}数量失败: ${error.message}`,
+            'count',
+            error
+          );
+        }
+
+        return count || 0;
+      },
+      cacheKey,
+      options
+    );
   }
 
   /**
@@ -395,4 +414,4 @@ export class DataService {
 }
 
 // 导出单例实例
-export const dataService = DataService.getInstance(); 
+export const dataService = DataService.getInstance();

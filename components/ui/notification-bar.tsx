@@ -1,9 +1,16 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { AlertTriangleIcon, CheckCircleIcon, InfoIcon, XCircleIcon, XIcon } from 'lucide-react';
-import { cn } from '@lib/utils';
 import { useNotificationStore } from '@lib/stores/ui/notification-store';
+import { cn } from '@lib/utils';
+import {
+  AlertTriangleIcon,
+  CheckCircleIcon,
+  InfoIcon,
+  XCircleIcon,
+  XIcon,
+} from 'lucide-react';
+
+import React, { useEffect } from 'react';
 
 const iconMap = {
   success: CheckCircleIcon,
@@ -33,12 +40,12 @@ export const NotificationBar: React.FC = () => {
   return (
     <div
       className={cn(
-        'fixed top-5 left-1/2 transform -translate-x-1/2 z-50', // 定位在顶部居中
+        'fixed top-5 left-1/2 z-50 -translate-x-1/2 transform', // 定位在顶部居中
         'w-auto max-w-[90%] md:max-w-md lg:max-w-lg', // 响应式宽度
-        'p-3 rounded-md shadow-lg border text-white flex items-center space-x-3', // 基础样式
+        'flex items-center space-x-3 rounded-md border p-3 text-white shadow-lg', // 基础样式
         colors, // 根据类型应用颜色
         'transition-all duration-300 ease-in-out', // 过渡动画
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4' // 显示/隐藏动画
+        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0' // 显示/隐藏动画
       )}
       role="alert"
     >
@@ -46,11 +53,11 @@ export const NotificationBar: React.FC = () => {
       <span className="flex-grow text-sm font-medium">{message}</span>
       <button
         onClick={hideNotification}
-        className="p-1 rounded-full hover:bg-white/20 transition-colors flex-shrink-0"
+        className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-white/20"
         aria-label="关闭通知"
       >
         <XIcon className="h-4 w-4" />
       </button>
     </div>
   );
-}; 
+};

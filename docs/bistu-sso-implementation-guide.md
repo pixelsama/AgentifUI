@@ -90,6 +90,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 ```
 
 获取Service Role密钥：
+
 1. 访问 [Supabase Dashboard](https://supabase.com/dashboard)
 2. 选择项目 → Settings → API
 3. 复制 `service_role` 密钥（⚠️ 不是 `anon` 密钥）
@@ -103,7 +104,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 
 ```typescript
 // TODO: 请根据实际的学工号格式调整此正则表达式
-const pattern = /^\d{10}$/;  // 修改为实际格式
+const pattern = /^\d{10}$/; // 修改为实际格式
 ```
 
 **文件**: `lib/services/user/sso-user-service.ts`
@@ -111,7 +112,7 @@ const pattern = /^\d{10}$/;  // 修改为实际格式
 
 ```typescript
 // TODO: 请根据实际的学工号格式调整此正则表达式
-const pattern = /^\d{10}$/;  // 修改为实际格式
+const pattern = /^\d{10}$/; // 修改为实际格式
 ```
 
 ### 3. 允许的重定向URL列表
@@ -123,7 +124,7 @@ const pattern = /^\d{10}$/;  // 修改为实际格式
 // 🔧 根据需要添加允许的重定向路径
 const allowedReturnUrls = [
   '/chat',
-  '/dashboard', 
+  '/dashboard',
   '/settings',
   '/apps',
   '/', // 首页
@@ -140,6 +141,7 @@ NEXT_PUBLIC_SSO_ONLY_MODE=true
 ```
 
 启用后登录页面将：
+
 - 显示北信科SSO登录按钮
 - 显示邮箱密码登录表单
 - 隐藏社交登录按钮
@@ -152,12 +154,14 @@ NEXT_PUBLIC_SSO_ONLY_MODE=true
 ### 1. 增强的CAS服务
 
 `lib/services/sso/bistu-cas-service.ts` 提供：
+
 - CAS 2.0/3.0协议支持
 - XML响应解析和调试
 - 类型安全的数据处理
 - 超时和错误处理
 
 关键特性：
+
 ```typescript
 // 支持原始XML响应调试
 interface BistuUserInfo {
@@ -165,29 +169,31 @@ interface BistuUserInfo {
   username: string;
   success: boolean;
   attributes?: {
-    name?: string;         // 真实姓名
-    username?: string;     // 学工号
+    name?: string; // 真实姓名
+    username?: string; // 学工号
     [key: string]: any;
   };
-  rawResponse?: string;    // 原始XML响应
+  rawResponse?: string; // 原始XML响应
 }
 ```
 
 ### 2. 完善的用户管理服务
 
 `lib/services/user/sso-user-service.ts` 实现：
+
 - 邮箱冲突自动处理
 - 多重用户查找策略
 - Admin客户端权限管理
 - 数据一致性保证
 
 主要改进：
+
 ```typescript
 // 通过邮箱查找用户（更可靠）
 static async findUserByEmployeeNumber(employeeNumber: string): Promise<Profile | null> {
   // 构建邮箱：学工号@bistu.edu.cn
   const email = `${employeeNumber.trim()}@bistu.edu.cn`;
-  
+
   // 先用普通客户端，失败则用Admin客户端
   // 确保能找到所有用户记录
 }
@@ -203,12 +209,14 @@ if (authError && authError.message.includes('already been registered')) {
 ### 3. SSO会话建立API
 
 `app/api/auth/sso-signin/route.ts` 提供：
+
 - 安全的会话建立机制
 - 临时密码方法
 - 请求去重处理
 - 完善的错误处理
 
 工作流程：
+
 ```typescript
 // 1. 验证SSO数据有效性
 // 2. 生成临时密码
@@ -221,12 +229,14 @@ if (authError && authError.message.includes('already been registered')) {
 ### 4. 智能的前端集成
 
 `components/auth/login-form.tsx` 实现：
+
 - 自动SSO会话检测
 - Cookie数据处理
 - 状态管理和UI反馈
 - 错误处理和重试机制
 
 特性：
+
 ```typescript
 // 自动检测SSO登录成功
 const ssoLoginSuccess = searchParams.get('sso_login') === 'success';
@@ -246,6 +256,7 @@ const response = await fetch('/api/auth/sso-signin', {
 ### 开发环境测试
 
 1. **启动开发服务器**
+
    ```bash
    pnpm run dev
    ```
@@ -320,21 +331,21 @@ SSO signin successful for user: uuid-here (processing time: 800ms)
 
 ```sql
 -- 查看SSO提供商配置
-SELECT id, name, protocol, enabled 
-FROM sso_providers 
+SELECT id, name, protocol, enabled
+FROM sso_providers
 WHERE name = '北京信息科技大学';
 
 -- 查看SSO用户
 SELECT id, username, full_name, employee_number, auth_source, last_login
-FROM profiles 
+FROM profiles
 WHERE auth_source = 'bistu_sso'
 ORDER BY created_at DESC;
 
 -- 检查邮箱冲突情况
-SELECT 
-  p.username, 
-  p.employee_number, 
-  p.email, 
+SELECT
+  p.username,
+  p.employee_number,
+  p.email,
   au.email as auth_email
 FROM profiles p
 LEFT JOIN auth.users au ON p.id = au.id
@@ -400,9 +411,9 @@ const userInfo = {
   employeeNumber,
   success: true,
   attributes: {
-    name: String(attributes['cas:name'] || ''),           // 真实姓名
+    name: String(attributes['cas:name'] || ''), // 真实姓名
     department: String(attributes['cas:department'] || ''), // 部门
-    studentType: String(attributes['cas:type'] || ''),     // 学生类型
+    studentType: String(attributes['cas:type'] || ''), // 学生类型
     // 添加其他需要的属性
   },
 };
@@ -414,19 +425,20 @@ const userInfo = {
 
 ```typescript
 // 添加更多用户字段
-const { data: authUser, error: authError } = await adminSupabase.auth.admin.createUser({
-  email,
-  user_metadata: {
-    full_name: userData.fullName || userData.username,
-    username: userData.username,
-    employee_number: userData.employeeNumber,
-    auth_source: 'bistu_sso',
-    sso_provider_id: userData.ssoProviderId,
-    department: userData.department,        // 新增
-    student_type: userData.studentType,     // 新增
-  },
-  // ... 其他配置
-});
+const { data: authUser, error: authError } =
+  await adminSupabase.auth.admin.createUser({
+    email,
+    user_metadata: {
+      full_name: userData.fullName || userData.username,
+      username: userData.username,
+      employee_number: userData.employeeNumber,
+      auth_source: 'bistu_sso',
+      sso_provider_id: userData.ssoProviderId,
+      department: userData.department, // 新增
+      student_type: userData.studentType, // 新增
+    },
+    // ... 其他配置
+  });
 ```
 
 ### 集成现有认证系统
@@ -434,25 +446,27 @@ const { data: authUser, error: authError } = await adminSupabase.auth.admin.crea
 如果需要与其他认证系统共存：
 
 1. **保持现有登录方式**：
+
    ```bash
    NEXT_PUBLIC_SSO_ONLY_MODE=false
    ```
 
 2. **添加用户来源识别**：
+
    ```typescript
    // 在用户查询时区分认证来源
    const user = await supabase
      .from('profiles')
      .select('*')
-     .eq('auth_source', 'bistu_sso')  // 仅查找SSO用户
+     .eq('auth_source', 'bistu_sso') // 仅查找SSO用户
      .single();
    ```
 
 3. **权限和角色管理**：
    ```sql
    -- 为SSO用户设置特定角色
-   UPDATE profiles 
-   SET role = 'student' 
+   UPDATE profiles
+   SET role = 'student'
    WHERE auth_source = 'bistu_sso';
    ```
 
@@ -488,15 +502,16 @@ const { data: authUser, error: authError } = await adminSupabase.auth.admin.crea
    - 实施请求去重
 
 2. **数据库优化**
+
    ```sql
    -- 添加性能索引
-   CREATE INDEX IF NOT EXISTS idx_profiles_employee_number_active 
-   ON profiles(employee_number) 
+   CREATE INDEX IF NOT EXISTS idx_profiles_employee_number_active
+   ON profiles(employee_number)
    WHERE employee_number IS NOT NULL AND status = 'active';
-   
+
    -- 添加邮箱索引
-   CREATE INDEX IF NOT EXISTS idx_profiles_email_bistu 
-   ON profiles(email) 
+   CREATE INDEX IF NOT EXISTS idx_profiles_email_bistu
+   ON profiles(email)
    WHERE auth_source = 'bistu_sso';
    ```
 
@@ -547,4 +562,4 @@ const { data: authUser, error: authError } = await adminSupabase.auth.admin.crea
 4. **技术改进**
    - 迁移到更现代的会话管理
    - 实施微服务架构
-   - 添加负载均衡支持 
+   - 添加负载均衡支持

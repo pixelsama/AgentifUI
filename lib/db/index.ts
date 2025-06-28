@@ -1,16 +1,20 @@
+// --- BEGIN COMMENT ---
+// 导入服务实例，用于内部函数使用
+// --- END COMMENT ---
+import { cacheService as cacheServiceInstance } from '@lib/services/db/cache-service';
+import { realtimeService as realtimeServiceInstance } from '@lib/services/db/realtime-service';
+
 /**
  * 数据库查询函数索引
- * 
+ *
  * 本文件导出所有数据库查询相关的函数
  * 使用时可以从这个文件统一导入所需的函数
- * 
+ *
  * 新增：统一数据服务、缓存服务、实时订阅服务
  * 兼容：保留原有函数的导出，同时提供新的优化版本
  */
 
-// --- BEGIN COMMENT ---
 // 新的统一服务导出
-// --- END COMMENT ---
 
 // 统一数据服务
 export { dataService } from '@lib/services/db/data-service';
@@ -19,28 +23,33 @@ export { dataService } from '@lib/services/db/data-service';
 export { cacheService, CacheKeys } from '@lib/services/db/cache-service';
 
 // 实时订阅服务
-export { realtimeService, SubscriptionKeys, SubscriptionConfigs } from '@lib/services/db/realtime-service';
+export {
+  realtimeService,
+  SubscriptionKeys,
+  SubscriptionConfigs,
+} from '@lib/services/db/realtime-service';
 
 // 消息服务
 export { messageService } from '@lib/services/db/message-service';
-export type { MessagePage, PaginationCursor } from '@lib/services/db/message-service';
+export type {
+  MessagePage,
+  PaginationCursor,
+} from '@lib/services/db/message-service';
 
 // Result类型和错误处理
 export type { Result } from '@lib/types/result';
-export { 
-  success, 
-  failure, 
-  wrapAsync, 
-  DatabaseError, 
-  NetworkError, 
-  ValidationError 
+export {
+  success,
+  failure,
+  wrapAsync,
+  DatabaseError,
+  NetworkError,
+  ValidationError,
 } from '@lib/types/result';
 
 // --- BEGIN COMMENT ---
-// 导入服务实例，用于内部函数使用
+
 // --- END COMMENT ---
-import { cacheService as cacheServiceInstance } from '@lib/services/db/cache-service';
-import { realtimeService as realtimeServiceInstance } from '@lib/services/db/realtime-service';
 
 // --- BEGIN COMMENT ---
 // 兼容性导出：保留原有函数接口
@@ -54,7 +63,7 @@ export {
   updateApiKey,
   deleteApiKey,
   getDecryptedApiKey,
-  incrementApiKeyUsage
+  incrementApiKeyUsage,
 } from './api-keys';
 
 // 服务提供商相关函数
@@ -66,7 +75,7 @@ export {
   getDefaultProvider,
   createProvider,
   updateProvider,
-  deleteProvider
+  deleteProvider,
 } from './providers';
 
 // 服务实例相关函数
@@ -80,7 +89,7 @@ export {
   deleteServiceInstance,
   setDefaultServiceInstance,
   getAppParametersFromDb,
-  updateAppParametersInDb
+  updateAppParametersInDb,
 } from './service-instances';
 
 // --- BEGIN COMMENT ---
@@ -97,13 +106,13 @@ export {
   updateExecutionStatus,
   deleteExecution,
   getExecutionsByServiceInstance,
-  getExecutionStats
+  getExecutionStats,
 } from './app-executions';
 
 // 兼容版本（保持原有API）
 export {
   getUserExecutionsLegacy,
-  getExecutionByIdLegacy
+  getExecutionByIdLegacy,
 } from './app-executions';
 
 // --- BEGIN COMMENT ---
@@ -119,7 +128,7 @@ export {
   updateUserProfile,
   setUserAsAdmin,
   isUserAdmin,
-  getUserOrganization
+  getUserOrganization,
 } from './profiles';
 
 // --- BEGIN COMMENT ---
@@ -136,7 +145,7 @@ export {
   updateUserProfileLegacy,
   setUserAsAdminLegacy,
   isUserAdminLegacy,
-  getUserOrganizationLegacy
+  getUserOrganizationLegacy,
 } from './profiles';
 
 // 对话相关函数
@@ -153,7 +162,7 @@ export {
   renameConversation,
   permanentlyDeleteConversation,
   createEmptyConversation,
-  updateConversationMetadata
+  updateConversationMetadata,
 } from './conversations';
 
 // --- BEGIN COMMENT ---
@@ -167,7 +176,7 @@ export {
   getMessagesByConversationId,
   chatMessageToDbMessage,
   createPlaceholderAssistantMessage,
-  getMessageByContentAndRole
+  getMessageByContentAndRole,
 } from './messages';
 
 // --- BEGIN COMMENT ---

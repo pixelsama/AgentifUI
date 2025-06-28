@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { cn } from '@lib/utils';
-import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { useLogout } from '@lib/hooks/use-logout';
-import { LogOut, Shield, Key, AlertCircle, Mail } from 'lucide-react';
+import { useSettingsColors } from '@lib/hooks/use-settings-colors';
+import { cn } from '@lib/utils';
+import { motion } from 'framer-motion';
+import { AlertCircle, Key, LogOut, Mail, Shield } from 'lucide-react';
+
+import { useState } from 'react';
+
 import { useTranslations } from 'next-intl';
 
 // --- BEGIN COMMENT ---
@@ -53,128 +55,171 @@ export function AccountSettings({ email, authSource }: AccountSettingsProps) {
   return (
     <div className="space-y-8">
       {/* 账号信息卡片 */}
-      <div className={cn(
-        "p-6 rounded-lg border",
-        colors.borderColor.tailwind,
-        colors.cardBackground.tailwind
-      )}>
-        <h3 className={cn(
-          "text-lg font-medium mb-4 font-serif",
-          colors.textColor.tailwind
-        )}>{t('accountInfo')}</h3>
-        
+      <div
+        className={cn(
+          'rounded-lg border p-6',
+          colors.borderColor.tailwind,
+          colors.cardBackground.tailwind
+        )}
+      >
+        <h3
+          className={cn(
+            'mb-4 font-serif text-lg font-medium',
+            colors.textColor.tailwind
+          )}
+        >
+          {t('accountInfo')}
+        </h3>
+
         <div className="space-y-4">
           {email && (
             <div className="flex items-center">
-              <div className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center",
-                colors.buttonBackground.tailwind,
-                colors.borderColor.tailwind,
-                "border"
-              )}>
-                <Mail className={cn("w-5 h-5", colors.secondaryTextColor.tailwind)} />
+              <div
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-full',
+                  colors.buttonBackground.tailwind,
+                  colors.borderColor.tailwind,
+                  'border'
+                )}
+              >
+                <Mail
+                  className={cn('h-5 w-5', colors.secondaryTextColor.tailwind)}
+                />
               </div>
               <div className="ml-4">
-                <p className={cn("text-sm font-serif", colors.secondaryTextColor.tailwind)}>{t('loginEmail')}</p>
-                <p className={cn("font-serif", colors.textColor.tailwind)}>{email}</p>
+                <p
+                  className={cn(
+                    'font-serif text-sm',
+                    colors.secondaryTextColor.tailwind
+                  )}
+                >
+                  {t('loginEmail')}
+                </p>
+                <p className={cn('font-serif', colors.textColor.tailwind)}>
+                  {email}
+                </p>
               </div>
             </div>
           )}
-          
+
           {authSource && (
             <div className="flex items-center">
-              <div className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center",
-                colors.buttonBackground.tailwind,
-                colors.borderColor.tailwind,
-                "border"
-              )}>
-                <Key className={cn("w-5 h-5", colors.secondaryTextColor.tailwind)} />
+              <div
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-full',
+                  colors.buttonBackground.tailwind,
+                  colors.borderColor.tailwind,
+                  'border'
+                )}
+              >
+                <Key
+                  className={cn('h-5 w-5', colors.secondaryTextColor.tailwind)}
+                />
               </div>
               <div className="ml-4">
-                <p className={cn("text-sm font-serif", colors.secondaryTextColor.tailwind)}>{t('authMethod')}</p>
-                <p className={cn("font-serif", colors.textColor.tailwind)}>{authSource}</p>
+                <p
+                  className={cn(
+                    'font-serif text-sm',
+                    colors.secondaryTextColor.tailwind
+                  )}
+                >
+                  {t('authMethod')}
+                </p>
+                <p className={cn('font-serif', colors.textColor.tailwind)}>
+                  {authSource}
+                </p>
               </div>
             </div>
           )}
         </div>
       </div>
-      
+
       {/* 安全设置卡片 */}
-      <div className={cn(
-        "p-6 rounded-lg border",
-        colors.borderColor.tailwind,
-        colors.cardBackground.tailwind
-      )}>
-        <h3 className={cn(
-          "text-lg font-medium mb-4 font-serif",
-          colors.textColor.tailwind
-        )}>{t('securitySettings')}</h3>
-        
+      <div
+        className={cn(
+          'rounded-lg border p-6',
+          colors.borderColor.tailwind,
+          colors.cardBackground.tailwind
+        )}
+      >
+        <h3
+          className={cn(
+            'mb-4 font-serif text-lg font-medium',
+            colors.textColor.tailwind
+          )}
+        >
+          {t('securitySettings')}
+        </h3>
+
         <div className="space-y-4">
           {/* 退出登录按钮 */}
           {showConfirm ? (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className={cn(
-                "p-4 rounded-lg mb-4 flex items-center border",
-                isDark 
-                  ? "bg-red-900/20 text-red-300 border-red-800" 
-                  : "bg-red-50 text-red-700 border-red-200"
+                'mb-4 flex items-center rounded-lg border p-4',
+                isDark
+                  ? 'border-red-800 bg-red-900/20 text-red-300'
+                  : 'border-red-200 bg-red-50 text-red-700'
               )}
             >
-              <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+              <AlertCircle className="mr-2 h-5 w-5 flex-shrink-0" />
               <span className="font-serif">{t('confirmLogout')}</span>
             </motion.div>
           ) : null}
-          
+
           <div className="flex items-center justify-between">
-            <div className={cn(
-              "flex items-center font-serif",
-              colors.textColor.tailwind
-            )}>
-              <LogOut className="w-5 h-5 mr-2" />
+            <div
+              className={cn(
+                'flex items-center font-serif',
+                colors.textColor.tailwind
+              )}
+            >
+              <LogOut className="mr-2 h-5 w-5" />
               <span>{t('logoutAccount')}</span>
             </div>
-            
+
             <div className="flex gap-3">
               {showConfirm && (
                 <button
                   onClick={cancelLogout}
                   className={cn(
-                    "px-3 py-2 rounded-lg",
-                    "transition-all duration-200",
-                    "cursor-pointer",
-                    "text-sm font-serif",
+                    'rounded-lg px-3 py-2',
+                    'transition-all duration-200',
+                    'cursor-pointer',
+                    'font-serif text-sm',
                     colors.buttonBackground.tailwind,
                     colors.buttonBorder.tailwind,
                     colors.textColor.tailwind,
                     colors.buttonHover.tailwind,
-                    "border"
+                    'border'
                   )}
                 >
                   {tCommon('cancel')}
                 </button>
               )}
-              
+
               <button
                 onClick={handleLogout}
                 disabled={isLoggingOut}
                 className={cn(
-                  "px-3 py-2 rounded-lg",
-                  "transition-all duration-200",
-                  "cursor-pointer",
-                  "text-sm font-serif",
-                  showConfirm 
-                    ? (isDark 
-                        ? "bg-red-600 hover:bg-red-700 text-white" 
-                        : "bg-red-600 hover:bg-red-700 text-white"
-                      )
+                  'rounded-lg px-3 py-2',
+                  'transition-all duration-200',
+                  'cursor-pointer',
+                  'font-serif text-sm',
+                  showConfirm
+                    ? isDark
+                      ? 'bg-red-600 text-white hover:bg-red-700'
+                      : 'bg-red-600 text-white hover:bg-red-700'
                     : `${colors.primaryButtonBackground.tailwind} ${colors.primaryButtonHover.tailwind} ${colors.primaryButtonText.tailwind}`
                 )}
               >
-                {isLoggingOut ? t('loggingOut') : (showConfirm ? t('confirmLogoutBtn') : t('logout'))}
+                {isLoggingOut
+                  ? t('loggingOut')
+                  : showConfirm
+                    ? t('confirmLogoutBtn')
+                    : t('logout')}
               </button>
             </div>
           </div>

@@ -5,6 +5,7 @@
 本文档详细描述了将北京信息科技大学统一认证系统（CAS）集成到AgentifUI平台的技术方案。该方案基于CAS 2.0/3.0协议，实现用户通过学校SSO系统的单点登录功能。
 
 **项目目标**：
+
 - 实现北京信息科技大学CAS SSO登录集成
 - 首次登录时自动创建用户账户
 - 存储用户的学工号（employeeNumber）作为企业标识
@@ -40,12 +41,12 @@
 
 #### 核心端点信息
 
-| 端点类型 | URL | 协议版本 | 功能描述 |
-|----------|-----|----------|----------|
-| 登录入口 | `https://sso.bistu.edu.cn/login` | CAS 2.0/3.0 | 用户登录页面 |
-| 注销入口 | `https://sso.bistu.edu.cn/logout` | CAS 2.0/3.0 | 用户注销 |
-| 票据验证 | `https://sso.bistu.edu.cn/serviceValidate` | CAS 2.0 | 票据验证接口 |
-| 票据验证 | `https://sso.bistu.edu.cn/p3/serviceValidate` | CAS 3.0 | 增强票据验证接口 |
+| 端点类型 | URL                                           | 协议版本    | 功能描述         |
+| -------- | --------------------------------------------- | ----------- | ---------------- |
+| 登录入口 | `https://sso.bistu.edu.cn/login`              | CAS 2.0/3.0 | 用户登录页面     |
+| 注销入口 | `https://sso.bistu.edu.cn/logout`             | CAS 2.0/3.0 | 用户注销         |
+| 票据验证 | `https://sso.bistu.edu.cn/serviceValidate`    | CAS 2.0     | 票据验证接口     |
+| 票据验证 | `https://sso.bistu.edu.cn/p3/serviceValidate` | CAS 3.0     | 增强票据验证接口 |
 
 #### 增强的认证流程
 
@@ -63,18 +64,18 @@ sequenceDiagram
     User->>App: 访问应用/点击SSO登录
     App->>CAS: 重定向到CAS登录页面
     Note over CAS: service=${APP_URL}/api/sso/bistu/callback
-    
+
     User->>CAS: 输入学工号和密码
     CAS->>CAS: 验证用户凭据
     CAS->>App: 重定向回应用（携带ticket）
-    
+
     App->>API: 调用callback API验证ticket
     API->>CAS: 向CAS验证ticket
     CAS->>API: 返回用户信息XML
-    
+
     API->>DB: 查找/创建用户
     Note over API,DB: 处理邮箱冲突，智能链接账户
-    
+
     API->>Frontend: 重定向到登录页面（携带SSO数据）
     Frontend->>API: 调用SSO登录API建立会话
     API->>API: 生成临时密码
@@ -100,6 +101,7 @@ sequenceDiagram
 ```
 
 **关键字段说明**：
+
 - `cas:user`: 用户登录名（学工号）
 - `cas:name`: 真实姓名
 - `cas:username`: 学工号（通常与cas:user相同）
@@ -164,28 +166,28 @@ sequenceDiagram
 ```typescript
 interface BistuCASService {
   // 生成登录URL
-  generateLoginURL(returnUrl?: string): string
-  
+  generateLoginURL(returnUrl?: string): string;
+
   // 生成注销URL
-  generateLogoutURL(returnUrl?: string): string
-  
+  generateLogoutURL(returnUrl?: string): string;
+
   // 验证ticket并获取用户信息
-  validateTicket(ticket: string, service: string): Promise<BistuUserInfo>
-  
+  validateTicket(ticket: string, service: string): Promise<BistuUserInfo>;
+
   // 解析CAS XML响应
-  parseValidationResponse(xmlText: string): BistuUserInfo
+  parseValidationResponse(xmlText: string): BistuUserInfo;
 }
 
 interface BistuUserInfo {
-  employeeNumber: string  // 学工号（主要标识）
-  username: string        // 用户名
-  success: boolean        // 验证是否成功
+  employeeNumber: string; // 学工号（主要标识）
+  username: string; // 用户名
+  success: boolean; // 验证是否成功
   attributes?: {
-    name?: string         // 真实姓名
-    username?: string     // 学工号
-    [key: string]: any    // 其他属性
-  }
-  rawResponse?: string    // 原始XML响应（调试用）
+    name?: string; // 真实姓名
+    username?: string; // 学工号
+    [key: string]: any; // 其他属性
+  };
+  rawResponse?: string; // 原始XML响应（调试用）
 }
 ```
 
@@ -194,23 +196,23 @@ interface BistuUserInfo {
 ```typescript
 interface SSOUserService {
   // 通过学工号查找用户（实际通过邮箱查找）
-  findUserByEmployeeNumber(employeeNumber: string): Promise<Profile | null>
-  
+  findUserByEmployeeNumber(employeeNumber: string): Promise<Profile | null>;
+
   // 创建SSO用户（含邮箱冲突处理）
-  createSSOUser(userData: CreateSSOUserData): Promise<Profile>
-  
+  createSSOUser(userData: CreateSSOUserData): Promise<Profile>;
+
   // 更新用户最后登录时间
-  updateLastLogin(userId: string): Promise<boolean>
-  
+  updateLastLogin(userId: string): Promise<boolean>;
+
   // 获取北信科SSO提供商信息
-  getBistuSSOProvider(): Promise<{id: string, name: string} | null>
+  getBistuSSOProvider(): Promise<{ id: string; name: string } | null>;
 }
 
 interface CreateSSOUserData {
-  employeeNumber: string  // 学工号
-  username: string        // 用户名
-  fullName?: string       // 全名
-  ssoProviderId: string   // SSO提供商ID
+  employeeNumber: string; // 学工号
+  username: string; // 用户名
+  fullName?: string; // 全名
+  ssoProviderId: string; // SSO提供商ID
 }
 ```
 
@@ -224,21 +226,21 @@ interface CreateSSOUserData {
 
 ```sql
 -- 添加学工号字段
-ALTER TABLE profiles 
+ALTER TABLE profiles
 ADD COLUMN IF NOT EXISTS employee_number TEXT;
 
 -- 添加唯一约束
-ALTER TABLE profiles 
-ADD CONSTRAINT profiles_employee_number_key 
+ALTER TABLE profiles
+ADD CONSTRAINT profiles_employee_number_key
 UNIQUE (employee_number);
 
 -- 添加索引优化查询
-CREATE INDEX IF NOT EXISTS idx_profiles_employee_number 
-ON profiles(employee_number) 
+CREATE INDEX IF NOT EXISTS idx_profiles_employee_number
+ON profiles(employee_number)
 WHERE employee_number IS NOT NULL;
 
 -- 字段注释
-COMMENT ON COLUMN profiles.employee_number 
+COMMENT ON COLUMN profiles.employee_number
 IS '学工号：北京信息科技大学统一身份标识';
 ```
 
@@ -279,6 +281,7 @@ INSERT INTO sso_providers (
 #### 3. 数据库函数
 
 **学工号查找函数**：
+
 ```sql
 CREATE OR REPLACE FUNCTION find_user_by_employee_number(emp_num TEXT)
 RETURNS TABLE(
@@ -289,13 +292,13 @@ RETURNS TABLE(
   last_login TIMESTAMP WITH TIME ZONE,
   auth_source TEXT,
   status account_status
-) 
+)
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
   RETURN QUERY
-  SELECT 
+  SELECT
     p.id,
     p.full_name,
     p.username,
@@ -311,6 +314,7 @@ $$;
 ```
 
 **SSO用户创建函数**：
+
 ```sql
 CREATE OR REPLACE FUNCTION create_sso_user(
   emp_number TEXT,
@@ -330,14 +334,14 @@ BEGIN
   IF emp_number IS NULL OR LENGTH(TRIM(emp_number)) = 0 THEN
     RAISE EXCEPTION 'Employee number cannot be null or empty';
   END IF;
-  
+
   -- 生成唯一用户名
   final_username := TRIM(user_name);
   WHILE EXISTS (SELECT 1 FROM profiles WHERE username = final_username) LOOP
     counter := counter + 1;
     final_username := TRIM(user_name) || '_' || counter;
   END LOOP;
-  
+
   -- 创建用户记录
   new_user_id := gen_random_uuid();
   INSERT INTO profiles (
@@ -349,7 +353,7 @@ BEGIN
     'bistu_sso', sso_provider_uuid::TEXT, 'active'::account_status, 'user'::user_role,
     NOW(), NOW(), NOW()
   );
-  
+
   RETURN new_user_id;
 END;
 $$;
@@ -382,9 +386,9 @@ export class BistuCASService {
    * 生成CAS登录URL
    */
   generateLoginURL(returnUrl?: string): string {
-    const serviceUrl = returnUrl ? 
-      `${this.config.serviceUrl}?returnUrl=${encodeURIComponent(returnUrl)}` : 
-      this.config.serviceUrl;
+    const serviceUrl = returnUrl
+      ? `${this.config.serviceUrl}?returnUrl=${encodeURIComponent(returnUrl)}`
+      : this.config.serviceUrl;
 
     const params = new URLSearchParams({ service: serviceUrl });
     return `${this.config.baseUrl}/login?${params.toString()}`;
@@ -393,18 +397,22 @@ export class BistuCASService {
   /**
    * 验证ticket并获取用户信息
    */
-  async validateTicket(ticket: string, service: string): Promise<BistuUserInfo> {
+  async validateTicket(
+    ticket: string,
+    service: string
+  ): Promise<BistuUserInfo> {
     try {
-      const validateEndpoint = this.config.version === '3.0' 
-        ? '/p3/serviceValidate' 
-        : '/serviceValidate';
+      const validateEndpoint =
+        this.config.version === '3.0'
+          ? '/p3/serviceValidate'
+          : '/serviceValidate';
 
       const response = await fetch(
         `${this.config.baseUrl}${validateEndpoint}?${new URLSearchParams({ service, ticket })}`,
         {
           method: 'GET',
           headers: {
-            'Accept': 'application/xml, text/xml',
+            Accept: 'application/xml, text/xml',
             'User-Agent': 'AgentifUI-BISTU-SSO-Client/1.0',
           },
           signal: AbortSignal.timeout(10000), // 10秒超时
@@ -449,13 +457,16 @@ export class BistuCASService {
             name: realName,
             username: String(attributes['cas:username'] || ''),
             // 移除cas:前缀的其他属性
-            ...Object.keys(attributes).reduce((acc, key) => {
-              if (key.startsWith('cas:')) {
-                const cleanKey = key.replace('cas:', '');
-                acc[cleanKey] = String(attributes[key] || '');
-              }
-              return acc;
-            }, {} as Record<string, any>),
+            ...Object.keys(attributes).reduce(
+              (acc, key) => {
+                if (key.startsWith('cas:')) {
+                  const cleanKey = key.replace('cas:', '');
+                  acc[cleanKey] = String(attributes[key] || '');
+                }
+                return acc;
+              },
+              {} as Record<string, any>
+            ),
           },
           rawResponse: xmlText,
         };
@@ -467,7 +478,10 @@ export class BistuCASService {
           success: false,
           attributes: {
             error_code: failure['@_code'] || 'UNKNOWN_ERROR',
-            error_message: typeof failure === 'string' ? failure : failure['#text'] || 'Authentication failed',
+            error_message:
+              typeof failure === 'string'
+                ? failure
+                : failure['#text'] || 'Authentication failed',
           },
           rawResponse: xmlText,
         };
@@ -496,12 +510,14 @@ export class SSOUserService {
   /**
    * 通过学工号查找用户（实际通过邮箱查找）
    */
-  static async findUserByEmployeeNumber(employeeNumber: string): Promise<Profile | null> {
+  static async findUserByEmployeeNumber(
+    employeeNumber: string
+  ): Promise<Profile | null> {
     const supabase = await createClient();
-    
+
     // 构建SSO用户的邮箱地址
     const email = `${employeeNumber.trim()}@bistu.edu.cn`;
-    
+
     // 先使用普通客户端查找
     const { data, error } = await supabase
       .from('profiles')
@@ -538,28 +554,33 @@ export class SSOUserService {
     const email = `${userData.employeeNumber}@bistu.edu.cn`;
 
     // 检查用户是否已存在
-    const existingUser = await this.findUserByEmployeeNumber(userData.employeeNumber);
+    const existingUser = await this.findUserByEmployeeNumber(
+      userData.employeeNumber
+    );
     if (existingUser) {
       return existingUser;
     }
 
     // 使用Admin API创建auth.users记录
-    const { data: authUser, error: authError } = await adminSupabase.auth.admin.createUser({
-      email,
-      user_metadata: {
-        full_name: userData.fullName || userData.username,
-        username: userData.username,
-        employee_number: userData.employeeNumber,
-        auth_source: 'bistu_sso',
-        sso_provider_id: userData.ssoProviderId,
-      },
-      email_confirm: true, // SSO用户自动确认邮箱
-    });
+    const { data: authUser, error: authError } =
+      await adminSupabase.auth.admin.createUser({
+        email,
+        user_metadata: {
+          full_name: userData.fullName || userData.username,
+          username: userData.username,
+          employee_number: userData.employeeNumber,
+          auth_source: 'bistu_sso',
+          sso_provider_id: userData.ssoProviderId,
+        },
+        email_confirm: true, // SSO用户自动确认邮箱
+      });
 
     // 处理邮箱冲突问题
     if (authError && authError.message.includes('already been registered')) {
       // 重新查找现有用户，使用多种策略
-      const existingUser = await this.findUserByEmployeeNumber(userData.employeeNumber);
+      const existingUser = await this.findUserByEmployeeNumber(
+        userData.employeeNumber
+      );
       if (existingUser) {
         return existingUser;
       }
@@ -567,7 +588,7 @@ export class SSOUserService {
       // 查找auth.users记录并创建对应的profile
       const { data: authUsers } = await adminSupabase.auth.admin.listUsers();
       const authUser = authUsers?.users?.find(user => user.email === email);
-      
+
       if (authUser) {
         // 创建缺失的profile记录
         const { data: newProfile, error: createError } = await adminSupabase
@@ -648,17 +669,18 @@ export class SSOUserService {
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const returnUrl = searchParams.get('returnUrl') || '/chat';
-  
+
   // 安全验证重定向URL
   const allowedReturnUrls = ['/chat', '/dashboard', '/settings', '/apps', '/'];
-  const isValidReturnUrl = returnUrl.startsWith('/') && 
+  const isValidReturnUrl =
+    returnUrl.startsWith('/') &&
     (allowedReturnUrls.includes(returnUrl) || returnUrl.startsWith('/chat/'));
   const safeReturnUrl = isValidReturnUrl ? returnUrl : '/chat';
-  
+
   // 创建CAS服务并生成登录URL
   const casService = createBistuCASService();
   const loginUrl = casService.generateLoginURL(safeReturnUrl);
-  
+
   return NextResponse.redirect(loginUrl);
 }
 ```
@@ -672,7 +694,7 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const ticket = requestUrl.searchParams.get('ticket');
   const returnUrl = requestUrl.searchParams.get('returnUrl') || '/chat';
-  
+
   if (!ticket) {
     return NextResponse.redirect(
       new URL('/login?error=missing_ticket&message=认证参数缺失', appUrl)
@@ -683,7 +705,7 @@ export async function GET(request: NextRequest) {
     // 验证ticket
     const casService = createBistuCASService();
     const userInfo = await casService.validateTicket(ticket, serviceUrl);
-    
+
     if (!userInfo.success || !userInfo.employeeNumber) {
       return NextResponse.redirect(
         new URL('/login?error=ticket_validation_failed', appUrl)
@@ -691,8 +713,10 @@ export async function GET(request: NextRequest) {
     }
 
     // 查找或创建用户
-    let user = await SSOUserService.findUserByEmployeeNumber(userInfo.employeeNumber);
-    
+    let user = await SSOUserService.findUserByEmployeeNumber(
+      userInfo.employeeNumber
+    );
+
     if (!user) {
       // 创建新用户
       const ssoProvider = { id: '10000000-0000-0000-0000-000000000001' };
@@ -714,9 +738,9 @@ export async function GET(request: NextRequest) {
     successUrl.searchParams.set('user_id', user.id);
     successUrl.searchParams.set('user_email', userEmail);
     successUrl.searchParams.set('redirect_to', returnUrl);
-    
+
     const response = NextResponse.redirect(successUrl);
-    
+
     // 设置SSO用户数据cookie
     const ssoUserData = {
       userId: user.id,
@@ -726,7 +750,7 @@ export async function GET(request: NextRequest) {
       fullName: user.full_name,
       authSource: 'bistu_sso',
       loginTime: Date.now(),
-      expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24小时过期
+      expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24小时过期
     };
 
     response.cookies.set('sso_user_data', JSON.stringify(ssoUserData), {
@@ -754,9 +778,9 @@ export async function GET(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const casService = createBistuCASService();
   const logoutUrl = casService.generateLogoutURL();
-  
+
   const response = NextResponse.redirect(logoutUrl);
-  
+
   // 清除会话cookie
   const cookiesToClear = ['sso_session', 'sb-access-token', 'sb-refresh-token'];
   cookiesToClear.forEach(cookieName => {
@@ -774,34 +798,40 @@ export async function GET(request: NextRequest) {
 ```typescript
 export async function POST(request: NextRequest) {
   const { userId, userEmail, ssoUserData } = await request.json();
-  
+
   // 验证SSO数据时效性
   if (Date.now() > ssoUserData.expiresAt) {
     return NextResponse.json({ message: 'SSO会话已过期' }, { status: 401 });
   }
 
   const adminSupabase = await createAdminClient();
-  
+
   // 验证用户存在
-  const { data: user, error: userError } = await adminSupabase.auth.admin.getUserById(userId);
+  const { data: user, error: userError } =
+    await adminSupabase.auth.admin.getUserById(userId);
   if (userError || !user) {
     return NextResponse.json({ message: '用户不存在' }, { status: 404 });
   }
 
   // 使用临时密码方法建立会话
   const tempPassword = `SSO_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-  
+
   // 设置临时密码
-  await adminSupabase.auth.admin.updateUserById(userId, { password: tempPassword });
-  
-  // 使用临时密码登录
-  const { data: signInData, error: signInError } = await adminSupabase.auth.signInWithPassword({
-    email: user.user.email,
+  await adminSupabase.auth.admin.updateUserById(userId, {
     password: tempPassword,
   });
 
+  // 使用临时密码登录
+  const { data: signInData, error: signInError } =
+    await adminSupabase.auth.signInWithPassword({
+      email: user.user.email,
+      password: tempPassword,
+    });
+
   // 立即清理临时密码
-  await adminSupabase.auth.admin.updateUserById(userId, { password: undefined });
+  await adminSupabase.auth.admin.updateUserById(userId, {
+    password: undefined,
+  });
 
   if (signInError || !signInData.session) {
     return NextResponse.json({ message: '会话创建失败' }, { status: 500 });
@@ -838,14 +868,14 @@ graph TD
 
 ```typescript
 interface SSOUserData {
-  userId: string;           // Supabase用户ID
-  email: string;            // 用户邮箱（学工号@bistu.edu.cn）
-  employeeNumber: string;   // 学工号
-  username: string;         // 用户名
-  fullName: string;         // 真实姓名
+  userId: string; // Supabase用户ID
+  email: string; // 用户邮箱（学工号@bistu.edu.cn）
+  employeeNumber: string; // 学工号
+  username: string; // 用户名
+  fullName: string; // 真实姓名
   authSource: 'bistu_sso'; // 认证来源
-  loginTime: number;        // 登录时间戳
-  expiresAt: number;        // 过期时间戳（24小时）
+  loginTime: number; // 登录时间戳
+  expiresAt: number; // 过期时间戳（24小时）
 }
 ```
 
@@ -864,7 +894,9 @@ export async function middleware(request: NextRequest) {
 
   // SSO处理期间暂时跳过认证检查
   if (ssoLoginSuccess || hasSsoUserCookie) {
-    console.log(`[Middleware] SSO session detected, allowing request to ${pathname}`);
+    console.log(
+      `[Middleware] SSO session detected, allowing request to ${pathname}`
+    );
     return response;
   }
 
@@ -882,18 +914,20 @@ useEffect(() => {
     const ssoLoginSuccess = searchParams.get('sso_login') === 'success';
     const userId = searchParams.get('user_id');
     const userEmail = searchParams.get('user_email');
-    
+
     if (ssoLoginSuccess && userId && userEmail) {
       setSsoProcessing(true);
-      
+
       try {
         // 读取SSO用户数据cookie
         const ssoUserCookie = document.cookie
           .split('; ')
           .find(row => row.startsWith('sso_user_data='));
-        
-        const ssoUserData = JSON.parse(decodeURIComponent(ssoUserCookie.split('=')[1]));
-        
+
+        const ssoUserData = JSON.parse(
+          decodeURIComponent(ssoUserCookie.split('=')[1])
+        );
+
         // 调用SSO登录API
         const response = await fetch('/api/auth/sso-signin', {
           method: 'POST',
@@ -904,9 +938,10 @@ useEffect(() => {
         if (response.ok) {
           const { session } = await response.json();
           await supabase.auth.setSession(session);
-          
+
           // 清理cookie并跳转
-          document.cookie = 'sso_user_data=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          document.cookie =
+            'sso_user_data=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
           router.replace(redirectTo);
         }
       } catch (error) {
@@ -968,7 +1003,9 @@ if (!process.env.NEXT_PUBLIC_APP_URL) {
 }
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for SSO user creation');
+  throw new Error(
+    'SUPABASE_SERVICE_ROLE_KEY is required for SSO user creation'
+  );
 }
 ```
 
@@ -982,7 +1019,7 @@ if (!userInfo.success) {
     service: serviceUrl,
     response: userInfo.rawResponse,
   });
-  
+
   return NextResponse.redirect(
     new URL('/login?error=cas_validation_failed&message=身份验证失败', appUrl)
   );
@@ -995,13 +1032,13 @@ if (!userInfo.success) {
 // 邮箱冲突处理
 if (authError && authError.message.includes('already been registered')) {
   console.log(`Email conflict detected for ${email}, attempting account linking`);
-  
+
   const existingUser = await this.findUserByEmployeeNumber(userData.employeeNumber);
   if (existingUser) {
     console.log(`Successfully linked existing user: ${existingUser.id}`);
     return existingUser;
   }
-  
+
   throw new Error('ACCOUNT_DATA_INCONSISTENT');
 }
 ```
@@ -1017,7 +1054,9 @@ console.log(userInfo.rawResponse || '无响应数据');
 console.log('=== 响应结束 ===');
 
 // 用户创建调试
-console.log(`Creating SSO user: ${userData.username} (${userData.employeeNumber})`);
+console.log(
+  `Creating SSO user: ${userData.username} (${userData.employeeNumber})`
+);
 console.log(`User email: ${email}, SSO Provider: ${userData.ssoProviderId}`);
 ```
 
@@ -1025,7 +1064,7 @@ console.log(`User email: ${email}, SSO Provider: ${userData.ssoProviderId}`);
 
 ```sql
 -- 检查SSO用户状态
-SELECT 
+SELECT
   p.id,
   p.username,
   p.full_name,
@@ -1042,7 +1081,7 @@ ORDER BY p.created_at DESC;
 
 -- 检查SSO提供商配置
 SELECT id, name, protocol, enabled, settings
-FROM sso_providers 
+FROM sso_providers
 WHERE name = '北京信息科技大学';
 ```
 
@@ -1052,16 +1091,16 @@ WHERE name = '北京信息科技大学';
 
 ```sql
 -- 修复缺失的employee_number字段
-UPDATE profiles 
+UPDATE profiles
 SET employee_number = SPLIT_PART(email, '@', 1)
-WHERE auth_source = 'bistu_sso' 
-  AND employee_number IS NULL 
+WHERE auth_source = 'bistu_sso'
+  AND employee_number IS NULL
   AND email LIKE '%@bistu.edu.cn';
 
 -- 修复auth_source字段
-UPDATE profiles 
+UPDATE profiles
 SET auth_source = 'bistu_sso'
-WHERE email LIKE '%@bistu.edu.cn' 
+WHERE email LIKE '%@bistu.edu.cn'
   AND auth_source IS NULL;
 ```
 
@@ -1071,8 +1110,9 @@ WHERE email LIKE '%@bistu.edu.cn'
 // 如果SSO会话建立失败，用户可以重新登录
 const handleRetrySSO = async () => {
   // 清理现有cookie
-  document.cookie = 'sso_user_data=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  
+  document.cookie =
+    'sso_user_data=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
   // 重新发起SSO登录
   window.location.href = '/api/sso/bistu/login?returnUrl=/chat';
 };
@@ -1114,12 +1154,12 @@ supabase migration list
 
 ```sql
 -- 添加数据库索引
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_profiles_bistu_active 
-ON profiles(employee_number, auth_source) 
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_profiles_bistu_active
+ON profiles(employee_number, auth_source)
 WHERE auth_source = 'bistu_sso' AND status = 'active';
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_profiles_email_bistu 
-ON profiles(email) 
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_profiles_email_bistu
+ON profiles(email)
 WHERE email LIKE '%@bistu.edu.cn';
 ```
 
@@ -1130,7 +1170,7 @@ WHERE email LIKE '%@bistu.edu.cn';
 ### 1. 关键指标监控
 
 - **SSO登录成功率**：监控ticket验证成功比例
-- **用户创建成功率**：监控新用户创建成功比例  
+- **用户创建成功率**：监控新用户创建成功比例
 - **会话建立成功率**：监控SSO会话建立成功比例
 - **响应时间**：监控CAS请求和回调处理时间
 
@@ -1173,4 +1213,4 @@ grep "Successfully created new SSO user" /var/log/app.log | tail -10
 4. **完善的错误处理**：详细日志、故障恢复、用户友好提示
 5. **生产就绪**：HTTPS支持、性能优化、监控告警、备份策略
 
-该方案确保了系统的安全性、可靠性和可维护性，为北信科用户提供了无缝的单点登录体验。 
+该方案确保了系统的安全性、可靠性和可维护性，为北信科用户提供了无缝的单点登录体验。

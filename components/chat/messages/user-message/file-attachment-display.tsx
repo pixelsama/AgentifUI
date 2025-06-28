@@ -1,50 +1,64 @@
-"use client"
+'use client';
 
-import React from "react"
-import { cn, formatBytes } from "@lib/utils"
-import { useTheme } from "@lib/hooks"
-import { FileTextIcon, FileImageIcon, FileArchiveIcon, FileMusicIcon, FileVideoIcon, FileIcon } from "lucide-react"
-import { useFilePreviewStore } from "@lib/stores/ui/file-preview-store"
-import type { MessageAttachment } from '@lib/stores/chat-store'
-import { useSidebarStore } from "@lib/stores/sidebar-store"
-import { useMobile } from "@lib/hooks/use-mobile"
+import { useTheme } from '@lib/hooks';
+import { useMobile } from '@lib/hooks/use-mobile';
+import type { MessageAttachment } from '@lib/stores/chat-store';
+import { useSidebarStore } from '@lib/stores/sidebar-store';
+import { useFilePreviewStore } from '@lib/stores/ui/file-preview-store';
+import { cn, formatBytes } from '@lib/utils';
+import {
+  FileArchiveIcon,
+  FileIcon,
+  FileImageIcon,
+  FileMusicIcon,
+  FileTextIcon,
+  FileVideoIcon,
+} from 'lucide-react';
+
+import React from 'react';
 
 interface FileAttachmentDisplayProps {
-  attachments: MessageAttachment[]
-  isDark?: boolean
-  className?: string
+  attachments: MessageAttachment[];
+  isDark?: boolean;
+  className?: string;
 }
 
 // 根据MIME类型获取相应图标
 const getFileIcon = (mimeType: string | undefined) => {
   // --- 类型安全检查 ---
-  if (!mimeType || typeof mimeType !== 'string') return FileIcon
-  
-  if (mimeType.startsWith('image/')) return FileImageIcon
-  if (mimeType.startsWith('audio/')) return FileMusicIcon
-  if (mimeType.startsWith('video/')) return FileVideoIcon
-  if (mimeType === 'application/pdf' || 
-      mimeType.includes('word') || 
-      mimeType.includes('excel') || 
-      mimeType.includes('csv') || 
-      mimeType.includes('text')) return FileTextIcon
-  if (mimeType.includes('zip') || 
-      mimeType.includes('rar') || 
-      mimeType.includes('tar') || 
-      mimeType.includes('7z') || 
-      mimeType.includes('gzip')) return FileArchiveIcon
-  return FileIcon
-}
+  if (!mimeType || typeof mimeType !== 'string') return FileIcon;
 
-export const FileAttachmentDisplay: React.FC<FileAttachmentDisplayProps> = ({ 
-  attachments, 
-  isDark = false, 
-  className
+  if (mimeType.startsWith('image/')) return FileImageIcon;
+  if (mimeType.startsWith('audio/')) return FileMusicIcon;
+  if (mimeType.startsWith('video/')) return FileVideoIcon;
+  if (
+    mimeType === 'application/pdf' ||
+    mimeType.includes('word') ||
+    mimeType.includes('excel') ||
+    mimeType.includes('csv') ||
+    mimeType.includes('text')
+  )
+    return FileTextIcon;
+  if (
+    mimeType.includes('zip') ||
+    mimeType.includes('rar') ||
+    mimeType.includes('tar') ||
+    mimeType.includes('7z') ||
+    mimeType.includes('gzip')
+  )
+    return FileArchiveIcon;
+  return FileIcon;
+};
+
+export const FileAttachmentDisplay: React.FC<FileAttachmentDisplayProps> = ({
+  attachments,
+  isDark = false,
+  className,
 }) => {
-  const openPreview = useFilePreviewStore((state) => state.openPreview);
+  const openPreview = useFilePreviewStore(state => state.openPreview);
   const isMobile = useMobile();
 
-  if (!attachments || attachments.length === 0) return null
+  if (!attachments || attachments.length === 0) return null;
 
   const handleAttachmentClick = (attachment: MessageAttachment) => {
     const sidebarState = useSidebarStore.getState();
@@ -59,56 +73,66 @@ export const FileAttachmentDisplay: React.FC<FileAttachmentDisplayProps> = ({
       }
     }
     openPreview(attachment);
-  }
+  };
 
   return (
     <div
       className={cn(
-        "w-full flex flex-wrap gap-2 px-2 pt-2 pb-1 justify-end",
+        'flex w-full flex-wrap justify-end gap-2 px-2 pt-2 pb-1',
         className
       )}
       style={{
         maxWidth: '100%',
         minHeight: '0',
-        marginRight: 0
+        marginRight: 0,
       }}
     >
       {attachments.map(attachment => {
-        const IconComponent = getFileIcon(attachment.type)
+        const IconComponent = getFileIcon(attachment.type);
         return (
           <button
             key={attachment.id}
             onClick={() => handleAttachmentClick(attachment)}
             className={cn(
-              "relative pl-2 pr-1 py-1 rounded-md flex items-center gap-2 flex-shrink basis-[calc((100%-1rem)/3)] max-w-[180px] sm:max-w-[200px]",
-              "text-left",
+              'relative flex max-w-[180px] flex-shrink basis-[calc((100%-1rem)/3)] items-center gap-2 rounded-md py-1 pr-1 pl-2 sm:max-w-[200px]',
+              'text-left',
               isDark
-                ? "bg-stone-800/90 border border-stone-700/80 hover:bg-stone-700/90"
-                : "bg-stone-200 border border-stone-300 hover:bg-stone-300"
+                ? 'border border-stone-700/80 bg-stone-800/90 hover:bg-stone-700/90'
+                : 'border border-stone-300 bg-stone-200 hover:bg-stone-300'
             )}
             title={`预览 ${attachment.name}`}
             aria-label={`预览文件 ${attachment.name}`}
           >
-            <div className={cn(
-              "flex-shrink-0 w-5 h-5 flex items-center justify-center relative",
-              isDark ? "text-stone-200" : "text-stone-700"
-            )}>
-              <IconComponent className="w-4 h-4" />
+            <div
+              className={cn(
+                'relative flex h-5 w-5 flex-shrink-0 items-center justify-center',
+                isDark ? 'text-stone-200' : 'text-stone-700'
+              )}
+            >
+              <IconComponent className="h-4 w-4" />
             </div>
-            <div className="flex-grow min-w-0">
-              <p className={cn(
-                "text-sm font-medium truncate",
-                isDark ? "text-stone-100" : "text-stone-900"
-              )}>{attachment.name}</p>
-              <p className={cn(
-                "text-xs",
-                "whitespace-nowrap",
-                isDark ? "text-stone-400" : "text-stone-600"
-              )}>{formatBytes(attachment.size)}</p>
+            <div className="min-w-0 flex-grow">
+              <p
+                className={cn(
+                  'truncate text-sm font-medium',
+                  isDark ? 'text-stone-100' : 'text-stone-900'
+                )}
+              >
+                {attachment.name}
+              </p>
+              <p
+                className={cn(
+                  'text-xs',
+                  'whitespace-nowrap',
+                  isDark ? 'text-stone-400' : 'text-stone-600'
+                )}
+              >
+                {formatBytes(attachment.size)}
+              </p>
             </div>
           </button>
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};

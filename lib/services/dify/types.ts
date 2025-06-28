@@ -89,7 +89,12 @@ export interface DifySseMessageReplaceEvent extends DifySseBaseEvent {
 export interface DifySseWorkflowStartedEvent extends DifySseBaseEvent {
   event: 'workflow_started';
   workflow_run_id: string;
-  data: { id: string; workflow_id: string; sequence_number: number; created_at: number; };
+  data: {
+    id: string;
+    workflow_id: string;
+    sequence_number: number;
+    created_at: number;
+  };
 }
 
 /** event: node_started (节点开始) */
@@ -215,7 +220,7 @@ export interface DifyRetrieverResource {
 }
 
 // 所有可能的 SSE 事件联合类型
-export type DifySseEvent = 
+export type DifySseEvent =
   | DifySseMessageEvent
   | DifySseMessageFileEvent
   | DifySseMessageEndEvent
@@ -379,8 +384,8 @@ export interface DifyStreamResponse {
   // 经过处理的文本块流，只包含 `event: message` 中的 `answer` 字段内容。
   // 服务层负责解析 SSE 并过滤出文本。
   // --- END COMMENT ---
-  answerStream: AsyncGenerator<string, void, undefined>; 
-  
+  answerStream: AsyncGenerator<string, void, undefined>;
+
   // --- BEGIN COMMENT ---
   // 提供方法以在流处理过程中或结束后获取 conversation_id。
   // 该方法在流开始时返回 null，在流中捕获到 ID 后返回 ID。
@@ -396,7 +401,11 @@ export interface DifyStreamResponse {
   // 可以添加一个 Promise，在 message_end 事件到达时 resolve，
   // 并携带最终的 usage 和 metadata 等信息，供需要完整响应的场景使用。
   // --- END COMMENT ---
-  completionPromise?: Promise<{ usage?: DifyUsage; metadata?: Record<string, any>; retrieverResources?: DifyRetrieverResource[] }>;
+  completionPromise?: Promise<{
+    usage?: DifyUsage;
+    metadata?: Record<string, any>;
+    retrieverResources?: DifyRetrieverResource[];
+  }>;
 
   // --- BEGIN COMMENT ---
   // 可能还需要传递其他从流中提取的非文本事件，如文件事件等，根据需求添加。
@@ -433,7 +442,7 @@ export interface DifyFileUploadResponse {
   created_by: string | number; // 用户 ID (可能是数字或字符串)
   created_at: number; // Unix 时间戳
 }
-// --- END ADDITION --- 
+// --- END ADDITION ---
 
 // --- BEGIN MESSAGES API TYPES ---
 
@@ -442,9 +451,9 @@ export interface DifyFileUploadResponse {
 // 这个可以作为 message-service.ts 抛出错误的类型参考
 // --- END COMMENT ---
 export interface DifyApiError {
-  status: number;      // HTTP 状态码
-  code: string;        // Dify 内部错误码或 HTTP 状态码字符串
-  message: string;     // 错误描述
+  status: number; // HTTP 状态码
+  code: string; // Dify 内部错误码或 HTTP 状态码字符串
+  message: string; // 错误描述
   [key: string]: any; // 允许其他可能的错误字段，如 Dify 返回的 validation_errors 等
 }
 
@@ -499,8 +508,7 @@ export interface GetMessagesResponse {
   has_more: boolean; // 是否还有更早的聊天记录可以加载
   limit: number; // 本次请求实际返回的聊天记录条数
 }
-// --- END MESSAGES API TYPES --- 
-
+// --- END MESSAGES API TYPES ---
 
 // --- BEGIN CONVERSATIONS API TYPES ---
 // --- BEGIN COMMENT ---
@@ -653,10 +661,10 @@ export interface DifyFileInputControl {
 /** 用户输入表单项 */
 export interface DifyUserInputFormItem {
   'text-input'?: DifyTextInputControl;
-  'number'?: DifyNumberInputControl;
-  'paragraph'?: DifyParagraphControl;
-  'select'?: DifySelectControl;
-  'file'?: DifyFileInputControl;
+  number?: DifyNumberInputControl;
+  paragraph?: DifyParagraphControl;
+  select?: DifySelectControl;
+  file?: DifyFileInputControl;
   'file-list'?: DifyFileInputControl; // 多文件模式
 }
 
@@ -707,7 +715,7 @@ export interface DifyFileUploadConfig {
   max_files?: number; // 文件数量限制（可能的字段名2）
   file_count_limit?: number; // 文件数量限制（可能的字段名3）
   image?: DifyImageUploadConfig; // 图片设置
-  document?: DifyDocumentUploadConfig; // 文档设置  
+  document?: DifyDocumentUploadConfig; // 文档设置
   audio?: DifyAudioUploadConfig; // 音频设置
   video?: DifyVideoUploadConfig; // 视频设置
   other?: DifyOtherUploadConfig; // 其他文件类型设置
@@ -879,7 +887,7 @@ export interface DifyWorkflowSseErrorEvent {
 }
 
 /** 所有 Workflow SSE 事件的联合类型 */
-export type DifyWorkflowSseEvent = 
+export type DifyWorkflowSseEvent =
   | DifyWorkflowSseStartedEvent
   | DifyWorkflowSseFinishedEvent
   | DifyWorkflowSseNodeStartedEvent
@@ -896,21 +904,21 @@ export type DifyWorkflowSseEvent =
 export interface DifyWorkflowStreamResponse {
   // 🎯 修复：节点执行进度流，支持所有 workflow 事件类型
   progressStream: AsyncGenerator<DifyWorkflowSseEvent, void, undefined>;
-  
+
   // 获取 workflow_run_id
   getWorkflowRunId: () => string | null;
-  
+
   // 获取 task_id
   getTaskId: () => string | null;
-  
+
   // 完成时的 Promise，包含最终结果
   completionPromise: Promise<DifyWorkflowFinishedData>;
 }
 
 /** Workflow API 错误码 */
-export type DifyWorkflowErrorCode = 
+export type DifyWorkflowErrorCode =
   | 'invalid_param'
-  | 'app_unavailable' 
+  | 'app_unavailable'
   | 'provider_not_initialize'
   | 'provider_quota_exceeded'
   | 'model_currently_not_support'
@@ -988,15 +996,18 @@ export interface DifyCompletionResponse {
 export interface DifyCompletionStreamResponse {
   // 文本块流
   answerStream: AsyncGenerator<string, void, undefined>;
-  
+
   // 获取消息 ID
   getMessageId: () => string | null;
-  
+
   // 获取任务 ID
   getTaskId: () => string | null;
-  
+
   // 完成时的 Promise
-  completionPromise: Promise<{ usage?: DifyUsage; metadata?: Record<string, any> }>;
+  completionPromise: Promise<{
+    usage?: DifyUsage;
+    metadata?: Record<string, any>;
+  }>;
 }
 
 // --- BEGIN COMMENT ---
@@ -1059,7 +1070,11 @@ export interface DifyWorkflowRunDetailResponse {
 // --- END COMMENT ---
 
 /** Workflow 执行状态枚举 */
-export type DifyWorkflowLogStatus = 'succeeded' | 'failed' | 'stopped' | 'running';
+export type DifyWorkflowLogStatus =
+  | 'succeeded'
+  | 'failed'
+  | 'stopped'
+  | 'running';
 
 /** 获取 Workflow 日志的请求参数 */
 export interface GetDifyWorkflowLogsParams {

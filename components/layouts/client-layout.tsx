@@ -1,9 +1,11 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-import { cn } from '@lib/utils';
 import { useSmartShortcuts } from '@lib/hooks/use-smart-shortcuts';
+import { cn } from '@lib/utils';
+
+import React, { useEffect, useState } from 'react';
+
+import { usePathname } from 'next/navigation';
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -19,24 +21,25 @@ export function ClientLayout({ children, fontClasses }: ClientLayoutProps) {
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const isChatPage = pathname?.startsWith('/chat');
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 启用智能快捷键：导航类快捷键即使在输入框中也可用
   // Cmd+K新对话、Cmd+Shift+A应用市场、Cmd+\切换侧栏
   // --- END COMMENT ---
   useSmartShortcuts({
-    enabled: mounted // 只在客户端挂载后启用
+    enabled: mounted, // 只在客户端挂载后启用
   });
-  
+
   useEffect(() => {
     setMounted(true);
     // 当客户端组件挂载后，给 body 添加 render-ready 类，使其可见
     document.body.classList.add('render-ready');
-    
+
     // --- BEGIN COMMENT ---
     // 🎯 全局设置 sidebar 挂载状态，避免每个布局重复调用导致的闪烁
     // --- END COMMENT ---
-    const { setMounted: setSidebarMounted } = require('@lib/stores/sidebar-store').useSidebarStore.getState();
+    const { setMounted: setSidebarMounted } =
+      require('@lib/stores/sidebar-store').useSidebarStore.getState();
     setSidebarMounted();
 
     // 清理函数：仅当 ClientLayout 自身卸载时才移除 render-ready
@@ -44,7 +47,7 @@ export function ClientLayout({ children, fontClasses }: ClientLayoutProps) {
       document.body.classList.remove('render-ready');
     };
   }, []); // 空依赖数组，确保此 effect 只在挂载和卸载时运行一次
-  
+
   useEffect(() => {
     if (!mounted) return;
     const bodyElement = document.body;
@@ -60,18 +63,10 @@ export function ClientLayout({ children, fontClasses }: ClientLayoutProps) {
       bodyElement.classList.remove('chat-page', 'default-page');
     };
   }, [pathname, isChatPage, mounted]); // 依赖项保持不变，用于页面特定类的切换
-  
+
   const layoutClass = mounted
-    ? cn(
-        fontClasses,
-        'antialiased',
-        isChatPage ? 'h-full' : 'min-h-screen'
-      )
+    ? cn(fontClasses, 'antialiased', isChatPage ? 'h-full' : 'min-h-screen')
     : cn(fontClasses, 'antialiased');
-  
-  return (
-    <div className={layoutClass}>
-      {children}
-    </div>
-  );
+
+  return <div className={layoutClass}>{children}</div>;
 }

@@ -1,5 +1,6 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { cookies } from 'next/headers';
+
+import { createServerClient } from '@supabase/ssr';
 
 /**
  * 创建 Supabase 服务器客户端
@@ -8,26 +9,26 @@ import { cookies } from 'next/headers'
  */
 export const createClient = async () => {
   // 根据Next.js 15要求，cookies()需要被await
-  const cookieStore = await cookies()
-  
+  const cookieStore = await cookies();
+
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value
+          return cookieStore.get(name)?.value;
         },
         set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options })
+          cookieStore.set({ name, value, ...options });
         },
         remove(name: string, options: any) {
-          cookieStore.set({ name, value: '', ...options })
+          cookieStore.set({ name, value: '', ...options });
         },
       },
     }
-  )
-}
+  );
+};
 
 /**
  * 创建 Supabase 管理员客户端（Service Role）
@@ -35,8 +36,8 @@ export const createClient = async () => {
  * ⚠️ 仅在服务器端使用，具有完全数据库访问权限
  */
 export const createAdminClient = async () => {
-  const cookieStore = await cookies()
-  
+  const cookieStore = await cookies();
+
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -47,15 +48,15 @@ export const createAdminClient = async () => {
       },
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value
+          return cookieStore.get(name)?.value;
         },
         set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options })
+          cookieStore.set({ name, value, ...options });
         },
         remove(name: string, options: any) {
-          cookieStore.set({ name, value: '', ...options })
+          cookieStore.set({ name, value: '', ...options });
         },
       },
     }
-  )
-}
+  );
+};

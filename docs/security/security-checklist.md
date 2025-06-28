@@ -5,18 +5,21 @@
 ### �� 每周检查（必须）
 
 #### 数据库安全
+
 - [ ] 运行 Supabase Database Linter
 - [ ] 检查 RLS 策略是否正常工作
 - [ ] 验证用户权限设置
 - [ ] 检查是否有新的安全告警
 
 #### 认证安全
+
 - [ ] 检查异常登录活动
 - [ ] 验证密码策略设置
 - [ ] 检查 OTP 配置
 - [ ] 审查用户注册趋势
 
 #### 应用安全
+
 - [ ] 检查依赖包安全更新
 - [ ] 验证 API 访问日志
 - [ ] 检查错误日志中的安全相关信息
@@ -25,12 +28,14 @@
 ### 🔧 每月检查（重要）
 
 #### 权限审计
+
 - [ ] 审查管理员账户
 - [ ] 检查数据库用户权限
 - [ ] 验证 API 密钥使用情况
 - [ ] 审查第三方集成权限
 
 #### 安全配置
+
 - [ ] 检查 Supabase 项目设置
 - [ ] 验证 CORS 配置
 - [ ] 检查 SSL/TLS 证书状态
@@ -48,17 +53,21 @@
 ### 检查结果
 
 #### ✅ 正常项目
+
 - 项目1：描述
 - 项目2：描述
 
 #### ⚠️ 需要关注
+
 - 问题1：描述 + 处理计划
 - 问题2：描述 + 处理计划
 
 #### 🚨 紧急问题
+
 - 问题：描述 + 立即处理方案
 
 ### 后续行动
+
 - [ ] 行动1：负责人 + 截止时间
 - [ ] 行动2：负责人 + 截止时间
 ```
@@ -106,15 +115,16 @@ grep -r "password\|secret\|key" .env* || echo "环境变量检查完成"
 
 ```sql
 -- 检查 RLS 状态
-SELECT schemaname, tablename, rowsecurity 
-FROM pg_tables 
+SELECT schemaname, tablename, rowsecurity
+FROM pg_tables
 WHERE schemaname = 'public';
 
 -- 检查用户权限
-SELECT * FROM auth.users 
+SELECT * FROM auth.users
 WHERE created_at > NOW() - INTERVAL '7 days';
 ```
 
 ---
-*维护者：开发团队*
-*最后更新：2025.5.24*
+
+_维护者：开发团队_
+_最后更新：2025.5.24_

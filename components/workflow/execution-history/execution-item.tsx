@@ -1,178 +1,218 @@
-"use client"
+'use client';
 
-import React from 'react'
-import { useTheme } from '@lib/hooks/use-theme'
-import { useThemeColors } from '@lib/hooks/use-theme-colors'
-import { cn } from '@lib/utils'
-import { CheckCircle, XCircle, Clock, ChevronRight, Check, Loader2 } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useTheme } from '@lib/hooks/use-theme';
+import { useThemeColors } from '@lib/hooks/use-theme-colors';
+import { cn } from '@lib/utils';
+import {
+  Check,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  Loader2,
+  XCircle,
+} from 'lucide-react';
+
+import React from 'react';
+
+import { useTranslations } from 'next-intl';
 
 interface ExecutionItemProps {
-  execution: any
-  onClick: () => void
-  isMultiSelectMode?: boolean
-  isSelected?: boolean
-  isLoading?: boolean
+  execution: any;
+  onClick: () => void;
+  isMultiSelectMode?: boolean;
+  isSelected?: boolean;
+  isLoading?: boolean;
 }
 
 /**
  * 单个执行记录项组件
- * 
+ *
  * 显示执行记录的基本信息和状态
  */
-export function ExecutionItem({ execution, onClick, isMultiSelectMode, isSelected, isLoading }: ExecutionItemProps) {
-  const { isDark } = useTheme()
-  const { colors } = useThemeColors()
-  const t = useTranslations('pages.workflow.status')
-  
+export function ExecutionItem({
+  execution,
+  onClick,
+  isMultiSelectMode,
+  isSelected,
+  isLoading,
+}: ExecutionItemProps) {
+  const { isDark } = useTheme();
+  const { colors } = useThemeColors();
+  const t = useTranslations('pages.workflow.status');
+
   const getStatusIcon = () => {
     switch (execution.status) {
       case 'completed':
-        return <CheckCircle className={cn(
-          "h-3.5 w-3.5",
-          isDark ? "text-stone-400" : "text-stone-600"
-        )} />
+        return (
+          <CheckCircle
+            className={cn(
+              'h-3.5 w-3.5',
+              isDark ? 'text-stone-400' : 'text-stone-600'
+            )}
+          />
+        );
       case 'failed':
-        return <XCircle className="h-3.5 w-3.5 text-red-500" />
+        return <XCircle className="h-3.5 w-3.5 text-red-500" />;
       case 'running':
-        return <Clock className={cn(
-          "h-3.5 w-3.5 animate-pulse",
-          isDark ? "text-stone-400" : "text-stone-600"
-        )} />
+        return (
+          <Clock
+            className={cn(
+              'h-3.5 w-3.5 animate-pulse',
+              isDark ? 'text-stone-400' : 'text-stone-600'
+            )}
+          />
+        );
       default:
-        return <Clock className={cn(
-          "h-3.5 w-3.5",
-          isDark ? "text-stone-400" : "text-stone-600"
-        )} />
+        return (
+          <Clock
+            className={cn(
+              'h-3.5 w-3.5',
+              isDark ? 'text-stone-400' : 'text-stone-600'
+            )}
+          />
+        );
     }
-  }
-  
+  };
+
   const getStatusText = () => {
     switch (execution.status) {
       case 'completed':
-        return t('completed')
+        return t('completed');
       case 'failed':
-        return t('failed')
+        return t('failed');
       case 'running':
-        return t('running')
+        return t('running');
       default:
-        return t('unknown')
+        return t('unknown');
     }
-  }
-  
+  };
+
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return date.toLocaleString('zh-CN', {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-  
+      minute: '2-digit',
+    });
+  };
+
   return (
     <div
       onClick={onClick}
       className={cn(
-        "p-3 rounded-md border cursor-pointer transition-all duration-200",
-        "hover:scale-[1.01] hover:shadow-md",
+        'cursor-pointer rounded-md border p-3 transition-all duration-200',
+        'hover:scale-[1.01] hover:shadow-md',
         // 选中状态样式
-        isMultiSelectMode && isSelected && (
-          isDark
-            ? "border-stone-500 bg-stone-600/50"
-            : "border-stone-400 bg-stone-300/50"
-        ),
+        isMultiSelectMode &&
+          isSelected &&
+          (isDark
+            ? 'border-stone-500 bg-stone-600/50'
+            : 'border-stone-400 bg-stone-300/50'),
         // 默认样式
-        (!isMultiSelectMode || !isSelected) && (
-          isDark
-            ? "border-stone-700/50 bg-stone-700/30 hover:bg-stone-700/50 hover:border-stone-600/50"
-            : "border-stone-300/50 bg-stone-50/50 hover:bg-stone-200/50 hover:border-stone-400/50"
-        )
+        (!isMultiSelectMode || !isSelected) &&
+          (isDark
+            ? 'border-stone-700/50 bg-stone-700/30 hover:border-stone-600/50 hover:bg-stone-700/50'
+            : 'border-stone-300/50 bg-stone-50/50 hover:border-stone-400/50 hover:bg-stone-200/50')
       )}
     >
       <div className="flex items-center justify-between">
         {/* 多选模式下的复选框 */}
         {isMultiSelectMode && (
-          <div className={cn(
-            "flex items-center justify-center w-4 h-4 rounded border mr-3",
-            isSelected
-              ? isDark
-                ? "bg-stone-500 border-stone-500"
-                : "bg-stone-600 border-stone-600"
-              : isDark
-                ? "border-stone-600"
-                : "border-stone-300"
-          )}>
-            {isSelected && (
-              <Check className="h-3 w-3 text-white" />
+          <div
+            className={cn(
+              'mr-3 flex h-4 w-4 items-center justify-center rounded border',
+              isSelected
+                ? isDark
+                  ? 'border-stone-500 bg-stone-500'
+                  : 'border-stone-600 bg-stone-600'
+                : isDark
+                  ? 'border-stone-600'
+                  : 'border-stone-300'
             )}
+          >
+            {isSelected && <Check className="h-3 w-3 text-white" />}
           </div>
         )}
-        
-        <div className="flex-1 min-w-0">
+
+        <div className="min-w-0 flex-1">
           {/* 标题和状态 */}
-          <div className="flex items-center gap-2 mb-1.5">
+          <div className="mb-1.5 flex items-center gap-2">
             {getStatusIcon()}
-            <h3 className={cn(
-              "text-sm font-medium font-serif truncate",
-              colors.mainText.tailwind
-            )}>
+            <h3
+              className={cn(
+                'truncate font-serif text-sm font-medium',
+                colors.mainText.tailwind
+              )}
+            >
               {execution.title}
             </h3>
           </div>
-          
+
           {/* 时间和耗时 */}
-          <div className="flex items-center gap-3 text-xs font-serif">
-            <span className={cn(
-              isDark ? "text-stone-500" : "text-stone-500"
-            )}>
+          <div className="flex items-center gap-3 font-serif text-xs">
+            <span className={cn(isDark ? 'text-stone-500' : 'text-stone-500')}>
               {formatDate(execution.created_at)}
             </span>
-            
+
             {execution.elapsed_time && (
-              <span className={cn(
-                isDark ? "text-stone-500" : "text-stone-500"
-              )}>
+              <span
+                className={cn(isDark ? 'text-stone-500' : 'text-stone-500')}
+              >
                 {execution.elapsed_time}s
               </span>
             )}
           </div>
-          
+
           {/* 错误信息 */}
           {execution.status === 'failed' && execution.error_message && (
-            <div className="mt-1.5 text-xs text-red-500 font-serif truncate">
+            <div className="mt-1.5 truncate font-serif text-xs text-red-500">
               {execution.error_message}
             </div>
           )}
         </div>
-        
+
         {/* 状态标签 */}
-        <div className="flex items-center gap-2 ml-3">
-          <span className={cn(
-            "text-xs font-serif px-2 py-0.5 rounded-sm",
-            execution.status === 'completed' && (isDark ? "bg-stone-700/50 text-stone-300" : "bg-stone-200/50 text-stone-700"),
-            execution.status === 'failed' && (isDark ? "bg-red-900/30 text-red-400" : "bg-red-100/50 text-red-700"),
-            execution.status === 'running' && (isDark ? "bg-stone-600/50 text-stone-300" : "bg-stone-300/50 text-stone-700")
-          )}>
+        <div className="ml-3 flex items-center gap-2">
+          <span
+            className={cn(
+              'rounded-sm px-2 py-0.5 font-serif text-xs',
+              execution.status === 'completed' &&
+                (isDark
+                  ? 'bg-stone-700/50 text-stone-300'
+                  : 'bg-stone-200/50 text-stone-700'),
+              execution.status === 'failed' &&
+                (isDark
+                  ? 'bg-red-900/30 text-red-400'
+                  : 'bg-red-100/50 text-red-700'),
+              execution.status === 'running' &&
+                (isDark
+                  ? 'bg-stone-600/50 text-stone-300'
+                  : 'bg-stone-300/50 text-stone-700')
+            )}
+          >
             {getStatusText()}
           </span>
-          
+
           {/* 只在非多选模式下显示箭头或loading */}
-          {!isMultiSelectMode && (
-            isLoading ? (
-              <Loader2 className={cn(
-                "h-3.5 w-3.5 animate-spin",
-                isDark ? "text-stone-500" : "text-stone-400"
-              )} />
+          {!isMultiSelectMode &&
+            (isLoading ? (
+              <Loader2
+                className={cn(
+                  'h-3.5 w-3.5 animate-spin',
+                  isDark ? 'text-stone-500' : 'text-stone-400'
+                )}
+              />
             ) : (
-              <ChevronRight className={cn(
-                "h-3.5 w-3.5",
-                isDark ? "text-stone-500" : "text-stone-400"
-              )} />
-            )
-          )}
+              <ChevronRight
+                className={cn(
+                  'h-3.5 w-3.5',
+                  isDark ? 'text-stone-500' : 'text-stone-400'
+                )}
+              />
+            ))}
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

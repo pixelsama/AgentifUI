@@ -3,20 +3,19 @@
 // 该文件负责处理与 Dify 标注相关的 API 交互，例如获取标注列表。
 // 它遵循与其他服务文件类似的设计模式，提供独立的、可导出的服务函数。
 // --- END COMMENT ---
-
-import type { 
-  GetDifyAnnotationsParams, 
-  DifyAnnotationListResponse, 
-  DifyApiError,
+import type {
   CreateDifyAnnotationRequest,
   CreateDifyAnnotationResponse,
+  DeleteDifyAnnotationResponse,
+  DifyAnnotationListResponse,
+  DifyAnnotationReplyAction,
+  DifyApiError,
+  DifyAsyncJobResponse,
+  DifyAsyncJobStatusResponse,
+  GetDifyAnnotationsParams,
+  InitialDifyAnnotationReplySettingsRequest,
   UpdateDifyAnnotationRequest,
   UpdateDifyAnnotationResponse,
-  DeleteDifyAnnotationResponse,
-  DifyAnnotationReplyAction,
-  InitialDifyAnnotationReplySettingsRequest,
-  DifyAsyncJobResponse,
-  DifyAsyncJobStatusResponse
 } from './types';
 
 // --- BEGIN COMMENT ---
@@ -63,9 +62,13 @@ export async function getDifyAnnotations(
     queryParams.append('limit', String(params.limit));
   }
 
-  const fullUrl = queryParams.toString() ? `${apiUrl}?${queryParams.toString()}` : apiUrl;
+  const fullUrl = queryParams.toString()
+    ? `${apiUrl}?${queryParams.toString()}`
+    : apiUrl;
 
-  console.log(`[Dify Annotation Service] Fetching annotations from: ${fullUrl}`);
+  console.log(
+    `[Dify Annotation Service] Fetching annotations from: ${fullUrl}`
+  );
 
   try {
     const response = await fetch(fullUrl, {
@@ -77,7 +80,7 @@ export async function getDifyAnnotations(
 
     if (!response.ok) {
       // 尝试解析错误响应体，以便提供更详细的错误信息
-      let errorData: DifyApiError | { message: string, code?: string } = {
+      let errorData: DifyApiError | { message: string; code?: string } = {
         message: `API request failed with status ${response.status}: ${response.statusText}`,
       };
       try {
@@ -91,7 +94,10 @@ export async function getDifyAnnotations(
         };
       } catch (e) {
         // 如果错误响应体不是有效的 JSON，则使用 HTTP 状态文本作为消息。
-        console.warn('[Dify Annotation Service] Failed to parse error response JSON.', e);
+        console.warn(
+          '[Dify Annotation Service] Failed to parse error response JSON.',
+          e
+        );
       }
 
       console.error(
@@ -109,21 +115,28 @@ export async function getDifyAnnotations(
       page: data.page,
       limit: data.limit,
       has_more: data.has_more,
-      count: data.data.length
+      count: data.data.length,
     });
     return data;
-
   } catch (error) {
     // 处理 fetch 本身的网络错误或其他在 try 块中未被捕获的错误
-    console.error('[Dify Annotation Service] Network or unexpected error while fetching annotations:', error);
+    console.error(
+      '[Dify Annotation Service] Network or unexpected error while fetching annotations:',
+      error
+    );
     // 重新抛出错误，或者将其包装成一个标准化的错误对象
     // 如果 error 已经是我们上面抛出的 errorData 结构，直接抛出
-    if (error && typeof error === 'object' && ('status' in error || 'message' in error)) {
-      throw error; 
+    if (
+      error &&
+      typeof error === 'object' &&
+      ('status' in error || 'message' in error)
+    ) {
+      throw error;
     }
     // 否则，包装成一个通用的错误结构
     throw {
-      message: (error instanceof Error) ? error.message : 'An unexpected error occurred',
+      message:
+        error instanceof Error ? error.message : 'An unexpected error occurred',
       code: 'NETWORK_ERROR',
     } as DifyApiError;
   }
@@ -144,11 +157,15 @@ export async function createDifyAnnotation(
   request: CreateDifyAnnotationRequest
 ): Promise<CreateDifyAnnotationResponse> {
   if (!appId) {
-    throw new Error('[Dify Annotation Service] appId is required for creating annotation.');
+    throw new Error(
+      '[Dify Annotation Service] appId is required for creating annotation.'
+    );
   }
 
   if (!request.question || !request.answer) {
-    throw new Error('[Dify Annotation Service] Both question and answer are required.');
+    throw new Error(
+      '[Dify Annotation Service] Both question and answer are required.'
+    );
   }
 
   const slug = 'apps/annotations';
@@ -182,24 +199,39 @@ export async function createDifyAnnotation(
           ...parsedError,
         };
       } catch (e) {
-        console.warn('[Dify Annotation Service] Failed to parse error response JSON.', e);
+        console.warn(
+          '[Dify Annotation Service] Failed to parse error response JSON.',
+          e
+        );
       }
 
-      console.error(`[Dify Annotation Service] Failed to create annotation (${response.status}):`, errorData);
+      console.error(
+        `[Dify Annotation Service] Failed to create annotation (${response.status}):`,
+        errorData
+      );
       throw errorData;
     }
 
     const data: CreateDifyAnnotationResponse = await response.json();
-    console.log('[Dify Annotation Service] Successfully created annotation:', { id: data.id });
+    console.log('[Dify Annotation Service] Successfully created annotation:', {
+      id: data.id,
+    });
     return data;
-
   } catch (error) {
-    console.error('[Dify Annotation Service] Network or unexpected error while creating annotation:', error);
-    if (error && typeof error === 'object' && ('status' in error || 'message' in error)) {
+    console.error(
+      '[Dify Annotation Service] Network or unexpected error while creating annotation:',
+      error
+    );
+    if (
+      error &&
+      typeof error === 'object' &&
+      ('status' in error || 'message' in error)
+    ) {
       throw error;
     }
     throw {
-      message: (error instanceof Error) ? error.message : 'An unexpected error occurred',
+      message:
+        error instanceof Error ? error.message : 'An unexpected error occurred',
       code: 'NETWORK_ERROR',
     } as DifyApiError;
   }
@@ -222,15 +254,21 @@ export async function updateDifyAnnotation(
   request: UpdateDifyAnnotationRequest
 ): Promise<UpdateDifyAnnotationResponse> {
   if (!appId) {
-    throw new Error('[Dify Annotation Service] appId is required for updating annotation.');
+    throw new Error(
+      '[Dify Annotation Service] appId is required for updating annotation.'
+    );
   }
 
   if (!annotationId) {
-    throw new Error('[Dify Annotation Service] annotationId is required for updating annotation.');
+    throw new Error(
+      '[Dify Annotation Service] annotationId is required for updating annotation.'
+    );
   }
 
   if (!request.question || !request.answer) {
-    throw new Error('[Dify Annotation Service] Both question and answer are required.');
+    throw new Error(
+      '[Dify Annotation Service] Both question and answer are required.'
+    );
   }
 
   const slug = `apps/annotations/${annotationId}`;
@@ -264,24 +302,39 @@ export async function updateDifyAnnotation(
           ...parsedError,
         };
       } catch (e) {
-        console.warn('[Dify Annotation Service] Failed to parse error response JSON.', e);
+        console.warn(
+          '[Dify Annotation Service] Failed to parse error response JSON.',
+          e
+        );
       }
 
-      console.error(`[Dify Annotation Service] Failed to update annotation (${response.status}):`, errorData);
+      console.error(
+        `[Dify Annotation Service] Failed to update annotation (${response.status}):`,
+        errorData
+      );
       throw errorData;
     }
 
     const data: UpdateDifyAnnotationResponse = await response.json();
-    console.log('[Dify Annotation Service] Successfully updated annotation:', { id: data.id });
+    console.log('[Dify Annotation Service] Successfully updated annotation:', {
+      id: data.id,
+    });
     return data;
-
   } catch (error) {
-    console.error('[Dify Annotation Service] Network or unexpected error while updating annotation:', error);
-    if (error && typeof error === 'object' && ('status' in error || 'message' in error)) {
+    console.error(
+      '[Dify Annotation Service] Network or unexpected error while updating annotation:',
+      error
+    );
+    if (
+      error &&
+      typeof error === 'object' &&
+      ('status' in error || 'message' in error)
+    ) {
       throw error;
     }
     throw {
-      message: (error instanceof Error) ? error.message : 'An unexpected error occurred',
+      message:
+        error instanceof Error ? error.message : 'An unexpected error occurred',
       code: 'NETWORK_ERROR',
     } as DifyApiError;
   }
@@ -302,11 +355,15 @@ export async function deleteDifyAnnotation(
   annotationId: string
 ): Promise<void> {
   if (!appId) {
-    throw new Error('[Dify Annotation Service] appId is required for deleting annotation.');
+    throw new Error(
+      '[Dify Annotation Service] appId is required for deleting annotation.'
+    );
   }
 
   if (!annotationId) {
-    throw new Error('[Dify Annotation Service] annotationId is required for deleting annotation.');
+    throw new Error(
+      '[Dify Annotation Service] annotationId is required for deleting annotation.'
+    );
   }
 
   const slug = `apps/annotations/${annotationId}`;
@@ -338,23 +395,38 @@ export async function deleteDifyAnnotation(
           ...parsedError,
         };
       } catch (e) {
-        console.warn('[Dify Annotation Service] Failed to parse error response JSON.', e);
+        console.warn(
+          '[Dify Annotation Service] Failed to parse error response JSON.',
+          e
+        );
       }
 
-      console.error(`[Dify Annotation Service] Failed to delete annotation (${response.status}):`, errorData);
+      console.error(
+        `[Dify Annotation Service] Failed to delete annotation (${response.status}):`,
+        errorData
+      );
       throw errorData;
     }
 
-    console.log('[Dify Annotation Service] Successfully deleted annotation:', { annotationId });
+    console.log('[Dify Annotation Service] Successfully deleted annotation:', {
+      annotationId,
+    });
     // 204 状态码表示删除成功，无响应体
-
   } catch (error) {
-    console.error('[Dify Annotation Service] Network or unexpected error while deleting annotation:', error);
-    if (error && typeof error === 'object' && ('status' in error || 'message' in error)) {
+    console.error(
+      '[Dify Annotation Service] Network or unexpected error while deleting annotation:',
+      error
+    );
+    if (
+      error &&
+      typeof error === 'object' &&
+      ('status' in error || 'message' in error)
+    ) {
       throw error;
     }
     throw {
-      message: (error instanceof Error) ? error.message : 'An unexpected error occurred',
+      message:
+        error instanceof Error ? error.message : 'An unexpected error occurred',
       code: 'NETWORK_ERROR',
     } as DifyApiError;
   }
@@ -378,21 +450,29 @@ export async function setDifyAnnotationReplySettings(
   request: InitialDifyAnnotationReplySettingsRequest
 ): Promise<DifyAsyncJobResponse> {
   if (!appId) {
-    throw new Error('[Dify Annotation Service] appId is required for setting annotation reply.');
+    throw new Error(
+      '[Dify Annotation Service] appId is required for setting annotation reply.'
+    );
   }
 
   if (!action || (action !== 'enable' && action !== 'disable')) {
-    throw new Error('[Dify Annotation Service] action must be either "enable" or "disable".');
+    throw new Error(
+      '[Dify Annotation Service] action must be either "enable" or "disable".'
+    );
   }
 
   if (typeof request.score_threshold !== 'number') {
-    throw new Error('[Dify Annotation Service] score_threshold is required and must be a number.');
+    throw new Error(
+      '[Dify Annotation Service] score_threshold is required and must be a number.'
+    );
   }
 
   const slug = `apps/annotation-reply/${action}`;
   const apiUrl = `${DIFY_PROXY_BASE_URL}/${appId}/${slug}`;
 
-  console.log(`[Dify Annotation Service] Setting annotation reply (${action}) at: ${apiUrl}`);
+  console.log(
+    `[Dify Annotation Service] Setting annotation reply (${action}) at: ${apiUrl}`
+  );
 
   try {
     const response = await fetch(apiUrl, {
@@ -420,27 +500,43 @@ export async function setDifyAnnotationReplySettings(
           ...parsedError,
         };
       } catch (e) {
-        console.warn('[Dify Annotation Service] Failed to parse error response JSON.', e);
+        console.warn(
+          '[Dify Annotation Service] Failed to parse error response JSON.',
+          e
+        );
       }
 
-      console.error(`[Dify Annotation Service] Failed to set annotation reply settings (${response.status}):`, errorData);
+      console.error(
+        `[Dify Annotation Service] Failed to set annotation reply settings (${response.status}):`,
+        errorData
+      );
       throw errorData;
     }
 
     const data: DifyAsyncJobResponse = await response.json();
-    console.log('[Dify Annotation Service] Successfully initiated annotation reply settings:', { 
-      job_id: data.job_id, 
-      job_status: data.job_status 
-    });
+    console.log(
+      '[Dify Annotation Service] Successfully initiated annotation reply settings:',
+      {
+        job_id: data.job_id,
+        job_status: data.job_status,
+      }
+    );
     return data;
-
   } catch (error) {
-    console.error('[Dify Annotation Service] Network or unexpected error while setting annotation reply:', error);
-    if (error && typeof error === 'object' && ('status' in error || 'message' in error)) {
+    console.error(
+      '[Dify Annotation Service] Network or unexpected error while setting annotation reply:',
+      error
+    );
+    if (
+      error &&
+      typeof error === 'object' &&
+      ('status' in error || 'message' in error)
+    ) {
       throw error;
     }
     throw {
-      message: (error instanceof Error) ? error.message : 'An unexpected error occurred',
+      message:
+        error instanceof Error ? error.message : 'An unexpected error occurred',
       code: 'NETWORK_ERROR',
     } as DifyApiError;
   }
@@ -463,15 +559,21 @@ export async function getDifyAnnotationReplyJobStatus(
   jobId: string
 ): Promise<DifyAsyncJobStatusResponse> {
   if (!appId) {
-    throw new Error('[Dify Annotation Service] appId is required for getting job status.');
+    throw new Error(
+      '[Dify Annotation Service] appId is required for getting job status.'
+    );
   }
 
   if (!action || (action !== 'enable' && action !== 'disable')) {
-    throw new Error('[Dify Annotation Service] action must be either "enable" or "disable".');
+    throw new Error(
+      '[Dify Annotation Service] action must be either "enable" or "disable".'
+    );
   }
 
   if (!jobId) {
-    throw new Error('[Dify Annotation Service] jobId is required for getting job status.');
+    throw new Error(
+      '[Dify Annotation Service] jobId is required for getting job status.'
+    );
   }
 
   const slug = `apps/annotation-reply/${action}/status/${jobId}`;
@@ -503,31 +605,44 @@ export async function getDifyAnnotationReplyJobStatus(
           ...parsedError,
         };
       } catch (e) {
-        console.warn('[Dify Annotation Service] Failed to parse error response JSON.', e);
+        console.warn(
+          '[Dify Annotation Service] Failed to parse error response JSON.',
+          e
+        );
       }
 
-      console.error(`[Dify Annotation Service] Failed to get job status (${response.status}):`, errorData);
+      console.error(
+        `[Dify Annotation Service] Failed to get job status (${response.status}):`,
+        errorData
+      );
       throw errorData;
     }
 
     const data: DifyAsyncJobStatusResponse = await response.json();
-    console.log('[Dify Annotation Service] Successfully fetched job status:', { 
-      job_id: data.job_id, 
+    console.log('[Dify Annotation Service] Successfully fetched job status:', {
+      job_id: data.job_id,
       job_status: data.job_status,
-      error_msg: data.error_msg 
+      error_msg: data.error_msg,
     });
     return data;
-
   } catch (error) {
-    console.error('[Dify Annotation Service] Network or unexpected error while getting job status:', error);
-    if (error && typeof error === 'object' && ('status' in error || 'message' in error)) {
+    console.error(
+      '[Dify Annotation Service] Network or unexpected error while getting job status:',
+      error
+    );
+    if (
+      error &&
+      typeof error === 'object' &&
+      ('status' in error || 'message' in error)
+    ) {
       throw error;
     }
     throw {
-      message: (error instanceof Error) ? error.message : 'An unexpected error occurred',
+      message:
+        error instanceof Error ? error.message : 'An unexpected error occurred',
       code: 'NETWORK_ERROR',
     } as DifyApiError;
   }
 }
 
-export {}; // 确保文件被视为一个 ES模块 
+export {}; // 确保文件被视为一个 ES模块

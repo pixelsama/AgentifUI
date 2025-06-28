@@ -1,22 +1,37 @@
-"use client"
+'use client';
 
-import React, { useState, useEffect } from 'react'
-import { useTheme } from '@lib/hooks/use-theme'
-import { cn } from '@lib/utils'
-import { Loader2, Clock, CheckCircle, XCircle, AlertCircle, RotateCcw, GitBranch, Zap } from 'lucide-react'
-import type { ChatflowNode, ChatflowIteration, ChatflowParallelBranch } from '@lib/stores/chatflow-execution-store'
-import { useChatflowExecutionStore } from '@lib/stores/chatflow-execution-store'
-import { useTranslations } from 'next-intl'
+import { useTheme } from '@lib/hooks/use-theme';
+import type {
+  ChatflowIteration,
+  ChatflowNode,
+  ChatflowParallelBranch,
+} from '@lib/stores/chatflow-execution-store';
+import { useChatflowExecutionStore } from '@lib/stores/chatflow-execution-store';
+import { cn } from '@lib/utils';
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  GitBranch,
+  Loader2,
+  RotateCcw,
+  XCircle,
+  Zap,
+} from 'lucide-react';
+
+import React, { useEffect, useState } from 'react';
+
+import { useTranslations } from 'next-intl';
 
 interface ChatflowExecutionBarProps {
-  node: ChatflowNode
-  index: number
-  delay?: number
+  node: ChatflowNode;
+  index: number;
+  delay?: number;
 }
 
 /**
  * Chatflow 执行条组件 - 显示节点执行信息的长条
- * 
+ *
  * 特点：
  * - fade-in 动画进入
  * - 左侧状态图标（spinner/完成/失败）
@@ -25,40 +40,54 @@ interface ChatflowExecutionBarProps {
  * - 适配 chatflow 的视觉风格
  * - 临时UI，刷新后消失
  */
-export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecutionBarProps) {
-  const { isDark } = useTheme()
-  const t = useTranslations('pages.chatflow.executionBar')
-  const [isVisible, setIsVisible] = useState(false)
-  const [elapsedTime, setElapsedTime] = useState(0)
-  
+export function ChatflowExecutionBar({
+  node,
+  index,
+  delay = 0,
+}: ChatflowExecutionBarProps) {
+  const { isDark } = useTheme();
+  const t = useTranslations('pages.chatflow.executionBar');
+  const [isVisible, setIsVisible] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+
   // 🎯 使用store中的展开状态
-  const { iterationExpandedStates, loopExpandedStates, toggleIterationExpanded, toggleLoopExpanded } = useChatflowExecutionStore()
-  const isExpanded = (node.isIterationNode ? iterationExpandedStates[node.id] : node.isLoopNode ? loopExpandedStates[node.id] : false) || false
-  
+  const {
+    iterationExpandedStates,
+    loopExpandedStates,
+    toggleIterationExpanded,
+    toggleLoopExpanded,
+  } = useChatflowExecutionStore();
+  const isExpanded =
+    (node.isIterationNode
+      ? iterationExpandedStates[node.id]
+      : node.isLoopNode
+        ? loopExpandedStates[node.id]
+        : false) || false;
+
   // --- 延迟显示动画 ---
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsVisible(true)
-    }, delay)
-    
-    return () => clearTimeout(timer)
-  }, [delay])
-  
+      setIsVisible(true);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [delay]);
+
   // --- 计时器 ---
   useEffect(() => {
     if (node.status === 'running' && node.startTime) {
       const interval = setInterval(() => {
-        setElapsedTime(Date.now() - node.startTime!)
-      }, 100)
-      
-      return () => clearInterval(interval)
+        setElapsedTime(Date.now() - node.startTime!);
+      }, 100);
+
+      return () => clearInterval(interval);
     } else if (node.status === 'completed' && node.startTime && node.endTime) {
-      setElapsedTime(node.endTime - node.startTime)
+      setElapsedTime(node.endTime - node.startTime);
     }
-  }, [node.status, node.startTime, node.endTime])
-  
+  }, [node.status, node.startTime, node.endTime]);
+
   // --- 自动展开逻辑已移至store中的iteration_started事件处理 ---
-  
+
   // --- 🎯 调试：监听节点变化 ---
   useEffect(() => {
     if (node.isIterationNode) {
@@ -69,298 +98,341 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
         totalIterations: node.totalIterations,
         currentIteration: node.currentIteration,
         iterationsCount: node.iterations?.length || 0,
-        status: node.status
-      })
+        status: node.status,
+      });
     }
-  }, [node])
-  
+  }, [node]);
+
   const formatTime = (ms: number) => {
-    if (ms < 1000) return `${ms}ms`
-    const seconds = (ms / 1000).toFixed(1)
-    return `${seconds}s`
-  }
-  
+    if (ms < 1000) return `${ms}ms`;
+    const seconds = (ms / 1000).toFixed(1);
+    return `${seconds}s`;
+  };
+
   const getStatusIcon = () => {
     switch (node.status) {
       case 'running':
-        return <Loader2 className={cn(
-          "h-4 w-4 animate-spin",
-          isDark ? "text-stone-400" : "text-stone-600"
-        )} />
+        return (
+          <Loader2
+            className={cn(
+              'h-4 w-4 animate-spin',
+              isDark ? 'text-stone-400' : 'text-stone-600'
+            )}
+          />
+        );
       case 'completed':
-        return <CheckCircle className={cn(
-          "h-4 w-4",
-          isDark ? "text-stone-400" : "text-stone-600"
-        )} />
+        return (
+          <CheckCircle
+            className={cn(
+              'h-4 w-4',
+              isDark ? 'text-stone-400' : 'text-stone-600'
+            )}
+          />
+        );
       case 'failed':
-        return <XCircle className="h-4 w-4 text-red-500" />
+        return <XCircle className="h-4 w-4 text-red-500" />;
       case 'pending':
-        return <Clock className={cn(
-          "h-4 w-4",
-          isDark ? "text-stone-500" : "text-stone-400"
-        )} />
+        return (
+          <Clock
+            className={cn(
+              'h-4 w-4',
+              isDark ? 'text-stone-500' : 'text-stone-400'
+            )}
+          />
+        );
       default:
-        return <AlertCircle className={cn(
-          "h-4 w-4",
-          isDark ? "text-stone-500" : "text-stone-400"
-        )} />
+        return (
+          <AlertCircle
+            className={cn(
+              'h-4 w-4',
+              isDark ? 'text-stone-500' : 'text-stone-400'
+            )}
+          />
+        );
     }
-  }
-  
+  };
+
   const getStatusText = () => {
     // 🎯 所有状态文本统一4个字，保持对齐
     if (node.isIterationNode) {
       switch (node.status) {
         case 'running':
-          return t('status.iterating')
+          return t('status.iterating');
         case 'completed':
-          return t('status.iterationCompleted')
+          return t('status.iterationCompleted');
         case 'failed':
-          return t('status.iterationFailed')
+          return t('status.iterationFailed');
         default:
-          return t('status.waitingIteration')
+          return t('status.waitingIteration');
       }
     }
-    
+
     if (node.isLoopNode) {
       switch (node.status) {
         case 'running':
-          return t('status.looping')
+          return t('status.looping');
         case 'completed':
-          return t('status.loopCompleted')
+          return t('status.loopCompleted');
         case 'failed':
-          return t('status.loopFailed')
+          return t('status.loopFailed');
         default:
-          return t('status.waitingLoop')
+          return t('status.waitingLoop');
       }
     }
-    
+
     switch (node.status) {
       case 'running':
-        return t('status.executing')
+        return t('status.executing');
       case 'completed':
-        return t('status.completed')
+        return t('status.completed');
       case 'failed':
-        return t('status.failed')
+        return t('status.failed');
       case 'pending':
-        return t('status.waiting')
+        return t('status.waiting');
       default:
-        return t('status.unknown')
+        return t('status.unknown');
     }
-  }
-  
+  };
+
   const getNodeTitle = () => {
     // 根据节点类型返回友好的名称
     switch (node.type) {
       case 'start':
-        return t('nodeTypes.start')
+        return t('nodeTypes.start');
       case 'llm':
-        return t('nodeTypes.llm')
+        return t('nodeTypes.llm');
       case 'knowledge-retrieval':
-        return t('nodeTypes.knowledgeRetrieval')
+        return t('nodeTypes.knowledgeRetrieval');
       case 'question-classifier':
-        return t('nodeTypes.questionClassifier')
+        return t('nodeTypes.questionClassifier');
       case 'if-else':
-        return t('nodeTypes.ifElse')
+        return t('nodeTypes.ifElse');
       case 'code':
-        return t('nodeTypes.code')
+        return t('nodeTypes.code');
       case 'template-transform':
-        return t('nodeTypes.templateTransform')
+        return t('nodeTypes.templateTransform');
       case 'variable-assigner':
-        return t('nodeTypes.variableAssigner')
+        return t('nodeTypes.variableAssigner');
       case 'variable-aggregator':
-        return t('nodeTypes.variableAggregator')
+        return t('nodeTypes.variableAggregator');
       case 'document-extractor':
-        return t('nodeTypes.documentExtractor')
+        return t('nodeTypes.documentExtractor');
       case 'parameter-extractor':
-        return t('nodeTypes.parameterExtractor')
+        return t('nodeTypes.parameterExtractor');
       case 'http-request':
-        return t('nodeTypes.httpRequest')
+        return t('nodeTypes.httpRequest');
       case 'list-operator':
-        return t('nodeTypes.listOperator')
+        return t('nodeTypes.listOperator');
       case 'iteration':
       case 'loop':
-        return t('nodeTypes.iteration')
+        return t('nodeTypes.iteration');
       case 'end':
-        return t('nodeTypes.end')
+        return t('nodeTypes.end');
       default:
-        return node.title || `${t('nodeTypes.node')} ${index + 1}`
+        return node.title || `${t('nodeTypes.node')} ${index + 1}`;
     }
-  }
-  
+  };
+
   // --- 移除节点类型图标，保持原来的文字显示 ---
-  
+
   const getBarStyles = () => {
     const baseStyles = cn(
-      "flex items-center gap-3 px-3 py-2 rounded-md border transition-all duration-300", // 🎯 恢复细bar样式
-      "transform font-serif",
-      isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-    )
-    
+      'flex items-center gap-3 rounded-md border px-3 py-2 transition-all duration-300', // 🎯 恢复细bar样式
+      'transform font-serif',
+      isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+    );
+
     // --- BEGIN COMMENT ---
     // 🎯 优化：迭代/循环中的节点使用左侧指示条+连接点设计，提供清晰的层级视觉指示
     // --- END COMMENT ---
-    const nestedStyles = (node.isInIteration || node.isInLoop) ? cn(
-      "relative ml-6 pl-4",
-      // 使用新的指示条样式
-      node.isInIteration ? "iteration-node" : "loop-node",
-      // 轻微的背景色区分
-      isDark ? "bg-stone-800/20" : "bg-stone-50/40"
-    ) : ""
-    
-    const combinedBaseStyles = cn(baseStyles, nestedStyles)
-    
+    const nestedStyles =
+      node.isInIteration || node.isInLoop
+        ? cn(
+            'relative ml-6 pl-4',
+            // 使用新的指示条样式
+            node.isInIteration ? 'iteration-node' : 'loop-node',
+            // 轻微的背景色区分
+            isDark ? 'bg-stone-800/20' : 'bg-stone-50/40'
+          )
+        : '';
+
+    const combinedBaseStyles = cn(baseStyles, nestedStyles);
+
     switch (node.status) {
       case 'running':
         return cn(
           combinedBaseStyles,
           isDark
-            ? "bg-stone-700/50 border-stone-600 shadow-lg shadow-stone-900/30"
-            : "bg-stone-200/50 border-stone-300 shadow-lg shadow-stone-200/50"
-        )
+            ? 'border-stone-600 bg-stone-700/50 shadow-lg shadow-stone-900/30'
+            : 'border-stone-300 bg-stone-200/50 shadow-lg shadow-stone-200/50'
+        );
       case 'completed':
         return cn(
           combinedBaseStyles,
           isDark
-            ? "bg-stone-600/30 border-stone-500"
-            : "bg-stone-100 border-stone-300"
-        )
+            ? 'border-stone-500 bg-stone-600/30'
+            : 'border-stone-300 bg-stone-100'
+        );
       case 'failed':
         return cn(
           combinedBaseStyles,
           isDark
-            ? "bg-red-900/20 border-red-700/50"
-            : "bg-red-50 border-red-200"
-        )
+            ? 'border-red-700/50 bg-red-900/20'
+            : 'border-red-200 bg-red-50'
+        );
       case 'pending':
         return cn(
           combinedBaseStyles,
           isDark
-            ? "bg-stone-800/50 border-stone-700/50"
-            : "bg-stone-50 border-stone-200"
-        )
+            ? 'border-stone-700/50 bg-stone-800/50'
+            : 'border-stone-200 bg-stone-50'
+        );
       default:
         return cn(
           combinedBaseStyles,
           isDark
-            ? "bg-stone-800/50 border-stone-700/50"
-            : "bg-stone-50 border-stone-200"
-        )
+            ? 'border-stone-700/50 bg-stone-800/50'
+            : 'border-stone-200 bg-stone-50'
+        );
     }
-  }
-  
-    return (
+  };
+
+  return (
     <div className="space-y-1">
-      <div 
+      <div
         className={cn(
           getBarStyles(),
           // 🎯 所有bar都有悬停效果，只有迭代、并行分支和循环节点才有cursor pointer
-          "hover:scale-[1.02] hover:shadow-md transition-all duration-200",
-          (node.isIterationNode || node.isParallelNode || node.isLoopNode) && "cursor-pointer"
+          'transition-all duration-200 hover:scale-[1.02] hover:shadow-md',
+          (node.isIterationNode || node.isParallelNode || node.isLoopNode) &&
+            'cursor-pointer'
         )}
-        onClick={(node.isIterationNode || node.isParallelNode || node.isLoopNode) ? () => {
-          if (node.isIterationNode) {
-            toggleIterationExpanded(node.id)
-          } else if (node.isLoopNode) {
-            toggleLoopExpanded(node.id)
-          }
-        } : undefined}
+        onClick={
+          node.isIterationNode || node.isParallelNode || node.isLoopNode
+            ? () => {
+                if (node.isIterationNode) {
+                  toggleIterationExpanded(node.id);
+                } else if (node.isLoopNode) {
+                  toggleLoopExpanded(node.id);
+                }
+              }
+            : undefined
+        }
       >
         {/* 左侧：状态图标 */}
-        <div className="flex-shrink-0">
-          {getStatusIcon()}
-        </div>
-        
+        <div className="flex-shrink-0">{getStatusIcon()}</div>
+
         {/* 中间：节点信息 - 紧凑布局 */}
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           {/* 节点标题和状态在同一行 */}
           <div className="flex items-center justify-between gap-2">
-            <span className={cn(
-              "font-medium text-sm font-serif truncate flex-1",
-              isDark ? "text-stone-200" : "text-stone-800"
-            )}>
+            <span
+              className={cn(
+                'flex-1 truncate font-serif text-sm font-medium',
+                isDark ? 'text-stone-200' : 'text-stone-800'
+              )}
+            >
               {getNodeTitle()}
             </span>
-            
+
             {/* 状态标签 - 简化显示 */}
-            <div className="flex items-center gap-1 flex-shrink-0">
-                          {/* 迭代/并行分支/循环计数 */}
-            {node.isIterationNode && node.totalIterations && (
-              <span className={cn(
-                "text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-700",
-                isDark && "bg-stone-700/50 text-stone-300"
-              )}>
-                {(node.currentIteration || 0) + 1}/{node.totalIterations}
-              </span>
-            )}
-            {node.isParallelNode && node.totalBranches && (
-              <span className={cn(
-                "text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-700",
-                isDark && "bg-stone-700/50 text-stone-300"
-              )}>
-                {node.completedBranches || 0}/{node.totalBranches}
-              </span>
-            )}
-            {node.isLoopNode && (
-              <span className={cn(
-                "text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-700",
-                isDark && "bg-stone-700/50 text-stone-300"
-              )}>
-                {node.maxLoops ? `${(node.currentLoop || 0) + 1}/${node.maxLoops}` : `${(node.currentLoop || 0) + 1}`}
-              </span>
-            )}
-              
-              <span className={cn(
-                "text-xs px-1.5 py-0.5 rounded font-serif transition-all duration-300",
-                node.status === 'running'
-                  ? cn(
-                      // 基础样式
-                      isDark
-                        ? "bg-stone-600/40 text-stone-200"
-                        : "bg-stone-300/60 text-stone-700",
-                      // 微妙的脉冲效果
-                      "animate-pulse"
-                    )
-                  : node.status === 'completed'
-                    ? isDark
-                      ? "bg-stone-500/40 text-stone-100"
-                      : "bg-stone-200 text-stone-800"
-                    : node.status === 'failed'
+            <div className="flex flex-shrink-0 items-center gap-1">
+              {/* 迭代/并行分支/循环计数 */}
+              {node.isIterationNode && node.totalIterations && (
+                <span
+                  className={cn(
+                    'rounded bg-stone-200 px-1.5 py-0.5 text-xs text-stone-700',
+                    isDark && 'bg-stone-700/50 text-stone-300'
+                  )}
+                >
+                  {(node.currentIteration || 0) + 1}/{node.totalIterations}
+                </span>
+              )}
+              {node.isParallelNode && node.totalBranches && (
+                <span
+                  className={cn(
+                    'rounded bg-stone-200 px-1.5 py-0.5 text-xs text-stone-700',
+                    isDark && 'bg-stone-700/50 text-stone-300'
+                  )}
+                >
+                  {node.completedBranches || 0}/{node.totalBranches}
+                </span>
+              )}
+              {node.isLoopNode && (
+                <span
+                  className={cn(
+                    'rounded bg-stone-200 px-1.5 py-0.5 text-xs text-stone-700',
+                    isDark && 'bg-stone-700/50 text-stone-300'
+                  )}
+                >
+                  {node.maxLoops
+                    ? `${(node.currentLoop || 0) + 1}/${node.maxLoops}`
+                    : `${(node.currentLoop || 0) + 1}`}
+                </span>
+              )}
+
+              <span
+                className={cn(
+                  'rounded px-1.5 py-0.5 font-serif text-xs transition-all duration-300',
+                  node.status === 'running'
+                    ? cn(
+                        // 基础样式
+                        isDark
+                          ? 'bg-stone-600/40 text-stone-200'
+                          : 'bg-stone-300/60 text-stone-700',
+                        // 微妙的脉冲效果
+                        'animate-pulse'
+                      )
+                    : node.status === 'completed'
                       ? isDark
-                        ? "bg-red-700/30 text-red-200"
-                        : "bg-red-100 text-red-700"
-                      : isDark
-                        ? "bg-stone-700/50 text-stone-400"
-                        : "bg-stone-200/80 text-stone-600"
-              )}>
+                        ? 'bg-stone-500/40 text-stone-100'
+                        : 'bg-stone-200 text-stone-800'
+                      : node.status === 'failed'
+                        ? isDark
+                          ? 'bg-red-700/30 text-red-200'
+                          : 'bg-red-100 text-red-700'
+                        : isDark
+                          ? 'bg-stone-700/50 text-stone-400'
+                          : 'bg-stone-200/80 text-stone-600'
+                )}
+              >
                 {getStatusText()}
               </span>
             </div>
           </div>
         </div>
-        
+
         {/* 右侧：计时信息 - 更紧凑 */}
-        <div className="flex-shrink-0 w-12 text-right">
-          {(node.status === 'running' || node.status === 'completed') && elapsedTime > 0 && (
-            <div className={cn(
-              "text-xs font-serif",
-              isDark ? "text-stone-400" : "text-stone-500"
-            )}>
-              {formatTime(elapsedTime)}
-            </div>
-          )}
+        <div className="w-12 flex-shrink-0 text-right">
+          {(node.status === 'running' || node.status === 'completed') &&
+            elapsedTime > 0 && (
+              <div
+                className={cn(
+                  'font-serif text-xs',
+                  isDark ? 'text-stone-400' : 'text-stone-500'
+                )}
+              >
+                {formatTime(elapsedTime)}
+              </div>
+            )}
         </div>
       </div>
-      
+
       {/* 🎯 展开状态说明：展开/折叠控制的是迭代中的子节点显示 */}
       {/* 实际的子节点显示由父组件根据 isExpanded 状态控制 */}
-      
+
       {/* 🎯 新增：展开的并行分支列表 */}
-      <CollapsibleContent 
-        isExpanded={isExpanded} 
-        show={!!(node.isParallelNode && node.parallelBranches && node.parallelBranches.length > 0)}
+      <CollapsibleContent
+        isExpanded={isExpanded}
+        show={
+          !!(
+            node.isParallelNode &&
+            node.parallelBranches &&
+            node.parallelBranches.length > 0
+          )
+        }
       >
-        <div className="space-y-2 ml-4">
+        <div className="ml-4 space-y-2">
           {/* 并行分支进度条 */}
           {node.totalBranches && (
             <div className="px-3 py-2">
@@ -372,7 +444,7 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
               />
             </div>
           )}
-          
+
           {/* 分支列表 */}
           <div className="space-y-1">
             {node.parallelBranches?.map((branch, index) => (
@@ -387,172 +459,196 @@ export function ChatflowExecutionBar({ node, index, delay = 0 }: ChatflowExecuti
         </div>
       </CollapsibleContent>
     </div>
-  )
+  );
 }
 
 // --- 🎯 新增：带有退出动画的折叠内容组件 ---
 interface CollapsibleContentProps {
-  isExpanded: boolean
-  show: boolean
-  children: React.ReactNode
+  isExpanded: boolean;
+  show: boolean;
+  children: React.ReactNode;
 }
 
-function CollapsibleContent({ isExpanded, show, children }: CollapsibleContentProps) {
+function CollapsibleContent({
+  isExpanded,
+  show,
+  children,
+}: CollapsibleContentProps) {
   // 🎯 简化：只有展开时才渲染，关闭时立即消失
   if (!show || !isExpanded) {
-    return null
+    return null;
   }
-  
+
   return (
     <div className="animate-in slide-in-from-top-2 fade-in duration-250">
       {children}
     </div>
-  )
+  );
 }
 
 // --- 迭代项组件已移除，改为简化的展开信息显示 ---
 
 // --- 🎯 新增：并行分支项组件 ---
 interface ParallelBranchItemProps {
-  branch: ChatflowParallelBranch
-  index: number
-  isDark: boolean
+  branch: ChatflowParallelBranch;
+  index: number;
+  isDark: boolean;
 }
 
-function ParallelBranchItem({ branch, index, isDark }: ParallelBranchItemProps) {
-  const t = useTranslations('pages.chatflow.executionBar')
-  const [elapsedTime, setElapsedTime] = useState(0)
-  
+function ParallelBranchItem({
+  branch,
+  index,
+  isDark,
+}: ParallelBranchItemProps) {
+  const t = useTranslations('pages.chatflow.executionBar');
+  const [elapsedTime, setElapsedTime] = useState(0);
+
   useEffect(() => {
     if (branch.status === 'running' && branch.startTime) {
       const interval = setInterval(() => {
-        setElapsedTime(Date.now() - branch.startTime)
-      }, 100)
-      return () => clearInterval(interval)
-    } else if (branch.status === 'completed' && branch.startTime && branch.endTime) {
-      setElapsedTime(branch.endTime - branch.startTime)
+        setElapsedTime(Date.now() - branch.startTime);
+      }, 100);
+      return () => clearInterval(interval);
+    } else if (
+      branch.status === 'completed' &&
+      branch.startTime &&
+      branch.endTime
+    ) {
+      setElapsedTime(branch.endTime - branch.startTime);
     }
-  }, [branch.status, branch.startTime, branch.endTime])
-  
+  }, [branch.status, branch.startTime, branch.endTime]);
+
   const formatTime = (ms: number) => {
-    if (ms < 1000) return `${ms}ms`
-    const seconds = (ms / 1000).toFixed(1)
-    return `${seconds}s`
-  }
-  
+    if (ms < 1000) return `${ms}ms`;
+    const seconds = (ms / 1000).toFixed(1);
+    return `${seconds}s`;
+  };
+
   const getBranchIcon = () => {
     switch (branch.status) {
       case 'running':
-        return <Loader2 className="h-3 w-3 animate-spin text-stone-500" />
+        return <Loader2 className="h-3 w-3 animate-spin text-stone-500" />;
       case 'completed':
-        return <CheckCircle className="h-3 w-3 text-stone-600" />
+        return <CheckCircle className="h-3 w-3 text-stone-600" />;
       case 'failed':
-        return <XCircle className="h-3 w-3 text-red-500" />
+        return <XCircle className="h-3 w-3 text-red-500" />;
       default:
-        return <Clock className="h-3 w-3 text-stone-400" />
+        return <Clock className="h-3 w-3 text-stone-400" />;
     }
-  }
-  
+  };
+
   return (
-    <div className={cn(
-      "flex items-center gap-2 px-3 py-2 rounded-md border-l-2 ml-4 font-serif",
-      branch.status === 'running' && cn(
-        "border-l-stone-400",
-        isDark ? "bg-stone-800/20" : "bg-stone-100"
-      ),
-      branch.status === 'completed' && cn(
-        "border-l-stone-500",
-        isDark ? "bg-stone-700/20" : "bg-stone-50"
-      ),
-      branch.status === 'failed' && cn(
-        "border-l-red-500",
-        isDark ? "bg-red-900/20" : "bg-red-50"
-      ),
-      branch.status === 'pending' && cn(
-        "border-l-stone-300",
-        isDark ? "bg-stone-800/20" : "bg-stone-50"
-      )
-    )}>
+    <div
+      className={cn(
+        'ml-4 flex items-center gap-2 rounded-md border-l-2 px-3 py-2 font-serif',
+        branch.status === 'running' &&
+          cn('border-l-stone-400', isDark ? 'bg-stone-800/20' : 'bg-stone-100'),
+        branch.status === 'completed' &&
+          cn('border-l-stone-500', isDark ? 'bg-stone-700/20' : 'bg-stone-50'),
+        branch.status === 'failed' &&
+          cn('border-l-red-500', isDark ? 'bg-red-900/20' : 'bg-red-50'),
+        branch.status === 'pending' &&
+          cn('border-l-stone-300', isDark ? 'bg-stone-800/20' : 'bg-stone-50')
+      )}
+    >
       <div className="flex-shrink-0">
-        <GitBranch className="h-3 w-3 mr-1" />
+        <GitBranch className="mr-1 h-3 w-3" />
         {getBranchIcon()}
       </div>
-      
-      <div className="flex-1 min-w-0">
+
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className={cn(
-            "text-sm font-medium",
-            isDark ? "text-stone-200" : "text-stone-800"
-          )}>
+          <span
+            className={cn(
+              'text-sm font-medium',
+              isDark ? 'text-stone-200' : 'text-stone-800'
+            )}
+          >
             {t('branch.label')} {String.fromCharCode(65 + branch.index)}
           </span>
-          <span className={cn(
-            "text-xs",
-            isDark ? "text-stone-400" : "text-stone-600"
-          )}>
+          <span
+            className={cn(
+              'text-xs',
+              isDark ? 'text-stone-400' : 'text-stone-600'
+            )}
+          >
             {branch.description || t('status.executing_')}
           </span>
         </div>
       </div>
-      
-      <div className="flex-shrink-0 w-12 text-right"> {/* 🎯 固定宽度避免抖动 */}
+
+      <div className="w-12 flex-shrink-0 text-right">
+        {' '}
+        {/* 🎯 固定宽度避免抖动 */}
         {elapsedTime > 0 && (
-          <span className={cn(
-            "text-xs font-serif",
-            isDark ? "text-stone-400" : "text-stone-500"
-          )}>
+          <span
+            className={cn(
+              'font-serif text-xs',
+              isDark ? 'text-stone-400' : 'text-stone-500'
+            )}
+          >
             {formatTime(elapsedTime)}
           </span>
         )}
       </div>
     </div>
-  )
+  );
 }
 
 // --- 🎯 新增：进度条组件 ---
 interface ProgressBarProps {
-  current: number
-  total: number
-  type: 'iteration' | 'branch'
-  isDark: boolean
+  current: number;
+  total: number;
+  type: 'iteration' | 'branch';
+  isDark: boolean;
 }
 
 function ProgressBar({ current, total, type, isDark }: ProgressBarProps) {
-  const t = useTranslations('pages.chatflow.executionBar')
-  const percentage = total > 0 ? (current / total) * 100 : 0
-  
+  const t = useTranslations('pages.chatflow.executionBar');
+  const percentage = total > 0 ? (current / total) * 100 : 0;
+
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-1">
-        <span className={cn(
-          "text-xs font-medium font-serif",
-          isDark ? "text-stone-300" : "text-stone-700"
-        )}>
-          {type === 'iteration' ? t('progressType.iteration') : t('progressType.branch')}
+      <div className="mb-1 flex items-center justify-between">
+        <span
+          className={cn(
+            'font-serif text-xs font-medium',
+            isDark ? 'text-stone-300' : 'text-stone-700'
+          )}
+        >
+          {type === 'iteration'
+            ? t('progressType.iteration')
+            : t('progressType.branch')}
         </span>
-        <span className={cn(
-          "text-xs font-serif",
-          isDark ? "text-stone-400" : "text-stone-500"
-        )}>
+        <span
+          className={cn(
+            'font-serif text-xs',
+            isDark ? 'text-stone-400' : 'text-stone-500'
+          )}
+        >
           {current}/{total}
         </span>
       </div>
-      
-      <div className={cn(
-        "w-full h-2 rounded-full overflow-hidden",
-        isDark ? "bg-stone-700" : "bg-stone-200"
-      )}>
+
+      <div
+        className={cn(
+          'h-2 w-full overflow-hidden rounded-full',
+          isDark ? 'bg-stone-700' : 'bg-stone-200'
+        )}
+      >
         <div
           className={cn(
-            "h-full rounded-full transition-all duration-500 ease-out chatflow-progress-bar",
-            "bg-gradient-to-r from-stone-400 to-stone-500" // 🎯 统一使用stone色系
+            'chatflow-progress-bar h-full rounded-full transition-all duration-500 ease-out',
+            'bg-gradient-to-r from-stone-400 to-stone-500' // 🎯 统一使用stone色系
           )}
-          style={{ 
-            width: `${percentage}%`,
-            '--progress-width': `${percentage}%`
-          } as React.CSSProperties}
+          style={
+            {
+              width: `${percentage}%`,
+              '--progress-width': `${percentage}%`,
+            } as React.CSSProperties
+          }
         />
       </div>
     </div>
-  )
-} 
+  );
+}

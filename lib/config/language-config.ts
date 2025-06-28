@@ -17,27 +17,27 @@ export const SUPPORTED_LANGUAGES = {
   'zh-CN': {
     name: 'Simplified Chinese',
     nativeName: '简体中文',
-    code: 'zh-CN'
+    code: 'zh-CN',
   },
   'zh-TW': {
     name: 'Traditional Chinese',
     nativeName: '繁體中文',
-    code: 'zh-TW'
+    code: 'zh-TW',
   },
   'en-US': {
     name: 'English (US)',
     nativeName: 'English',
-    code: 'en-US'
+    code: 'en-US',
   },
   'ja-JP': {
     name: 'Japanese',
     nativeName: '日本語',
-    code: 'ja-JP'
+    code: 'ja-JP',
   },
   'es-ES': {
     name: 'Spanish (Spain)',
     nativeName: 'Español',
-    code: 'es-ES'
+    code: 'es-ES',
   },
 } as const;
 
@@ -81,14 +81,16 @@ export const setLanguageCookie = (locale: SupportedLocale): void => {
 // --- END COMMENT ---
 export const getCurrentLocaleFromCookie = (): SupportedLocale => {
   if (typeof window === 'undefined') return DEFAULT_LOCALE;
-  
+
   const cookies = document.cookie.split(';');
-  const localeCookie = cookies.find(cookie => cookie.trim().startsWith('NEXT_LOCALE='));
-  
+  const localeCookie = cookies.find(cookie =>
+    cookie.trim().startsWith('NEXT_LOCALE=')
+  );
+
   if (localeCookie) {
     const locale = localeCookie.split('=')[1];
     return isValidLocale(locale) ? locale : DEFAULT_LOCALE;
   }
-  
+
   return DEFAULT_LOCALE;
-}; 
+};

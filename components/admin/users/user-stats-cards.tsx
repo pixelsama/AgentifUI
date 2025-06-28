@@ -1,44 +1,59 @@
-"use client"
+'use client';
 
-import React from 'react'
-import { Users, UserCheck, UserX, Clock, Shield, Crown, UserIcon, TrendingUp, TrendingDown, Calendar } from 'lucide-react'
-import { useTheme } from '@lib/hooks/use-theme'
-import { cn } from '@lib/utils'
-import type { UserStats } from '@lib/db/users'
+import type { UserStats } from '@lib/db/users';
+import { useTheme } from '@lib/hooks/use-theme';
+import { cn } from '@lib/utils';
+import {
+  Calendar,
+  Clock,
+  Crown,
+  Shield,
+  TrendingDown,
+  TrendingUp,
+  UserCheck,
+  UserIcon,
+  UserX,
+  Users,
+} from 'lucide-react';
+
+import React from 'react';
 
 interface UserStatsCardsProps {
-  stats: UserStats | null
-  isLoading: boolean
+  stats: UserStats | null;
+  isLoading: boolean;
 }
 
 // 统计卡片数据
 interface StatCard {
-  title: string
-  value: number | string
-  icon: React.ReactNode
-  color: 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'indigo' | 'gray'
+  title: string;
+  value: number | string;
+  icon: React.ReactNode;
+  color: 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'indigo' | 'gray';
   trend?: {
-    value: number
-    label: string
-    isPositive: boolean
-  }
+    value: number;
+    label: string;
+    isPositive: boolean;
+  };
 }
 
-export const UserStatsCards: React.FC<UserStatsCardsProps> = ({ stats, isLoading }) => {
-  const { isDark } = useTheme()
+export const UserStatsCards: React.FC<UserStatsCardsProps> = ({
+  stats,
+  isLoading,
+}) => {
+  const { isDark } = useTheme();
 
   // --- BEGIN COMMENT ---
   // 生成统计卡片数据
   // --- END COMMENT ---
   const statCards: StatCard[] = React.useMemo(() => {
-    if (!stats) return []
+    if (!stats) return [];
 
     return [
       {
         title: '总用户数',
         value: stats.totalUsers.toLocaleString(),
         icon: <Users className="h-5 w-5" />,
-        color: 'blue'
+        color: 'blue',
       },
       {
         title: '活跃用户',
@@ -48,8 +63,8 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({ stats, isLoading
         trend: {
           value: Math.round((stats.activeUsers / stats.totalUsers) * 100),
           label: '占总用户比例',
-          isPositive: true
-        }
+          isPositive: true,
+        },
       },
       {
         title: '已暂停',
@@ -59,32 +74,32 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({ stats, isLoading
         trend: {
           value: Math.round((stats.suspendedUsers / stats.totalUsers) * 100),
           label: '占总用户比例',
-          isPositive: false
-        }
+          isPositive: false,
+        },
       },
       {
         title: '待激活',
         value: stats.pendingUsers.toLocaleString(),
         icon: <Clock className="h-5 w-5" />,
-        color: 'yellow'
+        color: 'yellow',
       },
       {
         title: '管理员',
         value: stats.adminUsers.toLocaleString(),
         icon: <Shield className="h-5 w-5" />,
-        color: 'purple'
+        color: 'purple',
       },
       {
         title: '经理',
         value: stats.managerUsers.toLocaleString(),
         icon: <Crown className="h-5 w-5" />,
-        color: 'indigo'
+        color: 'indigo',
       },
       {
         title: '普通用户',
         value: stats.regularUsers.toLocaleString(),
         icon: <UserIcon className="h-5 w-5" />,
-        color: 'gray'
+        color: 'gray',
       },
       {
         title: '今日新增',
@@ -94,11 +109,11 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({ stats, isLoading
         trend: {
           value: stats.newUsersThisWeek - stats.newUsersToday,
           label: '本周其他天数',
-          isPositive: stats.newUsersToday > 0
-        }
-      }
-    ]
-  }, [stats])
+          isPositive: stats.newUsersToday > 0,
+        },
+      },
+    ];
+  }, [stats]);
 
   // --- BEGIN COMMENT ---
   // 获取颜色样式
@@ -109,142 +124,156 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({ stats, isLoading
         bg: isDark ? 'bg-blue-500/10' : 'bg-blue-50',
         border: isDark ? 'border-blue-500/20' : 'border-blue-200',
         icon: isDark ? 'text-blue-400' : 'text-blue-600',
-        iconBg: isDark ? 'bg-blue-500/20' : 'bg-blue-100'
+        iconBg: isDark ? 'bg-blue-500/20' : 'bg-blue-100',
       },
       green: {
         bg: isDark ? 'bg-green-500/10' : 'bg-green-50',
         border: isDark ? 'border-green-500/20' : 'border-green-200',
         icon: isDark ? 'text-green-400' : 'text-green-600',
-        iconBg: isDark ? 'bg-green-500/20' : 'bg-green-100'
+        iconBg: isDark ? 'bg-green-500/20' : 'bg-green-100',
       },
       red: {
         bg: isDark ? 'bg-red-500/10' : 'bg-red-50',
         border: isDark ? 'border-red-500/20' : 'border-red-200',
         icon: isDark ? 'text-red-400' : 'text-red-600',
-        iconBg: isDark ? 'bg-red-500/20' : 'bg-red-100'
+        iconBg: isDark ? 'bg-red-500/20' : 'bg-red-100',
       },
       yellow: {
         bg: isDark ? 'bg-yellow-500/10' : 'bg-yellow-50',
         border: isDark ? 'border-yellow-500/20' : 'border-yellow-200',
         icon: isDark ? 'text-yellow-400' : 'text-yellow-600',
-        iconBg: isDark ? 'bg-yellow-500/20' : 'bg-yellow-100'
+        iconBg: isDark ? 'bg-yellow-500/20' : 'bg-yellow-100',
       },
       purple: {
         bg: isDark ? 'bg-purple-500/10' : 'bg-purple-50',
         border: isDark ? 'border-purple-500/20' : 'border-purple-200',
         icon: isDark ? 'text-purple-400' : 'text-purple-600',
-        iconBg: isDark ? 'bg-purple-500/20' : 'bg-purple-100'
+        iconBg: isDark ? 'bg-purple-500/20' : 'bg-purple-100',
       },
       indigo: {
         bg: isDark ? 'bg-indigo-500/10' : 'bg-indigo-50',
         border: isDark ? 'border-indigo-500/20' : 'border-indigo-200',
         icon: isDark ? 'text-indigo-400' : 'text-indigo-600',
-        iconBg: isDark ? 'bg-indigo-500/20' : 'bg-indigo-100'
+        iconBg: isDark ? 'bg-indigo-500/20' : 'bg-indigo-100',
       },
       gray: {
         bg: isDark ? 'bg-stone-500/10' : 'bg-stone-50',
         border: isDark ? 'border-stone-500/20' : 'border-stone-200',
         icon: isDark ? 'text-stone-400' : 'text-stone-600',
-        iconBg: isDark ? 'bg-stone-500/20' : 'bg-stone-100'
-      }
-    }
-    return colorMap[color]
-  }
+        iconBg: isDark ? 'bg-stone-500/20' : 'bg-stone-100',
+      },
+    };
+    return colorMap[color];
+  };
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 mb-6">
+      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
         {[...Array(8)].map((_, index) => (
           <div
             key={index}
             className={cn(
-              "p-4 rounded-xl border animate-pulse backdrop-blur-sm",
-              isDark ? "bg-stone-800/50 border-stone-700/50" : "bg-white/50 border-stone-200/50"
+              'animate-pulse rounded-xl border p-4 backdrop-blur-sm',
+              isDark
+                ? 'border-stone-700/50 bg-stone-800/50'
+                : 'border-stone-200/50 bg-white/50'
             )}
           >
             <div className="flex flex-col space-y-3">
-              <div className={cn(
-                "w-8 h-8 rounded-lg",
-                isDark ? "bg-stone-700/50" : "bg-stone-100"
-              )} />
+              <div
+                className={cn(
+                  'h-8 w-8 rounded-lg',
+                  isDark ? 'bg-stone-700/50' : 'bg-stone-100'
+                )}
+              />
               <div>
-                <div className={cn(
-                  "h-3 w-16 rounded mb-2",
-                  isDark ? "bg-stone-700/50" : "bg-stone-200"
-                )} />
-                <div className={cn(
-                  "h-5 w-12 rounded",
-                  isDark ? "bg-stone-700/50" : "bg-stone-200"
-                )} />
+                <div
+                  className={cn(
+                    'mb-2 h-3 w-16 rounded',
+                    isDark ? 'bg-stone-700/50' : 'bg-stone-200'
+                  )}
+                />
+                <div
+                  className={cn(
+                    'h-5 w-12 rounded',
+                    isDark ? 'bg-stone-700/50' : 'bg-stone-200'
+                  )}
+                />
               </div>
             </div>
           </div>
         ))}
       </div>
-    )
+    );
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 mb-6">
+    <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
       {statCards.map((card, index) => {
-        const colors = getColorClasses(card.color)
-        
+        const colors = getColorClasses(card.color);
+
         return (
           <div
             key={index}
             className={cn(
-              "p-4 rounded-xl border transition-all duration-200 hover:shadow-lg hover:scale-105",
+              'rounded-xl border p-4 transition-all duration-200 hover:scale-105 hover:shadow-lg',
               colors.bg,
               colors.border,
-              "backdrop-blur-sm"
+              'backdrop-blur-sm'
             )}
           >
             <div className="flex flex-col space-y-2">
               {/* --- BEGIN COMMENT ---
               图标
               --- END COMMENT --- */}
-              <div className={cn(
-                "w-8 h-8 rounded-lg flex items-center justify-center",
-                colors.iconBg
-              )}>
-                <div className={cn("scale-75", colors.icon)}>
-                  {card.icon}
-                </div>
+              <div
+                className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-lg',
+                  colors.iconBg
+                )}
+              >
+                <div className={cn('scale-75', colors.icon)}>{card.icon}</div>
               </div>
-              
+
               {/* --- BEGIN COMMENT ---
               数据内容
               --- END COMMENT --- */}
               <div className="min-w-0">
-                <p className={cn(
-                  "text-xs font-serif font-medium mb-1 truncate",
-                  isDark ? "text-stone-400" : "text-stone-600"
-                )}>
+                <p
+                  className={cn(
+                    'mb-1 truncate font-serif text-xs font-medium',
+                    isDark ? 'text-stone-400' : 'text-stone-600'
+                  )}
+                >
                   {card.title}
                 </p>
-                <p className={cn(
-                  "text-lg font-bold font-serif",
-                  isDark ? "text-stone-100" : "text-stone-900"
-                )}>
+                <p
+                  className={cn(
+                    'font-serif text-lg font-bold',
+                    isDark ? 'text-stone-100' : 'text-stone-900'
+                  )}
+                >
                   {card.value}
                 </p>
-                
+
                 {/* --- BEGIN COMMENT ---
                 趋势信息（如果有）
                 --- END COMMENT --- */}
                 {card.trend && (
-                  <div className="flex items-center gap-1 mt-1">
+                  <div className="mt-1 flex items-center gap-1">
                     {card.trend.isPositive ? (
                       <TrendingUp className="h-2.5 w-2.5 text-green-500" />
                     ) : (
                       <TrendingDown className="h-2.5 w-2.5 text-red-500" />
                     )}
-                    <span className={cn(
-                      "text-xs font-serif truncate",
-                      card.trend.isPositive 
-                        ? "text-green-600" 
-                        : "text-red-600"
-                    )}>
+                    <span
+                      className={cn(
+                        'truncate font-serif text-xs',
+                        card.trend.isPositive
+                          ? 'text-green-600'
+                          : 'text-red-600'
+                      )}
+                    >
                       {card.trend.value}%
                     </span>
                   </div>
@@ -252,8 +281,8 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({ stats, isLoading
               </div>
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
-} 
+  );
+};

@@ -51,6 +51,9 @@ Thumbs.db
 .cache/
 .parcel-cache/
 
-# Problematic files (temporary)
-app/sso/processing/page.tsx
-components/auth/bistu-sso-button.tsx 
+# Legal and policy documents with special formatting
+CLA.md
+
+# GitHub workflows (to preserve exact formatting)
+.github/workflows/*.yml
+.github/workflows/*.yaml 

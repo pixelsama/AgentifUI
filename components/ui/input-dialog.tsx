@@ -1,12 +1,14 @@
-"use client"
+'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { useTranslations } from 'next-intl';
-import { cn } from '@lib/utils';
 import { useMobile } from '@lib/hooks';
 import { useTheme } from '@lib/hooks/use-theme';
-import { X, Pen } from 'lucide-react';
+import { cn } from '@lib/utils';
+import { Pen, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
+
+import React, { useEffect, useRef, useState } from 'react';
+
+import { useTranslations } from 'next-intl';
 
 interface InputDialogProps {
   isOpen: boolean;
@@ -39,7 +41,7 @@ export function InputDialog({
   confirmText,
   cancelText,
   isLoading = false,
-  maxLength = 100
+  maxLength = 100,
 }: InputDialogProps) {
   const { isDark } = useTheme();
   const isMobile = useMobile();
@@ -94,7 +96,11 @@ export function InputDialog({
     if (!isOpen) return;
 
     const handleClickOutside = (e: MouseEvent) => {
-      if (dialogRef.current && !dialogRef.current.contains(e.target as Node) && !isLoading) {
+      if (
+        dialogRef.current &&
+        !dialogRef.current.contains(e.target as Node) &&
+        !isLoading
+      ) {
         onClose();
       }
     };
@@ -191,7 +197,7 @@ export function InputDialog({
       className={cn(
         'fixed inset-0 z-[100] flex items-center justify-center p-4',
         'bg-black/60 backdrop-blur-md',
-        isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
+        isOpen ? 'opacity-100' : 'pointer-events-none opacity-0',
         'transition-all duration-300 ease-out'
       )}
       onClick={handleBackdropClick}
@@ -199,11 +205,11 @@ export function InputDialog({
       <div
         ref={dialogRef}
         className={cn(
-          'w-full max-w-lg mx-auto rounded-2xl shadow-2xl',
+          'mx-auto w-full max-w-lg rounded-2xl shadow-2xl',
           'transform transition-all duration-300 ease-out',
-          isDark 
-            ? 'bg-stone-900/95 border border-stone-700/50 shadow-black/40' 
-            : 'bg-white/95 border border-stone-200/50 shadow-stone-900/20',
+          isDark
+            ? 'border border-stone-700/50 bg-stone-900/95 shadow-black/40'
+            : 'border border-stone-200/50 bg-white/95 shadow-stone-900/20',
           'backdrop-blur-sm',
           isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         )}
@@ -212,21 +218,25 @@ export function InputDialog({
           {/* --- BEGIN COMMENT ---
           桌面端图标和标题区域 - 居中设计
           --- END COMMENT --- */}
-          <div className="flex flex-col items-center pt-8 pb-6 px-8">
-            <div className={cn(
-              'w-16 h-16 rounded-full flex items-center justify-center mb-6',
-              'ring-1 ring-inset',
-              isDark 
-                ? 'bg-stone-700/50 text-stone-400 ring-stone-700/50' 
-                : 'bg-stone-100 text-stone-500 ring-stone-200/50'
-            )}>
-              <Pen className="w-6 h-6" />
+          <div className="flex flex-col items-center px-8 pt-8 pb-6">
+            <div
+              className={cn(
+                'mb-6 flex h-16 w-16 items-center justify-center rounded-full',
+                'ring-1 ring-inset',
+                isDark
+                  ? 'bg-stone-700/50 text-stone-400 ring-stone-700/50'
+                  : 'bg-stone-100 text-stone-500 ring-stone-200/50'
+              )}
+            >
+              <Pen className="h-6 w-6" />
             </div>
-            
-            <h3 className={cn(
-              'text-xl font-semibold font-serif text-center mb-2',
-              isDark ? 'text-stone-100' : 'text-stone-900'
-            )}>
+
+            <h3
+              className={cn(
+                'mb-2 text-center font-serif text-xl font-semibold',
+                isDark ? 'text-stone-100' : 'text-stone-900'
+              )}
+            >
               {title}
             </h3>
           </div>
@@ -235,10 +245,12 @@ export function InputDialog({
           桌面端输入区域
           --- END COMMENT --- */}
           <div className="px-8 pb-6">
-            <label className={cn(
-              'block text-sm font-medium font-serif mb-3',
-              isDark ? 'text-stone-300' : 'text-stone-700'
-            )}>
+            <label
+              className={cn(
+                'mb-3 block font-serif text-sm font-medium',
+                isDark ? 'text-stone-300' : 'text-stone-700'
+              )}
+            >
               {label}
             </label>
             <div className="relative">
@@ -246,25 +258,27 @@ export function InputDialog({
                 ref={inputRef}
                 type="text"
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={e => setInputValue(e.target.value)}
                 placeholder={placeholder}
                 maxLength={maxLength}
                 disabled={isLoading}
                 className={cn(
-                  'w-full px-4 py-3 text-base font-serif rounded-xl',
+                  'w-full rounded-xl px-4 py-3 font-serif text-base',
                   'border-2 transition-all duration-200',
-                  'disabled:opacity-50 disabled:cursor-not-allowed',
-                  'focus:outline-none focus:ring-2 focus:ring-offset-2',
-                  isDark 
-                    ? 'bg-stone-800/50 border-stone-600 text-white placeholder-stone-500 focus:border-stone-500 focus:ring-stone-500/30 focus:ring-offset-stone-900' 
-                    : 'bg-stone-50/50 border-stone-300 text-stone-900 placeholder-stone-500 focus:border-stone-600 focus:ring-stone-500/30 focus:ring-offset-white'
+                  'disabled:cursor-not-allowed disabled:opacity-50',
+                  'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+                  isDark
+                    ? 'border-stone-600 bg-stone-800/50 text-white placeholder-stone-500 focus:border-stone-500 focus:ring-stone-500/30 focus:ring-offset-stone-900'
+                    : 'border-stone-300 bg-stone-50/50 text-stone-900 placeholder-stone-500 focus:border-stone-600 focus:ring-stone-500/30 focus:ring-offset-white'
                 )}
               />
               {maxLength && (
-                <div className={cn(
-                  'absolute -bottom-6 right-0 text-xs',
-                  isDark ? 'text-stone-500' : 'text-stone-400'
-                )}>
+                <div
+                  className={cn(
+                    'absolute right-0 -bottom-6 text-xs',
+                    isDark ? 'text-stone-500' : 'text-stone-400'
+                  )}
+                >
                   {inputValue.length}/{maxLength}
                 </div>
               )}
@@ -280,12 +294,12 @@ export function InputDialog({
               onClick={onClose}
               disabled={isLoading}
               className={cn(
-                'flex-1 px-6 py-3 text-sm font-serif rounded-xl',
+                'flex-1 rounded-xl px-6 py-3 font-serif text-sm',
                 'border transition-all duration-200',
-                'disabled:opacity-50 disabled:cursor-not-allowed',
-                'focus:outline-none focus:ring-2 focus:ring-offset-2',
-                isDark 
-                  ? 'border-stone-600 text-stone-300 hover:bg-stone-700/50 focus:ring-stone-500/30 focus:ring-offset-stone-900' 
+                'disabled:cursor-not-allowed disabled:opacity-50',
+                'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+                isDark
+                  ? 'border-stone-600 text-stone-300 hover:bg-stone-700/50 focus:ring-stone-500/30 focus:ring-offset-stone-900'
                   : 'border-stone-300 text-stone-700 hover:bg-stone-50 focus:ring-stone-500/30 focus:ring-offset-white'
               )}
             >
@@ -295,13 +309,13 @@ export function InputDialog({
               type="submit"
               disabled={isLoading || !isInputValid}
               className={cn(
-                'flex-1 px-6 py-3 text-sm font-serif rounded-xl',
+                'flex-1 rounded-xl px-6 py-3 font-serif text-sm',
                 'transition-all duration-200',
-                'disabled:opacity-50 disabled:cursor-not-allowed',
-                'focus:outline-none focus:ring-2 focus:ring-offset-2',
-                isDark 
-                  ? 'bg-stone-600 hover:bg-stone-700 focus:ring-stone-500/30 text-white shadow-lg shadow-stone-900/20 focus:ring-offset-stone-900' 
-                  : 'bg-stone-600 hover:bg-stone-700 focus:ring-stone-500/30 text-white shadow-lg shadow-stone-900/10 focus:ring-offset-white'
+                'disabled:cursor-not-allowed disabled:opacity-50',
+                'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+                isDark
+                  ? 'bg-stone-600 text-white shadow-lg shadow-stone-900/20 hover:bg-stone-700 focus:ring-stone-500/30 focus:ring-offset-stone-900'
+                  : 'bg-stone-600 text-white shadow-lg shadow-stone-900/10 hover:bg-stone-700 focus:ring-stone-500/30 focus:ring-offset-white'
               )}
             >
               {isLoading ? t('loading') : confirmText}
@@ -316,15 +330,15 @@ export function InputDialog({
             onClick={onClose}
             disabled={isLoading}
             className={cn(
-              'absolute top-4 right-4 p-2 rounded-full',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'absolute top-4 right-4 rounded-full p-2',
+              'disabled:cursor-not-allowed disabled:opacity-50',
               'transition-colors duration-200',
-              isDark 
-                ? 'text-stone-500 hover:text-stone-300 hover:bg-stone-800/50' 
-                : 'text-stone-400 hover:text-stone-600 hover:bg-stone-100',
+              isDark
+                ? 'text-stone-500 hover:bg-stone-800/50 hover:text-stone-300'
+                : 'text-stone-400 hover:bg-stone-100 hover:text-stone-600'
             )}
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </form>
       </div>
@@ -339,7 +353,7 @@ export function InputDialog({
       className={cn(
         'fixed inset-0 z-[100] flex items-end justify-center',
         'bg-black/50 backdrop-blur-md',
-        isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
+        isOpen ? 'opacity-100' : 'pointer-events-none opacity-0',
         'transition-opacity duration-300 ease-out'
       )}
       onClick={handleBackdropClick}
@@ -349,11 +363,11 @@ export function InputDialog({
         className={cn(
           'w-full max-w-lg rounded-t-3xl',
           'transform transition-transform duration-300 ease-out',
-          isDark 
-            ? 'bg-stone-900/95 border-t border-stone-700/50 shadow-black/40' 
-            : 'bg-white/95 border-t border-stone-200/50 shadow-stone-900/20',
-          'backdrop-blur-sm shadow-2xl',
-          isOpen ? 'translate-y-0' : 'translate-y-full',
+          isDark
+            ? 'border-t border-stone-700/50 bg-stone-900/95 shadow-black/40'
+            : 'border-t border-stone-200/50 bg-white/95 shadow-stone-900/20',
+          'shadow-2xl backdrop-blur-sm',
+          isOpen ? 'translate-y-0' : 'translate-y-full'
         )}
         style={{ maxHeight: '90vh', overflowY: 'auto' }}
       >
@@ -362,30 +376,36 @@ export function InputDialog({
           移动端顶部拖动条 - 更粗更明显
           --- END COMMENT --- */}
           <div className="flex items-center justify-center pt-4 pb-2">
-            <div className={cn(
-              'w-16 h-1.5 rounded-full',
-              isDark ? 'bg-stone-600' : 'bg-stone-300'
-            )}></div>
+            <div
+              className={cn(
+                'h-1.5 w-16 rounded-full',
+                isDark ? 'bg-stone-600' : 'bg-stone-300'
+              )}
+            ></div>
           </div>
 
           {/* --- BEGIN COMMENT ---
           移动端图标和标题区域
           --- END COMMENT --- */}
-          <div className="flex flex-col items-center pt-4 pb-6 px-6">
-            <div className={cn(
-              'w-20 h-20 rounded-full flex items-center justify-center mb-6',
-              'ring-1 ring-inset',
-              isDark 
-                ? 'bg-stone-700/50 text-stone-400 ring-stone-700/50' 
-                : 'bg-stone-100 text-stone-500 ring-stone-200/50'
-            )}>
-              <Pen className="w-8 h-8" />
+          <div className="flex flex-col items-center px-6 pt-4 pb-6">
+            <div
+              className={cn(
+                'mb-6 flex h-20 w-20 items-center justify-center rounded-full',
+                'ring-1 ring-inset',
+                isDark
+                  ? 'bg-stone-700/50 text-stone-400 ring-stone-700/50'
+                  : 'bg-stone-100 text-stone-500 ring-stone-200/50'
+              )}
+            >
+              <Pen className="h-8 w-8" />
             </div>
-            
-            <h3 className={cn(
-              'text-xl font-semibold font-serif text-center mb-6',
-              isDark ? 'text-stone-100' : 'text-stone-900'
-            )}>
+
+            <h3
+              className={cn(
+                'mb-6 text-center font-serif text-xl font-semibold',
+                isDark ? 'text-stone-100' : 'text-stone-900'
+              )}
+            >
               {title}
             </h3>
 
@@ -393,10 +413,12 @@ export function InputDialog({
             移动端输入区域 - 更大的触摸区域
             --- END COMMENT --- */}
             <div className="w-full">
-              <label className={cn(
-                'block text-base font-medium font-serif mb-3',
-                isDark ? 'text-stone-300' : 'text-stone-700'
-              )}>
+              <label
+                className={cn(
+                  'mb-3 block font-serif text-base font-medium',
+                  isDark ? 'text-stone-300' : 'text-stone-700'
+                )}
+              >
                 {label}
               </label>
               <div className="relative mb-8">
@@ -404,25 +426,27 @@ export function InputDialog({
                   ref={inputRef}
                   type="text"
                   value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+                  onChange={e => setInputValue(e.target.value)}
                   placeholder={placeholder}
                   maxLength={maxLength}
                   disabled={isLoading}
                   className={cn(
-                    'w-full px-4 py-4 text-base font-serif rounded-2xl',
+                    'w-full rounded-2xl px-4 py-4 font-serif text-base',
                     'border-2 transition-all duration-200',
-                    'disabled:opacity-50 disabled:cursor-not-allowed',
-                    'focus:outline-none focus:ring-2 focus:ring-offset-2',
-                    isDark 
-                      ? 'bg-stone-800/50 border-stone-600 text-white placeholder-stone-500 focus:border-stone-500 focus:ring-stone-500/30 focus:ring-offset-stone-900' 
-                      : 'bg-stone-50/50 border-stone-300 text-stone-900 placeholder-stone-500 focus:border-stone-600 focus:ring-stone-500/30 focus:ring-offset-white'
+                    'disabled:cursor-not-allowed disabled:opacity-50',
+                    'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+                    isDark
+                      ? 'border-stone-600 bg-stone-800/50 text-white placeholder-stone-500 focus:border-stone-500 focus:ring-stone-500/30 focus:ring-offset-stone-900'
+                      : 'border-stone-300 bg-stone-50/50 text-stone-900 placeholder-stone-500 focus:border-stone-600 focus:ring-stone-500/30 focus:ring-offset-white'
                   )}
                 />
                 {maxLength && (
-                  <div className={cn(
-                    'absolute -bottom-6 right-0 text-sm',
-                    isDark ? 'text-stone-500' : 'text-stone-400'
-                  )}>
+                  <div
+                    className={cn(
+                      'absolute right-0 -bottom-6 text-sm',
+                      isDark ? 'text-stone-500' : 'text-stone-400'
+                    )}
+                  >
                     {inputValue.length}/{maxLength}
                   </div>
                 )}
@@ -436,13 +460,13 @@ export function InputDialog({
                   type="submit"
                   disabled={isLoading || !isInputValid}
                   className={cn(
-                    'w-full py-4 text-base font-serif rounded-2xl',
+                    'w-full rounded-2xl py-4 font-serif text-base',
                     'transition-all duration-200',
-                    'disabled:opacity-50 disabled:cursor-not-allowed',
-                    'focus:outline-none focus:ring-2 focus:ring-offset-2',
-                    isDark 
-                      ? 'bg-stone-600 hover:bg-stone-700 focus:ring-stone-500/30 text-white shadow-lg shadow-stone-900/20 focus:ring-offset-stone-900' 
-                      : 'bg-stone-600 hover:bg-stone-700 focus:ring-stone-500/30 text-white shadow-lg shadow-stone-900/10 focus:ring-offset-white'
+                    'disabled:cursor-not-allowed disabled:opacity-50',
+                    'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+                    isDark
+                      ? 'bg-stone-600 text-white shadow-lg shadow-stone-900/20 hover:bg-stone-700 focus:ring-stone-500/30 focus:ring-offset-stone-900'
+                      : 'bg-stone-600 text-white shadow-lg shadow-stone-900/10 hover:bg-stone-700 focus:ring-stone-500/30 focus:ring-offset-white'
                   )}
                 >
                   {isLoading ? t('loading') : confirmText}
@@ -452,12 +476,12 @@ export function InputDialog({
                   onClick={onClose}
                   disabled={isLoading}
                   className={cn(
-                    'w-full py-4 text-base font-serif rounded-2xl',
+                    'w-full rounded-2xl py-4 font-serif text-base',
                     'border transition-all duration-200',
-                    'disabled:opacity-50 disabled:cursor-not-allowed',
-                    'focus:outline-none focus:ring-2 focus:ring-offset-2',
-                    isDark 
-                      ? 'border-stone-600 text-stone-300 hover:bg-stone-700/50 focus:ring-stone-500/30 focus:ring-offset-stone-900' 
+                    'disabled:cursor-not-allowed disabled:opacity-50',
+                    'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+                    isDark
+                      ? 'border-stone-600 text-stone-300 hover:bg-stone-700/50 focus:ring-stone-500/30 focus:ring-offset-stone-900'
                       : 'border-stone-300 text-stone-700 hover:bg-stone-50 focus:ring-stone-500/30 focus:ring-offset-white'
                   )}
                 >
@@ -474,8 +498,5 @@ export function InputDialog({
   // --- BEGIN COMMENT ---
   // 根据设备类型返回相应的对话框
   // --- END COMMENT ---
-  return createPortal(
-    isMobile ? mobileDialog : desktopDialog,
-    document.body
-  );
-} 
+  return createPortal(isMobile ? mobileDialog : desktopDialog, document.body);
+}

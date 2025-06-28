@@ -1,14 +1,18 @@
 /**
  * 服务实例相关的数据库查询函数
- * 
+ *
  * 本文件包含与服务实例表(service_instances)相关的所有数据库操作
  * 更新为使用统一的数据服务和Result类型
  */
-
+import { CacheKeys, cacheService } from '@lib/services/db/cache-service';
 import { dataService } from '@lib/services/db/data-service';
-import { cacheService, CacheKeys } from '@lib/services/db/cache-service';
-import { realtimeService, SubscriptionKeys, SubscriptionConfigs } from '@lib/services/db/realtime-service';
-import { Result, success, failure } from '@lib/types/result';
+import {
+  SubscriptionConfigs,
+  SubscriptionKeys,
+  realtimeService,
+} from '@lib/services/db/realtime-service';
+import { Result, failure, success } from '@lib/types/result';
+
 import { createClient } from '../supabase/client';
 import { ServiceInstance } from '../types/database';
 
@@ -20,7 +24,9 @@ const supabase = createClient();
  * @param providerId 提供商ID
  * @returns 服务实例列表的Result
  */
-export async function getServiceInstancesByProvider(providerId: string): Promise<Result<ServiceInstance[]>> {
+export async function getServiceInstancesByProvider(
+  providerId: string
+): Promise<Result<ServiceInstance[]>> {
   return dataService.findMany<ServiceInstance>(
     'service_instances',
     { provider_id: providerId },
@@ -34,7 +40,7 @@ export async function getServiceInstancesByProvider(providerId: string): Promise
       onUpdate: () => {
         // 服务实例更新时清除缓存
         cacheService.deletePattern('service_instances:*');
-      }
+      },
     }
   );
 }
@@ -44,12 +50,14 @@ export async function getServiceInstancesByProvider(providerId: string): Promise
  * @param providerId 提供商ID
  * @returns 默认服务实例的Result，如果未找到则返回null
  */
-export async function getDefaultServiceInstance(providerId: string): Promise<Result<ServiceInstance | null>> {
+export async function getDefaultServiceInstance(
+  providerId: string
+): Promise<Result<ServiceInstance | null>> {
   return dataService.findOne<ServiceInstance>(
     'service_instances',
-    { 
+    {
       provider_id: providerId,
-      is_default: true 
+      is_default: true,
     },
     {
       cache: true,
@@ -63,7 +71,9 @@ export async function getDefaultServiceInstance(providerId: string): Promise<Res
  * @param id 服务实例ID
  * @returns 服务实例对象的Result，如果未找到则返回null
  */
-export async function getServiceInstanceById(id: string): Promise<Result<ServiceInstance | null>> {
+export async function getServiceInstanceById(
+  id: string
+): Promise<Result<ServiceInstance | null>> {
   return dataService.findOne<ServiceInstance>(
     'service_instances',
     { id },
@@ -86,9 +96,9 @@ export async function getServiceInstanceByInstanceId(
 ): Promise<Result<ServiceInstance | null>> {
   return dataService.findOne<ServiceInstance>(
     'service_instances',
-    { 
+    {
       provider_id: providerId,
-      instance_id: instanceId 
+      instance_id: instanceId,
     },
     {
       cache: true,
@@ -113,22 +123,25 @@ export async function createServiceInstance(
         .update({ is_default: false })
         .eq('provider_id', serviceInstance.provider_id)
         .eq('is_default', true);
-      
+
       if (updateError) {
         throw updateError;
       }
     }
 
     // 创建新实例
-    const result = await dataService.create<ServiceInstance>('service_instances', serviceInstance);
-    
+    const result = await dataService.create<ServiceInstance>(
+      'service_instances',
+      serviceInstance
+    );
+
     if (!result.success) {
       throw result.error;
     }
 
     // 清除相关缓存
     cacheService.deletePattern('service_instances:*');
-    
+
     return result.data;
   });
 }
@@ -153,7 +166,7 @@ export async function updateServiceInstance(
           .update({ is_default: false })
           .eq('provider_id', currentInstanceResult.data.provider_id)
           .eq('is_default', true);
-        
+
         if (updateError) {
           throw updateError;
         }
@@ -161,15 +174,19 @@ export async function updateServiceInstance(
     }
 
     // 更新实例
-    const result = await dataService.update<ServiceInstance>('service_instances', id, updates);
-    
+    const result = await dataService.update<ServiceInstance>(
+      'service_instances',
+      id,
+      updates
+    );
+
     if (!result.success) {
       throw result.error;
     }
 
     // 清除相关缓存
     cacheService.deletePattern('service_instances:*');
-    
+
     return result.data;
   });
 }
@@ -179,7 +196,9 @@ export async function updateServiceInstance(
  * @param id 服务实例ID
  * @returns 是否删除成功的Result
  */
-export async function deleteServiceInstance(id: string): Promise<Result<boolean>> {
+export async function deleteServiceInstance(
+  id: string
+): Promise<Result<boolean>> {
   const result = await dataService.delete('service_instances', id);
 
   if (result.success) {
@@ -200,7 +219,9 @@ export async function deleteServiceInstance(id: string): Promise<Result<boolean>
  * 获取指定提供商的所有服务实例（兼容版本）
  * @deprecated 请使用新版本并处理Result类型
  */
-export async function getServiceInstancesByProviderLegacy(providerId: string): Promise<ServiceInstance[]> {
+export async function getServiceInstancesByProviderLegacy(
+  providerId: string
+): Promise<ServiceInstance[]> {
   const result = await getServiceInstancesByProvider(providerId);
   return result.success ? result.data : [];
 }
@@ -209,7 +230,9 @@ export async function getServiceInstancesByProviderLegacy(providerId: string): P
  * 获取默认服务实例（兼容版本）
  * @deprecated 请使用新版本并处理Result类型
  */
-export async function getDefaultServiceInstanceLegacy(providerId: string): Promise<ServiceInstance | null> {
+export async function getDefaultServiceInstanceLegacy(
+  providerId: string
+): Promise<ServiceInstance | null> {
   const result = await getDefaultServiceInstance(providerId);
   return result.success ? result.data : null;
 }
@@ -218,7 +241,9 @@ export async function getDefaultServiceInstanceLegacy(providerId: string): Promi
  * 根据ID获取服务实例（兼容版本）
  * @deprecated 请使用新版本并处理Result类型
  */
-export async function getServiceInstanceByIdLegacy(id: string): Promise<ServiceInstance | null> {
+export async function getServiceInstanceByIdLegacy(
+  id: string
+): Promise<ServiceInstance | null> {
   const result = await getServiceInstanceById(id);
   return result.success ? result.data : null;
 }
@@ -263,7 +288,9 @@ export async function updateServiceInstanceLegacy(
  * @param id 服务实例ID
  * @returns 是否删除成功
  */
-export async function deleteServiceInstanceLegacy(id: string): Promise<boolean> {
+export async function deleteServiceInstanceLegacy(
+  id: string
+): Promise<boolean> {
   const result = await deleteServiceInstance(id);
   return result.success && result.data;
 }
@@ -278,10 +305,12 @@ export async function deleteServiceInstanceLegacy(id: string): Promise<boolean> 
  * @param instanceId 应用实例ID
  * @returns 应用参数配置的Result，如果未配置则返回null
  */
-export async function getAppParametersFromDb(instanceId: string): Promise<Result<any | null>> {
+export async function getAppParametersFromDb(
+  instanceId: string
+): Promise<Result<any | null>> {
   return dataService.query(async () => {
     const result = await getServiceInstanceByInstanceId('dify', instanceId);
-    
+
     if (!result.success || !result.data) {
       return null;
     }
@@ -299,13 +328,13 @@ export async function getAppParametersFromDb(instanceId: string): Promise<Result
  * @returns 更新操作的Result
  */
 export async function updateAppParametersInDb(
-  instanceId: string, 
+  instanceId: string,
   parameters: any
 ): Promise<Result<void>> {
   return dataService.query(async () => {
     // 先获取当前的服务实例
     const result = await getServiceInstanceByInstanceId('dify', instanceId);
-    
+
     if (!result.success || !result.data) {
       throw new Error(`未找到实例ID为 ${instanceId} 的服务实例`);
     }
@@ -314,12 +343,12 @@ export async function updateAppParametersInDb(
     const currentConfig = result.data.config || {};
     const updatedConfig = {
       ...currentConfig,
-      dify_parameters: parameters
+      dify_parameters: parameters,
     };
 
     // 执行更新
     const updateResult = await updateServiceInstance(result.data.id, {
-      config: updatedConfig
+      config: updatedConfig,
     });
 
     if (!updateResult.success) {
@@ -335,35 +364,37 @@ export async function updateAppParametersInDb(
  * @param instanceId 要设置为默认的实例ID
  * @returns 操作结果的Result
  */
-export async function setDefaultServiceInstance(instanceId: string): Promise<Result<ServiceInstance>> {
+export async function setDefaultServiceInstance(
+  instanceId: string
+): Promise<Result<ServiceInstance>> {
   return dataService.query(async () => {
     // 首先获取要设置的实例信息
     const instanceResult = await getServiceInstanceById(instanceId);
     if (!instanceResult.success || !instanceResult.data) {
       throw new Error('找不到指定的服务实例');
     }
-    
+
     const instance = instanceResult.data;
-    
+
     // 在事务中执行：先将同一提供商的其他实例设为非默认，再设置当前实例为默认
     const { data, error } = await supabase.rpc('set_default_service_instance', {
       target_instance_id: instanceId,
-      target_provider_id: instance.provider_id
+      target_provider_id: instance.provider_id,
     });
-    
+
     if (error) {
       throw error;
     }
-    
+
     // 清除相关缓存
     cacheService.deletePattern('service_instances:*');
-    
+
     // 返回更新后的实例
     const updatedResult = await getServiceInstanceById(instanceId);
     if (!updatedResult.success) {
       throw updatedResult.error;
     }
-    
+
     return updatedResult.data!;
   });
 }

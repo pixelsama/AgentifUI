@@ -4,15 +4,14 @@
 // 它遵循与 file-service.ts 和 chat-service.ts (如果存在) 类似的设计模式，
 // 即提供独立的、可导出的服务函数。
 // --- END COMMENT ---
-
-import type { 
-  GetMessagesParams, 
-  GetMessagesResponse, 
+import type {
   DifyApiError,
+  DifyAudioToTextRequestPayload,
+  DifyAudioToTextResponse,
   DifyMessageFeedbackRequestPayload,
   DifyMessageFeedbackResponse,
-  DifyAudioToTextRequestPayload,
-  DifyAudioToTextResponse
+  GetMessagesParams,
+  GetMessagesResponse,
 } from './types';
 
 // --- BEGIN COMMENT ---
@@ -79,7 +78,7 @@ export async function getConversationMessages(
 
     if (!response.ok) {
       // 尝试解析错误响应体，以便提供更详细的错误信息
-      let errorData: DifyApiError | { message: string, code?: string } = {
+      let errorData: DifyApiError | { message: string; code?: string } = {
         message: `API request failed with status ${response.status}: ${response.statusText}`,
       };
       try {
@@ -93,7 +92,10 @@ export async function getConversationMessages(
         };
       } catch (e) {
         // 如果错误响应体不是有效的 JSON，则使用 HTTP 状态文本作为消息。
-        console.warn('[Dify Message Service] Failed to parse error response JSON.', e);
+        console.warn(
+          '[Dify Message Service] Failed to parse error response JSON.',
+          e
+        );
       }
 
       console.error(
@@ -108,18 +110,25 @@ export async function getConversationMessages(
     const data: GetMessagesResponse = await response.json();
     console.log('[Dify Message Service] Successfully fetched messages.', data);
     return data;
-
   } catch (error) {
     // 处理 fetch 本身的网络错误或其他在 try 块中未被捕获的错误
-    console.error('[Dify Message Service] Network or unexpected error while fetching messages:', error);
+    console.error(
+      '[Dify Message Service] Network or unexpected error while fetching messages:',
+      error
+    );
     // 重新抛出错误，或者将其包装成一个标准化的错误对象
     // 如果 error 已经是我们上面抛出的 errorData 结构，直接抛出
-    if (error && typeof error === 'object' && ('status' in error || 'message' in error)) {
-      throw error; 
+    if (
+      error &&
+      typeof error === 'object' &&
+      ('status' in error || 'message' in error)
+    ) {
+      throw error;
     }
     // 否则，包装成一个通用的错误结构
     throw {
-      message: (error instanceof Error) ? error.message : 'An unexpected error occurred',
+      message:
+        error instanceof Error ? error.message : 'An unexpected error occurred',
       code: 'NETWORK_ERROR',
     } as DifyApiError;
   }
@@ -130,7 +139,7 @@ export async function getConversationMessages(
 // 例如：发送消息、反馈消息等。
 // --- END COMMENT ---
 
-export {}; // 确保文件被视为一个 ES模块 
+export {}; // 确保文件被视为一个 ES模块
 
 // --- BEGIN COMMENT ---
 // 消息反馈 API 服务函数
@@ -138,7 +147,7 @@ export {}; // 确保文件被视为一个 ES模块
 
 /**
  * 提交消息反馈
- * 
+ *
  * @param appId - 应用 ID
  * @param messageId - 消息 ID
  * @param payload - 反馈数据
@@ -170,38 +179,37 @@ export async function submitMessageFeedback(
         errorData = {
           status: response.status,
           code: response.status.toString(),
-          message: response.statusText || '提交反馈失败'
+          message: response.statusText || '提交反馈失败',
         };
       }
-      
+
       console.error('[Dify Message Service] 提交消息反馈失败:', errorData);
       throw new Error(`提交消息反馈失败: ${errorData.message}`);
     }
 
     const result: DifyMessageFeedbackResponse = await response.json();
-    
+
     console.log('[Dify Message Service] 成功提交消息反馈:', {
       appId,
       messageId,
-      rating: payload.rating
+      rating: payload.rating,
     });
-    
-    return result;
 
+    return result;
   } catch (error) {
     console.error('[Dify Message Service] 提交消息反馈时发生错误:', error);
-    
+
     if (error instanceof Error) {
       throw error;
     }
-    
+
     throw new Error('提交消息反馈时发生未知错误');
   }
 }
 
 /**
  * 语音转文本
- * 
+ *
  * @param appId - 应用 ID
  * @param payload - 语音数据
  * @returns Promise<DifyAudioToTextResponse> - 转换结果
@@ -232,30 +240,29 @@ export async function convertAudioToText(
         errorData = {
           status: response.status,
           code: response.status.toString(),
-          message: response.statusText || '语音转文本失败'
+          message: response.statusText || '语音转文本失败',
         };
       }
-      
+
       console.error('[Dify Message Service] 语音转文本失败:', errorData);
       throw new Error(`语音转文本失败: ${errorData.message}`);
     }
 
     const result: DifyAudioToTextResponse = await response.json();
-    
+
     console.log('[Dify Message Service] 成功转换语音为文本:', {
       appId,
-      textLength: result.text.length
+      textLength: result.text.length,
     });
-    
-    return result;
 
+    return result;
   } catch (error) {
     console.error('[Dify Message Service] 语音转文本时发生错误:', error);
-    
+
     if (error instanceof Error) {
       throw error;
     }
-    
+
     throw new Error('语音转文本时发生未知错误');
   }
-} 
+}

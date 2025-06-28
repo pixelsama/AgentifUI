@@ -1,24 +1,26 @@
-"use client"
+'use client';
 
-import React, { useMemo, useState, useEffect } from "react"
-import { cn } from "@lib/utils"
-import { useTheme } from "@lib/hooks"
-import { TypeWriter } from "@components/ui/typewriter"
-import { useCurrentApp } from "@lib/hooks/use-current-app"
-import { useWelcomeLayout } from "@lib/hooks/use-welcome-layout"
-import { useTypewriterStore } from "@lib/stores/ui/typewriter-store"
-import { useTranslations } from 'next-intl'
+import { TypeWriter } from '@components/ui/typewriter';
+import { useTheme } from '@lib/hooks';
+import { useCurrentApp } from '@lib/hooks/use-current-app';
+import { useWelcomeLayout } from '@lib/hooks/use-welcome-layout';
+import { useTypewriterStore } from '@lib/stores/ui/typewriter-store';
+import { cn } from '@lib/utils';
+
+import React, { useEffect, useMemo, useState } from 'react';
+
+import { useTranslations } from 'next-intl';
 
 interface WelcomeScreenProps {
-  className?: string
-  username?: string | null
+  className?: string;
+  username?: string | null;
 }
 
 // 根据用户本地时间获取问候语
 const getTimeBasedGreeting = (t: (key: string) => string) => {
   const now = new Date();
   const hour = now.getHours();
-  
+
   if (hour >= 6 && hour < 12) {
     return t('greeting.morning');
   } else if (hour >= 12 && hour < 18) {
@@ -31,26 +33,27 @@ const getTimeBasedGreeting = (t: (key: string) => string) => {
 };
 
 export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
-  const { isDark } = useTheme()
-  const t = useTranslations('pages.chat')
-  const [finalText, setFinalText] = useState("")
+  const { isDark } = useTheme();
+  const t = useTranslations('pages.chat');
+  const [finalText, setFinalText] = useState('');
   // --- BEGIN COMMENT ---
   // 🎯 新增：TypeWriter重置键，确保应用切换时能够重新打字
   // --- END COMMENT ---
-  const [typewriterKey, setTypewriterKey] = useState(0)
-  
+  const [typewriterKey, setTypewriterKey] = useState(0);
+
   // --- BEGIN COMMENT ---
   // 🎯 新增：打字机状态管理
   // --- END COMMENT ---
-  const { setWelcomeTypewriterComplete, resetWelcomeTypewriter } = useTypewriterStore()
-  
+  const { setWelcomeTypewriterComplete, resetWelcomeTypewriter } =
+    useTypewriterStore();
+
   // --- BEGIN COMMENT ---
   // 🎯 新增：动态打字速度配置
   // 根据文字长度智能调整打字速度，提升长文本体验
   // --- END COMMENT ---
   const typewriterConfig = useMemo(() => {
-    const textLength = finalText.length
-    
+    const textLength = finalText.length;
+
     // --- BEGIN COMMENT ---
     // 🎯 智能速度阈值配置
     // 短文本：慢速打字，营造仪式感
@@ -63,43 +66,47 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
       return {
         speed: 20,
         delay: 50,
-        description: '短文本-慢速'
-      }
+        description: '短文本-慢速',
+      };
     } else if (textLength <= 50) {
       // 中短文本（21-50字符）：标准速度
       return {
         speed: 15,
         delay: 40,
-        description: '中短文本-标准'
-      }
+        description: '中短文本-标准',
+      };
     } else if (textLength <= 100) {
       // 中等文本（51-100字符）：中速打字
       return {
         speed: 10,
         delay: 30,
-        description: '中等文本-中速'
-      }
+        description: '中等文本-中速',
+      };
     } else if (textLength <= 200) {
       // 长文本（101-200字符）：快速打字
       return {
         speed: 5,
         delay: 10,
-        description: '长文本-快速'
-      }
+        description: '长文本-快速',
+      };
     } else {
       // 超长文本（>200字符）：极速打字
       return {
         speed: 8,
         delay: 100,
-        description: '超长文本-极速'
-      }
+        description: '超长文本-极速',
+      };
     }
-  }, [finalText.length])
-  
+  }, [finalText.length]);
+
   // --- BEGIN COMMENT ---
   // 使用智能布局系统获取欢迎文字的位置和标题样式
   // --- END COMMENT ---
-  const { welcomeText: welcomePosition, welcomeTextTitle, needsCompactLayout } = useWelcomeLayout()
+  const {
+    welcomeText: welcomePosition,
+    welcomeTextTitle,
+    needsCompactLayout,
+  } = useWelcomeLayout();
 
   // --- BEGIN COMMENT ---
   // 🎯 直接从当前应用实例获取开场白配置
@@ -107,7 +114,7 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
   // 添加验证状态保护，避免应用切换时显示错误内容
   // 🎯 新增：路径感知的状态保护，确保应用切换时序正确
   // --- END COMMENT ---
-  const { currentAppInstance, isValidating, isLoading } = useCurrentApp()
+  const { currentAppInstance, isValidating, isLoading } = useCurrentApp();
 
   // --- BEGIN COMMENT ---
   // 🎯 移除复杂的应用切换检测逻辑，简化组件职责
@@ -122,11 +129,12 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
   useEffect(() => {
     console.log('[WelcomeScreen] 当前状态:', {
       username,
-      hasOpeningStatement: !!currentAppInstance?.config?.dify_parameters?.opening_statement,
+      hasOpeningStatement:
+        !!currentAppInstance?.config?.dify_parameters?.opening_statement,
       currentAppId: currentAppInstance?.instance_id,
       pathname: window.location.pathname,
       isValidating,
-      isLoading
+      isLoading,
     });
 
     // --- BEGIN COMMENT ---
@@ -136,7 +144,7 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
     if (isValidating || isLoading) {
       console.log('[WelcomeScreen] 应用正在验证或加载中，暂停更新欢迎文字', {
         isValidating,
-        isLoading
+        isLoading,
       });
       return;
     }
@@ -149,7 +157,7 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
       console.log('[WelcomeScreen] 等待用户信息加载...');
       return;
     }
-    
+
     // --- BEGIN COMMENT ---
     // 🚨 修复：增加延迟时间，确保应用数据完全稳定后再渲染
     // 避免在应用切换过程中的中间状态渲染错误内容
@@ -159,17 +167,18 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
       // 🎯 重置打字机状态，准备开始新的打字动画
       // --- END COMMENT ---
       resetWelcomeTypewriter();
-      
+
       // --- BEGIN COMMENT ---
       // 🎯 确定最终显示的文字 - 简化版本
       // --- END COMMENT ---
-      let welcomeText = "";
-      
+      let welcomeText = '';
+
       // --- BEGIN COMMENT ---
       // 🎯 从数据库config字段直接获取开场白（如果有的话）
       // --- END COMMENT ---
-      const openingStatement = currentAppInstance?.config?.dify_parameters?.opening_statement;
-      
+      const openingStatement =
+        currentAppInstance?.config?.dify_parameters?.opening_statement;
+
       if (openingStatement && openingStatement.trim()) {
         // --- BEGIN COMMENT ---
         // 情况1：数据库中有应用的开场白配置
@@ -177,7 +186,7 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
         welcomeText = openingStatement.trim();
         console.log('[WelcomeScreen] 使用数据库开场白:', {
           appId: currentAppInstance?.instance_id,
-          text: welcomeText.substring(0, 50) + '...'
+          text: welcomeText.substring(0, 50) + '...',
         });
       } else if (username) {
         // --- BEGIN COMMENT ---
@@ -192,27 +201,26 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
         welcomeText = getTimeBasedGreeting(t);
         console.log('[WelcomeScreen] 使用默认问候:', welcomeText);
       }
-      
+
       // --- BEGIN COMMENT ---
       // 🎯 直接设置文字并强制重新开始打字动画
       // --- END COMMENT ---
       setFinalText(welcomeText);
       setTypewriterKey(prev => prev + 1);
-      
+
       console.log('[WelcomeScreen] 欢迎文字更新完成:', welcomeText);
     }, 200); // 🚨 修复：增加到200ms，确保应用数据稳定
-    
+
     // 清理定时器
     return () => clearTimeout(updateTimer);
-    
   }, [
-    username, 
-    currentAppInstance?.config?.dify_parameters?.opening_statement, 
+    username,
+    currentAppInstance?.config?.dify_parameters?.opening_statement,
     currentAppInstance?.instance_id,
-    isValidating,     // 🚨 修复：重新监听验证状态
-    isLoading,        // 🚨 修复：重新监听加载状态
+    isValidating, // 🚨 修复：重新监听验证状态
+    isLoading, // 🚨 修复：重新监听加载状态
     resetWelcomeTypewriter,
-    t
+    t,
   ]);
 
   // --- BEGIN COMMENT ---
@@ -224,23 +232,22 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
   };
 
   return (
-      <div 
-        className={cn(
-          "welcome-screen flex flex-col items-center justify-center text-center",
-          className
-        )}
-        style={welcomePosition}
-      >
-
+    <div
+      className={cn(
+        'welcome-screen flex flex-col items-center justify-center text-center',
+        className
+      )}
+      style={welcomePosition}
+    >
       <div className="w-full">
         {/* --- BEGIN COMMENT ---
         主标题容器：使用Hook提供的最高优先级宽度设置
         --- END COMMENT --- */}
-        <h2 
+        <h2
           className={cn(
-            "font-bold mb-2 mx-auto",
-            needsCompactLayout ? "text-xl" : "text-2xl",
-            "leading-tight"
+            'mx-auto mb-2 font-bold',
+            needsCompactLayout ? 'text-xl' : 'text-2xl',
+            'leading-tight'
           )}
           style={welcomeTextTitle}
         >
@@ -251,20 +258,20 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
           🎯 添加key属性，确保应用切换时重新开始打字动画
           🎯 添加onComplete回调，通知推荐问题组件开始渲染
           --- END COMMENT --- */}
-          <TypeWriter 
+          <TypeWriter
             key={typewriterKey} // 🎯 强制重新开始打字动画
             text={finalText}
             speed={typewriterConfig.speed} // 🎯 动态速度
             delay={typewriterConfig.delay} // 🎯 动态延迟
-            waitingEffect={finalText.endsWith("...")}
+            waitingEffect={finalText.endsWith('...')}
             onComplete={handleTypewriterComplete} // 🎯 打字机完成回调
             className={cn(
-              "font-bold leading-tight",
-              needsCompactLayout ? "text-xl" : "text-3xl"
+              'leading-tight font-bold',
+              needsCompactLayout ? 'text-xl' : 'text-3xl'
             )}
           />
         </h2>
       </div>
     </div>
-  )
-} 
+  );
+};

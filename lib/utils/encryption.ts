@@ -1,4 +1,9 @@
-import { createCipheriv, createDecipheriv, randomBytes, createHash } from 'crypto';
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  randomBytes,
+} from 'crypto';
 
 /**
  * 加密 API 密钥
@@ -11,20 +16,20 @@ export function encryptApiKey(apiKey: string, masterKey: string): string {
   const hash = createHash('sha256');
   hash.update(masterKey);
   const key = hash.digest(); // 生成 32 字节的密钥
-  
+
   // 生成随机初始化向量
   const iv = randomBytes(16);
-  
+
   // 创建加密器
   const cipher = createCipheriv('aes-256-gcm', key, iv);
-  
+
   // 加密数据
   let encrypted = cipher.update(apiKey, 'utf8', 'hex');
   encrypted += cipher.final('hex');
-  
+
   // 获取认证标签
   const authTag = cipher.getAuthTag().toString('hex');
-  
+
   // 返回格式化的加密数据
   return `${iv.toString('hex')}:${authTag}:${encrypted}`;
 }
@@ -35,31 +40,34 @@ export function encryptApiKey(apiKey: string, masterKey: string): string {
  * @param masterKey 主密钥
  * @returns 解密后的 API 密钥
  */
-export function decryptApiKey(encryptedData: string, masterKey: string): string {
+export function decryptApiKey(
+  encryptedData: string,
+  masterKey: string
+): string {
   // 使用 SHA-256 生成固定长度的密钥
   const hash = createHash('sha256');
   hash.update(masterKey);
   const key = hash.digest(); // 生成 32 字节的密钥
-  
+
   // 解析加密数据
   const [ivHex, authTagHex, encryptedHex] = encryptedData.split(':');
-  
+
   if (!ivHex || !authTagHex || !encryptedHex) {
     throw new Error('Invalid encrypted data format');
   }
-  
+
   // 转换为 Buffer
   const iv = Buffer.from(ivHex, 'hex');
   const authTag = Buffer.from(authTagHex, 'hex');
-  
+
   // 创建解密器
   const decipher = createDecipheriv('aes-256-gcm', key, iv);
   decipher.setAuthTag(authTag);
-  
+
   // 解密数据
   let decrypted = decipher.update(encryptedHex, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
-  
+
   return decrypted;
 }
 

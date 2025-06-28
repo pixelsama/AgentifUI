@@ -1,27 +1,33 @@
-"use client"
+'use client';
 
-import React, { useRef, useEffect } from "react"
-import { cn } from "@lib/utils"
-import { useAttachmentStore } from "@lib/stores/attachment-store"
-import { useFileTypes } from "@lib/hooks/use-file-types"
-import { AttachmentPreviewItem } from "./attachment-preview-item"
+import { useFileTypes } from '@lib/hooks/use-file-types';
+import { useAttachmentStore } from '@lib/stores/attachment-store';
+import { cn } from '@lib/utils';
+
+import React, { useEffect, useRef } from 'react';
+
+import { AttachmentPreviewItem } from './attachment-preview-item';
 
 // --- BEGIN COMMENT ---
 // 附件预览栏 Props 定义
 // --- END COMMENT ---
 interface AttachmentPreviewBarProps {
-  isDark?: boolean
-  onHeightChange: (height: number) => void // 回调函数，通知父组件高度变化
-  onRetryUpload: (id: string) => void // 添加重试上传的回调
+  isDark?: boolean;
+  onHeightChange: (height: number) => void; // 回调函数，通知父组件高度变化
+  onRetryUpload: (id: string) => void; // 添加重试上传的回调
 }
 
 // --- BEGIN COMMENT ---
 // 附件预览栏组件
 // --- END COMMENT ---
-export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({ isDark = false, onHeightChange, onRetryUpload }) => {
-  const files = useAttachmentStore((state) => state.files)
-  const { uploadConfig } = useFileTypes()
-  const containerRef = useRef<HTMLDivElement>(null)
+export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({
+  isDark = false,
+  onHeightChange,
+  onRetryUpload,
+}) => {
+  const files = useAttachmentStore(state => state.files);
+  const { uploadConfig } = useFileTypes();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // --- BEGIN MODIFICATION ---
   // 监听文件列表变化或窗口大小变化，动态计算并通知高度，并设置样式以实现动画
@@ -62,7 +68,7 @@ export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({ isDa
       // 监听内部的 flex 容器，而不是带 overflow 的外部容器
       const innerFlexContainer = container.querySelector(':scope > div');
       if (innerFlexContainer) {
-         resizeObserver.observe(innerFlexContainer);
+        resizeObserver.observe(innerFlexContainer);
       }
     }
 
@@ -72,7 +78,7 @@ export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({ isDa
       resizeObserver.disconnect();
       // 清除高度样式，以便下次正确计算
       if (container) {
-          container.style.height = '';
+        container.style.height = '';
       }
     };
   }, [files.length, onHeightChange]); // 依赖文件数量变化
@@ -88,16 +94,16 @@ export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({ isDa
         className="overflow-hidden transition-[height] duration-300 ease-in-out"
         style={{ height: 0 }}
       />
-    )
+    );
   }
 
   return (
     <div
       ref={containerRef}
       className={cn(
-        isDark ? "border-gray-700" : "border-gray-200", // This class no longer has effect but kept for potential future use
-        "overflow-hidden",
-        "transition-[height] duration-300 ease-in-out",
+        isDark ? 'border-gray-700' : 'border-gray-200', // This class no longer has effect but kept for potential future use
+        'overflow-hidden',
+        'transition-[height] duration-300 ease-in-out'
       )}
       style={{ height: 0 }}
     >
@@ -108,31 +114,36 @@ export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({ isDa
         {/* --- BEGIN COMMENT ---
         // 如果超出数量限制，显示警告信息
         // --- END COMMENT --- */}
-        {uploadConfig.enabled && uploadConfig.maxFiles > 0 && files.length > uploadConfig.maxFiles && (
-          <div className={cn(
-            "mb-2 px-3 py-2 rounded-lg text-sm font-serif",
-            isDark 
-              ? "bg-orange-900/30 border border-orange-500/30 text-orange-300" 
-              : "bg-orange-100 border border-orange-300 text-orange-700"
-          )}>
-            已超出文件数量限制 ({files.length}/{uploadConfig.maxFiles})，请删除部分文件
-          </div>
-        )}
-        
+        {uploadConfig.enabled &&
+          uploadConfig.maxFiles > 0 &&
+          files.length > uploadConfig.maxFiles && (
+            <div
+              className={cn(
+                'mb-2 rounded-lg px-3 py-2 font-serif text-sm',
+                isDark
+                  ? 'border border-orange-500/30 bg-orange-900/30 text-orange-300'
+                  : 'border border-orange-300 bg-orange-100 text-orange-700'
+              )}
+            >
+              已超出文件数量限制 ({files.length}/{uploadConfig.maxFiles}
+              )，请删除部分文件
+            </div>
+          )}
+
         {/* --- BEGIN COMMENT ---
         // 文件列表容器
         // --- END COMMENT --- */}
         <div className="flex flex-wrap gap-2">
-          {files.map((file) => (
-            <AttachmentPreviewItem 
-              key={file.id} 
-              attachment={file} 
-              isDark={isDark} 
-              onRetry={onRetryUpload} 
+          {files.map(file => (
+            <AttachmentPreviewItem
+              key={file.id}
+              attachment={file}
+              isDark={isDark}
+              onRetry={onRetryUpload}
             />
           ))}
         </div>
       </div>
     </div>
-  )
-} 
+  );
+};

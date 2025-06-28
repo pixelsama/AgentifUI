@@ -1,41 +1,64 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { useTranslations } from 'next-intl'
-import { useRouter } from "next/navigation"
-import { Zap, Bot, Plus, HeartOff, Heart, Edit, ChevronDown, ChevronRight, Pen, Trash } from "lucide-react"
-import { cn } from "@lib/utils"
-import { useCurrentApp } from "@lib/hooks/use-current-app"
-import { useChatStore } from "@lib/stores/chat-store"
-import { useSidebarStore } from "@lib/stores/sidebar-store"
-import { useFavoriteAppsStore } from "@lib/stores/favorite-apps-store"
-import { useThemeColors } from "@lib/hooks/use-theme-colors"
-import { SidebarListButton } from "./sidebar-list-button"
-import { MoreButtonV2 } from "@components/ui/more-button-v2"
-import { DropdownMenuV2 } from "@components/ui/dropdown-menu-v2"
-import React from "react"
+import { DropdownMenuV2 } from '@components/ui/dropdown-menu-v2';
+import { MoreButtonV2 } from '@components/ui/more-button-v2';
+import { useCurrentApp } from '@lib/hooks/use-current-app';
+import { useThemeColors } from '@lib/hooks/use-theme-colors';
+import { useChatStore } from '@lib/stores/chat-store';
+import { useFavoriteAppsStore } from '@lib/stores/favorite-apps-store';
+import { useSidebarStore } from '@lib/stores/sidebar-store';
+import { cn } from '@lib/utils';
+import {
+  Bot,
+  ChevronDown,
+  ChevronRight,
+  Edit,
+  Heart,
+  HeartOff,
+  Pen,
+  Plus,
+  Trash,
+  Zap,
+} from 'lucide-react';
+
+import { useEffect, useState } from 'react';
+import React from 'react';
+
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+
+import { SidebarListButton } from './sidebar-list-button';
 
 interface FavoriteApp {
-  instanceId: string
-  displayName: string
-  description?: string
-  iconUrl?: string
-  appType: 'model' | 'marketplace'
-  dify_apptype?: 'agent' | 'chatbot' | 'text-generation' | 'chatflow' | 'workflow'
+  instanceId: string;
+  displayName: string;
+  description?: string;
+  iconUrl?: string;
+  appType: 'model' | 'marketplace';
+  dify_apptype?:
+    | 'agent'
+    | 'chatbot'
+    | 'text-generation'
+    | 'chatflow'
+    | 'workflow';
 }
 
 interface SidebarFavoriteAppsProps {
-  isDark: boolean
-  contentVisible: boolean
+  isDark: boolean;
+  contentVisible: boolean;
 }
 
-export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteAppsProps) {
-  const router = useRouter()
-  const { switchToSpecificApp } = useCurrentApp()
-  const { clearMessages } = useChatStore()
-  const { isExpanded, selectItem, selectedType, selectedId } = useSidebarStore()
-  const { colors } = useThemeColors()
-  const t = useTranslations('sidebar')
+export function SidebarFavoriteApps({
+  isDark,
+  contentVisible,
+}: SidebarFavoriteAppsProps) {
+  const router = useRouter();
+  const { switchToSpecificApp } = useCurrentApp();
+  const { clearMessages } = useChatStore();
+  const { isExpanded, selectItem, selectedType, selectedId } =
+    useSidebarStore();
+  const { colors } = useThemeColors();
+  const t = useTranslations('sidebar');
   const {
     favoriteApps,
     removeFavoriteApp,
@@ -45,55 +68,53 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
     // 🎯 新增：展开/关闭状态管理
     // --- END COMMENT ---
     isExpanded: isAppsExpanded,
-    toggleExpanded
-  } = useFavoriteAppsStore()
+    toggleExpanded,
+  } = useFavoriteAppsStore();
 
   // 下拉菜单状态管理
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
   // 新增：点击状态管理，提供即时反馈
-  const [clickingAppId, setClickingAppId] = useState<string | null>(null)
+  const [clickingAppId, setClickingAppId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadFavoriteApps()
-  }, [loadFavoriteApps])
+    loadFavoriteApps();
+  }, [loadFavoriteApps]);
 
   // 监听sidebar展开状态，关闭时自动关闭dropdown
   useEffect(() => {
     if (!isExpanded && openDropdownId) {
-      setOpenDropdownId(null)
+      setOpenDropdownId(null);
     }
-  }, [isExpanded, openDropdownId])
+  }, [isExpanded, openDropdownId]);
 
   // --- BEGIN COMMENT ---
   // 根据展开状态决定显示数量：关闭时显示3个，展开时显示所有
   // --- END COMMENT ---
-  const displayApps = isAppsExpanded 
-    ? favoriteApps 
-    : favoriteApps.slice(0, 3)
+  const displayApps = isAppsExpanded ? favoriteApps : favoriteApps.slice(0, 3);
 
   // 判断应用是否处于选中状态 - 参考chat list的实现
   const isAppActive = React.useCallback((app: FavoriteApp) => {
     // 获取当前路由路径
-    const pathname = window.location.pathname
+    const pathname = window.location.pathname;
 
     // 检查当前路由是否是应用详情页面
-    if (!pathname.startsWith('/apps/')) return false
+    if (!pathname.startsWith('/apps/')) return false;
 
     // 🎯 修复：支持新的路由结构 /apps/{type}/[instanceId]
-    const pathParts = pathname.split('/apps/')[1]?.split('/')
-    if (!pathParts || pathParts.length < 2) return false
-    
-    const routeAppType = pathParts[0]  // 应用类型
-    const routeInstanceId = pathParts[1]  // 实例ID
-    
+    const pathParts = pathname.split('/apps/')[1]?.split('/');
+    if (!pathParts || pathParts.length < 2) return false;
+
+    const routeAppType = pathParts[0]; // 应用类型
+    const routeInstanceId = pathParts[1]; // 实例ID
+
     // 基本的instanceId匹配
-    if (routeInstanceId !== app.instanceId) return false
-    
+    if (routeInstanceId !== app.instanceId) return false;
+
     // 检查应用类型是否匹配
-    const appDifyType = app.dify_apptype || 'chatflow'
-    return routeAppType === appDifyType
-  }, [])
+    const appDifyType = app.dify_apptype || 'chatflow';
+    return routeAppType === appDifyType;
+  }, []);
 
   // 🎯 重构：优化点击处理逻辑，解决用户体验问题
   // 1. 立即跳转路由，让页面级spinner处理加载状态
@@ -103,85 +124,83 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
   const handleAppClick = async (app: FavoriteApp) => {
     // 🎯 防止重复点击
     if (clickingAppId === app.instanceId) {
-      console.log('[FavoriteApps] 防止重复点击:', app.instanceId)
-      return
+      console.log('[FavoriteApps] 防止重复点击:', app.instanceId);
+      return;
     }
 
     try {
       // 🎯 立即设置点击状态，提供短暂的视觉反馈
-      setClickingAppId(app.instanceId)
-      console.log('[FavoriteApps] 开始切换到常用应用:', app.displayName)
+      setClickingAppId(app.instanceId);
+      console.log('[FavoriteApps] 开始切换到常用应用:', app.displayName);
 
       // 🎯 立即设置sidebar选中状态，提供即时反馈
-      selectItem('app', app.instanceId)
+      selectItem('app', app.instanceId);
 
       // 🎯 立即跳转路由，让页面级spinner接管加载状态
-      const difyAppType = app.dify_apptype || 'chatflow'
-      const targetPath = `/apps/${difyAppType}/${app.instanceId}`
-      
-      console.log('[FavoriteApps] 立即跳转路由:', targetPath)
-      
+      const difyAppType = app.dify_apptype || 'chatflow';
+      const targetPath = `/apps/${difyAppType}/${app.instanceId}`;
+
+      console.log('[FavoriteApps] 立即跳转路由:', targetPath);
+
       // 🎯 修复竞态条件：只跳转路由，让目标页面自己处理应用切换
       // 避免同时调用 switchToSpecificApp 导致的 localStorage 状态闪烁
       // 这与应用市场的行为保持一致
-      router.push(targetPath)
-      
-      // 🎯 移除后台应用切换调用，避免与目标页面的切换逻辑产生竞态条件
-      
-      console.log('[FavoriteApps] 路由跳转已发起，页面接管后续处理')
+      router.push(targetPath);
 
+      // 🎯 移除后台应用切换调用，避免与目标页面的切换逻辑产生竞态条件
+
+      console.log('[FavoriteApps] 路由跳转已发起，页面接管后续处理');
     } catch (error) {
-      console.error('[FavoriteApps] 切换到常用应用失败:', error)
-      
+      console.error('[FavoriteApps] 切换到常用应用失败:', error);
+
       // 🎯 错误处理：恢复sidebar状态
-      selectItem(null, null)
+      selectItem(null, null);
     } finally {
       // 🎯 快速清除点击状态，避免按钮卡住
       // 使用短延迟确保用户能看到点击反馈
       setTimeout(() => {
-        setClickingAppId(null)
-      }, 200)
+        setClickingAppId(null);
+      }, 200);
     }
-  }
+  };
 
   // 🎯 优化：发起新对话使用相同的优化策略
   const handleStartNewChat = async (app: FavoriteApp) => {
     // 防止重复点击
     if (clickingAppId === app.instanceId) {
-      return
+      return;
     }
 
     try {
-      setClickingAppId(app.instanceId)
-      console.log('[FavoriteApps] 发起新对话:', app.displayName)
+      setClickingAppId(app.instanceId);
+      console.log('[FavoriteApps] 发起新对话:', app.displayName);
 
       // 立即设置sidebar选中状态
-      selectItem('app', app.instanceId)
+      selectItem('app', app.instanceId);
 
       // 立即跳转，让页面处理后续逻辑
-      const difyAppType = app.dify_apptype || 'chatflow'
-      const targetPath = `/apps/${difyAppType}/${app.instanceId}`
-      
-      console.log('[FavoriteApps] 发起新对话，跳转到:', targetPath)
-      router.push(targetPath)
-      
+      const difyAppType = app.dify_apptype || 'chatflow';
+      const targetPath = `/apps/${difyAppType}/${app.instanceId}`;
+
+      console.log('[FavoriteApps] 发起新对话，跳转到:', targetPath);
+      router.push(targetPath);
+
       // 🎯 移除后台应用切换调用，避免竞态条件
       // 让目标页面自己处理应用切换
-
     } catch (error) {
-      console.error('[FavoriteApps] 发起新对话失败:', error)
-      selectItem(null, null)
+      console.error('[FavoriteApps] 发起新对话失败:', error);
+      selectItem(null, null);
     } finally {
       setTimeout(() => {
-        setClickingAppId(null)
-      }, 200)
+        setClickingAppId(null);
+      }, 200);
     }
-  }
+  };
 
   // 隐藏应用
   const handleHideApp = (app: FavoriteApp) => {
-    removeFavoriteApp(app.instanceId)
-  }
+    removeFavoriteApp(app.instanceId);
+  };
 
   // 获取应用图标
   const getAppIcon = (app: FavoriteApp) => {
@@ -190,60 +209,62 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
         <img
           src={app.iconUrl}
           alt={app.displayName}
-          className="w-4 h-4 rounded-sm object-cover"
+          className="h-4 w-4 rounded-sm object-cover"
         />
-      )
+      );
     }
-    
+
     // 🎨 现代化设计：使用彩色渐变背景 + 简洁图标
     // 基于应用ID生成一致的渐变色彩，确保每个应用都有独特且稳定的视觉标识
     // 提升sidebar的现代感和视觉层次
     const getAppGradient = () => {
       const gradients = [
-        "bg-gradient-to-br from-blue-400 to-blue-600",
-        "bg-gradient-to-br from-purple-400 to-purple-600", 
-        "bg-gradient-to-br from-pink-400 to-pink-600",
-        "bg-gradient-to-br from-green-400 to-green-600",
-        "bg-gradient-to-br from-orange-400 to-orange-600",
-        "bg-gradient-to-br from-teal-400 to-teal-600",
-        "bg-gradient-to-br from-indigo-400 to-indigo-600",
-        "bg-gradient-to-br from-cyan-400 to-cyan-600"
-      ]
-      
+        'bg-gradient-to-br from-blue-400 to-blue-600',
+        'bg-gradient-to-br from-purple-400 to-purple-600',
+        'bg-gradient-to-br from-pink-400 to-pink-600',
+        'bg-gradient-to-br from-green-400 to-green-600',
+        'bg-gradient-to-br from-orange-400 to-orange-600',
+        'bg-gradient-to-br from-teal-400 to-teal-600',
+        'bg-gradient-to-br from-indigo-400 to-indigo-600',
+        'bg-gradient-to-br from-cyan-400 to-cyan-600',
+      ];
+
       // 基于应用ID生成一致的哈希值，确保相同应用总是显示相同颜色
       const hash = app.instanceId.split('').reduce((a, b) => {
-        a = ((a << 5) - a) + b.charCodeAt(0)
-        return a & a
-      }, 0)
-      
-      return gradients[Math.abs(hash) % gradients.length]
-    }
-    
+        a = (a << 5) - a + b.charCodeAt(0);
+        return a & a;
+      }, 0);
+
+      return gradients[Math.abs(hash) % gradients.length];
+    };
+
     return (
-      <div className={cn(
-        "w-4 h-4 rounded-md flex items-center justify-center text-white shadow-sm",
-        "transition-all duration-200 group-hover:scale-105",
-        getAppGradient()
-      )}>
+      <div
+        className={cn(
+          'flex h-4 w-4 items-center justify-center rounded-md text-white shadow-sm',
+          'transition-all duration-200 group-hover:scale-105',
+          getAppGradient()
+        )}
+      >
         {/* 使用简洁的几何图标，现代且通用 */}
-        <div className="w-2 h-2 rounded-sm bg-white/90" />
+        <div className="h-2 w-2 rounded-sm bg-white/90" />
       </div>
-    )
-  }
+    );
+  };
 
   // 创建下拉菜单
   const createMoreActions = (app: FavoriteApp) => {
-    const isMenuOpen = openDropdownId === app.instanceId
+    const isMenuOpen = openDropdownId === app.instanceId;
     // 🎯 检查当前应用是否正在处理中
-    const isAppBusy = clickingAppId === app.instanceId
+    const isAppBusy = clickingAppId === app.instanceId;
 
     const handleMenuOpenChange = (isOpen: boolean) => {
       // 🎯 如果应用正在处理中，不允许打开菜单
       if (isAppBusy && isOpen) {
-        return
+        return;
       }
-      setOpenDropdownId(isOpen ? app.instanceId : null)
-    }
+      setOpenDropdownId(isOpen ? app.instanceId : null);
+    };
 
     return (
       <DropdownMenuV2
@@ -262,41 +283,43 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
         }
       >
         <DropdownMenuV2.Item
-          icon={<Edit className="w-3.5 h-3.5" />}
+          icon={<Edit className="h-3.5 w-3.5" />}
           onClick={() => {
             // 🎯 点击后立即关闭菜单，避免状态冲突
-            setOpenDropdownId(null)
-            handleStartNewChat(app)
+            setOpenDropdownId(null);
+            handleStartNewChat(app);
           }}
           disabled={isAppBusy} // 🎯 应用忙碌时禁用
         >
           {/* --- BEGIN COMMENT ---
           根据应用类型显示不同的按钮文本
           --- END COMMENT --- */}
-          {app.dify_apptype === 'workflow' ? t('startWorkflow') : 
-           app.dify_apptype === 'text-generation' ? t('startTextGeneration') : 
-           t('startChat')}
+          {app.dify_apptype === 'workflow'
+            ? t('startWorkflow')
+            : app.dify_apptype === 'text-generation'
+              ? t('startTextGeneration')
+              : t('startChat')}
         </DropdownMenuV2.Item>
         <DropdownMenuV2.Item
-          icon={<HeartOff className="w-3.5 h-3.5" />}
+          icon={<HeartOff className="h-3.5 w-3.5" />}
           onClick={() => {
-            setOpenDropdownId(null)
-            handleHideApp(app)
+            setOpenDropdownId(null);
+            handleHideApp(app);
           }}
           disabled={isAppBusy} // 🎯 应用忙碌时禁用
         >
           {t('hideApp')}
         </DropdownMenuV2.Item>
       </DropdownMenuV2>
-    )
-  }
+    );
+  };
 
   // 如果没有常用应用，不显示任何内容
   if (!isLoading && displayApps.length === 0) {
-    return null
+    return null;
   }
 
-  if (!contentVisible) return null
+  if (!contentVisible) return null;
 
   return (
     <div className="flex flex-col">
@@ -304,37 +327,42 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
       粘性标题：保持原有样式，只添加粘性定位
       --- END COMMENT --- */}
       {displayApps.length > 0 && (
-        <div className={cn(
-          "sticky top-0 z-40 px-2 py-1 ml-[6px]",
-          // --- BEGIN COMMENT ---
-          // 使用与sidebar相同的背景色，确保粘性效果完美，无悬停效果
-          // 确保z-index足够高，完全覆盖下方内容，避免透明效果
-          // --- END COMMENT ---
-          colors.sidebarBackground.tailwind,
-          favoriteApps.length > 3 && "cursor-pointer"
-        )}
-        onClick={favoriteApps.length > 3 ? toggleExpanded : undefined}
+        <div
+          className={cn(
+            'sticky top-0 z-40 ml-[6px] px-2 py-1',
+            // --- BEGIN COMMENT ---
+            // 使用与sidebar相同的背景色，确保粘性效果完美，无悬停效果
+            // 确保z-index足够高，完全覆盖下方内容，避免透明效果
+            // --- END COMMENT ---
+            colors.sidebarBackground.tailwind,
+            favoriteApps.length > 3 && 'cursor-pointer'
+          )}
+          onClick={favoriteApps.length > 3 ? toggleExpanded : undefined}
         >
           <div className="flex items-center">
             {/* --- BEGIN COMMENT ---
             标题文字和展开按钮紧凑布局：去掉数字组件，按钮紧贴文字
             --- END COMMENT --- */}
-            <span className={cn(
-              "text-xs font-medium font-serif leading-none",
-              isDark ? "text-stone-400" : "text-stone-500"
-            )}>
+            <span
+              className={cn(
+                'font-serif text-xs leading-none font-medium',
+                isDark ? 'text-stone-400' : 'text-stone-500'
+              )}
+            >
               {t('favoriteApps')}
             </span>
-            
+
             {/* --- BEGIN COMMENT ---
             展开按钮：仅在有超过3个应用时显示，紧贴文字
             --- END COMMENT --- */}
             {favoriteApps.length > 3 && (
-              <ChevronRight className={cn(
-                "w-2.5 h-2.5 ml-0.5 transition-transform duration-200",
-                isAppsExpanded && "rotate-90",
-                isDark ? "text-stone-400/70" : "text-stone-500/70"
-              )} />
+              <ChevronRight
+                className={cn(
+                  'ml-0.5 h-2.5 w-2.5 transition-transform duration-200',
+                  isAppsExpanded && 'rotate-90',
+                  isDark ? 'text-stone-400/70' : 'text-stone-500/70'
+                )}
+              />
             )}
           </div>
         </div>
@@ -342,10 +370,12 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
 
       {/* 加载状态 */}
       {isLoading && (
-        <div className={cn(
-          "px-3 py-1 text-xs font-serif",
-          isDark ? "text-gray-500" : "text-gray-400"
-        )}>
+        <div
+          className={cn(
+            'px-3 py-1 font-serif text-xs',
+            isDark ? 'text-gray-500' : 'text-gray-400'
+          )}
+        >
           {t('loading')}
         </div>
       )}
@@ -359,22 +389,26 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
             // 🎯 修复跨页面切换延迟：在路由跳转期间允许sidebar store状态立即生效
             // 1. 如果sidebar store中选中了这个应用，立即显示为选中（路由跳转期间）
             // 2. 如果在非应用页面且store中没选中，确保不显示选中状态
-            const isInAppPage = window.location.pathname.startsWith('/apps/')
-            const isSelectedByStore = selectedType === 'app' && selectedId === app.instanceId
-            const isSelected = isSelectedByStore || (isInAppPage && isAppActive(app))
+            const isInAppPage = window.location.pathname.startsWith('/apps/');
+            const isSelectedByStore =
+              selectedType === 'app' && selectedId === app.instanceId;
+            const isSelected =
+              isSelectedByStore || (isInAppPage && isAppActive(app));
             // 检查当前应用是否正在点击中
-            const isClicking = clickingAppId === app.instanceId
+            const isClicking = clickingAppId === app.instanceId;
             // 计算是否是扩展项（超过前3个的应用）
-            const isExtendedItem = index >= 3
-            
+            const isExtendedItem = index >= 3;
+
             return (
-              <div 
+              <div
                 className={cn(
-                  "group relative transition-opacity duration-300",
+                  'group relative transition-opacity duration-300',
                   // --- BEGIN COMMENT ---
                   // 简单的fade in/out效果
                   // --- END COMMENT ---
-                  isExtendedItem && !isAppsExpanded ? "opacity-0 pointer-events-none" : "opacity-100"
+                  isExtendedItem && !isAppsExpanded
+                    ? 'pointer-events-none opacity-0'
+                    : 'opacity-100'
                 )}
                 key={app.instanceId}
               >
@@ -386,57 +420,57 @@ export function SidebarFavoriteApps({ isDark, contentVisible }: SidebarFavoriteA
                   hasOpenDropdown={openDropdownId === app.instanceId}
                   disableHover={!!openDropdownId || isClicking} // 🎯 点击时禁用悬停
                   moreActionsTrigger={
-                    <div className={cn(
-                      "transition-opacity",
-                      // 🎯 点击时隐藏more button，避免干扰
-                      isClicking
-                        ? "opacity-0 pointer-events-none"
-                        : openDropdownId === app.instanceId
-                          ? "opacity-100" // 当前打开菜单的item，more button保持显示
-                          : openDropdownId
-                            ? "opacity-0" // 有其他菜单打开时，此item的more button不显示
-                            : "opacity-0 group-hover:opacity-100 focus-within:opacity-100" // 正常状态下的悬停显示
-                    )}>
+                    <div
+                      className={cn(
+                        'transition-opacity',
+                        // 🎯 点击时隐藏more button，避免干扰
+                        isClicking
+                          ? 'pointer-events-none opacity-0'
+                          : openDropdownId === app.instanceId
+                            ? 'opacity-100' // 当前打开菜单的item，more button保持显示
+                            : openDropdownId
+                              ? 'opacity-0' // 有其他菜单打开时，此item的more button不显示
+                              : 'opacity-0 group-hover:opacity-100 focus-within:opacity-100' // 正常状态下的悬停显示
+                      )}
+                    >
                       {createMoreActions(app)}
                     </div>
                   }
                   className={cn(
-                    "w-full justify-start font-medium",
-                    "transition-all duration-200 ease-in-out",
+                    'w-full justify-start font-medium',
+                    'transition-all duration-200 ease-in-out',
                     // 🎯 点击时的特殊样式
-                    isClicking && "opacity-75 cursor-wait",
+                    isClicking && 'cursor-wait opacity-75',
                     // --- BEGIN COMMENT ---
                     // 🎨 统一悬停效果：与header保持完全一致
                     // 使用与header相同的 stone-300/80 和 stone-600/60
                     // --- END COMMENT ---
                     isDark
-                      ? "text-gray-300 hover:text-gray-100 hover:bg-stone-600/60"
-                      : "text-gray-700 hover:text-gray-900 hover:bg-stone-300/80"
+                      ? 'text-gray-300 hover:bg-stone-600/60 hover:text-gray-100'
+                      : 'text-gray-700 hover:bg-stone-300/80 hover:text-gray-900'
                   )}
                 >
-                  <div className="flex-1 min-w-0 flex items-center">
+                  <div className="flex min-w-0 flex-1 items-center">
                     {/* 应用名称 - 使用与近期对话一致的样式 */}
                     <span className="truncate font-serif text-xs font-medium">
                       {app.displayName}
                     </span>
                     {/* 🎯 新增：点击时显示状态提示 */}
                     {isClicking && (
-                      <span className={cn(
-                        "ml-2 text-xs opacity-75 font-serif",
-                        isDark ? "text-gray-400" : "text-gray-500"
-                      )}>
-                      </span>
+                      <span
+                        className={cn(
+                          'ml-2 font-serif text-xs opacity-75',
+                          isDark ? 'text-gray-400' : 'text-gray-500'
+                        )}
+                      ></span>
                     )}
                   </div>
                 </SidebarListButton>
               </div>
-            )
+            );
           })}
         </div>
       )}
-
-
-
     </div>
-  )
-} 
+  );
+}

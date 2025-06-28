@@ -1,38 +1,39 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { FILE_TYPE_CONFIG } from '@lib/constants/file-types';
 import { useTheme } from '@lib/hooks/use-theme';
-import { cn } from '@lib/utils';
 import type { DifyParametersSimplifiedConfig } from '@lib/types/dify-parameters';
+import { cn } from '@lib/utils';
 import {
-  X,
-  Settings,
-  MessageSquare,
-  Upload,
-  Plus,
-  Trash2,
+  BookOpen,
+  Check,
   ChevronDown,
   ChevronRight,
-  Sparkles,
-  Image,
-  Save,
-  RotateCcw,
-  FileText,
-  Globe,
-  Music,
-  Video,
-  File,
-  ExternalLink,
   Circle,
-  Check,
-  Mic,
-  Volume2,
-  BookOpen,
-  Tag,
+  ExternalLink,
+  File,
+  FileText,
   FormInput,
-  Settings2
+  Globe,
+  Image,
+  MessageSquare,
+  Mic,
+  Music,
+  Plus,
+  RotateCcw,
+  Save,
+  Settings,
+  Settings2,
+  Sparkles,
+  Tag,
+  Trash2,
+  Upload,
+  Video,
+  Volume2,
+  X,
 } from 'lucide-react';
-import { FILE_TYPE_CONFIG } from "@lib/constants/file-types";
+
+import React, { useEffect, useState } from 'react';
 
 interface DifyParametersPanelProps {
   isOpen: boolean;
@@ -47,20 +48,27 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
   onClose,
   config,
   onSave,
-  instanceName = '应用实例'
+  instanceName = '应用实例',
 }) => {
   const { isDark } = useTheme();
-  const [localConfig, setLocalConfig] = useState<DifyParametersSimplifiedConfig>(config);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [localConfig, setLocalConfig] =
+    useState<DifyParametersSimplifiedConfig>(config);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set()
+  );
   const [hasChanges, setHasChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  
+
   // --- 文件上传配置状态 ---
   const [fileUploadEnabled, setFileUploadEnabled] = useState(false);
   const [showFileUploadModal, setShowFileUploadModal] = useState(false);
-  const [uploadMethod, setUploadMethod] = useState<'local' | 'url' | 'both'>('both');
+  const [uploadMethod, setUploadMethod] = useState<'local' | 'url' | 'both'>(
+    'both'
+  );
   const [maxFiles, setMaxFiles] = useState(3);
-  const [enabledFileTypes, setEnabledFileTypes] = useState<Set<string>>(new Set(['图片']));
+  const [enabledFileTypes, setEnabledFileTypes] = useState<Set<string>>(
+    new Set(['图片'])
+  );
   const [customFileTypes, setCustomFileTypes] = useState<string>(''); // 新增：自定义文件类型
 
   // --- 初始状态保存（用于取消操作） ---
@@ -69,14 +77,14 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
     uploadMethod: 'both' as 'local' | 'url' | 'both',
     maxFiles: 3,
     enabledFileTypes: new Set<string>(['图片']),
-    customFileTypes: ''
+    customFileTypes: '',
   });
 
   useEffect(() => {
     setLocalConfig(config);
     setHasChanges(false);
     setIsInitialized(false);
-    
+
     // --- BEGIN COMMENT ---
     // 🎯 更新：初始化所有配置字段的默认值
     // --- END COMMENT ---
@@ -84,7 +92,8 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
       const initializedConfig: DifyParametersSimplifiedConfig = {
         opening_statement: config.opening_statement || '',
         suggested_questions: config.suggested_questions || [],
-        suggested_questions_after_answer: config.suggested_questions_after_answer || { enabled: false },
+        suggested_questions_after_answer:
+          config.suggested_questions_after_answer || { enabled: false },
         speech_to_text: config.speech_to_text || { enabled: false },
         text_to_speech: config.text_to_speech || { enabled: false },
         retriever_resource: config.retriever_resource || { enabled: false },
@@ -99,24 +108,24 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
           file_size_limit: 15,
           image_file_size_limit: 10,
           audio_file_size_limit: 50,
-          video_file_size_limit: 100
-        }
+          video_file_size_limit: 100,
+        },
       };
-      
+
       setLocalConfig(initializedConfig);
       setTimeout(() => setIsInitialized(true), 100);
     };
-    
+
     initializeConfig();
-    
+
     // 初始化文件上传配置状态
     const initializeFileUploadState = () => {
       const fileUploadConfig = config.file_upload;
-      
+
       // --- BEGIN COMMENT ---
       // 🎯 文件上传配置初始化完成，移除调试日志
       // --- END COMMENT ---
-      
+
       // --- BEGIN COMMENT ---
       // 🎯 修复：根据实际的 Dify API 返回格式检测文件上传是否启用
       // 实际格式：{enabled: true, image: {...}, allowed_file_types: [...]}
@@ -125,53 +134,63 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
       const hasFileUpload = !!(
         fileUploadConfig?.enabled || // 检查顶层的 enabled 字段
         fileUploadConfig?.image?.enabled || // 兼容标准格式
-        fileUploadConfig?.document?.enabled || 
-        fileUploadConfig?.audio?.enabled || 
+        fileUploadConfig?.document?.enabled ||
+        fileUploadConfig?.audio?.enabled ||
         fileUploadConfig?.video?.enabled ||
         fileUploadConfig?.other?.enabled
       );
-      
+
       console.log('[文件上传初始化] 检测到文件上传启用状态:', hasFileUpload);
-      
+
       let uploadMethodValue: 'local' | 'url' | 'both' = 'both';
       let maxFilesValue = 3;
       const enabledTypesSet = new Set<string>();
       let customFileTypesValue = '';
-      
+
       if (hasFileUpload && fileUploadConfig) {
         // --- BEGIN COMMENT ---
         // 🎯 修复：根据实际的 Dify API 返回格式获取配置参数
         // 优先从顶层字段获取，然后从具体文件类型配置获取
         // --- END COMMENT ---
-        
+
         // 从顶层配置或第一个启用的文件类型获取通用配置
         let configSource = null;
         if (fileUploadConfig.allowed_file_upload_methods) {
           // 使用顶层配置
           const methods = fileUploadConfig.allowed_file_upload_methods || [];
-          if (methods.includes('local_file') && methods.includes('remote_url')) {
+          if (
+            methods.includes('local_file') &&
+            methods.includes('remote_url')
+          ) {
             uploadMethodValue = 'both';
           } else if (methods.includes('local_file')) {
             uploadMethodValue = 'local';
           } else if (methods.includes('remote_url')) {
             uploadMethodValue = 'url';
           }
-          
+
           // 获取文件数量限制
-          maxFilesValue = fileUploadConfig.number_limits || 
-                         fileUploadConfig.max_files || 
-                         fileUploadConfig.file_count_limit || 
-                         3; // 默认值
+          maxFilesValue =
+            fileUploadConfig.number_limits ||
+            fileUploadConfig.max_files ||
+            fileUploadConfig.file_count_limit ||
+            3; // 默认值
         } else {
           // 回退到具体文件类型配置
-          configSource = fileUploadConfig.image || fileUploadConfig.document || 
-                        fileUploadConfig.audio || fileUploadConfig.video || 
-                        fileUploadConfig.other;
-          
+          configSource =
+            fileUploadConfig.image ||
+            fileUploadConfig.document ||
+            fileUploadConfig.audio ||
+            fileUploadConfig.video ||
+            fileUploadConfig.other;
+
           if (configSource) {
             maxFilesValue = configSource.number_limits || 3;
             const methods = configSource.transfer_methods || [];
-            if (methods.includes('local_file') && methods.includes('remote_url')) {
+            if (
+              methods.includes('local_file') &&
+              methods.includes('remote_url')
+            ) {
               uploadMethodValue = 'both';
             } else if (methods.includes('local_file')) {
               uploadMethodValue = 'local';
@@ -180,7 +199,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
             }
           }
         }
-        
+
         // --- BEGIN COMMENT ---
         // 🎯 修复：根据实际的 API 返回格式设置启用的文件类型
         // 从 allowed_file_types 字段或具体的文件类型配置中获取
@@ -189,12 +208,12 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
         if (fileUploadConfig.allowed_file_types) {
           // 从顶层的 allowed_file_types 字段获取
           const allowedTypes = fileUploadConfig.allowed_file_types;
-          
+
           // 检查是否包含标准类型
-          const hasStandardTypes = allowedTypes.some(type => 
+          const hasStandardTypes = allowedTypes.some(type =>
             ['image', 'document', 'audio', 'video'].includes(type)
           );
-          
+
           if (hasStandardTypes) {
             // 如果有标准类型，只添加标准类型
             if (allowedTypes.includes('image')) enabledTypesSet.add('图片');
@@ -206,7 +225,8 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
             enabledTypesSet.add('其他文件类型');
             // 从 allowed_file_extensions 获取自定义扩展名
             if (fileUploadConfig.allowed_file_extensions) {
-              customFileTypesValue = fileUploadConfig.allowed_file_extensions.join(', ');
+              customFileTypesValue =
+                fileUploadConfig.allowed_file_extensions.join(', ');
             }
           } else {
             // 如果没有标准类型也没有custom，可能是其他未知类型
@@ -221,39 +241,42 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
           if (fileUploadConfig.video?.enabled) enabledTypesSet.add('视频');
           if (fileUploadConfig.other?.enabled) {
             enabledTypesSet.add('其他文件类型');
-            customFileTypesValue = (fileUploadConfig.other as any).custom_extensions?.join(', ') || '';
+            customFileTypesValue =
+              (fileUploadConfig.other as any).custom_extensions?.join(', ') ||
+              '';
           }
         }
       }
-      
+
       // 如果没有启用任何类型，应该保持空集合，让用户自己选择
       // 不再默认启用任何文件类型
-      
+
       const newState = {
         fileUploadEnabled: hasFileUpload,
         uploadMethod: uploadMethodValue,
         maxFiles: maxFilesValue,
         enabledFileTypes: enabledTypesSet,
-        customFileTypes: customFileTypesValue
+        customFileTypes: customFileTypesValue,
       };
-      
+
       // 设置当前状态
       setFileUploadEnabled(newState.fileUploadEnabled);
       setUploadMethod(newState.uploadMethod);
       setMaxFiles(newState.maxFiles);
       setEnabledFileTypes(newState.enabledFileTypes);
       setCustomFileTypes(newState.customFileTypes);
-      
+
       // 保存初始状态
       setInitialFileUploadState(newState);
     };
-    
+
     initializeFileUploadState();
   }, [config]);
 
   useEffect(() => {
     if (isInitialized) {
-      const configChanged = JSON.stringify(localConfig) !== JSON.stringify(config);
+      const configChanged =
+        JSON.stringify(localConfig) !== JSON.stringify(config);
       setHasChanges(configChanged);
     }
   }, [localConfig, config, isInitialized]);
@@ -273,14 +296,14 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
       const newConfig = { ...prev };
       const keys = path.split('.');
       let current: any = newConfig;
-      
+
       for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]]) {
           current[keys[i]] = {};
         }
         current = current[keys[i]];
       }
-      
+
       current[keys[keys.length - 1]] = value;
       return newConfig;
     });
@@ -307,21 +330,21 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
   const handleSave = () => {
     onSave(localConfig);
     setHasChanges(false);
-    
+
     // 更新初始状态
     setInitialFileUploadState({
       fileUploadEnabled,
       uploadMethod,
       maxFiles,
       enabledFileTypes: new Set(enabledFileTypes),
-      customFileTypes
+      customFileTypes,
     });
   };
 
   const handleReset = () => {
     setLocalConfig(config);
     setHasChanges(false);
-    
+
     // 恢复文件上传状态到初始状态
     setFileUploadEnabled(initialFileUploadState.fileUploadEnabled);
     setUploadMethod(initialFileUploadState.uploadMethod);
@@ -356,53 +379,61 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
     // 🎯 修复：根据用户选择的文件类型生成对应的配置
     // --- END COMMENT ---
     const fileUploadConfig: any = {};
-    
-    const transferMethods = uploadMethod === 'local' ? ['local_file'] : 
-                           uploadMethod === 'url' ? ['remote_url'] : 
-                           ['local_file', 'remote_url'];
-    
+
+    const transferMethods =
+      uploadMethod === 'local'
+        ? ['local_file']
+        : uploadMethod === 'url'
+          ? ['remote_url']
+          : ['local_file', 'remote_url'];
+
     if (enabledFileTypes.has('图片')) {
       fileUploadConfig.image = {
         enabled: true,
         number_limits: maxFiles,
-        transfer_methods: transferMethods
+        transfer_methods: transferMethods,
       };
     }
-    
+
     if (enabledFileTypes.has('文档')) {
       fileUploadConfig.document = {
         enabled: true,
         number_limits: maxFiles,
-        transfer_methods: transferMethods
+        transfer_methods: transferMethods,
       };
     }
-    
+
     if (enabledFileTypes.has('音频')) {
       fileUploadConfig.audio = {
         enabled: true,
         number_limits: maxFiles,
-        transfer_methods: transferMethods
+        transfer_methods: transferMethods,
       };
     }
-    
+
     if (enabledFileTypes.has('视频')) {
       fileUploadConfig.video = {
         enabled: true,
         number_limits: maxFiles,
-        transfer_methods: transferMethods
+        transfer_methods: transferMethods,
       };
     }
-    
+
     if (enabledFileTypes.has('其他文件类型') && customFileTypes.trim()) {
       fileUploadConfig.other = {
         enabled: true,
         number_limits: maxFiles,
         transfer_methods: transferMethods,
-        custom_extensions: customFileTypes.split(/[,\s]+/).filter(ext => ext.trim())
+        custom_extensions: customFileTypes
+          .split(/[,\s]+/)
+          .filter(ext => ext.trim()),
       };
     }
-    
-    updateConfig('file_upload', Object.keys(fileUploadConfig).length > 0 ? fileUploadConfig : undefined);
+
+    updateConfig(
+      'file_upload',
+      Object.keys(fileUploadConfig).length > 0 ? fileUploadConfig : undefined
+    );
   };
 
   const openFileUploadModal = () => {
@@ -427,52 +458,59 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
   return (
     <>
       {/* --- 背景遮罩 --- */}
-      <div 
+      <div
         className={cn(
-          "fixed inset-0 z-50 transition-opacity duration-300 cursor-pointer",
-          "bg-black/20 backdrop-blur-sm",
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          'fixed inset-0 z-50 cursor-pointer transition-opacity duration-300',
+          'bg-black/20 backdrop-blur-sm',
+          isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
         )}
         onClick={onClose}
       />
-      
+
       {/* --- 侧边栏 --- */}
-      <div className={cn(
-        "fixed right-0 top-0 bottom-0 w-[520px] z-50",
-        "transform transition-transform duration-300 ease-out",
-        isOpen ? "translate-x-0" : "translate-x-full"
-      )}>
+      <div
+        className={cn(
+          'fixed top-0 right-0 bottom-0 z-50 w-[520px]',
+          'transform transition-transform duration-300 ease-out',
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        )}
+      >
         {/* --- 弹窗容器，留上下空间 --- */}
-        <div className="h-full p-4 flex flex-col">
-          <div className={cn(
-            "flex-1 flex flex-col mt-4 mb-4 max-h-[calc(100vh-8rem)]",
-            "rounded-2xl border shadow-2xl",
-            isDark 
-              ? "bg-stone-900 border-stone-700" 
-              : "bg-white border-stone-200"
-          )}>
-            
+        <div className="flex h-full flex-col p-4">
+          <div
+            className={cn(
+              'mt-4 mb-4 flex max-h-[calc(100vh-8rem)] flex-1 flex-col',
+              'rounded-2xl border shadow-2xl',
+              isDark
+                ? 'border-stone-700 bg-stone-900'
+                : 'border-stone-200 bg-white'
+            )}
+          >
             {/* --- 头部 --- */}
-            <div className={cn(
-              "flex items-center justify-between p-6 border-b flex-shrink-0",
-              isDark ? "border-stone-700" : "border-stone-200"
-            )}>
+            <div
+              className={cn(
+                'flex flex-shrink-0 items-center justify-between border-b p-6',
+                isDark ? 'border-stone-700' : 'border-stone-200'
+              )}
+            >
               {/* 标题 */}
-              <h2 className={cn(
-                "text-xl font-bold font-serif",
-                isDark ? "text-stone-100" : "text-stone-900"
-              )}>
+              <h2
+                className={cn(
+                  'font-serif text-xl font-bold',
+                  isDark ? 'text-stone-100' : 'text-stone-900'
+                )}
+              >
                 {instanceName} - Dify 参数配置
               </h2>
-              
+
               {/* 关闭按钮 */}
               <button
                 onClick={onClose}
                 className={cn(
-                  "p-2 rounded-lg transition-colors cursor-pointer",
-                  isDark 
-                    ? "hover:bg-stone-700 text-stone-400 hover:text-stone-300" 
-                    : "hover:bg-stone-100 text-stone-600 hover:text-stone-700"
+                  'cursor-pointer rounded-lg p-2 transition-colors',
+                  isDark
+                    ? 'text-stone-400 hover:bg-stone-700 hover:text-stone-300'
+                    : 'text-stone-600 hover:bg-stone-100 hover:text-stone-700'
                 )}
               >
                 <X className="h-5 w-5" />
@@ -480,64 +518,79 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
             </div>
 
             {/* --- 内容区域 --- */}
-            <div className="flex-1 overflow-y-auto min-h-0">
-              <div className="p-6 space-y-6 pb-8">
-                
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <div className="space-y-6 p-6 pb-8">
                 {/* --- 开场白配置 --- */}
                 <div className="space-y-4">
                   <button
                     onClick={() => toggleSection('basic')}
                     className={cn(
-                      "w-full flex items-center gap-3 p-4 rounded-xl transition-colors cursor-pointer",
-                      isDark 
-                        ? "bg-stone-800 hover:bg-stone-700" 
-                        : "bg-stone-50 hover:bg-stone-100"
+                      'flex w-full cursor-pointer items-center gap-3 rounded-xl p-4 transition-colors',
+                      isDark
+                        ? 'bg-stone-800 hover:bg-stone-700'
+                        : 'bg-stone-50 hover:bg-stone-100'
                     )}
                   >
-                    <MessageSquare className={cn(
-                      "h-4 w-4",
-                      isDark ? "text-stone-400" : "text-stone-600"
-                    )} />
-                    <span className={cn(
-                      "flex-1 text-left font-medium font-serif",
-                      isDark ? "text-stone-200" : "text-stone-800"
-                    )}>
+                    <MessageSquare
+                      className={cn(
+                        'h-4 w-4',
+                        isDark ? 'text-stone-400' : 'text-stone-600'
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        'flex-1 text-left font-serif font-medium',
+                        isDark ? 'text-stone-200' : 'text-stone-800'
+                      )}
+                    >
                       开场白配置
                     </span>
                     {expandedSections.has('basic') ? (
-                      <ChevronDown className={cn(
-                        "h-4 w-4",
-                        isDark ? "text-stone-400" : "text-stone-500"
-                      )} />
+                      <ChevronDown
+                        className={cn(
+                          'h-4 w-4',
+                          isDark ? 'text-stone-400' : 'text-stone-500'
+                        )}
+                      />
                     ) : (
-                      <ChevronRight className={cn(
-                        "h-4 w-4",
-                        isDark ? "text-stone-400" : "text-stone-500"
-                      )} />
+                      <ChevronRight
+                        className={cn(
+                          'h-4 w-4',
+                          isDark ? 'text-stone-400' : 'text-stone-500'
+                        )}
+                      />
                     )}
                   </button>
 
                   {expandedSections.has('basic') && (
-                    <div className={cn(
-                      "p-4 rounded-xl border space-y-4",
-                      isDark ? "bg-stone-800/50 border-stone-700" : "bg-stone-50/50 border-stone-200"
-                    )}>
+                    <div
+                      className={cn(
+                        'space-y-4 rounded-xl border p-4',
+                        isDark
+                          ? 'border-stone-700 bg-stone-800/50'
+                          : 'border-stone-200 bg-stone-50/50'
+                      )}
+                    >
                       {/* 开场白内容 */}
                       <div>
-                        <label className={cn(
-                          "block text-sm font-medium mb-2 font-serif",
-                          isDark ? "text-stone-300" : "text-stone-700"
-                        )}>
+                        <label
+                          className={cn(
+                            'mb-2 block font-serif text-sm font-medium',
+                            isDark ? 'text-stone-300' : 'text-stone-700'
+                          )}
+                        >
                           开场白内容
                         </label>
                         <textarea
                           value={localConfig.opening_statement || ''}
-                          onChange={(e) => updateConfig('opening_statement', e.target.value)}
+                          onChange={e =>
+                            updateConfig('opening_statement', e.target.value)
+                          }
                           className={cn(
-                            "w-full px-3 py-2 rounded-lg border font-serif resize-none",
-                            isDark 
-                              ? "bg-stone-700 border-stone-600 text-stone-100 placeholder-stone-400" 
-                              : "bg-white border-stone-300 text-stone-900 placeholder-stone-500"
+                            'w-full resize-none rounded-lg border px-3 py-2 font-serif',
+                            isDark
+                              ? 'border-stone-600 bg-stone-700 text-stone-100 placeholder-stone-400'
+                              : 'border-stone-300 bg-white text-stone-900 placeholder-stone-500'
                           )}
                           placeholder="输入开场白内容..."
                           rows={3}
@@ -546,49 +599,58 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
 
                       {/* 开场推荐问题 */}
                       <div>
-                        <label className={cn(
-                          "block text-sm font-medium mb-2 font-serif",
-                          isDark ? "text-stone-300" : "text-stone-700"
-                        )}>
+                        <label
+                          className={cn(
+                            'mb-2 block font-serif text-sm font-medium',
+                            isDark ? 'text-stone-300' : 'text-stone-700'
+                          )}
+                        >
                           开场推荐问题
                         </label>
                         <div className="space-y-3">
-                          {(localConfig.suggested_questions || []).map((question, index) => (
-                            <div key={index} className="flex gap-2">
-                              <input
-                                type="text"
-                                value={question}
-                                onChange={(e) => updateSuggestedQuestion(index, e.target.value)}
-                                className={cn(
-                                  "flex-1 px-3 py-2 rounded-lg border font-serif",
-                                  isDark 
-                                    ? "bg-stone-700 border-stone-600 text-stone-100 placeholder-stone-400" 
-                                    : "bg-white border-stone-300 text-stone-900 placeholder-stone-500"
-                                )}
-                                placeholder={`推荐问题 ${index + 1}`}
-                              />
-                              <button
-                                onClick={() => removeSuggestedQuestion(index)}
-                                className={cn(
-                                  "p-2 rounded-lg transition-colors cursor-pointer",
-                                  isDark 
-                                    ? "hover:bg-stone-700 text-stone-400 hover:text-stone-200" 
-                                    : "hover:bg-stone-200 text-stone-600 hover:text-stone-900"
-                                )}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </div>
-                          ))}
-                          
+                          {(localConfig.suggested_questions || []).map(
+                            (question, index) => (
+                              <div key={index} className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={question}
+                                  onChange={e =>
+                                    updateSuggestedQuestion(
+                                      index,
+                                      e.target.value
+                                    )
+                                  }
+                                  className={cn(
+                                    'flex-1 rounded-lg border px-3 py-2 font-serif',
+                                    isDark
+                                      ? 'border-stone-600 bg-stone-700 text-stone-100 placeholder-stone-400'
+                                      : 'border-stone-300 bg-white text-stone-900 placeholder-stone-500'
+                                  )}
+                                  placeholder={`推荐问题 ${index + 1}`}
+                                />
+                                <button
+                                  onClick={() => removeSuggestedQuestion(index)}
+                                  className={cn(
+                                    'cursor-pointer rounded-lg p-2 transition-colors',
+                                    isDark
+                                      ? 'text-stone-400 hover:bg-stone-700 hover:text-stone-200'
+                                      : 'text-stone-600 hover:bg-stone-200 hover:text-stone-900'
+                                  )}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            )
+                          )}
+
                           <button
                             onClick={addSuggestedQuestion}
                             className={cn(
-                              "w-full py-2 px-3 rounded-lg border border-dashed transition-colors cursor-pointer",
-                              "flex items-center justify-center gap-2 text-sm font-serif",
-                              isDark 
-                                ? "border-stone-600 hover:border-stone-500 text-stone-400 hover:text-stone-300" 
-                                : "border-stone-300 hover:border-stone-400 text-stone-600 hover:text-stone-700"
+                              'w-full cursor-pointer rounded-lg border border-dashed px-3 py-2 transition-colors',
+                              'flex items-center justify-center gap-2 font-serif text-sm',
+                              isDark
+                                ? 'border-stone-600 text-stone-400 hover:border-stone-500 hover:text-stone-300'
+                                : 'border-stone-300 text-stone-600 hover:border-stone-400 hover:text-stone-700'
                             )}
                           >
                             <Plus className="h-4 w-4" />
@@ -602,46 +664,65 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
 
                 {/* --- 回答后推荐问题配置 --- */}
                 <div className="space-y-4">
-                  <div className={cn(
-                    "flex items-center justify-between p-4 rounded-xl",
-                    isDark 
-                      ? "bg-stone-800" 
-                      : "bg-stone-50"
-                  )}>
+                  <div
+                    className={cn(
+                      'flex items-center justify-between rounded-xl p-4',
+                      isDark ? 'bg-stone-800' : 'bg-stone-50'
+                    )}
+                  >
                     <div className="flex items-center gap-3">
-                      <Sparkles className={cn(
-                        "h-4 w-4",
-                        isDark ? "text-stone-400" : "text-stone-600"
-                      )} />
-                      <span className={cn(
-                        "font-medium font-serif",
-                        isDark ? "text-stone-200" : "text-stone-800"
-                      )}>
+                      <Sparkles
+                        className={cn(
+                          'h-4 w-4',
+                          isDark ? 'text-stone-400' : 'text-stone-600'
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          'font-serif font-medium',
+                          isDark ? 'text-stone-200' : 'text-stone-800'
+                        )}
+                      >
                         回答后推荐问题
                       </span>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
+                    <label className="relative inline-flex cursor-pointer items-center">
                       <input
                         type="checkbox"
-                        checked={localConfig.suggested_questions_after_answer?.enabled || false}
-                        onChange={(e) => updateConfig('suggested_questions_after_answer.enabled', e.target.checked)}
-                        className="sr-only peer"
+                        checked={
+                          localConfig.suggested_questions_after_answer
+                            ?.enabled || false
+                        }
+                        onChange={e =>
+                          updateConfig(
+                            'suggested_questions_after_answer.enabled',
+                            e.target.checked
+                          )
+                        }
+                        className="peer sr-only"
                       />
-                      <div className={cn(
-                        "w-11 h-6 rounded-full peer transition-colors relative",
-                        "peer-focus:ring-2",
-                        localConfig.suggested_questions_after_answer?.enabled
-                          ? isDark 
-                            ? "bg-stone-600 peer-focus:ring-stone-500" 
-                            : "bg-stone-700 peer-focus:ring-stone-300"
-                          : isDark 
-                            ? "bg-stone-600 peer-focus:ring-stone-500" 
-                            : "bg-stone-300 peer-focus:ring-stone-300"
-                      )}>
-                        <div className={cn(
-                          "absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform",
-                          localConfig.suggested_questions_after_answer?.enabled ? "translate-x-5" : "translate-x-0"
-                        )} />
+                      <div
+                        className={cn(
+                          'peer relative h-6 w-11 rounded-full transition-colors',
+                          'peer-focus:ring-2',
+                          localConfig.suggested_questions_after_answer?.enabled
+                            ? isDark
+                              ? 'bg-stone-600 peer-focus:ring-stone-500'
+                              : 'bg-stone-700 peer-focus:ring-stone-300'
+                            : isDark
+                              ? 'bg-stone-600 peer-focus:ring-stone-500'
+                              : 'bg-stone-300 peer-focus:ring-stone-300'
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            'absolute top-0.5 left-0.5 h-5 w-5 transform rounded-full bg-white shadow transition-transform',
+                            localConfig.suggested_questions_after_answer
+                              ?.enabled
+                              ? 'translate-x-5'
+                              : 'translate-x-0'
+                          )}
+                        />
                       </div>
                     </label>
                   </div>
@@ -649,60 +730,74 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
 
                 {/* --- 文件上传配置 --- */}
                 <div className="space-y-4">
-                  <div className={cn(
-                    "flex items-center justify-between p-4 rounded-xl",
-                    isDark 
-                      ? "bg-stone-800" 
-                      : "bg-stone-50"
-                  )}>
+                  <div
+                    className={cn(
+                      'flex items-center justify-between rounded-xl p-4',
+                      isDark ? 'bg-stone-800' : 'bg-stone-50'
+                    )}
+                  >
                     <div className="flex items-center gap-3">
-                      <Upload className={cn(
-                        "h-4 w-4",
-                        isDark ? "text-stone-400" : "text-stone-600"
-                      )} />
-                      <span className={cn(
-                        "font-medium font-serif",
-                        isDark ? "text-stone-200" : "text-stone-800"
-                      )}>
+                      <Upload
+                        className={cn(
+                          'h-4 w-4',
+                          isDark ? 'text-stone-400' : 'text-stone-600'
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          'font-serif font-medium',
+                          isDark ? 'text-stone-200' : 'text-stone-800'
+                        )}
+                      >
                         文件上传功能
                       </span>
                     </div>
-                    <div className="flex items-center gap-3 h-6"> {/* 固定高度防止变化 */}
+                    <div className="flex h-6 items-center gap-3">
+                      {' '}
+                      {/* 固定高度防止变化 */}
                       {fileUploadEnabled && (
                         <button
                           onClick={openFileUploadModal}
                           className={cn(
-                            "p-2 rounded-lg transition-colors cursor-pointer",
-                            isDark 
-                              ? "hover:bg-stone-700 text-stone-400 hover:text-stone-200" 
-                              : "hover:bg-stone-200 text-stone-600 hover:text-stone-900"
+                            'cursor-pointer rounded-lg p-2 transition-colors',
+                            isDark
+                              ? 'text-stone-400 hover:bg-stone-700 hover:text-stone-200'
+                              : 'text-stone-600 hover:bg-stone-200 hover:text-stone-900'
                           )}
                         >
                           <ExternalLink className="h-4 w-4" />
                         </button>
                       )}
-                      <label className="relative inline-flex items-center cursor-pointer">
+                      <label className="relative inline-flex cursor-pointer items-center">
                         <input
                           type="checkbox"
                           checked={fileUploadEnabled}
-                          onChange={(e) => handleFileUploadToggle(e.target.checked)}
-                          className="sr-only peer"
+                          onChange={e =>
+                            handleFileUploadToggle(e.target.checked)
+                          }
+                          className="peer sr-only"
                         />
-                        <div className={cn(
-                          "w-11 h-6 rounded-full peer transition-colors relative",
-                          "peer-focus:ring-2",
-                          fileUploadEnabled 
-                            ? isDark 
-                              ? "bg-stone-600 peer-focus:ring-stone-500" 
-                              : "bg-stone-700 peer-focus:ring-stone-300"
-                            : isDark 
-                              ? "bg-stone-600 peer-focus:ring-stone-500" 
-                              : "bg-stone-300 peer-focus:ring-stone-300"
-                        )}>
-                          <div className={cn(
-                            "absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform",
-                            fileUploadEnabled ? "translate-x-5" : "translate-x-0"
-                          )} />
+                        <div
+                          className={cn(
+                            'peer relative h-6 w-11 rounded-full transition-colors',
+                            'peer-focus:ring-2',
+                            fileUploadEnabled
+                              ? isDark
+                                ? 'bg-stone-600 peer-focus:ring-stone-500'
+                                : 'bg-stone-700 peer-focus:ring-stone-300'
+                              : isDark
+                                ? 'bg-stone-600 peer-focus:ring-stone-500'
+                                : 'bg-stone-300 peer-focus:ring-stone-300'
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              'absolute top-0.5 left-0.5 h-5 w-5 transform rounded-full bg-white shadow transition-transform',
+                              fileUploadEnabled
+                                ? 'translate-x-5'
+                                : 'translate-x-0'
+                            )}
+                          />
                         </div>
                       </label>
                     </div>
@@ -711,46 +806,61 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
 
                 {/* --- 语音转文本配置 --- */}
                 <div className="space-y-4">
-                  <div className={cn(
-                    "flex items-center justify-between p-4 rounded-xl",
-                    isDark 
-                      ? "bg-stone-800" 
-                      : "bg-stone-50"
-                  )}>
+                  <div
+                    className={cn(
+                      'flex items-center justify-between rounded-xl p-4',
+                      isDark ? 'bg-stone-800' : 'bg-stone-50'
+                    )}
+                  >
                     <div className="flex items-center gap-3">
-                      <Mic className={cn(
-                        "h-4 w-4",
-                        isDark ? "text-stone-400" : "text-stone-600"
-                      )} />
-                      <span className={cn(
-                        "font-medium font-serif",
-                        isDark ? "text-stone-200" : "text-stone-800"
-                      )}>
+                      <Mic
+                        className={cn(
+                          'h-4 w-4',
+                          isDark ? 'text-stone-400' : 'text-stone-600'
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          'font-serif font-medium',
+                          isDark ? 'text-stone-200' : 'text-stone-800'
+                        )}
+                      >
                         语音转文本
                       </span>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
+                    <label className="relative inline-flex cursor-pointer items-center">
                       <input
                         type="checkbox"
                         checked={localConfig.speech_to_text?.enabled || false}
-                        onChange={(e) => updateConfig('speech_to_text.enabled', e.target.checked)}
-                        className="sr-only peer"
+                        onChange={e =>
+                          updateConfig(
+                            'speech_to_text.enabled',
+                            e.target.checked
+                          )
+                        }
+                        className="peer sr-only"
                       />
-                      <div className={cn(
-                        "w-11 h-6 rounded-full peer transition-colors relative",
-                        "peer-focus:ring-2",
-                        localConfig.speech_to_text?.enabled
-                          ? isDark 
-                            ? "bg-stone-600 peer-focus:ring-stone-500" 
-                            : "bg-stone-700 peer-focus:ring-stone-300"
-                          : isDark 
-                            ? "bg-stone-600 peer-focus:ring-stone-500" 
-                            : "bg-stone-300 peer-focus:ring-stone-300"
-                      )}>
-                        <div className={cn(
-                          "absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform",
-                          localConfig.speech_to_text?.enabled ? "translate-x-5" : "translate-x-0"
-                        )} />
+                      <div
+                        className={cn(
+                          'peer relative h-6 w-11 rounded-full transition-colors',
+                          'peer-focus:ring-2',
+                          localConfig.speech_to_text?.enabled
+                            ? isDark
+                              ? 'bg-stone-600 peer-focus:ring-stone-500'
+                              : 'bg-stone-700 peer-focus:ring-stone-300'
+                            : isDark
+                              ? 'bg-stone-600 peer-focus:ring-stone-500'
+                              : 'bg-stone-300 peer-focus:ring-stone-300'
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            'absolute top-0.5 left-0.5 h-5 w-5 transform rounded-full bg-white shadow transition-transform',
+                            localConfig.speech_to_text?.enabled
+                              ? 'translate-x-5'
+                              : 'translate-x-0'
+                          )}
+                        />
                       </div>
                     </label>
                   </div>
@@ -761,30 +871,42 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   <button
                     onClick={() => toggleSection('tts')}
                     className={cn(
-                      "w-full flex items-center gap-3 p-4 rounded-xl transition-colors cursor-pointer",
-                      isDark 
-                        ? "bg-stone-800 hover:bg-stone-700" 
-                        : "bg-stone-50 hover:bg-stone-100"
+                      'flex w-full cursor-pointer items-center gap-3 rounded-xl p-4 transition-colors',
+                      isDark
+                        ? 'bg-stone-800 hover:bg-stone-700'
+                        : 'bg-stone-50 hover:bg-stone-100'
                     )}
                   >
-                    <Volume2 className={cn(
-                      "h-4 w-4",
-                      isDark ? "text-stone-400" : "text-stone-600"
-                    )} />
-                    <span className={cn(
-                      "flex-1 text-left font-medium font-serif",
-                      isDark ? "text-stone-200" : "text-stone-800"
-                    )}>
+                    <Volume2
+                      className={cn(
+                        'h-4 w-4',
+                        isDark ? 'text-stone-400' : 'text-stone-600'
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        'flex-1 text-left font-serif font-medium',
+                        isDark ? 'text-stone-200' : 'text-stone-800'
+                      )}
+                    >
                       文本转语音
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className={cn(
-                        "text-xs font-serif",
-                        localConfig.text_to_speech?.enabled 
-                          ? isDark ? "text-green-400" : "text-green-600"
-                          : isDark ? "text-stone-500" : "text-stone-400"
-                      )}>
-                        {localConfig.text_to_speech?.enabled ? '已启用' : '已禁用'}
+                      <span
+                        className={cn(
+                          'font-serif text-xs',
+                          localConfig.text_to_speech?.enabled
+                            ? isDark
+                              ? 'text-green-400'
+                              : 'text-green-600'
+                            : isDark
+                              ? 'text-stone-500'
+                              : 'text-stone-400'
+                        )}
+                      >
+                        {localConfig.text_to_speech?.enabled
+                          ? '已启用'
+                          : '已禁用'}
                       </span>
                       {expandedSections.has('tts') ? (
                         <ChevronDown className="h-4 w-4 text-stone-400" />
@@ -795,40 +917,59 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   </button>
 
                   {expandedSections.has('tts') && (
-                    <div className={cn(
-                      "p-4 rounded-xl border space-y-4",
-                      isDark ? "bg-stone-800/50 border-stone-700" : "bg-stone-50/50 border-stone-200"
-                    )}>
+                    <div
+                      className={cn(
+                        'space-y-4 rounded-xl border p-4',
+                        isDark
+                          ? 'border-stone-700 bg-stone-800/50'
+                          : 'border-stone-200 bg-stone-50/50'
+                      )}
+                    >
                       {/* 启用开关 */}
                       <div className="flex items-center justify-between">
-                        <label className={cn(
-                          "text-sm font-medium font-serif",
-                          isDark ? "text-stone-300" : "text-stone-700"
-                        )}>
+                        <label
+                          className={cn(
+                            'font-serif text-sm font-medium',
+                            isDark ? 'text-stone-300' : 'text-stone-700'
+                          )}
+                        >
                           启用文本转语音
                         </label>
-                        <label className="relative inline-flex items-center cursor-pointer">
+                        <label className="relative inline-flex cursor-pointer items-center">
                           <input
                             type="checkbox"
-                            checked={localConfig.text_to_speech?.enabled || false}
-                            onChange={(e) => updateConfig('text_to_speech.enabled', e.target.checked)}
-                            className="sr-only peer"
+                            checked={
+                              localConfig.text_to_speech?.enabled || false
+                            }
+                            onChange={e =>
+                              updateConfig(
+                                'text_to_speech.enabled',
+                                e.target.checked
+                              )
+                            }
+                            className="peer sr-only"
                           />
-                          <div className={cn(
-                            "w-11 h-6 rounded-full peer transition-colors relative",
-                            "peer-focus:ring-2",
-                            localConfig.text_to_speech?.enabled
-                              ? isDark 
-                                ? "bg-stone-600 peer-focus:ring-stone-500" 
-                                : "bg-stone-700 peer-focus:ring-stone-300"
-                              : isDark 
-                                ? "bg-stone-600 peer-focus:ring-stone-500" 
-                                : "bg-stone-300 peer-focus:ring-stone-300"
-                          )}>
-                            <div className={cn(
-                              "absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform",
-                              localConfig.text_to_speech?.enabled ? "translate-x-5" : "translate-x-0"
-                            )} />
+                          <div
+                            className={cn(
+                              'peer relative h-6 w-11 rounded-full transition-colors',
+                              'peer-focus:ring-2',
+                              localConfig.text_to_speech?.enabled
+                                ? isDark
+                                  ? 'bg-stone-600 peer-focus:ring-stone-500'
+                                  : 'bg-stone-700 peer-focus:ring-stone-300'
+                                : isDark
+                                  ? 'bg-stone-600 peer-focus:ring-stone-500'
+                                  : 'bg-stone-300 peer-focus:ring-stone-300'
+                            )}
+                          >
+                            <div
+                              className={cn(
+                                'absolute top-0.5 left-0.5 h-5 w-5 transform rounded-full bg-white shadow transition-transform',
+                                localConfig.text_to_speech?.enabled
+                                  ? 'translate-x-5'
+                                  : 'translate-x-0'
+                              )}
+                            />
                           </div>
                         </label>
                       </div>
@@ -837,21 +978,28 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                       {localConfig.text_to_speech?.enabled && (
                         <>
                           <div>
-                            <label className={cn(
-                              "block text-sm font-medium mb-2 font-serif",
-                              isDark ? "text-stone-300" : "text-stone-700"
-                            )}>
+                            <label
+                              className={cn(
+                                'mb-2 block font-serif text-sm font-medium',
+                                isDark ? 'text-stone-300' : 'text-stone-700'
+                              )}
+                            >
                               语音类型
                             </label>
                             <input
                               type="text"
                               value={localConfig.text_to_speech?.voice || ''}
-                              onChange={(e) => updateConfig('text_to_speech.voice', e.target.value)}
+                              onChange={e =>
+                                updateConfig(
+                                  'text_to_speech.voice',
+                                  e.target.value
+                                )
+                              }
                               className={cn(
-                                "w-full px-3 py-2 rounded-lg border font-serif",
-                                isDark 
-                                  ? "bg-stone-700 border-stone-600 text-stone-100 placeholder-stone-400" 
-                                  : "bg-white border-stone-300 text-stone-900 placeholder-stone-500"
+                                'w-full rounded-lg border px-3 py-2 font-serif',
+                                isDark
+                                  ? 'border-stone-600 bg-stone-700 text-stone-100 placeholder-stone-400'
+                                  : 'border-stone-300 bg-white text-stone-900 placeholder-stone-500'
                               )}
                               placeholder="例如: alloy, echo, fable"
                             />
@@ -859,20 +1007,27 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
 
                           {/* 语言 */}
                           <div>
-                            <label className={cn(
-                              "block text-sm font-medium mb-2 font-serif",
-                              isDark ? "text-stone-300" : "text-stone-700"
-                            )}>
+                            <label
+                              className={cn(
+                                'mb-2 block font-serif text-sm font-medium',
+                                isDark ? 'text-stone-300' : 'text-stone-700'
+                              )}
+                            >
                               语言
                             </label>
                             <select
                               value={localConfig.text_to_speech?.language || ''}
-                              onChange={(e) => updateConfig('text_to_speech.language', e.target.value)}
+                              onChange={e =>
+                                updateConfig(
+                                  'text_to_speech.language',
+                                  e.target.value
+                                )
+                              }
                               className={cn(
-                                "w-full px-3 py-2 rounded-lg border font-serif",
-                                isDark 
-                                  ? "bg-stone-700 border-stone-600 text-stone-100" 
-                                  : "bg-white border-stone-300 text-stone-900"
+                                'w-full rounded-lg border px-3 py-2 font-serif',
+                                isDark
+                                  ? 'border-stone-600 bg-stone-700 text-stone-100'
+                                  : 'border-stone-300 bg-white text-stone-900'
                               )}
                             >
                               <option value="">选择语言</option>
@@ -885,41 +1040,55 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
 
                           {/* 自动播放 */}
                           <div>
-                            <label className={cn(
-                              "block text-sm font-medium mb-2 font-serif",
-                              isDark ? "text-stone-300" : "text-stone-700"
-                            )}>
+                            <label
+                              className={cn(
+                                'mb-2 block font-serif text-sm font-medium',
+                                isDark ? 'text-stone-300' : 'text-stone-700'
+                              )}
+                            >
                               自动播放
                             </label>
                             <div className="flex gap-2">
                               <button
                                 type="button"
-                                onClick={() => updateConfig('text_to_speech.autoPlay', 'enabled')}
+                                onClick={() =>
+                                  updateConfig(
+                                    'text_to_speech.autoPlay',
+                                    'enabled'
+                                  )
+                                }
                                 className={cn(
-                                  "flex-1 py-2 px-3 rounded-lg text-sm font-medium font-serif transition-colors cursor-pointer",
-                                  localConfig.text_to_speech?.autoPlay === 'enabled'
+                                  'flex-1 cursor-pointer rounded-lg px-3 py-2 font-serif text-sm font-medium transition-colors',
+                                  localConfig.text_to_speech?.autoPlay ===
+                                    'enabled'
                                     ? isDark
-                                      ? "bg-stone-600 text-white"
-                                      : "bg-stone-700 text-white"
+                                      ? 'bg-stone-600 text-white'
+                                      : 'bg-stone-700 text-white'
                                     : isDark
-                                      ? "bg-stone-700 text-stone-300 hover:bg-stone-600"
-                                      : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+                                      ? 'bg-stone-700 text-stone-300 hover:bg-stone-600'
+                                      : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                                 )}
                               >
                                 开启
                               </button>
                               <button
                                 type="button"
-                                onClick={() => updateConfig('text_to_speech.autoPlay', 'disabled')}
+                                onClick={() =>
+                                  updateConfig(
+                                    'text_to_speech.autoPlay',
+                                    'disabled'
+                                  )
+                                }
                                 className={cn(
-                                  "flex-1 py-2 px-3 rounded-lg text-sm font-medium font-serif transition-colors cursor-pointer",
-                                  localConfig.text_to_speech?.autoPlay === 'disabled'
+                                  'flex-1 cursor-pointer rounded-lg px-3 py-2 font-serif text-sm font-medium transition-colors',
+                                  localConfig.text_to_speech?.autoPlay ===
+                                    'disabled'
                                     ? isDark
-                                      ? "bg-stone-600 text-white"
-                                      : "bg-stone-700 text-white"
+                                      ? 'bg-stone-600 text-white'
+                                      : 'bg-stone-700 text-white'
                                     : isDark
-                                      ? "bg-stone-700 text-stone-300 hover:bg-stone-600"
-                                      : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+                                      ? 'bg-stone-700 text-stone-300 hover:bg-stone-600'
+                                      : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                                 )}
                               >
                                 关闭
@@ -934,46 +1103,63 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
 
                 {/* --- 引用和归属配置 --- */}
                 <div className="space-y-4">
-                  <div className={cn(
-                    "flex items-center justify-between p-4 rounded-xl",
-                    isDark 
-                      ? "bg-stone-800" 
-                      : "bg-stone-50"
-                  )}>
+                  <div
+                    className={cn(
+                      'flex items-center justify-between rounded-xl p-4',
+                      isDark ? 'bg-stone-800' : 'bg-stone-50'
+                    )}
+                  >
                     <div className="flex items-center gap-3">
-                      <BookOpen className={cn(
-                        "h-4 w-4",
-                        isDark ? "text-stone-400" : "text-stone-600"
-                      )} />
-                      <span className={cn(
-                        "font-medium font-serif",
-                        isDark ? "text-stone-200" : "text-stone-800"
-                      )}>
+                      <BookOpen
+                        className={cn(
+                          'h-4 w-4',
+                          isDark ? 'text-stone-400' : 'text-stone-600'
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          'font-serif font-medium',
+                          isDark ? 'text-stone-200' : 'text-stone-800'
+                        )}
+                      >
                         引用和归属
                       </span>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
+                    <label className="relative inline-flex cursor-pointer items-center">
                       <input
                         type="checkbox"
-                        checked={localConfig.retriever_resource?.enabled || false}
-                        onChange={(e) => updateConfig('retriever_resource.enabled', e.target.checked)}
-                        className="sr-only peer"
+                        checked={
+                          localConfig.retriever_resource?.enabled || false
+                        }
+                        onChange={e =>
+                          updateConfig(
+                            'retriever_resource.enabled',
+                            e.target.checked
+                          )
+                        }
+                        className="peer sr-only"
                       />
-                      <div className={cn(
-                        "w-11 h-6 rounded-full peer transition-colors relative",
-                        "peer-focus:ring-2",
-                        localConfig.retriever_resource?.enabled
-                          ? isDark 
-                            ? "bg-stone-600 peer-focus:ring-stone-500" 
-                            : "bg-stone-700 peer-focus:ring-stone-300"
-                          : isDark 
-                            ? "bg-stone-600 peer-focus:ring-stone-500" 
-                            : "bg-stone-300 peer-focus:ring-stone-300"
-                      )}>
-                        <div className={cn(
-                          "absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform",
-                          localConfig.retriever_resource?.enabled ? "translate-x-5" : "translate-x-0"
-                        )} />
+                      <div
+                        className={cn(
+                          'peer relative h-6 w-11 rounded-full transition-colors',
+                          'peer-focus:ring-2',
+                          localConfig.retriever_resource?.enabled
+                            ? isDark
+                              ? 'bg-stone-600 peer-focus:ring-stone-500'
+                              : 'bg-stone-700 peer-focus:ring-stone-300'
+                            : isDark
+                              ? 'bg-stone-600 peer-focus:ring-stone-500'
+                              : 'bg-stone-300 peer-focus:ring-stone-300'
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            'absolute top-0.5 left-0.5 h-5 w-5 transform rounded-full bg-white shadow transition-transform',
+                            localConfig.retriever_resource?.enabled
+                              ? 'translate-x-5'
+                              : 'translate-x-0'
+                          )}
+                        />
                       </div>
                     </label>
                   </div>
@@ -981,46 +1167,61 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
 
                 {/* --- 标记回复配置 --- */}
                 <div className="space-y-4">
-                  <div className={cn(
-                    "flex items-center justify-between p-4 rounded-xl",
-                    isDark 
-                      ? "bg-stone-800" 
-                      : "bg-stone-50"
-                  )}>
+                  <div
+                    className={cn(
+                      'flex items-center justify-between rounded-xl p-4',
+                      isDark ? 'bg-stone-800' : 'bg-stone-50'
+                    )}
+                  >
                     <div className="flex items-center gap-3">
-                      <Tag className={cn(
-                        "h-4 w-4",
-                        isDark ? "text-stone-400" : "text-stone-600"
-                      )} />
-                      <span className={cn(
-                        "font-medium font-serif",
-                        isDark ? "text-stone-200" : "text-stone-800"
-                      )}>
+                      <Tag
+                        className={cn(
+                          'h-4 w-4',
+                          isDark ? 'text-stone-400' : 'text-stone-600'
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          'font-serif font-medium',
+                          isDark ? 'text-stone-200' : 'text-stone-800'
+                        )}
+                      >
                         标记回复
                       </span>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
+                    <label className="relative inline-flex cursor-pointer items-center">
                       <input
                         type="checkbox"
                         checked={localConfig.annotation_reply?.enabled || false}
-                        onChange={(e) => updateConfig('annotation_reply.enabled', e.target.checked)}
-                        className="sr-only peer"
+                        onChange={e =>
+                          updateConfig(
+                            'annotation_reply.enabled',
+                            e.target.checked
+                          )
+                        }
+                        className="peer sr-only"
                       />
-                      <div className={cn(
-                        "w-11 h-6 rounded-full peer transition-colors relative",
-                        "peer-focus:ring-2",
-                        localConfig.annotation_reply?.enabled
-                          ? isDark 
-                            ? "bg-stone-600 peer-focus:ring-stone-500" 
-                            : "bg-stone-700 peer-focus:ring-stone-300"
-                          : isDark 
-                            ? "bg-stone-600 peer-focus:ring-stone-500" 
-                            : "bg-stone-300 peer-focus:ring-stone-300"
-                      )}>
-                        <div className={cn(
-                          "absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform",
-                          localConfig.annotation_reply?.enabled ? "translate-x-5" : "translate-x-0"
-                        )} />
+                      <div
+                        className={cn(
+                          'peer relative h-6 w-11 rounded-full transition-colors',
+                          'peer-focus:ring-2',
+                          localConfig.annotation_reply?.enabled
+                            ? isDark
+                              ? 'bg-stone-600 peer-focus:ring-stone-500'
+                              : 'bg-stone-700 peer-focus:ring-stone-300'
+                            : isDark
+                              ? 'bg-stone-600 peer-focus:ring-stone-500'
+                              : 'bg-stone-300 peer-focus:ring-stone-300'
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            'absolute top-0.5 left-0.5 h-5 w-5 transform rounded-full bg-white shadow transition-transform',
+                            localConfig.annotation_reply?.enabled
+                              ? 'translate-x-5'
+                              : 'translate-x-0'
+                          )}
+                        />
                       </div>
                     </label>
                   </div>
@@ -1031,28 +1232,34 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   <button
                     onClick={() => toggleSection('user_input')}
                     className={cn(
-                      "w-full flex items-center gap-3 p-4 rounded-xl transition-colors cursor-pointer",
-                      isDark 
-                        ? "bg-stone-800 hover:bg-stone-700" 
-                        : "bg-stone-50 hover:bg-stone-100"
+                      'flex w-full cursor-pointer items-center gap-3 rounded-xl p-4 transition-colors',
+                      isDark
+                        ? 'bg-stone-800 hover:bg-stone-700'
+                        : 'bg-stone-50 hover:bg-stone-100'
                     )}
                   >
-                    <FormInput className={cn(
-                      "h-4 w-4",
-                      isDark ? "text-stone-400" : "text-stone-600"
-                    )} />
-                    <span className={cn(
-                      "flex-1 text-left font-medium font-serif",
-                      isDark ? "text-stone-200" : "text-stone-800"
-                    )}>
+                    <FormInput
+                      className={cn(
+                        'h-4 w-4',
+                        isDark ? 'text-stone-400' : 'text-stone-600'
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        'flex-1 text-left font-serif font-medium',
+                        isDark ? 'text-stone-200' : 'text-stone-800'
+                      )}
+                    >
                       用户输入表单
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className={cn(
-                        "text-xs font-serif",
-                        isDark ? "text-stone-400" : "text-stone-600"
-                      )}>
-                        {(localConfig.user_input_form?.length || 0)} 个字段
+                      <span
+                        className={cn(
+                          'font-serif text-xs',
+                          isDark ? 'text-stone-400' : 'text-stone-600'
+                        )}
+                      >
+                        {localConfig.user_input_form?.length || 0} 个字段
                       </span>
                       {expandedSections.has('user_input') ? (
                         <ChevronDown className="h-4 w-4 text-stone-400" />
@@ -1063,59 +1270,89 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   </button>
 
                   {expandedSections.has('user_input') && (
-                    <div className={cn(
-                      "p-4 rounded-xl border space-y-4",
-                      isDark ? "bg-stone-800/50 border-stone-700" : "bg-stone-50/50 border-stone-200"
-                    )}>
-                      <div className={cn(
-                        "text-sm font-serif",
-                        isDark ? "text-stone-400" : "text-stone-600"
-                      )}>
-                        用户输入表单配置通常由 Dify 应用自动生成，建议通过同步功能获取最新配置。
+                    <div
+                      className={cn(
+                        'space-y-4 rounded-xl border p-4',
+                        isDark
+                          ? 'border-stone-700 bg-stone-800/50'
+                          : 'border-stone-200 bg-stone-50/50'
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'font-serif text-sm',
+                          isDark ? 'text-stone-400' : 'text-stone-600'
+                        )}
+                      >
+                        用户输入表单配置通常由 Dify
+                        应用自动生成，建议通过同步功能获取最新配置。
                       </div>
-                      
+
                       {(localConfig.user_input_form || []).length > 0 ? (
                         <div className="space-y-3">
-                          {(localConfig.user_input_form || []).map((formItem, index) => {
-                            const fieldType = Object.keys(formItem)[0];
-                            const fieldConfig = formItem[fieldType as keyof typeof formItem];
-                            
-                            return (
-                              <div key={index} className={cn(
-                                "p-3 rounded-lg border",
-                                isDark ? "bg-stone-700/50 border-stone-600" : "bg-stone-100/50 border-stone-300"
-                              )}>
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className={cn(
-                                    "text-sm font-medium font-serif",
-                                    isDark ? "text-stone-200" : "text-stone-800"
-                                  )}>
-                                    {fieldConfig?.label || `字段 ${index + 1}`}
-                                  </span>
-                                  <span className={cn(
-                                    "text-xs px-2 py-1 rounded font-serif",
-                                    isDark ? "bg-stone-600 text-stone-300" : "bg-stone-200 text-stone-700"
-                                  )}>
-                                    {fieldType}
-                                  </span>
+                          {(localConfig.user_input_form || []).map(
+                            (formItem, index) => {
+                              const fieldType = Object.keys(formItem)[0];
+                              const fieldConfig =
+                                formItem[fieldType as keyof typeof formItem];
+
+                              return (
+                                <div
+                                  key={index}
+                                  className={cn(
+                                    'rounded-lg border p-3',
+                                    isDark
+                                      ? 'border-stone-600 bg-stone-700/50'
+                                      : 'border-stone-300 bg-stone-100/50'
+                                  )}
+                                >
+                                  <div className="mb-2 flex items-center justify-between">
+                                    <span
+                                      className={cn(
+                                        'font-serif text-sm font-medium',
+                                        isDark
+                                          ? 'text-stone-200'
+                                          : 'text-stone-800'
+                                      )}
+                                    >
+                                      {fieldConfig?.label ||
+                                        `字段 ${index + 1}`}
+                                    </span>
+                                    <span
+                                      className={cn(
+                                        'rounded px-2 py-1 font-serif text-xs',
+                                        isDark
+                                          ? 'bg-stone-600 text-stone-300'
+                                          : 'bg-stone-200 text-stone-700'
+                                      )}
+                                    >
+                                      {fieldType}
+                                    </span>
+                                  </div>
+                                  <div
+                                    className={cn(
+                                      'font-serif text-xs',
+                                      isDark
+                                        ? 'text-stone-400'
+                                        : 'text-stone-600'
+                                    )}
+                                  >
+                                    变量名: {fieldConfig?.variable || 'N/A'} |
+                                    必填: {fieldConfig?.required ? '是' : '否'}{' '}
+                                    | 默认值: {fieldConfig?.default || '无'}
+                                  </div>
                                 </div>
-                                <div className={cn(
-                                  "text-xs font-serif",
-                                  isDark ? "text-stone-400" : "text-stone-600"
-                                )}>
-                                  变量名: {fieldConfig?.variable || 'N/A'} | 
-                                  必填: {fieldConfig?.required ? '是' : '否'} | 
-                                  默认值: {fieldConfig?.default || '无'}
-                                </div>
-                              </div>
-                            );
-                          })}
+                              );
+                            }
+                          )}
                         </div>
                       ) : (
-                        <div className={cn(
-                          "text-center py-8 text-sm font-serif",
-                          isDark ? "text-stone-500" : "text-stone-400"
-                        )}>
+                        <div
+                          className={cn(
+                            'py-8 text-center font-serif text-sm',
+                            isDark ? 'text-stone-500' : 'text-stone-400'
+                          )}
+                        >
                           暂无用户输入表单配置
                         </div>
                       )}
@@ -1128,20 +1365,24 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   <button
                     onClick={() => toggleSection('system')}
                     className={cn(
-                      "w-full flex items-center gap-3 p-4 rounded-xl transition-colors cursor-pointer",
-                      isDark 
-                        ? "bg-stone-800 hover:bg-stone-700" 
-                        : "bg-stone-50 hover:bg-stone-100"
+                      'flex w-full cursor-pointer items-center gap-3 rounded-xl p-4 transition-colors',
+                      isDark
+                        ? 'bg-stone-800 hover:bg-stone-700'
+                        : 'bg-stone-50 hover:bg-stone-100'
                     )}
                   >
-                    <Settings2 className={cn(
-                      "h-4 w-4",
-                      isDark ? "text-stone-400" : "text-stone-600"
-                    )} />
-                    <span className={cn(
-                      "flex-1 text-left font-medium font-serif",
-                      isDark ? "text-stone-200" : "text-stone-800"
-                    )}>
+                    <Settings2
+                      className={cn(
+                        'h-4 w-4',
+                        isDark ? 'text-stone-400' : 'text-stone-600'
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        'flex-1 text-left font-serif font-medium',
+                        isDark ? 'text-stone-200' : 'text-stone-800'
+                      )}
+                    >
                       系统参数
                     </span>
                     {expandedSections.has('system') ? (
@@ -1152,99 +1393,143 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   </button>
 
                   {expandedSections.has('system') && (
-                    <div className={cn(
-                      "p-4 rounded-xl border space-y-4",
-                      isDark ? "bg-stone-800/50 border-stone-700" : "bg-stone-50/50 border-stone-200"
-                    )}>
+                    <div
+                      className={cn(
+                        'space-y-4 rounded-xl border p-4',
+                        isDark
+                          ? 'border-stone-700 bg-stone-800/50'
+                          : 'border-stone-200 bg-stone-50/50'
+                      )}
+                    >
                       <div className="grid grid-cols-2 gap-4">
                         {/* 文档上传大小限制 */}
                         <div>
-                          <label className={cn(
-                            "block text-sm font-medium mb-2 font-serif",
-                            isDark ? "text-stone-300" : "text-stone-700"
-                          )}>
+                          <label
+                            className={cn(
+                              'mb-2 block font-serif text-sm font-medium',
+                              isDark ? 'text-stone-300' : 'text-stone-700'
+                            )}
+                          >
                             文档大小限制 (MB)
                           </label>
                           <input
                             type="number"
                             min="1"
                             max="100"
-                            value={localConfig.system_parameters?.file_size_limit || 15}
-                            onChange={(e) => updateConfig('system_parameters.file_size_limit', parseInt(e.target.value))}
+                            value={
+                              localConfig.system_parameters?.file_size_limit ||
+                              15
+                            }
+                            onChange={e =>
+                              updateConfig(
+                                'system_parameters.file_size_limit',
+                                parseInt(e.target.value)
+                              )
+                            }
                             className={cn(
-                              "w-full px-3 py-2 rounded-lg border font-serif",
-                              isDark 
-                                ? "bg-stone-700 border-stone-600 text-stone-100" 
-                                : "bg-white border-stone-300 text-stone-900"
+                              'w-full rounded-lg border px-3 py-2 font-serif',
+                              isDark
+                                ? 'border-stone-600 bg-stone-700 text-stone-100'
+                                : 'border-stone-300 bg-white text-stone-900'
                             )}
                           />
                         </div>
 
                         {/* 图片上传大小限制 */}
                         <div>
-                          <label className={cn(
-                            "block text-sm font-medium mb-2 font-serif",
-                            isDark ? "text-stone-300" : "text-stone-700"
-                          )}>
+                          <label
+                            className={cn(
+                              'mb-2 block font-serif text-sm font-medium',
+                              isDark ? 'text-stone-300' : 'text-stone-700'
+                            )}
+                          >
                             图片大小限制 (MB)
                           </label>
                           <input
                             type="number"
                             min="1"
                             max="50"
-                            value={localConfig.system_parameters?.image_file_size_limit || 10}
-                            onChange={(e) => updateConfig('system_parameters.image_file_size_limit', parseInt(e.target.value))}
+                            value={
+                              localConfig.system_parameters
+                                ?.image_file_size_limit || 10
+                            }
+                            onChange={e =>
+                              updateConfig(
+                                'system_parameters.image_file_size_limit',
+                                parseInt(e.target.value)
+                              )
+                            }
                             className={cn(
-                              "w-full px-3 py-2 rounded-lg border font-serif",
-                              isDark 
-                                ? "bg-stone-700 border-stone-600 text-stone-100" 
-                                : "bg-white border-stone-300 text-stone-900"
+                              'w-full rounded-lg border px-3 py-2 font-serif',
+                              isDark
+                                ? 'border-stone-600 bg-stone-700 text-stone-100'
+                                : 'border-stone-300 bg-white text-stone-900'
                             )}
                           />
                         </div>
 
                         {/* 音频上传大小限制 */}
                         <div>
-                          <label className={cn(
-                            "block text-sm font-medium mb-2 font-serif",
-                            isDark ? "text-stone-300" : "text-stone-700"
-                          )}>
+                          <label
+                            className={cn(
+                              'mb-2 block font-serif text-sm font-medium',
+                              isDark ? 'text-stone-300' : 'text-stone-700'
+                            )}
+                          >
                             音频大小限制 (MB)
                           </label>
                           <input
                             type="number"
                             min="1"
                             max="200"
-                            value={localConfig.system_parameters?.audio_file_size_limit || 50}
-                            onChange={(e) => updateConfig('system_parameters.audio_file_size_limit', parseInt(e.target.value))}
+                            value={
+                              localConfig.system_parameters
+                                ?.audio_file_size_limit || 50
+                            }
+                            onChange={e =>
+                              updateConfig(
+                                'system_parameters.audio_file_size_limit',
+                                parseInt(e.target.value)
+                              )
+                            }
                             className={cn(
-                              "w-full px-3 py-2 rounded-lg border font-serif",
-                              isDark 
-                                ? "bg-stone-700 border-stone-600 text-stone-100" 
-                                : "bg-white border-stone-300 text-stone-900"
+                              'w-full rounded-lg border px-3 py-2 font-serif',
+                              isDark
+                                ? 'border-stone-600 bg-stone-700 text-stone-100'
+                                : 'border-stone-300 bg-white text-stone-900'
                             )}
                           />
                         </div>
 
                         {/* 视频上传大小限制 */}
                         <div>
-                          <label className={cn(
-                            "block text-sm font-medium mb-2 font-serif",
-                            isDark ? "text-stone-300" : "text-stone-700"
-                          )}>
+                          <label
+                            className={cn(
+                              'mb-2 block font-serif text-sm font-medium',
+                              isDark ? 'text-stone-300' : 'text-stone-700'
+                            )}
+                          >
                             视频大小限制 (MB)
                           </label>
                           <input
                             type="number"
                             min="1"
                             max="500"
-                            value={localConfig.system_parameters?.video_file_size_limit || 100}
-                            onChange={(e) => updateConfig('system_parameters.video_file_size_limit', parseInt(e.target.value))}
+                            value={
+                              localConfig.system_parameters
+                                ?.video_file_size_limit || 100
+                            }
+                            onChange={e =>
+                              updateConfig(
+                                'system_parameters.video_file_size_limit',
+                                parseInt(e.target.value)
+                              )
+                            }
                             className={cn(
-                              "w-full px-3 py-2 rounded-lg border font-serif",
-                              isDark 
-                                ? "bg-stone-700 border-stone-600 text-stone-100" 
-                                : "bg-white border-stone-300 text-stone-900"
+                              'w-full rounded-lg border px-3 py-2 font-serif',
+                              isDark
+                                ? 'border-stone-600 bg-stone-700 text-stone-100'
+                                : 'border-stone-300 bg-white text-stone-900'
                             )}
                           />
                         </div>
@@ -1256,31 +1541,35 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
             </div>
 
             {/* --- 底部操作栏 --- */}
-            <div className={cn(
-              "p-6 border-t flex-shrink-0",
-              isDark ? "border-stone-700" : "border-stone-200"
-            )}>
+            <div
+              className={cn(
+                'flex-shrink-0 border-t p-6',
+                isDark ? 'border-stone-700' : 'border-stone-200'
+              )}
+            >
               {hasChanges && (
-                <p className={cn(
-                  "text-xs text-center mb-3 font-serif",
-                  isDark ? "text-stone-400" : "text-stone-600"
-                )}>
+                <p
+                  className={cn(
+                    'mb-3 text-center font-serif text-xs',
+                    isDark ? 'text-stone-400' : 'text-stone-600'
+                  )}
+                >
                   您有未保存的更改
                 </p>
               )}
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={handleReset}
                   disabled={!hasChanges}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl",
-                    "font-medium font-serif transition-colors",
+                    'flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3',
+                    'font-serif font-medium transition-colors',
                     hasChanges
                       ? isDark
-                        ? "bg-stone-700 hover:bg-stone-600 text-stone-200 cursor-pointer"
-                        : "bg-stone-100 hover:bg-stone-200 text-stone-700 cursor-pointer"
-                      : "opacity-50 cursor-not-allowed bg-stone-500/20 text-stone-500"
+                        ? 'cursor-pointer bg-stone-700 text-stone-200 hover:bg-stone-600'
+                        : 'cursor-pointer bg-stone-100 text-stone-700 hover:bg-stone-200'
+                      : 'cursor-not-allowed bg-stone-500/20 text-stone-500 opacity-50'
                   )}
                 >
                   <RotateCcw className="h-4 w-4" />
@@ -1290,13 +1579,13 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   onClick={handleSave}
                   disabled={!hasChanges}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl",
-                    "font-medium font-serif transition-colors",
+                    'flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3',
+                    'font-serif font-medium transition-colors',
                     hasChanges
                       ? isDark
-                        ? "bg-stone-600 hover:bg-stone-500 text-white cursor-pointer"
-                        : "bg-stone-700 hover:bg-stone-800 text-white cursor-pointer"
-                      : "opacity-50 cursor-not-allowed bg-stone-500/20 text-stone-500"
+                        ? 'cursor-pointer bg-stone-600 text-white hover:bg-stone-500'
+                        : 'cursor-pointer bg-stone-700 text-white hover:bg-stone-800'
+                      : 'cursor-not-allowed bg-stone-500/20 text-stone-500 opacity-50'
                   )}
                 >
                   <Save className="h-4 w-4" />
@@ -1311,36 +1600,42 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
       {/* --- 文件上传配置小模态框 --- */}
       {showFileUploadModal && (
         <>
-          <div 
-            className="fixed inset-0 z-60 bg-black/30 backdrop-blur-sm cursor-pointer"
+          <div
+            className="fixed inset-0 z-60 cursor-pointer bg-black/30 backdrop-blur-sm"
             onClick={handleFileUploadCancel}
           />
           <div className="fixed inset-x-4 top-4 bottom-24 z-60 flex items-center justify-center">
-            <div className="w-full max-w-[420px] max-h-full flex flex-col">
-              <div className={cn(
-                "rounded-xl border shadow-2xl flex flex-col h-full",
-                isDark 
-                  ? "bg-stone-900 border-stone-700" 
-                  : "bg-white border-stone-200"
-              )}>
+            <div className="flex max-h-full w-full max-w-[420px] flex-col">
+              <div
+                className={cn(
+                  'flex h-full flex-col rounded-xl border shadow-2xl',
+                  isDark
+                    ? 'border-stone-700 bg-stone-900'
+                    : 'border-stone-200 bg-white'
+                )}
+              >
                 {/* --- 模态框头部 --- */}
-                <div className={cn(
-                  "flex items-center justify-between p-4 border-b flex-shrink-0",
-                  isDark ? "border-stone-700" : "border-stone-200"
-                )}>
-                  <h3 className={cn(
-                    "text-base font-bold font-serif",
-                    isDark ? "text-stone-100" : "text-stone-900"
-                  )}>
+                <div
+                  className={cn(
+                    'flex flex-shrink-0 items-center justify-between border-b p-4',
+                    isDark ? 'border-stone-700' : 'border-stone-200'
+                  )}
+                >
+                  <h3
+                    className={cn(
+                      'font-serif text-base font-bold',
+                      isDark ? 'text-stone-100' : 'text-stone-900'
+                    )}
+                  >
                     文件上传配置
                   </h3>
                   <button
                     onClick={handleFileUploadCancel}
                     className={cn(
-                      "p-1.5 rounded-lg transition-colors cursor-pointer",
-                      isDark 
-                        ? "hover:bg-stone-800 text-stone-400 hover:text-stone-200" 
-                        : "hover:bg-stone-100 text-stone-600 hover:text-stone-900"
+                      'cursor-pointer rounded-lg p-1.5 transition-colors',
+                      isDark
+                        ? 'text-stone-400 hover:bg-stone-800 hover:text-stone-200'
+                        : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
                     )}
                   >
                     <X className="h-4 w-4" />
@@ -1348,28 +1643,30 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                 </div>
 
                 {/* --- 模态框内容区域（可滚动） --- */}
-                <div className="flex-1 overflow-y-auto min-h-0 p-4">
+                <div className="min-h-0 flex-1 overflow-y-auto p-4">
                   <div className="space-y-4">
                     {/* --- 上传文件类型 --- */}
                     <div>
-                      <label className={cn(
-                        "block text-sm font-medium mb-2 font-serif",
-                        isDark ? "text-stone-300" : "text-stone-700"
-                      )}>
+                      <label
+                        className={cn(
+                          'mb-2 block font-serif text-sm font-medium',
+                          isDark ? 'text-stone-300' : 'text-stone-700'
+                        )}
+                      >
                         上传文件类型
                       </label>
                       <div className="flex gap-1.5">
                         <button
                           onClick={() => setUploadMethod('local')}
                           className={cn(
-                            "px-3 py-1.5 rounded-lg text-xs font-serif transition-colors cursor-pointer",
+                            'cursor-pointer rounded-lg px-3 py-1.5 font-serif text-xs transition-colors',
                             uploadMethod === 'local'
                               ? isDark
-                                ? "bg-stone-600 text-white"
-                                : "bg-stone-700 text-white"
+                                ? 'bg-stone-600 text-white'
+                                : 'bg-stone-700 text-white'
                               : isDark
-                                ? "bg-stone-700 text-stone-300 hover:bg-stone-600"
-                                : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+                                ? 'bg-stone-700 text-stone-300 hover:bg-stone-600'
+                                : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                           )}
                         >
                           本地上传
@@ -1377,14 +1674,14 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                         <button
                           onClick={() => setUploadMethod('url')}
                           className={cn(
-                            "px-3 py-1.5 rounded-lg text-xs font-serif transition-colors cursor-pointer",
+                            'cursor-pointer rounded-lg px-3 py-1.5 font-serif text-xs transition-colors',
                             uploadMethod === 'url'
                               ? isDark
-                                ? "bg-stone-600 text-white"
-                                : "bg-stone-700 text-white"
+                                ? 'bg-stone-600 text-white'
+                                : 'bg-stone-700 text-white'
                               : isDark
-                                ? "bg-stone-700 text-stone-300 hover:bg-stone-600"
-                                : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+                                ? 'bg-stone-700 text-stone-300 hover:bg-stone-600'
+                                : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                           )}
                         >
                           URL
@@ -1392,14 +1689,14 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                         <button
                           onClick={() => setUploadMethod('both')}
                           className={cn(
-                            "px-3 py-1.5 rounded-lg text-xs font-serif transition-colors cursor-pointer",
+                            'cursor-pointer rounded-lg px-3 py-1.5 font-serif text-xs transition-colors',
                             uploadMethod === 'both'
                               ? isDark
-                                ? "bg-stone-600 text-white"
-                                : "bg-stone-700 text-white"
+                                ? 'bg-stone-600 text-white'
+                                : 'bg-stone-700 text-white'
                               : isDark
-                                ? "bg-stone-700 text-stone-300 hover:bg-stone-600"
-                                : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+                                ? 'bg-stone-700 text-stone-300 hover:bg-stone-600'
+                                : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                           )}
                         >
                           两者
@@ -1409,17 +1706,22 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
 
                     {/* --- 最大上传数 --- */}
                     <div>
-                      <label className={cn(
-                        "block text-sm font-medium mb-2 font-serif",
-                        isDark ? "text-stone-300" : "text-stone-700"
-                      )}>
+                      <label
+                        className={cn(
+                          'mb-2 block font-serif text-sm font-medium',
+                          isDark ? 'text-stone-300' : 'text-stone-700'
+                        )}
+                      >
                         最大上传数
                       </label>
-                      <p className={cn(
-                        "text-xs mb-2 font-serif",
-                        isDark ? "text-stone-400" : "text-stone-600"
-                      )}>
-                        文档 &lt; 15MB, 图片 &lt; 10MB, 音频 &lt; 50MB, 视频 &lt; 100MB
+                      <p
+                        className={cn(
+                          'mb-2 font-serif text-xs',
+                          isDark ? 'text-stone-400' : 'text-stone-600'
+                        )}
+                      >
+                        文档 &lt; 15MB, 图片 &lt; 10MB, 音频 &lt; 50MB, 视频
+                        &lt; 100MB
                       </p>
                       <div className="flex items-center gap-3">
                         <input
@@ -1427,16 +1729,18 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                           min="1"
                           max="10"
                           value={maxFiles}
-                          onChange={(e) => setMaxFiles(parseInt(e.target.value))}
+                          onChange={e => setMaxFiles(parseInt(e.target.value))}
                           className={cn(
-                            "flex-1 cursor-pointer",
-                            isDark ? "accent-stone-600" : "accent-stone-700"
+                            'flex-1 cursor-pointer',
+                            isDark ? 'accent-stone-600' : 'accent-stone-700'
                           )}
                         />
-                        <span className={cn(
-                          "text-base font-medium font-serif min-w-[1.5rem] text-center",
-                          isDark ? "text-stone-200" : "text-stone-800"
-                        )}>
+                        <span
+                          className={cn(
+                            'min-w-[1.5rem] text-center font-serif text-base font-medium',
+                            isDark ? 'text-stone-200' : 'text-stone-800'
+                          )}
+                        >
                           {maxFiles}
                         </span>
                       </div>
@@ -1444,132 +1748,168 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
 
                     {/* --- 支持的文件类型 --- */}
                     <div>
-                      <label className={cn(
-                        "block text-sm font-medium mb-2 font-serif",
-                        isDark ? "text-stone-300" : "text-stone-700"
-                      )}>
+                      <label
+                        className={cn(
+                          'mb-2 block font-serif text-sm font-medium',
+                          isDark ? 'text-stone-300' : 'text-stone-700'
+                        )}
+                      >
                         支持的文件类型
                       </label>
                       <div className="space-y-2">
-                        {Object.entries(FILE_TYPE_CONFIG).map(([fileType, config]) => {
-                          const IconComponent = config.icon;
-                          const isEnabled = enabledFileTypes.has(fileType);
-                          
-                          return (
-                            <div key={fileType} className="space-y-2">
-                              <div
-                                className={cn(
-                                  "flex items-center justify-between p-3 rounded-lg border transition-colors cursor-pointer",
-                                  isEnabled
-                                    ? isDark
-                                      ? "border-stone-500 bg-stone-700/50"
-                                      : "border-stone-400 bg-stone-100/50"
-                                    : isDark
-                                      ? "border-stone-600 bg-stone-800/50"
-                                      : "border-stone-200 bg-stone-50/50"
-                                )}
-                                onClick={() => toggleFileType(fileType)}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <div className={cn(
-                                    "p-1.5 rounded-lg",
-                                    isEnabled
-                                      ? isDark
-                                        ? "bg-stone-600 text-white"
-                                        : "bg-stone-700 text-white"
-                                      : isDark
-                                        ? "bg-stone-700 text-stone-400"
-                                        : "bg-stone-200 text-stone-600"
-                                  )}>
-                                    <IconComponent className="h-3 w-3" />
-                                  </div>
-                                  <div>
-                                    <div className={cn(
-                                      "font-medium text-sm font-serif",
-                                      isDark ? "text-stone-200" : "text-stone-800"
-                                    )}>
-                                      {fileType}
-                                    </div>
-                                    <div className={cn(
-                                      "text-xs font-serif",
-                                      isDark ? "text-stone-400" : "text-stone-600"
-                                    )}>
-                                      {config.extensions.length > 0 
-                                        ? config.extensions.slice(0, 3).join(', ').toUpperCase() + (config.extensions.length > 3 ? '...' : '')
-                                        : config.maxSize
-                                      }
-                                    </div>
-                                  </div>
-                                </div>
-                                <input
-                                  type="checkbox"
-                                  checked={isEnabled}
-                                  onChange={() => toggleFileType(fileType)}
+                        {Object.entries(FILE_TYPE_CONFIG).map(
+                          ([fileType, config]) => {
+                            const IconComponent = config.icon;
+                            const isEnabled = enabledFileTypes.has(fileType);
+
+                            return (
+                              <div key={fileType} className="space-y-2">
+                                <div
                                   className={cn(
-                                    "w-4 h-4 rounded border cursor-pointer",
+                                    'flex cursor-pointer items-center justify-between rounded-lg border p-3 transition-colors',
                                     isEnabled
                                       ? isDark
-                                        ? "bg-stone-600 border-stone-600 accent-stone-600"
-                                        : "bg-stone-700 border-stone-700 accent-stone-700"
+                                        ? 'border-stone-500 bg-stone-700/50'
+                                        : 'border-stone-400 bg-stone-100/50'
                                       : isDark
-                                        ? "border-stone-500 accent-stone-600"
-                                        : "border-stone-300 accent-stone-700"
+                                        ? 'border-stone-600 bg-stone-800/50'
+                                        : 'border-stone-200 bg-stone-50/50'
                                   )}
-                                />
-                              </div>
-                              
-                              {/* --- 其他文件类型的自定义输入 --- */}
-                              {fileType === '其他文件类型' && isEnabled && (
-                                <div className={cn(
-                                  "ml-4 p-3 rounded-lg border",
-                                  isDark ? "bg-stone-800 border-stone-600" : "bg-stone-50 border-stone-200"
-                                )}>
-                                  <label className={cn(
-                                    "block text-xs font-medium mb-2 font-serif",
-                                    isDark ? "text-stone-300" : "text-stone-700"
-                                  )}>
-                                    自定义文件扩展名（用逗号或空格分隔）
-                                  </label>
+                                  onClick={() => toggleFileType(fileType)}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      className={cn(
+                                        'rounded-lg p-1.5',
+                                        isEnabled
+                                          ? isDark
+                                            ? 'bg-stone-600 text-white'
+                                            : 'bg-stone-700 text-white'
+                                          : isDark
+                                            ? 'bg-stone-700 text-stone-400'
+                                            : 'bg-stone-200 text-stone-600'
+                                      )}
+                                    >
+                                      <IconComponent className="h-3 w-3" />
+                                    </div>
+                                    <div>
+                                      <div
+                                        className={cn(
+                                          'font-serif text-sm font-medium',
+                                          isDark
+                                            ? 'text-stone-200'
+                                            : 'text-stone-800'
+                                        )}
+                                      >
+                                        {fileType}
+                                      </div>
+                                      <div
+                                        className={cn(
+                                          'font-serif text-xs',
+                                          isDark
+                                            ? 'text-stone-400'
+                                            : 'text-stone-600'
+                                        )}
+                                      >
+                                        {config.extensions.length > 0
+                                          ? config.extensions
+                                              .slice(0, 3)
+                                              .join(', ')
+                                              .toUpperCase() +
+                                            (config.extensions.length > 3
+                                              ? '...'
+                                              : '')
+                                          : config.maxSize}
+                                      </div>
+                                    </div>
+                                  </div>
                                   <input
-                                    type="text"
-                                    value={customFileTypes}
-                                    onChange={(e) => setCustomFileTypes(e.target.value)}
+                                    type="checkbox"
+                                    checked={isEnabled}
+                                    onChange={() => toggleFileType(fileType)}
                                     className={cn(
-                                      "w-full px-2 py-1.5 rounded text-xs font-serif border",
-                                      isDark 
-                                        ? "bg-stone-700 border-stone-600 text-stone-100 placeholder-stone-400" 
-                                        : "bg-white border-stone-300 text-stone-900 placeholder-stone-500"
+                                      'h-4 w-4 cursor-pointer rounded border',
+                                      isEnabled
+                                        ? isDark
+                                          ? 'border-stone-600 bg-stone-600 accent-stone-600'
+                                          : 'border-stone-700 bg-stone-700 accent-stone-700'
+                                        : isDark
+                                          ? 'border-stone-500 accent-stone-600'
+                                          : 'border-stone-300 accent-stone-700'
                                     )}
-                                    placeholder="例如: zip, rar, 7z, tar"
                                   />
-                                  <p className={cn(
-                                    "text-xs mt-1 font-serif",
-                                    isDark ? "text-stone-400" : "text-stone-600"
-                                  )}>
-                                    支持格式：zip, rar, 7z, tar, gz, bz2, xz 等
-                                  </p>
                                 </div>
-                              )}
-                            </div>
-                          );
-                        })}
+
+                                {/* --- 其他文件类型的自定义输入 --- */}
+                                {fileType === '其他文件类型' && isEnabled && (
+                                  <div
+                                    className={cn(
+                                      'ml-4 rounded-lg border p-3',
+                                      isDark
+                                        ? 'border-stone-600 bg-stone-800'
+                                        : 'border-stone-200 bg-stone-50'
+                                    )}
+                                  >
+                                    <label
+                                      className={cn(
+                                        'mb-2 block font-serif text-xs font-medium',
+                                        isDark
+                                          ? 'text-stone-300'
+                                          : 'text-stone-700'
+                                      )}
+                                    >
+                                      自定义文件扩展名（用逗号或空格分隔）
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={customFileTypes}
+                                      onChange={e =>
+                                        setCustomFileTypes(e.target.value)
+                                      }
+                                      className={cn(
+                                        'w-full rounded border px-2 py-1.5 font-serif text-xs',
+                                        isDark
+                                          ? 'border-stone-600 bg-stone-700 text-stone-100 placeholder-stone-400'
+                                          : 'border-stone-300 bg-white text-stone-900 placeholder-stone-500'
+                                      )}
+                                      placeholder="例如: zip, rar, 7z, tar"
+                                    />
+                                    <p
+                                      className={cn(
+                                        'mt-1 font-serif text-xs',
+                                        isDark
+                                          ? 'text-stone-400'
+                                          : 'text-stone-600'
+                                      )}
+                                    >
+                                      支持格式：zip, rar, 7z, tar, gz, bz2, xz
+                                      等
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          }
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* --- 模态框底部按钮 --- */}
-                <div className={cn(
-                  "flex gap-2 p-4 border-t flex-shrink-0",
-                  isDark ? "border-stone-700" : "border-stone-200"
-                )}>
+                <div
+                  className={cn(
+                    'flex flex-shrink-0 gap-2 border-t p-4',
+                    isDark ? 'border-stone-700' : 'border-stone-200'
+                  )}
+                >
                   <button
                     onClick={handleFileUploadCancel}
                     className={cn(
-                      "flex-1 py-2 px-3 rounded-lg text-sm font-medium font-serif transition-colors cursor-pointer",
+                      'flex-1 cursor-pointer rounded-lg px-3 py-2 font-serif text-sm font-medium transition-colors',
                       isDark
-                        ? "bg-stone-700 hover:bg-stone-600 text-stone-200"
-                        : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+                        ? 'bg-stone-700 text-stone-200 hover:bg-stone-600'
+                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                     )}
                   >
                     取消
@@ -1577,10 +1917,10 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   <button
                     onClick={handleFileUploadSave}
                     className={cn(
-                      "flex-1 py-2 px-3 rounded-lg text-sm font-medium font-serif transition-colors cursor-pointer",
+                      'flex-1 cursor-pointer rounded-lg px-3 py-2 font-serif text-sm font-medium transition-colors',
                       isDark
-                        ? "bg-stone-600 hover:bg-stone-500 text-white"
-                        : "bg-stone-700 hover:bg-stone-800 text-white"
+                        ? 'bg-stone-600 text-white hover:bg-stone-500'
+                        : 'bg-stone-700 text-white hover:bg-stone-800'
                     )}
                   >
                     确定
@@ -1595,4 +1935,4 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
   );
 };
 
-export default DifyParametersPanel; 
+export default DifyParametersPanel;

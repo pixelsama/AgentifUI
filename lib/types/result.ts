@@ -1,11 +1,11 @@
 /**
  * 统一的Result类型定义
- * 
+ *
  * 用于标准化所有数据库操作和API调用的返回值
  * 提供一致的错误处理和成功状态检查
  */
 
-export type Result<T> = 
+export type Result<T> =
   | { success: true; data: T; error?: never }
   | { success: false; error: Error; data?: never };
 
@@ -82,4 +82,4 @@ export class ValidationError extends Error {
     super(message);
     this.name = 'ValidationError';
   }
-} 
+}

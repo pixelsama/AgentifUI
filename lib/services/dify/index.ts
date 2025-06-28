@@ -4,10 +4,7 @@
 // --- END COMMENT ---
 
 // Chat 服务
-export {
-  streamDifyChat,
-  stopDifyStreamingTask
-} from './chat-service';
+export { streamDifyChat, stopDifyStreamingTask } from './chat-service';
 
 // Workflow 服务
 export {
@@ -15,7 +12,7 @@ export {
   streamDifyWorkflow,
   stopDifyWorkflow,
   getDifyWorkflowRunDetail,
-  getDifyWorkflowLogs
+  getDifyWorkflowLogs,
 } from './workflow-service';
 
 // App 服务
@@ -27,14 +24,14 @@ export {
   getDifyAppInfoWithConfig,
   getDifyWebAppSettings,
   getDifyAppMeta,
-  testDifyAppParameters
+  testDifyAppParameters,
 } from './app-service';
 
 // Message 服务
 export {
   getConversationMessages,
   submitMessageFeedback,
-  convertAudioToText
+  convertAudioToText,
 } from './message-service';
 
 // Conversation 服务
@@ -42,14 +39,14 @@ export {
   getConversations,
   deleteConversation,
   renameConversation,
-  getConversationVariables
+  getConversationVariables,
 } from './conversation-service';
 
 // Completion 服务
 export {
   executeDifyCompletion,
   streamDifyCompletion,
-  stopDifyCompletion
+  stopDifyCompletion,
 } from './completion-service';
 
 // Annotation 服务
@@ -59,7 +56,7 @@ export {
   updateDifyAnnotation,
   deleteDifyAnnotation,
   setDifyAnnotationReplySettings,
-  getDifyAnnotationReplyJobStatus
+  getDifyAnnotationReplyJobStatus,
 } from './annotation-service';
 
 // 类型定义
@@ -70,7 +67,7 @@ export type {
   DifySseEvent,
   DifyUsage,
   DifyRetrieverResource,
-  
+
   // Workflow 相关类型
   DifyWorkflowRequestPayload,
   DifyWorkflowCompletionResponse,
@@ -84,25 +81,25 @@ export type {
   GetDifyWorkflowLogsParams,
   GetDifyWorkflowLogsResponse,
   DifyWorkflowLogEntry,
-  
+
   // App 相关类型
   DifyAppParametersResponse,
   DifyAppInfoResponse,
   DifyWebAppSettingsResponse,
   DifyAppMetaResponse,
   DifyToolIconDetail,
-  
+
   // Message 相关类型
   DifyMessageFeedbackRequestPayload,
   DifyMessageFeedbackResponse,
   DifyAudioToTextRequestPayload,
   DifyAudioToTextResponse,
-  
+
   // Completion 相关类型
   DifyCompletionRequestPayload,
   DifyCompletionResponse,
   DifyCompletionStreamResponse,
-  
+
   // Annotation 相关类型
   DifyAnnotationItem,
   GetDifyAnnotationsParams,
@@ -116,8 +113,8 @@ export type {
   InitialDifyAnnotationReplySettingsRequest,
   DifyAsyncJobResponse,
   DifyAsyncJobStatusResponse,
-  
+
   // 通用类型
   DifyFile,
-  DifyApiError
-} from './types'; 
+  DifyApiError,
+} from './types';

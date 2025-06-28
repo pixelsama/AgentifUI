@@ -8,15 +8,25 @@
 
 ```tsx
 // components/app-selector/app-selector.tsx
-import { useState, useEffect } from 'react';
-import { useCurrentApp } from '@lib/hooks/use-current-app';
-import { getAllDifyApps } from '@lib/services/dify/app-service'; // 需要创建
+// 需要创建
 import { Button } from '@components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select';
+import { useCurrentApp } from '@lib/hooks/use-current-app';
+import { getAllDifyApps } from '@lib/services/dify/app-service';
+
+import { useEffect, useState } from 'react';
 
 export function AppSelector() {
   const { currentAppId, switchToApp, isLoading } = useCurrentApp();
-  const [availableApps, setAvailableApps] = useState<Array<{id: string, name: string}>>([]);
+  const [availableApps, setAvailableApps] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
   const [isLoadingApps, setIsLoadingApps] = useState(false);
 
   // 获取可用的app列表
@@ -32,7 +42,7 @@ export function AppSelector() {
         setIsLoadingApps(false);
       }
     };
-    
+
     loadApps();
   }, []);
 
@@ -52,8 +62,8 @@ export function AppSelector() {
   return (
     <div className="flex items-center space-x-2">
       <span className="text-sm text-gray-600">当前应用:</span>
-      <Select 
-        value={currentAppId || ''} 
+      <Select
+        value={currentAppId || ''}
         onValueChange={handleAppChange}
         disabled={isLoading || isLoadingApps}
       >
@@ -77,13 +87,15 @@ export function AppSelector() {
 
 ```typescript
 // lib/services/dify/app-service.ts
-import type { ServiceInstance } from '@lib/types/database';
 import { getProviderByName } from '@lib/db';
+import type { ServiceInstance } from '@lib/types/database';
 
 /**
  * 获取所有可用的Dify应用
  */
-export async function getAllDifyApps(): Promise<Array<{id: string, name: string, description?: string}>> {
+export async function getAllDifyApps(): Promise<
+  Array<{ id: string; name: string; description?: string }>
+> {
   try {
     // 获取Dify提供商
     const providerResult = await getProviderByName('Dify');
@@ -94,23 +106,24 @@ export async function getAllDifyApps(): Promise<Array<{id: string, name: string,
     // 获取所有Dify服务实例
     const { createClient } = await import('@lib/supabase/client');
     const supabase = createClient();
-    
+
     const { data: instances, error } = await supabase
       .from('service_instances')
       .select('instance_id, display_name, description')
       .eq('provider_id', providerResult.data.id)
       .order('display_name');
-      
+
     if (error) {
       throw error;
     }
-    
-    return instances?.map(instance => ({
-      id: instance.instance_id,
-      name: instance.display_name || instance.instance_id,
-      description: instance.description
-    })) || [];
-    
+
+    return (
+      instances?.map(instance => ({
+        id: instance.instance_id,
+        name: instance.display_name || instance.instance_id,
+        description: instance.description,
+      })) || []
+    );
   } catch (error) {
     console.error('获取Dify应用列表失败:', error);
     throw error;
@@ -124,33 +137,36 @@ export async function getAllDifyApps(): Promise<Array<{id: string, name: string,
 // lib/hooks/use-current-app.ts (添加方法)
 export function useCurrentApp() {
   // ... 现有代码 ...
-  
+
   // 新增：切换app的便捷方法
-  const switchToApp = useCallback(async (appId: string) => {
-    try {
-      await switchToAppAction(appId);
-      
-      // 切换成功后，可能需要：
-      // 1. 清除当前聊天状态
-      // 2. 重定向到新的聊天页面
-      // 3. 刷新相关数据
-      
-      // 清除当前聊天状态
-      const { clearMessages } = require('@lib/stores/chat-store').useChatStore.getState();
-      clearMessages();
-      
-      // 重定向到app页面
-      if (typeof window !== 'undefined') {
-        window.location.href = '/app/app-name';
-        // 或者切换到聊天的首页
-        window.location.href = '/chat/new';
+  const switchToApp = useCallback(
+    async (appId: string) => {
+      try {
+        await switchToAppAction(appId);
+
+        // 切换成功后，可能需要：
+        // 1. 清除当前聊天状态
+        // 2. 重定向到新的聊天页面
+        // 3. 刷新相关数据
+
+        // 清除当前聊天状态
+        const { clearMessages } =
+          require('@lib/stores/chat-store').useChatStore.getState();
+        clearMessages();
+
+        // 重定向到app页面
+        if (typeof window !== 'undefined') {
+          window.location.href = '/app/app-name';
+          // 或者切换到聊天的首页
+          window.location.href = '/chat/new';
+        }
+      } catch (error) {
+        console.error('切换app失败:', error);
+        throw error;
       }
-      
-    } catch (error) {
-      console.error('切换app失败:', error);
-      throw error;
-    }
-  }, [switchToAppAction]);
+    },
+    [switchToAppAction]
+  );
 
   return {
     // ... 现有返回值 ...

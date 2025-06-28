@@ -730,7 +730,7 @@
     },
     "admin": {
       "title": "Admin Panel",
-      "users": "User Management", 
+      "users": "User Management",
       "organizations": "Organization Management",
       "analytics": "Analytics"
     },

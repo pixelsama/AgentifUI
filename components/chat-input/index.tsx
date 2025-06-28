@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
 // 导出所有子组件，方便单独使用
-export { ChatButton } from "./button"
-export { ChatTextInput } from "./text-input" 
-export { ChatButtonArea, ChatTextArea } from "./layout"
-export { ChatContainer } from "./container"
-export { ChatInput } from "./chat-input"
-export { AttachmentPreviewBar } from "./attachment-preview-bar"
-export { AttachmentPreviewItem } from "./attachment-preview-item"
+export { ChatButton } from './button';
+export { ChatTextInput } from './text-input';
+export { ChatButtonArea, ChatTextArea } from './layout';
+export { ChatContainer } from './container';
+export { ChatInput } from './chat-input';
+export { AttachmentPreviewBar } from './attachment-preview-bar';
+export { AttachmentPreviewItem } from './attachment-preview-item';

@@ -1,150 +1,156 @@
-"use client"
+'use client';
 
-import React, { useState, useRef, useEffect } from 'react'
-import { useTheme } from '@lib/hooks/use-theme'
-import { cn } from '@lib/utils'
-import { ChevronDown, Check } from 'lucide-react'
+import { useTheme } from '@lib/hooks/use-theme';
+import { cn } from '@lib/utils';
+import { Check, ChevronDown } from 'lucide-react';
+
+import React, { useEffect, useRef, useState } from 'react';
 
 interface CustomSelectProps {
-  value: string
-  onChange: (value: string) => void
-  options: string[]
-  placeholder: string
-  error?: string
-  className?: string
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+  placeholder: string;
+  error?: string;
+  className?: string;
 }
 
 /**
  * 现代化自定义下拉选择组件
- * 
+ *
  * 特点：
  * - 美观的现代化设计
  * - 平滑的动画效果
  * - 支持键盘导航
  * - 统一的stone色系主题
  */
-export function CustomSelect({ 
-  value, 
-  onChange, 
-  options, 
-  placeholder, 
+export function CustomSelect({
+  value,
+  onChange,
+  options,
+  placeholder,
   error,
-  className 
+  className,
 }: CustomSelectProps) {
-  const { isDark } = useTheme()
-  const [isOpen, setIsOpen] = useState(false)
-  const [highlightedIndex, setHighlightedIndex] = useState(-1)
-  const selectRef = useRef<HTMLDivElement>(null)
-  const optionsRef = useRef<HTMLDivElement>(null)
-  
+  const { isDark } = useTheme();
+  const [isOpen, setIsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const selectRef = useRef<HTMLDivElement>(null);
+  const optionsRef = useRef<HTMLDivElement>(null);
+
   // 点击外部关闭下拉框
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-        setHighlightedIndex(-1)
+      if (
+        selectRef.current &&
+        !selectRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+        setHighlightedIndex(-1);
       }
-    }
-    
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-  
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // 键盘导航
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (!isOpen) return
-      
+      if (!isOpen) return;
+
       switch (event.key) {
         case 'ArrowDown':
-          event.preventDefault()
-          setHighlightedIndex(prev => 
+          event.preventDefault();
+          setHighlightedIndex(prev =>
             prev < options.length - 1 ? prev + 1 : 0
-          )
-          break
+          );
+          break;
         case 'ArrowUp':
-          event.preventDefault()
-          setHighlightedIndex(prev => 
+          event.preventDefault();
+          setHighlightedIndex(prev =>
             prev > 0 ? prev - 1 : options.length - 1
-          )
-          break
+          );
+          break;
         case 'Enter':
-          event.preventDefault()
+          event.preventDefault();
           if (highlightedIndex >= 0) {
-            onChange(options[highlightedIndex])
-            setIsOpen(false)
-            setHighlightedIndex(-1)
+            onChange(options[highlightedIndex]);
+            setIsOpen(false);
+            setHighlightedIndex(-1);
           }
-          break
+          break;
         case 'Escape':
-          setIsOpen(false)
-          setHighlightedIndex(-1)
-          break
+          setIsOpen(false);
+          setHighlightedIndex(-1);
+          break;
       }
-    }
-    
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, highlightedIndex, options, onChange])
-  
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, highlightedIndex, options, onChange]);
+
   // 滚动到高亮选项
   useEffect(() => {
     if (highlightedIndex >= 0 && optionsRef.current) {
-      const highlightedElement = optionsRef.current.children[highlightedIndex] as HTMLElement
+      const highlightedElement = optionsRef.current.children[
+        highlightedIndex
+      ] as HTMLElement;
       if (highlightedElement) {
         highlightedElement.scrollIntoView({
           block: 'nearest',
-          behavior: 'smooth'
-        })
+          behavior: 'smooth',
+        });
       }
     }
-  }, [highlightedIndex])
-  
-  const selectedOption = options.find(option => option === value)
-  
+  }, [highlightedIndex]);
+
+  const selectedOption = options.find(option => option === value);
+
   const triggerClasses = cn(
-    "w-full px-4 py-3 rounded-xl border-2 font-serif transition-all duration-300",
-    "focus:outline-none focus:ring-4 focus:ring-stone-500/20 focus:border-stone-500",
-    "focus:shadow-lg focus:shadow-stone-500/25 backdrop-blur-sm",
-    "cursor-pointer select-none flex items-center justify-between",
+    'w-full rounded-xl border-2 px-4 py-3 font-serif transition-all duration-300',
+    'focus:border-stone-500 focus:ring-4 focus:ring-stone-500/20 focus:outline-none',
+    'backdrop-blur-sm focus:shadow-lg focus:shadow-stone-500/25',
+    'flex cursor-pointer items-center justify-between select-none',
     error
-      ? "border-red-400 focus:ring-red-500/20 focus:border-red-500" + (isDark ? " bg-red-900/10" : " bg-red-50/50")
+      ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20' +
+          (isDark ? ' bg-red-900/10' : ' bg-red-50/50')
       : isDark
-        ? "bg-stone-800/90 border-stone-600 text-stone-100 hover:border-stone-500"
-        : "bg-white/90 border-stone-300 text-stone-900 hover:border-stone-400",
+        ? 'border-stone-600 bg-stone-800/90 text-stone-100 hover:border-stone-500'
+        : 'border-stone-300 bg-white/90 text-stone-900 hover:border-stone-400',
     className
-  )
-  
+  );
+
   const dropdownClasses = cn(
-    "absolute top-full left-0 right-0 mt-2 z-40",
-    "rounded-xl border-2 shadow-xl backdrop-blur-xl",
-    "max-h-60 overflow-y-auto",
-    "transform transition-all duration-300 ease-out",
-    isOpen 
-      ? "opacity-100 scale-100 translate-y-0" 
-      : "opacity-0 scale-95 -translate-y-2 pointer-events-none",
-    isDark 
-      ? "bg-stone-800/95 border-stone-600"
-      : "bg-white/95 border-stone-300"
-  )
-  
-  const optionClasses = (index: number, isSelected: boolean) => cn(
-    "px-4 py-3 cursor-pointer transition-all duration-200",
-    "flex items-center justify-between font-serif",
-    "first:rounded-t-xl last:rounded-b-xl",
-    index === highlightedIndex
-      ? isDark 
-        ? "bg-stone-700 text-stone-100 shadow-sm"
-        : "bg-stone-100 text-stone-900 shadow-sm"
-      : isSelected
+    'absolute top-full right-0 left-0 z-40 mt-2',
+    'rounded-xl border-2 shadow-xl backdrop-blur-xl',
+    'max-h-60 overflow-y-auto',
+    'transform transition-all duration-300 ease-out',
+    isOpen
+      ? 'translate-y-0 scale-100 opacity-100'
+      : 'pointer-events-none -translate-y-2 scale-95 opacity-0',
+    isDark ? 'border-stone-600 bg-stone-800/95' : 'border-stone-300 bg-white/95'
+  );
+
+  const optionClasses = (index: number, isSelected: boolean) =>
+    cn(
+      'cursor-pointer px-4 py-3 transition-all duration-200',
+      'flex items-center justify-between font-serif',
+      'first:rounded-t-xl last:rounded-b-xl',
+      index === highlightedIndex
         ? isDark
-          ? "bg-stone-700/50 text-stone-200"
-          : "bg-stone-50 text-stone-800"
-        : isDark
-          ? "text-stone-300 hover:bg-stone-700/30"
-          : "text-stone-700 hover:bg-stone-50"
-  )
-  
+          ? 'bg-stone-700 text-stone-100 shadow-sm'
+          : 'bg-stone-100 text-stone-900 shadow-sm'
+        : isSelected
+          ? isDark
+            ? 'bg-stone-700/50 text-stone-200'
+            : 'bg-stone-50 text-stone-800'
+          : isDark
+            ? 'text-stone-300 hover:bg-stone-700/30'
+            : 'text-stone-700 hover:bg-stone-50'
+    );
+
   return (
     <div ref={selectRef} className="relative">
       <div
@@ -155,30 +161,34 @@ export function CustomSelect({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        <span className={cn(
-          selectedOption ? "" : isDark ? "text-stone-500" : "text-stone-400"
-        )}>
+        <span
+          className={cn(
+            selectedOption ? '' : isDark ? 'text-stone-500' : 'text-stone-400'
+          )}
+        >
           {selectedOption || placeholder}
         </span>
-        
-        <ChevronDown className={cn(
-          "h-4 w-4 transition-transform duration-200",
-          isOpen ? "rotate-180" : "rotate-0",
-          isDark ? "text-stone-400" : "text-stone-500"
-        )} />
+
+        <ChevronDown
+          className={cn(
+            'h-4 w-4 transition-transform duration-200',
+            isOpen ? 'rotate-180' : 'rotate-0',
+            isDark ? 'text-stone-400' : 'text-stone-500'
+          )}
+        />
       </div>
-      
+
       <div className={dropdownClasses}>
         <div ref={optionsRef} role="listbox">
           {options.map((option, index) => {
-            const isSelected = option === value
+            const isSelected = option === value;
             return (
               <div
                 key={option}
                 onClick={() => {
-                  onChange(option)
-                  setIsOpen(false)
-                  setHighlightedIndex(-1)
+                  onChange(option);
+                  setIsOpen(false);
+                  setHighlightedIndex(-1);
                 }}
                 onMouseEnter={() => setHighlightedIndex(index)}
                 className={optionClasses(index, isSelected)}
@@ -187,16 +197,18 @@ export function CustomSelect({
               >
                 <span>{option}</span>
                 {isSelected && (
-                  <Check className={cn(
-                    "h-4 w-4 ml-2",
-                    isDark ? "text-stone-300" : "text-stone-600"
-                  )} />
+                  <Check
+                    className={cn(
+                      'ml-2 h-4 w-4',
+                      isDark ? 'text-stone-300' : 'text-stone-600'
+                    )}
+                  />
                 )}
               </div>
-            )
+            );
           })}
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

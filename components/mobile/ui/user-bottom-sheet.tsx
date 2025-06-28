@@ -1,19 +1,22 @@
-"use client"
+'use client';
 
-import React from "react"
-import { BottomSheet } from "./bottom-sheet"
-import { cn } from "@lib/utils"
-import { useTheme } from "@lib/hooks/use-theme"
-import { Sliders, Sun, Moon, LogOut, Clock, UserCircle } from "lucide-react"
-import { useLogout } from "@lib/hooks/use-logout"
-import { useRouter } from "next/navigation"
-import { useProfile } from "@lib/hooks/use-profile"
-import { useTranslations } from "next-intl"
+import { useLogout } from '@lib/hooks/use-logout';
+import { useProfile } from '@lib/hooks/use-profile';
+import { useTheme } from '@lib/hooks/use-theme';
+import { cn } from '@lib/utils';
+import { Clock, LogOut, Moon, Sliders, Sun, UserCircle } from 'lucide-react';
+
+import React from 'react';
+
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+
+import { BottomSheet } from './bottom-sheet';
 
 interface UserBottomSheetProps {
-  isOpen: boolean
-  onClose: () => void
-  isLoggedIn: boolean
+  isOpen: boolean;
+  onClose: () => void;
+  isLoggedIn: boolean;
 }
 
 /**
@@ -25,23 +28,23 @@ interface UserBottomSheetProps {
 export function UserBottomSheet({
   isOpen,
   onClose,
-  isLoggedIn
+  isLoggedIn,
 }: UserBottomSheetProps) {
-  const { isDark, toggleTheme } = useTheme()
-  const { logout } = useLogout()
-  const router = useRouter()
-  const t = useTranslations("mobile.user")
-  const tBottomSheet = useTranslations("mobile.bottomSheet")
-  const tMenu = useTranslations("mobile.menu")
-  
+  const { isDark, toggleTheme } = useTheme();
+  const { logout } = useLogout();
+  const router = useRouter();
+  const t = useTranslations('mobile.user');
+  const tBottomSheet = useTranslations('mobile.bottomSheet');
+  const tMenu = useTranslations('mobile.menu');
+
   // 使用 useProfile hook 获取用户信息
-  const { profile } = useProfile()
-  
+  const { profile } = useProfile();
+
   // 从 profile 中提取用户信息
-  const userName = profile?.full_name || profile?.username || t("defaultUser")
-  const userCompany = profile?.organization?.name || t("noOrganization")
-  const avatarUrl = profile?.avatar_url
-  
+  const userName = profile?.full_name || profile?.username || t('defaultUser');
+  const userCompany = profile?.organization?.name || t('noOrganization');
+  const avatarUrl = profile?.avatar_url;
+
   // 生成用户头像的首字母
   const getInitials = (name: string) => {
     return name
@@ -49,9 +52,9 @@ export function UserBottomSheet({
       .map(word => word.charAt(0))
       .join('')
       .toUpperCase()
-      .slice(0, 2)
-  }
-  
+      .slice(0, 2);
+  };
+
   // 根据用户名生成一致的石色系背景颜色
   const getAvatarBgColor = (name: string) => {
     const colors = [
@@ -62,158 +65,170 @@ export function UserBottomSheet({
       '#475569', // slate-600
       '#6b7280', // gray-500
       '#4b5563', // gray-600
-      '#737373'  // neutral-500
-    ]
-    
-    let hash = 0
+      '#737373', // neutral-500
+    ];
+
+    let hash = 0;
     for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash)
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
-    return colors[Math.abs(hash) % colors.length]
-  }
-  
+    return colors[Math.abs(hash) % colors.length];
+  };
+
   // 处理登录
   const handleLogin = () => {
-    router.push('/login')
-    onClose()
-  }
-  
+    router.push('/login');
+    onClose();
+  };
+
   // 处理注册
   const handleRegister = () => {
-    router.push('/register')
-    onClose()
-  }
-  
+    router.push('/register');
+    onClose();
+  };
+
   // 处理退出登录
   const handleLogout = async () => {
-    await logout()
-    onClose()
-  }
-  
+    await logout();
+    onClose();
+  };
+
   // 渲染菜单项
   const renderMenuItem = (
-    icon: React.ReactNode, 
-    label: string, 
+    icon: React.ReactNode,
+    label: string,
     onClick: () => void,
     danger: boolean = false
   ) => (
-    <button 
+    <button
       onClick={onClick}
       className={cn(
-        "flex items-center w-full px-4 py-3 rounded-lg",
+        'flex w-full items-center rounded-lg px-4 py-3',
         // 亮色/暗色模式样式
-        isDark 
-          ? danger 
-            ? "hover:bg-red-900/30 text-red-400 hover:text-red-300" 
-            : "hover:bg-stone-700 text-stone-300 hover:text-stone-200" 
-          : danger 
-            ? "hover:bg-red-50 text-red-600 hover:text-red-700" 
-            : "hover:bg-stone-100 text-stone-700 hover:text-stone-900",
+        isDark
+          ? danger
+            ? 'text-red-400 hover:bg-red-900/30 hover:text-red-300'
+            : 'text-stone-300 hover:bg-stone-700 hover:text-stone-200'
+          : danger
+            ? 'text-red-600 hover:bg-red-50 hover:text-red-700'
+            : 'text-stone-700 hover:bg-stone-100 hover:text-stone-900',
         // 共用样式
-        "transition-colors duration-200",
+        'transition-colors duration-200'
       )}
     >
       <span className="mr-3 flex-shrink-0">{icon}</span>
-      <span className="font-medium font-serif">{label}</span>
+      <span className="font-serif font-medium">{label}</span>
     </button>
-  )
-  
+  );
+
   return (
     <BottomSheet
       isOpen={isOpen}
       onClose={onClose}
-      title={isLoggedIn ? tBottomSheet("userMenu") : tBottomSheet("account")}
+      title={isLoggedIn ? tBottomSheet('userMenu') : tBottomSheet('account')}
     >
       {isLoggedIn ? (
         <div className="flex flex-col">
           {/* 用户信息区域 */}
-          <div className={cn(
-            "flex items-center p-4 mb-3 rounded-lg",
-            isDark ? "bg-stone-700/50" : "bg-stone-100",
-            "shadow-sm"
-          )}>
+          <div
+            className={cn(
+              'mb-3 flex items-center rounded-lg p-4',
+              isDark ? 'bg-stone-700/50' : 'bg-stone-100',
+              'shadow-sm'
+            )}
+          >
             {/* 头像 - 与桌面端保持一致 */}
             {avatarUrl ? (
               <img
                 src={avatarUrl}
-                alt={t("avatarAlt", { userName })}
-                className="w-12 h-12 rounded-full object-cover shadow-md"
-                onError={(e) => {
+                alt={t('avatarAlt', { userName })}
+                className="h-12 w-12 rounded-full object-cover shadow-md"
+                onError={e => {
                   // 头像加载失败时隐藏图片
-                  (e.target as HTMLImageElement).style.display = 'none'
+                  (e.target as HTMLImageElement).style.display = 'none';
                 }}
               />
             ) : (
               <div
-                className="w-12 h-12 rounded-full flex items-center justify-center text-white font-medium shadow-md"
+                className="flex h-12 w-12 items-center justify-center rounded-full font-medium text-white shadow-md"
                 style={{
-                  backgroundColor: getAvatarBgColor(userName)
+                  backgroundColor: getAvatarBgColor(userName),
                 }}
               >
                 {getInitials(userName)}
               </div>
             )}
             <div className="ml-4 overflow-hidden">
-              <div className={cn(
-                "font-medium truncate font-serif",
-                isDark ? "text-white" : "text-stone-800"
-              )}>
+              <div
+                className={cn(
+                  'truncate font-serif font-medium',
+                  isDark ? 'text-white' : 'text-stone-800'
+                )}
+              >
                 {userName}
               </div>
-              <div className={cn(
-                "text-sm truncate max-w-[200px] font-serif",
-                isDark ? "text-stone-400" : "text-stone-500"
-              )}>
+              <div
+                className={cn(
+                  'max-w-[200px] truncate font-serif text-sm',
+                  isDark ? 'text-stone-400' : 'text-stone-500'
+                )}
+              >
                 {userCompany}
               </div>
             </div>
           </div>
-          
+
           {/* 菜单选项 */}
-          <div className={cn(
-            "space-y-1 rounded-lg overflow-hidden", 
-            isDark ? "bg-stone-800/50" : "bg-stone-50",
-            "border",
-            isDark ? "border-stone-700" : "border-stone-200",
-            "mb-2"
-          )}>
+          <div
+            className={cn(
+              'space-y-1 overflow-hidden rounded-lg',
+              isDark ? 'bg-stone-800/50' : 'bg-stone-50',
+              'border',
+              isDark ? 'border-stone-700' : 'border-stone-200',
+              'mb-2'
+            )}
+          >
             {renderMenuItem(
-              <Clock className="w-5 h-5" />,
-              tMenu("history"),
+              <Clock className="h-5 w-5" />,
+              tMenu('history'),
               () => {
-                router.push('/chat/history')
-                onClose()
+                router.push('/chat/history');
+                onClose();
               }
             )}
-            
+
             {renderMenuItem(
-              <Sliders className="w-5 h-5" />,
-              tMenu("settings"),
+              <Sliders className="h-5 w-5" />,
+              tMenu('settings'),
               () => {
-                router.push('/settings')
-                onClose()
+                router.push('/settings');
+                onClose();
               }
             )}
-            
+
             {renderMenuItem(
-              isDark
-                ? <Sun className="w-5 h-5 text-yellow-400" />
-                : <Moon className="w-5 h-5" />,
-              isDark ? tMenu("lightMode") : tMenu("darkMode"),
+              isDark ? (
+                <Sun className="h-5 w-5 text-yellow-400" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              ),
+              isDark ? tMenu('lightMode') : tMenu('darkMode'),
               toggleTheme
             )}
           </div>
-          
+
           {/* 退出登录按钮（单独分组） */}
-          <div className={cn(
-            "rounded-lg overflow-hidden", 
-            isDark ? "bg-stone-800/50" : "bg-stone-50",
-            "border",
-            isDark ? "border-stone-700" : "border-stone-200"
-          )}>
+          <div
+            className={cn(
+              'overflow-hidden rounded-lg',
+              isDark ? 'bg-stone-800/50' : 'bg-stone-50',
+              'border',
+              isDark ? 'border-stone-700' : 'border-stone-200'
+            )}
+          >
             {renderMenuItem(
-              <LogOut className="w-5 h-5" />,
-              tMenu("logout"),
+              <LogOut className="h-5 w-5" />,
+              tMenu('logout'),
               handleLogout,
               true
             )}
@@ -221,44 +236,50 @@ export function UserBottomSheet({
         </div>
       ) : (
         <div className="space-y-4 pt-2">
-          <div className={cn(
-            "text-center mb-4 py-4 px-4 rounded-lg",
-            isDark ? "bg-stone-700/50 text-stone-300" : "bg-stone-100 text-stone-600"
-          )}>
-            <UserCircle className={cn(
-              "w-16 h-16 mx-auto mb-3",
-              isDark ? "text-stone-400" : "text-stone-500"
-            )} />
-            <p className="font-serif">{t("loginPrompt")}</p>
+          <div
+            className={cn(
+              'mb-4 rounded-lg px-4 py-4 text-center',
+              isDark
+                ? 'bg-stone-700/50 text-stone-300'
+                : 'bg-stone-100 text-stone-600'
+            )}
+          >
+            <UserCircle
+              className={cn(
+                'mx-auto mb-3 h-16 w-16',
+                isDark ? 'text-stone-400' : 'text-stone-500'
+              )}
+            />
+            <p className="font-serif">{t('loginPrompt')}</p>
           </div>
-          
+
           <button
             onClick={handleLogin}
             className={cn(
-              "w-full py-3 px-4 rounded-lg font-medium text-center font-serif",
-              isDark 
-                ? "bg-blue-600 hover:bg-blue-700 text-white" 
-                : "bg-blue-500 hover:bg-blue-600 text-white",
-              "shadow-sm transition-colors duration-200"
+              'w-full rounded-lg px-4 py-3 text-center font-serif font-medium',
+              isDark
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-blue-500 text-white hover:bg-blue-600',
+              'shadow-sm transition-colors duration-200'
             )}
-                      >
-              {tMenu("login")}
-            </button>
-          
-            <button
-              onClick={handleRegister}
-              className={cn(
-                "w-full py-3 px-4 rounded-lg font-medium text-center font-serif",
-                isDark 
-                  ? "bg-stone-700 hover:bg-stone-600 text-stone-200" 
-                  : "bg-stone-200 hover:bg-stone-300 text-stone-700",
-                "shadow-sm transition-colors duration-200"
-              )}
-            >
-              {tMenu("register")}
-            </button>
+          >
+            {tMenu('login')}
+          </button>
+
+          <button
+            onClick={handleRegister}
+            className={cn(
+              'w-full rounded-lg px-4 py-3 text-center font-serif font-medium',
+              isDark
+                ? 'bg-stone-700 text-stone-200 hover:bg-stone-600'
+                : 'bg-stone-200 text-stone-700 hover:bg-stone-300',
+              'shadow-sm transition-colors duration-200'
+            )}
+          >
+            {tMenu('register')}
+          </button>
         </div>
       )}
     </BottomSheet>
-  )
-} 
+  );
+}

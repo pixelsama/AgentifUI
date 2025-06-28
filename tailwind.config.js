@@ -20,32 +20,36 @@ module.exports = {
         // display: Playfair Display + 思源宋体 - 装饰性标题字体
         // --- END COMMENT ---
         sans: [
-          'var(--font-crimson)', 
-          'var(--font-noto-serif)', 
-          'Georgia', 
-          'serif'
+          'var(--font-crimson)',
+          'var(--font-noto-serif)',
+          'Georgia',
+          'serif',
         ],
         serif: [
-          'var(--font-crimson)', 
-          'var(--font-noto-serif)', 
-          'Georgia', 
-          'serif'
-        ], 
-        display: [
-          'var(--font-playfair)', 
-          'var(--font-noto-serif)', 
-          'serif'
+          'var(--font-crimson)',
+          'var(--font-noto-serif)',
+          'Georgia',
+          'serif',
         ],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Monaco', 'Consolas', 'Liberation Mono', 'Menlo', 'monospace'],
+        display: ['var(--font-playfair)', 'var(--font-noto-serif)', 'serif'],
+        mono: [
+          'ui-monospace',
+          'SFMono-Regular',
+          'Monaco',
+          'Consolas',
+          'Liberation Mono',
+          'Menlo',
+          'monospace',
+        ],
       },
       animation: {
         'slide-in-down': 'slideInDown 0.3s ease-out forwards',
         'slide-out-up': 'slideOutUp 0.3s ease-in forwards',
         'pulse-subtle': 'pulseSubtle 2s infinite ease-in-out',
         'bounce-subtle': 'bounceSubtle 1s infinite',
-        'fadein': 'fadeIn 0.5s ease-out',
+        fadein: 'fadeIn 0.5s ease-out',
         'fade-in': 'fadeIn 0.3s ease-out forwards',
-        'blink': 'blink 1s step-end infinite',
+        blink: 'blink 1s step-end infinite',
         'slide-in-right': 'slideInRight 0.3s ease-out forwards',
         'slide-out-right': 'slideOutRight 0.3s ease-in forwards',
       },
@@ -90,11 +94,9 @@ module.exports = {
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)'
+        sm: 'calc(var(--radius) - 4px)',
       },
     },
   },
-  plugins: [
-    require('tailwind-scrollbar')({ nocompatible: true }),
-  ],
-} 
+  plugins: [require('tailwind-scrollbar')({ nocompatible: true })],
+};

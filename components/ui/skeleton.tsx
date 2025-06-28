@@ -1,7 +1,7 @@
 'use client';
 
-import { cn } from '@lib/utils';
 import { useTheme } from '@lib/hooks/use-theme';
+import { cn } from '@lib/utils';
 
 interface SkeletonProps {
   className?: string;
@@ -11,18 +11,26 @@ interface SkeletonProps {
 
 // 基础骨架屏组件
 export function Skeleton({ className, width, height }: SkeletonProps) {
-  const { isDark } = useTheme()
-  
+  const { isDark } = useTheme();
+
   const style = {
-    width: width ? (typeof width === 'number' ? `${width}px` : width) : undefined,
-    height: height ? (typeof height === 'number' ? `${height}px` : height) : undefined,
+    width: width
+      ? typeof width === 'number'
+        ? `${width}px`
+        : width
+      : undefined,
+    height: height
+      ? typeof height === 'number'
+        ? `${height}px`
+        : height
+      : undefined,
   };
 
   return (
-    <div 
+    <div
       className={cn(
-        "animate-pulse rounded-md",
-        isDark ? "bg-stone-700/50" : "bg-gray-200",
+        'animate-pulse rounded-md',
+        isDark ? 'bg-stone-700/50' : 'bg-gray-200',
         className
       )}
       style={style}
@@ -33,7 +41,7 @@ export function Skeleton({ className, width, height }: SkeletonProps) {
 // 文本输入框骨架屏
 export function InputSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn('space-y-2', className)}>
       <Skeleton className="h-4 w-1/4" />
       <Skeleton className="h-10 w-full" />
     </div>
@@ -42,7 +50,7 @@ export function InputSkeleton({ className }: { className?: string }) {
 
 // 按钮骨架屏
 export function ButtonSkeleton({ className }: { className?: string }) {
-  return <Skeleton className={cn("h-10 w-full", className)} />;
+  return <Skeleton className={cn('h-10 w-full', className)} />;
 }
 
 // 头像骨架屏
@@ -51,14 +59,14 @@ export function AvatarSkeleton({ size = 40 }: { size?: number }) {
 }
 
 // 标题骨架屏
-export function TitleSkeleton({ width = "1/3" }: { width?: string }) {
+export function TitleSkeleton({ width = '1/3' }: { width?: string }) {
   return <Skeleton className={`h-8 w-${width} mb-6`} />;
 }
 
 // 资料表单骨架屏
 export function ProfileFormSkeleton() {
   return (
-    <div className="max-w-md w-full mx-auto p-4 space-y-6">
+    <div className="mx-auto w-full max-w-md space-y-6 p-4">
       <TitleSkeleton />
       <div className="space-y-4">
         <InputSkeleton />
@@ -72,9 +80,9 @@ export function ProfileFormSkeleton() {
 // 聊天消息骨架屏
 export function ChatMessageSkeleton() {
   return (
-    <div className="flex items-start space-x-3 mb-4">
+    <div className="mb-4 flex items-start space-x-3">
       <AvatarSkeleton />
-      <div className="space-y-2 flex-1">
+      <div className="flex-1 space-y-2">
         <Skeleton className="h-4 w-1/4" />
         <Skeleton className="h-20 w-full" />
       </div>
@@ -83,7 +91,11 @@ export function ChatMessageSkeleton() {
 }
 
 // 聊天列表骨架屏
-export function ChatListSkeleton({ messageCount = 3 }: { messageCount?: number }) {
+export function ChatListSkeleton({
+  messageCount = 3,
+}: {
+  messageCount?: number;
+}) {
   return (
     <div className="space-y-6">
       {Array.from({ length: messageCount }).map((_, index) => (
@@ -96,18 +108,24 @@ export function ChatListSkeleton({ messageCount = 3 }: { messageCount?: number }
 // 卡片骨架屏
 export function CardSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("rounded-lg p-4", className)}>
-      <Skeleton className="h-8 w-1/3 mb-4" />
-      <Skeleton className="h-4 w-full mb-2" />
+    <div className={cn('rounded-lg p-4', className)}>
+      <Skeleton className="mb-4 h-8 w-1/3" />
+      <Skeleton className="mb-2 h-4 w-full" />
       <Skeleton className="h-4 w-2/3" />
     </div>
   );
 }
 
 // 表格骨架屏
-export function TableSkeleton({ rows = 3, className }: { rows?: number, className?: string }) {
+export function TableSkeleton({
+  rows = 3,
+  className,
+}: {
+  rows?: number;
+  className?: string;
+}) {
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn('space-y-3', className)}>
       <div className="flex space-x-4 pb-2">
         <Skeleton className="h-8 w-1/4" />
         <Skeleton className="h-8 w-1/4" />
@@ -128,8 +146,8 @@ export function TableSkeleton({ rows = 3, className }: { rows?: number, classNam
 
 // API配置页面骨架屏
 export function ApiConfigSkeleton() {
-  const { isDark } = useTheme()
-  
+  const { isDark } = useTheme();
+
   return (
     <div className="space-y-8">
       {/* 标题区域 */}
@@ -137,74 +155,97 @@ export function ApiConfigSkeleton() {
         <Skeleton className="h-10 w-1/3" />
         <Skeleton className="h-5 w-2/3" />
       </div>
-      
+
       {/* API密钥管理提示区域 */}
-      <div className={cn(
-        "p-4 rounded-lg border",
-        isDark ? "bg-blue-900/20 border-blue-800/30" : "bg-blue-50/80 border-blue-100"
-      )}>
-        <Skeleton className={cn(
-          "h-6 w-1/4 mb-2",
-          isDark ? "bg-blue-700/30" : "bg-blue-200/50"
-        )} />
-        <Skeleton className={cn(
-          "h-4 w-full mb-1",
-          isDark ? "bg-blue-700/30" : "bg-blue-200/50"
-        )} />
-        <Skeleton className={cn(
-          "h-4 w-full mb-1",
-          isDark ? "bg-blue-700/30" : "bg-blue-200/50"
-        )} />
-        <Skeleton className={cn(
-          "h-4 w-3/4",
-          isDark ? "bg-blue-700/30" : "bg-blue-200/50"
-        )} />
+      <div
+        className={cn(
+          'rounded-lg border p-4',
+          isDark
+            ? 'border-blue-800/30 bg-blue-900/20'
+            : 'border-blue-100 bg-blue-50/80'
+        )}
+      >
+        <Skeleton
+          className={cn(
+            'mb-2 h-6 w-1/4',
+            isDark ? 'bg-blue-700/30' : 'bg-blue-200/50'
+          )}
+        />
+        <Skeleton
+          className={cn(
+            'mb-1 h-4 w-full',
+            isDark ? 'bg-blue-700/30' : 'bg-blue-200/50'
+          )}
+        />
+        <Skeleton
+          className={cn(
+            'mb-1 h-4 w-full',
+            isDark ? 'bg-blue-700/30' : 'bg-blue-200/50'
+          )}
+        />
+        <Skeleton
+          className={cn(
+            'h-4 w-3/4',
+            isDark ? 'bg-blue-700/30' : 'bg-blue-200/50'
+          )}
+        />
       </div>
-      
+
       {/* 选项卡区域 */}
       <div>
-        <div className={cn(
-          "flex pb-2 mb-6 border-b",
-          isDark ? "border-stone-700/50" : "border-stone-200/50"
-        )}>
-          <Skeleton className="h-10 w-24 mr-4" />
+        <div
+          className={cn(
+            'mb-6 flex border-b pb-2',
+            isDark ? 'border-stone-700/50' : 'border-stone-200/50'
+          )}
+        >
+          <Skeleton className="mr-4 h-10 w-24" />
           <Skeleton className="h-10 w-24" />
         </div>
-        
+
         {/* 应用实例列表区域 */}
         <div className="space-y-6">
-          <div className="flex justify-between items-center mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <Skeleton className="h-8 w-1/4" />
             <Skeleton className="h-10 w-32" />
           </div>
-          
+
           {/* 表格 - 使用卡片包裹 */}
-          <div className={cn(
-            "rounded-lg overflow-hidden border",
-            isDark ? "bg-stone-800 border-stone-700/30" : "bg-white border-stone-300/50"
-          )}>
+          <div
+            className={cn(
+              'overflow-hidden rounded-lg border',
+              isDark
+                ? 'border-stone-700/30 bg-stone-800'
+                : 'border-stone-300/50 bg-white'
+            )}
+          >
             {/* 表头 */}
-            <div className={cn(
-              "flex p-4",
-              isDark ? "bg-stone-800/60" : "bg-stone-100/80"
-            )}>
-              <Skeleton className="h-6 w-1/5 mr-4" />
-              <Skeleton className="h-6 w-1/5 mr-4" />
-              <Skeleton className="h-6 w-1/5 mr-4" />
-              <Skeleton className="h-6 w-1/5 mr-4" />
+            <div
+              className={cn(
+                'flex p-4',
+                isDark ? 'bg-stone-800/60' : 'bg-stone-100/80'
+              )}
+            >
+              <Skeleton className="mr-4 h-6 w-1/5" />
+              <Skeleton className="mr-4 h-6 w-1/5" />
+              <Skeleton className="mr-4 h-6 w-1/5" />
+              <Skeleton className="mr-4 h-6 w-1/5" />
               <Skeleton className="h-6 w-1/5" />
             </div>
-            
+
             {/* 表行 */}
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className={cn(
-                "flex p-4 border-t",
-                isDark ? "border-stone-700/20" : "border-stone-200/50"
-              )}>
-                <Skeleton className="h-6 w-1/5 mr-4" />
-                <Skeleton className="h-6 w-1/5 mr-4" />
-                <Skeleton className="h-6 w-1/5 mr-4" />
-                <Skeleton className="h-6 w-1/5 mr-4" />
+              <div
+                key={index}
+                className={cn(
+                  'flex border-t p-4',
+                  isDark ? 'border-stone-700/20' : 'border-stone-200/50'
+                )}
+              >
+                <Skeleton className="mr-4 h-6 w-1/5" />
+                <Skeleton className="mr-4 h-6 w-1/5" />
+                <Skeleton className="mr-4 h-6 w-1/5" />
+                <Skeleton className="mr-4 h-6 w-1/5" />
                 <Skeleton className="h-6 w-1/5" />
               </div>
             ))}

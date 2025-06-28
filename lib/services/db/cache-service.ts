@@ -1,6 +1,6 @@
 /**
  * 统一的缓存服务
- * 
+ *
  * 提供内存级别的数据缓存，支持TTL（生存时间）管理
  * 用于减少数据库查询次数，提高应用性能
  */
@@ -40,12 +40,12 @@ export class CacheService {
    * @param ttl 生存时间（毫秒），默认5分钟
    */
   async get<T>(
-    key: string, 
-    fetcher: () => Promise<T>, 
+    key: string,
+    fetcher: () => Promise<T>,
     ttl: number = 5 * 60 * 1000
   ): Promise<T> {
     const cached = this.cache.get(key);
-    
+
     // 检查缓存是否存在且未过期
     if (cached && Date.now() - cached.timestamp < cached.ttl) {
       console.log(`[缓存命中] 键: ${key}`);
@@ -55,12 +55,12 @@ export class CacheService {
     // 缓存不存在或已过期，重新获取数据
     console.log(`[缓存未命中] 键: ${key}，重新获取数据`);
     const data = await fetcher();
-    
+
     // 存储到缓存
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl
+      ttl,
     });
 
     return data;
@@ -73,7 +73,7 @@ export class CacheService {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl
+      ttl,
     });
   }
 
@@ -83,12 +83,12 @@ export class CacheService {
   has(key: string): boolean {
     const cached = this.cache.get(key);
     if (!cached) return false;
-    
+
     if (Date.now() - cached.timestamp >= cached.ttl) {
       this.cache.delete(key);
       return false;
     }
-    
+
     return true;
   }
 
@@ -105,14 +105,14 @@ export class CacheService {
   deletePattern(pattern: string): number {
     let deletedCount = 0;
     const regex = new RegExp(pattern.replace('*', '.*'));
-    
+
     for (const key of this.cache.keys()) {
       if (regex.test(key)) {
         this.cache.delete(key);
         deletedCount++;
       }
     }
-    
+
     return deletedCount;
   }
 
@@ -129,14 +129,14 @@ export class CacheService {
   private cleanupExpired(): void {
     const now = Date.now();
     let cleanedCount = 0;
-    
+
     for (const [key, item] of this.cache.entries()) {
       if (now - item.timestamp >= item.ttl) {
         this.cache.delete(key);
         cleanedCount++;
       }
     }
-    
+
     if (cleanedCount > 0) {
       console.log(`[缓存清理] 清理了 ${cleanedCount} 个过期缓存项`);
     }
@@ -153,20 +153,20 @@ export class CacheService {
     const now = Date.now();
     let expired = 0;
     let totalMemorySize = 0;
-    
+
     for (const [key, item] of this.cache.entries()) {
       // 计算内存大小（粗略估算）
       totalMemorySize += key.length * 2 + JSON.stringify(item.data).length * 2;
-      
+
       if (now - item.timestamp >= item.ttl) {
         expired++;
       }
     }
-    
+
     return {
       size: this.cache.size,
       expired,
-      totalMemorySize
+      totalMemorySize,
     };
   }
 
@@ -188,17 +188,21 @@ export const cacheService = CacheService.getInstance();
 // 常用的缓存键生成器
 export const CacheKeys = {
   userProfile: (userId: string) => `user:profile:${userId}`,
-  userConversations: (userId: string, page: number = 0) => `user:conversations:${userId}:${page}`,
+  userConversations: (userId: string, page: number = 0) =>
+    `user:conversations:${userId}:${page}`,
   conversation: (conversationId: string) => `conversation:${conversationId}`,
-  conversationMessages: (conversationId: string, page: number = 0) => `conversation:messages:${conversationId}:${page}`,
+  conversationMessages: (conversationId: string, page: number = 0) =>
+    `conversation:messages:${conversationId}:${page}`,
   providers: () => 'providers:active',
   serviceInstances: (providerId: string) => `service:instances:${providerId}`,
   apiKey: (serviceInstanceId: string) => `api:key:${serviceInstanceId}`,
-  conversationByExternalId: (externalId: string) => `conversation:external:${externalId}`,
-  
+  conversationByExternalId: (externalId: string) =>
+    `conversation:external:${externalId}`,
+
   // App Executions 缓存键（用于工作流和文本生成的一次性任务）
   // 由于这些是历史记录查询，适合较长的缓存时间
-  userExecutions: (userId: string, page: number = 0) => `user:executions:${userId}:${page}`,
+  userExecutions: (userId: string, page: number = 0) =>
+    `user:executions:${userId}:${page}`,
   execution: (executionId: string) => `execution:${executionId}`,
   // 注：暂不添加实时订阅，因为执行记录主要用于历史查看，后续如需要可以添加
-}; 
+};

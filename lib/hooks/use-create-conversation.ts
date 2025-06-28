@@ -1,14 +1,14 @@
 /**
  * 新对话创建钩子
- * 
+ *
  * --- BEGIN COMMENT ---
  * 🎯 适用范围：仅用于对话类 Dify 应用（chatbot、agent、chatflow）
  * 这些应用的数据存储到 conversations + messages 表
- * 
+ *
  * 任务类应用（workflow、text-generation）使用独立的组件和存储逻辑，
  * 数据存储到 app_executions 表，不使用此 hook
  * --- END COMMENT ---
- * 
+ *
  * 提供新对话的创建和初始化功能，包括：
  * - Dify API 调用和流式响应处理
  * - 数据库对话记录创建
@@ -16,33 +16,71 @@
  * - 对话标题自动生成
  * - 常用应用管理
  */
+// For userId
+// import { useCurrentAppStore } from '@lib/stores/current-app-store'; // appId is passed as param
+import { createConversation } from '@lib/db';
+import { streamDifyChat } from '@lib/services/dify/chat-service';
+import { renameConversation } from '@lib/services/dify/conversation-service';
+import { DifyStreamResponse } from '@lib/services/dify/types';
+import type {
+  DifyChatRequestPayload,
+  DifySseIterationCompletedEvent,
+  DifySseIterationNextEvent,
+  DifySseIterationStartedEvent,
+  DifySseLoopCompletedEvent,
+  DifySseLoopNextEvent,
+  DifySseLoopStartedEvent,
+  DifySseNodeFinishedEvent,
+  DifySseNodeStartedEvent,
+  DifySseParallelBranchFinishedEvent,
+  DifySseParallelBranchStartedEvent,
+} from '@lib/services/dify/types';
+// 使用新的优化版本
+import { useChatStore } from '@lib/stores/chat-store';
+// To set local conversation ID
+import { useAutoAddFavoriteApp } from '@lib/stores/favorite-apps-store';
+import {
+  PendingConversation,
+  usePendingConversationStore,
+} from '@lib/stores/pending-conversation-store';
+import { useSupabaseAuth } from '@lib/supabase/hooks';
 
 import { useCallback, useState } from 'react';
-import { usePendingConversationStore, PendingConversation } from '@lib/stores/pending-conversation-store';
-import { streamDifyChat } from '@lib/services/dify/chat-service';
-import { DifyStreamResponse } from '@lib/services/dify/types';
-import { renameConversation } from '@lib/services/dify/conversation-service';
-import type { DifyChatRequestPayload, DifySseNodeStartedEvent, DifySseNodeFinishedEvent, DifySseIterationStartedEvent, DifySseIterationNextEvent, DifySseIterationCompletedEvent, DifySseParallelBranchStartedEvent, DifySseParallelBranchFinishedEvent, DifySseLoopStartedEvent, DifySseLoopNextEvent, DifySseLoopCompletedEvent } from '@lib/services/dify/types';
-import { useSupabaseAuth } from '@lib/supabase/hooks'; // For userId
-// import { useCurrentAppStore } from '@lib/stores/current-app-store'; // appId is passed as param
-import { createConversation } from '@lib/db'; // 使用新的优化版本
-import { useChatStore } from '@lib/stores/chat-store'; // To set local conversation ID
-import { useAutoAddFavoriteApp } from '@lib/stores/favorite-apps-store';
+
 import { useTranslations } from 'next-intl';
 
 interface UseCreateConversationReturn {
   initiateNewConversation: (
-    payload: Omit<DifyChatRequestPayload, 'response_mode' | 'conversation_id' | 'auto_generate_name'>,
+    payload: Omit<
+      DifyChatRequestPayload,
+      'response_mode' | 'conversation_id' | 'auto_generate_name'
+    >,
     appId: string,
     userIdentifier: string,
     onDbIdCreated?: (difyId: string, dbId: string) => void,
-    onNodeEvent?: (event: DifySseNodeStartedEvent | DifySseNodeFinishedEvent | DifySseIterationStartedEvent | DifySseIterationNextEvent | DifySseIterationCompletedEvent | DifySseParallelBranchStartedEvent | DifySseParallelBranchFinishedEvent | DifySseLoopStartedEvent | DifySseLoopNextEvent | DifySseLoopCompletedEvent) => void // 🎯 新增：支持节点事件回调
+    onNodeEvent?: (
+      event:
+        | DifySseNodeStartedEvent
+        | DifySseNodeFinishedEvent
+        | DifySseIterationStartedEvent
+        | DifySseIterationNextEvent
+        | DifySseIterationCompletedEvent
+        | DifySseParallelBranchStartedEvent
+        | DifySseParallelBranchFinishedEvent
+        | DifySseLoopStartedEvent
+        | DifySseLoopNextEvent
+        | DifySseLoopCompletedEvent
+    ) => void // 🎯 新增：支持节点事件回调
   ) => Promise<{
     tempConvId: string;
-    realConvId?: string; 
-    taskId?: string;     
+    realConvId?: string;
+    taskId?: string;
     answerStream?: AsyncGenerator<string, void, undefined>;
-    completionPromise?: Promise<{ usage?: any; metadata?: Record<string, any>; retrieverResources?: any[] }>;
+    completionPromise?: Promise<{
+      usage?: any;
+      metadata?: Record<string, any>;
+      retrieverResources?: any[];
+    }>;
     error?: any;
   }>;
   isLoading: boolean;
@@ -54,24 +92,42 @@ export function useCreateConversation(): UseCreateConversationReturn {
   const [error, setError] = useState<any>(null);
   const t = useTranslations('sidebar');
 
-  const addPending = usePendingConversationStore((state) => state.addPending);
-  const addPendingWithLimit = usePendingConversationStore((state) => state.addPendingWithLimit);
-  const setRealIdAndStatus = usePendingConversationStore((state) => state.setRealIdAndStatus);
-  const updateTitleInPendingStore = usePendingConversationStore((state) => state.updateTitle);
-  const updateStatusInPendingStore = usePendingConversationStore((state) => state.updateStatus);
-  const markAsOptimistic = usePendingConversationStore((state) => state.markAsOptimistic);
-  const setSupabasePKInPendingStore = usePendingConversationStore((state) => state.setSupabasePK);
+  const addPending = usePendingConversationStore(state => state.addPending);
+  const addPendingWithLimit = usePendingConversationStore(
+    state => state.addPendingWithLimit
+  );
+  const setRealIdAndStatus = usePendingConversationStore(
+    state => state.setRealIdAndStatus
+  );
+  const updateTitleInPendingStore = usePendingConversationStore(
+    state => state.updateTitle
+  );
+  const updateStatusInPendingStore = usePendingConversationStore(
+    state => state.updateStatus
+  );
+  const markAsOptimistic = usePendingConversationStore(
+    state => state.markAsOptimistic
+  );
+  const setSupabasePKInPendingStore = usePendingConversationStore(
+    state => state.setSupabasePK
+  );
 
   // --- BEGIN COMMENT ---
   // 🎯 新增：打字机效果相关Actions
   // --- END COMMENT ---
-  const startTitleTypewriter = usePendingConversationStore((state) => state.startTitleTypewriter);
-  const completeTitleTypewriter = usePendingConversationStore((state) => state.completeTitleTypewriter);
+  const startTitleTypewriter = usePendingConversationStore(
+    state => state.startTitleTypewriter
+  );
+  const completeTitleTypewriter = usePendingConversationStore(
+    state => state.completeTitleTypewriter
+  );
 
   const { session } = useSupabaseAuth();
   const currentUserId = session?.user?.id;
-  const setCurrentChatConversationId = useChatStore((state) => state.setCurrentConversationId);
-  
+  const setCurrentChatConversationId = useChatStore(
+    state => state.setCurrentConversationId
+  );
+
   // --- BEGIN COMMENT ---
   // 添加常用应用管理hook
   // --- END COMMENT ---
@@ -79,51 +135,85 @@ export function useCreateConversation(): UseCreateConversationReturn {
 
   const initiateNewConversation = useCallback(
     async (
-      payloadData: Omit<DifyChatRequestPayload, 'response_mode' | 'conversation_id' | 'auto_generate_name'>,
+      payloadData: Omit<
+        DifyChatRequestPayload,
+        'response_mode' | 'conversation_id' | 'auto_generate_name'
+      >,
       appId: string,
       userIdentifier: string,
       onDbIdCreated?: (difyId: string, dbId: string) => void,
-      onNodeEvent?: (event: DifySseNodeStartedEvent | DifySseNodeFinishedEvent | DifySseIterationStartedEvent | DifySseIterationNextEvent | DifySseIterationCompletedEvent | DifySseParallelBranchStartedEvent | DifySseParallelBranchFinishedEvent | DifySseLoopStartedEvent | DifySseLoopNextEvent | DifySseLoopCompletedEvent) => void // 🎯 新增：支持节点事件回调
+      onNodeEvent?: (
+        event:
+          | DifySseNodeStartedEvent
+          | DifySseNodeFinishedEvent
+          | DifySseIterationStartedEvent
+          | DifySseIterationNextEvent
+          | DifySseIterationCompletedEvent
+          | DifySseParallelBranchStartedEvent
+          | DifySseParallelBranchFinishedEvent
+          | DifySseLoopStartedEvent
+          | DifySseLoopNextEvent
+          | DifySseLoopCompletedEvent
+      ) => void // 🎯 新增：支持节点事件回调
     ): Promise<{
       tempConvId: string;
       realConvId?: string;
       taskId?: string;
       answerStream?: AsyncGenerator<string, void, undefined>;
-      completionPromise?: Promise<{ usage?: any; metadata?: Record<string, any>; retrieverResources?: any[] }>;
+      completionPromise?: Promise<{
+        usage?: any;
+        metadata?: Record<string, any>;
+        retrieverResources?: any[];
+      }>;
       error?: any;
     }> => {
       setIsLoading(true);
       setError(null);
 
       const tempConvId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-      
+
       // --- BEGIN COMMENT ---
       // 🎯 使用新的addPendingWithLimit方法，支持自动"挤出"效果
       // --- END COMMENT ---
-      addPendingWithLimit(tempConvId, t('creating'), 20, (evictedCount) => {
-        console.log(`[useCreateConversation] 新对话创建触发挤出效果，预计挤出${evictedCount}个对话`);
+      addPendingWithLimit(tempConvId, t('creating'), 20, evictedCount => {
+        console.log(
+          `[useCreateConversation] 新对话创建触发挤出效果，预计挤出${evictedCount}个对话`
+        );
         // 这里可以添加动画效果或通知用户
-      }); 
+      });
       updateStatusInPendingStore(tempConvId, 'creating');
 
       // --- BEGIN EARLY HIGHLIGHT ---
       try {
         const currentPath = window.location.pathname;
-        if (currentPath === '/chat/new' || 
-            !currentPath.startsWith('/chat/temp-') ||
-            currentPath.startsWith('/apps/')) { // 🎯 添加应用详情页面的路径支持
-          console.log(`[useCreateConversation] Early highlight: Updating URL to /chat/${tempConvId}`);
+        if (
+          currentPath === '/chat/new' ||
+          !currentPath.startsWith('/chat/temp-') ||
+          currentPath.startsWith('/apps/')
+        ) {
+          // 🎯 添加应用详情页面的路径支持
+          console.log(
+            `[useCreateConversation] Early highlight: Updating URL to /chat/${tempConvId}`
+          );
           window.history.replaceState({}, '', `/chat/${tempConvId}`);
         }
-        
-        console.log(`[useCreateConversation] Early highlight: Setting ChatStore currentConversationId to ${tempConvId}`);
-        setCurrentChatConversationId(tempConvId); 
 
-        const { selectItem } = require('@lib/stores/sidebar-store').useSidebarStore.getState();
-        console.log(`[useCreateConversation] Early highlight: Selecting item in SidebarStore: ${tempConvId}`);
+        console.log(
+          `[useCreateConversation] Early highlight: Setting ChatStore currentConversationId to ${tempConvId}`
+        );
+        setCurrentChatConversationId(tempConvId);
+
+        const { selectItem } =
+          require('@lib/stores/sidebar-store').useSidebarStore.getState();
+        console.log(
+          `[useCreateConversation] Early highlight: Selecting item in SidebarStore: ${tempConvId}`
+        );
         selectItem('chat', tempConvId, true); // 保持当前展开状态
       } catch (highlightError) {
-        console.error('[useCreateConversation] Error during early highlight:', highlightError);
+        console.error(
+          '[useCreateConversation] Error during early highlight:',
+          highlightError
+        );
       }
       // --- END EARLY HIGHLIGHT ---
 
@@ -137,103 +227,161 @@ export function useCreateConversation(): UseCreateConversationReturn {
           ...payloadData,
           user: userIdentifier,
           response_mode: 'streaming',
-          conversation_id: null, 
-          auto_generate_name: false, 
+          conversation_id: null,
+          auto_generate_name: false,
         };
 
         streamResponse = await streamDifyChat(
           chatPayload,
           appId,
-          (id) => { // onConversationIdReceived callback
+          id => {
+            // onConversationIdReceived callback
             if (id && !realConvIdFromStream) {
               realConvIdFromStream = id;
-              console.log(`[useCreateConversation] Real conversation ID received from stream: ${id}`);
-              
+              console.log(
+                `[useCreateConversation] Real conversation ID received from stream: ${id}`
+              );
+
               const currentPath = window.location.pathname;
               if (currentPath === `/chat/${tempConvId}`) {
-                console.log(`[useCreateConversation] Updating URL from ${currentPath} to /chat/${id}`);
+                console.log(
+                  `[useCreateConversation] Updating URL from ${currentPath} to /chat/${id}`
+                );
                 window.history.replaceState({}, '', `/chat/${id}`);
-              } else if (currentPath.includes('/chat/temp-') || 
-                        currentPath === '/chat/new' ||
-                        currentPath.startsWith('/apps/')) { // 🎯 添加应用详情页面的路径支持
-                 console.log(`[useCreateConversation] Updating URL (from new/temp/apps) to /chat/${id}`);
+              } else if (
+                currentPath.includes('/chat/temp-') ||
+                currentPath === '/chat/new' ||
+                currentPath.startsWith('/apps/')
+              ) {
+                // 🎯 添加应用详情页面的路径支持
+                console.log(
+                  `[useCreateConversation] Updating URL (from new/temp/apps) to /chat/${id}`
+                );
                 window.history.replaceState({}, '', `/chat/${id}`);
               }
-              
+
               try {
-                const chatStoreState = require('@lib/stores/chat-store').useChatStore.getState();
-                if (chatStoreState.currentConversationId === tempConvId || chatStoreState.currentConversationId === null) {
-                    chatStoreState.setCurrentConversationId(id);
+                const chatStoreState =
+                  require('@lib/stores/chat-store').useChatStore.getState();
+                if (
+                  chatStoreState.currentConversationId === tempConvId ||
+                  chatStoreState.currentConversationId === null
+                ) {
+                  chatStoreState.setCurrentConversationId(id);
                 }
 
-                const sidebarStoreState = require('@lib/stores/sidebar-store').useSidebarStore.getState();
-                if (sidebarStoreState.selectedId === tempConvId || sidebarStoreState.selectedId === null) {
-                    sidebarStoreState.selectItem('chat', id, true); // 保持当前展开状态
+                const sidebarStoreState =
+                  require('@lib/stores/sidebar-store').useSidebarStore.getState();
+                if (
+                  sidebarStoreState.selectedId === tempConvId ||
+                  sidebarStoreState.selectedId === null
+                ) {
+                  sidebarStoreState.selectItem('chat', id, true); // 保持当前展开状态
                 }
               } catch (error) {
-                console.error('[useCreateConversation] Error updating stores to realId:', error);
+                console.error(
+                  '[useCreateConversation] Error updating stores to realId:',
+                  error
+                );
               }
-              
-              setRealIdAndStatus(tempConvId, id, 'stream_completed_title_pending');
+
+              setRealIdAndStatus(
+                tempConvId,
+                id,
+                'stream_completed_title_pending'
+              );
               updateStatusInPendingStore(tempConvId, 'title_fetching');
 
               // --- BEGIN COMMENT ---
               // 立即创建数据库记录，不等待标题获取完成
               // 这确保在流式响应期间消息可以被保存
               // --- END COMMENT ---
-              const saveConversationToDb = async (difyConvId: string, convTitle: string, currentTempConvId: string) => {
+              const saveConversationToDb = async (
+                difyConvId: string,
+                convTitle: string,
+                currentTempConvId: string
+              ) => {
                 if (!currentUserId || !appId) {
-                  console.error("[useCreateConversation] Cannot save to DB: userId or appId is missing.", { currentUserId, appId });
-                  updateStatusInPendingStore(currentTempConvId, 'failed'); 
-                  updateTitleInPendingStore(currentTempConvId, t('saveFailed'), true);
+                  console.error(
+                    '[useCreateConversation] Cannot save to DB: userId or appId is missing.',
+                    { currentUserId, appId }
+                  );
+                  updateStatusInPendingStore(currentTempConvId, 'failed');
+                  updateTitleInPendingStore(
+                    currentTempConvId,
+                    t('saveFailed'),
+                    true
+                  );
                   return;
                 }
                 try {
-                  console.log(`[useCreateConversation] 立即创建数据库记录: difyId=${difyConvId}, title=${convTitle}, userId=${currentUserId}, appId=${appId}`);
-                  
+                  console.log(
+                    `[useCreateConversation] 立即创建数据库记录: difyId=${difyConvId}, title=${convTitle}, userId=${currentUserId}, appId=${appId}`
+                  );
+
                   const result = await createConversation({
                     user_id: currentUserId,
-                    app_id: appId, 
+                    app_id: appId,
                     external_id: difyConvId,
                     title: convTitle,
                     ai_config_id: null,
                     summary: null,
                     settings: {},
-                    status: 'active', 
+                    status: 'active',
                     last_message_preview: null, // 由数据库触发器自动设置
                     metadata: {},
                   });
 
                   if (result.success && result.data) {
                     const localConversation = result.data;
-                    console.log(`[useCreateConversation] 数据库记录创建成功，数据库ID: ${localConversation.id}, Dify对话ID: ${difyConvId}`);
-                    
+                    console.log(
+                      `[useCreateConversation] 数据库记录创建成功，数据库ID: ${localConversation.id}, Dify对话ID: ${difyConvId}`
+                    );
+
                     // --- BEGIN COMMENT ---
                     // 🎯 在对话创建成功后添加应用到常用列表
                     // 这是最佳时机：确保对话真正创建成功，且只在新对话时执行一次
                     // --- END COMMENT ---
-                    console.log(`[useCreateConversation] 添加应用到常用列表: ${appId}`);
+                    console.log(
+                      `[useCreateConversation] 添加应用到常用列表: ${appId}`
+                    );
                     addToFavorites(appId);
-                    
+
                     // 🎯 增强：使用原子性更新，避免竞态条件
-                    const { markAsPersistedComplete } = usePendingConversationStore.getState();
+                    const { markAsPersistedComplete } =
+                      usePendingConversationStore.getState();
                     markAsPersistedComplete(difyConvId, localConversation.id);
 
                     // 立即调用回调函数，通知数据库ID创建完成
                     if (typeof onDbIdCreated === 'function') {
-                      console.log(`[useCreateConversation] 立即通知数据库ID创建完成: difyId=${difyConvId}, dbId=${localConversation.id}`);
+                      console.log(
+                        `[useCreateConversation] 立即通知数据库ID创建完成: difyId=${difyConvId}, dbId=${localConversation.id}`
+                      );
                       onDbIdCreated(difyConvId, localConversation.id);
                     }
-                    
+
                     return localConversation.id;
                   } else {
-                    console.error(`[useCreateConversation] 创建对话失败:`, result.error);
-                    throw new Error(result.error?.message || "Failed to save conversation to local DB or local ID not returned.");
+                    console.error(
+                      `[useCreateConversation] 创建对话失败:`,
+                      result.error
+                    );
+                    throw new Error(
+                      result.error?.message ||
+                        'Failed to save conversation to local DB or local ID not returned.'
+                    );
                   }
                 } catch (dbError) {
-                  console.error(`[useCreateConversation] Error saving conversation (difyId: ${difyConvId}) to DB:`, dbError);
+                  console.error(
+                    `[useCreateConversation] Error saving conversation (difyId: ${difyConvId}) to DB:`,
+                    dbError
+                  );
                   updateStatusInPendingStore(currentTempConvId, 'failed');
-                  updateTitleInPendingStore(currentTempConvId, t('saveFailed'), true);
+                  updateTitleInPendingStore(
+                    currentTempConvId,
+                    t('saveFailed'),
+                    true
+                  );
                   return null;
                 }
               };
@@ -245,28 +393,49 @@ export function useCreateConversation(): UseCreateConversationReturn {
               (async () => {
                 // 立即创建数据库记录，使用临时标题
                 const tempTitle = t('creating');
-                console.log(`[useCreateConversation] 立即创建数据库记录，Dify对话ID=${id}`);
-                const dbId = await saveConversationToDb(id, tempTitle, tempConvId);
-                
+                console.log(
+                  `[useCreateConversation] 立即创建数据库记录，Dify对话ID=${id}`
+                );
+                const dbId = await saveConversationToDb(
+                  id,
+                  tempTitle,
+                  tempConvId
+                );
+
                 // 异步获取正式标题并更新数据库记录
-                renameConversation(appId, id, { user: userIdentifier, auto_generate: true })
-                  .then(async renameResponse => { 
-                    const finalTitle = (renameResponse && renameResponse.name) ? renameResponse.name : t('untitled');
-                    console.log(`[useCreateConversation] 标题获取成功，启动打字机效果: ${finalTitle}`);
-                    
+                renameConversation(appId, id, {
+                  user: userIdentifier,
+                  auto_generate: true,
+                })
+                  .then(async renameResponse => {
+                    const finalTitle =
+                      renameResponse && renameResponse.name
+                        ? renameResponse.name
+                        : t('untitled');
+                    console.log(
+                      `[useCreateConversation] 标题获取成功，启动打字机效果: ${finalTitle}`
+                    );
+
                     // --- BEGIN COMMENT ---
                     // 🎯 启动打字机效果而不是直接更新标题
                     // --- END COMMENT ---
                     startTitleTypewriter(tempConvId, finalTitle);
-                    
+
                     // 更新数据库中的标题
                     if (dbId && finalTitle !== tempTitle) {
                       try {
-                        const { updateConversation } = require('@lib/db/conversations');
+                        const {
+                          updateConversation,
+                        } = require('@lib/db/conversations');
                         await updateConversation(dbId, { title: finalTitle });
-                        console.log(`[useCreateConversation] 数据库标题更新成功: ${finalTitle}`);
+                        console.log(
+                          `[useCreateConversation] 数据库标题更新成功: ${finalTitle}`
+                        );
                       } catch (updateError) {
-                        console.error(`[useCreateConversation] 更新数据库标题失败:`, updateError);
+                        console.error(
+                          `[useCreateConversation] 更新数据库标题失败:`,
+                          updateError
+                        );
                       }
                     }
 
@@ -274,67 +443,109 @@ export function useCreateConversation(): UseCreateConversationReturn {
                     try {
                       const currentPath = window.location.pathname;
                       if (currentPath === `/chat/${id}`) {
-                        const { selectItem } = require('@lib/stores/sidebar-store').useSidebarStore.getState();
+                        const { selectItem } =
+                          require('@lib/stores/sidebar-store').useSidebarStore.getState();
                         selectItem('chat', id, true); // 保持当前展开状态
                       }
                     } catch (error) {
-                      console.error('[useCreateConversation] Error selecting item in sidebar after title:', error);
+                      console.error(
+                        '[useCreateConversation] Error selecting item in sidebar after title:',
+                        error
+                      );
                     }
                   })
-                  .catch(async renameError => { 
-                    console.error(`[useCreateConversation] 标题获取失败，使用默认标题:`, renameError);
+                  .catch(async renameError => {
+                    console.error(
+                      `[useCreateConversation] 标题获取失败，使用默认标题:`,
+                      renameError
+                    );
                     const fallbackTitle = t('untitled');
-                    
+
                     // --- BEGIN COMMENT ---
                     // 🎯 启动打字机效果显示默认标题
                     // --- END COMMENT ---
                     startTitleTypewriter(tempConvId, fallbackTitle);
-                    
+
                     // 更新数据库中的标题
                     if (dbId) {
                       try {
-                        const { updateConversation } = require('@lib/db/conversations');
-                        await updateConversation(dbId, { title: fallbackTitle });
-                        console.log(`[useCreateConversation] 使用默认标题更新数据库: ${fallbackTitle}`);
+                        const {
+                          updateConversation,
+                        } = require('@lib/db/conversations');
+                        await updateConversation(dbId, {
+                          title: fallbackTitle,
+                        });
+                        console.log(
+                          `[useCreateConversation] 使用默认标题更新数据库: ${fallbackTitle}`
+                        );
                       } catch (updateError) {
-                        console.error(`[useCreateConversation] 更新默认标题失败:`, updateError);
+                        console.error(
+                          `[useCreateConversation] 更新默认标题失败:`,
+                          updateError
+                        );
                       }
                     }
-                    
+
                     // 只有当前路由确实是这个对话时才更新选中状态
                     try {
                       const currentPath = window.location.pathname;
                       if (currentPath === `/chat/${id}`) {
-                        const { selectItem } = require('@lib/stores/sidebar-store').useSidebarStore.getState();
+                        const { selectItem } =
+                          require('@lib/stores/sidebar-store').useSidebarStore.getState();
                         selectItem('chat', id, true); // 保持当前展开状态
                       }
                     } catch (error) {
-                      console.error('[useCreateConversation] Error selecting item in sidebar (title fetch failed):', error);
+                      console.error(
+                        '[useCreateConversation] Error selecting item in sidebar (title fetch failed):',
+                        error
+                      );
                     }
                   });
               })().catch(error => {
-                console.error('[useCreateConversation] 数据库记录创建过程发生错误:', error);
+                console.error(
+                  '[useCreateConversation] 数据库记录创建过程发生错误:',
+                  error
+                );
               });
             }
           },
           onNodeEvent // 🎯 传递节点事件回调，支持chatflow节点控制
         );
-        
-        if (!realConvIdFromStream) realConvIdFromStream = streamResponse.getConversationId();
+
+        if (!realConvIdFromStream)
+          realConvIdFromStream = streamResponse.getConversationId();
         if (!taskIdFromStream) taskIdFromStream = streamResponse.getTaskId();
 
-        if (realConvIdFromStream && !usePendingConversationStore.getState().getPendingByRealId(realConvIdFromStream)?.realId) {
-            setRealIdAndStatus(tempConvId, realConvIdFromStream, 'stream_completed_title_pending');
-            updateStatusInPendingStore(tempConvId, 'title_fetching'); 
-            
-            const currentPath = window.location.pathname;
-            if (currentPath === `/chat/${tempConvId}` || 
-                currentPath.includes('/chat/temp-') || 
-                currentPath === '/chat/new' ||
-                currentPath.startsWith('/apps/')) { // 🎯 添加应用详情页面的路径支持
-                console.log(`[useCreateConversation] Updating URL (fallback) from ${currentPath} to /chat/${realConvIdFromStream}`);
-                window.history.replaceState({}, '', `/chat/${realConvIdFromStream}`);
-            }
+        if (
+          realConvIdFromStream &&
+          !usePendingConversationStore
+            .getState()
+            .getPendingByRealId(realConvIdFromStream)?.realId
+        ) {
+          setRealIdAndStatus(
+            tempConvId,
+            realConvIdFromStream,
+            'stream_completed_title_pending'
+          );
+          updateStatusInPendingStore(tempConvId, 'title_fetching');
+
+          const currentPath = window.location.pathname;
+          if (
+            currentPath === `/chat/${tempConvId}` ||
+            currentPath.includes('/chat/temp-') ||
+            currentPath === '/chat/new' ||
+            currentPath.startsWith('/apps/')
+          ) {
+            // 🎯 添加应用详情页面的路径支持
+            console.log(
+              `[useCreateConversation] Updating URL (fallback) from ${currentPath} to /chat/${realConvIdFromStream}`
+            );
+            window.history.replaceState(
+              {},
+              '',
+              `/chat/${realConvIdFromStream}`
+            );
+          }
         }
 
         setIsLoading(false);
@@ -345,21 +556,23 @@ export function useCreateConversation(): UseCreateConversationReturn {
           answerStream: streamResponse.answerStream,
           completionPromise: streamResponse.completionPromise,
         };
-
       } catch (e) {
-        console.error('[useCreateConversation] Error initiating new conversation:', e);
+        console.error(
+          '[useCreateConversation] Error initiating new conversation:',
+          e
+        );
         setError(e);
         setIsLoading(false);
-        updateStatusInPendingStore(tempConvId, 'failed'); 
+        updateStatusInPendingStore(tempConvId, 'failed');
         updateTitleInPendingStore(tempConvId, t('createFailed'), true);
         return { tempConvId, error: e };
       }
     },
     [
-      addPending, 
-      setRealIdAndStatus, 
-      updateTitleInPendingStore, 
-      updateStatusInPendingStore, 
+      addPending,
+      setRealIdAndStatus,
+      updateTitleInPendingStore,
+      updateStatusInPendingStore,
       markAsOptimistic,
       setSupabasePKInPendingStore,
       startTitleTypewriter,

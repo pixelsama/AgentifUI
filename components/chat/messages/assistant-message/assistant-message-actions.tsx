@@ -1,34 +1,43 @@
-"use client"
+'use client';
 
-import React from "react"
-import { FiCopy, FiRefreshCw, FiThumbsUp, FiThumbsDown, FiCheck } from "react-icons/fi"
-import { MessageActionButton } from "@components/ui/message-action-button"
-import { MessageActionsContainer } from "@components/ui/message-actions-container"
-import { useTheme } from "@lib/hooks/use-theme"
-import { cn } from "@lib/utils"
+import { MessageActionButton } from '@components/ui/message-action-button';
+import { MessageActionsContainer } from '@components/ui/message-actions-container';
+import { useTheme } from '@lib/hooks/use-theme';
+import { cn } from '@lib/utils';
+import {
+  FiCheck,
+  FiCopy,
+  FiRefreshCw,
+  FiThumbsDown,
+  FiThumbsUp,
+} from 'react-icons/fi';
+
+import React from 'react';
 
 interface AssistantMessageActionsProps {
-  messageId: string
-  onCopy: () => void
-  onRegenerate: () => void
-  onFeedback: (isPositive: boolean) => void
-  className?: string
-  isRegenerating?: boolean
+  messageId: string;
+  onCopy: () => void;
+  onRegenerate: () => void;
+  onFeedback: (isPositive: boolean) => void;
+  className?: string;
+  isRegenerating?: boolean;
 }
 
-export const AssistantMessageActions: React.FC<AssistantMessageActionsProps> = ({
+export const AssistantMessageActions: React.FC<
+  AssistantMessageActionsProps
+> = ({
   messageId,
   onCopy,
   onRegenerate,
   onFeedback,
   className,
-  isRegenerating = false
+  isRegenerating = false,
 }) => {
-  const { isDark } = useTheme()
-  
+  const { isDark } = useTheme();
+
   return (
-    <MessageActionsContainer 
-      align="left" 
+    <MessageActionsContainer
+      align="left"
       isAssistantMessage={true}
       className={className}
     >
@@ -45,13 +54,15 @@ export const AssistantMessageActions: React.FC<AssistantMessageActionsProps> = (
         label="重新生成"
         onClick={onRegenerate}
         disabled={isRegenerating}
-        className={isRegenerating ? "animate-spin" : ""}
+        className={isRegenerating ? 'animate-spin' : ''}
         tooltipPosition="bottom"
       />
-      <div className={cn(
-        "self-stretch border-r mx-1",
-        isDark ? "border-gray-700" : "border-gray-300"
-      )} />
+      <div
+        className={cn(
+          'mx-1 self-stretch border-r',
+          isDark ? 'border-gray-700' : 'border-gray-300'
+        )}
+      />
       <MessageActionButton
         icon={FiThumbsUp}
         label="有用"
@@ -67,5 +78,5 @@ export const AssistantMessageActions: React.FC<AssistantMessageActionsProps> = (
         tooltipPosition="bottom"
       />
     </MessageActionsContainer>
-  )
-}
+  );
+};

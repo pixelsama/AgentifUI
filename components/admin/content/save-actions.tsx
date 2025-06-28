@@ -1,38 +1,48 @@
-"use client"
+'use client';
 
-import React from 'react'
-import { useTheme } from '@lib/hooks/use-theme'
-import { cn } from '@lib/utils'
-import { Save, RotateCcw, Loader2 } from 'lucide-react'
+import { useTheme } from '@lib/hooks/use-theme';
+import { cn } from '@lib/utils';
+import { Loader2, RotateCcw, Save } from 'lucide-react';
+
+import React from 'react';
 
 interface SaveActionsProps {
-  hasChanges: boolean
-  isSaving: boolean
-  onSave: () => void
-  onReset: () => void
+  hasChanges: boolean;
+  isSaving: boolean;
+  onSave: () => void;
+  onReset: () => void;
 }
 
-export function SaveActions({ hasChanges, isSaving, onSave, onReset }: SaveActionsProps) {
-  const { isDark } = useTheme()
+export function SaveActions({
+  hasChanges,
+  isSaving,
+  onSave,
+  onReset,
+}: SaveActionsProps) {
+  const { isDark } = useTheme();
 
   return (
-    <div className={cn(
-      "flex items-center justify-between p-4 border-t bg-gradient-to-r",
-      isDark 
-        ? "border-stone-600 from-stone-800 to-stone-750" 
-        : "border-stone-200 from-stone-50 to-white"
-    )}>
+    <div
+      className={cn(
+        'flex items-center justify-between border-t bg-gradient-to-r p-4',
+        isDark
+          ? 'to-stone-750 border-stone-600 from-stone-800'
+          : 'border-stone-200 from-stone-50 to-white'
+      )}
+    >
       {/* --- BEGIN COMMENT ---
       状态提示
       --- END COMMENT --- */}
       <div className="flex items-center gap-2">
         {hasChanges && (
           <>
-            <div className="w-2 h-2 rounded-full bg-orange-500" />
-            <span className={cn(
-              "text-sm",
-              isDark ? "text-stone-300" : "text-stone-600"
-            )}>
+            <div className="h-2 w-2 rounded-full bg-orange-500" />
+            <span
+              className={cn(
+                'text-sm',
+                isDark ? 'text-stone-300' : 'text-stone-600'
+              )}
+            >
               有未保存的更改
             </span>
           </>
@@ -40,19 +50,23 @@ export function SaveActions({ hasChanges, isSaving, onSave, onReset }: SaveActio
         {isSaving && (
           <>
             <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-            <span className={cn(
-              "text-sm",
-              isDark ? "text-stone-300" : "text-stone-600"
-            )}>
+            <span
+              className={cn(
+                'text-sm',
+                isDark ? 'text-stone-300' : 'text-stone-600'
+              )}
+            >
               正在保存...
             </span>
           </>
         )}
         {!hasChanges && !isSaving && (
-          <span className={cn(
-            "text-sm",
-            isDark ? "text-stone-400" : "text-stone-500"
-          )}>
+          <span
+            className={cn(
+              'text-sm',
+              isDark ? 'text-stone-400' : 'text-stone-500'
+            )}
+          >
             所有更改已保存
           </span>
         )}
@@ -66,11 +80,13 @@ export function SaveActions({ hasChanges, isSaving, onSave, onReset }: SaveActio
           onClick={onReset}
           disabled={!hasChanges || isSaving}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+            'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
             hasChanges && !isSaving
-              ? isDark ? "bg-stone-700 hover:bg-stone-600 text-stone-100" : "bg-stone-200 hover:bg-stone-300 text-stone-700"
-              : "opacity-50 cursor-not-allowed",
-            isDark ? "text-stone-400" : "text-stone-500"
+              ? isDark
+                ? 'bg-stone-700 text-stone-100 hover:bg-stone-600'
+                : 'bg-stone-200 text-stone-700 hover:bg-stone-300'
+              : 'cursor-not-allowed opacity-50',
+            isDark ? 'text-stone-400' : 'text-stone-500'
           )}
         >
           <RotateCcw className="h-4 w-4" />
@@ -81,12 +97,18 @@ export function SaveActions({ hasChanges, isSaving, onSave, onReset }: SaveActio
           onClick={onSave}
           disabled={!hasChanges || isSaving}
           className={cn(
-            "flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-colors",
+            'flex items-center gap-2 rounded-lg px-6 py-2 text-sm font-medium transition-colors',
             hasChanges && !isSaving
-              ? isDark ? "bg-stone-100 text-stone-900 hover:bg-white" : "bg-stone-900 text-white hover:bg-stone-800"
-              : "opacity-50 cursor-not-allowed",
-            isDark && (!hasChanges || isSaving) ? "bg-stone-600 text-stone-400" : "",
-            !isDark && (!hasChanges || isSaving) ? "bg-stone-300 text-stone-500" : ""
+              ? isDark
+                ? 'bg-stone-100 text-stone-900 hover:bg-white'
+                : 'bg-stone-900 text-white hover:bg-stone-800'
+              : 'cursor-not-allowed opacity-50',
+            isDark && (!hasChanges || isSaving)
+              ? 'bg-stone-600 text-stone-400'
+              : '',
+            !isDark && (!hasChanges || isSaving)
+              ? 'bg-stone-300 text-stone-500'
+              : ''
           )}
         >
           {isSaving ? (
@@ -98,5 +120,5 @@ export function SaveActions({ hasChanges, isSaving, onSave, onReset }: SaveActio
         </button>
       </div>
     </div>
-  )
-} 
+  );
+}

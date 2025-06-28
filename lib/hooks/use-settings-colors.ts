@@ -1,5 +1,6 @@
-import { useTheme } from './use-theme';
 import { getSettingsColors } from '@lib/theme/settings-colors';
+
+import { useTheme } from './use-theme';
 
 // --- BEGIN COMMENT ---
 // 设置页面颜色 Hook
@@ -8,9 +9,9 @@ import { getSettingsColors } from '@lib/theme/settings-colors';
 export function useSettingsColors() {
   const { isDark } = useTheme();
   const colors = getSettingsColors(isDark);
-  
+
   return {
     colors,
-    isDark
+    isDark,
   };
 }

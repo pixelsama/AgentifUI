@@ -1,253 +1,276 @@
-import { useCallback, useEffect, useState } from 'react'
-import { createClient } from './client'
-import { Session, User } from '@supabase/supabase-js'
-import type { Database } from './types'
+import { useCallback, useEffect, useState } from 'react';
+
+import { Session, User } from '@supabase/supabase-js';
+
+import { createClient } from './client';
+import type { Database } from './types';
 
 /**
  * 用户认证钩子
  * 提供用户登录状态和会话信息
  */
 export const useSupabaseAuth = () => {
-  const supabase = createClient()
-  const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
-  const [loading, setLoading] = useState(true)
+  const supabase = createClient();
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getSession = async () => {
-      setLoading(true)
-      const { data: { session }, error } = await supabase.auth.getSession()
-      
+      setLoading(true);
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
       if (error) {
-        console.error('Error fetching session:', error)
+        console.error('Error fetching session:', error);
       }
-      
-      setSession(session)
-      setUser(session?.user || null)
-      setLoading(false)
-    }
 
-    getSession()
+      setSession(session);
+      setUser(session?.user || null);
+      setLoading(false);
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session)
-        setUser(session?.user || null)
-        setLoading(false)
-      }
-    )
+    getSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user || null);
+      setLoading(false);
+    });
 
     return () => {
-      subscription.unsubscribe()
-    }
-  }, [supabase])
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
-  return { user, session, loading }
-}
+  return { user, session, loading };
+};
 
 /**
  * 用户资料钩子
  * 提供用户资料信息和更新方法
  */
 export const useProfile = () => {
-  const { user } = useSupabaseAuth()
-  const supabase = createClient()
-  const [profile, setProfile] = useState<Database['public']['Tables']['profiles']['Row'] | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { user } = useSupabaseAuth();
+  const supabase = createClient();
+  const [profile, setProfile] = useState<
+    Database['public']['Tables']['profiles']['Row'] | null
+  >(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getProfile = async () => {
       if (!user) {
-        setProfile(null)
-        setLoading(false)
-        return
+        setProfile(null);
+        setLoading(false);
+        return;
       }
 
-      setLoading(true)
+      setLoading(true);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single()
+        .single();
 
       if (error) {
-        console.error('Error fetching profile:', error)
+        console.error('Error fetching profile:', error);
       } else {
-        setProfile(data)
+        setProfile(data);
       }
-      
-      setLoading(false)
-    }
 
-    getProfile()
-  }, [user, supabase])
+      setLoading(false);
+    };
+
+    getProfile();
+  }, [user, supabase]);
 
   const updateProfile = useCallback(
     async (updates: Database['public']['Tables']['profiles']['Update']) => {
-      if (!user) return { error: new Error('No user logged in') }
+      if (!user) return { error: new Error('No user logged in') };
 
       const { data, error } = await supabase
         .from('profiles')
         .update(updates)
         .eq('id', user.id)
         .select()
-        .single()
+        .single();
 
       if (error) {
-        return { error }
+        return { error };
       }
 
-      setProfile(data)
-      return { data }
+      setProfile(data);
+      return { data };
     },
     [user, supabase]
-  )
+  );
 
-  return { profile, loading, updateProfile }
-}
+  return { profile, loading, updateProfile };
+};
 
 /**
  * 组织钩子
  * 提供用户所属组织信息
  */
 export const useOrganizations = () => {
-  const { user } = useSupabaseAuth()
-  const supabase = createClient()
-  const [organizations, setOrganizations] = useState<Database['public']['Tables']['organizations']['Row'][]>([])
-  const [loading, setLoading] = useState(true)
+  const { user } = useSupabaseAuth();
+  const supabase = createClient();
+  const [organizations, setOrganizations] = useState<
+    Database['public']['Tables']['organizations']['Row'][]
+  >([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getOrganizations = async () => {
       if (!user) {
-        setOrganizations([])
-        setLoading(false)
-        return
+        setOrganizations([]);
+        setLoading(false);
+        return;
       }
 
-      setLoading(true)
+      setLoading(true);
       const { data, error } = await supabase
         .from('organizations')
-        .select(`
+        .select(
+          `
           *,
           org_members!inner(*)
-        `)
-        .eq('org_members.user_id', user.id)
+        `
+        )
+        .eq('org_members.user_id', user.id);
 
       if (error) {
-        console.error('Error fetching organizations:', error)
+        console.error('Error fetching organizations:', error);
       } else {
-        setOrganizations(data || [])
+        setOrganizations(data || []);
       }
-      
-      setLoading(false)
-    }
 
-    getOrganizations()
-  }, [user, supabase])
+      setLoading(false);
+    };
 
-  return { organizations, loading }
-}
+    getOrganizations();
+  }, [user, supabase]);
+
+  return { organizations, loading };
+};
 
 /**
  * 对话钩子
  * 提供用户对话列表
  */
 export const useConversations = (limit = 10) => {
-  const { user } = useSupabaseAuth()
-  const supabase = createClient()
-  const [conversations, setConversations] = useState<Database['public']['Tables']['conversations']['Row'][]>([])
-  const [loading, setLoading] = useState(true)
+  const { user } = useSupabaseAuth();
+  const supabase = createClient();
+  const [conversations, setConversations] = useState<
+    Database['public']['Tables']['conversations']['Row'][]
+  >([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getConversations = async () => {
       if (!user) {
-        setConversations([])
-        setLoading(false)
-        return
+        setConversations([]);
+        setLoading(false);
+        return;
       }
 
-      setLoading(true)
+      setLoading(true);
       const { data, error } = await supabase
         .from('conversations')
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .order('updated_at', { ascending: false })
-        .limit(limit)
+        .limit(limit);
 
       if (error) {
-        console.error('Error fetching conversations:', error)
+        console.error('Error fetching conversations:', error);
       } else {
-        setConversations(data || [])
+        setConversations(data || []);
       }
-      
-      setLoading(false)
-    }
 
-    getConversations()
-  }, [user, supabase, limit])
+      setLoading(false);
+    };
 
-  return { conversations, loading }
-}
+    getConversations();
+  }, [user, supabase, limit]);
+
+  return { conversations, loading };
+};
 
 /**
  * 消息钩子
  * 提供特定对话的消息列表和发送消息方法
  */
 export const useMessages = (conversationId: string | null) => {
-  const supabase = createClient()
-  const [messages, setMessages] = useState<Database['public']['Tables']['messages']['Row'][]>([])
-  const [loading, setLoading] = useState(true)
+  const supabase = createClient();
+  const [messages, setMessages] = useState<
+    Database['public']['Tables']['messages']['Row'][]
+  >([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getMessages = async () => {
       if (!conversationId) {
-        setMessages([])
-        setLoading(false)
-        return
+        setMessages([]);
+        setLoading(false);
+        return;
       }
 
-      setLoading(true)
+      setLoading(true);
       const { data, error } = await supabase
         .from('messages')
         .select('*')
         .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: true });
 
       if (error) {
-        console.error('Error fetching messages:', error)
+        console.error('Error fetching messages:', error);
       } else {
-        setMessages(data || [])
+        setMessages(data || []);
       }
-      
-      setLoading(false)
-    }
 
-    getMessages()
+      setLoading(false);
+    };
+
+    getMessages();
 
     // 设置实时订阅
     const subscription = supabase
       .channel(`messages:${conversationId}`)
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'messages',
-        filter: `conversation_id=eq.${conversationId}`
-      }, (payload) => {
-        setMessages(current => [...current, payload.new as Database['public']['Tables']['messages']['Row']])
-      })
-      .subscribe()
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        payload => {
+          setMessages(current => [
+            ...current,
+            payload.new as Database['public']['Tables']['messages']['Row'],
+          ]);
+        }
+      )
+      .subscribe();
 
-    getMessages()
+    getMessages();
 
     return () => {
-      subscription.unsubscribe()
-    }
-  }, [conversationId, supabase])
+      subscription.unsubscribe();
+    };
+  }, [conversationId, supabase]);
 
   const sendMessage = useCallback(
     async (content: string, role: 'user' | 'system' = 'user') => {
-      if (!conversationId) return { error: new Error('No conversation selected') }
+      if (!conversationId)
+        return { error: new Error('No conversation selected') };
 
       const { data, error } = await supabase
         .from('messages')
@@ -255,15 +278,18 @@ export const useMessages = (conversationId: string | null) => {
           conversation_id: conversationId,
           role,
           content,
-          user_id: role === 'user' ? (await supabase.auth.getUser()).data.user?.id : null
+          user_id:
+            role === 'user'
+              ? (await supabase.auth.getUser()).data.user?.id
+              : null,
         })
         .select()
-        .single()
+        .single();
 
-      return { data, error }
+      return { data, error };
     },
     [conversationId, supabase]
-  )
+  );
 
-  return { messages, loading, sendMessage }
-}
+  return { messages, loading, sendMessage };
+};

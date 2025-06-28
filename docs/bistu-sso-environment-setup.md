@@ -54,6 +54,7 @@ supabase db push
 ```
 
 关键迁移文件：
+
 - `20250617185201_fix_enum_transaction_issue.sql` - 添加CAS协议支持
 - `20250617185202_add_bistu_sso_data.sql` - 创建SSO数据结构和函数
 - `20250618150000_fix_sso_function_types.sql` - 修复数据库函数类型
@@ -107,12 +108,12 @@ CAS验证成功 → 回调应用 → 验证ticket → 创建/查找用户
 
 ### 关键API端点
 
-| 端点 | 功能 | 方法 |
-|------|------|------|
-| `/api/sso/bistu/login` | SSO登录入口 | GET |
-| `/api/sso/bistu/callback` | CAS回调处理 | GET |
-| `/api/sso/bistu/logout` | SSO注销 | GET/POST |
-| `/api/auth/sso-signin` | SSO会话建立 | POST |
+| 端点                      | 功能        | 方法     |
+| ------------------------- | ----------- | -------- |
+| `/api/sso/bistu/login`    | SSO登录入口 | GET      |
+| `/api/sso/bistu/callback` | CAS回调处理 | GET      |
+| `/api/sso/bistu/logout`   | SSO注销     | GET/POST |
+| `/api/auth/sso-signin`    | SSO会话建立 | POST     |
 
 ### 数据库结构
 
@@ -190,19 +191,21 @@ CAS验证成功 → 回调应用 → 验证ticket → 创建/查找用户
 ### 调试方法
 
 1. **开启详细日志**
+
    ```bash
    # 查看SSO相关日志
    tail -f /var/log/your-app.log | grep -i sso
    ```
 
 2. **检查数据库状态**
+
    ```sql
    -- 检查SSO提供商配置
    SELECT * FROM sso_providers WHERE name = '北京信息科技大学';
-   
+
    -- 检查用户创建情况
-   SELECT id, username, employee_number, auth_source 
-   FROM profiles 
+   SELECT id, username, employee_number, auth_source
+   FROM profiles
    WHERE auth_source = 'bistu_sso';
    ```
 
@@ -222,4 +225,4 @@ CAS验证成功 → 回调应用 → 验证ticket → 创建/查找用户
 4. **用户创建**：首次登录用户应自动创建账户
 5. **会话管理**：确认登录后能正常访问受保护页面
 
-如遇问题，请查看服务器日志并参考故障排查部分。 
+如遇问题，请查看服务器日志并参考故障排查部分。

@@ -17,6 +17,7 @@ AgentifUI采用现代化的多层架构设计，结合Next.js App Router的最�
 ## 2. 前端架构
 
 ### 技术栈
+
 - **框架**: React 18+
 - **类型系统**: TypeScript
 - **样式方案**: Tailwind CSS
@@ -26,6 +27,7 @@ AgentifUI采用现代化的多层架构设计，结合Next.js App Router的最�
 - **工具库**: Lucide Icons, clsx/cn
 
 ### 目录结构设计
+
 ```
 AgentifUI/
   ├── .cursor/            # Cursor IDE配置文件
@@ -62,7 +64,7 @@ AgentifUI/
   │       ├── sidebar-chat-list.tsx # 聊天列表
   │       ├── sidebar-app-list.tsx # 应用列表
   │       ├── sidebar-backdrop.tsx # 移动设备背景遮罩
-  │       └── sidebar-chat-icon.tsx # 聊天图标 
+  │       └── sidebar-chat-icon.tsx # 聊天图标
   ├── lib/                # 工具和配置
   │   ├── config/         # 配置文件 (例如 dify-config.ts)
   │   ├── hooks/          # 共享钩子函数
@@ -111,6 +113,7 @@ AgentifUI/
 ### 组件架构
 
 #### 聊天模块组件结构
+
 ```
 components/
   ├── chat/              # 聊天相关组件
@@ -158,56 +161,59 @@ components/
 ### 响应式设计架构
 
 #### 宽度管理系统
+
 ```typescript
 // lib/hooks/use-chat-width.ts
 export function useChatWidth() {
-  const isMobile = useMobile()
-  
+  const isMobile = useMobile();
+
   // 桌面设备使用max-w-3xl (768px)，移动设备使用max-w-full
-  const widthClass = isMobile ? "max-w-full" : "max-w-3xl"
-  
+  const widthClass = isMobile ? 'max-w-full' : 'max-w-3xl';
+
   // 内边距配置
-  const paddingClass = isMobile ? "px-2" : "px-4"
-  
+  const paddingClass = isMobile ? 'px-2' : 'px-4';
+
   return {
     widthClass,
     paddingClass,
-    isMobile
-  }
+    isMobile,
+  };
 }
 ```
 
 #### 移动设备检测
+
 ```typescript
 // lib/hooks/use-mobile.ts
 export function useMobile() {
   // 初始状态设为undefined，避免服务端渲染不匹配问题
-  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined)
+  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
     // 使用MediaQueryList来监听屏幕尺寸变化
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+
     const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    }
-    
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+
     // 添加变化监听
-    mql.addEventListener("change", onChange)
-    
+    mql.addEventListener('change', onChange);
+
     // 立即检测当前状态
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+
     // 清理监听器
-    return () => mql.removeEventListener("change", onChange)
-  }, [])
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
 
   // 确保返回布尔值（即使初始状态是undefined）
-  return !!isMobile
+  return !!isMobile;
 }
 ```
 
 #### 统一宽度应用
+
 - ChatLoader、ChatInput、ChatInputBackdrop 共用相同宽度类
 - 移动端自适应全宽
 - 桌面端最大宽度限制
@@ -216,6 +222,7 @@ export function useMobile() {
 ## 3. 状态管理
 
 ### 状态管理架构
+
 项目使用Zustand作为状态管理解决方案，将状态按功能域进行组织：
 
 ```
@@ -234,29 +241,31 @@ lib/stores/
 ```
 
 ### 聊天状态管理
+
 ```typescript
 // lib/stores/chat-input-store.ts示例
 interface ChatInputState {
-  inputText: string
-  setInputText: (text: string) => void
-  isSubmitting: boolean
-  setIsSubmitting: (isSubmitting: boolean) => void
-  isDark: boolean
-  toggleDarkMode: () => void
+  inputText: string;
+  setInputText: (text: string) => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (isSubmitting: boolean) => void;
+  isDark: boolean;
+  toggleDarkMode: () => void;
 }
 
 // 状态实现
-export const useChatInputStore = create<ChatInputState>((set) => ({
-  inputText: "",
-  setInputText: (text) => set({ inputText: text }),
+export const useChatInputStore = create<ChatInputState>(set => ({
+  inputText: '',
+  setInputText: text => set({ inputText: text }),
   isSubmitting: false,
-  setIsSubmitting: (isSubmitting) => set({ isSubmitting }),
+  setIsSubmitting: isSubmitting => set({ isSubmitting }),
   isDark: false,
-  toggleDarkMode: () => set((state) => ({ isDark: !state.isDark })),
-}))
+  toggleDarkMode: () => set(state => ({ isDark: !state.isDark })),
+}));
 ```
 
 ### 钩子函数设计
+
 ```
 lib/hooks/
   ├── use-chat-interface.ts  # 聊天界面逻辑封装
@@ -275,6 +284,7 @@ lib/hooks/
 ## 4. API层设计
 
 ### API路由结构
+
 ```
 app/
   │  └─ api/
@@ -288,24 +298,27 @@ app/
 ```
 
 ### 中间件设计
+
 中间件主要分为两类：
 
 1. **Edge中间件**：位于项目根目录的`middleware.ts`文件。
-   *   已**集成 Supabase Auth 逻辑**，实现路由保护。
-   *   负责检查用户会话状态，将未登录用户重定向到登录页面。
-   *   处理基本的请求检查、路由重定向（如 `/chat` -> `/chat/new`）、CORS 配置等。
+   - 已**集成 Supabase Auth 逻辑**，实现路由保护。
+   - 负责检查用户会话状态，将未登录用户重定向到登录页面。
+   - 处理基本的请求检查、路由重定向（如 `/chat` -> `/chat/new`）、CORS 配置等。
 
 2. **API路由内部逻辑**：在具体API路由处理函数内部（例如后台管理 API）
-   *   使用 Supabase 服务端客户端获取当前登录用户信息。
-   *   负责API密钥管理、请求参数验证、详细请求日志、错误处理和基于角色的访问控制 (RBAC)。
+   - 使用 Supabase 服务端客户端获取当前登录用户信息。
+   - 负责API密钥管理、请求参数验证、详细请求日志、错误处理和基于角色的访问控制 (RBAC)。
 
 ## 5. 数据存储设计
 
 ### 数据库选型
+
 - **数据库类型**: PostgreSQL (Supabase 托管)
 - **数据库访问**: 使用 Supabase 客户端库直接访问
 
 ### 核心数据模型
+
 - **认证相关表** (由 Supabase Auth 自动管理):
   - **`auth.users`**: 存储核心用户认证信息 (id, email, password_hash 等)。
   - **`auth.identities`**: 存储 OAuth 身份信息。
@@ -323,6 +336,7 @@ app/
   - **`organizations`**: 组织信息 (如果需要多租户)。
 
 ### 存储策略
+
 - 敏感数据（如外部 API 密钥）应加密存储或通过安全的环境变量管理。
 - 使用 Supabase 客户端库进行数据库交互，使用 Supabase 迁移文件进行版本控制。
 - 利用 Supabase 的 Row Level Security (RLS) 策略确保数据安全。
@@ -331,14 +345,16 @@ app/
 ## 6. 认证流程
 
 ### 认证方式
+
 - 使用 **Supabase Auth** 实现统一认证。
 - 支持多种认证方式:
-   - **邮箱/密码**: 标准的邮箱密码登录。
-   - **OAuth**: Google, GitHub 等社交登录。
-   - **验证码**: 无密码登录（验证码发送到邮箱）。
-   - **企业 SSO**: 支持 SAML 2.0 集成。
+  - **邮箱/密码**: 标准的邮箱密码登录。
+  - **OAuth**: Google, GitHub 等社交登录。
+  - **验证码**: 无密码登录（验证码发送到邮箱）。
+  - **企业 SSO**: 支持 SAML 2.0 集成。
 
 ### 认证流程图 (示例: OAuth 登录)
+
 ```
 用户点击登录按钮 → 前端调用 Supabase signInWithOAuth({ provider: 'google' }) → 重定向到 Google 授权页
   ↑                                                                    ↓
@@ -352,11 +368,13 @@ app/
 ## 7. AI模型集成
 
 ### Dify API集成
+
 - 使用代理模式将前端请求安全地转发到Dify API
 - 在代理层处理API密钥管理和请求转换
 - 支持流式响应和错误处理
 
 ### 多模型供应商架构
+
 ```
 客户端请求 → Next.js API → 模型路由层 → Dify API / 其他模型提供商
                              ↑
@@ -365,6 +383,7 @@ app/
 ```
 
 **模型路由决策逻辑**：
+
 - 基于用户在界面中的明确选择
 - 通过后台管理系统配置的模型参数（如 API Key, URL），这些配置可存储在数据库中，按需读取。
 - 考虑配置的使用限额和成本控制
@@ -372,6 +391,7 @@ app/
 - 提供自动故障转移能力，当首选模型不可用时切换到备选模型
 
 ### 模型调用优化
+
 - 实现请求缓存减少重复调用
 - 添加重试机制处理临时故障
 - 实现模型回退策略确保可用性
@@ -379,10 +399,12 @@ app/
 ## 8. 部署和扩展策略
 
 ### 部署选项
+
 - **开发环境**: 本地开发服务器 (`pnpm run dev`)。
 - **测试/生产环境**: Vercel, Docker 容器化部署到云服务器或本地服务器 (支持私有化)。
 
 ### 扩展考虑
+
 - 使用 Edge Functions (如果部署平台支持) 提高全局性能。
 - 实现细粒度缓存策略减少 API 调用。
 - 数据库连接池管理。
@@ -391,11 +413,13 @@ app/
 ## 9. 安全性考虑
 
 ### 数据安全
+
 - 外部 API 密钥等敏感信息通过环境变量或安全的配置管理服务注入，避免硬编码。
 - 使用 NextAuth.js 的 CSRF 保护和安全的会话管理。
 - 实现请求来源验证。
 
 ### 输入验证
+
 - 对所有 API 输入实施严格验证 (推荐使用 Zod 等库)。
 - 实现内容过滤防止潜在的 LLM 注入攻击。
 - 限制请求大小和频率 (Rate Limiting)。
@@ -403,16 +427,19 @@ app/
 ## 10. 后续开发路线图
 
 ### 近期计划
+
 - **实现基于 NextAuth.js 的核心认证流程 (邮箱/密码, 至少一个 OAuth/SSO Provider)**。
 - 完善基础组件库。
 - 建立 Dify API 代理的完整功能，并确保配置可管理。
 
 ### 中期目标
+
 - **构建后台管理基础框架 (用户管理, 角色/权限管理)**。
 - 实现 Dify 模型参数等配置的后台管理功能。
 - 实现高级聊天功能（历史、保存等）。
 
 ### 长期愿景
+
 - **完善后台管理功能 (分析仪表板, 操作日志等)**。
 - 实现企业级权限管理和多租户支持 (如果需要)。
 - 支持自定义模型微调和部署。

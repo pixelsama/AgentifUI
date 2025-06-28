@@ -1,14 +1,18 @@
 /**
  * 服务提供商相关的数据库查询函数
- * 
+ *
  * 本文件包含与服务提供商表(providers)相关的所有数据库操作
  * 更新为使用统一的数据服务和Result类型
  */
-
+import { CacheKeys, cacheService } from '@lib/services/db/cache-service';
 import { dataService } from '@lib/services/db/data-service';
-import { cacheService, CacheKeys } from '@lib/services/db/cache-service';
-import { realtimeService, SubscriptionKeys, SubscriptionConfigs } from '@lib/services/db/realtime-service';
-import { Result, success, failure } from '@lib/types/result';
+import {
+  SubscriptionConfigs,
+  SubscriptionKeys,
+  realtimeService,
+} from '@lib/services/db/realtime-service';
+import { Result, failure, success } from '@lib/types/result';
+
 import { createClient } from '../supabase/client';
 import { Provider } from '../types/database';
 
@@ -33,7 +37,7 @@ export async function getAllProviders(): Promise<Result<Provider[]>> {
       onUpdate: () => {
         // 提供商信息更新时清除缓存
         cacheService.deletePattern('providers:*');
-      }
+      },
     }
   );
 }
@@ -56,7 +60,7 @@ export async function getActiveProviders(): Promise<Result<Provider[]>> {
       onUpdate: () => {
         // 提供商信息更新时清除缓存
         cacheService.deletePattern('providers:*');
-      }
+      },
     }
   );
 }
@@ -66,7 +70,9 @@ export async function getActiveProviders(): Promise<Result<Provider[]>> {
  * @param id 服务提供商ID
  * @returns 服务提供商对象的Result，如果未找到则返回null
  */
-export async function getProviderById(id: string): Promise<Result<Provider | null>> {
+export async function getProviderById(
+  id: string
+): Promise<Result<Provider | null>> {
   return dataService.findOne<Provider>(
     'providers',
     { id },
@@ -82,7 +88,9 @@ export async function getProviderById(id: string): Promise<Result<Provider | nul
  * @param name 服务提供商名称
  * @returns 服务提供商对象的Result，如果未找到则返回null
  */
-export async function getProviderByName(name: string): Promise<Result<Provider | null>> {
+export async function getProviderByName(
+  name: string
+): Promise<Result<Provider | null>> {
   return dataService.findOne<Provider>(
     'providers',
     { name },
@@ -100,9 +108,9 @@ export async function getProviderByName(name: string): Promise<Result<Provider |
 export async function getDefaultProvider(): Promise<Result<Provider | null>> {
   return dataService.findOne<Provider>(
     'providers',
-    { 
+    {
       is_default: true,
-      is_active: true 
+      is_active: true,
     },
     {
       cache: true,
@@ -184,7 +192,9 @@ export async function getActiveProvidersLegacy(): Promise<Provider[]> {
  * 根据ID获取服务提供商（兼容版本）
  * @deprecated 请使用新版本并处理Result类型
  */
-export async function getProviderByIdLegacy(id: string): Promise<Provider | null> {
+export async function getProviderByIdLegacy(
+  id: string
+): Promise<Provider | null> {
   const result = await getProviderById(id);
   return result.success ? result.data : null;
 }
@@ -193,7 +203,9 @@ export async function getProviderByIdLegacy(id: string): Promise<Provider | null
  * 根据名称获取服务提供商（兼容版本）
  * @deprecated 请使用新版本并处理Result类型
  */
-export async function getProviderByNameLegacy(name: string): Promise<Provider | null> {
+export async function getProviderByNameLegacy(
+  name: string
+): Promise<Provider | null> {
   const result = await getProviderByName(name);
   return result.success ? result.data : null;
 }

@@ -1,15 +1,18 @@
-"use client"
+'use client';
 
-import React from "react"
-import { cn } from "@lib/utils"
-import { useMobile } from "@lib/hooks"
-import { useThemeColors } from "@lib/hooks/use-theme-colors"
-import { useSettingsColors } from "@lib/hooks/use-settings-colors"
-import { useSidebarStore } from "@lib/stores/sidebar-store"
-import { usePathname } from "next/navigation"
-import { DesktopUserAvatar } from "./desktop-user-avatar"
-import { ConversationTitleButton } from "./conversation-title-button"
-import { WorkflowHistoryButton } from "./workflow-history-button"
+import { useMobile } from '@lib/hooks';
+import { useSettingsColors } from '@lib/hooks/use-settings-colors';
+import { useThemeColors } from '@lib/hooks/use-theme-colors';
+import { useSidebarStore } from '@lib/stores/sidebar-store';
+import { cn } from '@lib/utils';
+
+import React from 'react';
+
+import { usePathname } from 'next/navigation';
+
+import { ConversationTitleButton } from './conversation-title-button';
+import { DesktopUserAvatar } from './desktop-user-avatar';
+import { WorkflowHistoryButton } from './workflow-history-button';
 
 /**
  * 桌面端顶部导航栏组件
@@ -22,14 +25,14 @@ import { WorkflowHistoryButton } from "./workflow-history-button"
  * - 在设置页面自动适配设置页面的背景色，实现完全融入效果
  */
 export function NavBar() {
-  const isMobile = useMobile()
-  const pathname = usePathname()
-  const { colors: themeColors } = useThemeColors()
-  const { colors: settingsColors } = useSettingsColors()
-  const { isExpanded } = useSidebarStore()
+  const isMobile = useMobile();
+  const pathname = usePathname();
+  const { colors: themeColors } = useThemeColors();
+  const { colors: settingsColors } = useSettingsColors();
+  const { isExpanded } = useSidebarStore();
 
   if (isMobile) {
-    return null
+    return null;
   }
 
   // --- BEGIN COMMENT ---
@@ -37,29 +40,29 @@ export function NavBar() {
   // Settings页面使用settings专门的背景色，其他页面使用主题背景色
   // 确保navbar与页面完全融入，无违和感
   // --- END COMMENT ---
-  const isSettingsPage = pathname?.startsWith('/settings')
-  const backgroundColor = isSettingsPage 
-    ? settingsColors.pageBackground.tailwind 
-    : themeColors.mainBackground.tailwind
+  const isSettingsPage = pathname?.startsWith('/settings');
+  const backgroundColor = isSettingsPage
+    ? settingsColors.pageBackground.tailwind
+    : themeColors.mainBackground.tailwind;
 
   // --- BEGIN COMMENT ---
   // 计算左边距：桌面端始终为sidebar留出空间
   // 根据展开状态设置相应边距
   // --- END COMMENT ---
   const getLeftMargin = () => {
-    return isExpanded ? "left-0 md:left-64" : "left-0 md:left-16"
-  }
+    return isExpanded ? 'left-0 md:left-64' : 'left-0 md:left-16';
+  };
 
   return (
     <>
       {/* Header 主体 */}
       <header
         className={cn(
-          "fixed top-0 right-4 h-12 z-20", 
+          'fixed top-0 right-4 z-20 h-12',
           getLeftMargin(),
-          "transition-[left] duration-150 ease-in-out",
+          'transition-[left] duration-150 ease-in-out',
           backgroundColor,
-          "flex items-center justify-between pl-4 pr-2",
+          'flex items-center justify-between pr-2 pl-4'
         )}
       >
         <div className="flex items-center space-x-2">
@@ -68,13 +71,13 @@ export function NavBar() {
           --- END MODIFIED COMMENT --- */}
           <ConversationTitleButton />
         </div>
-        
+
         <div className="flex items-center space-x-2">
           {/* --- BEGIN COMMENT ---
           工作流历史记录按钮（仅在工作流和文本生成页面显示）
           --- END COMMENT --- */}
           <WorkflowHistoryButton />
-          
+
           {/* --- BEGIN COMMENT ---
           用户头像按钮
           --- END COMMENT --- */}
@@ -82,5 +85,5 @@ export function NavBar() {
         </div>
       </header>
     </>
-  )
+  );
 }

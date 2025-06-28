@@ -1,24 +1,36 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@components/ui/dialog';
 import { Button } from '@components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@components/ui/dialog';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select';
 import { Switch } from '@components/ui/switch';
 import { Textarea } from '@components/ui/textarea';
-import { Trash2, Plus, Edit, Save, X } from 'lucide-react';
-import { toast } from 'sonner';
-import { cn } from '@lib/utils';
+import {
+  createProvider,
+  deleteProvider,
+  getAllProviders,
+  updateProvider,
+} from '@lib/db/providers';
 import { useTheme } from '@lib/hooks/use-theme';
 import { Provider } from '@lib/types/database';
-import { 
-  getAllProviders, 
-  createProvider, 
-  updateProvider, 
-  deleteProvider 
-} from '@lib/db/providers';
+import { cn } from '@lib/utils';
+import { Edit, Plus, Save, Trash2, X } from 'lucide-react';
+import { toast } from 'sonner';
+
+import React, { useEffect, useState } from 'react';
 
 // --- BEGIN COMMENT ---
 // 提供商类型枚举，基于数据库分析的建议
@@ -30,7 +42,7 @@ const PROVIDER_TYPES = [
   { value: 'tts', label: 'TTS (文本转语音)' },
   { value: 'stt', label: 'STT (语音转文本)' },
   { value: 'vision', label: 'Vision (图像识别)' },
-  { value: 'multimodal', label: 'Multimodal (多模态)' }
+  { value: 'multimodal', label: 'Multimodal (多模态)' },
 ] as const;
 
 // --- BEGIN COMMENT ---
@@ -40,7 +52,7 @@ const AUTH_TYPES = [
   { value: 'api_key', label: 'API Key' },
   { value: 'bearer_token', label: 'Bearer Token' },
   { value: 'oauth2', label: 'OAuth 2.0' },
-  { value: 'basic_auth', label: 'Basic Auth' }
+  { value: 'basic_auth', label: 'Basic Auth' },
 ] as const;
 
 interface ProviderFormData {
@@ -58,10 +70,10 @@ interface ProviderManagementModalProps {
   onProviderChange?: () => void;
 }
 
-export function ProviderManagementModal({ 
-  open, 
-  onOpenChange, 
-  onProviderChange 
+export function ProviderManagementModal({
+  open,
+  onOpenChange,
+  onProviderChange,
 }: ProviderManagementModalProps) {
   const { isDark } = useTheme();
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -74,7 +86,7 @@ export function ProviderManagementModal({
     base_url: '',
     auth_type: 'api_key',
     is_active: true,
-    is_default: false
+    is_default: false,
   });
   const [errors, setErrors] = useState<Partial<ProviderFormData>>({});
 
@@ -150,7 +162,7 @@ export function ProviderManagementModal({
       base_url: '',
       auth_type: 'api_key',
       is_active: true,
-      is_default: false
+      is_default: false,
     });
     setErrors({});
     setEditingProvider(null);
@@ -175,7 +187,7 @@ export function ProviderManagementModal({
       base_url: provider.base_url,
       auth_type: provider.auth_type,
       is_active: provider.is_active,
-      is_default: provider.is_default
+      is_default: provider.is_default,
     });
     setEditingProvider(provider);
     setIsCreating(false);
@@ -259,21 +271,21 @@ export function ProviderManagementModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>管理服务提供商</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* --- 创建新提供商按钮 --- */}
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium">提供商列表</h3>
-            <Button 
+            <Button
               onClick={startCreating}
               disabled={loading || isCreating || editingProvider !== null}
               className="flex items-center gap-2"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="h-4 w-4" />
               添加提供商
             </Button>
           </div>
@@ -281,62 +293,74 @@ export function ProviderManagementModal({
           {/* --- 提供商列表 --- */}
           <div className="space-y-3">
             {loading && providers.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-muted-foreground py-8 text-center">
                 加载中...
               </div>
             ) : providers.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-muted-foreground py-8 text-center">
                 暂无提供商配置
               </div>
             ) : (
-              providers.map((provider) => (
+              providers.map(provider => (
                 <div
                   key={provider.id}
                   className={cn(
-                    "border rounded-lg p-4 space-y-3 transition-colors",
+                    'space-y-3 rounded-lg border p-4 transition-colors',
                     // 基础样式
-                    isDark ? "border-stone-600 bg-stone-800/50" : "border-stone-200 bg-white",
+                    isDark
+                      ? 'border-stone-600 bg-stone-800/50'
+                      : 'border-stone-200 bg-white',
                     // 编辑状态样式
-                    editingProvider?.id === provider.id && (
-                      isDark 
-                        ? "border-stone-400 bg-stone-700/50" 
-                        : "border-stone-500 bg-stone-100/50"
-                    )
+                    editingProvider?.id === provider.id &&
+                      (isDark
+                        ? 'border-stone-400 bg-stone-700/50'
+                        : 'border-stone-500 bg-stone-100/50')
                   )}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <h4 className={cn(
-                        "font-medium font-serif",
-                        isDark ? "text-stone-100" : "text-stone-900"
-                      )}>
+                      <h4
+                        className={cn(
+                          'font-serif font-medium',
+                          isDark ? 'text-stone-100' : 'text-stone-900'
+                        )}
+                      >
                         {provider.name}
                       </h4>
-                      <span className={cn(
-                        "px-2 py-1 text-xs rounded-full font-serif",
-                        isDark ? "bg-stone-700 text-stone-300" : "bg-stone-100 text-stone-700"
-                      )}>
-                        {PROVIDER_TYPES.find(t => t.value === provider.type)?.label || provider.type}
+                      <span
+                        className={cn(
+                          'rounded-full px-2 py-1 font-serif text-xs',
+                          isDark
+                            ? 'bg-stone-700 text-stone-300'
+                            : 'bg-stone-100 text-stone-700'
+                        )}
+                      >
+                        {PROVIDER_TYPES.find(t => t.value === provider.type)
+                          ?.label || provider.type}
                       </span>
-                      <span className={cn(
-                        "px-2 py-1 text-xs rounded-full font-serif",
-                        provider.is_active 
-                          ? isDark
-                            ? "bg-green-900/50 text-green-300 border border-green-700"
-                            : "bg-green-100 text-green-700"
-                          : isDark
-                            ? "bg-red-900/50 text-red-300 border border-red-700"
-                            : "bg-red-100 text-red-700"
-                      )}>
+                      <span
+                        className={cn(
+                          'rounded-full px-2 py-1 font-serif text-xs',
+                          provider.is_active
+                            ? isDark
+                              ? 'border border-green-700 bg-green-900/50 text-green-300'
+                              : 'bg-green-100 text-green-700'
+                            : isDark
+                              ? 'border border-red-700 bg-red-900/50 text-red-300'
+                              : 'bg-red-100 text-red-700'
+                        )}
+                      >
                         {provider.is_active ? '已启用' : '已禁用'}
                       </span>
                       {provider.is_default && (
-                        <span className={cn(
-                          "px-2 py-1 text-xs rounded-full font-serif",
-                          isDark
-                            ? "bg-stone-500/50 text-stone-200 border border-stone-400"
-                            : "bg-stone-200 text-stone-800"
-                        )}>
+                        <span
+                          className={cn(
+                            'rounded-full px-2 py-1 font-serif text-xs',
+                            isDark
+                              ? 'border border-stone-400 bg-stone-500/50 text-stone-200'
+                              : 'bg-stone-200 text-stone-800'
+                          )}
+                        >
                           默认提供商
                         </span>
                       )}
@@ -346,9 +370,11 @@ export function ProviderManagementModal({
                         variant="outline"
                         size="sm"
                         onClick={() => startEditing(provider)}
-                        disabled={loading || isCreating || editingProvider !== null}
+                        disabled={
+                          loading || isCreating || editingProvider !== null
+                        }
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
@@ -357,16 +383,24 @@ export function ProviderManagementModal({
                         disabled={loading}
                         className="text-red-600 hover:text-red-700"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                  <div className={cn(
-                    "text-sm font-serif",
-                    isDark ? "text-stone-400" : "text-stone-600"
-                  )}>
-                    <p><strong>API URL:</strong> {provider.base_url}</p>
-                    <p><strong>认证方式:</strong> {AUTH_TYPES.find(a => a.value === provider.auth_type)?.label || provider.auth_type}</p>
+                  <div
+                    className={cn(
+                      'font-serif text-sm',
+                      isDark ? 'text-stone-400' : 'text-stone-600'
+                    )}
+                  >
+                    <p>
+                      <strong>API URL:</strong> {provider.base_url}
+                    </p>
+                    <p>
+                      <strong>认证方式:</strong>{' '}
+                      {AUTH_TYPES.find(a => a.value === provider.auth_type)
+                        ?.label || provider.auth_type}
+                    </p>
                   </div>
                 </div>
               ))
@@ -376,7 +410,7 @@ export function ProviderManagementModal({
           {/* --- 创建/编辑表单 --- */}
           {(isCreating || editingProvider) && (
             <div className="border-t pt-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-medium">
                   {isCreating ? '添加新提供商' : '编辑提供商'}
                 </h3>
@@ -386,20 +420,22 @@ export function ProviderManagementModal({
                   onClick={resetForm}
                   disabled={loading}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {/* --- 提供商名称 --- */}
                 <div className="space-y-2">
                   <Label htmlFor="name">提供商名称 *</Label>
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e =>
+                      setFormData(prev => ({ ...prev, name: e.target.value }))
+                    }
                     placeholder="例如：Dify、OpenAI、Claude"
-                    className={errors.name ? "border-red-500" : ""}
+                    className={errors.name ? 'border-red-500' : ''}
                   />
                   {errors.name && (
                     <p className="text-sm text-red-600">{errors.name}</p>
@@ -411,13 +447,17 @@ export function ProviderManagementModal({
                   <Label htmlFor="type">提供商类型 *</Label>
                   <Select
                     value={formData.type}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
+                    onValueChange={value =>
+                      setFormData(prev => ({ ...prev, type: value }))
+                    }
                   >
-                    <SelectTrigger className={errors.type ? "border-red-500" : ""}>
+                    <SelectTrigger
+                      className={errors.type ? 'border-red-500' : ''}
+                    >
                       <SelectValue placeholder="选择提供商类型" />
                     </SelectTrigger>
                     <SelectContent>
-                      {PROVIDER_TYPES.map((type) => (
+                      {PROVIDER_TYPES.map(type => (
                         <SelectItem key={type.value} value={type.value}>
                           {type.label}
                         </SelectItem>
@@ -435,9 +475,14 @@ export function ProviderManagementModal({
                   <Input
                     id="base_url"
                     value={formData.base_url}
-                    onChange={(e) => setFormData(prev => ({ ...prev, base_url: e.target.value }))}
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        base_url: e.target.value,
+                      }))
+                    }
                     placeholder="例如：https://api.dify.ai/v1"
-                    className={errors.base_url ? "border-red-500" : ""}
+                    className={errors.base_url ? 'border-red-500' : ''}
                   />
                   {errors.base_url && (
                     <p className="text-sm text-red-600">{errors.base_url}</p>
@@ -449,13 +494,17 @@ export function ProviderManagementModal({
                   <Label htmlFor="auth_type">认证类型 *</Label>
                   <Select
                     value={formData.auth_type}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, auth_type: value }))}
+                    onValueChange={value =>
+                      setFormData(prev => ({ ...prev, auth_type: value }))
+                    }
                   >
-                    <SelectTrigger className={errors.auth_type ? "border-red-500" : ""}>
+                    <SelectTrigger
+                      className={errors.auth_type ? 'border-red-500' : ''}
+                    >
                       <SelectValue placeholder="选择认证类型" />
                     </SelectTrigger>
                     <SelectContent>
-                      {AUTH_TYPES.map((auth) => (
+                      {AUTH_TYPES.map(auth => (
                         <SelectItem key={auth.value} value={auth.value}>
                           {auth.label}
                         </SelectItem>
@@ -474,9 +523,11 @@ export function ProviderManagementModal({
                     <Switch
                       id="is_active"
                       checked={formData.is_active}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                      onCheckedChange={checked =>
+                        setFormData(prev => ({ ...prev, is_active: checked }))
+                      }
                     />
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-muted-foreground text-sm">
                       {formData.is_active ? '已启用' : '已禁用'}
                     </span>
                   </div>
@@ -489,20 +540,22 @@ export function ProviderManagementModal({
                     <Switch
                       id="is_default"
                       checked={formData.is_default}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_default: checked }))}
+                      onCheckedChange={checked =>
+                        setFormData(prev => ({ ...prev, is_default: checked }))
+                      }
                     />
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-muted-foreground text-sm">
                       {formData.is_default ? '设为默认' : '非默认'}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     系统中只能有一个默认提供商，设置后其他提供商的默认状态将被自动清除
                   </p>
                 </div>
               </div>
 
               {/* --- 保存按钮 --- */}
-              <div className="flex justify-end gap-2 mt-6">
+              <div className="mt-6 flex justify-end gap-2">
                 <Button
                   variant="outline"
                   onClick={resetForm}
@@ -515,7 +568,7 @@ export function ProviderManagementModal({
                   disabled={loading}
                   className="flex items-center gap-2"
                 >
-                  <Save className="w-4 h-4" />
+                  <Save className="h-4 w-4" />
                   {loading ? '保存中...' : '保存'}
                 </Button>
               </div>
@@ -525,4 +578,4 @@ export function ProviderManagementModal({
       </DialogContent>
     </Dialog>
   );
-} 
+}

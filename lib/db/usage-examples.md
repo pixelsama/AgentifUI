@@ -7,13 +7,13 @@
 ### 基本用法
 
 ```typescript
-import { getCurrentUserProfile, Result } from '@lib/db';
+import { Result, getCurrentUserProfile } from '@lib/db';
 import { Profile } from '@lib/types/database';
 
 // 获取当前用户资料 - 新的方式
 async function handleGetUserProfile() {
   const result: Result<Profile | null> = await getCurrentUserProfile();
-  
+
   if (result.success) {
     // 类型安全的数据访问
     const profile = result.data;
@@ -71,10 +71,10 @@ async function getConversationsWithCache() {
       cacheTTL: 5 * 60 * 1000, // 5分钟缓存
       subscribe: true,
       subscriptionKey: 'user-conversations:user-id',
-      onUpdate: (payload) => {
+      onUpdate: payload => {
         console.log('对话数据更新:', payload);
         // 处理实时更新
-      }
+      },
     }
   );
 
@@ -97,7 +97,7 @@ async function createAndUpdateConversation() {
   const createResult = await dataService.create('conversations', {
     user_id: 'user-id',
     title: '新对话',
-    status: 'active'
+    status: 'active',
   });
 
   if (createResult.success) {
@@ -126,20 +126,17 @@ async function createAndUpdateConversation() {
 import { messageService } from '@lib/db';
 
 async function loadMessagesWithPagination() {
-  const result = await messageService.getMessagesPaginated(
-    'conversation-id',
-    {
-      limit: 20,
-      direction: 'older',
-      includeCount: true,
-      cache: true
-    }
-  );
+  const result = await messageService.getMessagesPaginated('conversation-id', {
+    limit: 20,
+    direction: 'older',
+    includeCount: true,
+    cache: true,
+  });
 
   if (result.success) {
     const { messages, hasMore, nextCursor, totalCount } = result.data;
     console.log(`加载了 ${messages.length} 条消息，总共 ${totalCount} 条`);
-    
+
     if (hasMore && nextCursor) {
       // 加载更多消息
       const moreResult = await messageService.getMessagesPaginated(
@@ -147,7 +144,7 @@ async function loadMessagesWithPagination() {
         {
           cursor: nextCursor,
           limit: 20,
-          direction: 'older'
+          direction: 'older',
         }
       );
     }
@@ -166,7 +163,7 @@ async function saveUserMessage() {
     user_id: 'user-id',
     role: 'user',
     content: '用户发送的消息',
-    metadata: { source: 'web' }
+    metadata: { source: 'web' },
   });
 
   if (result.success) {
@@ -182,7 +179,7 @@ async function saveUserMessage() {
 ### 手动缓存管理
 
 ```typescript
-import { cacheService, CacheKeys } from '@lib/db';
+import { CacheKeys, cacheService } from '@lib/db';
 
 // 设置缓存
 cacheService.set('custom-key', { data: 'value' }, 10 * 60 * 1000);
@@ -213,13 +210,17 @@ console.log('缓存状态:', stats);
 ### 手动管理实时订阅
 
 ```typescript
-import { realtimeService, SubscriptionKeys, SubscriptionConfigs } from '@lib/db';
+import {
+  SubscriptionConfigs,
+  SubscriptionKeys,
+  realtimeService,
+} from '@lib/db';
 
 // 订阅用户对话变化
 const unsubscribe = realtimeService.subscribe(
   SubscriptionKeys.userConversations('user-id'),
   SubscriptionConfigs.conversations('user-id'),
-  (payload) => {
+  payload => {
     console.log('对话变化:', payload);
     switch (payload.eventType) {
       case 'INSERT':
@@ -295,7 +296,7 @@ function ConversationList() {
 ### 统一错误处理
 
 ```typescript
-import { Result, DatabaseError, NetworkError } from '@lib/db';
+import { DatabaseError, NetworkError, Result } from '@lib/db';
 
 function handleDatabaseResult<T>(result: Result<T>): T | null {
   if (result.success) {
@@ -343,22 +344,32 @@ async function safeAsyncOperation() {
 
 ```typescript
 // 短期缓存：用户资料
-await dataService.findOne('profiles', { id: userId }, {
-  cache: true,
-  cacheTTL: 5 * 60 * 1000 // 5分钟
-});
+await dataService.findOne(
+  'profiles',
+  { id: userId },
+  {
+    cache: true,
+    cacheTTL: 5 * 60 * 1000, // 5分钟
+  }
+);
 
 // 中期缓存：对话列表
 await dataService.findMany('conversations', filters, orderBy, pagination, {
   cache: true,
-  cacheTTL: 10 * 60 * 1000 // 10分钟
+  cacheTTL: 10 * 60 * 1000, // 10分钟
 });
 
 // 长期缓存：配置数据
-await dataService.findMany('providers', { is_active: true }, undefined, undefined, {
-  cache: true,
-  cacheTTL: 60 * 60 * 1000 // 1小时
-});
+await dataService.findMany(
+  'providers',
+  { is_active: true },
+  undefined,
+  undefined,
+  {
+    cache: true,
+    cacheTTL: 60 * 60 * 1000, // 1小时
+  }
+);
 ```
 
 ### 批量操作
@@ -367,7 +378,7 @@ await dataService.findMany('providers', { is_active: true }, undefined, undefine
 // 批量保存消息
 await messageService.saveMessages([
   { conversation_id: 'id1', role: 'user', content: 'msg1' },
-  { conversation_id: 'id1', role: 'assistant', content: 'msg2' }
+  { conversation_id: 'id1', role: 'assistant', content: 'msg2' },
 ]);
 ```
 
@@ -425,4 +436,4 @@ if (result.success) {
 }
 ```
 
-通过这些示例，你可以逐步将现有代码迁移到新的优化接口，享受更好的性能、缓存和错误处理机制。 
+通过这些示例，你可以逐步将现有代码迁移到新的优化接口，享受更好的性能、缓存和错误处理机制。

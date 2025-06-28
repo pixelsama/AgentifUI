@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@lib/utils';
+
+import React, { useEffect, useRef, useState } from 'react';
 
 interface StreamingTextProps {
   content: string;
@@ -23,7 +24,7 @@ export const StreamingText: React.FC<StreamingTextProps> = ({
   isComplete = false,
   className,
   typewriterSpeed = 100, // 默认100字符/秒
-  children
+  children,
 }) => {
   const [displayedContent, setDisplayedContent] = useState('');
   const animationRef = useRef<number | null>(null);
@@ -60,12 +61,18 @@ export const StreamingText: React.FC<StreamingTextProps> = ({
     const animate = () => {
       const now = Date.now();
       const deltaTime = now - lastUpdateTimeRef.current;
-      
+
       // 计算应该显示的字符数
-      const charactersToAdd = Math.max(1, Math.floor((deltaTime * typewriterSpeed) / 1000));
-      
+      const charactersToAdd = Math.max(
+        1,
+        Math.floor((deltaTime * typewriterSpeed) / 1000)
+      );
+
       if (charactersToAdd > 0 && currentIndexRef.current < content.length) {
-        currentIndexRef.current = Math.min(currentIndexRef.current + charactersToAdd, content.length);
+        currentIndexRef.current = Math.min(
+          currentIndexRef.current + charactersToAdd,
+          content.length
+        );
         setDisplayedContent(content.substring(0, currentIndexRef.current));
         lastUpdateTimeRef.current = now;
       }
@@ -91,7 +98,7 @@ export const StreamingText: React.FC<StreamingTextProps> = ({
   }, [content, isStreaming, isComplete, typewriterSpeed]);
 
   return (
-    <div className={cn("streaming-text-container", className)}>
+    <div className={cn('streaming-text-container', className)}>
       {children(displayedContent)}
     </div>
   );
@@ -109,14 +116,12 @@ interface StreamingMarkdownProps {
   typewriterSpeed?: number;
 }
 
-export const StreamingMarkdown: React.FC<StreamingMarkdownProps> = (props) => {
+export const StreamingMarkdown: React.FC<StreamingMarkdownProps> = props => {
   return (
     <StreamingText {...props}>
-      {(displayedContent) => (
-        <div className="streaming-markdown-content">
-          {displayedContent}
-        </div>
+      {displayedContent => (
+        <div className="streaming-markdown-content">{displayedContent}</div>
       )}
     </StreamingText>
   );
-}; 
+};

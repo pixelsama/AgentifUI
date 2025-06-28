@@ -34,24 +34,25 @@
 
 扩展自 `auth.users`，包含用户的基本信息和状态。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 用户ID | 主键，引用 auth.users(id) |
-| full_name | TEXT | 用户全名 | |
-| username | TEXT | 用户名 | 唯一 |
-| avatar_url | TEXT | 头像URL | |
-| email | TEXT | 用户邮箱 | 从 auth.users 同步 |
-| phone | TEXT | 用户手机号 | 从 auth.users 同步 |
-| role | user_role | 用户角色 | DEFAULT 'user'::user_role |
-| status | account_status | 账号状态 | DEFAULT 'active'::account_status |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT CURRENT_TIMESTAMP |
-| last_login | TIMESTAMP WITH TIME ZONE | 最后登录时间 | |
-| auth_source | TEXT | 认证来源 | DEFAULT 'email'，支持 email/google/github/phone/bistu_sso |
-| sso_provider_id | UUID | SSO提供商ID | 引用 sso_providers(id) |
-| employee_number | TEXT | 学工号 | 北京信息科技大学统一身份标识，唯一约束 |
+| 字段名          | 类型                     | 描述         | 约束                                                      |
+| --------------- | ------------------------ | ------------ | --------------------------------------------------------- |
+| id              | UUID                     | 用户ID       | 主键，引用 auth.users(id)                                 |
+| full_name       | TEXT                     | 用户全名     |                                                           |
+| username        | TEXT                     | 用户名       | 唯一                                                      |
+| avatar_url      | TEXT                     | 头像URL      |                                                           |
+| email           | TEXT                     | 用户邮箱     | 从 auth.users 同步                                        |
+| phone           | TEXT                     | 用户手机号   | 从 auth.users 同步                                        |
+| role            | user_role                | 用户角色     | DEFAULT 'user'::user_role                                 |
+| status          | account_status           | 账号状态     | DEFAULT 'active'::account_status                          |
+| created_at      | TIMESTAMP WITH TIME ZONE | 创建时间     | DEFAULT CURRENT_TIMESTAMP                                 |
+| updated_at      | TIMESTAMP WITH TIME ZONE | 更新时间     | DEFAULT CURRENT_TIMESTAMP                                 |
+| last_login      | TIMESTAMP WITH TIME ZONE | 最后登录时间 |                                                           |
+| auth_source     | TEXT                     | 认证来源     | DEFAULT 'email'，支持 email/google/github/phone/bistu_sso |
+| sso_provider_id | UUID                     | SSO提供商ID  | 引用 sso_providers(id)                                    |
+| employee_number | TEXT                     | 学工号       | 北京信息科技大学统一身份标识，唯一约束                    |
 
 **枚举类型定义：**
+
 - `user_role`: ENUM ('admin', 'manager', 'user')
 - `account_status`: ENUM ('active', 'suspended', 'pending')
 
@@ -59,15 +60,15 @@
 
 存储用户界面和功能偏好设置。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 偏好设置ID | 主键 |
-| user_id | UUID | 用户ID | 引用 auth.users(id)，唯一 |
-| theme | TEXT | 界面主题 | DEFAULT 'light' |
-| language | TEXT | 界面语言 | DEFAULT 'zh-CN' |
-| notification_settings | JSONB | 通知设置 | DEFAULT '{}' |
-| ai_preferences | JSONB | AI偏好设置 | DEFAULT '{}' |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT CURRENT_TIMESTAMP |
+| 字段名                | 类型                     | 描述       | 约束                      |
+| --------------------- | ------------------------ | ---------- | ------------------------- |
+| id                    | UUID                     | 偏好设置ID | 主键                      |
+| user_id               | UUID                     | 用户ID     | 引用 auth.users(id)，唯一 |
+| theme                 | TEXT                     | 界面主题   | DEFAULT 'light'           |
+| language              | TEXT                     | 界面语言   | DEFAULT 'zh-CN'           |
+| notification_settings | JSONB                    | 通知设置   | DEFAULT '{}'              |
+| ai_preferences        | JSONB                    | AI偏好设置 | DEFAULT '{}'              |
+| updated_at            | TIMESTAMP WITH TIME ZONE | 更新时间   | DEFAULT CURRENT_TIMESTAMP |
 
 ### 组织和成员管理
 
@@ -75,38 +76,40 @@
 
 存储组织信息。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 组织ID | 主键 |
-| name | TEXT | 组织名称 | NOT NULL |
-| logo_url | TEXT | 组织Logo URL | |
-| settings | JSONB | 组织设置 | DEFAULT '{}' |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT CURRENT_TIMESTAMP |
+| 字段名     | 类型                     | 描述         | 约束                      |
+| ---------- | ------------------------ | ------------ | ------------------------- |
+| id         | UUID                     | 组织ID       | 主键                      |
+| name       | TEXT                     | 组织名称     | NOT NULL                  |
+| logo_url   | TEXT                     | 组织Logo URL |                           |
+| settings   | JSONB                    | 组织设置     | DEFAULT '{}'              |
+| created_at | TIMESTAMP WITH TIME ZONE | 创建时间     | DEFAULT CURRENT_TIMESTAMP |
+| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间     | DEFAULT CURRENT_TIMESTAMP |
 
 #### org_members
 
 存储组织成员关系，支持用户在同一组织的多个部门任职。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 关系ID | 主键 |
-| org_id | UUID | 组织ID | 引用 organizations(id)，NOT NULL |
-| user_id | UUID | 用户ID | 引用 auth.users(id)，NOT NULL |
-| role | org_member_role | 成员角色 | DEFAULT 'member' |
-| department | TEXT | 部门名称 | |
-| job_title | TEXT | 职位名称 | |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT CURRENT_TIMESTAMP |
-| | | | UNIQUE(org_id, user_id, department) |
+| 字段名     | 类型                     | 描述     | 约束                                |
+| ---------- | ------------------------ | -------- | ----------------------------------- |
+| id         | UUID                     | 关系ID   | 主键                                |
+| org_id     | UUID                     | 组织ID   | 引用 organizations(id)，NOT NULL    |
+| user_id    | UUID                     | 用户ID   | 引用 auth.users(id)，NOT NULL       |
+| role       | org_member_role          | 成员角色 | DEFAULT 'member'                    |
+| department | TEXT                     | 部门名称 |                                     |
+| job_title  | TEXT                     | 职位名称 |                                     |
+| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP           |
+| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT CURRENT_TIMESTAMP           |
+|            |                          |          | UNIQUE(org_id, user_id, department) |
 
 **多部门支持特性**：
+
 - 用户可以在同一组织的多个部门任职
 - 每个用户在同一组织的每个部门只能有一条记录
 - 权限检查时取用户的第一个部门记录
 - 支持灵活的组织架构管理
 
 **枚举类型定义：**
+
 - `org_member_role`: ENUM ('owner', 'admin', 'member')
 
 ### 部门应用权限管理
@@ -115,39 +118,43 @@
 
 存储部门级应用访问权限，实现精确的权限控制。**重要：此表不包含任何自动生成的虚拟数据，所有权限记录都必须通过管理界面手动配置。**
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 权限ID | 主键 |
-| org_id | UUID | 组织ID | 引用 organizations(id)，NOT NULL |
-| department | TEXT | 部门名称 | NOT NULL |
-| service_instance_id | UUID | 服务实例ID | 引用 service_instances(id)，NOT NULL |
-| is_enabled | BOOLEAN | 是否启用 | DEFAULT TRUE |
-| ~~permission_level~~ | ~~TEXT~~ | ~~权限级别~~ | ~~已移除，简化权限设计~~ |
-| usage_quota | INTEGER | 月度使用配额 | NULL表示无限制 |
-| used_count | INTEGER | 当月已使用次数 | DEFAULT 0 |
-| quota_reset_date | DATE | 配额重置日期 | DEFAULT CURRENT_DATE |
-| settings | JSONB | 扩展配置 | DEFAULT '{}' |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT CURRENT_TIMESTAMP |
-| | | | UNIQUE(org_id, department, service_instance_id) |
+| 字段名               | 类型                     | 描述           | 约束                                            |
+| -------------------- | ------------------------ | -------------- | ----------------------------------------------- |
+| id                   | UUID                     | 权限ID         | 主键                                            |
+| org_id               | UUID                     | 组织ID         | 引用 organizations(id)，NOT NULL                |
+| department           | TEXT                     | 部门名称       | NOT NULL                                        |
+| service_instance_id  | UUID                     | 服务实例ID     | 引用 service_instances(id)，NOT NULL            |
+| is_enabled           | BOOLEAN                  | 是否启用       | DEFAULT TRUE                                    |
+| ~~permission_level~~ | ~~TEXT~~                 | ~~权限级别~~   | ~~已移除，简化权限设计~~                        |
+| usage_quota          | INTEGER                  | 月度使用配额   | NULL表示无限制                                  |
+| used_count           | INTEGER                  | 当月已使用次数 | DEFAULT 0                                       |
+| quota_reset_date     | DATE                     | 配额重置日期   | DEFAULT CURRENT_DATE                            |
+| settings             | JSONB                    | 扩展配置       | DEFAULT '{}'                                    |
+| created_at           | TIMESTAMP WITH TIME ZONE | 创建时间       | DEFAULT CURRENT_TIMESTAMP                       |
+| updated_at           | TIMESTAMP WITH TIME ZONE | 更新时间       | DEFAULT CURRENT_TIMESTAMP                       |
+|                      |                          |                | UNIQUE(org_id, department, service_instance_id) |
 
 **权限控制说明：**
+
 - **简化设计**: 移除了混淆的permission_level字段，采用更简洁的权限控制
 - **二元权限**: 通过is_enabled字段控制部门是否可以访问应用
 - **配额管理**: 通过usage_quota和used_count字段管理使用配额
 
 **权限配置原则：**
+
 - **手动配置**: 所有权限记录必须通过管理界面手动创建
 - **无虚拟数据**: 系统不会自动为组织×部门×应用的组合创建权限记录
 - **默认拒绝**: 如果部门没有权限记录，则无法访问org_only类型的应用
 - **精确控制**: 管理员可以精确控制哪些部门可以访问哪些应用
 
 **应用可见性控制：**
+
 - `public`: 所有用户可见，无需权限检查
 - `org_only`: 只有在department_app_permissions表中有启用权限记录的部门成员可见
 - `private`: 私有应用（预留功能）
 
 **最新迁移更新 (2025-06-11)**：
+
 - **权限设计简化**: 移除混淆的permission_level字段，采用更简洁的二元权限控制
 - **多部门支持**: 用户可以在同一组织的多个部门任职
 - **权限精确控制**: 基于三元组(org_id + department + service_instance_id)的权限管理
@@ -156,6 +163,7 @@
 - **管理员视图清理**: 移除了过时的admin_user_management_view，改用函数方式
 
 **索引优化：**
+
 - `idx_dept_app_permissions_org_dept`: (org_id, department)
 - `idx_dept_app_permissions_service_instance_id`: (service_instance_id)
 - `idx_dept_app_permissions_enabled`: (org_id, department, is_enabled)
@@ -166,33 +174,33 @@
 
 存储用户与AI的对话会话。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 对话ID | 主键 |
-| org_id | UUID | 组织ID | 引用 organizations(id) |
-| user_id | UUID | 用户ID | 引用 auth.users(id)，NOT NULL |
-| ai_config_id | UUID | AI配置ID | 引用 ai_configs(id) |
-| title | TEXT | 对话标题 | NOT NULL |
-| summary | TEXT | 对话摘要 | |
-| settings | JSONB | 对话设置 | DEFAULT '{}' |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT CURRENT_TIMESTAMP |
-| status | TEXT | 对话状态 | DEFAULT 'active' |
+| 字段名       | 类型                     | 描述     | 约束                          |
+| ------------ | ------------------------ | -------- | ----------------------------- |
+| id           | UUID                     | 对话ID   | 主键                          |
+| org_id       | UUID                     | 组织ID   | 引用 organizations(id)        |
+| user_id      | UUID                     | 用户ID   | 引用 auth.users(id)，NOT NULL |
+| ai_config_id | UUID                     | AI配置ID | 引用 ai_configs(id)           |
+| title        | TEXT                     | 对话标题 | NOT NULL                      |
+| summary      | TEXT                     | 对话摘要 |                               |
+| settings     | JSONB                    | 对话设置 | DEFAULT '{}'                  |
+| created_at   | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP     |
+| updated_at   | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT CURRENT_TIMESTAMP     |
+| status       | TEXT                     | 对话状态 | DEFAULT 'active'              |
 
 #### messages
 
 存储对话中的消息。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 消息ID | 主键 |
-| conversation_id | UUID | 对话ID | 引用 conversations(id)，NOT NULL |
-| user_id | UUID | 用户ID | 引用 auth.users(id) |
-| role | message_role | 消息角色 | NOT NULL |
-| content | TEXT | 消息内容 | NOT NULL |
-| metadata | JSONB | 元数据 | DEFAULT '{}' |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP |
-| status | message_status | 消息状态 | DEFAULT 'sent' |
+| 字段名          | 类型                     | 描述     | 约束                             |
+| --------------- | ------------------------ | -------- | -------------------------------- |
+| id              | UUID                     | 消息ID   | 主键                             |
+| conversation_id | UUID                     | 对话ID   | 引用 conversations(id)，NOT NULL |
+| user_id         | UUID                     | 用户ID   | 引用 auth.users(id)              |
+| role            | message_role             | 消息角色 | NOT NULL                         |
+| content         | TEXT                     | 消息内容 | NOT NULL                         |
+| metadata        | JSONB                    | 元数据   | DEFAULT '{}'                     |
+| created_at      | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP        |
+| status          | message_status           | 消息状态 | DEFAULT 'sent'                   |
 
 ### API密钥管理
 
@@ -200,20 +208,21 @@
 
 存储API服务提供商信息。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 提供商ID | 主键 |
-| name | TEXT | 提供商名称 | NOT NULL，唯一 |
-| type | TEXT | 提供商类型 | NOT NULL |
-| base_url | TEXT | 基础URL | NOT NULL |
-| auth_type | TEXT | 认证类型 | NOT NULL |
-| is_active | BOOLEAN | 是否激活 | DEFAULT TRUE |
-| is_default | BOOLEAN | 是否默认提供商 | DEFAULT FALSE |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT NOW() |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT NOW() |
-| | | | UNIQUE INDEX: 系统中只能有一个默认提供商 |
+| 字段名     | 类型                     | 描述           | 约束                                     |
+| ---------- | ------------------------ | -------------- | ---------------------------------------- |
+| id         | UUID                     | 提供商ID       | 主键                                     |
+| name       | TEXT                     | 提供商名称     | NOT NULL，唯一                           |
+| type       | TEXT                     | 提供商类型     | NOT NULL                                 |
+| base_url   | TEXT                     | 基础URL        | NOT NULL                                 |
+| auth_type  | TEXT                     | 认证类型       | NOT NULL                                 |
+| is_active  | BOOLEAN                  | 是否激活       | DEFAULT TRUE                             |
+| is_default | BOOLEAN                  | 是否默认提供商 | DEFAULT FALSE                            |
+| created_at | TIMESTAMP WITH TIME ZONE | 创建时间       | DEFAULT NOW()                            |
+| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间       | DEFAULT NOW()                            |
+|            |                          |                | UNIQUE INDEX: 系统中只能有一个默认提供商 |
 
 **默认提供商管理特性：**
+
 - **唯一性约束**：通过部分唯一索引确保系统中只有一个默认提供商（`is_default = TRUE`）
 - **自动管理**：触发器自动确保设置新默认提供商时，其他提供商的默认状态被清除
 - **删除保护**：删除默认提供商时，自动将第一个活跃提供商设为新的默认提供商
@@ -223,23 +232,24 @@
 
 存储服务实例信息。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 实例ID | 主键 |
-| provider_id | UUID | 提供商ID | 引用 providers(id) |
-| display_name | TEXT | 显示名称 | DEFAULT '' |
-| description | TEXT | 描述 | DEFAULT '' |
-| instance_id | TEXT | 实例标识符 | NOT NULL |
-| api_path | TEXT | API路径 | DEFAULT '' |
-| is_default | BOOLEAN | 是否默认 | DEFAULT FALSE |
-| visibility | TEXT | 应用可见性 | DEFAULT 'public'，CHECK IN ('public', 'org_only', 'private') |
-| config | JSONB | 配置参数 | DEFAULT '{}' |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT NOW() |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT NOW() |
-| | | | UNIQUE(provider_id, instance_id) |
-| | | | UNIQUE INDEX: 每个提供商最多一个默认应用 |
+| 字段名       | 类型                     | 描述       | 约束                                                         |
+| ------------ | ------------------------ | ---------- | ------------------------------------------------------------ |
+| id           | UUID                     | 实例ID     | 主键                                                         |
+| provider_id  | UUID                     | 提供商ID   | 引用 providers(id)                                           |
+| display_name | TEXT                     | 显示名称   | DEFAULT ''                                                   |
+| description  | TEXT                     | 描述       | DEFAULT ''                                                   |
+| instance_id  | TEXT                     | 实例标识符 | NOT NULL                                                     |
+| api_path     | TEXT                     | API路径    | DEFAULT ''                                                   |
+| is_default   | BOOLEAN                  | 是否默认   | DEFAULT FALSE                                                |
+| visibility   | TEXT                     | 应用可见性 | DEFAULT 'public'，CHECK IN ('public', 'org_only', 'private') |
+| config       | JSONB                    | 配置参数   | DEFAULT '{}'                                                 |
+| created_at   | TIMESTAMP WITH TIME ZONE | 创建时间   | DEFAULT NOW()                                                |
+| updated_at   | TIMESTAMP WITH TIME ZONE | 更新时间   | DEFAULT NOW()                                                |
+|              |                          |            | UNIQUE(provider_id, instance_id)                             |
+|              |                          |            | UNIQUE INDEX: 每个提供商最多一个默认应用                     |
 
 **应用可见性说明：**
+
 - `public`: 公开应用，所有用户可见
 - `org_only`: 组织应用，只有被授权的部门成员可见
 - `private`: 私有应用，预留给未来扩展
@@ -248,18 +258,18 @@
 
 存储API密钥。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 密钥ID | 主键 |
-| provider_id | UUID | 提供商ID | 引用 providers(id) |
-| service_instance_id | UUID | 服务实例ID | 引用 service_instances(id) |
-| user_id | UUID | 用户ID | 引用 auth.users(id) |
-| key_value | TEXT | 加密的密钥值 | NOT NULL |
-| is_default | BOOLEAN | 是否默认 | DEFAULT FALSE |
-| usage_count | INTEGER | 使用次数 | DEFAULT 0 |
-| last_used_at | TIMESTAMP WITH TIME ZONE | 最后使用时间 | |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT NOW() |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT NOW() |
+| 字段名              | 类型                     | 描述         | 约束                       |
+| ------------------- | ------------------------ | ------------ | -------------------------- |
+| id                  | UUID                     | 密钥ID       | 主键                       |
+| provider_id         | UUID                     | 提供商ID     | 引用 providers(id)         |
+| service_instance_id | UUID                     | 服务实例ID   | 引用 service_instances(id) |
+| user_id             | UUID                     | 用户ID       | 引用 auth.users(id)        |
+| key_value           | TEXT                     | 加密的密钥值 | NOT NULL                   |
+| is_default          | BOOLEAN                  | 是否默认     | DEFAULT FALSE              |
+| usage_count         | INTEGER                  | 使用次数     | DEFAULT 0                  |
+| last_used_at        | TIMESTAMP WITH TIME ZONE | 最后使用时间 |                            |
+| created_at          | TIMESTAMP WITH TIME ZONE | 创建时间     | DEFAULT NOW()              |
+| updated_at          | TIMESTAMP WITH TIME ZONE | 更新时间     | DEFAULT NOW()              |
 
 ### SSO认证
 
@@ -267,27 +277,29 @@
 
 存储SSO提供商信息，支持多种单点登录协议和动态配置管理。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 提供商ID | 主键，用于API路由(/api/sso/{id}/*)和服务实例缓存 |
-| name | TEXT | 提供商名称 | NOT NULL，用于管理界面展示和日志记录 |
-| protocol | sso_protocol | 协议类型 | NOT NULL，决定使用哪个服务实现类 |
-| settings | JSONB | 统一配置结构 | NOT NULL，DEFAULT '{}'，包含protocol_config、security、ui三个主要部分 |
-| client_id | TEXT | 客户端ID | OAuth2/OIDC协议使用，CAS协议不使用此字段 |
-| client_secret | TEXT | 客户端密钥 | OAuth2/OIDC协议使用，建议加密存储 |
-| metadata_url | TEXT | 元数据URL | SAML协议使用，用于自动配置端点信息 |
-| enabled | BOOLEAN | 是否启用 | DEFAULT TRUE，false时不会在登录页面显示且API拒绝访问 |
-| display_order | INTEGER | 显示顺序 | DEFAULT 0，登录页面按钮显示顺序（数字越小越靠前） |
-| button_text | TEXT | 按钮文本 | 登录按钮显示文本，为空时使用name字段值，支持多语言 |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT CURRENT_TIMESTAMP |
+| 字段名        | 类型                     | 描述         | 约束                                                                  |
+| ------------- | ------------------------ | ------------ | --------------------------------------------------------------------- |
+| id            | UUID                     | 提供商ID     | 主键，用于API路由(/api/sso/{id}/\*)和服务实例缓存                     |
+| name          | TEXT                     | 提供商名称   | NOT NULL，用于管理界面展示和日志记录                                  |
+| protocol      | sso_protocol             | 协议类型     | NOT NULL，决定使用哪个服务实现类                                      |
+| settings      | JSONB                    | 统一配置结构 | NOT NULL，DEFAULT '{}'，包含protocol_config、security、ui三个主要部分 |
+| client_id     | TEXT                     | 客户端ID     | OAuth2/OIDC协议使用，CAS协议不使用此字段                              |
+| client_secret | TEXT                     | 客户端密钥   | OAuth2/OIDC协议使用，建议加密存储                                     |
+| metadata_url  | TEXT                     | 元数据URL    | SAML协议使用，用于自动配置端点信息                                    |
+| enabled       | BOOLEAN                  | 是否启用     | DEFAULT TRUE，false时不会在登录页面显示且API拒绝访问                  |
+| display_order | INTEGER                  | 显示顺序     | DEFAULT 0，登录页面按钮显示顺序（数字越小越靠前）                     |
+| button_text   | TEXT                     | 按钮文本     | 登录按钮显示文本，为空时使用name字段值，支持多语言                    |
+| created_at    | TIMESTAMP WITH TIME ZONE | 创建时间     | DEFAULT CURRENT_TIMESTAMP                                             |
+| updated_at    | TIMESTAMP WITH TIME ZONE | 更新时间     | DEFAULT CURRENT_TIMESTAMP                                             |
 
 **枚举类型定义：**
+
 - `sso_protocol`: ENUM ('OIDC', 'SAML', 'CAS')
 
 **协议支持说明：**
+
 - `OIDC`: OpenID Connect 协议
-- `SAML`: SAML 2.0 协议  
+- `SAML`: SAML 2.0 协议
 - `CAS`: CAS 2.0/3.0 协议（支持北京信息科技大学统一认证）
 
 **统一配置结构说明：**
@@ -342,29 +354,29 @@ SSO协议模板现通过TypeScript配置文件管理：`@lib/config/sso-protocol
 
 存储域名到SSO提供商的映射。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 映射ID | 主键 |
-| domain | TEXT | 域名 | NOT NULL，唯一 |
-| sso_provider_id | UUID | SSO提供商ID | 引用 sso_providers(id)，NOT NULL |
-| enabled | BOOLEAN | 是否启用 | DEFAULT TRUE |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT CURRENT_TIMESTAMP |
+| 字段名          | 类型                     | 描述        | 约束                             |
+| --------------- | ------------------------ | ----------- | -------------------------------- |
+| id              | UUID                     | 映射ID      | 主键                             |
+| domain          | TEXT                     | 域名        | NOT NULL，唯一                   |
+| sso_provider_id | UUID                     | SSO提供商ID | 引用 sso_providers(id)，NOT NULL |
+| enabled         | BOOLEAN                  | 是否启用    | DEFAULT TRUE                     |
+| created_at      | TIMESTAMP WITH TIME ZONE | 创建时间    | DEFAULT CURRENT_TIMESTAMP        |
+| updated_at      | TIMESTAMP WITH TIME ZONE | 更新时间    | DEFAULT CURRENT_TIMESTAMP        |
 
 #### auth_settings
 
 存储全局认证设置。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 设置ID | 主键 |
-| allow_email_registration | BOOLEAN | 允许邮箱注册 | DEFAULT FALSE |
-| allow_phone_registration | BOOLEAN | 允许手机注册 | DEFAULT FALSE |
-| allow_password_login | BOOLEAN | 允许密码登录 | DEFAULT TRUE |
-| require_email_verification | BOOLEAN | 要求邮箱验证 | DEFAULT TRUE |
-| password_policy | JSONB | 密码策略 | DEFAULT '{"min_length": 8, ...}' |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP |
-| updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT CURRENT_TIMESTAMP |
+| 字段名                     | 类型                     | 描述         | 约束                             |
+| -------------------------- | ------------------------ | ------------ | -------------------------------- |
+| id                         | UUID                     | 设置ID       | 主键                             |
+| allow_email_registration   | BOOLEAN                  | 允许邮箱注册 | DEFAULT FALSE                    |
+| allow_phone_registration   | BOOLEAN                  | 允许手机注册 | DEFAULT FALSE                    |
+| allow_password_login       | BOOLEAN                  | 允许密码登录 | DEFAULT TRUE                     |
+| require_email_verification | BOOLEAN                  | 要求邮箱验证 | DEFAULT TRUE                     |
+| password_policy            | JSONB                    | 密码策略     | DEFAULT '{"min_length": 8, ...}' |
+| created_at                 | TIMESTAMP WITH TIME ZONE | 创建时间     | DEFAULT CURRENT_TIMESTAMP        |
+| updated_at                 | TIMESTAMP WITH TIME ZONE | 更新时间     | DEFAULT CURRENT_TIMESTAMP        |
 
 ### 其他表
 
@@ -372,16 +384,16 @@ SSO协议模板现通过TypeScript配置文件管理：`@lib/config/sso-protocol
 
 存储组织级别的AI服务配置。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 配置ID | 主键 |
-| org_id | UUID | 组织ID | 引用 organizations(id) |
-| provider | TEXT | 提供商 | NOT NULL |
-| app_id | TEXT | 应用ID | |
-| api_key | TEXT | API密钥 | NOT NULL |
-| api_url | TEXT | API URL | NOT NULL |
-| settings | JSONB | 配置设置 | DEFAULT '{}' |
-| enabled | BOOLEAN | 是否启用 | DEFAULT TRUE |
+| 字段名     | 类型                     | 描述     | 约束                      |
+| ---------- | ------------------------ | -------- | ------------------------- |
+| id         | UUID                     | 配置ID   | 主键                      |
+| org_id     | UUID                     | 组织ID   | 引用 organizations(id)    |
+| provider   | TEXT                     | 提供商   | NOT NULL                  |
+| app_id     | TEXT                     | 应用ID   |                           |
+| api_key    | TEXT                     | API密钥  | NOT NULL                  |
+| api_url    | TEXT                     | API URL  | NOT NULL                  |
+| settings   | JSONB                    | 配置设置 | DEFAULT '{}'              |
+| enabled    | BOOLEAN                  | 是否启用 | DEFAULT TRUE              |
 | created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP |
 | updated_at | TIMESTAMP WITH TIME ZONE | 更新时间 | DEFAULT CURRENT_TIMESTAMP |
 
@@ -389,18 +401,18 @@ SSO协议模板现通过TypeScript配置文件管理：`@lib/config/sso-protocol
 
 存储API调用日志。
 
-| 字段名 | 类型 | 描述 | 约束 |
-|--------|------|------|------|
-| id | UUID | 日志ID | 主键 |
-| user_id | UUID | 用户ID | 引用 auth.users(id) |
-| conversation_id | UUID | 对话ID | 引用 conversations(id) |
-| provider | TEXT | 提供商 | NOT NULL |
-| endpoint | TEXT | 端点 | NOT NULL |
-| request | JSONB | 请求内容 | DEFAULT '{}' |
-| response | JSONB | 响应内容 | DEFAULT '{}' |
-| status_code | INTEGER | 状态码 | |
-| latency_ms | INTEGER | 延迟(毫秒) | |
-| created_at | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP |
+| 字段名          | 类型                     | 描述       | 约束                      |
+| --------------- | ------------------------ | ---------- | ------------------------- |
+| id              | UUID                     | 日志ID     | 主键                      |
+| user_id         | UUID                     | 用户ID     | 引用 auth.users(id)       |
+| conversation_id | UUID                     | 对话ID     | 引用 conversations(id)    |
+| provider        | TEXT                     | 提供商     | NOT NULL                  |
+| endpoint        | TEXT                     | 端点       | NOT NULL                  |
+| request         | JSONB                    | 请求内容   | DEFAULT '{}'              |
+| response        | JSONB                    | 响应内容   | DEFAULT '{}'              |
+| status_code     | INTEGER                  | 状态码     |                           |
+| latency_ms      | INTEGER                  | 延迟(毫秒) |                           |
+| created_at      | TIMESTAMP WITH TIME ZONE | 创建时间   | DEFAULT CURRENT_TIMESTAMP |
 
 ## 数据库特性
 
@@ -510,12 +522,14 @@ API密钥使用AES-256-GCM加密算法存储，格式为"iv:authTag:encryptedDat
 管理员功能通过以下方式实现用户数据访问：
 
 **管理员功能实现：**
+
 - 管理员通过 `lib/db/users.ts` 中的 `getUserList` 函数获取用户数据
 - 使用 RLS 策略控制数据访问权限
 - 管理员可以访问包括 `auth.users` 表中的邮箱、手机号等敏感信息
 - 普通用户只能访问自己的数据
 
 **安全控制：**
+
 - 所有管理员操作都需要进行权限验证
 - 使用数据库函数封装敏感操作
 - 前端通过中间件验证管理员身份
@@ -567,8 +581,8 @@ CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
-    SELECT 1 FROM profiles 
-    WHERE id = auth.uid() 
+    SELECT 1 FROM profiles
+    WHERE id = auth.uid()
     AND role = 'admin'
   );
 END;
@@ -610,6 +624,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ```
 
 **安全特性：**
+
 - 只有管理员可以访问统计数据
 - 使用 `SECURITY DEFINER` 模式确保权限
 - 返回 JSON 格式便于前端处理
@@ -625,11 +640,13 @@ SELECT public.initialize_admin('admin@example.com');
 ```
 
 **安全考虑：**
+
 - 只能由数据库管理员执行
 - 验证用户存在性
 - 提供操作确认通知
 
 **最新修复 (2025-06-22)**：
+
 - **初始化权限修复**：修复了系统初始化时无法创建第一个管理员的问题
 - **智能权限检查**：只有在系统中没有任何管理员时才允许创建第一个管理员
 - **安全性保持**：一旦系统中有管理员，所有原有的权限检查机制完全保持不变
@@ -647,6 +664,7 @@ SELECT * FROM find_user_by_employee_number('2021011221');
 ```
 
 **返回字段：**
+
 - `user_id`: 用户UUID
 - `full_name`: 用户全名
 - `username`: 用户名
@@ -656,11 +674,13 @@ SELECT * FROM find_user_by_employee_number('2021011221');
 - `status`: 账户状态（account_status枚举类型）
 
 **安全特性：**
+
 - 使用 `SECURITY DEFINER` 模式
 - 只返回活跃状态用户
 - 验证学工号格式
 
 **最新修复 (2025-06-18)**：
+
 - 修正了函数返回类型定义中的数据类型不匹配问题
 - `auth_source` 字段使用正确的TEXT类型
 - `status` 字段使用正确的account_status枚举类型
@@ -675,12 +695,14 @@ SELECT create_sso_user('2021011221', 'zhang.san', '10000000-0000-0000-0000-00000
 ```
 
 **特性：**
+
 - 自动处理用户名冲突（添加数字后缀）
 - 验证学工号唯一性
 - 自动设置认证来源为 'bistu_sso'（TEXT类型值）
 - 设置初始登录时间
 
 **最新修复 (2025-06-18)**：
+
 - **UUID类型转换修复**: 修正了sso_provider_id字段的类型转换问题，直接使用UUID类型而非错误的TEXT转换
 - **INSERT语句优化**: 确保所有字段的数据类型正确匹配数据库表结构
 - **类型安全保证**: auth_source使用TEXT值，枚举字段正确转换，UUID字段直接使用UUID类型
@@ -713,11 +735,13 @@ SELECT create_sso_user('2021011221', 'zhang.san', '10000000-0000-0000-0000-00000
 #### profiles表RLS策略重构 (2025-06-18)
 
 **问题背景**：
+
 - profiles表的RLS策略存在无限递归问题
 - 复杂的表间依赖导致策略执行时循环查询
 - 影响系统稳定性和性能
 
 **解决方案**：
+
 1. **策略简化**：移除所有复杂的表间依赖策略
 2. **超简单策略**：采用最基础的权限控制逻辑
 3. **避免递归**：确保策略不会产生循环查询
@@ -739,6 +763,7 @@ CREATE POLICY "simple_profiles_update" ON profiles
 ```
 
 **策略特点**：
+
 - **简单有效**：避免复杂的子查询和表间依赖
 - **性能优化**：减少数据库查询负载
 - **兼容性保持**：确保现有功能正常工作
@@ -760,8 +785,8 @@ VALUES ('00000000-0000-0000-0000-000000000001', '默认组织', 'https://via.pla
 ```sql
 INSERT INTO ai_configs (id, org_id, provider, app_id, api_key, api_url, settings)
 VALUES (
-  '00000000-0000-0000-0000-000000000001', 
-  '00000000-0000-0000-0000-000000000001', 
+  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-0000-0000-000000000001',
   'dify',
   'default',
   'your_dify_api_key_here',
@@ -809,6 +834,7 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 以下是包含在当前数据库版本中的所有迁移文件（按时间顺序）：
 
 ### 2025-06-10 重大更新 - 组织权限管理系统
+
 - `20250610120000_add_org_app_permissions.sql`: 初始组织级权限系统
 - `20250610120001_redesign_department_permissions.sql`: 重新设计的部门级权限系统
 - `20250610130000_add_department_permission_management.sql`: 添加部门权限管理函数
@@ -825,6 +851,7 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 - `20250610180000_fix_organization_select_for_users.sql`: 修复普通用户组织查看权限
 
 ### 历史迁移文件
+
 - `20250501000000_init.sql`: 初始化基础表结构
 - `20250502000000_sso_config.sql`: SSO认证配置
 - `20250508134000_create_profile_trigger.sql`: 用户资料触发器
@@ -878,16 +905,19 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 - `20250609214100_fix_org_members_foreign_key.sql`: 修复组织成员外键
 
 ### 2025-06-17 SSO集成更新 - 北京信息科技大学CAS认证
+
 - `20250617185201_fix_enum_transaction_issue.sql`: 修复PostgreSQL枚举类型事务问题，添加CAS协议支持
 - `20250617185202_add_bistu_sso_data.sql`: 北信科SSO集成数据迁移，添加学工号字段、SSO函数和配置
 - `20250617190000_drop_sso_views.sql`: 清理SSO统计视图，简化数据库对象
 
 ### 2025-06-18 数据库稳定性修复 - RLS策略无限递归问题和SSO类型修复
+
 - `20250618110000_fix_profiles_infinite_recursion.sql`: 完全修复profiles表RLS策略无限递归问题，确保系统稳定运行
 - `20250618150000_fix_sso_function_types.sql`: 修复SSO数据库函数返回类型不匹配问题，确保北信科SSO登录正常工作
 - `20250618160000_fix_sso_uuid_type_conversion.sql`: 修复create_sso_user函数中的UUID类型转换问题，确保SSO用户创建正常工作
 
 ### 2025-06-20 SSO配置管理系统扩展 - 动态SSO配置和协议模板
+
 - `20250620131421_extend_sso_providers_table.sql`: 扩展SSO提供商表，添加UI配置字段和协议模板系统，支持动态SSO配置管理
 
   **主要功能增强：**
@@ -898,6 +928,7 @@ VALUES ('00000000-0000-0000-0000-000000000001');
   - **管理员权限控制**：协议模板表启用RLS，确保只有管理员可以访问和管理协议模板
 
 ### 2025-06-27 SSO协议模板重构 - TypeScript配置管理
+
 - `20250627000001_remove_protocol_templates_typescript_refactor.sql`: 删除SSO协议模板表，改用TypeScript配置文件管理
 
   **重构特性：**
@@ -907,6 +938,7 @@ VALUES ('00000000-0000-0000-0000-000000000001');
   - **开发体验优化**：配置修改无需数据库迁移，支持版本控制和代码审查
   - **安全迁移**：包含完整的存在性检查和清理验证，确保迁移过程安全可靠
   - **向后兼容**：保留所有SSO提供商功能，仅协议模板管理方式变更
+
 - `20250609214200_remove_deprecated_admin_views.sql`: 移除过时管理员视图
 - `20250609214300_fix_admin_users_function_types.sql`: 修复管理员用户函数类型
 - `20250609214400_fix_phone_column_type.sql`: 修复手机号列类型
@@ -930,8 +962,9 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 - `20250611103054_fix_security_definer_view_warning.sql`: 修复安全定义视图警告
 
 ### 2025-06-24 RLS安全增强 - API表行级安全策略检查
+
 - `20250624090857_ensure_rls_enabled_for_api_tables.sql`: 确保API相关表启用RLS，智能检查和条件启用
-  
+
   **主要功能增强：**
   - **智能RLS检查**：通过pg_tables系统表检查api_keys、service_instances、providers三个表的RLS状态
   - **条件启用机制**：只在RLS未启用时才执行启用操作，已启用则跳过，避免重复操作
@@ -940,12 +973,14 @@ VALUES ('00000000-0000-0000-0000-000000000001');
   - **运维友好**：提供清晰的NOTICE消息，便于运维人员监控和调试
 
 **迁移执行结果验证**：
+
 - ✅ api_keys表RLS状态: true
-- ✅ service_instances表RLS状态: true  
+- ✅ service_instances表RLS状态: true
 - ✅ providers表RLS状态: true
 - ✅ 所有API相关表的RLS都已正确启用
 
 ### 2025-06-27 最新迁移文件 - SSO协议模板重构
+
 - `20250627000001_remove_protocol_templates_typescript_refactor.sql`: SSO协议模板TypeScript重构迁移
 
   **迁移特性：**
@@ -960,9 +995,11 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 ### 2025-06-11 权限系统优化
 
 #### 20250611103054_fix_security_definer_view_warning.sql
+
 **目标**: 修复Supabase安全视图警告，优化权限控制机制
 
 **主要变更**:
+
 1. **视图安全优化**:
    - 重新创建`user_organization_departments`视图，明确指定为`SECURITY INVOKER`
    - 确保视图依赖底层表的RLS策略进行权限控制
@@ -974,18 +1011,22 @@ VALUES ('00000000-0000-0000-0000-000000000001');
    - 包含明确的参数控制和权限检查
 
 #### 20250610180000_fix_organization_select_for_users.sql
+
 **目标**: 修复普通用户无法查看组织信息的问题
 
 **主要变更**:
+
 1. **RLS策略优化**:
    - 删除过于严格的`simple_organizations_select`策略
    - 创建新的`organizations_select_for_members`策略
    - 管理员可以查看所有组织，普通用户可以查看自己所属的组织
 
 #### 20250610133559_simplify_department_permissions.sql
+
 **目标**: 简化部门权限设计，移除混淆的字段
 
 **主要变更**:
+
 1. **表结构简化**:
    - 删除`permission_level`字段（造成混淆的根源）
    - 采用更简洁的二元权限控制（is_enabled字段）
@@ -1004,11 +1045,13 @@ VALUES ('00000000-0000-0000-0000-000000000001');
 ### 2025-06-10 组织权限管理系统
 
 #### 多部门支持 (20250610170000)
+
 - 用户可以在同一组织的多个部门任职
 - 每个用户在同一组织的每个部门只能有一条记录
 - 权限检查时取用户的第一个部门记录
 
 #### RLS策略修复系列 (20250610160000-165100)
+
 - 修复了组织创建、成员管理的RLS策略
 - 解决了无限递归问题
 - 完整重置并重新设计了所有RLS策略

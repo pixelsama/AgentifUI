@@ -1,22 +1,27 @@
 /**
  * 整合数据库对话和临时对话的 Hook
- * 
+ *
  * 将数据库中的对话和 pending-conversation-store 中的临时对话整合在一起
- * 
+ *
  * TODO: 数据库集成
  * 当数据库集成完成后，此 Hook 将从两个数据源获取对话：
  * 1. 数据库中的正式对话（通过 useSidebarConversations 获取）
  * 2. 前端存储中的临时对话（通过 usePendingConversationStore 获取）
- * 
+ *
  * 当对话创建完成并保存到数据库后，应该从 pendingConversationStore 中移除临时对话
  * 这样就可以使用数据库中的实际对话，而不是临时对话
  */
-
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { useSidebarConversations } from './use-sidebar-conversations';
-import { usePendingConversationStore, PendingConversation } from '@lib/stores/pending-conversation-store';
-import { useSupabaseAuth } from '@lib/supabase/hooks'; // 引入 Supabase Auth Hook
+import {
+  PendingConversation,
+  usePendingConversationStore,
+} from '@lib/stores/pending-conversation-store';
+import { useSupabaseAuth } from '@lib/supabase/hooks';
+// 引入 Supabase Auth Hook
 import { Conversation } from '@lib/types/database';
+
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+import { useSidebarConversations } from './use-sidebar-conversations';
 
 // --- BEGIN COMMENT ---
 // 扩展 Conversation 类型，添加临时状态标志
@@ -32,7 +37,7 @@ export interface CombinedConversation extends Partial<Conversation> {
   pendingStatus?: PendingConversation['status']; // 临时对话状态
   tempId?: string; // 临时 ID
   supabase_pk?: string; // 数据库主键 (Supabase ID)
-  
+
   // --- BEGIN COMMENT ---
   // 🎯 新增：打字机效果相关状态
   // --- END COMMENT ---
@@ -46,7 +51,7 @@ export interface CombinedConversation extends Partial<Conversation> {
 
 /**
  * 整合数据库对话和临时对话的 Hook
- * 
+ *
  * @returns 整合后的对话列表、加载状态、错误信息和刷新函数
  */
 export function useCombinedConversations() {
@@ -57,7 +62,7 @@ export function useCombinedConversations() {
     conversations: dbConversations,
     isLoading: isDbLoading,
     error: dbError,
-    refresh: refreshDbConversations
+    refresh: refreshDbConversations,
   } = useSidebarConversations(20);
 
   // --- BEGIN COMMENT ---
@@ -70,9 +75,11 @@ export function useCombinedConversations() {
   // 获取临时对话列表
   // 使用 useRef 和 useEffect 确保能够监听到 pendingConversationStore 的变化
   // --- END COMMENT ---
-  const pendingConversations = usePendingConversationStore(state => state.pendingConversations);
+  const pendingConversations = usePendingConversationStore(
+    state => state.pendingConversations
+  );
   const [pendingArray, setPendingArray] = useState<PendingConversation[]>([]);
-  
+
   // 监听 pendingConversations 的变化
   // 当 pendingConversations Map 实例从 store 更新时，直接用其内容更新 pendingArray
   useEffect(() => {
@@ -82,8 +89,10 @@ export function useCombinedConversations() {
   // --- BEGIN COMMENT ---
   // 保存上一次的合并对话列表，避免路由切换时闪烁
   // --- END COMMENT ---
-  const [prevCombinedConversations, setPrevCombinedConversations] = useState<CombinedConversation[]>([]);
-  
+  const [prevCombinedConversations, setPrevCombinedConversations] = useState<
+    CombinedConversation[]
+  >([]);
+
   // 整合数据库对话和临时对话
   const combinedConversations = useMemo(() => {
     const finalConversations: CombinedConversation[] = [];
@@ -93,8 +102,14 @@ export function useCombinedConversations() {
     // 如果数据库对话和临时对话都为空，但有上一次的合并对话列表，则直接返回上一次的列表
     // 这样可以避免在路由切换时侧边栏对话列表闪烁消失
     // --- END COMMENT ---
-    if (dbConversations.length === 0 && pendingArray.length === 0 && prevCombinedConversations.length > 0) {
-      console.log('[useCombinedConversations] 数据库和临时对话都为空，使用上一次的合并对话列表');
+    if (
+      dbConversations.length === 0 &&
+      pendingArray.length === 0 &&
+      prevCombinedConversations.length > 0
+    ) {
+      console.log(
+        '[useCombinedConversations] 数据库和临时对话都为空，使用上一次的合并对话列表'
+      );
       return prevCombinedConversations;
     }
 
@@ -145,23 +160,47 @@ export function useCombinedConversations() {
         pendingStatus: pending.status,
         tempId: pending.tempId,
         supabase_pk: pending.supabase_pk, // Use supabase_pk from pending store if available
-        
+
         // --- BEGIN COMMENT ---
         // 🎯 映射打字机效果状态
         // --- END COMMENT ---
-        titleTypewriterState: pending.titleTypewriterState
+        titleTypewriterState: pending.titleTypewriterState,
       });
     });
-    
+
     // 3. 排序
     finalConversations.sort((a, b) => {
       // Example: active pending items first, then by updated_at
-      if (a.isPending && a.pendingStatus && ['creating', 'streaming_message', 'title_fetching'].includes(a.pendingStatus) &&
-         !(b.isPending && b.pendingStatus && ['creating', 'streaming_message', 'title_fetching'].includes(b.pendingStatus))) {
+      if (
+        a.isPending &&
+        a.pendingStatus &&
+        ['creating', 'streaming_message', 'title_fetching'].includes(
+          a.pendingStatus
+        ) &&
+        !(
+          b.isPending &&
+          b.pendingStatus &&
+          ['creating', 'streaming_message', 'title_fetching'].includes(
+            b.pendingStatus
+          )
+        )
+      ) {
         return -1;
       }
-      if (!(a.isPending && a.pendingStatus && ['creating', 'streaming_message', 'title_fetching'].includes(a.pendingStatus)) &&
-           b.isPending && b.pendingStatus && ['creating', 'streaming_message', 'title_fetching'].includes(b.pendingStatus)) {
+      if (
+        !(
+          a.isPending &&
+          a.pendingStatus &&
+          ['creating', 'streaming_message', 'title_fetching'].includes(
+            a.pendingStatus
+          )
+        ) &&
+        b.isPending &&
+        b.pendingStatus &&
+        ['creating', 'streaming_message', 'title_fetching'].includes(
+          b.pendingStatus
+        )
+      ) {
         return 1;
       }
       // Fallback to updated_at, ensuring it's a valid date string
@@ -179,12 +218,16 @@ export function useCombinedConversations() {
       // 保留前20个对话（包括活跃的临时对话）
       const keptConversations = finalConversations.slice(0, MAX_CONVERSATIONS);
       const evictedConversations = finalConversations.slice(MAX_CONVERSATIONS);
-      
-      console.log(`[useCombinedConversations] 🎯 挤出效果触发，保留${keptConversations.length}个对话，移除${evictedConversations.length}个对话`);
+
+      console.log(
+        `[useCombinedConversations] 🎯 挤出效果触发，保留${keptConversations.length}个对话，移除${evictedConversations.length}个对话`
+      );
       evictedConversations.forEach(conv => {
-        console.log(`[useCombinedConversations] 挤出对话: ${conv.title} (${conv.id})`);
+        console.log(
+          `[useCombinedConversations] 挤出对话: ${conv.title} (${conv.id})`
+        );
       });
-      
+
       return keptConversations;
     }
 
@@ -210,7 +253,7 @@ export function useCombinedConversations() {
       refreshDbConversations();
       setPendingArray(Array.from(pendingConversations.values()));
     });
-    
+
     return () => {
       unsubscribe();
     };
@@ -232,52 +275,65 @@ export function useCombinedConversations() {
 
     const cleanupExpiredPendingConversations = () => {
       const now = Date.now();
-      
+
       pendingArray.forEach(p => {
         // 检查对话年龄
         const createdTime = new Date(p.createdAt).getTime();
         const ageInMinutes = (now - createdTime) / (1000 * 60);
-        
+
         // 🎯 增强：更严格的清理条件，避免竞态条件
-        const shouldCleanup = (
+        const shouldCleanup =
           // 基本条件：超过15分钟（增加缓冲时间）
-          ageInMinutes > 15 && 
+          ageInMinutes > 15 &&
           // 必须有真实ID
-          p.realId && 
+          p.realId &&
           // 数据库中存在对应记录
           dbRealIds.has(p.realId) &&
           // 状态必须是最终完成状态
-          (p.status === 'persisted_optimistic' || p.status === 'title_resolved') &&
+          (p.status === 'persisted_optimistic' ||
+            p.status === 'title_resolved') &&
           // 🎯 新增：必须有数据库主键，确保真正保存到数据库
           p.supabase_pk &&
           // 🎯 新增：标题必须是最终确定的
-          p.isTitleFinal
-        );
-        
+          p.isTitleFinal;
+
         if (shouldCleanup) {
-          console.log(`[useCombinedConversations] 清理已确认保存的临时对话: ${p.tempId} (realId: ${p.realId}, 年龄: ${ageInMinutes.toFixed(1)}分钟)`);
+          console.log(
+            `[useCombinedConversations] 清理已确认保存的临时对话: ${p.tempId} (realId: ${p.realId}, 年龄: ${ageInMinutes.toFixed(1)}分钟)`
+          );
           removePending(p.tempId);
         } else if (p.realId && dbRealIds.has(p.realId)) {
           // 详细记录保留原因，便于调试
           const reasons = [];
-          if (ageInMinutes <= 15) reasons.push(`年龄不足(${ageInMinutes.toFixed(1)}分钟)`);
-          if (p.status !== 'persisted_optimistic' && p.status !== 'title_resolved') reasons.push(`状态未完成(${p.status})`);
+          if (ageInMinutes <= 15)
+            reasons.push(`年龄不足(${ageInMinutes.toFixed(1)}分钟)`);
+          if (
+            p.status !== 'persisted_optimistic' &&
+            p.status !== 'title_resolved'
+          )
+            reasons.push(`状态未完成(${p.status})`);
           if (!p.supabase_pk) reasons.push('无数据库主键');
           if (!p.isTitleFinal) reasons.push('标题未确定');
-          
-          if (reasons.length > 0 && ageInMinutes > 5) { // 只记录超过5分钟的情况
-            console.log(`[useCombinedConversations] 保留临时对话 ${p.tempId}: ${reasons.join(', ')}`);
+
+          if (reasons.length > 0 && ageInMinutes > 5) {
+            // 只记录超过5分钟的情况
+            console.log(
+              `[useCombinedConversations] 保留临时对话 ${p.tempId}: ${reasons.join(', ')}`
+            );
           }
         }
       });
     };
-    
+
     // 🎯 增强：延迟首次执行，避免初始化时误删
     const initialDelay = setTimeout(cleanupExpiredPendingConversations, 30000); // 30秒后首次执行
-    
+
     // 每3分钟检查一次（降低频率，减少竞态风险）
-    const intervalId = setInterval(cleanupExpiredPendingConversations, 3 * 60 * 1000);
-    
+    const intervalId = setInterval(
+      cleanupExpiredPendingConversations,
+      3 * 60 * 1000
+    );
+
     // 清理定时器
     return () => {
       clearTimeout(initialDelay);
@@ -293,12 +349,12 @@ export function useCombinedConversations() {
       setPrevCombinedConversations(combinedConversations);
     }
   }, [combinedConversations]);
-  
+
   return {
     conversations: combinedConversations,
     isLoading: isDbLoading,
     error: dbError,
-    refresh
+    refresh,
   };
 }
 
@@ -307,12 +363,12 @@ export function useCombinedConversations() {
 // --- END COMMENT ---
 class ConversationEventEmitter {
   private listeners: Set<() => void> = new Set();
-  
+
   subscribe(callback: () => void) {
     this.listeners.add(callback);
     return () => this.listeners.delete(callback);
   }
-  
+
   emit() {
     this.listeners.forEach(callback => callback());
   }

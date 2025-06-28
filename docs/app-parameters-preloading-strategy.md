@@ -7,16 +7,19 @@ AgentifUI 实现了智能的应用参数预加载策略，旨在提升用户体�
 ## 核心特性
 
 ### 1. 分层预加载策略
+
 - **关键应用**：当前应用 + 常用模型 + 模型类型应用，立即并行加载
 - **其他应用**：应用市场应用等，延迟1秒后台加载
 - **智能分类**：基于应用元数据配置和名称启发式分析
 
 ### 2. 智能激活条件
+
 - **登录状态检查**：只有登录用户才触发预加载
 - **页面检查**：只在 `/chat` 和 `/app` 页面激活预加载
 - **非阻塞加载**：使用 `setTimeout(0)` 确保不阻塞页面跳转
 
 ### 3. 缓存机制
+
 - **5分钟缓存**：应用参数缓存5分钟，避免重复请求
 - **批量缓存**：统一管理所有应用的参数缓存
 - **智能失效**：过期缓存自动清理
@@ -28,6 +31,7 @@ AgentifUI 实现了智能的应用参数预加载策略，旨在提升用户体�
 在管理界面（`/admin/api-config`）为每个应用配置元数据：
 
 #### 4个模型类型应用配置示例
+
 ```typescript
 // GPT-4 模型
 {
@@ -42,7 +46,7 @@ AgentifUI 实现了智能的应用参数预加载策略，旨在提升用户体�
 
 // Claude 模型
 {
-  app_type: "model", 
+  app_type: "model",
   model_type: "claude",
   is_common_model: true,  // 标记为常用模型
   is_marketplace_app: false,
@@ -54,7 +58,7 @@ AgentifUI 实现了智能的应用参数预加载策略，旨在提升用户体�
 // Gemini 模型
 {
   app_type: "model",
-  model_type: "gemini", 
+  model_type: "gemini",
   is_common_model: false, // 非常用模型，但仍是关键应用
   is_marketplace_app: false,
   tags: ["对话", "多模态"],
@@ -67,7 +71,7 @@ AgentifUI 实现了智能的应用参数预加载策略，旨在提升用户体�
   app_type: "model",
   model_type: "local-llm",
   is_common_model: false,
-  is_marketplace_app: false, 
+  is_marketplace_app: false,
   tags: ["本地", "私有"],
   icon_url: "https://example.com/local-icon.png",
   brief_description: "本地部署模型"
@@ -75,6 +79,7 @@ AgentifUI 实现了智能的应用参数预加载策略，旨在提升用户体�
 ```
 
 #### 10个应用市场应用配置示例
+
 ```typescript
 // 翻译助手
 {
@@ -83,7 +88,7 @@ AgentifUI 实现了智能的应用参数预加载策略，旨在提升用户体�
   is_common_model: false,
   is_marketplace_app: true,
   tags: ["翻译", "工具"],
-  icon_url: "https://example.com/translate-icon.png", 
+  icon_url: "https://example.com/translate-icon.png",
   brief_description: "多语言翻译助手"
 }
 
@@ -100,7 +105,7 @@ AgentifUI 实现了智能的应用参数预加载策略，旨在提升用户体�
 
 // 文档写作助手
 {
-  app_type: "marketplace", 
+  app_type: "marketplace",
   model_type: "",
   is_common_model: false,
   is_marketplace_app: true,
@@ -117,6 +122,7 @@ AgentifUI 实现了智能的应用参数预加载策略，旨在提升用户体�
 基于上述配置，预加载策略的工作流程：
 
 #### 第一层：关键应用（立即加载）
+
 1. **当前应用**：用户正在使用的应用，最高优先级
 2. **常用模型**：`is_common_model: true` 的应用（如 GPT-4、Claude）
 3. **模型类型应用**：`app_type: "model"` 的应用（包括 Gemini、本地模型）
@@ -124,26 +130,27 @@ AgentifUI 实现了智能的应用参数预加载策略，旨在提升用户体�
 ```typescript
 // 关键应用示例（立即并行加载）
 criticalApps = [
-  "current-app-id",     // 当前应用
-  "gpt-4-app-id",       // 常用模型
-  "claude-app-id",      // 常用模型  
-  "gemini-app-id",      // 模型类型
-  "local-llm-app-id"    // 模型类型
-]
+  'current-app-id', // 当前应用
+  'gpt-4-app-id', // 常用模型
+  'claude-app-id', // 常用模型
+  'gemini-app-id', // 模型类型
+  'local-llm-app-id', // 模型类型
+];
 ```
 
 #### 第二层：其他应用（延迟1秒加载）
+
 1. **应用市场应用**：`app_type: "marketplace"` 或 `is_marketplace_app: true`
 2. **其他未分类应用**
 
 ```typescript
 // 其他应用示例（延迟后台加载）
 otherApps = [
-  "translate-app-id",   // 应用市场应用
-  "code-gen-app-id",    // 应用市场应用
-  "doc-writer-app-id",  // 应用市场应用
+  'translate-app-id', // 应用市场应用
+  'code-gen-app-id', // 应用市场应用
+  'doc-writer-app-id', // 应用市场应用
   // ... 其他7个应用市场应用
-]
+];
 ```
 
 ### 无配置时的智能分类
@@ -152,10 +159,32 @@ otherApps = [
 
 ```typescript
 // 模型关键词
-const modelKeywords = ['gpt', 'claude', 'gemini', 'llama', 'qwen', '通义', '模型', 'model', 'chat', '对话'];
+const modelKeywords = [
+  'gpt',
+  'claude',
+  'gemini',
+  'llama',
+  'qwen',
+  '通义',
+  '模型',
+  'model',
+  'chat',
+  '对话',
+];
 
-// 应用市场关键词  
-const marketplaceKeywords = ['翻译', 'translate', '代码', 'code', '助手', 'assistant', '工具', 'tool', '生成', 'generate'];
+// 应用市场关键词
+const marketplaceKeywords = [
+  '翻译',
+  'translate',
+  '代码',
+  'code',
+  '助手',
+  'assistant',
+  '工具',
+  'tool',
+  '生成',
+  'generate',
+];
 
 // 分类逻辑
 if (isLikelyModel && !isLikelyMarketplace) {
@@ -178,7 +207,7 @@ if (isLikelyModel && !isLikelyMarketplace) {
 export default function ClientLayout({ children }: ClientLayoutProps) {
   // 🎯 自动预加载：检测登录状态和页面类型
   useAppParametersPreloader();
-  
+
   return (
     <div className={fontClasses}>
       {children}
@@ -201,7 +230,7 @@ function MyComponent() {
     preloadError,           // 预加载错误
     isActive,               // 预加载是否激活
     isCriticalAppsLoaded,   // 关键应用是否加载完成
-    
+
     // 进度信息
     progress: {
       loaded,               // 已加载应用数
@@ -211,11 +240,11 @@ function MyComponent() {
       criticalTotal,        // 总关键应用数
       criticalCompleted     // 关键应用是否全部完成
     },
-    
+
     // 操作方法
     triggerPreload,         // 手动触发预加载
     shouldPreload,          // 是否应该预加载
-    
+
     // 查询方法
     isAppParametersCached,  // 检查应用参数是否已缓存
     getCachedAppParameters, // 获取缓存的应用参数
@@ -248,7 +277,7 @@ import { useCurrentApp } from '@lib/hooks/use-current-app';
 
 function WelcomeScreen() {
   const { currentAppId } = useCurrentApp();
-  const { 
+  const {
     parameters,      // 应用参数
     isLoading,       // 是否加载中
     error,           // 错误信息
@@ -293,17 +322,17 @@ import { useEffect } from 'react';
 export default function AppPage() {
   const params = useParams();
   const appName = params.name as string;
-  
-  const { 
-    currentAppId, 
+
+  const {
+    currentAppId,
     switchToApp,
-    validateAndRefreshConfig 
+    validateAndRefreshConfig
   } = useCurrentApp();
-  
-  const { 
-    parameters, 
-    isLoading, 
-    error 
+
+  const {
+    parameters,
+    isLoading,
+    error
   } = useAppParameters(currentAppId);
 
   // 🎯 关键：应用切换逻辑
@@ -311,7 +340,7 @@ export default function AppPage() {
     if (appName && appName !== currentAppId) {
       // 切换到指定应用
       switchToApp(appName);
-      
+
       // 验证应用配置
       validateAndRefreshConfig();
     }
@@ -344,7 +373,7 @@ export default function AppPage() {
 // lib/hooks/use-app-parameters-preloader.ts
 const isAppRelatedPage = useCallback(() => {
   if (!pathname) return false;
-  
+
   const appPages = ['/chat', '/app']; // 已包含 /app 路由
   return appPages.some(page => pathname.startsWith(page));
 }, [pathname]);
@@ -354,28 +383,30 @@ const isAppRelatedPage = useCallback(() => {
 
 ```typescript
 // lib/stores/current-app-store.ts
-const switchToApp = useCallback(async (appId: string) => {
-  try {
-    setIsValidating(true);
-    
-    // 🎯 利用预加载缓存快速切换
-    const cachedParameters = getCachedAppParameters(appId);
-    if (cachedParameters) {
-      console.log('[CurrentApp] 使用预加载缓存快速切换应用:', appId);
+const switchToApp = useCallback(
+  async (appId: string) => {
+    try {
+      setIsValidating(true);
+
+      // 🎯 利用预加载缓存快速切换
+      const cachedParameters = getCachedAppParameters(appId);
+      if (cachedParameters) {
+        console.log('[CurrentApp] 使用预加载缓存快速切换应用:', appId);
+        setCurrentAppId(appId);
+        return;
+      }
+
+      // 如果没有缓存，正常切换流程
       setCurrentAppId(appId);
-      return;
+      await validateAndRefreshConfig();
+    } catch (error) {
+      console.error('[CurrentApp] 切换应用失败:', error);
+    } finally {
+      setIsValidating(false);
     }
-    
-    // 如果没有缓存，正常切换流程
-    setCurrentAppId(appId);
-    await validateAndRefreshConfig();
-    
-  } catch (error) {
-    console.error('[CurrentApp] 切换应用失败:', error);
-  } finally {
-    setIsValidating(false);
-  }
-}, [setCurrentAppId, validateAndRefreshConfig, getCachedAppParameters]);
+  },
+  [setCurrentAppId, validateAndRefreshConfig, getCachedAppParameters]
+);
 ```
 
 ### 是否需要调用 Hooks？
@@ -395,10 +426,10 @@ function AppPage() {
   // ✅ 只需要这两个 hooks
   const { currentAppId, switchToApp } = useCurrentApp();
   const { parameters, isLoading, error } = useAppParameters(currentAppId);
-  
+
   // ❌ 不需要手动调用预加载器
   // const preloader = useAppParametersPreloader();
-  
+
   // 应用切换逻辑
   useEffect(() => {
     if (targetAppId !== currentAppId) {
@@ -438,12 +469,13 @@ function AppPage() {
 ```typescript
 // 开发环境下监控预加载状态
 if (process.env.NODE_ENV === 'development') {
-  const { progress, isActive, isCriticalAppsLoaded } = useAppParametersPreloader();
-  
+  const { progress, isActive, isCriticalAppsLoaded } =
+    useAppParametersPreloader();
+
   console.log('[Preloader Debug]', {
     isActive,
     isCriticalAppsLoaded,
-    progress
+    progress,
   });
 }
 ```
@@ -471,7 +503,8 @@ if (process.env.NODE_ENV === 'development') {
 
 ```typescript
 // 检查应用参数缓存状态
-const { isAppParametersCached, getCachedAppParameters } = useAppParametersPreloader();
+const { isAppParametersCached, getCachedAppParameters } =
+  useAppParametersPreloader();
 
 console.log('App cached:', isAppParametersCached('your-app-id'));
 console.log('Cached parameters:', getCachedAppParameters('your-app-id'));
@@ -481,4 +514,4 @@ console.log('Cached parameters:', getCachedAppParameters('your-app-id'));
 
 AgentifUI 的应用参数预加载策略通过智能分层、缓存机制和非阻塞加载，显著提升了用户体验。正确配置应用元数据并遵循最佳实践，可以确保系统高效运行。
 
-对于后续的 `/app/[name]` 路由集成，只需要使用现有的 `useCurrentApp()` 和 `useAppParameters()` hooks，预加载策略会自动工作，无需额外的手动干预。 
+对于后续的 `/app/[name]` 路由集成，只需要使用现有的 `useCurrentApp()` 和 `useAppParameters()` hooks，预加载策略会自动工作，无需额外的手动干预。

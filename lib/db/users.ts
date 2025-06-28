@@ -1,14 +1,13 @@
 /**
  * 用户管理相关的数据库查询函数
- * 
+ *
  * 本文件包含用户管理界面所需的所有数据库操作
  * 包括用户列表查询、用户详情、角色管理、状态管理等
  */
-
 import { dataService } from '@lib/services/db/data-service';
-import { Result, success, failure } from '@lib/types/result';
 import { createClient } from '@lib/supabase/client';
 import type { Database } from '@lib/supabase/types';
+import { Result, failure, success } from '@lib/types/result';
 
 // 类型定义
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -80,13 +79,15 @@ const supabase = createClient();
 /**
  * 获取用户列表（使用安全的管理员函数）
  */
-export async function getUserList(filters: UserFilters = {}): Promise<Result<{
-  users: EnhancedUser[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}>> {
+export async function getUserList(filters: UserFilters = {}): Promise<
+  Result<{
+    users: EnhancedUser[];
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }>
+> {
   try {
     const {
       role,
@@ -98,16 +99,15 @@ export async function getUserList(filters: UserFilters = {}): Promise<Result<{
       sortBy = 'created_at',
       sortOrder = 'desc',
       page = 1,
-      pageSize = 20
+      pageSize = 20,
     } = filters;
 
     // --- BEGIN COMMENT ---
     // 获取用户信息，包含auth.users表的邮箱和手机号信息
     // 同时关联查询组织信息
     // --- END COMMENT ---
-    let query = supabase
-      .from('profiles')
-      .select(`
+    let query = supabase.from('profiles').select(
+      `
         *,
         org_members (
           role,
@@ -119,7 +119,9 @@ export async function getUserList(filters: UserFilters = {}): Promise<Result<{
             logo_url
           )
         )
-      `, { count: 'exact' });
+      `,
+      { count: 'exact' }
+    );
 
     // 应用筛选条件
     if (role) {
@@ -132,9 +134,11 @@ export async function getUserList(filters: UserFilters = {}): Promise<Result<{
       query = query.eq('auth_source', auth_source);
     }
     if (search) {
-      query = query.or(`full_name.ilike.%${search}%,username.ilike.%${search}%`);
+      query = query.or(
+        `full_name.ilike.%${search}%,username.ilike.%${search}%`
+      );
     }
-    
+
     // --- BEGIN COMMENT ---
     // 组织和部门筛选：通过关联的org_members表进行筛选
     // 注意：这里需要使用inner join来确保只返回有组织关联的用户
@@ -142,7 +146,7 @@ export async function getUserList(filters: UserFilters = {}): Promise<Result<{
     if (organization || department) {
       // 如果有组织或部门筛选，需要确保用户有org_members记录
       query = query.not('org_members', 'is', null);
-      
+
       if (organization) {
         query = query.eq('org_members.organizations.name', organization);
       }
@@ -172,19 +176,21 @@ export async function getUserList(filters: UserFilters = {}): Promise<Result<{
     // --- END COMMENT ---
     const userIds = (profiles || []).map(p => p.id);
     let authUsers: any[] = [];
-    
+
     if (userIds.length > 0) {
       // 通过RPC函数获取auth.users信息（需要管理员权限）
-      const { data: authData, error: authError } = await supabase
-        .rpc('get_admin_users', { user_ids: userIds });
-      
+      const { data: authData, error: authError } = await supabase.rpc(
+        'get_admin_users',
+        { user_ids: userIds }
+      );
+
       if (authError) {
         console.error('获取auth.users信息失败:', {
           error: authError,
           userIdsCount: userIds.length,
           errorCode: authError.code,
           errorMessage: authError.message,
-          errorDetails: authError.details
+          errorDetails: authError.details,
         });
         // 如果RPC调用失败，仍然继续处理，但记录错误
       } else if (authData) {
@@ -201,51 +207,55 @@ export async function getUserList(filters: UserFilters = {}): Promise<Result<{
     // --- BEGIN COMMENT ---
     // 合并profiles和auth.users数据，包含组织信息
     // --- END COMMENT ---
-    const enhancedUsers: EnhancedUser[] = (profiles || []).map((profile: any) => {
-      const authUser = authUsers.find(au => au.id === profile.id);
-      const orgMember = profile.org_members?.[0]; // 取第一个组织
-      const organization = orgMember?.organizations;
-      
-      return {
-        id: profile.id,
-        email: authUser?.email || '未设置',
-        phone: authUser?.phone || '未设置',
-        email_confirmed_at: authUser?.email_confirmed_at,
-        phone_confirmed_at: authUser?.phone_confirmed_at,
-        created_at: authUser?.created_at || profile.created_at,
-        updated_at: authUser?.updated_at || profile.updated_at,
-        last_sign_in_at: authUser?.last_sign_in_at,
-        full_name: profile.full_name,
-        username: profile.username,
-        avatar_url: profile.avatar_url,
-        role: profile.role,
-        status: profile.status,
-        auth_source: profile.auth_source,
-        sso_provider_id: profile.sso_provider_id,
-        employee_number: profile.employee_number, // 新增：包含学工号数据
-        profile_created_at: profile.created_at,
-        profile_updated_at: profile.updated_at,
-        last_login: profile.last_login,
-        // --- BEGIN COMMENT ---
-        // 组织信息字段
-        // --- END COMMENT ---
-        organization_name: organization?.name || null,
-        organization_role: orgMember?.role || null,
-        department: orgMember?.department || null,
-        job_title: orgMember?.job_title || null,
-      };
-    });
+    const enhancedUsers: EnhancedUser[] = (profiles || []).map(
+      (profile: any) => {
+        const authUser = authUsers.find(au => au.id === profile.id);
+        const orgMember = profile.org_members?.[0]; // 取第一个组织
+        const organization = orgMember?.organizations;
+
+        return {
+          id: profile.id,
+          email: authUser?.email || '未设置',
+          phone: authUser?.phone || '未设置',
+          email_confirmed_at: authUser?.email_confirmed_at,
+          phone_confirmed_at: authUser?.phone_confirmed_at,
+          created_at: authUser?.created_at || profile.created_at,
+          updated_at: authUser?.updated_at || profile.updated_at,
+          last_sign_in_at: authUser?.last_sign_in_at,
+          full_name: profile.full_name,
+          username: profile.username,
+          avatar_url: profile.avatar_url,
+          role: profile.role,
+          status: profile.status,
+          auth_source: profile.auth_source,
+          sso_provider_id: profile.sso_provider_id,
+          employee_number: profile.employee_number, // 新增：包含学工号数据
+          profile_created_at: profile.created_at,
+          profile_updated_at: profile.updated_at,
+          last_login: profile.last_login,
+          // --- BEGIN COMMENT ---
+          // 组织信息字段
+          // --- END COMMENT ---
+          organization_name: organization?.name || null,
+          organization_role: orgMember?.role || null,
+          department: orgMember?.department || null,
+          job_title: orgMember?.job_title || null,
+        };
+      }
+    );
 
     return success({
       users: enhancedUsers,
       total,
       page,
       pageSize,
-      totalPages
+      totalPages,
     });
   } catch (error) {
     console.error('获取用户列表异常:', error);
-    return failure(error instanceof Error ? error : new Error('获取用户列表失败'));
+    return failure(
+      error instanceof Error ? error : new Error('获取用户列表失败')
+    );
   }
 }
 
@@ -264,17 +274,21 @@ export async function getUserStats(): Promise<Result<UserStats>> {
     return success(data as UserStats);
   } catch (error) {
     console.error('获取用户统计异常:', error);
-    return failure(error instanceof Error ? error : new Error('获取用户统计失败'));
+    return failure(
+      error instanceof Error ? error : new Error('获取用户统计失败')
+    );
   }
 }
 
 /**
  * 获取单个用户详细信息（使用安全的数据库函数，不暴露敏感的auth.users数据）
  */
-export async function getUserById(userId: string): Promise<Result<EnhancedUser | null>> {
+export async function getUserById(
+  userId: string
+): Promise<Result<EnhancedUser | null>> {
   try {
     const { data, error } = await supabase.rpc('get_user_detail_for_admin', {
-      target_user_id: userId
+      target_user_id: userId,
     });
 
     if (error) {
@@ -296,27 +310,36 @@ export async function getUserById(userId: string): Promise<Result<EnhancedUser |
       // 对于敏感信息，使用安全的替代字段
       email: userDetail.has_email ? '[已设置]' : null,
       phone: userDetail.has_phone ? '[已设置]' : null,
-      email_confirmed_at: userDetail.email_confirmed ? new Date().toISOString() : null,
-      phone_confirmed_at: userDetail.phone_confirmed ? new Date().toISOString() : null
+      email_confirmed_at: userDetail.email_confirmed
+        ? new Date().toISOString()
+        : null,
+      phone_confirmed_at: userDetail.phone_confirmed
+        ? new Date().toISOString()
+        : null,
     };
 
     return success(enhancedUser);
   } catch (error) {
     console.error('获取用户信息异常:', error);
-    return failure(error instanceof Error ? error : new Error('获取用户信息失败'));
+    return failure(
+      error instanceof Error ? error : new Error('获取用户信息失败')
+    );
   }
 }
 
 /**
  * 更新用户资料
  */
-export async function updateUserProfile(userId: string, updates: Partial<ProfileUpdate>): Promise<Result<Profile>> {
+export async function updateUserProfile(
+  userId: string,
+  updates: Partial<ProfileUpdate>
+): Promise<Result<Profile>> {
   try {
     const { data, error } = await supabase
       .from('profiles')
       .update({
         ...updates,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('id', userId)
       .select()
@@ -329,21 +352,29 @@ export async function updateUserProfile(userId: string, updates: Partial<Profile
     return success(data);
   } catch (error) {
     console.error('更新用户资料异常:', error);
-    return failure(error instanceof Error ? error : new Error('更新用户资料失败'));
+    return failure(
+      error instanceof Error ? error : new Error('更新用户资料失败')
+    );
   }
 }
 
 /**
  * 更新用户角色
  */
-export async function updateUserRole(userId: string, role: UserRole): Promise<Result<Profile>> {
+export async function updateUserRole(
+  userId: string,
+  role: UserRole
+): Promise<Result<Profile>> {
   return updateUserProfile(userId, { role });
 }
 
 /**
  * 更新用户状态
  */
-export async function updateUserStatus(userId: string, status: AccountStatus): Promise<Result<Profile>> {
+export async function updateUserStatus(
+  userId: string,
+  status: AccountStatus
+): Promise<Result<Profile>> {
   return updateUserProfile(userId, { status });
 }
 
@@ -352,8 +383,9 @@ export async function updateUserStatus(userId: string, status: AccountStatus): P
  */
 export async function deleteUser(userId: string): Promise<Result<void>> {
   try {
-    const { data, error } = await supabase
-      .rpc('safe_delete_user', { target_user_id: userId });
+    const { data, error } = await supabase.rpc('safe_delete_user', {
+      target_user_id: userId,
+    });
 
     if (error) {
       return failure(new Error(`删除用户失败: ${error.message}`));
@@ -373,14 +405,17 @@ export async function deleteUser(userId: string): Promise<Result<void>> {
 /**
  * 创建新用户（仅创建profile，需要先有auth.users记录）
  */
-export async function createUserProfile(userId: string, profileData: {
-  full_name?: string;
-  username?: string;
-  avatar_url?: string;
-  role?: UserRole;
-  status?: AccountStatus;
-  auth_source?: string;
-}): Promise<Result<Profile>> {
+export async function createUserProfile(
+  userId: string,
+  profileData: {
+    full_name?: string;
+    username?: string;
+    avatar_url?: string;
+    role?: UserRole;
+    status?: AccountStatus;
+    auth_source?: string;
+  }
+): Promise<Result<Profile>> {
   try {
     const { data, error } = await supabase
       .from('profiles')
@@ -388,7 +423,7 @@ export async function createUserProfile(userId: string, profileData: {
         id: userId,
         ...profileData,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .select()
       .single();
@@ -400,20 +435,25 @@ export async function createUserProfile(userId: string, profileData: {
     return success(data);
   } catch (error) {
     console.error('创建用户资料异常:', error);
-    return failure(error instanceof Error ? error : new Error('创建用户资料失败'));
+    return failure(
+      error instanceof Error ? error : new Error('创建用户资料失败')
+    );
   }
 }
 
 /**
  * 批量更新用户状态
  */
-export async function batchUpdateUserStatus(userIds: string[], status: AccountStatus): Promise<Result<void>> {
+export async function batchUpdateUserStatus(
+  userIds: string[],
+  status: AccountStatus
+): Promise<Result<void>> {
   try {
     const { error } = await supabase
       .from('profiles')
-      .update({ 
+      .update({
         status,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .in('id', userIds);
 
@@ -424,20 +464,25 @@ export async function batchUpdateUserStatus(userIds: string[], status: AccountSt
     return success(undefined);
   } catch (error) {
     console.error('批量更新用户状态异常:', error);
-    return failure(error instanceof Error ? error : new Error('批量更新用户状态失败'));
+    return failure(
+      error instanceof Error ? error : new Error('批量更新用户状态失败')
+    );
   }
 }
 
 /**
  * 批量更新用户角色
  */
-export async function batchUpdateUserRole(userIds: string[], role: UserRole): Promise<Result<void>> {
+export async function batchUpdateUserRole(
+  userIds: string[],
+  role: UserRole
+): Promise<Result<void>> {
   try {
     const { error } = await supabase
       .from('profiles')
-      .update({ 
+      .update({
         role,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .in('id', userIds);
 
@@ -448,14 +493,18 @@ export async function batchUpdateUserRole(userIds: string[], role: UserRole): Pr
     return success(undefined);
   } catch (error) {
     console.error('批量更新用户角色异常:', error);
-    return failure(error instanceof Error ? error : new Error('批量更新用户角色失败'));
+    return failure(
+      error instanceof Error ? error : new Error('批量更新用户角色失败')
+    );
   }
 }
 
 /**
  * 获取所有可用的组织列表（用于筛选下拉框）
  */
-export async function getOrganizationOptions(): Promise<Result<Array<{ value: string; label: string }>>> {
+export async function getOrganizationOptions(): Promise<
+  Result<Array<{ value: string; label: string }>>
+> {
   try {
     const { data, error } = await supabase
       .from('organizations')
@@ -469,20 +518,24 @@ export async function getOrganizationOptions(): Promise<Result<Array<{ value: st
 
     const options = (data || []).map(org => ({
       value: org.name,
-      label: org.name
+      label: org.name,
     }));
 
     return success(options);
   } catch (error) {
     console.error('获取组织列表异常:', error);
-    return failure(error instanceof Error ? error : new Error('获取组织列表失败'));
+    return failure(
+      error instanceof Error ? error : new Error('获取组织列表失败')
+    );
   }
 }
 
 /**
  * 获取所有可用的部门列表（用于筛选下拉框）
  */
-export async function getDepartmentOptions(): Promise<Result<Array<{ value: string; label: string }>>> {
+export async function getDepartmentOptions(): Promise<
+  Result<Array<{ value: string; label: string }>>
+> {
   try {
     const { data, error } = await supabase
       .from('org_members')
@@ -496,30 +549,38 @@ export async function getDepartmentOptions(): Promise<Result<Array<{ value: stri
     }
 
     // 去重并格式化
-    const uniqueDepartments = [...new Set((data || []).map(item => item.department).filter(Boolean))];
+    const uniqueDepartments = [
+      ...new Set((data || []).map(item => item.department).filter(Boolean)),
+    ];
     const options = uniqueDepartments.map(dept => ({
       value: dept,
-      label: dept
+      label: dept,
     }));
 
     return success(options);
   } catch (error) {
     console.error('获取部门列表异常:', error);
-    return failure(error instanceof Error ? error : new Error('获取部门列表失败'));
+    return failure(
+      error instanceof Error ? error : new Error('获取部门列表失败')
+    );
   }
 }
 
 /**
  * 根据组织获取该组织下的部门列表
  */
-export async function getDepartmentOptionsByOrganization(organizationName: string): Promise<Result<Array<{ value: string; label: string }>>> {
+export async function getDepartmentOptionsByOrganization(
+  organizationName: string
+): Promise<Result<Array<{ value: string; label: string }>>> {
   try {
     const { data, error } = await supabase
       .from('org_members')
-      .select(`
+      .select(
+        `
         department,
         organizations!inner(name)
-      `)
+      `
+      )
       .eq('organizations.name', organizationName)
       .not('department', 'is', null)
       .order('department');
@@ -530,15 +591,19 @@ export async function getDepartmentOptionsByOrganization(organizationName: strin
     }
 
     // 去重并格式化
-    const uniqueDepartments = [...new Set((data || []).map(item => item.department).filter(Boolean))];
+    const uniqueDepartments = [
+      ...new Set((data || []).map(item => item.department).filter(Boolean)),
+    ];
     const options = uniqueDepartments.map(dept => ({
       value: dept,
-      label: dept
+      label: dept,
     }));
 
     return success(options);
   } catch (error) {
     console.error('获取组织部门列表异常:', error);
-    return failure(error instanceof Error ? error : new Error('获取组织部门列表失败'));
+    return failure(
+      error instanceof Error ? error : new Error('获取组织部门列表失败')
+    );
   }
-} 
+}

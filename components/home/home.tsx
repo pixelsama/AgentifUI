@@ -1,14 +1,16 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@components/ui/button';
-import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { createClient } from '@lib/supabase/client';
-import { useTheme } from '@lib/hooks/use-theme';
 import { AdminButton } from '@components/admin/admin-button';
-import { useTranslations } from 'next-intl';
+import { Button } from '@components/ui/button';
 import { LanguageSwitcher } from '@components/ui/language-switcher';
+import { useTheme } from '@lib/hooks/use-theme';
+import { createClient } from '@lib/supabase/client';
+import { AnimatePresence, motion } from 'framer-motion';
+
+import { useEffect, useState } from 'react';
+
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 export function Home() {
   const router = useRouter();
@@ -20,8 +22,10 @@ export function Home() {
   const handleStartClick = async () => {
     try {
       // 检查用户是否已登录
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (session) {
         // 用户已登录，直接跳转到聊天页面
         router.push('/chat');
@@ -52,7 +56,7 @@ export function Home() {
         primaryButton: 'bg-stone-600 hover:bg-stone-500 text-gray-100',
         secondaryButton: 'border-stone-500 text-gray-200 hover:bg-stone-600',
         featureIconBg: 'bg-stone-600',
-        featureTextColor: 'text-gray-300'
+        featureTextColor: 'text-gray-300',
       };
     } else {
       return {
@@ -64,7 +68,7 @@ export function Home() {
         primaryButton: 'bg-stone-800 hover:bg-stone-700 text-gray-100',
         secondaryButton: 'border-stone-400 text-stone-800 hover:bg-stone-200',
         featureIconBg: 'bg-stone-200',
-        featureTextColor: 'text-stone-700'
+        featureTextColor: 'text-stone-700',
       };
     }
   };
@@ -75,7 +79,9 @@ export function Home() {
     const getCurrentUser = async () => {
       // 🔒 安全修复：使用 getUser() 进行服务器端验证
       // 避免依赖可能被篡改的本地 session 数据
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setCurrentUser(user);
     };
 
@@ -84,97 +90,110 @@ export function Home() {
 
   return (
     <AnimatePresence>
-      <div className="w-full py-12 px-4 sm:px-6 lg:px-8 relative">
+      <div className="relative w-full px-4 py-12 sm:px-6 lg:px-8">
         {/* --- BEGIN COMMENT ---
         右上角工具栏：管理员按钮（左）+ 语言切换器（右）
         使用绝对定位，响应式设计
         移动端隐藏，避免布局问题
         --- END COMMENT --- */}
-        <div className="hidden sm:flex fixed top-4 right-4 lg:top-6 lg:right-6 z-50 flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-3">
+        <div className="fixed top-4 right-4 z-50 hidden flex-col items-end gap-2 sm:flex sm:flex-row sm:items-center sm:gap-3 lg:top-6 lg:right-6">
           <AdminButton />
           <LanguageSwitcher variant="floating" />
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6 }}
-          className="max-w-5xl mx-auto"
+          className="mx-auto max-w-5xl"
         >
           {/* 主标题区域 */}
-          <div className="text-center mb-16">
-            <motion.h1 
+          <div className="mb-16 text-center">
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className={`text-5xl md:text-6xl font-bold bg-gradient-to-r ${colors.titleGradient} bg-clip-text text-transparent mb-6 leading-tight py-2`}
+              className={`bg-gradient-to-r text-5xl font-bold md:text-6xl ${colors.titleGradient} mb-6 bg-clip-text py-2 leading-tight text-transparent`}
             >
               {t('title')}
             </motion.h1>
-            
-            <motion.p 
+
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className={`text-xl md:text-2xl ${colors.textColor} max-w-3xl mx-auto font-light`}
+              className={`text-xl md:text-2xl ${colors.textColor} mx-auto max-w-3xl font-light`}
             >
               {t('subtitle')}
             </motion.p>
           </div>
-          
+
           {/* 特性卡片区域 */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16"
+            className="mb-16 grid grid-cols-1 gap-8 md:grid-cols-3"
           >
             {[
-              { title: t('features.feature1.title'), description: t('features.feature1.description') },
-              { title: t('features.feature2.title'), description: t('features.feature2.description') },
-              { title: t('features.feature3.title'), description: t('features.feature3.description') }
+              {
+                title: t('features.feature1.title'),
+                description: t('features.feature1.description'),
+              },
+              {
+                title: t('features.feature2.title'),
+                description: t('features.feature2.description'),
+              },
+              {
+                title: t('features.feature3.title'),
+                description: t('features.feature3.description'),
+              },
             ].map((feature, index) => (
-              <motion.div 
+              <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-                className={`${colors.cardBg} ${colors.cardShadow} border ${colors.cardBorder} rounded-xl p-6 flex flex-col items-center text-center`}
+                className={`${colors.cardBg} ${colors.cardShadow} border ${colors.cardBorder} flex flex-col items-center rounded-xl p-6 text-center`}
               >
-                <div className={`${colors.featureIconBg} w-12 h-12 rounded-full flex items-center justify-center mb-4`}>
+                <div
+                  className={`${colors.featureIconBg} mb-4 flex h-12 w-12 items-center justify-center rounded-full`}
+                >
                   <span className="text-xl">#{index + 1}</span>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className={`${colors.featureTextColor} text-sm`}>{feature.description}</p>
+                <h3 className="mb-2 text-xl font-semibold">{feature.title}</h3>
+                <p className={`${colors.featureTextColor} text-sm`}>
+                  {feature.description}
+                </p>
               </motion.div>
             ))}
           </motion.div>
-          
+
           {/* 按钮区域 */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
+            className="mb-16 flex flex-col justify-center gap-4 sm:flex-row"
           >
-            <Button 
-              size="lg" 
-              className={`${colors.primaryButton} px-8 py-3 h-auto text-base font-medium rounded-lg transition-all duration-200 cursor-pointer hover:scale-105`}
+            <Button
+              size="lg"
+              className={`${colors.primaryButton} h-auto cursor-pointer rounded-lg px-8 py-3 text-base font-medium transition-all duration-200 hover:scale-105`}
               onClick={handleStartClick}
             >
               {t('getStarted')}
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className={`${colors.secondaryButton} px-8 py-3 h-auto text-base font-medium rounded-lg transition-all duration-200 cursor-pointer hover:scale-105`}
+            <Button
+              size="lg"
+              variant="outline"
+              className={`${colors.secondaryButton} h-auto cursor-pointer rounded-lg px-8 py-3 text-base font-medium transition-all duration-200 hover:scale-105`}
               onClick={handleLearnMoreClick}
             >
               {t('learnMore')}
             </Button>
           </motion.div>
-          
+
           {/* 底部信息 */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -184,11 +203,11 @@ export function Home() {
           >
             <p>
               {t('copyright.prefix', { year: new Date().getFullYear() })}
-              <a 
+              <a
                 href="https://github.com/ifLabX/AgentifUI"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:underline hover:opacity-80 transition-all duration-200"
+                className="transition-all duration-200 hover:underline hover:opacity-80"
               >
                 {t('copyright.linkText')}
               </a>

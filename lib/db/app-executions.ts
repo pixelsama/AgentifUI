@@ -1,17 +1,25 @@
 /**
  * 应用执行记录相关的数据库查询函数
- * 
+ *
  * 本文件包含与应用执行记录表(app_executions)相关的所有数据库操作
  * 用于管理工作流和文本生成应用的执行历史
  * 更新为使用统一的数据服务和Result类型
  */
-
+import { CacheKeys, cacheService } from '@lib/services/db/cache-service';
 import { dataService } from '@lib/services/db/data-service';
-import { cacheService, CacheKeys } from '@lib/services/db/cache-service';
-import { realtimeService, SubscriptionKeys, SubscriptionConfigs } from '@lib/services/db/realtime-service';
-import { Result, success, failure } from '@lib/types/result';
-import { AppExecution, ExecutionType, ExecutionStatus } from '../types/database';
+import {
+  SubscriptionConfigs,
+  SubscriptionKeys,
+  realtimeService,
+} from '@lib/services/db/realtime-service';
+import { Result, failure, success } from '@lib/types/result';
+
 import { createClient } from '../supabase/client';
+import {
+  AppExecution,
+  ExecutionStatus,
+  ExecutionType,
+} from '../types/database';
 
 // 保持与现有代码的兼容性，同时使用新的数据服务
 const supabase = createClient();
@@ -31,11 +39,11 @@ export async function getUserExecutions(
   offset: number = 0,
   executionType?: ExecutionType,
   status?: ExecutionStatus
-): Promise<Result<{ executions: AppExecution[], total: number }>> {
-  const filters: Record<string, any> = { 
+): Promise<Result<{ executions: AppExecution[]; total: number }>> {
+  const filters: Record<string, any> = {
     user_id: userId,
     ...(executionType && { execution_type: executionType }),
-    ...(status && { status: status })
+    ...(status && { status: status }),
   };
 
   try {
@@ -57,14 +65,14 @@ export async function getUserExecutions(
 
     // 获取总数
     const countResult = await dataService.count('app_executions', filters);
-    
+
     if (!countResult.success) {
       return failure(countResult.error);
     }
 
     return success({
       executions: executionsResult.data,
-      total: countResult.data
+      total: countResult.data,
     });
   } catch (error) {
     return failure(error instanceof Error ? error : new Error(String(error)));
@@ -76,7 +84,9 @@ export async function getUserExecutions(
  * @param executionId 执行记录ID
  * @returns 执行记录对象的Result，如果未找到则返回null
  */
-export async function getExecutionById(executionId: string): Promise<Result<AppExecution | null>> {
+export async function getExecutionById(
+  executionId: string
+): Promise<Result<AppExecution | null>> {
   return dataService.findOne<AppExecution>(
     'app_executions',
     { id: executionId },
@@ -92,7 +102,9 @@ export async function getExecutionById(executionId: string): Promise<Result<AppE
  * @param externalExecutionId Dify返回的执行ID
  * @returns 执行记录对象的Result，如果未找到则返回null
  */
-export async function getExecutionByExternalId(externalExecutionId: string): Promise<Result<AppExecution | null>> {
+export async function getExecutionByExternalId(
+  externalExecutionId: string
+): Promise<Result<AppExecution | null>> {
   return dataService.findOne<AppExecution>(
     'app_executions',
     { external_execution_id: externalExecutionId },
@@ -119,10 +131,13 @@ export async function createExecution(
     error_message: execution.error_message || null,
     elapsed_time: execution.elapsed_time || null,
     completed_at: execution.completed_at || null,
-    metadata: execution.metadata || {}
+    metadata: execution.metadata || {},
   };
 
-  return dataService.create<AppExecution>('app_executions', executionWithDefaults);
+  return dataService.create<AppExecution>(
+    'app_executions',
+    executionWithDefaults
+  );
 }
 
 /**
@@ -137,7 +152,7 @@ export async function updateExecution(
 ): Promise<Result<AppExecution>> {
   const updateData = {
     ...updates,
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
   };
 
   return dataService.update<AppExecution>('app_executions', id, updateData);
@@ -165,53 +180,56 @@ export async function updateCompleteExecutionData(
     metadata?: Record<string, any>;
   }
 ): Promise<Result<AppExecution>> {
-  console.log('[数据库] 开始完整执行数据更新，ID:', id)
-  console.log('[数据库] 更新数据:', JSON.stringify(completeData, null, 2))
-  
+  console.log('[数据库] 开始完整执行数据更新，ID:', id);
+  console.log('[数据库] 更新数据:', JSON.stringify(completeData, null, 2));
+
   try {
     // 构建安全的更新数据对象，确保所有字段都有明确的值
     const safeUpdateData: Partial<AppExecution> = {
       status: completeData.status,
       updated_at: new Date().toISOString(),
-      
+
       // Dify标识符 - 明确处理null值
       ...(completeData.external_execution_id !== undefined && {
-        external_execution_id: completeData.external_execution_id
+        external_execution_id: completeData.external_execution_id,
       }),
       ...(completeData.task_id !== undefined && {
-        task_id: completeData.task_id
+        task_id: completeData.task_id,
       }),
-      
+
       // 执行结果 - 明确处理null值
       ...(completeData.outputs !== undefined && {
-        outputs: completeData.outputs
+        outputs: completeData.outputs,
       }),
       ...(completeData.total_steps !== undefined && {
-        total_steps: completeData.total_steps
+        total_steps: completeData.total_steps,
       }),
       ...(completeData.total_tokens !== undefined && {
-        total_tokens: completeData.total_tokens
+        total_tokens: completeData.total_tokens,
       }),
       ...(completeData.elapsed_time !== undefined && {
-        elapsed_time: completeData.elapsed_time
+        elapsed_time: completeData.elapsed_time,
       }),
-      
+
       // 错误和完成信息
       ...(completeData.error_message !== undefined && {
-        error_message: completeData.error_message
+        error_message: completeData.error_message,
       }),
       ...(completeData.completed_at !== undefined && {
-        completed_at: completeData.completed_at
+        completed_at: completeData.completed_at,
       }),
-      
+
       // metadata - 确保是有效的JSON对象
       ...(completeData.metadata !== undefined && {
-        metadata: completeData.metadata || {}
-      })
+        metadata: completeData.metadata || {},
+      }),
     };
-    
-    console.log('[数据库] 安全更新数据对象:', JSON.stringify(safeUpdateData, null, 2))
-    
+
+    console.log(
+      '[数据库] 安全更新数据对象:',
+      JSON.stringify(safeUpdateData, null, 2)
+    );
+
     // 使用原生Supabase客户端进行更新，确保所有字段都能正确保存
     const { data, error } = await supabase
       .from('app_executions')
@@ -219,20 +237,20 @@ export async function updateCompleteExecutionData(
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) {
-      console.error('[数据库] 完整数据更新失败:', error)
+      console.error('[数据库] 完整数据更新失败:', error);
       return failure(error);
     }
-    
+
     if (!data) {
-      console.error('[数据库] 更新成功但未返回数据')
+      console.error('[数据库] 更新成功但未返回数据');
       return failure(new Error('更新成功但未返回数据'));
     }
-    
-    console.log('[数据库] ✅ 完整数据更新成功')
-    console.log('[数据库] 更新后的数据:', JSON.stringify(data, null, 2))
-    
+
+    console.log('[数据库] ✅ 完整数据更新成功');
+    console.log('[数据库] 更新后的数据:', JSON.stringify(data, null, 2));
+
     // 清除相关缓存
     try {
       await cacheService.delete(`execution:${id}`);
@@ -240,11 +258,10 @@ export async function updateCompleteExecutionData(
     } catch (cacheError) {
       console.warn('[数据库] 清除缓存时出错:', cacheError);
     }
-    
+
     return success(data as AppExecution);
-    
   } catch (error) {
-    console.error('[数据库] 完整数据更新时发生异常:', error)
+    console.error('[数据库] 完整数据更新时发生异常:', error);
     return failure(error instanceof Error ? error : new Error(String(error)));
   }
 }
@@ -258,14 +275,14 @@ export async function updateCompleteExecutionData(
  * @returns 是否更新成功的Result
  */
 export async function updateExecutionStatus(
-  id: string, 
+  id: string,
   status: ExecutionStatus,
   errorMessage?: string,
   completedAt?: string
 ): Promise<Result<boolean>> {
-  const updateData: Partial<AppExecution> = { 
+  const updateData: Partial<AppExecution> = {
     status,
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
   };
 
   if (errorMessage !== undefined) {
@@ -274,12 +291,20 @@ export async function updateExecutionStatus(
 
   if (completedAt !== undefined) {
     updateData.completed_at = completedAt;
-  } else if (status === 'completed' || status === 'failed' || status === 'stopped') {
+  } else if (
+    status === 'completed' ||
+    status === 'failed' ||
+    status === 'stopped'
+  ) {
     updateData.completed_at = new Date().toISOString();
   }
 
-  const result = await dataService.update<AppExecution>('app_executions', id, updateData);
-  
+  const result = await dataService.update<AppExecution>(
+    'app_executions',
+    id,
+    updateData
+  );
+
   if (result.success) {
     return success(true);
   } else {
@@ -294,9 +319,9 @@ export async function updateExecutionStatus(
  */
 export async function deleteExecution(id: string): Promise<Result<boolean>> {
   console.log(`[软删除执行记录] 开始软删除执行记录，ID: ${id}`);
-  
+
   const result = await dataService.softDelete('app_executions', id);
-  
+
   if (result.success) {
     console.log(`[软删除执行记录] 软删除操作完成，ID: ${id}`);
     return success(true);
@@ -317,8 +342,8 @@ export async function getExecutionsByServiceInstance(
   limit: number = 10
 ): Promise<Result<AppExecution[]>> {
   try {
-    console.log('[获取执行记录] 开始查询，服务实例ID:', serviceInstanceId)
-    
+    console.log('[获取执行记录] 开始查询，服务实例ID:', serviceInstanceId);
+
     // 先尝试获取所有记录，然后在应用层过滤
     const result = await dataService.findMany<AppExecution>(
       'app_executions',
@@ -330,19 +355,24 @@ export async function getExecutionsByServiceInstance(
         cacheTTL: 2 * 60 * 1000, // 2分钟缓存
       }
     );
-    
+
     if (!result.success) {
       console.error('[获取执行记录] 数据服务查询失败:', result.error);
       return failure(result.error);
     }
-    
+
     // 在应用层过滤软删除的记录
     const filteredData = result.data
       .filter(execution => execution.status !== 'deleted')
       .slice(0, limit); // 限制最终返回的数量
-    
-    console.log('[获取执行记录] 查询成功，总数:', result.data.length, '过滤后:', filteredData.length)
-    
+
+    console.log(
+      '[获取执行记录] 查询成功，总数:',
+      result.data.length,
+      '过滤后:',
+      filteredData.length
+    );
+
     return success(filteredData);
   } catch (error) {
     console.error('[获取执行记录] 查询时发生异常:', error);
@@ -359,18 +389,20 @@ export async function getExecutionsByServiceInstance(
 export async function getExecutionStats(
   userId: string,
   executionType?: ExecutionType
-): Promise<Result<{
-  total: number;
-  completed: number;
-  failed: number;
-  running: number;
-  totalTokens: number;
-  avgElapsedTime: number;
-}>> {
+): Promise<
+  Result<{
+    total: number;
+    completed: number;
+    failed: number;
+    running: number;
+    totalTokens: number;
+    avgElapsedTime: number;
+  }>
+> {
   try {
-    const filters: Record<string, any> = { 
+    const filters: Record<string, any> = {
       user_id: userId,
-      ...(executionType && { execution_type: executionType })
+      ...(executionType && { execution_type: executionType }),
     };
 
     // 获取基础统计
@@ -387,11 +419,18 @@ export async function getExecutionStats(
       total: data.length,
       completed: data.filter(item => item.status === 'completed').length,
       failed: data.filter(item => item.status === 'failed').length,
-      running: data.filter(item => item.status === 'running' || item.status === 'pending').length,
-      totalTokens: data.reduce((sum, item) => sum + (item.total_tokens || 0), 0),
-      avgElapsedTime: data.length > 0 
-        ? data.reduce((sum, item) => sum + (item.elapsed_time || 0), 0) / data.length 
-        : 0
+      running: data.filter(
+        item => item.status === 'running' || item.status === 'pending'
+      ).length,
+      totalTokens: data.reduce(
+        (sum, item) => sum + (item.total_tokens || 0),
+        0
+      ),
+      avgElapsedTime:
+        data.length > 0
+          ? data.reduce((sum, item) => sum + (item.elapsed_time || 0), 0) /
+            data.length
+          : 0,
     };
 
     return success(stats);
@@ -414,8 +453,14 @@ export async function getUserExecutionsLegacy(
   offset: number = 0,
   executionType?: ExecutionType,
   status?: ExecutionStatus
-): Promise<{ executions: AppExecution[], total: number }> {
-  const result = await getUserExecutions(userId, limit, offset, executionType, status);
+): Promise<{ executions: AppExecution[]; total: number }> {
+  const result = await getUserExecutions(
+    userId,
+    limit,
+    offset,
+    executionType,
+    status
+  );
   if (result.success) {
     return result.data;
   } else {
@@ -427,7 +472,9 @@ export async function getUserExecutionsLegacy(
 /**
  * 根据ID获取执行记录详情（兼容版本）
  */
-export async function getExecutionByIdLegacy(executionId: string): Promise<AppExecution | null> {
+export async function getExecutionByIdLegacy(
+  executionId: string
+): Promise<AppExecution | null> {
   const result = await getExecutionById(executionId);
   if (result.success) {
     return result.data;
@@ -435,4 +482,4 @@ export async function getExecutionByIdLegacy(executionId: string): Promise<AppEx
     console.error('获取执行记录详情失败:', result.error);
     return null;
   }
-} 
+}

@@ -20,6 +20,7 @@
 ### 1. 访问忘记密码页面
 
 从登录页面点击"忘记密码？"链接：
+
 ```
 https://your-domain.com/login → 点击"忘记密码？" → https://your-domain.com/forgot-password
 ```
@@ -31,6 +32,7 @@ https://your-domain.com/login → 点击"忘记密码？" → https://your-domai
 ### 3. 检查邮箱
 
 系统会发送包含重置链接的邮件到指定邮箱。邮件内容包括：
+
 - 重置密码的专用链接
 - 链接有效期（1小时）
 - 安全提示信息
@@ -38,6 +40,7 @@ https://your-domain.com/login → 点击"忘记密码？" → https://your-domai
 ### 4. 点击重置链接
 
 点击邮件中的重置链接，会自动跳转到重置密码页面：
+
 ```
 https://your-domain.com/reset-password?access_token=...&refresh_token=...
 ```
@@ -45,6 +48,7 @@ https://your-domain.com/reset-password?access_token=...&refresh_token=...
 ### 5. 设置新密码
 
 在重置密码页面：
+
 - 输入新密码（至少6位）
 - 确认新密码
 - 点击"更新密码"按钮
@@ -75,6 +79,7 @@ components/auth/
 ### 核心API调用
 
 #### 发送重置邮件
+
 ```typescript
 const { error } = await supabase.auth.resetPasswordForEmail(email, {
   redirectTo: `${window.location.origin}/reset-password`,
@@ -82,6 +87,7 @@ const { error } = await supabase.auth.resetPasswordForEmail(email, {
 ```
 
 #### 验证并设置会话
+
 ```typescript
 const { error: sessionError } = await supabase.auth.setSession({
   access_token,
@@ -90,15 +96,17 @@ const { error: sessionError } = await supabase.auth.setSession({
 ```
 
 #### 更新密码
+
 ```typescript
 const { error } = await supabase.auth.updateUser({
-  password: newPassword
+  password: newPassword,
 });
 ```
 
 ### 状态管理
 
 重置密码表单包含以下状态：
+
 - `isTokenValid`: token验证状态（null | true | false）
 - `isLoading`: 加载状态
 - `error`: 错误信息
@@ -108,6 +116,7 @@ const { error } = await supabase.auth.updateUser({
 ### 错误处理
 
 系统处理以下常见错误情况：
+
 - 无效邮箱格式
 - 邮件发送频率限制
 - 重置链接过期
@@ -126,6 +135,7 @@ node scripts/test_reset_password.js
 ```
 
 测试脚本功能：
+
 1. 检查Auth配置
 2. 注册测试账户
 3. 发送重置密码邮件
@@ -134,6 +144,7 @@ node scripts/test_reset_password.js
 ### 手动测试步骤
 
 1. **准备测试环境**
+
    ```bash
    pnpm run dev
    ```
@@ -170,6 +181,7 @@ node scripts/test_reset_password.js
    - 重定向URL设置
 
 2. **认证设置**
+
    ```
    Site URL: http://localhost:3000 (开发环境)
    Additional Redirect URLs: https://your-domain.com (生产环境)
@@ -184,6 +196,7 @@ node scripts/test_reset_password.js
 ### 环境变量
 
 确保设置以下环境变量：
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
@@ -194,7 +207,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ### 响应式设计
 
 - **移动端优化**: 触摸友好的按钮和输入框
-- **断点适应**: 
+- **断点适应**:
   - `< 640px`: 移动设备布局
   - `≥ 768px`: 平板和桌面布局
 
@@ -235,20 +248,26 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ## 🐛 常见问题
 
 ### Q: 收不到重置邮件怎么办？
-A: 
+
+A:
+
 1. 检查垃圾邮件文件夹
 2. 确认邮箱地址正确
 3. 等待几分钟后重试
 4. 联系管理员检查邮件配置
 
 ### Q: 重置链接提示无效？
-A: 
+
+A:
+
 1. 检查链接是否完整
 2. 确认链接未过期（1小时）
 3. 重新申请重置密码
 
 ### Q: 新密码设置失败？
+
 A:
+
 1. 确认密码长度至少6位
 2. 检查两次输入是否一致
 3. 尝试使用更复杂的密码
@@ -256,6 +275,7 @@ A:
 ## 📞 技术支持
 
 如遇到技术问题，请：
+
 1. 查看浏览器控制台错误信息
 2. 运行测试脚本诊断问题
 3. 检查Supabase控制台日志
@@ -263,4 +283,4 @@ A:
 
 ---
 
-*最后更新: 2024年12月* 
+_最后更新: 2024年12月_

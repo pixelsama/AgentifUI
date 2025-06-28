@@ -1,6 +1,7 @@
-"use client";
+'use client';
 
 import { StagewiseToolbar } from '@stagewise/toolbar-next';
+
 import { useEffect, useState } from 'react';
 
 // --- BEGIN COMMENT ---
@@ -18,7 +19,7 @@ export function StagewiseToolbarWrapper() {
 
   // 基本工具栏配置
   const stagewiseConfig = {
-    plugins: []
+    plugins: [],
   };
 
   // 只在客户端渲染，且依赖 Next.js 自带的环境变量检测

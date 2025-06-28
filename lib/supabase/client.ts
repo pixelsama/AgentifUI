@@ -1,11 +1,11 @@
-import { createBrowserClient } from '@supabase/ssr'
-import { SupabaseClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * 全局单例 Supabase 客户端实例
  * 用于避免创建多个客户端实例
  */
-let supabaseInstance: SupabaseClient | null = null
+let supabaseInstance: SupabaseClient | null = null;
 
 /**
  * 创建或获取 Supabase 浏览器客户端
@@ -15,14 +15,14 @@ let supabaseInstance: SupabaseClient | null = null
 export const createClient = () => {
   // 如果实例已存在，直接返回
   if (supabaseInstance) {
-    return supabaseInstance
+    return supabaseInstance;
   }
-  
+
   // 如果实例不存在，创建新实例
   supabaseInstance = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-  
-  return supabaseInstance
-}
+  );
+
+  return supabaseInstance;
+};

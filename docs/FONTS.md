@@ -8,11 +8,11 @@ AgentifUI 采用 Claude 风格的中英文字体组合，提供优雅的阅读�
 
 ### 主要字体配置
 
-| 用途 | 英文字体 | 中文字体 | Tailwind 类 | 说明 |
-|------|----------|----------|-------------|------|
-| 界面文字 | Inter | Noto Sans SC | `font-sans` | 现代简洁，适用于界面元素 |
-| 阅读内容 | Crimson Pro | Noto Serif SC | `font-serif` | 优雅易读，适用于长文本 |
-| 装饰标题 | Playfair Display | Noto Sans SC | `font-display` | 装饰性强，适用于重要标题 |
+| 用途     | 英文字体         | 中文字体      | Tailwind 类    | 说明                     |
+| -------- | ---------------- | ------------- | -------------- | ------------------------ |
+| 界面文字 | Inter            | Noto Sans SC  | `font-sans`    | 现代简洁，适用于界面元素 |
+| 阅读内容 | Crimson Pro      | Noto Serif SC | `font-serif`   | 优雅易读，适用于长文本   |
+| 装饰标题 | Playfair Display | Noto Sans SC  | `font-display` | 装饰性强，适用于重要标题 |
 
 ### 字体特点
 
@@ -76,16 +76,22 @@ AgentifUI 采用 Claude 风格的中英文字体组合，提供优雅的阅读�
 ### 1. Next.js 字体配置 (`app/layout.tsx`)
 
 ```tsx
-import { Inter, Crimson_Pro, Playfair_Display, Noto_Sans_SC, Noto_Serif_SC } from 'next/font/google';
+import {
+  Crimson_Pro,
+  Inter,
+  Noto_Sans_SC,
+  Noto_Serif_SC,
+  Playfair_Display,
+} from 'next/font/google';
 
-const inter = Inter({ 
-  subsets: ['latin'], 
+const inter = Inter({
+  subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
 });
 
-const notoSansSC = Noto_Sans_SC({ 
-  subsets: ['latin'], 
+const notoSansSC = Noto_Sans_SC({
+  subsets: ['latin'],
   weight: ['300', '400', '500', '700'],
   variable: '--font-noto-sans',
   display: 'swap',
@@ -102,28 +108,24 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: [
-          'var(--font-inter)', 
-          'var(--font-noto-sans)', 
-          '-apple-system', 
-          'BlinkMacSystemFont', 
-          'system-ui', 
-          'sans-serif'
+          'var(--font-inter)',
+          'var(--font-noto-sans)',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'system-ui',
+          'sans-serif',
         ],
         serif: [
-          'var(--font-crimson)', 
-          'var(--font-noto-serif)', 
-          'Georgia', 
-          'serif'
-        ], 
-        display: [
-          'var(--font-playfair)', 
-          'var(--font-noto-sans)', 
-          'serif'
+          'var(--font-crimson)',
+          'var(--font-noto-serif)',
+          'Georgia',
+          'serif',
         ],
+        display: ['var(--font-playfair)', 'var(--font-noto-sans)', 'serif'],
       },
     },
   },
-}
+};
 ```
 
 ### 3. 全局 CSS 强制应用 (`app/globals.css`)
@@ -131,16 +133,23 @@ module.exports = {
 ```css
 @layer base {
   * {
-    font-family: var(--font-inter), var(--font-noto-sans), -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
+    font-family:
+      var(--font-inter),
+      var(--font-noto-sans),
+      -apple-system,
+      BlinkMacSystemFont,
+      system-ui,
+      sans-serif !important;
   }
-  
-  .font-serif, 
+
+  .font-serif,
   .prose,
   .markdown-content,
   article {
-    font-family: var(--font-crimson), var(--font-noto-serif), Georgia, serif !important;
+    font-family:
+      var(--font-crimson), var(--font-noto-serif), Georgia, serif !important;
   }
-  
+
   .font-display,
   h1.display,
   .title-display {
@@ -236,4 +245,4 @@ module.exports = {
 
 ---
 
-通过遵循这个指南，你可以充分利用 AgentifUI 的字体系统，创建美观且易读的用户界面。 
+通过遵循这个指南，你可以充分利用 AgentifUI 的字体系统，创建美观且易读的用户界面。

@@ -8,19 +8,22 @@
 
 ```typescript
 // ✅ 正确：使用zod进行输入验证
-import { z } from 'zod'
+import { z } from 'zod';
 
 const userSchema = z.object({
   email: z.string().email('邮箱格式不正确'),
-  username: z.string().min(2, '用户名至少2位').max(20, '用户名最多20位')
+  username: z
+    .string()
+    .min(2, '用户名至少2位')
+    .max(20, '用户名最多20位')
     .regex(/^[a-zA-Z0-9_]+$/, '用户名只能包含字母、数字和下划线'),
-  password: z.string().min(8, '密码至少8位')
-})
+  password: z.string().min(8, '密码至少8位'),
+});
 
 // ❌ 错误：直接使用未验证的输入
 const handleSubmit = (data: any) => {
   // 危险：未验证的数据直接使用
-}
+};
 ```
 
 ### 2. XSS 防护
@@ -44,11 +47,11 @@ import DOMPurify from 'dompurify'
 const config = {
   apiUrl: process.env.NEXT_PUBLIC_API_URL,
   // 敏感信息不使用NEXT_PUBLIC_前缀
-  secretKey: process.env.SECRET_KEY
-}
+  secretKey: process.env.SECRET_KEY,
+};
 
 // ❌ 错误：硬编码敏感信息
-const API_KEY = 'sk-1234567890abcdef' // 危险
+const API_KEY = 'sk-1234567890abcdef'; // 危险
 ```
 
 ### 4. API 调用安全
@@ -59,22 +62,22 @@ const fetchData = async () => {
   try {
     const response = await fetch('/api/data', {
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
     if (!response.ok) {
-      throw new Error('请求失败')
+      throw new Error('请求失败');
     }
-    
-    return await response.json()
+
+    return await response.json();
   } catch (error) {
-    console.error('API调用失败:', error)
+    console.error('API调用失败:', error);
     // 不要暴露详细错误信息给用户
-    throw new Error('操作失败，请稍后重试')
+    throw new Error('操作失败，请稍后重试');
   }
-}
+};
 ```
 
 ## 后端安全规范
@@ -83,21 +86,24 @@ const fetchData = async () => {
 
 ```typescript
 // ✅ 正确：验证用户权限
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 
 export async function POST(request: Request) {
-  const supabase = createRouteHandlerClient({ cookies })
-  
+  const supabase = createRouteHandlerClient({ cookies });
+
   // 验证用户身份
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
   if (error || !user) {
-    return NextResponse.json({ error: '未授权访问' }, { status: 401 })
+    return NextResponse.json({ error: '未授权访问' }, { status: 401 });
   }
-  
+
   // 验证输入数据
-  const body = await request.json()
-  const validatedData = userSchema.parse(body)
-  
+  const body = await request.json();
+  const validatedData = userSchema.parse(body);
+
   // 处理业务逻辑
 }
 ```
@@ -125,7 +131,7 @@ try {
   // 业务逻辑
 } catch (error) {
   console.error('详细错误信息:', error) // 仅记录到服务器日志
-  
+
   // 返回通用错误信息，不暴露系统细节
   return NextResponse.json(
     { error: '操作失败，请稍后重试' },
@@ -239,4 +245,4 @@ pnpm audit
 
 ---
 
-遵循这些安全规范，可以显著提高代码质量和系统安全性。所有开发人员都应该熟悉并严格执行这些规范。 
+遵循这些安全规范，可以显著提高代码质量和系统安全性。所有开发人员都应该熟悉并严格执行这些规范。

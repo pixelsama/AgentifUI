@@ -40,48 +40,61 @@
 ### 标准重置流程
 
 #### 1. 访问忘记密码页面
+
 从登录页面点击"忘记密码？"链接：
+
 ```
 https://your-domain.com/login → 点击"忘记密码？" → https://your-domain.com/forgot-password
 ```
 
 #### 2. 输入邮箱地址
+
 在忘记密码页面输入注册时使用的邮箱地址。
 
 #### 3. 检查邮箱
+
 系统会发送包含重置链接的邮件到指定邮箱。邮件内容包括：
+
 - 重置密码的专用链接
 - 链接有效期（默认1小时）
 - 安全提示信息
 
 #### 4. 点击重置链接
+
 点击邮件中的重置链接，会自动跳转到重置密码页面。链接格式：
 
 **新版本格式**（推荐）：
+
 ```
 https://your-domain.com/reset-password?type=recovery&token_hash=...
 ```
 
 **旧版本格式**（兼容性）：
+
 ```
 https://your-domain.com/reset-password?access_token=...&refresh_token=...
 ```
 
 #### 5. 设置新密码
+
 在重置密码页面：
+
 - 输入新密码（至少6位）
 - 确认新密码
 - 点击"更新密码"按钮
 
 #### 6. 完成重置
+
 重置成功后会自动跳转到登录页面，显示成功提示。
 
 ### Supabase认证流程
 
 #### Implicit Flow（客户端流程）
+
 适用于纯客户端应用，用户确认邮件后直接接收访问令牌。
 
 #### PKCE Flow（授权码流程）
+
 适用于SSR应用，提供更高的安全性。
 
 ## 🛠️ 技术实现
@@ -106,6 +119,7 @@ components/auth/
 ### 核心API调用
 
 #### 1. 发送重置邮件
+
 ```typescript
 // --- 发送密码重置邮件 ---
 const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -118,6 +132,7 @@ if (error) {
 ```
 
 #### 2. 验证重置token（新版本）
+
 ```typescript
 // --- 验证Supabase重置密码token ---
 const { data, error } = await supabase.auth.verifyOtp({
@@ -131,6 +146,7 @@ if (error) {
 ```
 
 #### 3. 设置会话（旧版本兼容）
+
 ```typescript
 // --- 设置用户会话（兼容旧版本） ---
 const { error } = await supabase.auth.setSession({
@@ -144,10 +160,11 @@ if (error) {
 ```
 
 #### 4. 更新密码
+
 ```typescript
 // --- 更新用户密码 ---
 const { error } = await supabase.auth.updateUser({
-  password: newPassword
+  password: newPassword,
 });
 
 if (error) {
@@ -163,13 +180,13 @@ useEffect(() => {
   const checkUserSession = async () => {
     try {
       const supabase = createClient();
-      
+
       // --- 检查URL参数 ---
       const access_token = searchParams.get('access_token');
       const refresh_token = searchParams.get('refresh_token');
       const type = searchParams.get('type');
       const token_hash = searchParams.get('token_hash');
-      
+
       console.log('=== 重置密码调试信息 ===');
       console.log('完整URL:', window.location.href);
       console.log('URL参数:', window.location.search);
@@ -177,9 +194,9 @@ useEffect(() => {
         access_token: access_token ? '存在' : 'null',
         refresh_token: refresh_token ? '存在' : 'null',
         type,
-        token_hash: token_hash ? '存在' : 'null'
+        token_hash: token_hash ? '存在' : 'null',
       });
-      
+
       // --- 处理Supabase的重置密码重定向（新版本） ---
       if (type === 'recovery' && token_hash) {
         console.log('检测到Supabase重置密码链接，尝试验证token');
@@ -187,7 +204,7 @@ useEffect(() => {
           type: 'recovery',
           token_hash: token_hash,
         });
-        
+
         if (verifyError) {
           console.error('Token验证失败:', verifyError);
           setError(`重置链接验证失败: ${verifyError.message}`);
@@ -198,7 +215,7 @@ useEffect(() => {
         }
         return;
       }
-      
+
       // --- 处理直接的access_token（兼容旧版本） ---
       if (access_token) {
         console.log('检测到access_token，尝试设置会话');
@@ -217,11 +234,14 @@ useEffect(() => {
         }
         return;
       }
-      
+
       // --- 检查是否已有有效会话 ---
       console.log('没有URL参数，检查现有会话');
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
       if (userError) {
         console.error('获取用户信息失败:', userError);
         setError('无法验证用户身份，请重新申请重置密码');
@@ -234,7 +254,6 @@ useEffect(() => {
         setError('重置链接无效或已过期，请重新申请重置密码');
         setIsTokenValid(false);
       }
-      
     } catch (err) {
       console.error('验证过程出错:', err);
       setError('验证失败，请重新申请重置密码');
@@ -249,6 +268,7 @@ useEffect(() => {
 ### 状态管理
 
 重置密码表单包含以下状态：
+
 - `isTokenValid`: token验证状态（null | true | false）
 - `isLoading`: 加载状态
 - `error`: 错误信息
@@ -260,21 +280,26 @@ useEffect(() => {
 ### Supabase控制台配置
 
 #### 1. 邮件配置
+
 在Auth设置中配置：
 
 **邮件模板**：
+
 - 自定义重置密码邮件模板
 - 设置合适的邮件主题和内容
 - 确保重定向URL正确
 
 **重定向URL**：
+
 ```
 开发环境: http://localhost:3000/reset-password
 生产环境: https://your-domain.com/reset-password
 ```
 
 #### 2. 速率限制
+
 建议配置：
+
 ```
 Email sent per hour: 3
 Token verifications per hour: 30
@@ -284,6 +309,7 @@ Password resets per hour: 10
 #### 3. 邮件发送服务
 
 **内置邮件服务**（测试用）：
+
 - 限制：每小时2封邮件
 - 适用：开发和测试环境
 
@@ -293,6 +319,7 @@ Password resets per hour: 10
 ### 环境变量
 
 确保设置以下环境变量：
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
@@ -321,6 +348,7 @@ supabase status
 #### 问题1：点击邮件链接显示"链接无效"
 
 **原因分析**：
+
 1. Token验证方式错误
 2. URL参数处理不完整
 3. 缺少回退机制
@@ -331,12 +359,14 @@ supabase status
 #### 问题2：收不到重置邮件
 
 **可能原因**：
+
 - 邮箱地址不存在于系统中
 - 邮件被标记为垃圾邮件
 - SMTP配置问题
 - 达到发送频率限制
 
 **解决步骤**：
+
 1. 确认邮箱地址正确
 2. 检查垃圾邮件文件夹
 3. 等待几分钟后重试
@@ -345,6 +375,7 @@ supabase status
 #### 问题3：重置链接过期
 
 **解决方案**：
+
 - 重新申请重置密码
 - 检查邮件发送时间
 - 确认token有效期配置
@@ -352,11 +383,13 @@ supabase status
 #### 问题4：密码更新失败
 
 **可能原因**：
+
 - 密码不符合强度要求
 - 会话已过期
 - 网络连接问题
 
 **解决方案**：
+
 1. 使用更强的密码（至少6位）
 2. 重新通过邮件链接访问
 3. 检查网络连接
@@ -364,7 +397,9 @@ supabase status
 ### 调试技巧
 
 #### 1. 浏览器控制台调试
+
 修复后的代码包含详细的调试日志，检查：
+
 ```
 === 重置密码调试信息 ===
 完整URL: http://localhost:3000/reset-password?type=recovery&token_hash=abc123
@@ -373,13 +408,17 @@ URL参数解析: {...}
 ```
 
 #### 2. Supabase Auth日志
+
 在Supabase控制台的Auth > Logs中查看：
+
 - 邮件发送记录
 - Token验证记录
 - 错误日志
 
 #### 3. 网络请求监控
+
 使用浏览器开发工具监控：
+
 - API请求状态
 - 响应内容
 - 错误信息
@@ -396,6 +435,7 @@ node scripts/test_reset_password.js
 ```
 
 测试脚本功能：
+
 1. 检查Auth配置
 2. 注册测试账户
 3. 发送重置密码邮件
@@ -404,6 +444,7 @@ node scripts/test_reset_password.js
 ### 手动测试步骤
 
 #### 1. 准备测试环境
+
 ```bash
 # 启动开发服务器
 pnpm run dev
@@ -413,6 +454,7 @@ supabase start
 ```
 
 #### 2. 端到端测试
+
 1. **创建测试账户**
    - 访问 `http://localhost:3000/register`
    - 使用真实邮箱注册
@@ -442,7 +484,7 @@ node -e "
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config({ path: '.env.local' });
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL, 
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 supabase.auth.resetPasswordForEmail('your-email@example.com', {
@@ -458,11 +500,13 @@ supabase.auth.resetPasswordForEmail('your-email@example.com', {
 ### 响应式设计
 
 #### 移动端优化
+
 - 触摸友好的按钮和输入框
 - 适合手指操作的尺寸
 - 合理的间距布局
 
 #### 断点适应
+
 ```css
 /* 移动设备优先 */
 < 640px: 单列布局，大号按钮
@@ -473,16 +517,19 @@ supabase.auth.resetPasswordForEmail('your-email@example.com', {
 ### 视觉反馈
 
 #### 加载状态
+
 - 按钮loading状态和禁用
 - 表单骨架屏显示
 - 进度指示器
 
 #### 错误提示
+
 - 红色边框高亮错误字段
 - 详细错误信息展示
 - 友好的错误文案
 
 #### 成功反馈
+
 - 绿色确认图标
 - 自动跳转倒计时
 - 成功状态持久化
@@ -490,14 +537,15 @@ supabase.auth.resetPasswordForEmail('your-email@example.com', {
 ### 可访问性
 
 #### 语义化HTML
+
 ```html
 <!-- 正确的表单结构 -->
 <form role="form" aria-labelledby="reset-password-title">
   <h1 id="reset-password-title">重置密码</h1>
   <label for="password">新密码</label>
-  <input 
-    id="password" 
-    type="password" 
+  <input
+    id="password"
+    type="password"
     aria-describedby="password-help"
     aria-required="true"
   />
@@ -506,11 +554,13 @@ supabase.auth.resetPasswordForEmail('your-email@example.com', {
 ```
 
 #### 键盘导航
+
 - 支持Tab键顺序导航
 - Enter键提交表单
 - Escape键关闭模态框
 
 #### 屏幕阅读器支持
+
 - ARIA标签和角色
 - 状态变化通知
 - 错误信息朗读
@@ -518,6 +568,7 @@ supabase.auth.resetPasswordForEmail('your-email@example.com', {
 ### 主题支持
 
 #### 深色/浅色主题
+
 ```typescript
 // --- 主题适配的颜色类 ---
 className={cn(
@@ -532,11 +583,13 @@ className={cn(
 ### 客户端安全
 
 #### 密码处理
+
 - 密码输入框默认隐藏，可切换显示
 - 不在前端存储明文密码
 - 密码强度实时验证
 
 #### 数据保护
+
 - 表单验证防止XSS攻击
 - 敏感信息不存储在localStorage
 - CSRF保护机制
@@ -544,11 +597,13 @@ className={cn(
 ### 服务端安全
 
 #### Token安全
+
 - 重置token单次使用
 - Token有时效性限制（默认1小时）
 - 安全的token生成算法
 
 #### 访问控制
+
 - 邮件发送频率限制
 - IP地址监控
 - 异常行为检测
@@ -556,12 +611,14 @@ className={cn(
 ### 最佳实践
 
 #### 生产环境
+
 1. **使用HTTPS**：确保所有通信加密
 2. **配置CSP**：内容安全策略防护
 3. **监控日志**：异常请求监控
 4. **定期审计**：安全配置检查
 
 #### 密码策略
+
 1. **强度要求**：最少6位，建议包含大小写字母、数字和符号
 2. **历史密码**：防止重复使用最近的密码
 3. **过期策略**：定期提醒更新密码
@@ -569,7 +626,9 @@ className={cn(
 ## 🐛 常见问题
 
 ### Q: 收不到重置邮件怎么办？
-**A**: 
+
+**A**:
+
 1. 检查垃圾邮件文件夹
 2. 确认邮箱地址正确且已注册
 3. 等待几分钟后重试（避免频率限制）
@@ -577,14 +636,18 @@ className={cn(
 5. 查看Supabase Auth日志
 
 ### Q: 重置链接提示无效？
-**A**: 
+
+**A**:
+
 1. 检查链接是否完整（可能被邮件客户端截断）
 2. 确认链接未过期（默认1小时有效期）
 3. 避免多次点击同一链接
 4. 重新申请重置密码
 
 ### Q: 新密码设置失败？
+
 **A**:
+
 1. 确认密码长度至少6位
 2. 检查两次输入是否一致
 3. 尝试使用更复杂的密码
@@ -592,14 +655,18 @@ className={cn(
 5. 检查网络连接稳定性
 
 ### Q: 邮件发送频率受限？
+
 **A**:
+
 1. 等待冷却期后重试
 2. 检查Supabase控制台的速率限制设置
 3. 考虑升级到自定义SMTP服务
 4. 联系技术支持调整限制
 
 ### Q: 本地开发收不到邮件？
+
 **A**:
+
 1. 确认使用`supabase start`启动本地服务
 2. 检查Inbucket界面查看邮件
 3. 运行`supabase status`获取Inbucket URL

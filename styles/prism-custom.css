@@ -1,7 +1,7 @@
 /* 自定义Prism.js样式，确保与我们的CSS变量系统兼容 */
 
 /* 确保代码块中的行高和间距一致 */
-pre[class*="language-"] {
+pre[class*='language-'] {
   margin: 0;
   padding: 0;
   background: var(--md-code-bg);
@@ -9,7 +9,7 @@ pre[class*="language-"] {
   overflow: auto;
 }
 
-code[class*="language-"] {
+code[class*='language-'] {
   display: block;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   font-size: 0.875rem;
@@ -25,7 +25,7 @@ code[class*="language-"] {
 }
 
 /* 确保行内代码样式与代码块一致 */
-:not(pre) > code[class*="language-"] {
+:not(pre) > code[class*='language-'] {
   background: var(--md-inline-code-bg);
   color: var(--md-inline-code-text);
   border: 1px solid var(--md-inline-code-border);
@@ -35,21 +35,21 @@ code[class*="language-"] {
 }
 
 /* 确保代码块内的滚动条样式一致 */
-pre[class*="language-"]::-webkit-scrollbar {
+pre[class*='language-']::-webkit-scrollbar {
   height: 0.5rem;
   width: 0.5rem;
 }
 
-pre[class*="language-"]::-webkit-scrollbar-track {
+pre[class*='language-']::-webkit-scrollbar-track {
   background: transparent;
 }
 
-pre[class*="language-"]::-webkit-scrollbar-thumb {
+pre[class*='language-']::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.1);
   border-radius: 0.25rem;
 }
 
-.dark pre[class*="language-"]::-webkit-scrollbar-thumb {
+.dark pre[class*='language-']::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
 }
 

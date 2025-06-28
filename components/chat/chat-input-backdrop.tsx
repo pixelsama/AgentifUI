@@ -1,22 +1,23 @@
-"use client"
+'use client';
 
-import React from "react"
-import { cn } from "@lib/utils"
-import { useChatWidth } from "@lib/hooks"
-import { useThemeColors } from "@lib/hooks/use-theme-colors"
+import { useChatWidth } from '@lib/hooks';
+import { useThemeColors } from '@lib/hooks/use-theme-colors';
+import { cn } from '@lib/utils';
+
+import React from 'react';
 
 interface ChatInputBackdropProps {
-  className?: string
+  className?: string;
 }
 
 export function ChatInputBackdrop({ className }: ChatInputBackdropProps) {
-  const { colors, isDark } = useThemeColors()
-  const { widthClass } = useChatWidth()
-  
+  const { colors, isDark } = useThemeColors();
+  const { widthClass } = useChatWidth();
+
   return (
-    <div 
+    <div
       className={cn(
-        "absolute bottom-0 left-0 right-0 h-24 pointer-events-none z-0 mx-auto",
+        'pointer-events-none absolute right-0 bottom-0 left-0 z-0 mx-auto h-24',
         widthClass, // 使用统一的宽度类
         colors.mainBackground.tailwind, // <-- 始终使用 mainBackground
         className
@@ -25,5 +26,5 @@ export function ChatInputBackdrop({ className }: ChatInputBackdropProps) {
       //   background: colors.mainBackground.rgb
       // }}
     />
-  )
-} 
+  );
+}

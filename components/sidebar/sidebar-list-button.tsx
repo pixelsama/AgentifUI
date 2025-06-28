@@ -1,8 +1,9 @@
-"use client"
+'use client';
 
-import type * as React from "react"
-import { cn } from "@lib/utils"
-import { useTheme } from "@lib/hooks/use-theme"
+import { useTheme } from '@lib/hooks/use-theme';
+import { cn } from '@lib/utils';
+
+import type * as React from 'react';
 
 // --- BEGIN COMMENT ---
 // SidebarListButton 组件
@@ -12,44 +13,47 @@ import { useTheme } from "@lib/hooks/use-theme"
 // 🎯 新增：支持more button和item区域的悬停分离效果
 // --- END COMMENT ---
 interface SidebarListButtonProps extends React.HTMLAttributes<HTMLDivElement> {
-  icon: React.ReactNode
-  active?: boolean
-  isLoading?: boolean
-  moreActionsTrigger?: React.ReactNode
-  isDisabled?: boolean 
-  children?: React.ReactNode
-  hasOpenDropdown?: boolean // 是否有打开的下拉菜单
-  disableHover?: boolean // 是否禁用悬停效果（当有其他菜单打开时）
+  icon: React.ReactNode;
+  active?: boolean;
+  isLoading?: boolean;
+  moreActionsTrigger?: React.ReactNode;
+  isDisabled?: boolean;
+  children?: React.ReactNode;
+  hasOpenDropdown?: boolean; // 是否有打开的下拉菜单
+  disableHover?: boolean; // 是否禁用悬停效果（当有其他菜单打开时）
 }
 
-export function SidebarListButton({ 
-  icon, 
-  active = false, 
-  isLoading = false, 
-  className, 
-  onClick, 
+export function SidebarListButton({
+  icon,
+  active = false,
+  isLoading = false,
+  className,
+  onClick,
   moreActionsTrigger,
   isDisabled = false,
   hasOpenDropdown = false,
   disableHover = false,
   children,
-  ...props 
+  ...props
 }: SidebarListButtonProps) {
-  const { isDark } = useTheme()
+  const { isDark } = useTheme();
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isDisabled) return;
-    onClick?.(e)
-  }
+    onClick?.(e);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (isDisabled) return;
-    if (e.key === "Enter" || e.key === " ") {
+    if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      const mockEvent = { ...e, type: 'click' } as unknown as React.MouseEvent<HTMLDivElement>; 
+      const mockEvent = {
+        ...e,
+        type: 'click',
+      } as unknown as React.MouseEvent<HTMLDivElement>;
       onClick?.(mockEvent);
     }
-  }
+  };
 
   // --- BEGIN COMMENT ---
   // 🎯 处理主要内容区域的点击（排除more button区域）
@@ -57,7 +61,7 @@ export function SidebarListButton({
   const handleMainContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // 只有点击主要内容区域时才触发选择
     handleClick(e);
-  }
+  };
 
   return (
     <div
@@ -69,20 +73,22 @@ export function SidebarListButton({
         // 基础样式 - 🎯 进一步减小内边距，使按钮更加紧凑
         // 从 px-2.5 py-1.5 改为 px-2 py-1，减小整体尺寸
         // --- END COMMENT ---
-        "relative flex items-center rounded-lg px-2 py-1 text-sm font-medium group",
-        "transition-all duration-300 ease-out",
-        
+        'group relative flex items-center rounded-lg px-2 py-1 text-sm font-medium',
+        'transition-all duration-300 ease-out',
+
         // --- BEGIN COMMENT ---
         // 焦点状态样式
         // --- END COMMENT ---
-        "outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-        isDark ? "focus-visible:ring-stone-500 focus-visible:ring-offset-gray-900" : "focus-visible:ring-primary focus-visible:ring-offset-background",
-        
+        'outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+        isDark
+          ? 'focus-visible:ring-stone-500 focus-visible:ring-offset-gray-900'
+          : 'focus-visible:ring-primary focus-visible:ring-offset-background',
+
         // --- BEGIN COMMENT ---
         // 边框样式
         // --- END COMMENT ---
-        "border",
-        
+        'border',
+
         // --- BEGIN COMMENT ---
         // 禁用状态样式
         // --- END COMMENT ---
@@ -90,40 +96,44 @@ export function SidebarListButton({
         // 恢复cursor-pointer，现在父容器使用cursor-e-resize不会冲突
         // disabled时使用cursor-not-allowed
         // --- END COMMENT ---
-        isDisabled ? "cursor-not-allowed opacity-60 border-transparent" : "cursor-pointer",
-        
+        isDisabled
+          ? 'cursor-not-allowed border-transparent opacity-60'
+          : 'cursor-pointer',
+
         // --- BEGIN COMMENT ---
         // 🎯 亮色主题样式 - 统一悬停效果与header保持一致
         // --- END COMMENT ---
-        !isDark && !isDisabled && [
-          "text-stone-600",
-          // 只有在没有打开下拉菜单且没有禁用悬停时才显示悬停效果
-          !hasOpenDropdown && !disableHover && "hover:bg-stone-300/80",
-          active 
-            ? "bg-stone-300 shadow-sm border-stone-400/80" 
-            : "border-transparent"
-        ],
-        !isDark && isDisabled && ["text-stone-400"],
-        
+        !isDark &&
+          !isDisabled && [
+            'text-stone-600',
+            // 只有在没有打开下拉菜单且没有禁用悬停时才显示悬停效果
+            !hasOpenDropdown && !disableHover && 'hover:bg-stone-300/80',
+            active
+              ? 'border-stone-400/80 bg-stone-300 shadow-sm'
+              : 'border-transparent',
+          ],
+        !isDark && isDisabled && ['text-stone-400'],
+
         // --- BEGIN COMMENT ---
         // 🎯 暗色主题样式 - 统一悬停效果与header保持一致
         // --- END COMMENT ---
-        isDark && !isDisabled && [
-          "text-gray-200",
-          // 只有在没有打开下拉菜单且没有禁用悬停时才显示悬停效果
-          !hasOpenDropdown && !disableHover && "hover:bg-stone-600/60",
-          active 
-            ? "bg-stone-700 shadow-sm border-stone-600" 
-            : "border-transparent"
-        ],
-        isDark && isDisabled && ["text-gray-500"],
-        
+        isDark &&
+          !isDisabled && [
+            'text-gray-200',
+            // 只有在没有打开下拉菜单且没有禁用悬停时才显示悬停效果
+            !hasOpenDropdown && !disableHover && 'hover:bg-stone-600/60',
+            active
+              ? 'border-stone-600 bg-stone-700 shadow-sm'
+              : 'border-transparent',
+          ],
+        isDark && isDisabled && ['text-gray-500'],
+
         // --- BEGIN COMMENT ---
         // 响应式宽度样式
         // --- END COMMENT ---
-        "w-full", // 默认宽度为100%
-        
-        className,
+        'w-full', // 默认宽度为100%
+
+        className
       )}
       onKeyDown={handleKeyDown}
       {...props}
@@ -132,47 +142,55 @@ export function SidebarListButton({
       🎯 主要内容区域：包含图标和文本，点击处理
       移除独立的悬停效果，使用整体的悬停效果
       --- END COMMENT --- */}
-      <div 
+      <div
         className={cn(
-          "flex flex-1 items-center min-w-0",
+          'flex min-w-0 flex-1 items-center',
           // --- BEGIN COMMENT ---
           // 恢复cursor-pointer，确保按钮区域有明确的交互提示
           // --- END COMMENT ---
-          !isDisabled && "cursor-pointer"
+          !isDisabled && 'cursor-pointer'
         )}
         onClick={handleMainContentClick}
       >
         {isLoading ? (
-          <span className={cn("flex h-4 w-4 items-center justify-center")}>
-            <div className={cn("h-3 w-3 animate-pulse rounded-full", isDark ? "bg-stone-600" : "bg-stone-400", "opacity-80")} />
+          <span className={cn('flex h-4 w-4 items-center justify-center')}>
+            <div
+              className={cn(
+                'h-3 w-3 animate-pulse rounded-full',
+                isDark ? 'bg-stone-600' : 'bg-stone-400',
+                'opacity-80'
+              )}
+            />
           </span>
         ) : (
-          <span className={cn("flex h-4 w-4 items-center justify-center -ml-0.5", 
-            isDark ? "text-gray-400" : "text-gray-500")}>
+          <span
+            className={cn(
+              '-ml-0.5 flex h-4 w-4 items-center justify-center',
+              isDark ? 'text-gray-400' : 'text-gray-500'
+            )}
+          >
             {icon}
           </span>
         )}
         {children && (
-          <div className="ml-1.5 flex-1 min-w-0 truncate"> 
-            {children}
-          </div>
+          <div className="ml-1.5 min-w-0 flex-1 truncate">{children}</div>
         )}
       </div>
-      
+
       {/* --- BEGIN COMMENT ---
       🎯 More Actions区域：独立的悬停和点击处理
       使用更高的CSS优先级来覆盖整体的悬停效果
       --- END COMMENT --- */}
       {moreActionsTrigger && (
-        <div 
+        <div
           className={cn(
-            "ml-0.5 flex-shrink-0 relative z-10",
+            'relative z-10 ml-0.5 flex-shrink-0'
             // --- BEGIN COMMENT ---
             // 🎯 More button区域的独立悬停效果，覆盖整体悬停
             // 使用 hover:bg-transparent 来"取消"父级的悬停效果
             // --- END COMMENT ---
           )}
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation(); // 防止点击 MoreButton 区域时选中聊天项
           }}
         >
@@ -180,5 +198,5 @@ export function SidebarListButton({
         </div>
       )}
     </div>
-  )
+  );
 }
