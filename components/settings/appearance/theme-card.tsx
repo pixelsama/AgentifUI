@@ -2,7 +2,7 @@
 
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
-import { ArrowUpIcon, MoreHorizontal, Plus } from 'lucide-react';
+import { ArrowUpIcon, MoreHorizontal, Paperclip } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
 
@@ -55,8 +55,8 @@ export function ThemeCard({
           buttonBg: 'bg-black',
           buttonText: 'text-white',
           functionButtonBg: 'bg-transparent',
-          functionButtonBorder: 'border-gray-200',
-          functionButtonText: 'text-gray-600',
+          functionButtonBorder: 'border-stone-300',
+          functionButtonText: 'text-stone-600',
         };
       case 'dark':
         return {
@@ -147,82 +147,79 @@ export function ThemeCard({
           {/* 模拟主聊天区域 */}
           <div className="flex h-full flex-1 flex-col">
             {/* 模拟消息区域 */}
-            <div className="flex-1 space-y-1.5 p-2">
-              {/* 模拟助手消息 */}
-              <div className="flex justify-start">
-                <div
-                  className={cn(
-                    'max-w-[70%] rounded-lg px-2 py-1 text-[6px] leading-tight',
-                    styles.assistantMessageBg,
-                    styles.textColor
-                  )}
-                >
-                  {theme === 'system' ? (
-                    <span className="rounded bg-white/80 px-1 text-stone-900">
-                      {t('system')}
-                    </span>
-                  ) : (
-                    t(theme)
-                  )}
-                </div>
-              </div>
-
-              {/* 模拟用户消息 */}
-              <div className="flex justify-end">
-                <div
-                  className={cn(
-                    'max-w-[60%] rounded-lg px-2 py-1 text-[6px] leading-tight',
-                    styles.userMessageBg,
-                    theme === 'dark' ? 'text-stone-100' : 'text-stone-800'
-                  )}
-                >
-                  Hello
+            <div className="flex-1 px-3 py-2">
+              {/* 消息区域 - 更加居中布局，Hello消息在顶部 */}
+              <div className="mx-auto max-w-[70%]">
+                {/* 模拟用户消息 - 在顶部 */}
+                <div className="flex justify-end">
+                  <div
+                    className={cn(
+                      'max-w-[60%] rounded-lg px-2 py-1 text-[6px] leading-tight',
+                      styles.userMessageBg,
+                      theme === 'dark' ? 'text-stone-100' : 'text-stone-800'
+                    )}
+                  >
+                    Hello
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* 模拟输入框区域 */}
-            <div className="p-1.5">
-              <div
-                className={cn(
-                  'flex items-center gap-1 rounded-lg border px-1.5 py-1',
-                  styles.inputBg,
-                  styles.borderColor
-                )}
-              >
-                {/* 模拟附件按钮 */}
+            {/* 模拟输入框区域 - 更加居中布局 */}
+            <div className="px-3 pb-1.5">
+              <div className="mx-auto max-w-[70%]">
                 <div
                   className={cn(
-                    'flex h-3 w-3 items-center justify-center rounded border',
-                    styles.functionButtonBg,
-                    styles.functionButtonBorder
+                    'flex flex-col rounded-lg border',
+                    styles.inputBg,
+                    styles.borderColor
                   )}
                 >
-                  <Plus
-                    className={cn('h-1.5 w-1.5', styles.functionButtonText)}
-                  />
-                </div>
+                  {/* 输入文本区域 */}
+                  <div className="px-2 pt-1.5 pb-2">
+                    <div className="space-y-0.5">
+                      <div
+                        className={cn(
+                          'h-0.5 w-10 rounded-full opacity-30',
+                          styles.secondaryTextColor
+                        )}
+                      />
+                      <div
+                        className={cn(
+                          'h-0.5 w-6 rounded-full opacity-20',
+                          styles.secondaryTextColor
+                        )}
+                      />
+                    </div>
+                  </div>
 
-                {/* 模拟输入框 */}
-                <div className="flex h-3 flex-1 items-center">
-                  <div
-                    className={cn(
-                      'h-0.5 w-8 rounded-full opacity-40',
-                      styles.secondaryTextColor
-                    )}
-                  />
-                </div>
+                  {/* 按钮区域 */}
+                  <div className="relative px-1.5 pb-1.5">
+                    {/* 左下角附件按钮 */}
+                    <div
+                      className={cn(
+                        'absolute bottom-1.5 left-1.5 flex h-2.5 w-2.5 items-center justify-center rounded border',
+                        styles.functionButtonBg,
+                        styles.functionButtonBorder
+                      )}
+                    >
+                      <Paperclip
+                        className={cn('h-1 w-1', styles.functionButtonText)}
+                      />
+                    </div>
 
-                {/* 模拟发送按钮 */}
-                <div
-                  className={cn(
-                    'flex h-3 w-3 items-center justify-center rounded-full',
-                    styles.buttonBg
-                  )}
-                >
-                  <ArrowUpIcon
-                    className={cn('h-1.5 w-1.5', styles.buttonText)}
-                  />
+                    {/* 右下角发送按钮 */}
+                    <div
+                      className={cn(
+                        'absolute right-1.5 bottom-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full',
+                        styles.buttonBg
+                      )}
+                    >
+                      <ArrowUpIcon
+                        className={cn('h-1 w-1', styles.buttonText)}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
