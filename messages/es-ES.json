@@ -684,15 +684,12 @@
         "editProfile": "Editar Perfil",
         "name": "Nombre",
         "nickname": "Nombre de Usuario",
-        "avatarUrl": "URL del Avatar",
         "profileUpdated": "Perfil actualizado exitosamente",
         "updateFailed": "Error al actualizar perfil",
         "saving": "Guardando...",
         "saveChanges": "Guardar Cambios",
         "namePlaceholder": "Ingresa tu nombre",
         "usernamePlaceholder": "Ingresa tu nombre de usuario",
-        "avatarPlaceholder": "Ingresa URL de imagen de avatar",
-        "avatarHint": "Ingresa una URL de imagen válida, se recomiendan imágenes cuadradas",
         "roles": {
           "admin": "Administrador",
           "manager": "Gerente",
@@ -703,7 +700,61 @@
           "notSet": "No establecido",
           "noOrganization": "Sin organización"
         },
-        "loadProfileError": "Error al cargar perfil"
+        "loadProfileError": "Error al cargar perfil",
+        "avatar": {
+          "defaultUser": "Usuario",
+          "userAvatar": "Avatar de {userName}",
+          "editHover": "Editar",
+          "uploadSuccess": "Avatar subido exitosamente",
+          "deleteSuccess": "Avatar eliminado exitosamente"
+        }
+      },
+      "avatarModal": {
+        "title": "Configuración de Avatar",
+        "subtitle": "Haz clic para subir o arrastra la imagen al área de abajo",
+        "currentAvatar": "Avatar Actual",
+        "supportedFormats": "Soporta formatos JPEG, JPG, PNG, WebP • Máx 5MB",
+        "uploadArea": {
+          "uploading": "Subiendo...",
+          "changeAvatar": "Haz clic para cambiar avatar",
+          "uploadAvatar": "Haz clic para subir avatar",
+          "uploadProgress": "Progreso de subida: {progress}%",
+          "dragHint": "O arrastra la imagen aquí"
+        },
+        "buttons": {
+          "deleteAvatar": "Eliminar Avatar",
+          "complete": "Completar",
+          "uploading": "Subiendo...",
+          "cancel": "Cancelar",
+          "confirmDelete": "Confirmar Eliminar",
+          "deleting": "Eliminando..."
+        },
+        "deleteConfirm": {
+          "title": "Eliminar Avatar",
+          "message": "¿Estás seguro de que quieres eliminar el avatar actual? Esta acción no se puede deshacer."
+        },
+        "status": {
+          "success": "Operación completada exitosamente"
+        },
+        "errors": {
+          "unsupportedType": "Tipo de archivo no soportado. Por favor selecciona imágenes en formato JPEG, JPG, PNG o WebP.",
+          "fileTooLarge": "Archivo demasiado grande. Por favor selecciona imágenes menores a 5MB.",
+          "userNotLoggedIn": "Usuario no logueado",
+          "uploadFailed": "Error al subir",
+          "deleteFailed": "Error al eliminar"
+        }
+      },
+      "avatarUpload": {
+        "errors": {
+          "unsupportedFileType": "Tipo de archivo no soportado. Formatos soportados: {types}",
+          "fileTooLarge": "Archivo demasiado grande. Máximo soportado {maxSize}MB",
+          "uploadFailed": "Error al subir: {message}",
+          "getUrlFailed": "Error al obtener URL del avatar",
+          "updateDatabaseFailed": "Error al actualizar base de datos: {message}",
+          "deleteFailed": "Error al eliminar: {message}",
+          "uploadFailedGeneric": "Error al subir",
+          "deleteFailedGeneric": "Error al eliminar"
+        }
       },
       "appearanceSettings": {
         "title": "Configuración de Apariencia",

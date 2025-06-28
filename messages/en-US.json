@@ -684,15 +684,12 @@
         "editProfile": "Edit Profile",
         "name": "Name",
         "nickname": "Username",
-        "avatarUrl": "Avatar URL",
         "profileUpdated": "Profile updated successfully",
         "updateFailed": "Failed to update profile",
         "saving": "Saving...",
         "saveChanges": "Save Changes",
         "namePlaceholder": "Enter your name",
         "usernamePlaceholder": "Enter your username",
-        "avatarPlaceholder": "Enter avatar image URL",
-        "avatarHint": "Enter a valid image URL, square images recommended",
         "roles": {
           "admin": "Administrator",
           "manager": "Manager",
@@ -703,7 +700,61 @@
           "notSet": "Not set",
           "noOrganization": "No organization"
         },
-        "loadProfileError": "Error loading profile"
+        "loadProfileError": "Error loading profile",
+        "avatar": {
+          "defaultUser": "User",
+          "userAvatar": "{userName}'s avatar",
+          "editHover": "Edit",
+          "uploadSuccess": "Avatar uploaded successfully",
+          "deleteSuccess": "Avatar deleted successfully"
+        }
+      },
+      "avatarModal": {
+        "title": "Avatar Settings",
+        "subtitle": "Click to upload or drag image to the area below",
+        "currentAvatar": "Current Avatar",
+        "supportedFormats": "Supports JPEG, JPG, PNG, WebP formats • Max 5MB",
+        "uploadArea": {
+          "uploading": "Uploading...",
+          "changeAvatar": "Click to change avatar",
+          "uploadAvatar": "Click to upload avatar",
+          "uploadProgress": "Upload progress: {progress}%",
+          "dragHint": "Or drag image here"
+        },
+        "buttons": {
+          "deleteAvatar": "Delete Avatar",
+          "complete": "Complete",
+          "uploading": "Uploading...",
+          "cancel": "Cancel",
+          "confirmDelete": "Confirm Delete",
+          "deleting": "Deleting..."
+        },
+        "deleteConfirm": {
+          "title": "Delete Avatar",
+          "message": "Are you sure you want to delete the current avatar? This action cannot be undone."
+        },
+        "status": {
+          "success": "Operation completed successfully"
+        },
+        "errors": {
+          "unsupportedType": "Unsupported file type. Please select JPEG, JPG, PNG or WebP format images.",
+          "fileTooLarge": "File too large. Please select images smaller than 5MB.",
+          "userNotLoggedIn": "User not logged in",
+          "uploadFailed": "Upload failed",
+          "deleteFailed": "Delete failed"
+        }
+      },
+      "avatarUpload": {
+        "errors": {
+          "unsupportedFileType": "Unsupported file type. Supported formats: {types}",
+          "fileTooLarge": "File too large. Maximum supported {maxSize}MB",
+          "uploadFailed": "Upload failed: {message}",
+          "getUrlFailed": "Failed to get avatar URL",
+          "updateDatabaseFailed": "Failed to update database: {message}",
+          "deleteFailed": "Delete failed: {message}",
+          "uploadFailedGeneric": "Upload failed",
+          "deleteFailedGeneric": "Delete failed"
+        }
       },
       "appearanceSettings": {
         "title": "Appearance Settings",

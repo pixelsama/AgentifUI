@@ -43,37 +43,6 @@ export function UserBottomSheet({
   // 从 profile 中提取用户信息
   const userName = profile?.full_name || profile?.username || t('defaultUser');
   const userCompany = profile?.organization?.name || t('noOrganization');
-  const avatarUrl = profile?.avatar_url;
-
-  // 生成用户头像的首字母
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  // 根据用户名生成一致的石色系背景颜色
-  const getAvatarBgColor = (name: string) => {
-    const colors = [
-      '#78716c', // stone-500
-      '#57534e', // stone-600
-      '#44403c', // stone-700
-      '#64748b', // slate-500
-      '#475569', // slate-600
-      '#6b7280', // gray-500
-      '#4b5563', // gray-600
-      '#737373', // neutral-500
-    ];
-
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return colors[Math.abs(hash) % colors.length];
-  };
 
   // 处理登录
   const handleLogin = () => {
@@ -129,52 +98,28 @@ export function UserBottomSheet({
     >
       {isLoggedIn ? (
         <div className="flex flex-col">
-          {/* 用户信息区域 */}
+          {/* 用户信息区域 - 简洁设计 */}
           <div
             className={cn(
-              'mb-3 flex items-center rounded-lg p-4',
-              isDark ? 'bg-stone-700/50' : 'bg-stone-100',
-              'shadow-sm'
+              'mb-3 rounded-lg px-3 py-2',
+              isDark ? 'bg-stone-700/30' : 'bg-stone-100/80'
             )}
           >
-            {/* 头像 - 与桌面端保持一致 */}
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={t('avatarAlt', { userName })}
-                className="h-12 w-12 rounded-full object-cover shadow-md"
-                onError={e => {
-                  // 头像加载失败时隐藏图片
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            ) : (
-              <div
-                className="flex h-12 w-12 items-center justify-center rounded-full font-medium text-white shadow-md"
-                style={{
-                  backgroundColor: getAvatarBgColor(userName),
-                }}
-              >
-                {getInitials(userName)}
-              </div>
-            )}
-            <div className="ml-4 overflow-hidden">
-              <div
-                className={cn(
-                  'truncate font-serif font-medium',
-                  isDark ? 'text-white' : 'text-stone-800'
-                )}
-              >
-                {userName}
-              </div>
-              <div
-                className={cn(
-                  'max-w-[200px] truncate font-serif text-sm',
-                  isDark ? 'text-stone-400' : 'text-stone-500'
-                )}
-              >
-                {userCompany}
-              </div>
+            <div
+              className={cn(
+                'font-serif font-medium',
+                isDark ? 'text-white' : 'text-stone-800'
+              )}
+            >
+              {userName}
+            </div>
+            <div
+              className={cn(
+                'font-serif text-sm',
+                isDark ? 'text-stone-400' : 'text-stone-500'
+              )}
+            >
+              {userCompany}
             </div>
           </div>
 

@@ -684,15 +684,12 @@
         "editProfile": "プロフィール編集",
         "name": "名前",
         "nickname": "ユーザー名",
-        "avatarUrl": "アバターURL",
         "profileUpdated": "プロフィールが正常に更新されました",
         "updateFailed": "プロフィールの更新に失敗しました",
         "saving": "保存中...",
         "saveChanges": "変更を保存",
         "namePlaceholder": "お名前を入力してください",
         "usernamePlaceholder": "ユーザー名を入力してください",
-        "avatarPlaceholder": "アバター画像のURLを入力してください",
-        "avatarHint": "有効な画像URLを入力してください。正方形の画像を推奨します",
         "roles": {
           "admin": "管理者",
           "manager": "マネージャー",
@@ -703,7 +700,61 @@
           "notSet": "未設定",
           "noOrganization": "組織なし"
         },
-        "loadProfileError": "プロフィールの読み込みエラー"
+        "loadProfileError": "プロフィールの読み込みエラー",
+        "avatar": {
+          "defaultUser": "ユーザー",
+          "userAvatar": "{userName}のアバター",
+          "editHover": "編集",
+          "uploadSuccess": "アバターのアップロードが完了しました",
+          "deleteSuccess": "アバターの削除が完了しました"
+        }
+      },
+      "avatarModal": {
+        "title": "アバター設定",
+        "subtitle": "クリックしてアップロードするか、下のエリアに画像をドラッグしてください",
+        "currentAvatar": "現在のアバター",
+        "supportedFormats": "JPEG、JPG、PNG、WebP形式をサポート • 最大5MB",
+        "uploadArea": {
+          "uploading": "アップロード中...",
+          "changeAvatar": "クリックしてアバターを変更",
+          "uploadAvatar": "クリックしてアバターをアップロード",
+          "uploadProgress": "アップロード進捗: {progress}%",
+          "dragHint": "または画像をここにドラッグ"
+        },
+        "buttons": {
+          "deleteAvatar": "アバターを削除",
+          "complete": "完了",
+          "uploading": "アップロード中...",
+          "cancel": "キャンセル",
+          "confirmDelete": "削除を確認",
+          "deleting": "削除中..."
+        },
+        "deleteConfirm": {
+          "title": "アバターを削除",
+          "message": "現在のアバターを削除してもよろしいですか？この操作は取り消せません。"
+        },
+        "status": {
+          "success": "操作が正常に完了しました"
+        },
+        "errors": {
+          "unsupportedType": "サポートされていないファイル形式です。JPEG、JPG、PNG、WebP形式の画像を選択してください。",
+          "fileTooLarge": "ファイルサイズが大きすぎます。5MB以下の画像を選択してください。",
+          "userNotLoggedIn": "ユーザーがログインしていません",
+          "uploadFailed": "アップロードに失敗しました",
+          "deleteFailed": "削除に失敗しました"
+        }
+      },
+      "avatarUpload": {
+        "errors": {
+          "unsupportedFileType": "サポートされていないファイル形式です。サポート形式：{types}",
+          "fileTooLarge": "ファイルサイズが大きすぎます。最大サポート {maxSize}MB",
+          "uploadFailed": "アップロード失敗：{message}",
+          "getUrlFailed": "アバターURLの取得に失敗しました",
+          "updateDatabaseFailed": "データベース更新に失敗しました：{message}",
+          "deleteFailed": "削除失敗：{message}",
+          "uploadFailedGeneric": "アップロードに失敗しました",
+          "deleteFailedGeneric": "削除に失敗しました"
+        }
       },
       "appearanceSettings": {
         "title": "外観設定",

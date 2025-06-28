@@ -86,41 +86,36 @@ export function ProfileSettings() {
       >
         <h1 className="mb-6 font-serif text-2xl font-bold">{t('title')}</h1>
 
-        <div className="space-y-8">
-          {/* 用户头像和基本信息骨架屏 */}
+        <div className="space-y-6">
+          {/* 用户头像和基本信息骨架屏 - 紧凑布局 */}
           <div
             className={cn(
-              'rounded-lg border p-6',
+              'rounded-lg border p-4',
               colors.borderColor.tailwind,
               colors.cardBackground.tailwind
             )}
           >
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-4">
+              {/* 头像骨架屏 - 缩小到16x16 */}
               <div
                 className={cn(
-                  'h-20 w-20 rounded-full',
+                  'h-16 w-16 rounded-full',
                   colors.skeletonBackground.tailwind,
                   'animate-pulse'
                 )}
               ></div>
-              <div className="flex-1 space-y-3">
+              {/* 基本信息骨架屏 */}
+              <div className="flex-1 space-y-2">
                 <div
                   className={cn(
-                    'h-6 w-48',
+                    'h-5 w-32',
                     colors.skeletonBackground.tailwind,
                     'animate-pulse rounded-md'
                   )}
                 ></div>
                 <div
                   className={cn(
-                    'h-4 w-32',
-                    colors.skeletonBackground.tailwind,
-                    'animate-pulse rounded-md'
-                  )}
-                ></div>
-                <div
-                  className={cn(
-                    'h-4 w-40',
+                    'h-4 w-48',
                     colors.skeletonBackground.tailwind,
                     'animate-pulse rounded-md'
                   )}
@@ -129,33 +124,33 @@ export function ProfileSettings() {
             </div>
           </div>
 
-          {/* 账户信息骨架屏 */}
+          {/* 账户信息骨架屏 - 紧凑网格布局 */}
           <div
             className={cn(
-              'rounded-lg border p-6',
+              'rounded-lg border p-4',
               colors.borderColor.tailwind,
               colors.cardBackground.tailwind
             )}
           >
             <div
               className={cn(
-                'mb-4 h-6 w-32',
+                'mb-3 h-4 w-20',
                 colors.skeletonBackground.tailwind,
                 'animate-pulse rounded-md'
               )}
             ></div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {[1, 2, 3, 4].map(item => (
-                <div key={item} className="flex items-center space-x-3">
+                <div key={item} className="flex items-center space-x-2">
                   <div
                     className={cn(
-                      'h-10 w-10 rounded-full',
+                      'h-4 w-4 rounded',
                       colors.skeletonBackground.tailwind,
                       'animate-pulse'
                     )}
                   ></div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <div
                       className={cn(
                         'h-3 w-16',
@@ -176,25 +171,35 @@ export function ProfileSettings() {
             </div>
           </div>
 
-          {/* 编辑表单骨架屏 */}
+          {/* 编辑表单骨架屏 - 简化布局 */}
           <div
             className={cn(
-              'rounded-lg border p-6',
+              'rounded-lg border p-4',
               colors.borderColor.tailwind,
               colors.cardBackground.tailwind
             )}
           >
-            <div
-              className={cn(
-                'mb-6 h-6 w-32',
-                colors.skeletonBackground.tailwind,
-                'animate-pulse rounded-md'
-              )}
-            ></div>
+            <div className="mb-4 flex items-center">
+              <div
+                className={cn(
+                  'mr-2 h-4 w-4',
+                  colors.skeletonBackground.tailwind,
+                  'animate-pulse rounded'
+                )}
+              ></div>
+              <div
+                className={cn(
+                  'h-4 w-20',
+                  colors.skeletonBackground.tailwind,
+                  'animate-pulse rounded-md'
+                )}
+              ></div>
+            </div>
 
-            <div className="space-y-6">
-              {[1, 2, 3].map(item => (
-                <div key={item} className="space-y-2">
+            <div className="space-y-4">
+              {/* 表单字段骨架屏 */}
+              {[1, 2].map(item => (
+                <div key={item} className="space-y-1">
                   <div
                     className={cn(
                       'h-4 w-16',
@@ -204,19 +209,21 @@ export function ProfileSettings() {
                   ></div>
                   <div
                     className={cn(
-                      'h-12 w-full',
+                      'h-12 w-full rounded-lg border',
+                      colors.borderColor.tailwind,
                       colors.skeletonBackground.tailwind,
-                      'animate-pulse rounded-md'
+                      'animate-pulse'
                     )}
                   ></div>
                 </div>
               ))}
 
+              {/* 提交按钮骨架屏 */}
               <div
                 className={cn(
-                  'h-12 w-full',
+                  'h-10 w-full rounded-lg',
                   colors.skeletonBackground.tailwind,
-                  'animate-pulse rounded-md'
+                  'animate-pulse'
                 )}
               ></div>
             </div>

@@ -275,7 +275,7 @@ export function DesktopUserAvatar() {
         >
           {isLoggedIn ? (
             <>
-              {/* 用户信息头部 */}
+              {/* 用户信息头部 - 无头像版本 */}
               <div
                 className="mb-2 rounded-lg p-3"
                 style={{
@@ -284,39 +284,7 @@ export function DesktopUserAvatar() {
                     : 'rgba(231, 229, 228, 0.8)',
                 }}
               >
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    {avatarUrl ? (
-                      <img
-                        src={avatarUrl}
-                        alt={`${userName}的头像`}
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          border: 'none',
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'white',
-                          fontWeight: '500',
-                          backgroundColor: getAvatarBgColor(userName),
-                          border: 'none',
-                        }}
-                      >
-                        {getInitials(userName)}
-                      </div>
-                    )}
-                  </div>
+                <div className="flex items-center">
                   <div className="min-w-0 flex-1">
                     <p
                       className="truncate font-serif text-sm font-semibold"

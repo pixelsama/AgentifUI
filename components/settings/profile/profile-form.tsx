@@ -3,6 +3,7 @@
 import { updateUserProfile } from '@lib/db/profiles';
 import { Profile as ExtendedProfile } from '@lib/hooks/use-profile';
 import { updateProfileCache } from '@lib/hooks/use-profile';
+import { useProfile } from '@lib/hooks/use-profile';
 import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { Profile as DatabaseProfile } from '@lib/types/database';
 import { cn } from '@lib/utils';
@@ -12,15 +13,18 @@ import {
   AtSign,
   Building2,
   Calendar,
+  Camera,
   Check,
   Edit3,
   User,
   UserCircle,
 } from 'lucide-react';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useFormatter, useTranslations } from 'next-intl';
+
+import { AvatarModal } from './avatar-modal';
 
 // --- BEGIN COMMENT ---
 // 个人资料表单组件
@@ -73,6 +77,7 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
   const { colors, isDark } = useSettingsColors();
   const t = useTranslations('pages.settings.profileSettings');
   const format = useFormatter();
+  const { mutate: refreshProfile } = useProfile(); // 添加刷新profile的功能
 
   // --- BEGIN COMMENT ---
   // 检查是否为SSO单点登录模式
@@ -83,13 +88,38 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
   const [formData, setFormData] = useState({
     full_name: profile.full_name || '',
     username: profile.username || '',
-    avatar_url: profile.avatar_url || '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{
     type: 'success' | 'error';
     text: string;
   } | null>(null);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+
+  // --- BEGIN COMMENT ---
+  // 处理头像更新
+  // --- END COMMENT ---
+  const handleAvatarUpdate = useCallback(
+    async (avatarUrl: string | null) => {
+      setMessage({
+        type: 'success',
+        text: avatarUrl ? t('avatar.uploadSuccess') : t('avatar.deleteSuccess'),
+      });
+
+      // 刷新profile数据，让所有使用useProfile的组件都能看到最新的头像
+      try {
+        await refreshProfile();
+      } catch (error) {
+        console.error('刷新profile失败:', error);
+      }
+
+      // 调用成功回调，通知父组件
+      if (onSuccess) {
+        onSuccess();
+      }
+    },
+    [t, refreshProfile, onSuccess]
+  );
 
   // --- BEGIN COMMENT ---
   // 处理表单字段变更
@@ -132,7 +162,6 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
 
       if (!isSSOOnlyMode) {
         updateData.full_name = formData.full_name;
-        updateData.avatar_url = formData.avatar_url;
       }
 
       // 更新用户资料
@@ -195,7 +224,6 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
         day: 'numeric',
       });
     } catch (error) {
-      console.warn('日期格式化失败:', error);
       return t('status.notRecorded');
     }
   };
@@ -239,25 +267,60 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
           {/* 用户头像 - 缩小尺寸 */}
           <div className="relative">
             {profile.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt={`${profile.full_name || profile.username || '用户'}的头像`}
-                className="h-14 w-14 rounded-full object-cover"
-                onError={e => {
-                  // 头像加载失败时隐藏图片
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
+              <div
+                className="group relative cursor-pointer"
+                onClick={() => setShowAvatarModal(true)}
+              >
+                <img
+                  src={profile.avatar_url}
+                  alt={t('avatar.userAvatar', {
+                    userName:
+                      profile.full_name ||
+                      profile.username ||
+                      t('avatar.defaultUser'),
+                  })}
+                  className="h-16 w-16 rounded-full object-cover transition-all duration-300 group-hover:opacity-80"
+                  onError={e => {
+                    // 头像加载失败时隐藏图片
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+                {/* 悬停时显示编辑图标 - 确保与头像大小一致 */}
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-all duration-300 group-hover:opacity-100">
+                  <div className="flex flex-col items-center space-y-1">
+                    <Camera className="h-5 w-5 text-white" />
+                    <span className="text-xs font-medium text-white">
+                      {t('avatar.editHover')}
+                    </span>
+                  </div>
+                </div>
+              </div>
             ) : (
               <div
-                className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-medium text-white"
+                className="group relative flex h-16 w-16 cursor-pointer items-center justify-center rounded-full text-lg font-medium text-white transition-all duration-300"
                 style={{
                   backgroundColor: getAvatarBgColor(
-                    profile.full_name || profile.username || '用户'
+                    profile.full_name ||
+                      profile.username ||
+                      t('avatar.defaultUser')
                   ),
                 }}
+                onClick={() => setShowAvatarModal(true)}
               >
-                {getInitials(profile.full_name || profile.username || '用户')}
+                {getInitials(
+                  profile.full_name ||
+                    profile.username ||
+                    t('avatar.defaultUser')
+                )}
+                {/* 悬停时显示编辑图标 - 确保与头像大小一致 */}
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-all duration-300 group-hover:opacity-100">
+                  <div className="flex flex-col items-center space-y-1">
+                    <Camera className="h-4 w-4 text-white" />
+                    <span className="text-xs font-medium text-white">
+                      {t('avatar.editHover')}
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -270,7 +333,7 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
                 colors.textColor.tailwind
               )}
             >
-              {profile.full_name || profile.username || '未设置姓名'}
+              {profile.full_name || profile.username || t('status.notSet')}
             </h3>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
               <span
@@ -502,53 +565,6 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
             </div>
           </div>
 
-          {/* 头像URL字段 - 仅在非SSO模式下显示 */}
-          {!isSSOOnlyMode && (
-            <div className="space-y-1">
-              <label
-                htmlFor="avatar_url"
-                className={cn(
-                  'block font-serif text-sm font-medium',
-                  colors.textColor.tailwind
-                )}
-              >
-                {t('avatarUrl')}
-              </label>
-              <div
-                className={cn(
-                  'flex items-center space-x-2 rounded-lg border p-3 transition-all duration-200',
-                  colors.buttonBackground.tailwind,
-                  colors.buttonBorder.tailwind,
-                  'focus-within:ring-1 focus-within:ring-stone-500/30'
-                )}
-              >
-                <UserCircle
-                  className={cn('h-4 w-4', colors.secondaryTextColor.tailwind)}
-                />
-                <input
-                  id="avatar_url"
-                  name="avatar_url"
-                  type="text"
-                  value={formData.avatar_url}
-                  onChange={handleChange}
-                  className={cn(
-                    'w-full bg-transparent font-serif text-sm outline-none',
-                    colors.textColor.tailwind
-                  )}
-                  placeholder={t('avatarPlaceholder')}
-                />
-              </div>
-              <p
-                className={cn(
-                  'font-serif text-xs',
-                  colors.secondaryTextColor.tailwind
-                )}
-              >
-                {t('avatarHint')}
-              </p>
-            </div>
-          )}
-
           {/* 提交按钮 */}
           <button
             type="submit"
@@ -565,6 +581,17 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
           </button>
         </form>
       </div>
+
+      {/* 头像模态框 */}
+      <AvatarModal
+        isOpen={showAvatarModal}
+        onClose={() => setShowAvatarModal(false)}
+        currentAvatarUrl={profile.avatar_url}
+        userName={
+          profile.full_name || profile.username || t('avatar.defaultUser')
+        }
+        onAvatarUpdate={handleAvatarUpdate}
+      />
     </div>
   );
 }

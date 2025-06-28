@@ -684,15 +684,12 @@
         "editProfile": "编辑个人资料",
         "name": "姓名",
         "nickname": "昵称",
-        "avatarUrl": "头像URL",
         "profileUpdated": "个人资料已更新",
         "updateFailed": "更新资料失败",
         "saving": "保存中...",
         "saveChanges": "保存修改",
         "namePlaceholder": "请输入您的姓名",
         "usernamePlaceholder": "请输入您的用户名",
-        "avatarPlaceholder": "请输入头像图片URL",
-        "avatarHint": "输入有效的图片URL，建议使用正方形图片",
         "roles": {
           "admin": "管理员",
           "manager": "经理",
@@ -703,7 +700,61 @@
           "notSet": "未设置",
           "noOrganization": "无企业关联"
         },
-        "loadProfileError": "加载资料时出错"
+        "loadProfileError": "加载资料时出错",
+        "avatar": {
+          "defaultUser": "用户",
+          "userAvatar": "{userName}的头像",
+          "editHover": "编辑",
+          "uploadSuccess": "头像上传成功",
+          "deleteSuccess": "头像删除成功"
+        }
+      },
+      "avatarModal": {
+        "title": "头像设置",
+        "subtitle": "点击上传或拖拽图片到下方区域",
+        "currentAvatar": "当前头像",
+        "supportedFormats": "支持 JPEG、JPG、PNG、WebP 格式 • 最大 5MB",
+        "uploadArea": {
+          "uploading": "正在上传...",
+          "changeAvatar": "点击更换头像",
+          "uploadAvatar": "点击上传头像",
+          "uploadProgress": "上传进度：{progress}%",
+          "dragHint": "或将图片拖拽到此处"
+        },
+        "buttons": {
+          "deleteAvatar": "删除头像",
+          "complete": "完成",
+          "uploading": "上传中...",
+          "cancel": "取消",
+          "confirmDelete": "确认删除",
+          "deleting": "删除中..."
+        },
+        "deleteConfirm": {
+          "title": "删除头像",
+          "message": "确定要删除当前头像吗？此操作无法撤销。"
+        },
+        "status": {
+          "success": "操作成功完成"
+        },
+        "errors": {
+          "unsupportedType": "不支持的文件类型。请选择 JPEG、JPG、PNG 或 WebP 格式的图片。",
+          "fileTooLarge": "文件过大。请选择小于 5MB 的图片。",
+          "userNotLoggedIn": "用户未登录",
+          "uploadFailed": "上传失败",
+          "deleteFailed": "删除失败"
+        }
+      },
+      "avatarUpload": {
+        "errors": {
+          "unsupportedFileType": "不支持的文件类型。支持的格式：{types}",
+          "fileTooLarge": "文件过大。最大支持 {maxSize}MB",
+          "uploadFailed": "上传失败: {message}",
+          "getUrlFailed": "获取头像URL失败",
+          "updateDatabaseFailed": "更新数据库失败: {message}",
+          "deleteFailed": "删除失败: {message}",
+          "uploadFailedGeneric": "上传失败",
+          "deleteFailedGeneric": "删除失败"
+        }
       },
       "appearanceSettings": {
         "title": "外观设置",

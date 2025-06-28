@@ -684,15 +684,12 @@
         "editProfile": "編輯個人資料",
         "name": "姓名",
         "nickname": "暱稱",
-        "avatarUrl": "頭像URL",
         "profileUpdated": "個人資料已更新",
         "updateFailed": "更新資料失敗",
         "saving": "儲存中...",
         "saveChanges": "儲存修改",
         "namePlaceholder": "請輸入您的姓名",
         "usernamePlaceholder": "請輸入您的使用者名稱",
-        "avatarPlaceholder": "請輸入頭像圖片URL",
-        "avatarHint": "輸入有效的圖片URL，建議使用正方形圖片",
         "roles": {
           "admin": "管理員",
           "manager": "經理",
@@ -703,7 +700,61 @@
           "notSet": "未設定",
           "noOrganization": "無企業關聯"
         },
-        "loadProfileError": "載入資料時發生錯誤"
+        "loadProfileError": "載入資料時發生錯誤",
+        "avatar": {
+          "defaultUser": "使用者",
+          "userAvatar": "{userName}的頭像",
+          "editHover": "編輯",
+          "uploadSuccess": "頭像上傳成功",
+          "deleteSuccess": "頭像刪除成功"
+        }
+      },
+      "avatarModal": {
+        "title": "頭像設定",
+        "subtitle": "點擊上傳或將圖片拖拽至下方區域",
+        "currentAvatar": "目前頭像",
+        "supportedFormats": "支援 JPEG、JPG、PNG、WebP 格式 • 最大 5MB",
+        "uploadArea": {
+          "uploading": "上傳中...",
+          "changeAvatar": "點擊更換頭像",
+          "uploadAvatar": "點擊上傳頭像",
+          "uploadProgress": "上傳進度：{progress}%",
+          "dragHint": "或將圖片拖拽到此處"
+        },
+        "buttons": {
+          "deleteAvatar": "刪除頭像",
+          "complete": "完成",
+          "uploading": "上傳中...",
+          "cancel": "取消",
+          "confirmDelete": "確認刪除",
+          "deleting": "刪除中..."
+        },
+        "deleteConfirm": {
+          "title": "刪除頭像",
+          "message": "確定要刪除目前頭像嗎？此操作無法復原。"
+        },
+        "status": {
+          "success": "操作成功完成"
+        },
+        "errors": {
+          "unsupportedType": "不支援的檔案類型。請選擇 JPEG、JPG、PNG 或 WebP 格式的圖片。",
+          "fileTooLarge": "檔案過大。請選擇小於 5MB 的圖片。",
+          "userNotLoggedIn": "使用者未登入",
+          "uploadFailed": "上傳失敗",
+          "deleteFailed": "刪除失敗"
+        }
+      },
+      "avatarUpload": {
+        "errors": {
+          "unsupportedFileType": "不支援的檔案類型。支援的格式：{types}",
+          "fileTooLarge": "檔案過大。最大支援 {maxSize}MB",
+          "uploadFailed": "上傳失敗：{message}",
+          "getUrlFailed": "取得頭像URL失敗",
+          "updateDatabaseFailed": "更新資料庫失敗：{message}",
+          "deleteFailed": "刪除失敗：{message}",
+          "uploadFailedGeneric": "上傳失敗",
+          "deleteFailedGeneric": "刪除失敗"
+        }
       },
       "appearanceSettings": {
         "title": "外觀設定",
