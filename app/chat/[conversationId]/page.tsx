@@ -133,11 +133,11 @@ export default function ChatPage() {
   
   // --- BEGIN COMMENT ---
   // 合并scrollRef和setMessagesContainer
+  // scrollRef是RefObject类型，直接设置current属性
   // --- END COMMENT ---
   const setScrollRef = (element: HTMLDivElement | null) => {
     if (scrollRef) {
-      // @ts-ignore - scrollRef.current在类型上不是一个setter函数，但实际可能是
-      typeof scrollRef === 'function' ? scrollRef(element) : (scrollRef.current = element);
+      scrollRef.current = element;
     }
     setMessagesContainer(element);
   };

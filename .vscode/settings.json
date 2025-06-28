@@ -21,18 +21,14 @@
 
   "npm.packageManager": "pnpm",
 
-  "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+  // Automatic formatting with Prettier
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
   },
   
-  // Setup font family
+  // Font configuration
   "editor.fontFamily": "Maple Mono NF, Jetbrains Mono, Menlo, Consolas, monospace",
-  // Or enable OpenType features
-  "editor.fontLigatures": "'calt', 'cv01', 'ss01', 'zero'",
-  
-
-
+  "editor.fontLigatures": "'calt', 'cv01', 'ss01', 'zero'"
 }

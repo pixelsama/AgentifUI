@@ -8,8 +8,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate-dify": "ts-node scripts/migrate-dify-config.ts",
-    "init-dify": "node init-scripts/init-dify-config.js"
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:staged": "lint-staged",
+    "code:fix": "pnpm run lint:fix && pnpm run format",
+    "prepare": "husky"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [
@@ -63,6 +67,7 @@
     "@eslint/eslintrc": "^3",
     "@stagewise/toolbar-next": "^0.4.9",
     "@tailwindcss/postcss": "^4",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/lodash": "^4.17.16",
     "@types/node": "^22.15.30",
     "@types/react": "^19",
@@ -70,10 +75,19 @@
     "autoprefixer": "^10.0.1",
     "eslint": "^9.28.0",
     "eslint-config-next": "15.3.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
     "postcss": "^8",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.13",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,md,css,scss,yaml,yml}": [
+      "prettier --write"
+    ]
   }
 }
