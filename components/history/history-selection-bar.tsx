@@ -52,7 +52,7 @@ export function HistorySelectionBar({
     <div
       className={cn(
         'sticky top-0 z-10 transition-all duration-300 ease-in-out',
-        'mx-4 mb-4 rounded-xl backdrop-blur-sm',
+        'mb-4 rounded-xl backdrop-blur-sm',
         'bg-gradient-to-r',
         isDark
           ? 'border border-stone-600/50 from-stone-800/95 via-stone-800/90 to-stone-800/95 shadow-lg shadow-stone-900/20'

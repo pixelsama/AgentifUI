@@ -257,15 +257,12 @@ export function History() {
         colors.mainBackground.tailwind
       )}
     >
-      {/* 页面内容区域 - 使用与聊天页面相同的宽度和居中设置 */}
-      <div
-        className={cn(
-          'flex flex-1 flex-col overflow-auto py-4',
-          colors.mainBackground.tailwind
-        )}
-      >
+      {/* 固定头部区域 - 不滚动 */}
+      <div className="flex-shrink-0">
         {/* 标题和新对话按钮 - 居中显示 */}
-        <div className={cn('mx-auto mb-6 w-full', widthClass, paddingClass)}>
+        <div
+          className={cn('mx-auto mb-6 w-full pt-4', widthClass, paddingClass)}
+        >
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <h1
@@ -386,9 +383,19 @@ export function History() {
             isDeleting={isBatchDeleting}
           />
         </div>
+      </div>
 
-        {/* 对话列表 - 居中显示 */}
-        <div className={cn('mx-auto w-full', widthClass, paddingClass)}>
+      {/* 可滚动列表区域 - 独立滚动 */}
+      <div className="flex-1 overflow-hidden">
+        {/* 对话列表容器 */}
+        <div
+          className={cn(
+            'h-full overflow-y-auto',
+            widthClass,
+            'mx-auto',
+            paddingClass
+          )}
+        >
           <HistoryList
             conversations={filteredConversations}
             isLoading={isLoading}

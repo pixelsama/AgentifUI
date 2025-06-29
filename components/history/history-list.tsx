@@ -59,7 +59,6 @@ export function HistoryList({
   const { isDark } = useTheme();
   const t = useTranslations('history');
   const format = useFormatter();
-  const listRef = React.useRef<HTMLDivElement>(null);
 
   // --- BEGIN COMMENT ---
   // Dialog状态管理
@@ -389,70 +388,69 @@ export function HistoryList({
 
   return (
     <>
-      <div ref={listRef} className="flex-1 overflow-y-auto pr-1">
-        {isLoading && conversations.length === 0 ? (
-          // 加载状态
-          <div className="flex flex-col space-y-4">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <div
-                key={index}
-                className={cn(
-                  'h-24 animate-pulse rounded-lg',
-                  isDark ? 'bg-stone-800' : 'bg-stone-200'
-                )}
-              />
-            ))}
-          </div>
-        ) : conversations.length === 0 ? (
-          // 空状态
-          <div
-            className={cn(
-              'flex h-full flex-col items-center justify-center',
-              isDark ? 'text-stone-400' : 'text-stone-500'
-            )}
-          >
-            {searchQuery ? (
-              <>
-                <Search className="mb-4 h-12 w-12 opacity-50" />
-                <p className="text-lg font-medium">{t('noSearchResults')}</p>
-                <p className="mt-2 text-sm">{t('searchHint')}</p>
-              </>
-            ) : (
-              <>
-                <MessageSquare className="mb-4 h-12 w-12 opacity-50" />
-                <p className="text-lg font-medium">{t('noHistoryTitle')}</p>
-                <p className="mt-2 text-sm">{t('noHistoryDesc')}</p>
-              </>
-            )}
-          </div>
-        ) : (
-          // 对话列表
-          <div className="flex flex-col">
-            {conversations.map(renderConversationItem)}
+      {/* 移除内部滚动容器，直接渲染内容 */}
+      {isLoading && conversations.length === 0 ? (
+        // 加载状态
+        <div className="flex flex-col space-y-4 pt-2">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div
+              key={index}
+              className={cn(
+                'h-24 animate-pulse rounded-lg',
+                isDark ? 'bg-stone-800' : 'bg-stone-200'
+              )}
+            />
+          ))}
+        </div>
+      ) : conversations.length === 0 ? (
+        // 空状态
+        <div
+          className={cn(
+            'flex h-full flex-col items-center justify-center py-16',
+            isDark ? 'text-stone-400' : 'text-stone-500'
+          )}
+        >
+          {searchQuery ? (
+            <>
+              <Search className="mb-4 h-12 w-12 opacity-50" />
+              <p className="text-lg font-medium">{t('noSearchResults')}</p>
+              <p className="mt-2 text-sm">{t('searchHint')}</p>
+            </>
+          ) : (
+            <>
+              <MessageSquare className="mb-4 h-12 w-12 opacity-50" />
+              <p className="text-lg font-medium">{t('noHistoryTitle')}</p>
+              <p className="mt-2 text-sm">{t('noHistoryDesc')}</p>
+            </>
+          )}
+        </div>
+      ) : (
+        // 对话列表
+        <div className="flex flex-col pt-2 pb-6">
+          {conversations.map(renderConversationItem)}
 
-            {/* --- BEGIN COMMENT ---
-            // 显示对话总数信息，在列表底部
-            // --- END COMMENT --- */}
-            {conversations.length > 0 && (
-              <div
-                className={cn(
-                  'mt-4 flex items-center justify-center border-t py-6',
-                  isDark
-                    ? 'border-stone-600 text-stone-500'
-                    : 'border-stone-300 text-stone-500'
-                )}
-              >
-                <Clock className="mr-2 h-4 w-4" />
-                <span className="text-sm">
-                  {searchQuery
-                    ? t('searchResults', { count: conversations.length })
-                    : t('totalRecords', { total })}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+          {/* --- BEGIN COMMENT ---
+          // 显示对话总数信息，在列表底部
+          // --- END COMMENT --- */}
+          {conversations.length > 0 && (
+            <div
+              className={cn(
+                'mt-4 flex items-center justify-center border-t py-6',
+                isDark
+                  ? 'border-stone-600 text-stone-500'
+                  : 'border-stone-300 text-stone-500'
+              )}
+            >
+              <Clock className="mr-2 h-4 w-4" />
+              <span className="text-sm">
+                {searchQuery
+                  ? t('searchResults', { count: conversations.length })
+                  : t('totalRecords', { total })}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* --- BEGIN COMMENT ---
       重命名对话框
