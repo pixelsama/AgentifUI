@@ -5,19 +5,15 @@ import { useProfile } from '@lib/hooks/use-profile';
 import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { cn } from '@lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  AlertCircle,
-  Camera,
-  Check,
-  Loader2,
-  Trash2,
-  Upload,
-  X,
-} from 'lucide-react';
+import { AlertCircle, Camera, Check, Trash2, X } from 'lucide-react';
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
+
+import { AvatarCropper } from './avatar-cropper';
+import { AvatarPreview } from './avatar-preview';
+import { AvatarUploadArea } from './avatar-upload-area';
 
 // --- BEGIN COMMENT ---
 // 头像模态框组件接口定义
@@ -29,50 +25,6 @@ interface AvatarModalProps {
   userName: string;
   onAvatarUpdate?: (avatarUrl: string | null) => void;
 }
-
-// --- BEGIN COMMENT ---
-// 上传状态接口
-// --- END COMMENT ---
-interface UploadState {
-  isUploading: boolean;
-  progress: number;
-  status: 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
-  error: string | null;
-}
-
-// --- BEGIN COMMENT ---
-// 生成用户头像的首字母
-// --- END COMMENT ---
-const getInitials = (name: string) => {
-  return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-};
-
-// --- BEGIN COMMENT ---
-// 根据用户名生成一致的石色系背景颜色
-// --- END COMMENT ---
-const getAvatarBgColor = (name: string) => {
-  const colors = [
-    '#78716c', // stone-500
-    '#57534e', // stone-600
-    '#44403c', // stone-700
-    '#64748b', // slate-500
-    '#475569', // slate-600
-    '#6b7280', // gray-500
-    '#4b5563', // gray-600
-    '#737373', // neutral-500
-  ];
-
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-};
 
 /**
  * 现代化头像模态框组件
@@ -100,40 +52,40 @@ export function AvatarModal({
   const t = useTranslations('pages.settings.avatarModal');
   const avatarUpload = useAvatarUpload();
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [uploadState, setUploadState] = useState<UploadState>({
-    isUploading: false,
-    progress: 0,
-    status: 'idle',
-    error: null,
-  });
+  // --- BEGIN COMMENT ---
+  // 简化状态管理：主要使用useAvatarUpload的状态，只保留UI相关状态
+  // --- END COMMENT ---
+  const [showCropper, setShowCropper] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // --- BEGIN COMMENT ---
   // 重置状态
   // --- END COMMENT ---
   const resetState = useCallback(() => {
-    setUploadState({
-      isUploading: false,
-      progress: 0,
-      status: 'idle',
-      error: null,
-    });
+    avatarUpload.resetState();
     setPreviewUrl(null);
     setShowDeleteConfirm(false);
-  }, []);
+    setShowCropper(false);
+    setSelectedFile(null);
+  }, [avatarUpload]);
 
   // --- BEGIN COMMENT ---
   // 处理模态框关闭
   // --- END COMMENT ---
   const handleClose = useCallback(() => {
-    if (!uploadState.isUploading) {
+    if (!avatarUpload.state.isUploading && !avatarUpload.state.isDeleting) {
       resetState();
       onClose();
     }
-  }, [uploadState.isUploading, resetState, onClose]);
+  }, [
+    avatarUpload.state.isUploading,
+    avatarUpload.state.isDeleting,
+    resetState,
+    onClose,
+  ]);
 
   // --- BEGIN COMMENT ---
   // 文件验证
@@ -168,83 +120,24 @@ export function AvatarModal({
   );
 
   // --- BEGIN COMMENT ---
-  // 处理文件上传（真实实现）
-  // --- END COMMENT ---
-  const handleFileUpload = useCallback(
-    async (file: File) => {
-      if (!profile?.id) {
-        setUploadState(prev => ({
-          ...prev,
-          error: t('errors.userNotLoggedIn'),
-        }));
-        return;
-      }
-
-      // 验证文件
-      const validation = validateFile(file);
-      if (!validation.valid) {
-        setUploadState(prev => ({
-          ...prev,
-          error: validation.error || t('errors.uploadFailed'),
-        }));
-        return;
-      }
-
-      // 创建预览URL
-      const preview = URL.createObjectURL(file);
-      setPreviewUrl(preview);
-
-      // 开始上传
-      setUploadState({
-        isUploading: true,
-        progress: 0,
-        status: 'uploading',
-        error: null,
-      });
-
-      try {
-        // 调用真实的上传API
-        const result = await avatarUpload.uploadAvatar(file, profile.id);
-
-        setUploadState({
-          isUploading: false,
-          progress: 100,
-          status: 'complete',
-          error: null,
-        });
-
-        // 通知父组件更新
-        onAvatarUpdate?.(result.url);
-
-        // 1.5秒后自动关闭
-        setTimeout(() => {
-          handleClose();
-        }, 1500);
-      } catch (error) {
-        setUploadState({
-          isUploading: false,
-          progress: 0,
-          status: 'error',
-          error:
-            error instanceof Error ? error.message : t('errors.uploadFailed'),
-        });
-      } finally {
-        // 清理预览URL
-        URL.revokeObjectURL(preview);
-        setPreviewUrl(null);
-      }
-    },
-    [profile?.id, validateFile, onAvatarUpdate, handleClose, t, avatarUpload]
-  );
-
-  // --- BEGIN COMMENT ---
-  // 处理文件选择
+  // 处理文件选择 - 进入裁切模式
   // --- END COMMENT ---
   const handleFileSelect = useCallback(
     (file: File) => {
-      handleFileUpload(file);
+      // 验证文件
+      const validation = validateFile(file);
+      if (!validation.valid) {
+        console.error('File validation failed:', validation.error);
+        return;
+      }
+
+      // 设置选中的文件并进入裁切模式
+      setSelectedFile(file);
+      const preview = URL.createObjectURL(file);
+      setPreviewUrl(preview);
+      setShowCropper(true);
     },
-    [handleFileUpload]
+    [validateFile]
   );
 
   // --- BEGIN COMMENT ---
@@ -288,36 +181,69 @@ export function AvatarModal({
   );
 
   // --- BEGIN COMMENT ---
+  // 确认裁切并上传
+  // --- END COMMENT ---
+  const handleCropConfirm = useCallback(
+    async (croppedFile: File) => {
+      if (!profile?.id) return;
+
+      try {
+        // 上传裁切后的图片
+        const result = await avatarUpload.uploadAvatar(croppedFile, profile.id);
+
+        // 通知父组件更新
+        onAvatarUpdate?.(result.url);
+
+        // 1.5秒后自动关闭
+        setTimeout(() => {
+          handleClose();
+        }, 1500);
+      } catch (error) {
+        console.error('Upload failed:', error);
+      }
+    },
+    [profile?.id, avatarUpload, onAvatarUpdate, handleClose]
+  );
+
+  // --- BEGIN COMMENT ---
+  // 取消裁切，返回上传界面
+  // --- END COMMENT ---
+  const handleCropCancel = useCallback(() => {
+    setShowCropper(false);
+    setSelectedFile(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+  }, [previewUrl]);
+
+  // --- BEGIN COMMENT ---
   // 处理删除头像（真实实现）
   // --- END COMMENT ---
   const handleDeleteAvatar = useCallback(async () => {
     if (!profile?.id || !currentAvatarUrl) return;
 
-    setUploadState({
-      isUploading: true,
-      progress: 0,
-      status: 'uploading',
-      error: null,
-    });
-
     try {
-      // 从URL中提取文件路径
-      const url = new URL(currentAvatarUrl);
-      const pathParts = url.pathname.split('/');
-      const bucketIndex = pathParts.indexOf('avatars');
-      if (bucketIndex !== -1 && bucketIndex < pathParts.length - 1) {
-        const filePath = pathParts.slice(bucketIndex + 1).join('/');
+      // 使用useAvatarUpload中的extractFilePathFromUrl函数
+      const extractFilePathFromUrl = (url: string): string | null => {
+        try {
+          const urlObj = new URL(url);
+          const pathParts = urlObj.pathname.split('/');
+          const bucketIndex = pathParts.indexOf('avatars');
+          if (bucketIndex !== -1 && bucketIndex < pathParts.length - 1) {
+            return pathParts.slice(bucketIndex + 1).join('/');
+          }
+          return null;
+        } catch {
+          return null;
+        }
+      };
 
+      const filePath = extractFilePathFromUrl(currentAvatarUrl);
+      if (filePath) {
         // 调用真实的删除API，传递userId
         await avatarUpload.deleteAvatar(filePath, profile.id);
       }
-
-      setUploadState({
-        isUploading: false,
-        progress: 100,
-        status: 'complete',
-        error: null,
-      });
 
       // 通知父组件更新
       onAvatarUpdate?.(null);
@@ -330,34 +256,24 @@ export function AvatarModal({
         handleClose();
       }, 1000);
     } catch (error) {
-      setUploadState({
-        isUploading: false,
-        progress: 0,
-        status: 'error',
-        error:
-          error instanceof Error ? error.message : t('errors.deleteFailed'),
-      });
+      console.error('Delete failed:', error);
     }
   }, [
     profile?.id,
     currentAvatarUrl,
     onAvatarUpdate,
     handleClose,
-    t,
     avatarUpload,
   ]);
 
-  // --- BEGIN COMMENT ---
-  // 点击上传区域
-  // --- END COMMENT ---
-  const handleUploadClick = useCallback(() => {
-    if (!uploadState.isUploading) {
-      fileInputRef.current?.click();
-    }
-  }, [uploadState.isUploading]);
-
   // 当前显示的头像URL
   const displayAvatarUrl = previewUrl || currentAvatarUrl;
+
+  // 获取当前的上传/删除状态
+  const isProcessing =
+    avatarUpload.state.isUploading || avatarUpload.state.isDeleting;
+  const currentProgress = avatarUpload.state.progress;
+  const currentError = avatarUpload.state.error;
 
   if (!isOpen) return null;
 
@@ -399,7 +315,7 @@ export function AvatarModal({
             <div className="flex items-center space-x-3">
               <div
                 className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-full',
+                  'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full',
                   isDark ? 'bg-stone-700' : 'bg-stone-100'
                 )}
               >
@@ -428,7 +344,7 @@ export function AvatarModal({
             </div>
             <button
               onClick={handleClose}
-              disabled={uploadState.isUploading}
+              disabled={isProcessing}
               className={cn(
                 'rounded-lg p-2 transition-colors duration-150',
                 isDark
@@ -443,355 +359,218 @@ export function AvatarModal({
 
           {/* 模态框内容 */}
           <div className="space-y-5 p-5">
-            {/* 当前头像显示 */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="relative">
-                {displayAvatarUrl ? (
-                  <img
-                    src={displayAvatarUrl}
-                    alt={t('currentAvatar')}
-                    className={cn(
-                      'h-20 w-20 rounded-full object-cover ring-2',
-                      isDark ? 'ring-stone-700' : 'ring-stone-200',
-                      uploadState.isUploading && 'opacity-75'
-                    )}
-                  />
-                ) : (
-                  <div
-                    className={cn(
-                      'flex h-20 w-20 items-center justify-center rounded-full text-xl font-medium text-white ring-2',
-                      isDark ? 'ring-stone-700' : 'ring-stone-200'
-                    )}
-                    style={{
-                      backgroundColor: getAvatarBgColor(userName),
-                    }}
-                  >
-                    {getInitials(userName)}
-                  </div>
-                )}
-
-                {/* 上传进度覆盖层 */}
-                {(uploadState.isUploading ||
-                  avatarUpload.state.isUploading ||
-                  avatarUpload.state.isDeleting) && (
-                  <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60">
-                    <div className="text-center">
-                      <Loader2 className="mx-auto h-5 w-5 animate-spin text-white" />
-                      <div className="mt-1 text-xs text-white">
-                        {avatarUpload.state.progress || uploadState.progress}%
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="text-center">
-                <h3
-                  className={cn(
-                    'font-serif text-sm font-medium',
-                    colors.textColor.tailwind
-                  )}
-                >
-                  {userName}
-                </h3>
-                <p
-                  className={cn(
-                    'font-serif text-xs',
-                    colors.secondaryTextColor.tailwind
-                  )}
-                >
-                  {t('supportedFormats')}
-                </p>
-              </div>
-            </div>
-
-            {/* 状态消息 */}
-            <AnimatePresence>
-              {(uploadState.error || avatarUpload.state.error) && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className={cn(
-                    'flex items-center rounded-lg p-3',
-                    isDark
-                      ? 'border border-red-800 bg-red-900/20 text-red-300'
-                      : 'border border-red-200 bg-red-50 text-red-700'
-                  )}
-                >
-                  <AlertCircle className="mr-2 h-4 w-4 flex-shrink-0" />
-                  <span className="font-serif text-sm">
-                    {avatarUpload.state.error || uploadState.error}
-                  </span>
-                </motion.div>
-              )}
-
-              {(uploadState.status === 'complete' ||
-                avatarUpload.state.status === 'success') &&
-                !uploadState.error &&
-                !avatarUpload.state.error && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className={cn(
-                      'flex items-center rounded-lg p-3',
-                      isDark
-                        ? 'border border-green-800 bg-green-900/20 text-green-300'
-                        : 'border border-green-200 bg-green-50 text-green-700'
-                    )}
-                  >
-                    <Check className="mr-2 h-4 w-4 flex-shrink-0" />
-                    <span className="font-serif text-sm">
-                      {t('status.success')}
-                    </span>
-                  </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* 上传区域 */}
-            <div
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onClick={handleUploadClick}
-              className={cn(
-                'relative cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors duration-150',
-                isDragOver
-                  ? isDark
-                    ? 'border-stone-400 bg-stone-800/50'
-                    : 'border-stone-400 bg-stone-50'
-                  : colors.borderColor.tailwind,
-                (uploadState.isUploading ||
-                  avatarUpload.state.isUploading ||
-                  avatarUpload.state.isDeleting) &&
-                  'cursor-not-allowed opacity-75',
-                colors.cardBackground.tailwind
-              )}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleInputChange}
-                className="hidden"
-                disabled={
-                  uploadState.isUploading ||
-                  avatarUpload.state.isUploading ||
-                  avatarUpload.state.isDeleting
-                }
+            {/* 裁切界面 */}
+            {showCropper && previewUrl && (
+              <AvatarCropper
+                imageUrl={previewUrl}
+                onConfirm={handleCropConfirm}
+                onCancel={handleCropCancel}
+                isUploading={isProcessing}
+                isDark={isDark}
+                colors={colors}
               />
-
-              <div className="space-y-3">
-                {/* 上传图标 */}
-                <div
-                  className={cn(
-                    'inline-flex h-12 w-12 items-center justify-center rounded-full',
-                    isDark ? 'bg-stone-700' : 'bg-stone-100'
-                  )}
-                >
-                  {uploadState.isUploading ||
-                  avatarUpload.state.isUploading ||
-                  avatarUpload.state.isDeleting ? (
-                    <Loader2
-                      className={cn(
-                        'h-6 w-6 animate-spin',
-                        colors.secondaryTextColor.tailwind
-                      )}
-                    />
-                  ) : (
-                    <Upload
-                      className={cn(
-                        'h-6 w-6',
-                        colors.secondaryTextColor.tailwind
-                      )}
-                    />
-                  )}
-                </div>
-
-                {/* 上传文本 */}
-                <div className="space-y-1">
-                  <p
-                    className={cn(
-                      'font-serif text-sm font-medium',
-                      colors.textColor.tailwind
-                    )}
-                  >
-                    {uploadState.isUploading ||
-                    avatarUpload.state.isUploading ||
-                    avatarUpload.state.isDeleting
-                      ? t('uploadArea.uploading')
-                      : currentAvatarUrl
-                        ? t('uploadArea.changeAvatar')
-                        : t('uploadArea.uploadAvatar')}
-                  </p>
-                  <p
-                    className={cn(
-                      'font-serif text-xs',
-                      colors.secondaryTextColor.tailwind
-                    )}
-                  >
-                    {uploadState.isUploading ||
-                    avatarUpload.state.isUploading ||
-                    avatarUpload.state.isDeleting
-                      ? t('uploadArea.uploadProgress', {
-                          progress:
-                            avatarUpload.state.progress || uploadState.progress,
-                        })
-                      : t('uploadArea.dragHint')}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* 操作按钮 */}
-            <div className="flex gap-3">
-              {currentAvatarUrl && (
-                <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  disabled={
-                    uploadState.isUploading ||
-                    avatarUpload.state.isUploading ||
-                    avatarUpload.state.isDeleting
-                  }
-                  className={cn(
-                    'flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-serif text-sm transition-colors duration-150',
-                    'border disabled:cursor-not-allowed disabled:opacity-50',
-                    isDark
-                      ? 'border-red-800 bg-red-900/20 text-red-300 hover:bg-red-900/30'
-                      : 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
-                  )}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  {t('buttons.deleteAvatar')}
-                </button>
-              )}
-
-              <button
-                onClick={handleClose}
-                disabled={
-                  uploadState.isUploading ||
-                  avatarUpload.state.isUploading ||
-                  avatarUpload.state.isDeleting
-                }
-                className={cn(
-                  'flex-1 rounded-lg px-4 py-2.5 font-serif text-sm transition-colors duration-150',
-                  colors.buttonBackground.tailwind,
-                  colors.buttonBorder.tailwind,
-                  colors.buttonText.tailwind,
-                  colors.buttonHover.tailwind,
-                  'border disabled:cursor-not-allowed disabled:opacity-50'
-                )}
-              >
-                {uploadState.isUploading ||
-                avatarUpload.state.isUploading ||
-                avatarUpload.state.isDeleting
-                  ? t('buttons.uploading')
-                  : t('buttons.complete')}
-              </button>
-            </div>
-          </div>
-
-          {/* 删除确认对话框 */}
-          <AnimatePresence>
-            {showDeleteConfirm && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50"
-                onClick={() => setShowDeleteConfirm(false)}
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.15 }}
-                  onClick={e => e.stopPropagation()}
-                  className={cn(
-                    'mx-4 w-full max-w-sm rounded-lg p-5 shadow-xl',
-                    colors.cardBackground.tailwind,
-                    colors.borderColor.tailwind,
-                    'border'
-                  )}
-                >
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div
-                        className={cn(
-                          'inline-flex h-10 w-10 items-center justify-center rounded-full',
-                          isDark ? 'bg-red-900/20' : 'bg-red-100'
-                        )}
-                      >
-                        <Trash2
-                          className={cn(
-                            'h-5 w-5',
-                            isDark ? 'text-red-400' : 'text-red-600'
-                          )}
-                        />
-                      </div>
-                      <h3
-                        className={cn(
-                          'mt-3 font-serif text-base font-medium',
-                          colors.textColor.tailwind
-                        )}
-                      >
-                        {t('deleteConfirm.title')}
-                      </h3>
-                      <p
-                        className={cn(
-                          'mt-2 font-serif text-sm',
-                          colors.secondaryTextColor.tailwind
-                        )}
-                      >
-                        {t('deleteConfirm.message')}
-                      </p>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setShowDeleteConfirm(false)}
-                        className={cn(
-                          'flex-1 rounded-lg px-4 py-2 font-serif text-sm transition-colors duration-150',
-                          colors.buttonBackground.tailwind,
-                          colors.buttonBorder.tailwind,
-                          colors.buttonText.tailwind,
-                          colors.buttonHover.tailwind,
-                          'border'
-                        )}
-                      >
-                        {t('buttons.cancel')}
-                      </button>
-                      <button
-                        onClick={handleDeleteAvatar}
-                        disabled={
-                          uploadState.isUploading ||
-                          avatarUpload.state.isUploading ||
-                          avatarUpload.state.isDeleting
-                        }
-                        className={cn(
-                          'flex-1 rounded-lg px-4 py-2 font-serif text-sm transition-colors duration-150',
-                          'border disabled:cursor-not-allowed disabled:opacity-50',
-                          isDark
-                            ? 'border-red-800 bg-red-900/20 text-red-300 hover:bg-red-900/30'
-                            : 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
-                        )}
-                      >
-                        {uploadState.isUploading ||
-                        avatarUpload.state.isUploading ||
-                        avatarUpload.state.isDeleting
-                          ? t('buttons.deleting')
-                          : t('buttons.confirmDelete')}
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
             )}
-          </AnimatePresence>
+
+            {/* 原有的上传界面 - 只在非裁切模式下显示 */}
+            {!showCropper && (
+              <>
+                {/* 当前头像显示 */}
+                <AvatarPreview
+                  avatarUrl={displayAvatarUrl}
+                  userName={userName}
+                  isUploading={isProcessing}
+                  progress={currentProgress}
+                  isDark={isDark}
+                  colors={colors}
+                />
+
+                {/* 状态消息 */}
+                <AnimatePresence>
+                  {currentError && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className={cn(
+                        'flex items-center rounded-lg p-3',
+                        isDark
+                          ? 'border border-red-800 bg-red-900/20 text-red-300'
+                          : 'border border-red-200 bg-red-50 text-red-700'
+                      )}
+                    >
+                      <AlertCircle className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <span className="font-serif text-sm">{currentError}</span>
+                    </motion.div>
+                  )}
+
+                  {avatarUpload.state.status === 'success' && !currentError && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className={cn(
+                        'flex items-center rounded-lg p-3',
+                        isDark
+                          ? 'border border-green-800 bg-green-900/20 text-green-300'
+                          : 'border border-green-200 bg-green-50 text-green-700'
+                      )}
+                    >
+                      <Check className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <span className="font-serif text-sm">
+                        {t('status.success')}
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* 上传区域 */}
+                <AvatarUploadArea
+                  onFileSelect={handleFileSelect}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  isDragOver={isDragOver}
+                  isUploading={isProcessing}
+                  hasCurrentAvatar={!!currentAvatarUrl}
+                  progress={currentProgress}
+                  isDark={isDark}
+                  colors={colors}
+                />
+
+                {/* 操作按钮 */}
+                <div className="flex gap-3">
+                  {currentAvatarUrl && (
+                    <button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      disabled={isProcessing}
+                      className={cn(
+                        'flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-serif text-sm transition-colors duration-150',
+                        'border disabled:cursor-not-allowed disabled:opacity-50',
+                        isDark
+                          ? 'border-red-800 bg-red-900/20 text-red-300 hover:bg-red-900/30'
+                          : 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
+                      )}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      {t('buttons.deleteAvatar')}
+                    </button>
+                  )}
+
+                  <button
+                    onClick={handleClose}
+                    disabled={isProcessing}
+                    className={cn(
+                      'flex-1 rounded-lg px-4 py-2.5 font-serif text-sm transition-colors duration-150',
+                      colors.buttonBackground.tailwind,
+                      colors.buttonBorder.tailwind,
+                      colors.buttonText.tailwind,
+                      colors.buttonHover.tailwind,
+                      'border disabled:cursor-not-allowed disabled:opacity-50'
+                    )}
+                  >
+                    {isProcessing
+                      ? t('buttons.uploading')
+                      : t('buttons.complete')}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* 删除确认对话框 */}
+            <AnimatePresence>
+              {showDeleteConfirm && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50"
+                  onClick={() => setShowDeleteConfirm(false)}
+                >
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    onClick={e => e.stopPropagation()}
+                    className={cn(
+                      'mx-4 w-full max-w-sm rounded-lg p-5 shadow-xl',
+                      colors.cardBackground.tailwind,
+                      colors.borderColor.tailwind,
+                      'border'
+                    )}
+                  >
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <div
+                          className={cn(
+                            'inline-flex h-10 w-10 items-center justify-center rounded-full',
+                            isDark ? 'bg-red-900/20' : 'bg-red-100'
+                          )}
+                        >
+                          <Trash2
+                            className={cn(
+                              'h-5 w-5',
+                              isDark ? 'text-red-400' : 'text-red-600'
+                            )}
+                          />
+                        </div>
+                        <h3
+                          className={cn(
+                            'mt-3 font-serif text-base font-medium',
+                            colors.textColor.tailwind
+                          )}
+                        >
+                          {t('deleteConfirm.title')}
+                        </h3>
+                        <p
+                          className={cn(
+                            'mt-2 font-serif text-sm',
+                            colors.secondaryTextColor.tailwind
+                          )}
+                        >
+                          {t('deleteConfirm.message')}
+                        </p>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => setShowDeleteConfirm(false)}
+                          className={cn(
+                            'flex-1 rounded-lg px-4 py-2 font-serif text-sm transition-colors duration-150',
+                            colors.buttonBackground.tailwind,
+                            colors.buttonBorder.tailwind,
+                            colors.buttonText.tailwind,
+                            colors.buttonHover.tailwind,
+                            'border'
+                          )}
+                        >
+                          {t('buttons.cancel')}
+                        </button>
+                        <button
+                          onClick={handleDeleteAvatar}
+                          disabled={isProcessing}
+                          className={cn(
+                            'flex-1 rounded-lg px-4 py-2 font-serif text-sm transition-colors duration-150',
+                            'border disabled:cursor-not-allowed disabled:opacity-50',
+                            isDark
+                              ? 'border-red-800 bg-red-900/20 text-red-300 hover:bg-red-900/30'
+                              : 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
+                          )}
+                        >
+                          {isProcessing
+                            ? t('buttons.deleting')
+                            : t('buttons.confirmDelete')}
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>

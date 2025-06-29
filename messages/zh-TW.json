@@ -721,6 +721,12 @@
         "subtitle": "點擊上傳或將圖片拖拽至下方區域",
         "currentAvatar": "目前頭像",
         "supportedFormats": "支援 JPEG、JPG、PNG、WebP 格式 • 最大 5MB",
+        "crop": {
+          "zoom": "縮放",
+          "cancel": "重新選擇",
+          "confirm": "確認裁切",
+          "uploading": "上傳中..."
+        },
         "uploadArea": {
           "uploading": "上傳中...",
           "changeAvatar": "點擊更換頭像",

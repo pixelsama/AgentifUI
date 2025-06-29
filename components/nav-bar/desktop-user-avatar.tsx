@@ -216,8 +216,8 @@ export function DesktopUserAvatar() {
           className="relative cursor-pointer rounded-full transition-all duration-200 focus:outline-none"
           style={{
             padding: 0,
-            width: '32px',
-            height: '32px',
+            width: '40px',
+            height: '40px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -231,7 +231,7 @@ export function DesktopUserAvatar() {
                 <img
                   src={avatarUrl}
                   alt={`${userName}的头像`}
-                  className="h-8 w-8 rounded-full object-cover transition-transform duration-200 hover:scale-105"
+                  className="h-10 w-10 rounded-full object-cover transition-transform duration-200 hover:scale-105"
                   style={{
                     border: 'none',
                   }}
@@ -242,7 +242,7 @@ export function DesktopUserAvatar() {
                 />
               ) : (
                 <div
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium text-white transition-transform duration-200 hover:scale-105"
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-base font-medium text-white transition-transform duration-200 hover:scale-105"
                   style={{
                     backgroundColor: getAvatarBgColor(userName),
                     border: 'none',
@@ -255,8 +255,8 @@ export function DesktopUserAvatar() {
           ) : (
             <div
               style={{
-                width: '32px',
-                height: '32px',
+                width: '40px',
+                height: '40px',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -267,7 +267,7 @@ export function DesktopUserAvatar() {
                 transition: 'all 0.2s',
               }}
             >
-              <UserCircle size={16} />
+              <UserCircle size={20} />
             </div>
           )}
         </button>
@@ -276,7 +276,7 @@ export function DesktopUserAvatar() {
         {isDropdownOpen && (
           <div
             ref={dropdownRef}
-            className="animate-slide-in-down absolute top-10 right-0 z-50 w-64 rounded-xl p-2 shadow-xl"
+            className="animate-slide-in-down absolute top-12 right-0 z-50 w-64 rounded-xl p-2 shadow-xl"
             style={{
               backgroundColor: colors.mainBackground.rgb,
               border: `1px solid ${effectiveTheme ? '#44403c' : '#e7e5e4'}`,

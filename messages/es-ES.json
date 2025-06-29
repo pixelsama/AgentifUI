@@ -721,6 +721,12 @@
         "subtitle": "Haz clic para subir o arrastra la imagen al área de abajo",
         "currentAvatar": "Avatar Actual",
         "supportedFormats": "Soporta formatos JPEG, JPG, PNG, WebP • Máx 5MB",
+        "crop": {
+          "zoom": "Zoom",
+          "cancel": "Reseleccionar",
+          "confirm": "Confirmar Recorte",
+          "uploading": "Subiendo..."
+        },
         "uploadArea": {
           "uploading": "Subiendo...",
           "changeAvatar": "Haz clic para cambiar avatar",

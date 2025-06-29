@@ -721,6 +721,12 @@
         "subtitle": "クリックしてアップロードするか、下のエリアに画像をドラッグしてください",
         "currentAvatar": "現在のアバター",
         "supportedFormats": "JPEG、JPG、PNG、WebP形式をサポート • 最大5MB",
+        "crop": {
+          "zoom": "ズーム",
+          "cancel": "再選択",
+          "confirm": "トリミング確認",
+          "uploading": "アップロード中..."
+        },
         "uploadArea": {
           "uploading": "アップロード中...",
           "changeAvatar": "クリックしてアバターを変更",

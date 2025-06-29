@@ -110,7 +110,7 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       try {
         await refreshProfile();
       } catch (error) {
-        console.error('刷新profile失败:', error);
+        console.error('Profile refresh failed:', error);
       }
 
       // 调用成功回调，通知父组件
@@ -285,14 +285,22 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}
                 />
-                {/* 悬停时显示编辑图标 - 确保与头像大小一致 */}
+                {/* 悬停时显示编辑提示文字 */}
                 <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-all duration-300 group-hover:opacity-100">
-                  <div className="flex flex-col items-center space-y-1">
-                    <Camera className="h-5 w-5 text-white" />
-                    <span className="text-xs font-medium text-white">
-                      {t('avatar.editHover')}
-                    </span>
-                  </div>
+                  <span className="text-xs font-medium text-white">
+                    {t('avatar.editHover')}
+                  </span>
+                </div>
+                {/* 右下角编辑指示器 */}
+                <div
+                  className={cn(
+                    'absolute right-0 bottom-0 flex h-5 w-5 items-center justify-center rounded-full border shadow-sm transition-all duration-300 group-hover:scale-105',
+                    isDark
+                      ? 'border-stone-700 bg-stone-600 text-stone-200 group-hover:bg-stone-500'
+                      : 'border-white bg-stone-200 text-stone-600 group-hover:bg-stone-300'
+                  )}
+                >
+                  <Camera className="h-2.5 w-2.5" />
                 </div>
               </div>
             ) : (
@@ -312,14 +320,22 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
                     profile.username ||
                     t('avatar.defaultUser')
                 )}
-                {/* 悬停时显示编辑图标 - 确保与头像大小一致 */}
+                {/* 悬停时显示编辑提示文字 */}
                 <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-all duration-300 group-hover:opacity-100">
-                  <div className="flex flex-col items-center space-y-1">
-                    <Camera className="h-4 w-4 text-white" />
-                    <span className="text-xs font-medium text-white">
-                      {t('avatar.editHover')}
-                    </span>
-                  </div>
+                  <span className="text-xs font-medium text-white">
+                    {t('avatar.editHover')}
+                  </span>
+                </div>
+                {/* 右下角编辑指示器 */}
+                <div
+                  className={cn(
+                    'absolute right-0 bottom-0 flex h-5 w-5 items-center justify-center rounded-full border shadow-sm transition-all duration-300 group-hover:scale-105',
+                    isDark
+                      ? 'border-stone-700 bg-stone-600 text-stone-200 group-hover:bg-stone-500'
+                      : 'border-white bg-stone-200 text-stone-600 group-hover:bg-stone-300'
+                  )}
+                >
+                  <Camera className="h-2.5 w-2.5" />
                 </div>
               </div>
             )}

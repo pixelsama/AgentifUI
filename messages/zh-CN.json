@@ -721,6 +721,12 @@
         "subtitle": "点击上传或拖拽图片到下方区域",
         "currentAvatar": "当前头像",
         "supportedFormats": "支持 JPEG、JPG、PNG、WebP 格式 • 最大 5MB",
+        "crop": {
+          "zoom": "缩放",
+          "cancel": "重新选择",
+          "confirm": "确认裁切",
+          "uploading": "上传中..."
+        },
         "uploadArea": {
           "uploading": "正在上传...",
           "changeAvatar": "点击更换头像",
