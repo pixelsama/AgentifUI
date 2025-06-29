@@ -12,6 +12,7 @@ export { PageLoader } from './page-loader';
 export { NotificationBar } from './notification-bar';
 export { ConfirmDialog } from './confirm-dialog';
 export { InputDialog } from './input-dialog';
+export { LogoutConfirmDialog } from './logout-confirm-dialog';
 
 export { PinButton } from './pin-button';
 export { Popover, PopoverItem, PopoverDivider } from './popover';

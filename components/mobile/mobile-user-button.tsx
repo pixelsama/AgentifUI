@@ -1,5 +1,6 @@
 'use client';
 
+import { LogoutConfirmDialog } from '@components/ui';
 import { useMobile } from '@lib/hooks/use-mobile';
 import { useProfile } from '@lib/hooks/use-profile';
 import { useTheme } from '@lib/hooks/use-theme';
@@ -23,6 +24,7 @@ export function MobileUserButton() {
   const isMobile = useMobile();
   const { isExpanded } = useSidebarStore();
   const [isOpen, setIsOpen] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const t = useTranslations('mobile.user');
   const tNav = useTranslations('mobile.navigation');
 
@@ -84,6 +86,12 @@ export function MobileUserButton() {
 
   return (
     <>
+      {/* 退出登录确认对话框 */}
+      <LogoutConfirmDialog
+        isOpen={showLogoutDialog}
+        onClose={() => setShowLogoutDialog(false)}
+      />
+
       <button
         onClick={handleOpenBottomSheet}
         className={cn(
@@ -156,6 +164,7 @@ export function MobileUserButton() {
         isOpen={isOpen}
         onClose={handleCloseBottomSheet}
         isLoggedIn={!!isLoggedIn}
+        onLogoutClick={() => setShowLogoutDialog(true)}
       />
     </>
   );

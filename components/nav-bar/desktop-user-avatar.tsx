@@ -1,5 +1,6 @@
 'use client';
 
+import { LogoutConfirmDialog } from '@components/ui';
 import { useLogout } from '@lib/hooks/use-logout';
 import { useProfile } from '@lib/hooks/use-profile';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
@@ -52,6 +53,7 @@ export function DesktopUserAvatar() {
   const [currentTheme, setCurrentTheme] = useState(() => getThemeFromCache());
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -146,9 +148,9 @@ export function DesktopUserAvatar() {
     setHoveredItem(null);
   };
 
-  // 处理退出登录
-  const handleLogout = async () => {
-    await logout();
+  // 处理退出登录 - 显示确认对话框
+  const handleLogout = () => {
+    setShowLogoutDialog(true);
     setIsDropdownOpen(false);
     setHoveredItem(null);
   };
@@ -199,257 +201,265 @@ export function DesktopUserAvatar() {
   const effectiveTheme = currentTheme;
 
   return (
-    <div className="relative mr-2">
-      {/* 纯圆形头像按钮 - 使用内联样式避免闪烁 */}
-      <button
-        ref={triggerRef}
-        onClick={toggleDropdown}
-        className="relative cursor-pointer rounded-full transition-all duration-200 focus:outline-none"
-        style={{
-          padding: 0,
-          width: '32px',
-          height: '32px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-        aria-label={isLoggedIn ? t('userMenu') : t('login')}
-      >
-        {isLoggedIn ? (
-          <>
-            {/* 纯圆形头像 - 无边框 */}
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={`${userName}的头像`}
-                className="h-8 w-8 rounded-full object-cover transition-transform duration-200 hover:scale-105"
-                style={{
-                  border: 'none',
-                }}
-                onError={e => {
-                  // 头像加载失败时隐藏图片
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            ) : (
-              <div
-                className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium text-white transition-transform duration-200 hover:scale-105"
-                style={{
-                  backgroundColor: getAvatarBgColor(userName),
-                  border: 'none',
-                }}
-              >
-                {getInitials(userName)}
-              </div>
-            )}
-          </>
-        ) : (
-          <div
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: effectiveTheme ? '#57534e' : '#f5f5f4',
-              color: effectiveTheme ? '#e7e5e4' : '#57534e',
-              border: `2px solid ${effectiveTheme ? '#44403c' : '#d6d3d1'}`,
-              transition: 'all 0.2s',
-            }}
-          >
-            <UserCircle size={16} />
-          </div>
-        )}
-      </button>
+    <>
+      {/* 退出登录确认对话框 */}
+      <LogoutConfirmDialog
+        isOpen={showLogoutDialog}
+        onClose={() => setShowLogoutDialog(false)}
+      />
 
-      {/* 下拉菜单 */}
-      {isDropdownOpen && (
-        <div
-          ref={dropdownRef}
-          className="animate-slide-in-down absolute top-10 right-0 z-50 w-64 rounded-xl p-2 shadow-xl"
+      <div className="relative mr-2">
+        {/* 纯圆形头像按钮 - 使用内联样式避免闪烁 */}
+        <button
+          ref={triggerRef}
+          onClick={toggleDropdown}
+          className="relative cursor-pointer rounded-full transition-all duration-200 focus:outline-none"
           style={{
-            backgroundColor: colors.mainBackground.rgb,
-            border: `1px solid ${effectiveTheme ? '#44403c' : '#e7e5e4'}`,
+            padding: 0,
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
+          aria-label={isLoggedIn ? t('userMenu') : t('login')}
         >
           {isLoggedIn ? (
             <>
-              {/* 用户信息头部 - 无头像版本 */}
-              <div
-                className="mb-2 rounded-lg p-3"
-                style={{
-                  backgroundColor: effectiveTheme
-                    ? 'rgba(120, 113, 108, 0.3)'
-                    : 'rgba(231, 229, 228, 0.8)',
-                }}
-              >
-                <div className="flex items-center">
-                  <div className="min-w-0 flex-1">
-                    <p
-                      className="truncate font-serif text-sm font-semibold"
-                      style={{
-                        color: effectiveTheme ? '#f5f5f4' : '#1c1917',
-                      }}
-                    >
-                      {userName}
-                    </p>
-                    <p
-                      className="truncate font-serif text-xs"
-                      style={{
-                        color: effectiveTheme ? '#a8a29e' : '#78716c',
-                      }}
-                    >
-                      {userCompany}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* 分割线 */}
-              <div
-                className="mb-2 h-px"
-                style={{
-                  backgroundColor: effectiveTheme ? '#44403c' : '#e7e5e4',
-                }}
-              />
-
-              {/* 菜单项 */}
-              <div className="space-y-1">
-                {allMenuItems.map((item, index) => {
-                  const itemKey = `menu-${index}`;
-                  const isHovered = hoveredItem === itemKey;
-
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => handleMenuItemClick(item.action)}
-                      className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors duration-150 focus:outline-none"
-                      style={{
-                        backgroundColor: isHovered
-                          ? effectiveTheme
-                            ? 'rgba(68, 64, 60, 0.5)'
-                            : 'rgba(231, 229, 228, 1)'
-                          : 'transparent',
-                        color: effectiveTheme ? '#d6d3d1' : '#44403c',
-                      }}
-                      onMouseEnter={() => setHoveredItem(itemKey)}
-                      onMouseLeave={() => setHoveredItem(null)}
-                    >
-                      <item.icon
-                        className="h-4 w-4"
-                        style={{
-                          color: effectiveTheme ? '#a8a29e' : '#57534e',
-                        }}
-                      />
-                      <span
-                        className="flex-1 font-serif text-sm"
-                        style={{
-                          color: effectiveTheme ? '#d6d3d1' : '#44403c',
-                        }}
-                      >
-                        {item.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* 分割线 */}
-              <div
-                className="my-2 h-px"
-                style={{
-                  backgroundColor: effectiveTheme ? '#44403c' : '#e7e5e4',
-                }}
-              />
-
-              {/* 退出登录 */}
-              <button
-                onClick={handleLogout}
-                className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors duration-150 focus:outline-none"
-                style={{
-                  color: '#dc2626',
-                  backgroundColor:
-                    hoveredItem === 'logout'
-                      ? effectiveTheme
-                        ? 'rgba(153, 27, 27, 0.2)'
-                        : 'rgba(254, 226, 226, 1)'
-                      : 'transparent',
-                }}
-                onMouseEnter={() => setHoveredItem('logout')}
-                onMouseLeave={() => setHoveredItem(null)}
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="font-serif text-sm">{t('logout')}</span>
-              </button>
-            </>
-          ) : (
-            <div className="p-4">
-              {/* 未登录状态 */}
-              <div
-                className="mb-6 rounded-xl px-4 py-6 text-center"
-                style={{
-                  backgroundColor: effectiveTheme
-                    ? 'rgba(120, 113, 108, 0.3)'
-                    : 'rgba(231, 229, 228, 0.8)',
-                  color: effectiveTheme ? '#d6d3d1' : '#57534e',
-                }}
-              >
-                <UserCircle
-                  className="mx-auto mb-3 h-16 w-16"
+              {/* 纯圆形头像 - 无边框 */}
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={`${userName}的头像`}
+                  className="h-8 w-8 rounded-full object-cover transition-transform duration-200 hover:scale-105"
                   style={{
-                    color: effectiveTheme ? '#a8a29e' : '#78716c',
+                    border: 'none',
+                  }}
+                  onError={e => {
+                    // 头像加载失败时隐藏图片
+                    (e.target as HTMLImageElement).style.display = 'none';
                   }}
                 />
-                <p className="font-serif font-medium">{t('loginPrompt')}</p>
-                <p className="mt-1 font-serif text-sm opacity-75">
-                  {t('loginDescription')}
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <button
-                  onClick={() =>
-                    handleMenuItemClick(() => router.push('/login'))
-                  }
-                  className="w-full transform rounded-xl px-4 py-3 text-center font-serif font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
+              ) : (
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium text-white transition-transform duration-200 hover:scale-105"
                   style={{
-                    backgroundColor:
-                      hoveredItem === 'login' ? '#44403c' : '#57534e',
+                    backgroundColor: getAvatarBgColor(userName),
+                    border: 'none',
                   }}
-                  onMouseEnter={() => setHoveredItem('login')}
-                  onMouseLeave={() => setHoveredItem(null)}
                 >
-                  {t('login')}
-                </button>
-
-                <button
-                  onClick={() =>
-                    handleMenuItemClick(() => router.push('/register'))
-                  }
-                  className="w-full transform rounded-xl px-4 py-3 text-center font-serif font-medium shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
-                  style={{
-                    backgroundColor:
-                      hoveredItem === 'register'
-                        ? effectiveTheme
-                          ? '#57534e'
-                          : '#d6d3d1'
-                        : effectiveTheme
-                          ? '#44403c'
-                          : '#f5f5f4',
-                    color: effectiveTheme ? '#e7e5e4' : '#44403c',
-                    border: `1px solid ${effectiveTheme ? '#57534e' : '#d6d3d1'}`,
-                  }}
-                  onMouseEnter={() => setHoveredItem('register')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  {t('register')}
-                </button>
-              </div>
+                  {getInitials(userName)}
+                </div>
+              )}
+            </>
+          ) : (
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: effectiveTheme ? '#57534e' : '#f5f5f4',
+                color: effectiveTheme ? '#e7e5e4' : '#57534e',
+                border: `2px solid ${effectiveTheme ? '#44403c' : '#d6d3d1'}`,
+                transition: 'all 0.2s',
+              }}
+            >
+              <UserCircle size={16} />
             </div>
           )}
-        </div>
-      )}
-    </div>
+        </button>
+
+        {/* 下拉菜单 */}
+        {isDropdownOpen && (
+          <div
+            ref={dropdownRef}
+            className="animate-slide-in-down absolute top-10 right-0 z-50 w-64 rounded-xl p-2 shadow-xl"
+            style={{
+              backgroundColor: colors.mainBackground.rgb,
+              border: `1px solid ${effectiveTheme ? '#44403c' : '#e7e5e4'}`,
+            }}
+          >
+            {isLoggedIn ? (
+              <>
+                {/* 用户信息头部 - 无头像版本 */}
+                <div
+                  className="mb-2 rounded-lg p-3"
+                  style={{
+                    backgroundColor: effectiveTheme
+                      ? 'rgba(120, 113, 108, 0.3)'
+                      : 'rgba(231, 229, 228, 0.8)',
+                  }}
+                >
+                  <div className="flex items-center">
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className="truncate font-serif text-sm font-semibold"
+                        style={{
+                          color: effectiveTheme ? '#f5f5f4' : '#1c1917',
+                        }}
+                      >
+                        {userName}
+                      </p>
+                      <p
+                        className="truncate font-serif text-xs"
+                        style={{
+                          color: effectiveTheme ? '#a8a29e' : '#78716c',
+                        }}
+                      >
+                        {userCompany}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 分割线 */}
+                <div
+                  className="mb-2 h-px"
+                  style={{
+                    backgroundColor: effectiveTheme ? '#44403c' : '#e7e5e4',
+                  }}
+                />
+
+                {/* 菜单项 */}
+                <div className="space-y-1">
+                  {allMenuItems.map((item, index) => {
+                    const itemKey = `menu-${index}`;
+                    const isHovered = hoveredItem === itemKey;
+
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => handleMenuItemClick(item.action)}
+                        className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors duration-150 focus:outline-none"
+                        style={{
+                          backgroundColor: isHovered
+                            ? effectiveTheme
+                              ? 'rgba(68, 64, 60, 0.5)'
+                              : 'rgba(231, 229, 228, 1)'
+                            : 'transparent',
+                          color: effectiveTheme ? '#d6d3d1' : '#44403c',
+                        }}
+                        onMouseEnter={() => setHoveredItem(itemKey)}
+                        onMouseLeave={() => setHoveredItem(null)}
+                      >
+                        <item.icon
+                          className="h-4 w-4"
+                          style={{
+                            color: effectiveTheme ? '#a8a29e' : '#57534e',
+                          }}
+                        />
+                        <span
+                          className="flex-1 font-serif text-sm"
+                          style={{
+                            color: effectiveTheme ? '#d6d3d1' : '#44403c',
+                          }}
+                        >
+                          {item.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* 分割线 */}
+                <div
+                  className="my-2 h-px"
+                  style={{
+                    backgroundColor: effectiveTheme ? '#44403c' : '#e7e5e4',
+                  }}
+                />
+
+                {/* 退出登录 */}
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors duration-150 focus:outline-none"
+                  style={{
+                    color: '#dc2626',
+                    backgroundColor:
+                      hoveredItem === 'logout'
+                        ? effectiveTheme
+                          ? 'rgba(153, 27, 27, 0.2)'
+                          : 'rgba(254, 226, 226, 1)'
+                        : 'transparent',
+                  }}
+                  onMouseEnter={() => setHoveredItem('logout')}
+                  onMouseLeave={() => setHoveredItem(null)}
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="font-serif text-sm">{t('logout')}</span>
+                </button>
+              </>
+            ) : (
+              <div className="p-4">
+                {/* 未登录状态 */}
+                <div
+                  className="mb-6 rounded-xl px-4 py-6 text-center"
+                  style={{
+                    backgroundColor: effectiveTheme
+                      ? 'rgba(120, 113, 108, 0.3)'
+                      : 'rgba(231, 229, 228, 0.8)',
+                    color: effectiveTheme ? '#d6d3d1' : '#57534e',
+                  }}
+                >
+                  <UserCircle
+                    className="mx-auto mb-3 h-16 w-16"
+                    style={{
+                      color: effectiveTheme ? '#a8a29e' : '#78716c',
+                    }}
+                  />
+                  <p className="font-serif font-medium">{t('loginPrompt')}</p>
+                  <p className="mt-1 font-serif text-sm opacity-75">
+                    {t('loginDescription')}
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={() =>
+                      handleMenuItemClick(() => router.push('/login'))
+                    }
+                    className="w-full transform rounded-xl px-4 py-3 text-center font-serif font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
+                    style={{
+                      backgroundColor:
+                        hoveredItem === 'login' ? '#44403c' : '#57534e',
+                    }}
+                    onMouseEnter={() => setHoveredItem('login')}
+                    onMouseLeave={() => setHoveredItem(null)}
+                  >
+                    {t('login')}
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      handleMenuItemClick(() => router.push('/register'))
+                    }
+                    className="w-full transform rounded-xl px-4 py-3 text-center font-serif font-medium shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
+                    style={{
+                      backgroundColor:
+                        hoveredItem === 'register'
+                          ? effectiveTheme
+                            ? '#57534e'
+                            : '#d6d3d1'
+                          : effectiveTheme
+                            ? '#44403c'
+                            : '#f5f5f4',
+                      color: effectiveTheme ? '#e7e5e4' : '#44403c',
+                      border: `1px solid ${effectiveTheme ? '#57534e' : '#d6d3d1'}`,
+                    }}
+                    onMouseEnter={() => setHoveredItem('register')}
+                    onMouseLeave={() => setHoveredItem(null)}
+                  >
+                    {t('register')}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </>
   );
 }

@@ -17,6 +17,7 @@ interface UserBottomSheetProps {
   isOpen: boolean;
   onClose: () => void;
   isLoggedIn: boolean;
+  onLogoutClick?: () => void;
 }
 
 /**
@@ -29,6 +30,7 @@ export function UserBottomSheet({
   isOpen,
   onClose,
   isLoggedIn,
+  onLogoutClick,
 }: UserBottomSheetProps) {
   const { isDark, toggleTheme } = useTheme();
   const { logout } = useLogout();
@@ -56,10 +58,12 @@ export function UserBottomSheet({
     onClose();
   };
 
-  // 处理退出登录
-  const handleLogout = async () => {
-    await logout();
-    onClose();
+  // 处理退出登录 - 触发确认对话框
+  const handleLogout = () => {
+    if (onLogoutClick) {
+      onLogoutClick();
+      onClose();
+    }
   };
 
   // 渲染菜单项
