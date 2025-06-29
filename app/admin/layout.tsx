@@ -4,7 +4,6 @@ import { useTheme } from '@lib/hooks/use-theme';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { cn } from '@lib/utils';
 import {
-  BarChart3,
   Bell,
   Building2,
   ChevronRight,
@@ -20,7 +19,6 @@ import {
   Plus,
   Search,
   Settings,
-  Shield,
   ShieldCheck,
   Users,
   Wrench,
@@ -95,18 +93,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: Building2,
       href: '/admin/organizations',
       description: '管理组织结构和部门权限',
-    },
-    {
-      text: '数据统计',
-      icon: BarChart3,
-      href: '/admin/analytics',
-      description: '查看使用情况和分析',
-    },
-    {
-      text: '安全设置',
-      icon: Shield,
-      href: '/admin/security',
-      description: '配置安全策略和审计',
     },
   ];
 
