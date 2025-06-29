@@ -27,6 +27,24 @@ export interface AvatarUploadResult {
 }
 
 // --- BEGIN COMMENT ---
+// 从头像URL中提取文件路径的辅助函数
+// --- END COMMENT ---
+const extractFilePathFromUrl = (url: string): string | null => {
+  try {
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname.split('/');
+    const bucketIndex = pathParts.indexOf('avatars');
+
+    if (bucketIndex !== -1 && bucketIndex < pathParts.length - 1) {
+      return pathParts.slice(bucketIndex + 1).join('/');
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+// --- BEGIN COMMENT ---
 // 头像上传Hook
 // 提供完整的头像上传、删除、URL生成功能
 // --- END COMMENT ---
@@ -94,7 +112,7 @@ export function useAvatarUpload() {
   );
 
   // --- BEGIN COMMENT ---
-  // 上传头像函数
+  // 上传头像函数（包含自动清理旧文件）
   // --- END COMMENT ---
   const uploadAvatar = useCallback(
     async (file: File, userId: string): Promise<AvatarUploadResult> => {
@@ -113,10 +131,17 @@ export function useAvatarUpload() {
       }));
 
       try {
-        // 生成文件路径
+        // 1. 获取当前头像URL（用于后续删除旧文件）
+        const { data: currentProfile } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', userId)
+          .single();
+
+        // 2. 生成新文件路径
         const filePath = generateFilePath(userId, file.name);
 
-        // 上传到 Supabase Storage
+        // 3. 上传新头像到 Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('avatars')
           .upload(filePath, file, {
@@ -130,7 +155,7 @@ export function useAvatarUpload() {
           );
         }
 
-        // 获取公共 URL
+        // 4. 获取公共 URL
         const { data: urlData } = supabase.storage
           .from('avatars')
           .getPublicUrl(filePath);
@@ -139,7 +164,7 @@ export function useAvatarUpload() {
           throw new Error(t('errors.getUrlFailed'));
         }
 
-        // 更新数据库中的头像URL
+        // 5. 更新数据库中的头像URL
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
@@ -152,6 +177,21 @@ export function useAvatarUpload() {
           throw new Error(
             t('errors.updateDatabaseFailed', { message: updateError.message })
           );
+        }
+
+        // 6. 删除旧头像文件（如果存在）
+        // 使用静默删除，不影响主流程
+        if (currentProfile?.avatar_url) {
+          const oldFilePath = extractFilePathFromUrl(currentProfile.avatar_url);
+          if (oldFilePath) {
+            // 静默删除，即使失败也不影响新头像上传成功
+            supabase.storage
+              .from('avatars')
+              .remove([oldFilePath])
+              .catch(error => {
+                console.warn('删除旧头像文件失败（不影响主流程）:', error);
+              });
+          }
         }
 
         setState(prev => ({
