@@ -1,6 +1,6 @@
 'use client';
 
-import { NavBar } from '@components/nav-bar';
+// NavBar 已移至根布局，无需导入
 import { WorkflowLayout } from '@components/workflow/workflow-layout';
 import { useCurrentApp } from '@lib/hooks/use-current-app';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
@@ -244,8 +244,7 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
         colors.mainText.tailwind
       )}
     >
-      {/* --- 顶部导航栏 --- */}
-      <NavBar />
+      {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
 
       {/* --- 主内容区域，为 NavBar 留出空间 --- */}
       <div className="h-full overflow-hidden pt-12">

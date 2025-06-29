@@ -7,7 +7,7 @@ import { AppFilters, AppHeader, AppList, AppLoading } from '@components/apps';
 // 这样可以显示来自不同提供商的应用市场应用
 // --- END COMMENT ---
 import type { AppInstance } from '@components/apps/types';
-import { NavBar } from '@components/nav-bar';
+// NavBar 已移至根布局，无需导入
 import { useMobile } from '@lib/hooks';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { useAppListStore } from '@lib/stores/app-list-store';
@@ -246,7 +246,7 @@ export default function AppsPage() {
 
   return (
     <>
-      <NavBar />
+      {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
 
       <div
         className={cn(

@@ -1,5 +1,6 @@
 // 导入动态标题组件
 import { StagewiseToolbarWrapper } from '@components/dev/stagewise-toolbar';
+import { ConditionalNavBar } from '@components/nav-bar';
 import { ConditionalSidebar } from '@components/sidebar/conditional-sidebar';
 // 确保导入 Providers 组件
 import { DynamicTitle } from '@components/ui/dynamic-title';
@@ -110,6 +111,8 @@ export default async function RootLayout({
             <ClientLayout fontClasses={fontClasses}>
               {/* 🎯 条件渲染 Sidebar - 根据路由决定是否显示，避免路由切换时重新挂载 */}
               <ConditionalSidebar />
+              {/* 🎯 条件渲染 NavBar - 根据路由决定是否显示，避免路由切换时重新挂载导致的闪烁 */}
+              <ConditionalNavBar />
               {children}
               <TooltipContainer />
               <NotificationBar />

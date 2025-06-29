@@ -1,7 +1,6 @@
 'use client';
 
 import { History } from '@components/history';
-import { NavBar } from '@components/nav-bar';
 import { useTheme } from '@lib/hooks/use-theme';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { cn } from '@lib/utils';
@@ -31,8 +30,7 @@ export default function HistoryPage() {
 
   return (
     <>
-      {/* --- 添加导航栏 --- */}
-      <NavBar />
+      {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
 
       <div
         className={cn(

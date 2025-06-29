@@ -1,7 +1,6 @@
 'use client';
 
 import { MobileNavButton } from '@components/mobile';
-import { NavBar } from '@components/nav-bar';
 import { SettingsMobileNav, SettingsSidebar } from '@components/settings';
 import { useMobile } from '@lib/hooks';
 import { useSettingsColors } from '@lib/hooks/use-settings-colors';
@@ -39,8 +38,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
     >
       {/* 🎯 Sidebar 已移至根布局，无需重复渲染 */}
 
-      {/* --- 添加导航栏 --- */}
-      <NavBar />
+      {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
 
       {/* 
         移动端导航按钮 - 仅在客户端挂载后显示 

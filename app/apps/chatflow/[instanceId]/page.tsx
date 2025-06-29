@@ -10,7 +10,7 @@ import { ChatInput } from '@components/chat-input';
 import { ChatflowFloatingController } from '@components/chatflow/chatflow-floating-controller';
 import { ChatflowInputArea } from '@components/chatflow/chatflow-input-area';
 import { ChatflowNodeTracker } from '@components/chatflow/chatflow-node-tracker';
-import { NavBar } from '@components/nav-bar/nav-bar';
+// NavBar 已移至根布局，无需导入
 import {
   useChatInterface,
   useChatScroll,
@@ -461,7 +461,7 @@ export default function AppDetailPage() {
         colors.mainText.tailwind
       )}
     >
-      <NavBar />
+      {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
 
       {/* --- BEGIN COMMENT ---
       主要内容区域 - 使用简化的布局结构

@@ -16,7 +16,7 @@ import { DynamicSuggestedQuestions } from '@components/chat/dynamic-suggested-qu
 import { ChatflowFloatingController } from '@components/chatflow/chatflow-floating-controller';
 import { ChatflowNodeTracker } from '@components/chatflow/chatflow-node-tracker';
 import { FilePreviewCanvas } from '@components/file-preview/file-preview-canvas';
-import { NavBar } from '@components/nav-bar/nav-bar';
+// NavBar 已移至根布局，无需导入
 import { useChatInterface, useChatStateSync } from '@lib/hooks';
 import { useMobile } from '@lib/hooks';
 import { useChatPageState } from '@lib/hooks/use-chat-page-state';
@@ -166,7 +166,7 @@ export default function ChatPage() {
         colors.mainText.tailwind
       )}
     >
-      <NavBar />
+      {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
       <div
         className={cn(
           'relative flex min-h-0 flex-1 flex-col overflow-hidden',

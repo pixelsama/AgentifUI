@@ -8,7 +8,7 @@ import {
 } from '@components/chat';
 import { ChatInput } from '@components/chat-input';
 import { DynamicSuggestedQuestions } from '@components/chat/dynamic-suggested-questions';
-import { NavBar } from '@components/nav-bar/nav-bar';
+// NavBar 已移至根布局，无需导入
 import {
   useChatInterface,
   useChatScroll,
@@ -431,7 +431,7 @@ export default function AppDetailPage() {
         colors.mainText.tailwind
       )}
     >
-      <NavBar />
+      {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
 
       {/* --- BEGIN COMMENT ---
       主要内容区域 - 使用简化的布局结构

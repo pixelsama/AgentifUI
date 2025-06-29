@@ -4,7 +4,7 @@ import { MobileNavButton } from '@components/mobile';
 import { useMobile } from '@lib/hooks';
 import { useTheme } from '@lib/hooks/use-theme';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
-// import { NavBar } from "@components/nav-bar/nav-bar" // NavBar 将在 Page 中引入
+// NavBar 已移至根布局，无需在此处引入
 import { cn } from '@lib/utils';
 
 interface ChatLayoutProps {
