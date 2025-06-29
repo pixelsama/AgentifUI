@@ -647,32 +647,32 @@
       "navigation": {
         "overview": "概览",
         "profileNav": "个人资料",
-        "accountNav": "账号",
+        "accountNav": "账户",
         "appearanceNav": "外观",
         "languageNav": "语言"
       },
       "descriptions": {
         "overview": "管理您的个人偏好，自定义应用体验",
-        "profileDesc": "更新个人信息、头像和账号设置",
-        "accountDesc": "管理您的账号安全和登录信息",
+        "profileDesc": "更新个人信息、头像和账户设置",
+        "accountDesc": "管理您的账户安全和登录信息",
         "appearanceDesc": "自定义主题、颜色和界面布局",
         "languageDesc": "选择您偏好的显示语言和地区设置"
       },
       "accountSettings": {
-        "title": "账号设置",
-        "accountInfo": "账号信息",
+        "title": "账户设置",
+        "accountInfo": "账户信息",
         "loginEmail": "登录邮箱",
         "authMethod": "认证方式",
         "emailPasswordAuth": "邮箱密码",
         "securitySettings": "安全设置",
-        "logoutAccount": "退出当前账号",
+        "logoutAccount": "退出当前账户",
         "confirmLogout": "确定要退出登录吗？",
         "confirmLogoutBtn": "确认退出",
         "logout": "退出登录",
         "loggingOut": "退出中...",
-        "loadAccountError": "加载账号信息时出错",
+        "loadAccountError": "加载账户信息时出错",
         "retry": "重试",
-        "deleteAccount": "删除账号"
+        "deleteAccount": "删除账户"
       },
       "profileSettings": {
         "title": "个人资料",
@@ -952,7 +952,7 @@
     "settings": {
       "main": "设置",
       "profile": "个人资料",
-      "account": "账号设置",
+      "account": "账户设置",
       "appearance": "外观设置",
       "language": "语言设置"
     },

@@ -647,32 +647,32 @@
       "navigation": {
         "overview": "概覽",
         "profileNav": "個人資料",
-        "accountNav": "帳號",
+        "accountNav": "帳戶",
         "appearanceNav": "外觀",
         "languageNav": "語言"
       },
       "descriptions": {
         "overview": "管理您的個人偏好，自訂應用程式體驗",
-        "profileDesc": "更新個人資訊、頭像和帳號設定",
-        "accountDesc": "管理您的帳號安全和登入資訊",
+        "profileDesc": "更新個人資訊、頭像和帳戶設定",
+        "accountDesc": "管理您的帳戶安全和登入資訊",
         "appearanceDesc": "自訂主題、顏色和介面配置",
         "languageDesc": "選擇您偏好的顯示語言和地區設定"
       },
       "accountSettings": {
-        "title": "帳號設定",
-        "accountInfo": "帳號資訊",
+        "title": "帳戶設定",
+        "accountInfo": "帳戶資訊",
         "loginEmail": "登入電子郵件",
         "authMethod": "認證方式",
         "emailPasswordAuth": "電子郵件密碼",
         "securitySettings": "安全設定",
-        "logoutAccount": "登出目前帳號",
+        "logoutAccount": "登出目前帳戶",
         "confirmLogout": "確定要登出嗎？",
         "confirmLogoutBtn": "確認登出",
         "logout": "登出",
         "loggingOut": "登出中...",
-        "loadAccountError": "載入帳號資訊時發生錯誤",
+        "loadAccountError": "載入帳戶資訊時發生錯誤",
         "retry": "重試",
-        "deleteAccount": "刪除帳號"
+        "deleteAccount": "刪除帳戶"
       },
       "profileSettings": {
         "title": "個人資料",
@@ -931,7 +931,7 @@
       "settings": "設定",
       "lightMode": "亮色模式",
       "darkMode": "暗色模式",
-      "logout": "退出登入",
+      "logout": "登出",
       "login": "登入",
       "register": "註冊新帳戶"
     }
@@ -952,7 +952,7 @@
     "settings": {
       "main": "設定",
       "profile": "個人資料",
-      "account": "帳號設定",
+      "account": "帳戶設定",
       "appearance": "外觀設定",
       "language": "語言設定"
     },

@@ -48,7 +48,7 @@
         "night": "Se está haciendo tarde"
       },
       "recentChats": "Chats Recientes",
-      "historyChats": "Historial de Chats",
+      "historyChats": "Historial de Chat",
       "input": {
         "placeholder": "Escribe tu mensaje...",
         "sendMessage": "Enviar mensaje",
@@ -879,7 +879,7 @@
     "expand": "Expandir",
     "collapse": "Contraer",
     "newChat": "Nuevo Chat",
-    "historyChats": "Historial de Chats",
+    "historyChats": "Historial de Chat",
     "appsMarket": "Mercado de Aplicaciones",
     "settings": "Configuración",
     "recentChats": "Chats Recientes",
