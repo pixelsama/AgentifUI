@@ -457,14 +457,6 @@ export function SidebarChatList({
   };
 
   // --- BEGIN COMMENT ---
-  // 判断是否显示骨架屏
-  // 只有在首次加载或强制刷新时才显示骨架屏
-  // 如果有上一次成功加载的对话列表，则使用缓存的列表，避免闪烁
-  // --- END COMMENT ---
-  // const showSkeleton = isLoadingConversations && conversations.length === 0 && prevLoadedConversations.length === 0;
-  // const showSkeleton = false;
-
-  // --- BEGIN COMMENT ---
   // 🎯 修复：当没有对话时完全隐藏，与常用应用保持一致
   // --- END COMMENT ---
   const hasAnyConversations =
@@ -479,29 +471,29 @@ export function SidebarChatList({
       <div className="flex flex-col space-y-1">
         {/* --- BEGIN COMMENT ---
         // 近期对话粘性标题栏：模仿常用应用的样式，添加粘性定位
+        // 🎯 修复：只有在有对话时才显示标题，避免出现后消失的问题
         // --- END COMMENT --- */}
-        <div
-          className={cn(
-            'sticky top-0 z-40 ml-[6px] flex items-center px-2 py-1 font-serif text-xs font-medium',
-            // --- BEGIN COMMENT ---
-            // 使用与sidebar相同的背景色，确保粘性效果完美
-            // 确保z-index足够高，完全覆盖下方内容
-            // --- END COMMENT ---
-            colors.sidebarBackground.tailwind
-          )}
-        >
-          <span
+        {hasAnyConversations && (
+          <div
             className={cn(
-              'font-serif text-xs leading-none font-medium',
-              isDark ? 'text-stone-400' : 'text-stone-500'
+              'sticky top-0 z-40 ml-[6px] flex items-center px-2 py-1 font-serif text-xs font-medium',
+              // --- BEGIN COMMENT ---
+              // 使用与sidebar相同的背景色，确保粘性效果完美
+              // 确保z-index足够高，完全覆盖下方内容
+              // --- END COMMENT ---
+              colors.sidebarBackground.tailwind
             )}
           >
-            {t('recentChats')}
-          </span>
-        </div>
-
-        {/* 显示骨架屏 */}
-        {/* {showSkeleton && <ChatSkeleton isDark={isDark} count={5} />} */}
+            <span
+              className={cn(
+                'font-serif text-xs leading-none font-medium',
+                isDark ? 'text-stone-400' : 'text-stone-500'
+              )}
+            >
+              {t('recentChats')}
+            </span>
+          </div>
+        )}
 
         {/* --- 待处理对话列表 --- */}
         {pendingChats.length > 0 && (
