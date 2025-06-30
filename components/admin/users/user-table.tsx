@@ -5,6 +5,7 @@ import type { EnhancedUser } from '@lib/db/users';
 import { useProfile } from '@lib/hooks/use-profile';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
+import { getAvatarBgColor, getInitials } from '@lib/utils/avatar';
 import {
   CheckSquare,
   Clock,
@@ -451,21 +452,72 @@ export const UserTable: React.FC<UserTableProps> = ({
                   </td>
 
                   {/* --- BEGIN COMMENT ---
-                  用户信息列 - 优化布局和截断处理
+                  用户信息列 - 包含头像和用户信息
                   --- END COMMENT --- */}
                   <td className="px-4 py-4">
-                    <div className="flex items-center space-x-2">
-                      {/* 移除组织信息显示 */}
-                      <div className="flex flex-col">
+                    <div className="flex items-center space-x-3">
+                      {/* 用户头像 */}
+                      <div className="relative flex-shrink-0">
+                        {user.avatar_url ? (
+                          <img
+                            src={user.avatar_url}
+                            alt={`${user.full_name || user.username || '用户'}的头像`}
+                            className="h-10 w-10 rounded-full object-cover"
+                            onError={e => {
+                              // 头像加载失败时显示默认头像
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                const fallback = parent.querySelector(
+                                  '.avatar-fallback'
+                                ) as HTMLElement;
+                                if (fallback) {
+                                  fallback.style.display = 'flex';
+                                }
+                              }
+                            }}
+                          />
+                        ) : null}
+                        {/* 默认头像（当没有头像或加载失败时显示） */}
+                        <div
+                          className={cn(
+                            'avatar-fallback absolute inset-0 flex h-10 w-10 items-center justify-center rounded-full text-xs font-medium text-white',
+                            user.avatar_url ? 'hidden' : 'flex'
+                          )}
+                          style={{
+                            backgroundColor: getAvatarBgColor(
+                              user.full_name || user.username || '未设置'
+                            ),
+                          }}
+                        >
+                          {getInitials(
+                            user.full_name || user.username || '未设置'
+                          )}
+                        </div>
+                      </div>
+
+                      {/* 用户信息 */}
+                      <div className="flex min-w-0 flex-1 flex-col">
                         <div className="flex items-center space-x-1">
-                          <span className="font-serif text-sm font-medium">
+                          <span
+                            className={cn(
+                              'truncate font-serif text-sm font-medium',
+                              isDark ? 'text-stone-200' : 'text-stone-800'
+                            )}
+                          >
                             {user.full_name || user.username || '未设置'}
                           </span>
                           {user.role === 'admin' && (
                             <span className="text-xs text-red-500">👑</span>
                           )}
                         </div>
-                        <span className="font-serif text-xs text-stone-500">
+                        <span
+                          className={cn(
+                            'truncate font-serif text-xs',
+                            isDark ? 'text-stone-500' : 'text-stone-500'
+                          )}
+                        >
                           @{user.username || '未设置'}
                         </span>
                       </div>

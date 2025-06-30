@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@lib/utils';
+import { getAvatarBgColor, getInitials } from '@lib/utils/avatar';
 import { Loader2 } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
@@ -17,40 +18,6 @@ interface AvatarPreviewProps {
   colors: any;
   size?: 'sm' | 'md' | 'lg';
 }
-
-// --- BEGIN COMMENT ---
-// 生成用户头像的首字母
-// --- END COMMENT ---
-const getInitials = (name: string) => {
-  return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-};
-
-// --- BEGIN COMMENT ---
-// 根据用户名生成一致的石色系背景颜色
-// --- END COMMENT ---
-const getAvatarBgColor = (name: string) => {
-  const colors = [
-    '#78716c', // stone-500
-    '#57534e', // stone-600
-    '#44403c', // stone-700
-    '#64748b', // slate-500
-    '#475569', // slate-600
-    '#6b7280', // gray-500
-    '#4b5563', // gray-600
-    '#737373', // neutral-500
-  ];
-
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-};
 
 export function AvatarPreview({
   avatarUrl,
