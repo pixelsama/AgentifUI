@@ -262,7 +262,7 @@ export function ResetPasswordForm() {
                 )}
               />
             </div>
-            <h2 className="font-serif text-xl font-bold text-stone-900 sm:text-2xl">
+            <h2 className="py-1 font-serif text-xl leading-normal font-bold text-stone-900 sm:text-2xl">
               {t('invalidTitle')}
             </h2>
             <p
@@ -333,7 +333,7 @@ export function ResetPasswordForm() {
                 )}
               />
             </div>
-            <h2 className="font-serif text-xl font-bold text-stone-900 sm:text-2xl">
+            <h2 className="py-1 font-serif text-xl leading-normal font-bold text-stone-900 sm:text-2xl">
               {t('successTitle')}
             </h2>
             <p
@@ -388,7 +388,7 @@ export function ResetPasswordForm() {
         )}
       >
         <div className="text-center">
-          <h2 className="font-serif text-xl font-bold text-stone-900 sm:text-2xl">
+          <h2 className="py-1 font-serif text-xl leading-normal font-bold text-stone-900 sm:text-2xl">
             {t('title')}
           </h2>
           <p

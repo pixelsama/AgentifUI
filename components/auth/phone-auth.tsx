@@ -104,7 +104,7 @@ export default function PhoneAuth() {
       )}
     >
       <div className="text-center">
-        <h2 className="flex items-center justify-center gap-2 bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text font-serif text-3xl font-bold text-transparent">
+        <h2 className="flex items-center justify-center gap-2 bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text py-1 font-serif text-3xl leading-normal font-bold text-transparent">
           <Phone className="h-6 w-6 text-stone-600" />
           {t('title')}
         </h2>

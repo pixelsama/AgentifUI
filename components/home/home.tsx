@@ -114,7 +114,7 @@ export function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className={`bg-gradient-to-r text-5xl font-bold md:text-6xl ${colors.titleGradient} mb-6 bg-clip-text py-2 leading-tight text-transparent`}
+              className={`bg-gradient-to-r text-5xl font-bold md:text-6xl ${colors.titleGradient} mb-6 bg-clip-text py-2 leading-normal text-transparent`}
             >
               {t('title')}
             </motion.h1>

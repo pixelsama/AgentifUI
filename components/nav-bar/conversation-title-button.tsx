@@ -25,6 +25,7 @@ import {
   ChevronDown,
   ChevronUp,
   Edit,
+  Heart,
   Pen,
   Star,
   Trash,
@@ -412,20 +413,24 @@ export function ConversationTitleButton({
         <button
           onClick={handleToggleFavorite}
           className={cn(
-            'flex-shrink-0 rounded-md p-1.5 transition-colors',
+            'flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full',
+            'transition-all duration-200',
+            'hover:scale-110',
             isFavorite(instanceId)
-              ? isDark
-                ? 'bg-stone-700 text-stone-300'
-                : 'bg-stone-200 text-stone-700'
-              : isDark
-                ? 'text-stone-500 hover:bg-stone-700 hover:text-stone-300'
-                : 'text-stone-400 hover:bg-stone-200 hover:text-stone-600'
+              ? [
+                  'bg-red-100 text-red-500',
+                  isDark && 'bg-red-900/30 text-red-400',
+                ]
+              : [
+                  'bg-stone-100 text-stone-400 hover:bg-stone-200',
+                  isDark && 'bg-stone-800 text-stone-500 hover:bg-stone-700',
+                ]
           )}
         >
-          <Star
+          <Heart
             className={cn(
-              'h-3.5 w-3.5',
-              isFavorite(instanceId) && 'fill-current'
+              'h-3 w-3 transition-transform',
+              isFavorite(instanceId) && 'scale-110 fill-current'
             )}
           />
         </button>

@@ -127,7 +127,7 @@ export function RegisterForm() {
       )}
     >
       <div className="text-center">
-        <h2 className="bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text font-serif text-3xl font-bold text-transparent">
+        <h2 className="bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text py-1 font-serif text-3xl leading-normal font-bold text-transparent">
           {t('title')}
         </h2>
         <p

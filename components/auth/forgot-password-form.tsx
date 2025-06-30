@@ -103,7 +103,7 @@ export function ForgotPasswordForm() {
             </div>
             <h2
               className={cn(
-                'font-serif text-xl font-bold text-stone-900 sm:text-2xl',
+                'py-1 font-serif text-xl leading-normal font-bold text-stone-900 sm:text-2xl',
                 isDark
                   ? 'bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text text-transparent'
                   : ''
@@ -171,7 +171,7 @@ export function ForgotPasswordForm() {
         <div className="text-center">
           <h2
             className={cn(
-              'font-serif text-xl font-bold text-stone-900 sm:text-2xl',
+              'py-1 font-serif text-xl leading-normal font-bold text-stone-900 sm:text-2xl',
               isDark
                 ? 'bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text text-transparent'
                 : ''

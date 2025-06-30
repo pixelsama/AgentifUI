@@ -216,7 +216,7 @@ export function GroupsList({ groups, isLoading }: GroupsListProps) {
                             )}
                           >
                             <Eye className="h-4 w-4" />
-                            查看成员
+                            成员管理
                           </button>
                           <button
                             onClick={() => {

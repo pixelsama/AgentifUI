@@ -386,37 +386,37 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* --- BEGIN COMMENT ---
       主内容区域 - 顶部留出navbar空间，左侧始终留出slim sidebar空间
       --- END COMMENT --- */}
+      {/* --- BEGIN COMMENT ---
+      导航加载状态覆盖层 - 覆盖整个页面包括所有侧边栏
+      --- END COMMENT --- */}
+      {isNavigating && (
+        <div
+          className={cn(
+            'fixed inset-0 z-50 flex items-center justify-center',
+            'backdrop-blur-sm',
+            isDark ? 'bg-stone-900/60' : 'bg-white/60'
+          )}
+        >
+          <div
+            className={cn(
+              'flex items-center gap-3 rounded-lg border px-6 py-3 shadow-lg',
+              isDark
+                ? 'border-stone-700 bg-stone-800 text-stone-200'
+                : 'border-stone-200 bg-white text-stone-700'
+            )}
+          >
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            <span className="text-sm font-medium">正在加载...</span>
+          </div>
+        </div>
+      )}
+
       <main
         className={cn(
           // 🎯 优化主内容区域过渡动画速度
           'relative ml-16 min-h-screen pt-12 transition-all duration-150 ease-out'
         )}
       >
-        {/* --- BEGIN COMMENT ---
-        导航加载状态覆盖层 - 仅覆盖主内容区域
-        --- END COMMENT --- */}
-        {isNavigating && (
-          <div
-            className={cn(
-              'absolute inset-0 z-10 flex items-center justify-center',
-              'backdrop-blur-sm',
-              isDark ? 'bg-stone-900/50' : 'bg-white/50'
-            )}
-          >
-            <div
-              className={cn(
-                'flex items-center gap-3 rounded-lg border px-6 py-3 shadow-lg',
-                isDark
-                  ? 'border-stone-700 bg-stone-800 text-stone-200'
-                  : 'border-stone-200 bg-white text-stone-700'
-              )}
-            >
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              <span className="text-sm font-medium">正在加载...</span>
-            </div>
-          </div>
-        )}
-
         {children}
       </main>
     </div>

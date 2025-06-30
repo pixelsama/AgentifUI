@@ -165,7 +165,7 @@ export default function SSOProcessingPage() {
       >
         {/* --- 标题 --- */}
         <div className="space-y-2">
-          <h1 className="bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text text-2xl font-bold text-transparent">
+          <h1 className="bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text py-1 text-2xl leading-normal font-bold text-transparent">
             {t('title')}
           </h1>
         </div>
