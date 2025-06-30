@@ -894,8 +894,8 @@
     "user": {
       "userMenu": "用戶選單",
       "login": "登錄",
-      "logout": "退出登錄",
-      "loggingOut": "退出中...",
+      "logout": "登出",
+      "loggingOut": "登出中...",
       "register": "註冊新帳戶",
       "history": "歷史對話",
       "settings": "設定",

@@ -8,11 +8,11 @@
       "remove": "Remove",
       "error": "Error",
       "logoutDialog": {
-        "title": "Sign Out",
-        "message": "Are you sure you want to sign out? You will need to log in again to access your account.",
-        "confirm": "Sign Out",
+        "title": "Logout",
+        "message": "Are you sure you want to logout? You will need to log in again to access your account.",
+        "confirm": "Logout",
         "cancel": "Cancel",
-        "loggingOut": "Signing out..."
+        "loggingOut": "Logging out..."
       }
     }
   },
@@ -725,11 +725,11 @@
         "authMethod": "Authentication Method",
         "emailPasswordAuth": "Email & Password",
         "securitySettings": "Security Settings",
-        "logoutAccount": "Sign out of current account",
-        "confirmLogout": "Are you sure you want to sign out?",
+        "logoutAccount": "Logout of current account",
+        "confirmLogout": "Are you sure you want to logout?",
         "confirmLogoutBtn": "Confirm Logout",
         "logout": "Logout",
-        "loggingOut": "Signing out...",
+        "loggingOut": "Logging out...",
         "loadAccountError": "Error loading account information",
         "retry": "Retry",
         "deleteAccount": "Delete Account"
