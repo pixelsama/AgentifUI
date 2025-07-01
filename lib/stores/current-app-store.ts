@@ -94,6 +94,30 @@ export const useCurrentAppStore = create<CurrentAppState>()(
           return;
         }
 
+        // --- BEGIN COMMENT ---
+        // 🔒 安全检查：确保用户已登录才初始化应用存储
+        // 防止未认证用户触发缓存创建
+        // --- END COMMENT ---
+        try {
+          const { createClient } = await import('../supabase/client');
+          const supabase = createClient();
+          const {
+            data: { user },
+            error,
+          } = await supabase.auth.getUser();
+
+          if (!user || error) {
+            console.log('[CurrentAppStore] 用户未登录，跳过应用存储初始化');
+            return;
+          }
+        } catch (authError) {
+          console.warn(
+            '[CurrentAppStore] 认证检查失败，跳过初始化:',
+            authError
+          );
+          return;
+        }
+
         set({ isLoadingAppId: true, errorLoadingAppId: null });
 
         try {

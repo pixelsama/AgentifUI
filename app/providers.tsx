@@ -1,6 +1,7 @@
 'use client';
 
 import { useCurrentAppStore } from '@lib/stores/current-app-store';
+import { createClient } from '@lib/supabase/client';
 
 import { useEffect, useState } from 'react';
 
@@ -11,6 +12,7 @@ import { ThemeProvider } from 'next-themes';
 export function Providers({ children }: { children: React.ReactNode }) {
   // 避免水合不匹配，确保在客户端渲染时才加载 ThemeProvider
   const [mounted, setMounted] = useState(false);
+  const [userChecked, setUserChecked] = useState(false);
 
   // --- BEGIN COMMENT ---
   // 使用 hook 方式获取初始化方法，遵循 React 最佳实践
@@ -21,10 +23,35 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
+
     // --- BEGIN COMMENT ---
-    // 初始化默认的 App ID，使用新版本的数据库接口
+    // 🔒 安全修复：只在用户已登录时才初始化应用存储
+    // 防止未登录用户触发不必要的缓存创建
     // --- END COMMENT ---
-    initializeDefaultAppId();
+    const checkUserAndInitialize = async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
+
+        setUserChecked(true);
+
+        if (user && !error) {
+          console.log('[Providers] 用户已登录，初始化应用存储');
+          // 只有在用户已登录时才初始化默认 App ID
+          await initializeDefaultAppId();
+        } else {
+          console.log('[Providers] 用户未登录，跳过应用存储初始化');
+        }
+      } catch (error) {
+        console.warn('[Providers] 检查用户状态失败:', error);
+        setUserChecked(true);
+      }
+    };
+
+    checkUserAndInitialize();
   }, [initializeDefaultAppId]);
 
   if (!mounted) {

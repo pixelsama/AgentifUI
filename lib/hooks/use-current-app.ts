@@ -48,6 +48,21 @@ export function useCurrentApp() {
 
   const initializeApp = useCallback(async () => {
     try {
+      // --- BEGIN COMMENT ---
+      // 🔒 安全检查：确保用户已登录才初始化应用
+      // --- END COMMENT ---
+      const { createClient } = await import('@lib/supabase/client');
+      const supabase = createClient();
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (!user || error) {
+        console.log('[useCurrentApp] 用户未登录，跳过应用初始化');
+        return;
+      }
+
       await initializeDefaultAppId();
     } catch (error) {
       console.error('初始化应用失败:', error);

@@ -46,7 +46,7 @@ export type SupportedLocale = keyof typeof SUPPORTED_LANGUAGES;
 // --- BEGIN COMMENT ---
 // 默认语言
 // --- END COMMENT ---
-export const DEFAULT_LOCALE: SupportedLocale = 'zh-CN';
+export const DEFAULT_LOCALE: SupportedLocale = 'en-US';
 
 // --- BEGIN COMMENT ---
 // 获取所有支持的语言代码数组
