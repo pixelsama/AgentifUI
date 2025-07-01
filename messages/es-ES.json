@@ -994,6 +994,7 @@
     }
   },
   "sidebar": {
+    "appName": "AgentifUI",
     "expand": "Expandir",
     "collapse": "Contraer",
     "newChat": "Nuevo Chat",

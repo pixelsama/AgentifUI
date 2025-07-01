@@ -354,7 +354,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
                   : ['from-stone-700 via-stone-800 to-stone-900']
               )}
             >
-              AgentifUI
+              {t('appName')}
             </span>
           </div>
         )}

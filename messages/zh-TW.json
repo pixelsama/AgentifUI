@@ -994,6 +994,7 @@
     }
   },
   "sidebar": {
+    "appName": "AgentifUI",
     "expand": "展開",
     "collapse": "收起",
     "newChat": "新對話",
