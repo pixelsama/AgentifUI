@@ -44,7 +44,9 @@ export function WorkflowTracker({
   onReset,
 }: WorkflowTrackerProps) {
   const { isDark } = useTheme();
-  const t = useTranslations('workflow');
+  const tStatus = useTranslations('pages.workflow.status');
+  const tForm = useTranslations('pages.workflow.form');
+  const tNodeStatus = useTranslations('pages.workflow.nodeStatus');
   const [showResult, setShowResult] = useState(false);
 
   // --- 从store获取真实的节点状态 ---
@@ -180,7 +182,7 @@ export function WorkflowTracker({
                     isDark ? 'text-stone-200' : 'text-stone-800'
                   )}
                 >
-                  {t('status.pending')}
+                  {tStatus('pending')}
                 </h3>
                 <p
                   className={cn(
@@ -188,7 +190,7 @@ export function WorkflowTracker({
                     isDark ? 'text-stone-400' : 'text-stone-600'
                   )}
                 >
-                  {t('form.startExecution')}
+                  {tForm('startExecution')}
                 </p>
               </div>
             </div>
@@ -203,7 +205,7 @@ export function WorkflowTracker({
                   isDark ? 'text-stone-200' : 'text-stone-800'
                 )}
               >
-                {t('form.executing')}
+                {tForm('executing')}
               </h3>
             </div>
 
@@ -231,7 +233,7 @@ export function WorkflowTracker({
                         isDark ? 'text-stone-200' : 'text-stone-800'
                       )}
                     >
-                      {t('status.running')}
+                      {tStatus('running')}
                     </div>
                     <div
                       className={cn(
@@ -239,7 +241,7 @@ export function WorkflowTracker({
                         isDark ? 'text-stone-400' : 'text-stone-600'
                       )}
                     >
-                      {t('nodeStatus.waitingParallel')}
+                      {tNodeStatus('waitingParallel')}
                     </div>
                   </div>
                 </div>
