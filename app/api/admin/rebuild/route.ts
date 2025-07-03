@@ -60,7 +60,7 @@ export async function POST() {
     }
 
     // --- Check build success using correct Next.js output ---
-    if (!buildStdout.includes('compiled successfully')) {
+    if (!buildStdout.includes('✓ Compiled successfully')) {
       console.error('Build process failed:', buildStdout, buildStderr);
       return NextResponse.json(
         { error: 'Build failed', details: buildStderr || buildStdout },
@@ -70,22 +70,28 @@ export async function POST() {
 
     console.log('Build process successful:', buildStdout);
 
-    // --- Step 2: Execute PM2 restart synchronously ---
-    const { stdout: restartStdout, stderr: restartStderr } = await execAsync(
-      `pm2 restart "AgentifUI"`
-    );
+    // --- Step 2: Schedule delayed restart to avoid interrupting current request ---
+    // Use setTimeout to delay restart until after response is sent
+    setTimeout(async () => {
+      try {
+        console.log('Starting delayed PM2 restart...');
+        const { stdout: restartStdout, stderr: restartStderr } =
+          await execAsync(`pm2 restart "AgentifUI"`);
 
-    if (restartStderr) {
-      console.error('PM2 restart error:', restartStderr);
-      // --- Don't fail if restart has stderr, but log it ---
-    }
+        if (restartStderr) {
+          console.error('PM2 restart error:', restartStderr);
+        }
 
-    console.log('PM2 restart success:', restartStdout);
+        console.log('PM2 restart success:', restartStdout);
+      } catch (restartError) {
+        console.error('Failed to restart PM2:', restartError);
+      }
+    }, 2000); // 2 second delay to ensure response is sent
 
     return NextResponse.json({
-      message: 'Recompilation and restart completed successfully!',
+      message:
+        'Build completed successfully! Application will restart in 2 seconds.',
       buildOutput: buildStdout,
-      restartOutput: restartStdout,
     });
   } catch (error: any) {
     // --- Enhanced error handling ---

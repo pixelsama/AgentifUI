@@ -44,9 +44,19 @@ export function RebuildButton() {
         return;
       }
 
-      toast.success('构建和重启完成！', {
-        description: result.message,
+      toast.success('构建完成！', {
+        description: '应用将在2秒后自动重启以应用更改。',
       });
+
+      setTimeout(() => {
+        toast.info('应用重启中...', {
+          description: '页面将在重启完成后自动刷新。',
+        });
+      }, 3000);
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 8000);
     } catch (error: any) {
       console.error('Rebuild error:', error);
       toast.error('部署失败', {
