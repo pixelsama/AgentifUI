@@ -1,11 +1,21 @@
 'use client';
 
+import { ApiConfigFields } from '@components/admin/api-config/api-config-fields';
 import { CustomProviderSelector } from '@components/admin/api-config/custom-provider-selector';
 import { DifyAppTypeSelector } from '@components/admin/api-config/dify-app-type-selector';
 import DifyParametersPanel from '@components/admin/api-config/dify-parameters-panel';
+import { EmptyState } from '@components/admin/api-config/empty-state';
+import { FormActions } from '@components/admin/api-config/form-actions';
+import { InstanceDetailHeader } from '@components/admin/api-config/instance-detail-header';
+import { InstanceFormContainer } from '@components/admin/api-config/instance-form-container';
+import {
+  handleCreateInstance,
+  handleUpdateInstance,
+} from '@components/admin/api-config/instance-save-handlers';
+import { ProviderManagementButton } from '@components/admin/api-config/provider-management-button';
 import { ProviderManagementModal } from '@components/admin/api-config/provider-management-modal';
-import { KeyCombination } from '@components/ui/adaptive-key-badge';
-import { useFormattedShortcut } from '@lib/hooks/use-platform-keys';
+import { TagsSelector } from '@components/admin/api-config/tags-selector';
+import { useApiConfigEvents } from '@components/admin/api-config/use-api-config-events';
 import { useTheme } from '@lib/hooks/use-theme';
 // import { getDifyAppParameters } from '@lib/services/dify/app-service'; // 移除直接导入，改为动态导入保持一致性
 import type { DifyAppParametersResponse } from '@lib/services/dify/types';
@@ -22,11 +32,7 @@ import {
   CheckCircle,
   Database,
   Edit,
-  Eye,
-  EyeOff,
   FileText,
-  Globe,
-  Key,
   Lightbulb,
   Loader2,
   Plus,
@@ -44,13 +50,6 @@ import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import React, { useEffect, useState } from 'react';
-
-interface ApiConfigPageProps {
-  selectedInstance?: ServiceInstance | null;
-  showAddForm?: boolean;
-  onClearSelection?: () => void;
-  instances?: ServiceInstance[];
-}
 
 const InstanceForm = ({
   instance,
@@ -160,7 +159,6 @@ const InstanceForm = ({
     },
   });
 
-  const [showApiKey, setShowApiKey] = useState(false);
   const [showDifyPanel, setShowDifyPanel] = useState(false);
   const [setAsDefault, setSetAsDefault] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -209,11 +207,6 @@ const InstanceForm = ({
     // 所有验证通过
     setInstanceIdError('');
   };
-
-  // --- BEGIN COMMENT ---
-  // 🎯 获取保存快捷键信息
-  // --- END COMMENT ---
-  const saveShortcut = useFormattedShortcut('SAVE_SUBMIT');
 
   useEffect(() => {
     const newData = {
@@ -1029,181 +1022,16 @@ const InstanceForm = ({
             </div>
           </div>
 
-          {/* --- BEGIN COMMENT --- */}
-          {/* 🎯 API配置字段 - 移动到描述字段之前 */}
-          {/* --- END COMMENT --- */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* --- BEGIN COMMENT ---
-            API URL 输入框 - 禁用修改，显示供应商绑定逻辑
-            --- END COMMENT --- */}
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <label
-                  className={cn(
-                    'font-serif text-sm font-medium',
-                    isDark ? 'text-stone-300' : 'text-stone-700'
-                  )}
-                >
-                  API URL (config.api_url)
-                </label>
-
-                {/* 供应商绑定提示标签 */}
-                <span
-                  className={cn(
-                    'inline-flex items-center gap-1 rounded-full px-2 py-1 font-serif text-xs font-medium',
-                    isDark
-                      ? 'border border-blue-700/30 bg-blue-900/20 text-blue-300'
-                      : 'border border-blue-200 bg-blue-50 text-blue-700'
-                  )}
-                >
-                  <Globe className="h-3 w-3" />
-                  供应商绑定
-                </span>
-              </div>
-
-              <input
-                type="url"
-                value={
-                  formData.config.api_url ||
-                  (() => {
-                    if (isEditing && instance) {
-                      const currentProvider = providers.find(
-                        p => p.id === instance.provider_id
-                      );
-                      return (
-                        currentProvider?.base_url || 'https://api.dify.ai/v1'
-                      );
-                    } else {
-                      const selectedProvider = providers.find(
-                        p => p.id === selectedProviderId
-                      );
-                      return (
-                        selectedProvider?.base_url || 'https://api.dify.ai/v1'
-                      );
-                    }
-                  })()
-                }
-                disabled={true} // 禁用 URL 修改
-                className={cn(
-                  'w-full rounded-lg border px-3 py-2 font-serif',
-                  // 禁用状态样式
-                  'cursor-not-allowed opacity-75',
-                  isDark
-                    ? 'border-stone-600 bg-stone-800/50 text-stone-300'
-                    : 'border-stone-300 bg-stone-100/50 text-stone-600'
-                )}
-                placeholder="URL 将自动使用所选供应商的配置"
-              />
-
-              <div
-                className={cn(
-                  'mt-2 rounded-md p-2 font-serif text-xs',
-                  isDark
-                    ? 'bg-stone-800/50 text-stone-400'
-                    : 'bg-stone-50 text-stone-600'
-                )}
-              >
-                <div className="flex items-start gap-2">
-                  <Globe className="mt-0.5 h-3 w-3 flex-shrink-0" />
-                  <div>
-                    <ul className="space-y-1 text-xs">
-                      <li>
-                        • URL 与服务供应商绑定，修改请在"管理提供商"中操作
-                      </li>
-                      {isEditing && instance && (
-                        <li>
-                          • 当前供应商:{' '}
-                          {(() => {
-                            const currentProvider = providers.find(
-                              p => p.id === instance.provider_id
-                            );
-                            return currentProvider
-                              ? currentProvider.name
-                              : '未知供应商';
-                          })()}
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-2 flex items-start justify-between">
-                <label
-                  className={cn(
-                    'font-serif text-sm font-medium',
-                    isDark ? 'text-stone-300' : 'text-stone-700'
-                  )}
-                >
-                  API 密钥 (key_value) {!isEditing && '*'}
-                </label>
-
-                {/* --- API密钥配置状态标签 - 靠上对齐，避免挤压输入框 --- */}
-                {isEditing && (
-                  <span
-                    className={cn(
-                      '-mt-0.5 inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-serif text-xs font-medium',
-                      hasApiKey
-                        ? isDark
-                          ? 'border border-green-700/30 bg-green-900/20 text-green-300'
-                          : 'border border-green-200 bg-green-50 text-green-700'
-                        : isDark
-                          ? 'border border-orange-700/30 bg-orange-900/20 text-orange-300'
-                          : 'border border-orange-200 bg-orange-50 text-orange-700'
-                    )}
-                  >
-                    <Key className="h-3 w-3" />
-                    {hasApiKey ? '已配置' : '未配置'}
-                  </span>
-                )}
-              </div>
-
-              <div className="relative">
-                <input
-                  type={showApiKey ? 'text' : 'password'}
-                  value={formData.apiKey}
-                  onChange={e =>
-                    setFormData(prev => ({ ...prev, apiKey: e.target.value }))
-                  }
-                  className={cn(
-                    'w-full rounded-lg border px-3 py-2 pr-10 font-serif',
-                    isDark
-                      ? 'border-stone-600 bg-stone-700 text-stone-100 placeholder-stone-400'
-                      : 'border-stone-300 bg-white text-stone-900 placeholder-stone-500'
-                  )}
-                  placeholder={
-                    isEditing ? '留空则不更新 API 密钥' : '输入 API 密钥'
-                  }
-                  required={!isEditing}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowApiKey(!showApiKey)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 transform"
-                >
-                  {showApiKey ? (
-                    <Eye className="h-4 w-4 text-stone-500" />
-                  ) : (
-                    <EyeOff className="h-4 w-4 text-stone-500" />
-                  )}
-                </button>
-              </div>
-
-              {/* --- 提示信息（仅在编辑模式且已配置时显示） --- */}
-              {isEditing && hasApiKey && (
-                <p
-                  className={cn(
-                    'mt-1 font-serif text-xs',
-                    isDark ? 'text-stone-400' : 'text-stone-500'
-                  )}
-                >
-                  留空输入框将保持现有密钥不变
-                </p>
-              )}
-            </div>
-          </div>
+          {/* --- API配置字段 --- */}
+          <ApiConfigFields
+            formData={formData}
+            setFormData={setFormData}
+            isEditing={isEditing}
+            hasApiKey={hasApiKey}
+            instance={instance}
+            providers={providers}
+            selectedProviderId={selectedProviderId}
+          />
 
           {/* --- BEGIN COMMENT --- */}
           {/* 🎯 同步配置按钮 - 仅在新建模式下显示 */}
@@ -1434,298 +1262,23 @@ const InstanceForm = ({
           />
 
           {/* 应用标签配置 - 紧凑设计 */}
-          <div>
-            <label
-              className={cn(
-                'mb-3 block font-serif text-sm font-medium',
-                isDark ? 'text-stone-300' : 'text-stone-700'
-              )}
-            >
-              应用标签 (tags)
-            </label>
-            <div className="space-y-3">
-              {/* 预定义标签选择 - 按类别分组 */}
-              <div className="space-y-3">
-                {/* 模型类型 */}
-                <div>
-                  <div
-                    className={cn(
-                      'mb-2 font-serif text-xs font-medium',
-                      isDark ? 'text-stone-400' : 'text-stone-600'
-                    )}
-                  >
-                    模型类型
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {['对话模型', '推理模型', '文档模型', '多模态'].map(tag => (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => {
-                          const isSelected =
-                            formData.config.app_metadata.tags.includes(tag);
-                          setFormData(prev => ({
-                            ...prev,
-                            config: {
-                              ...prev.config,
-                              app_metadata: {
-                                ...prev.config.app_metadata,
-                                tags: isSelected
-                                  ? prev.config.app_metadata.tags.filter(
-                                      t => t !== tag
-                                    )
-                                  : [...prev.config.app_metadata.tags, tag],
-                              },
-                            },
-                          }));
-                        }}
-                        className={cn(
-                          'cursor-pointer rounded px-2 py-1.5 font-serif text-xs font-medium transition-colors',
-                          formData.config.app_metadata.tags.includes(tag)
-                            ? isDark
-                              ? 'border border-stone-500 bg-stone-600 text-stone-200'
-                              : 'border border-stone-300 bg-stone-200 text-stone-800'
-                            : isDark
-                              ? 'border border-stone-600 bg-stone-700/50 text-stone-400 hover:bg-stone-700'
-                              : 'border border-stone-300 bg-stone-50 text-stone-600 hover:bg-stone-100'
-                        )}
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+          <TagsSelector
+            tags={formData.config.app_metadata.tags}
+            onTagsChange={newTags => {
+              setFormData(prev => ({
+                ...prev,
+                config: {
+                  ...prev.config,
+                  app_metadata: {
+                    ...prev.config.app_metadata,
+                    tags: newTags,
+                  },
+                },
+              }));
+            }}
+          />
 
-                {/* 应用场景 */}
-                <div>
-                  <div
-                    className={cn(
-                      'mb-2 font-serif text-xs font-medium',
-                      isDark ? 'text-stone-400' : 'text-stone-600'
-                    )}
-                  >
-                    应用场景
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {['文本生成', '代码生成', '数据分析', '翻译'].map(tag => (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => {
-                          const isSelected =
-                            formData.config.app_metadata.tags.includes(tag);
-                          setFormData(prev => ({
-                            ...prev,
-                            config: {
-                              ...prev.config,
-                              app_metadata: {
-                                ...prev.config.app_metadata,
-                                tags: isSelected
-                                  ? prev.config.app_metadata.tags.filter(
-                                      t => t !== tag
-                                    )
-                                  : [...prev.config.app_metadata.tags, tag],
-                              },
-                            },
-                          }));
-                        }}
-                        className={cn(
-                          'cursor-pointer rounded px-2 py-1.5 font-serif text-xs font-medium transition-colors',
-                          formData.config.app_metadata.tags.includes(tag)
-                            ? isDark
-                              ? 'border border-stone-500 bg-stone-600 text-stone-200'
-                              : 'border border-stone-300 bg-stone-200 text-stone-800'
-                            : isDark
-                              ? 'border border-stone-600 bg-stone-700/50 text-stone-400 hover:bg-stone-700'
-                              : 'border border-stone-300 bg-stone-50 text-stone-600 hover:bg-stone-100'
-                        )}
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 技术特性 */}
-                <div>
-                  <div
-                    className={cn(
-                      'mb-2 font-serif text-xs font-medium',
-                      isDark ? 'text-stone-400' : 'text-stone-600'
-                    )}
-                  >
-                    技术特性
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {['高精度', '快速响应', '本地部署', '企业级'].map(tag => (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => {
-                          const isSelected =
-                            formData.config.app_metadata.tags.includes(tag);
-                          setFormData(prev => ({
-                            ...prev,
-                            config: {
-                              ...prev.config,
-                              app_metadata: {
-                                ...prev.config.app_metadata,
-                                tags: isSelected
-                                  ? prev.config.app_metadata.tags.filter(
-                                      t => t !== tag
-                                    )
-                                  : [...prev.config.app_metadata.tags, tag],
-                              },
-                            },
-                          }));
-                        }}
-                        className={cn(
-                          'cursor-pointer rounded px-2 py-1.5 font-serif text-xs font-medium transition-colors',
-                          formData.config.app_metadata.tags.includes(tag)
-                            ? isDark
-                              ? 'border border-stone-500 bg-stone-600 text-stone-200'
-                              : 'border border-stone-300 bg-stone-200 text-stone-800'
-                            : isDark
-                              ? 'border border-stone-600 bg-stone-700/50 text-stone-400 hover:bg-stone-700'
-                              : 'border border-stone-300 bg-stone-50 text-stone-600 hover:bg-stone-100'
-                        )}
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* 自定义标签输入 - 更小的输入框 */}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="自定义标签（回车添加）"
-                  className={cn(
-                    'flex-1 rounded border px-2 py-1.5 font-serif text-xs',
-                    isDark
-                      ? 'border-stone-600 bg-stone-700 text-stone-100 placeholder-stone-400'
-                      : 'border-stone-300 bg-white text-stone-900 placeholder-stone-500'
-                  )}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      const input = e.target as HTMLInputElement;
-                      const tag = input.value.trim();
-                      if (
-                        tag &&
-                        !formData.config.app_metadata.tags.includes(tag)
-                      ) {
-                        setFormData(prev => ({
-                          ...prev,
-                          config: {
-                            ...prev.config,
-                            app_metadata: {
-                              ...prev.config.app_metadata,
-                              tags: [...prev.config.app_metadata.tags, tag],
-                            },
-                          },
-                        }));
-                        input.value = '';
-                      }
-                    }
-                  }}
-                />
-              </div>
-
-              {/* 已选标签显示 - 更小的标签 */}
-              {formData.config.app_metadata.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {formData.config.app_metadata.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className={cn(
-                        'inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-serif text-xs font-medium',
-                        isDark
-                          ? 'border border-stone-600 bg-stone-700 text-stone-300'
-                          : 'border border-stone-300 bg-stone-100 text-stone-700'
-                      )}
-                    >
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFormData(prev => ({
-                            ...prev,
-                            config: {
-                              ...prev.config,
-                              app_metadata: {
-                                ...prev.config.app_metadata,
-                                tags: prev.config.app_metadata.tags.filter(
-                                  (_, i) => i !== index
-                                ),
-                              },
-                            },
-                          }));
-                        }}
-                        className={cn(
-                          'rounded-full p-0.5 transition-colors hover:bg-red-500 hover:text-white',
-                          isDark ? 'text-stone-400' : 'text-stone-500'
-                        )}
-                      >
-                        <X className="h-2 w-2" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <p
-                className={cn(
-                  'font-serif text-xs',
-                  isDark ? 'text-stone-400' : 'text-stone-500'
-                )}
-              >
-                标签用于应用分类和搜索
-              </p>
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <button
-              type="submit"
-              disabled={isProcessing}
-              className={cn(
-                'flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 font-serif font-medium transition-colors disabled:opacity-50',
-                isDark
-                  ? 'bg-stone-600 text-white hover:bg-stone-500'
-                  : 'bg-stone-800 text-white hover:bg-stone-700'
-              )}
-            >
-              {isProcessing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-              <span>{isProcessing ? '保存中...' : '保存'}</span>
-              {!isProcessing && (
-                <KeyCombination
-                  keys={saveShortcut.symbols}
-                  size="md"
-                  isDark={isDark}
-                  className="ml-3"
-                />
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={onCancel}
-              className={cn(
-                'flex-1 cursor-pointer rounded-lg px-4 py-2 font-serif font-medium transition-colors',
-                isDark
-                  ? 'bg-stone-700 text-stone-200 hover:bg-stone-600'
-                  : 'bg-stone-200 text-stone-800 hover:bg-stone-300'
-              )}
-            >
-              取消
-            </button>
-          </div>
+          <FormActions isProcessing={isProcessing} onCancel={onCancel} />
         </form>
       </div>
 
@@ -1761,86 +1314,14 @@ export default function ApiConfigPage() {
     string | null
   >(null);
 
-  useEffect(() => {
-    const handleSelectInstance = (event: CustomEvent) => {
-      const instance = event.detail as ServiceInstance;
-      setSelectedInstance(instance);
-      setShowAddForm(false);
-    };
-
-    const handleToggleAddForm = () => {
-      if (showAddForm) {
-        setShowAddForm(false);
-        setSelectedInstance(null);
-      } else {
-        setSelectedInstance(null);
-        setShowAddForm(true);
-      }
-    };
-
-    const handleInstanceDeleted = (event: CustomEvent) => {
-      const { instanceId } = event.detail;
-      if (selectedInstance?.instance_id === instanceId) {
-        setSelectedInstance(null);
-        setShowAddForm(false);
-      }
-    };
-
-    const handleDefaultInstanceChanged = (event: CustomEvent) => {
-      const { instanceId } = event.detail;
-      // --- 始终显示成功提示，不管是否是当前选中的实例 ---
-      toast.success('默认应用设置成功');
-
-      // --- 重新加载服务实例数据以更新UI状态 ---
-      setTimeout(() => {
-        // 给数据库操作一点时间完成
-        window.dispatchEvent(new CustomEvent('reloadInstances'));
-      }, 100);
-    };
-
-    const handleFilterChanged = (event: CustomEvent) => {
-      const { providerId } = event.detail;
-      setCurrentFilterProviderId(providerId);
-    };
-
-    window.addEventListener(
-      'selectInstance',
-      handleSelectInstance as EventListener
-    );
-    window.addEventListener('toggleAddForm', handleToggleAddForm);
-    window.addEventListener(
-      'instanceDeleted',
-      handleInstanceDeleted as EventListener
-    );
-    window.addEventListener(
-      'defaultInstanceChanged',
-      handleDefaultInstanceChanged as EventListener
-    );
-    window.addEventListener(
-      'filterChanged',
-      handleFilterChanged as EventListener
-    );
-
-    return () => {
-      window.removeEventListener(
-        'selectInstance',
-        handleSelectInstance as EventListener
-      );
-      window.removeEventListener('toggleAddForm', handleToggleAddForm);
-      window.removeEventListener(
-        'instanceDeleted',
-        handleInstanceDeleted as EventListener
-      );
-      window.removeEventListener(
-        'defaultInstanceChanged',
-        handleDefaultInstanceChanged as EventListener
-      );
-      window.removeEventListener(
-        'filterChanged',
-        handleFilterChanged as EventListener
-      );
-    };
-  }, [showAddForm, selectedInstance]);
+  // --- 使用自定义 Hook 管理事件监听器 ---
+  useApiConfigEvents({
+    showAddForm,
+    selectedInstance,
+    setSelectedInstance,
+    setShowAddForm,
+    setCurrentFilterProviderId,
+  });
 
   const handleClearSelection = () => {
     setSelectedInstance(null);
@@ -1878,176 +1359,52 @@ export default function ApiConfigPage() {
   return (
     <div className="flex h-full flex-col">
       {/* --- 管理提供商按钮 --- */}
-      <div className="flex justify-end px-6 pt-6 pb-3">
-        <button
-          onClick={() => setShowProviderModal(true)}
-          className={cn(
-            'flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
-            'focus:ring-2 focus:ring-offset-2 focus:outline-none',
-            'border shadow-sm',
-            isDark
-              ? 'border-stone-500 bg-stone-600 text-stone-100 shadow-stone-900/20 hover:bg-stone-500 hover:text-white focus:ring-stone-400'
-              : 'border-stone-300 bg-stone-200 text-stone-800 shadow-stone-200/50 hover:bg-stone-300 hover:text-stone-900 focus:ring-stone-500'
-          )}
-        >
-          <Settings className="h-4 w-4" />
-          <span className="font-serif">管理提供商</span>
-        </button>
-      </div>
+      <ProviderManagementButton onClick={() => setShowProviderModal(true)} />
 
       {showAddForm ? (
-        <div className="min-h-0 flex-1 overflow-y-auto p-6">
+        <InstanceFormContainer>
           <InstanceForm
             instance={null}
             isEditing={false}
             defaultProviderId={currentFilterProviderId}
-            onSave={data => {
-              setIsProcessing(true);
-              // --- 提取setAsDefault状态和其他数据 ---
-              const { setAsDefault, ...instanceData } = data;
-
-              // --- 使用用户选择的提供商 ---
-              const providerId = data.selectedProviderId;
-              if (!providerId) {
-                toast.error('请选择服务提供商');
-                setIsProcessing(false);
-                return;
-              }
-
-              // 验证选择的提供商是否有效
-              const selectedProvider = providers.find(p => p.id === providerId);
-              if (!selectedProvider) {
-                toast.error('选择的服务提供商无效');
-                setIsProcessing(false);
-                return;
-              }
-
-              if (!selectedProvider.is_active) {
-                toast.error('选择的服务提供商未激活');
-                setIsProcessing(false);
-                return;
-              }
-
-              addInstance(
-                {
-                  ...instanceData,
-                  provider_id: providerId,
-                },
-                data.apiKey
+            onSave={data =>
+              handleCreateInstance(
+                data,
+                providers,
+                addInstance,
+                setIsProcessing,
+                handleClearSelection
               )
-                .then(newInstance => {
-                  toast.success('应用实例创建成功');
-
-                  // --- 如果选择了设为默认，则在创建成功后设置为默认应用 ---
-                  if (setAsDefault && newInstance?.id) {
-                    return useApiConfigStore
-                      .getState()
-                      .setDefaultInstance(newInstance.id)
-                      .then(() => {
-                        toast.success('应用实例已设为默认应用');
-                      })
-                      .catch(error => {
-                        console.error('设置默认应用失败:', error);
-                        toast.warning('应用创建成功，但设置默认应用失败');
-                      });
-                  }
-                })
-                .then(() => {
-                  handleClearSelection();
-                })
-                .catch(error => {
-                  console.error('创建失败:', error);
-                  toast.error('创建应用实例失败');
-                })
-                .finally(() => {
-                  setIsProcessing(false);
-                });
-            }}
+            }
             onCancel={handleClearSelection}
             isProcessing={isProcessing}
           />
-        </div>
+        </InstanceFormContainer>
       ) : selectedInstance ? (
-        <div className="min-h-0 flex-1 overflow-y-auto p-6">
-          <div className="mb-6">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h2
-                  className={cn(
-                    'font-serif text-xl font-bold',
-                    isDark ? 'text-stone-100' : 'text-stone-900'
-                  )}
-                >
-                  {selectedInstance.display_name}
-                </h2>
-                <p
-                  className={cn(
-                    'mt-1 font-serif text-sm',
-                    isDark ? 'text-stone-400' : 'text-stone-600'
-                  )}
-                >
-                  {selectedInstance.description || selectedInstance.instance_id}
-                </p>
-              </div>
-              <button
-                onClick={handleClearSelection}
-                className={cn(
-                  'cursor-pointer rounded-lg p-2 transition-colors',
-                  'focus:ring-2 focus:ring-offset-2 focus:outline-none',
-                  isDark
-                    ? 'bg-stone-600 text-stone-200 hover:bg-stone-500 hover:text-stone-100 focus:ring-stone-500'
-                    : 'bg-stone-200 text-stone-700 hover:bg-stone-300 hover:text-stone-900 focus:ring-stone-400'
-                )}
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
+        <InstanceFormContainer>
+          <InstanceDetailHeader
+            instance={selectedInstance}
+            onClose={handleClearSelection}
+          />
 
           <InstanceForm
             instance={selectedInstance}
             isEditing={true}
-            onSave={data => {
-              setIsProcessing(true);
-              updateInstance(selectedInstance.id, data, data.apiKey)
-                .then(() => {
-                  toast.success('应用实例更新成功');
-                  handleClearSelection();
-                })
-                .catch(error => {
-                  console.error('更新失败:', error);
-                  toast.error('更新应用实例失败');
-                })
-                .finally(() => {
-                  setIsProcessing(false);
-                });
-            }}
+            onSave={data =>
+              handleUpdateInstance(
+                selectedInstance,
+                data,
+                updateInstance,
+                setIsProcessing,
+                handleClearSelection
+              )
+            }
             onCancel={handleClearSelection}
             isProcessing={isProcessing}
           />
-        </div>
+        </InstanceFormContainer>
       ) : (
-        <div className="flex flex-1 items-center justify-center p-6">
-          <div className="text-center">
-            <Settings className="mx-auto mb-4 h-16 w-16 text-stone-400" />
-            <h3
-              className={cn(
-                'mb-2 font-serif text-lg font-medium',
-                isDark ? 'text-stone-300' : 'text-stone-700'
-              )}
-            >
-              选择应用实例
-            </h3>
-            <p
-              className={cn(
-                'font-serif text-sm',
-                isDark ? 'text-stone-400' : 'text-stone-600'
-              )}
-            >
-              从左侧列表中选择一个应用实例来查看和编辑其配置，或点击添加按钮创建新的应用实例
-            </p>
-          </div>
-        </div>
+        <EmptyState />
       )}
 
       {/* --- Provider管理模态框 --- */}
