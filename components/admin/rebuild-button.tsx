@@ -26,15 +26,31 @@ export function RebuildButton() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || '发生未知错误');
+        if (response.status === 429) {
+          toast.warning('构建正在进行中', {
+            description: '请等待当前构建完成后再试。',
+          });
+        } else if (response.status === 401) {
+          toast.error('认证失败', {
+            description: '请重新登录后再试。',
+          });
+        } else if (response.status === 403) {
+          toast.error('权限不足', {
+            description: '您没有权限执行此操作。',
+          });
+        } else {
+          throw new Error(result.error || '发生未知错误');
+        }
+        return;
       }
 
-      toast.success('构建成功，正在重启应用...', {
+      toast.success('构建和重启完成！', {
         description: result.message,
       });
     } catch (error: any) {
+      console.error('Rebuild error:', error);
       toast.error('部署失败', {
-        description: error.message,
+        description: error.message || '网络错误，请检查连接后重试。',
       });
     } finally {
       setIsLoading(false);

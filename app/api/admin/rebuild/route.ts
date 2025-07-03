@@ -7,7 +7,22 @@ import { NextResponse } from 'next/server';
 
 const execAsync = util.promisify(exec);
 
+// --- Concurrent build control ---
+// Prevent multiple build processes from running simultaneously
+let isBuilding = false;
+
 export async function POST() {
+  // --- Check if build is already in progress ---
+  if (isBuilding) {
+    return NextResponse.json(
+      {
+        error:
+          'Build is already in progress, please wait for the current build to complete.',
+      },
+      { status: 429 }
+    );
+  }
+
   const supabase = await createClient();
 
   const {
@@ -28,38 +43,59 @@ export async function POST() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
+  // --- Set building lock ---
+  isBuilding = true;
+
   try {
     const projectDir = '/home/bistu/AgentifUI';
 
-    // Step 1: Await the build process
+    // --- Step 1: Execute build process ---
     const { stdout: buildStdout, stderr: buildStderr } = await execAsync(
       `cd ${projectDir} && pnpm build`
     );
-    if (buildStderr && !buildStdout.includes('build complete')) {
-      // If build fails (stderr has content and stdout doesn't indicate success), return an error.
-      console.error('Build process failed:', buildStderr);
+
+    // --- Log stderr as warnings (not necessarily errors) ---
+    if (buildStderr) {
+      console.warn('Build stderr output:', buildStderr);
+    }
+
+    // --- Check build success using correct Next.js output ---
+    if (!buildStdout.includes('compiled successfully')) {
+      console.error('Build process failed:', buildStdout, buildStderr);
       return NextResponse.json(
-        { error: 'Build failed', details: buildStderr },
+        { error: 'Build failed', details: buildStderr || buildStdout },
         { status: 500 }
       );
     }
+
     console.log('Build process successful:', buildStdout);
 
-    // Step 2: Fire-and-forget the restart process and immediately return success
-    execAsync(`pm2 restart "AgentifUI"`).catch(err => {
-      // Log error if restart command itself fails to execute
-      console.error('Failed to start pm2 restart:', err);
-    });
+    // --- Step 2: Execute PM2 restart synchronously ---
+    const { stdout: restartStdout, stderr: restartStderr } = await execAsync(
+      `pm2 restart "AgentifUI"`
+    );
+
+    if (restartStderr) {
+      console.error('PM2 restart error:', restartStderr);
+      // --- Don't fail if restart has stderr, but log it ---
+    }
+
+    console.log('PM2 restart success:', restartStdout);
 
     return NextResponse.json({
-      message: 'Recompilation successful! Restarting application...',
+      message: 'Recompilation and restart completed successfully!',
+      buildOutput: buildStdout,
+      restartOutput: restartStdout,
     });
   } catch (error: any) {
-    // This will now mostly catch errors from the build step.
+    // --- Enhanced error handling ---
     console.error('An error occurred during rebuild process:', error);
     return NextResponse.json(
       { error: 'Rebuild process failed', details: error.message },
       { status: 500 }
     );
+  } finally {
+    // --- Always release the lock ---
+    isBuilding = false;
   }
 }
