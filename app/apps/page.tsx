@@ -142,7 +142,7 @@ export default function AppsPage() {
       };
     });
 
-  // 🎯 动态分类逻辑：只有存在常用应用时才显示常用应用分类
+  // 🎯 动态分类逻辑：从应用 tags 中提取分类 + 常用应用分类
   const hasCommonApps = apps.some(app => {
     const isFavorite = favoriteApps.some(
       fav => fav.instanceId === app.instanceId
@@ -150,9 +150,48 @@ export default function AppsPage() {
     return app.isPopular || isFavorite;
   });
 
-  const categories = hasCommonApps
-    ? [t('categoryKeys.all'), t('categoryKeys.commonApps')]
-    : [t('categoryKeys.all')];
+  // --- BEGIN COMMENT ---
+  // 🎯 新增：动态提取所有应用的 tags 作为分类
+  // 从应用市场的所有应用中提取唯一的 tags，并按使用频率排序
+  // --- END COMMENT ---
+  const extractTagCategories = (apps: AppInstance[]): string[] => {
+    const tagCounts = new Map<string, number>();
+
+    // 统计每个 tag 的使用频率
+    apps.forEach(app => {
+      if (app.tags && app.tags.length > 0) {
+        app.tags.forEach(tag => {
+          if (tag && tag.trim()) {
+            const normalizedTag = tag.trim();
+            tagCounts.set(
+              normalizedTag,
+              (tagCounts.get(normalizedTag) || 0) + 1
+            );
+          }
+        });
+      }
+    });
+
+    // 按使用频率降序排序，如果频率相同则按字母顺序排序
+    return Array.from(tagCounts.entries())
+      .sort(([tagA, countA], [tagB, countB]) => {
+        if (countA !== countB) {
+          return countB - countA; // 按频率降序
+        }
+        return tagA.localeCompare(tagB); // 按字母顺序
+      })
+      .map(([tag]) => tag);
+  };
+
+  // 提取 tag 分类
+  const tagCategories = extractTagCategories(apps);
+
+  // 构建完整的分类列表
+  const categories = [
+    t('categoryKeys.all'), // "全部" 分类
+    ...(hasCommonApps ? [t('categoryKeys.commonApps')] : []), // "常用应用" 分类（如果有的话）
+    ...tagCategories, // 动态 tag 分类
+  ];
 
   // 🎯 应用过滤逻辑（保持原有逻辑）
   const filteredApps = apps.filter(app => {
