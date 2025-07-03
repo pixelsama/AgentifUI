@@ -40,7 +40,7 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import React, { useEffect, useState } from 'react';
@@ -320,7 +320,7 @@ const InstanceForm = ({
     // 🎯 检查实时验证错误
     // --- END COMMENT ---
     if (instanceIdError) {
-      toast.error(`应用ID格式错误: ${instanceIdError}`);
+      toast.error('应用ID格式错误', { description: instanceIdError });
       return;
     }
 
@@ -329,7 +329,9 @@ const InstanceForm = ({
     // --- END COMMENT ---
     const validationErrors = validateDifyFormData(formData);
     if (validationErrors.length > 0) {
-      toast.error(validationErrors.join(', '));
+      toast.error('表单验证失败', {
+        description: validationErrors.join('\n'),
+      });
       return;
     }
 
@@ -395,12 +397,12 @@ const InstanceForm = ({
     // 🎯 新建模式下需要API URL和API Key，编辑模式下需要instance_id
     // --- END COMMENT ---
     if (!isEditing && (!formData.config.api_url || !formData.apiKey)) {
-      toast('请先填写API URL和API Key');
+      toast.warning('请先填写API URL和API Key');
       return;
     }
 
     if (isEditing && !formData.instance_id) {
-      toast('请先填写应用ID');
+      toast.warning('请先填写应用ID');
       return;
     }
 
@@ -467,7 +469,7 @@ const InstanceForm = ({
 
         // 检查表单配置是否完整
         if (!formData.config.api_url || !formData.apiKey) {
-          toast('请先填写API URL和API Key');
+          toast.warning('请先填写API URL和API Key');
           return;
         }
 
@@ -626,7 +628,7 @@ const InstanceForm = ({
       console.error('[同步配置] 同步失败:', error);
       const errorMessage =
         error instanceof Error ? error.message : '同步配置失败';
-      toast.error(`同步失败: ${errorMessage}`);
+      toast.error('同步失败', { description: errorMessage });
     } finally {
       setIsSyncing(false);
     }
@@ -1215,13 +1217,13 @@ const InstanceForm = ({
                   isSyncing || !formData.config.api_url || !formData.apiKey
                 }
                 className={cn(
-                  'flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 font-serif font-medium transition-colors',
+                  'flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 font-serif font-medium transition-colors disabled:opacity-50',
                   isSyncing || !formData.config.api_url || !formData.apiKey
                     ? 'cursor-not-allowed opacity-50'
                     : 'cursor-pointer',
                   isDark
                     ? 'bg-stone-600 text-white hover:bg-stone-500'
-                    : 'bg-stone-600 text-white hover:bg-stone-700'
+                    : 'bg-stone-800 text-white hover:bg-stone-700'
                 )}
               >
                 {isSyncing ? (
@@ -1692,7 +1694,7 @@ const InstanceForm = ({
               className={cn(
                 'flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 font-serif font-medium transition-colors disabled:opacity-50',
                 isDark
-                  ? 'bg-stone-600 text-stone-100 hover:bg-stone-500'
+                  ? 'bg-stone-600 text-white hover:bg-stone-500'
                   : 'bg-stone-800 text-white hover:bg-stone-700'
               )}
             >
@@ -1946,7 +1948,7 @@ export default function ApiConfigPage() {
                       })
                       .catch(error => {
                         console.error('设置默认应用失败:', error);
-                        toast('应用创建成功，但设置默认应用失败');
+                        toast.warning('应用创建成功，但设置默认应用失败');
                       });
                   }
                 })

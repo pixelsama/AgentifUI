@@ -4,7 +4,7 @@ import { useTheme } from '@lib/hooks/use-theme';
 import { useGroupManagementStore } from '@lib/stores/group-management-store';
 import { cn } from '@lib/utils';
 import { Building2, Loader2, X } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 import { useState } from 'react';
 

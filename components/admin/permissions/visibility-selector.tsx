@@ -8,7 +8,7 @@ import {
 import type { AppVisibility } from '@lib/types/database';
 import { cn } from '@lib/utils';
 import { Globe, Lock, Users } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface VisibilitySelectorProps {
   app: AppWithPermissions;

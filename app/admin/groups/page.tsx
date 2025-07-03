@@ -8,7 +8,7 @@ import { GroupsStatsCards } from '@components/admin/groups/groups-stats-cards';
 import { useTheme } from '@lib/hooks/use-theme';
 import { useGroupManagementStore } from '@lib/stores/group-management-store';
 import { cn } from '@lib/utils';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 import React, { useEffect, useState } from 'react';
 

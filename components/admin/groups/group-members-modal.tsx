@@ -25,7 +25,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 import React, { useEffect, useState } from 'react';
 

@@ -5,7 +5,6 @@ import { usePermissionManagementStore } from '@lib/stores/permission-management-
 import type { AppVisibility } from '@lib/types/database';
 import { cn } from '@lib/utils';
 import { Blocks, Globe, Lock, Users } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 
 import { GroupPermissionList } from './group-permission-list';
 import { VisibilitySelector } from './visibility-selector';

@@ -8,8 +8,7 @@ import { DynamicTitle } from '@components/ui/dynamic-title';
 import { NotificationBar } from '@components/ui/notification-bar';
 import { TooltipContainer } from '@components/ui/tooltip';
 import { cn } from '@lib/utils';
-import { Toaster } from 'react-hot-toast';
-import { Toaster as SonnerToaster } from 'sonner';
+import { Toaster } from 'sonner';
 
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
@@ -117,30 +116,6 @@ export default async function RootLayout({
               <TooltipContainer />
               <NotificationBar />
               <Toaster
-                position="top-center"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: 'var(--toast-bg)',
-                    color: 'var(--toast-text)',
-                    border: '1px solid var(--toast-border)',
-                    fontFamily: 'var(--font-noto-serif)',
-                  },
-                  success: {
-                    iconTheme: {
-                      primary: '#10b981',
-                      secondary: '#ffffff',
-                    },
-                  },
-                  error: {
-                    iconTheme: {
-                      primary: '#ef4444',
-                      secondary: '#ffffff',
-                    },
-                  },
-                }}
-              />
-              <SonnerToaster
                 position="top-center"
                 richColors
                 theme="system"

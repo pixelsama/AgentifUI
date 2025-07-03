@@ -17,7 +17,7 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 import { useState } from 'react';
 

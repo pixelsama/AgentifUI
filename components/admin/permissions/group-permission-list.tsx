@@ -7,7 +7,7 @@ import {
 } from '@lib/stores/permission-management-store';
 import { cn } from '@lib/utils';
 import { Building2, Check, X } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface GroupPermissionListProps {
   app: AppWithPermissions;

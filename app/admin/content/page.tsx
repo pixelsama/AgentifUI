@@ -13,7 +13,7 @@ import { useTheme } from '@lib/hooks/use-theme';
 import { TranslationService } from '@lib/services/admin/content/translation-service';
 import { cn } from '@lib/utils';
 import { Eye } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 import React, { useEffect, useState } from 'react';
 
