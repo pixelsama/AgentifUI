@@ -586,7 +586,11 @@ export function useWorkflowExecution(instanceId: string) {
       const { getExecutionsByServiceInstance } = await import(
         '@lib/db/app-executions'
       );
-      const result = await getExecutionsByServiceInstance(targetApp.id, 20); // 使用UUID主键
+      const result = await getExecutionsByServiceInstance(
+        targetApp.id,
+        userId,
+        20
+      ); // 使用UUID主键，添加用户ID过滤
 
       if (result.success) {
         console.log('[工作流执行] 历史记录加载成功，数量:', result.data.length);

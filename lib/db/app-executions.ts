@@ -80,16 +80,21 @@ export async function getUserExecutions(
 }
 
 /**
- * 根据ID获取执行记录详情（优化版本）
+ * 根据ID获取执行记录详情（优化版本，包含用户权限检查）
  * @param executionId 执行记录ID
- * @returns 执行记录对象的Result，如果未找到则返回null
+ * @param userId 用户ID - 必需参数，确保只返回该用户的执行记录
+ * @returns 执行记录对象的Result，如果未找到或无权访问则返回null
  */
 export async function getExecutionById(
-  executionId: string
+  executionId: string,
+  userId: string
 ): Promise<Result<AppExecution | null>> {
   return dataService.findOne<AppExecution>(
     'app_executions',
-    { id: executionId },
+    {
+      id: executionId,
+      user_id: userId, // 🔒 关键安全过滤：只返回当前用户的记录
+    },
     {
       cache: true,
       cacheTTL: 5 * 60 * 1000, // 5分钟缓存
@@ -98,16 +103,21 @@ export async function getExecutionById(
 }
 
 /**
- * 根据外部执行ID获取执行记录（优化版本）
+ * 根据外部执行ID获取执行记录（优化版本，包含用户权限检查）
  * @param externalExecutionId Dify返回的执行ID
- * @returns 执行记录对象的Result，如果未找到则返回null
+ * @param userId 用户ID - 必需参数，确保只返回该用户的执行记录
+ * @returns 执行记录对象的Result，如果未找到或无权访问则返回null
  */
 export async function getExecutionByExternalId(
-  externalExecutionId: string
+  externalExecutionId: string,
+  userId: string
 ): Promise<Result<AppExecution | null>> {
   return dataService.findOne<AppExecution>(
     'app_executions',
-    { external_execution_id: externalExecutionId },
+    {
+      external_execution_id: externalExecutionId,
+      user_id: userId, // 🔒 关键安全过滤：只返回当前用户的记录
+    },
     {
       cache: true,
       cacheTTL: 5 * 60 * 1000, // 5分钟缓存
@@ -313,12 +323,27 @@ export async function updateExecutionStatus(
 }
 
 /**
- * 删除执行记录（软删除版本）
+ * 删除执行记录（软删除版本，包含用户权限检查）
  * @param id 执行记录ID
+ * @param userId 用户ID - 必需参数，确保只能删除该用户的执行记录
  * @returns 是否删除成功的Result
  */
-export async function deleteExecution(id: string): Promise<Result<boolean>> {
-  console.log(`[软删除执行记录] 开始软删除执行记录，ID: ${id}`);
+export async function deleteExecution(
+  id: string,
+  userId: string
+): Promise<Result<boolean>> {
+  console.log(
+    `[软删除执行记录] 开始软删除执行记录，ID: ${id}, 用户ID: ${userId}`
+  );
+
+  // 🔒 安全检查：先验证记录是否属于当前用户
+  const existingResult = await getExecutionById(id, userId);
+  if (!existingResult.success || !existingResult.data) {
+    console.warn(
+      `[软删除执行记录] 记录不存在或无权访问，ID: ${id}, 用户ID: ${userId}`
+    );
+    return failure(new Error('执行记录不存在或您无权删除该记录'));
+  }
 
   const result = await dataService.softDelete('app_executions', id);
 
@@ -332,22 +357,32 @@ export async function deleteExecution(id: string): Promise<Result<boolean>> {
 }
 
 /**
- * 获取服务实例的执行记录（优化版本，过滤软删除记录）
+ * 获取用户在指定服务实例的执行记录（优化版本，过滤软删除记录）
  * @param serviceInstanceId 服务实例ID
+ * @param userId 用户ID - 必需参数，确保只返回该用户的执行记录
  * @param limit 限制数量
  * @returns 执行记录列表的Result
  */
 export async function getExecutionsByServiceInstance(
   serviceInstanceId: string,
+  userId: string,
   limit: number = 10
 ): Promise<Result<AppExecution[]>> {
   try {
-    console.log('[获取执行记录] 开始查询，服务实例ID:', serviceInstanceId);
+    console.log(
+      '[获取执行记录] 开始查询，服务实例ID:',
+      serviceInstanceId,
+      '用户ID:',
+      userId
+    );
 
-    // 先尝试获取所有记录，然后在应用层过滤
+    // 同时过滤服务实例ID和用户ID，确保安全性
     const result = await dataService.findMany<AppExecution>(
       'app_executions',
-      { service_instance_id: serviceInstanceId },
+      {
+        service_instance_id: serviceInstanceId,
+        user_id: userId, // 🔒 关键安全过滤：只返回当前用户的记录
+      },
       { column: 'created_at', ascending: false },
       { offset: 0, limit: limit * 2 }, // 获取更多记录以确保有足够的非删除记录
       {
@@ -473,9 +508,10 @@ export async function getUserExecutionsLegacy(
  * 根据ID获取执行记录详情（兼容版本）
  */
 export async function getExecutionByIdLegacy(
-  executionId: string
+  executionId: string,
+  userId: string
 ): Promise<AppExecution | null> {
-  const result = await getExecutionById(executionId);
+  const result = await getExecutionById(executionId, userId);
   if (result.success) {
     return result.data;
   } else {

@@ -1,5 +1,6 @@
 'use client';
 
+import { useProfile } from '@lib/hooks/use-profile';
 import { useTheme } from '@lib/hooks/use-theme';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { useWorkflowExecutionStore } from '@lib/stores/workflow-execution-store';
@@ -37,6 +38,8 @@ export function ExecutionHistory({
   isMobile,
   onViewResult,
 }: ExecutionHistoryProps) {
+  const { profile } = useProfile();
+  const userId = profile?.id;
   const { colors, isDark } = useThemeColors();
   const t = useTranslations('pages.workflow.history');
   const [isLoading, setIsLoading] = useState(true);
@@ -95,7 +98,18 @@ export function ExecutionHistory({
         const { getExecutionsByServiceInstance } = await import(
           '@lib/db/app-executions'
         );
-        const result = await getExecutionsByServiceInstance(targetApp.id, 50); // 获取更多历史记录
+
+        if (!userId) {
+          console.warn('[执行历史] 用户未登录，无法加载历史记录');
+          setIsLoading(false);
+          return;
+        }
+
+        const result = await getExecutionsByServiceInstance(
+          targetApp.id,
+          userId,
+          50
+        ); // 🔒 添加用户ID过滤
 
         if (result.success) {
           console.log('[执行历史] 历史记录加载成功，数量:', result.data.length);
@@ -127,9 +141,15 @@ export function ExecutionHistory({
       // 导入删除函数
       const { deleteExecution } = await import('@lib/db/app-executions');
 
+      // 检查用户登录状态
+      if (!userId) {
+        console.warn('[执行历史] 用户未登录，无法删除执行记录');
+        return;
+      }
+
       // 并行删除所有选中的记录
       const deletePromises = Array.from(selectedIds).map(async id => {
-        const result = await deleteExecution(id);
+        const result = await deleteExecution(id, userId); // 🔒 添加用户ID过滤
         if (!result.success) {
           console.error(`删除执行记录失败 ${id}:`, result.error);
           return false;
@@ -180,7 +200,17 @@ export function ExecutionHistory({
       const { getExecutionsByServiceInstance } = await import(
         '@lib/db/app-executions'
       );
-      const result = await getExecutionsByServiceInstance(targetApp.id, 50);
+
+      if (!userId) {
+        console.warn('[执行历史] 用户未登录，无法刷新历史记录');
+        return;
+      }
+
+      const result = await getExecutionsByServiceInstance(
+        targetApp.id,
+        userId,
+        50
+      ); // 🔒 添加用户ID过滤
 
       if (result.success) {
         console.log('[执行历史] 历史记录刷新成功，数量:', result.data.length);
@@ -214,7 +244,20 @@ export function ExecutionHistory({
         console.log('正在获取执行详情:', execution.id);
 
         const { getExecutionById } = await import('@lib/db/app-executions');
-        const result = await getExecutionById(execution.id);
+
+        if (!userId) {
+          console.warn('[执行历史] 用户未登录，无法获取执行详情');
+          // 显示错误结果
+          const errorResult = {
+            error: t('getDetailFailed'),
+            message: '用户未登录',
+            status: 'error',
+          };
+          onViewResult(errorResult, execution);
+          return;
+        }
+
+        const result = await getExecutionById(execution.id, userId); // 🔒 添加用户ID过滤
 
         if (result.success && result.data) {
           const fullExecution = result.data;
