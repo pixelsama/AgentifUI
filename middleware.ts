@@ -163,12 +163,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 已登录用户访问认证页面时重定向到聊天页面
-  if (user && isAuthPage) {
+  // 已登录用户访问根目录或认证页面时重定向到新聊天页面
+  if (user && (pathname === '/' || isAuthPage)) {
     console.log(
-      `[Middleware] User logged in, redirecting auth page ${pathname} to /chat`
+      `[Middleware] User logged in, redirecting ${pathname} to /chat/new`
     );
-    return NextResponse.redirect(new URL('/chat', request.url));
+    return NextResponse.redirect(new URL('/chat/new', request.url));
   }
 
   return response;
