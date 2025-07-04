@@ -115,14 +115,14 @@ export function WorkflowLayout({ instanceId }: WorkflowLayoutProps) {
   const handleCompleteReset = useCallback(() => {
     console.log('[工作流布局] 完全重置');
 
-    // 重置执行状态
-    resetAll();
+    // 重置执行状态（保留历史记录）
+    resetExecution();
 
     // 重置表单
     if (formResetRef.current?.resetForm) {
       formResetRef.current.resetForm();
     }
-  }, [resetAll]);
+  }, [resetExecution]);
 
   // --- 清除错误 ---
   const handleClearError = useCallback(() => {

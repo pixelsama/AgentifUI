@@ -1,24 +1,28 @@
 'use client';
 
+// --- 引入工作流Markdown组件 ---
 import {
   CodeBlock,
   InlineCode,
   MarkdownBlockquote,
   MarkdownTableContainer,
 } from '@components/chat/markdown-block';
-import { TooltipWrapper } from '@components/ui/tooltip-wrapper';
+import { ThinkBlockContent } from '@components/chat/markdown-block/think-block-content';
+// --- 引入ThinkBlock组件 ---
+import { ThinkBlockHeader } from '@components/chat/markdown-block/think-block-header';
+import { useMobile } from '@lib/hooks/use-mobile';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import 'katex/dist/katex.min.css';
-import { Download, X } from 'lucide-react';
-import { FiCheck, FiCopy } from 'react-icons/fi';
+import { Copy, Download, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
-import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 
-import React, { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+// --- 引入React Hook ---
+import React, { useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
@@ -29,45 +33,95 @@ interface ResultViewerProps {
 }
 
 /**
- * 结果查看器组件
- *
- * 以弹窗形式展示工作流执行结果
+ * 解析工作流结果中的think标签内容
+ * @param content 原始内容字符串
+ * @returns 解析结果包含think内容和主内容
  */
+const parseThinkContent = (
+  content: string
+): {
+  hasThinkBlock: boolean;
+  thinkContent: string;
+  mainContent: string;
+  isThinkComplete: boolean;
+} => {
+  const thinkStartTag = '<think>';
+  const thinkEndTag = '</think>';
+
+  // 检查是否包含think标签
+  if (content.includes(thinkStartTag)) {
+    const startIndex = content.indexOf(thinkStartTag);
+    const endIndex = content.indexOf(thinkEndTag, startIndex);
+
+    if (endIndex !== -1) {
+      // Think块完整
+      const thinkContent = content.substring(
+        startIndex + thinkStartTag.length,
+        endIndex
+      );
+      const mainContent = content
+        .substring(endIndex + thinkEndTag.length)
+        .trim();
+
+      return {
+        hasThinkBlock: true,
+        thinkContent: thinkContent.trim(),
+        mainContent,
+        isThinkComplete: true,
+      };
+    } else {
+      // Think块未完成（理论上在结果查看器中不应该出现）
+      const thinkContent = content.substring(startIndex + thinkStartTag.length);
+      return {
+        hasThinkBlock: true,
+        thinkContent: thinkContent.trim(),
+        mainContent: '',
+        isThinkComplete: false,
+      };
+    }
+  }
+
+  // 没有think标签
+  return {
+    hasThinkBlock: false,
+    thinkContent: '',
+    mainContent: content,
+    isThinkComplete: true,
+  };
+};
+
 export function ResultViewer({
   result,
   execution,
   onClose,
 }: ResultViewerProps) {
   const { isDark } = useTheme();
-  const [isVisible, setIsVisible] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
+  const isMobile = useMobile();
   const t = useTranslations('pages.workflow.resultViewer');
 
-  // --- 组件挂载时触发进入动画 ---
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
+  // --- ThinkBlock状态管理 ---
+  const [isThinkOpen, setIsThinkOpen] = useState(false); // 默认折叠
 
-  // --- 格式化结果数据 ---
   const formatResult = (
     data: any
-  ): { content: string; isMarkdown: boolean } => {
-    if (!data) return { content: t('noData'), isMarkdown: false };
-
+  ): {
+    content: string;
+    isMarkdown: boolean;
+    hasThinkBlock: boolean;
+    thinkContent: string;
+    mainContent: string;
+  } => {
     try {
-      // 如果数据已经是字符串，检查是否是JSON字符串
-      if (typeof data === 'string') {
-        try {
-          const parsed = JSON.parse(data);
-          return {
-            content: JSON.stringify(parsed, null, 2),
-            isMarkdown: false,
-          };
-        } catch {
-          // 如果不是JSON字符串，可能是markdown内容
-          return { content: data, isMarkdown: true };
-        }
+      if (!data || typeof data !== 'object') {
+        const content = String(data || '');
+        const parsed = parseThinkContent(content);
+        return {
+          content,
+          isMarkdown: false,
+          hasThinkBlock: parsed.hasThinkBlock,
+          thinkContent: parsed.thinkContent,
+          mainContent: parsed.mainContent,
+        };
       }
 
       // 检查是否有result1、result2等字段（工作流结果模式）
@@ -80,54 +134,82 @@ export function ResultViewer({
         const resultContent = data[firstResultKey];
 
         if (typeof resultContent === 'string') {
-          // 移除think块内容，只保留主要内容
-          let cleanContent = resultContent;
+          // 🎯 关键修改：不再删除think块，而是解析它们
+          const parsed = parseThinkContent(resultContent);
 
-          // 移除<think>...</think>块
-          cleanContent = cleanContent.replace(/<think>[\s\S]*?<\/think>/g, '');
+          // 检查主内容是否包含markdown
+          const markdownContent = parsed.mainContent || parsed.thinkContent;
+          const isMarkdown =
+            markdownContent.includes('```') ||
+            markdownContent.includes('#') ||
+            markdownContent.includes('**');
 
-          // 检查是否包含markdown
-          if (
-            cleanContent.includes('```') ||
-            cleanContent.includes('#') ||
-            cleanContent.includes('**')
-          ) {
-            return { content: cleanContent.trim(), isMarkdown: true };
-          } else {
-            return { content: cleanContent.trim(), isMarkdown: false };
-          }
+          return {
+            content: resultContent,
+            isMarkdown,
+            hasThinkBlock: parsed.hasThinkBlock,
+            thinkContent: parsed.thinkContent,
+            mainContent: parsed.mainContent,
+          };
         }
       }
 
       // 如果有text字段，优先显示text内容
       if (data.text && typeof data.text === 'string') {
-        // 检查是否包含markdown代码块
-        if (data.text.includes('```')) {
-          // 包含代码块，作为markdown渲染
-          return { content: data.text, isMarkdown: true };
-        } else {
-          // 纯文本或简单内容
-          return { content: data.text, isMarkdown: false };
-        }
+        const parsed = parseThinkContent(data.text);
+        const isMarkdown = data.text.includes('```');
+
+        return {
+          content: data.text,
+          isMarkdown,
+          hasThinkBlock: parsed.hasThinkBlock,
+          thinkContent: parsed.thinkContent,
+          mainContent: parsed.mainContent,
+        };
       }
 
       // 如果有outputs字段，优先显示outputs
       if (data.outputs && typeof data.outputs === 'object') {
+        const content = JSON.stringify(data.outputs, null, 2);
         return {
-          content: JSON.stringify(data.outputs, null, 2),
+          content,
           isMarkdown: false,
+          hasThinkBlock: false,
+          thinkContent: '',
+          mainContent: content,
         };
       }
 
       // 否则显示完整数据
-      return { content: JSON.stringify(data, null, 2), isMarkdown: false };
+      const content = JSON.stringify(data, null, 2);
+      return {
+        content,
+        isMarkdown: false,
+        hasThinkBlock: false,
+        thinkContent: '',
+        mainContent: content,
+      };
     } catch (error) {
       console.error('[结果查看器] 数据格式化失败:', error);
-      return { content: String(data), isMarkdown: false };
+      const content = String(data);
+      const parsed = parseThinkContent(content);
+      return {
+        content,
+        isMarkdown: false,
+        hasThinkBlock: parsed.hasThinkBlock,
+        thinkContent: parsed.thinkContent,
+        mainContent: parsed.mainContent,
+      };
     }
   };
 
-  const { content: formattedContent, isMarkdown } = formatResult(result);
+  const {
+    content: formattedContent,
+    isMarkdown,
+    hasThinkBlock,
+    thinkContent,
+    mainContent,
+  } = formatResult(result);
 
   // --- Markdown组件配置 ---
   const markdownComponents: any = {
@@ -268,31 +350,28 @@ export function ResultViewer({
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(formattedContent);
-      setIsCopied(true);
-      console.log('[结果查看器] 结果已复制到剪贴板');
-
-      // 2秒后重置状态
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
+      // 复制时只复制主内容，不包含think块
+      const copyContent = hasThinkBlock ? mainContent : formattedContent;
+      await navigator.clipboard.writeText(copyContent);
+      // 这里可以添加成功提示
     } catch (error) {
-      console.error('[结果查看器] 复制失败:', error);
+      console.error('复制失败:', error);
     }
   };
 
   const handleDownload = () => {
-    const blob = new Blob([formattedContent], {
-      type: isMarkdown ? 'text/markdown' : 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `workflow-result-${Date.now()}.${isMarkdown ? 'md' : 'json'}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const element = document.createElement('a');
+    const copyContent = hasThinkBlock ? mainContent : formattedContent;
+    const file = new Blob([copyContent], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const extension = isMarkdown ? 'md' : 'json';
+    element.download = `workflow-result-${timestamp}.${extension}`;
+
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -301,7 +380,6 @@ export function ResultViewer({
     }
   };
 
-  // --- 键盘事件监听 ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -310,157 +388,131 @@ export function ResultViewer({
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [onClose]);
 
   return (
-    <>
-      {/* 背景遮罩 */}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      onClick={handleBackdropClick}
+    >
       <div
         className={cn(
-          'fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300',
-          isVisible ? 'opacity-100' : 'opacity-0'
+          'relative mx-4 flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border shadow-2xl',
+          isDark ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-white'
         )}
-        onClick={handleBackdropClick}
-      />
-
-      {/* 弹窗内容 */}
-      <div className="fixed inset-4 z-50 flex items-center justify-center">
+      >
+        {/* 头部区域 */}
         <div
           className={cn(
-            'max-h-full w-full max-w-4xl overflow-hidden rounded-2xl shadow-2xl transition-all duration-300',
-            isDark
-              ? 'border border-stone-700 bg-stone-900'
-              : 'border border-stone-200 bg-white',
-            isVisible ? 'animate-scale-in' : 'scale-95 opacity-0'
+            'flex items-center justify-between border-b px-6 py-4',
+            isDark ? 'border-gray-700' : 'border-gray-200'
           )}
         >
-          {/* 头部 */}
-          <div
+          <h2
             className={cn(
-              'flex items-center justify-between border-b p-6',
-              isDark ? 'border-stone-700' : 'border-stone-200'
+              'text-lg font-semibold',
+              isDark ? 'text-white' : 'text-gray-900'
             )}
           >
-            <div>
-              <h2
-                className={cn(
-                  'font-serif text-xl font-bold',
-                  isDark ? 'text-stone-100' : 'text-stone-900'
-                )}
-              >
-                {t('title')}
-              </h2>
-              <p
-                className={cn(
-                  'mt-1 font-serif text-sm',
-                  isDark ? 'text-stone-400' : 'text-stone-600'
-                )}
-              >
-                {execution?.title || t('title')}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {/* 复制按钮 */}
-              <TooltipWrapper
-                content={isCopied ? t('copied') : t('copy')}
-                id="result-viewer-copy-btn"
-                placement="bottom"
-                size="sm"
-                showArrow={false}
-                desktopOnly={true}
-              >
-                <button
-                  onClick={handleCopy}
-                  className={cn(
-                    'flex items-center justify-center rounded-lg p-2 transition-colors',
-                    isDark ? 'text-stone-400' : 'text-stone-500',
-                    isDark ? 'hover:text-stone-300' : 'hover:text-stone-700',
-                    isDark ? 'hover:bg-stone-600/40' : 'hover:bg-stone-300/40',
-                    'focus:outline-none'
-                  )}
-                  style={{ transform: 'translateZ(0)' }}
-                  aria-label={isCopied ? t('copied') : t('copy')}
-                >
-                  {isCopied ? (
-                    <FiCheck className="h-4 w-4" />
-                  ) : (
-                    <FiCopy className="h-4 w-4" />
-                  )}
-                </button>
-              </TooltipWrapper>
-
-              {/* 下载按钮 */}
-              <TooltipWrapper
-                content={t('download')}
-                id="workflow-result-viewer-download-btn"
-                placement="bottom"
-                size="sm"
-                showArrow={false}
-                desktopOnly={true}
-              >
-                <button
-                  onClick={handleDownload}
-                  className={cn(
-                    'rounded-lg p-2 transition-colors',
-                    isDark
-                      ? 'text-stone-400 hover:bg-stone-700 hover:text-stone-300'
-                      : 'text-stone-600 hover:bg-stone-100 hover:text-stone-700'
-                  )}
-                  aria-label={t('download')}
-                >
-                  <Download className="h-4 w-4" />
-                </button>
-              </TooltipWrapper>
-
-              {/* 关闭按钮 */}
-              <button
-                onClick={onClose}
-                className={cn(
-                  'rounded-lg p-2 transition-colors',
-                  isDark
-                    ? 'text-stone-400 hover:bg-stone-700 hover:text-stone-300'
-                    : 'text-stone-600 hover:bg-stone-100 hover:text-stone-700'
-                )}
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* 内容区域 */}
-          <div className="max-h-[calc(100vh-12rem)] overflow-y-auto p-6">
-            {isMarkdown ? (
-              <div
-                className={cn(
-                  'prose prose-stone max-w-none font-serif',
-                  isDark ? 'prose-invert' : ''
-                )}
-              >
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkMath]}
-                  rehypePlugins={[rehypeKatex, rehypeRaw]}
-                  components={markdownComponents}
-                >
-                  {formattedContent}
-                </ReactMarkdown>
-              </div>
-            ) : (
-              <pre
-                className={cn(
-                  'overflow-x-auto rounded-lg p-4 font-mono text-sm whitespace-pre-wrap',
-                  isDark
-                    ? 'bg-stone-800 text-stone-200'
-                    : 'bg-stone-50 text-stone-800'
-                )}
-              >
-                {formattedContent}
-              </pre>
-            )}
+            {t('title')}
+          </h2>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleCopy}
+              className={cn(
+                'rounded-md p-2 transition-colors',
+                isDark
+                  ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+              )}
+              title={t('copyButton')}
+            >
+              <Copy className="h-4 w-4" />
+            </button>
+            <button
+              onClick={handleDownload}
+              className={cn(
+                'rounded-md p-2 transition-colors',
+                isDark
+                  ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+              )}
+              title={t('downloadButton')}
+            >
+              <Download className="h-4 w-4" />
+            </button>
+            <button
+              onClick={onClose}
+              className={cn(
+                'rounded-md p-2 transition-colors',
+                isDark
+                  ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+              )}
+              title={t('closeButton')}
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         </div>
+
+        {/* 内容区域 */}
+        <div
+          className={cn(
+            'flex-1 overflow-y-auto p-6',
+            isDark ? 'bg-gray-900' : 'bg-white'
+          )}
+        >
+          {/* 🎯 Think Block 区域 */}
+          {hasThinkBlock && thinkContent && (
+            <div className="mb-4">
+              <ThinkBlockHeader
+                status="completed"
+                isOpen={isThinkOpen}
+                onToggle={() => setIsThinkOpen(!isThinkOpen)}
+              />
+              {isThinkOpen && (
+                <ThinkBlockContent
+                  markdownContent={thinkContent}
+                  isOpen={isThinkOpen}
+                />
+              )}
+            </div>
+          )}
+
+          {/* 主内容区域 */}
+          {(mainContent || (!hasThinkBlock && formattedContent)) && (
+            <div
+              className={cn(
+                'markdown-body w-full',
+                isDark ? 'text-gray-100' : 'text-gray-900'
+              )}
+            >
+              {isMarkdown ? (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                  components={markdownComponents}
+                >
+                  {hasThinkBlock ? mainContent : formattedContent}
+                </ReactMarkdown>
+              ) : (
+                <pre
+                  className={cn(
+                    'font-mono text-sm break-words whitespace-pre-wrap',
+                    isDark ? 'text-gray-300' : 'text-gray-700'
+                  )}
+                >
+                  {hasThinkBlock ? mainContent : formattedContent}
+                </pre>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </>
+    </div>
   );
 }
