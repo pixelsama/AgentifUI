@@ -1,7 +1,5 @@
 'use client';
 
-import { KeyCombination } from '@components/ui/adaptive-key-badge';
-import { useFormattedShortcut } from '@lib/hooks/use-platform-keys';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { Loader2, Save } from 'lucide-react';
@@ -15,7 +13,6 @@ interface FormActionsProps {
 
 export const FormActions = ({ isProcessing, onCancel }: FormActionsProps) => {
   const { isDark } = useTheme();
-  const saveShortcut = useFormattedShortcut('SAVE_SUBMIT');
   const t = useTranslations('pages.admin.apiConfig.formActions');
 
   return (
@@ -36,14 +33,6 @@ export const FormActions = ({ isProcessing, onCancel }: FormActionsProps) => {
           <Save className="h-4 w-4" />
         )}
         <span>{isProcessing ? t('saving') : t('save')}</span>
-        {!isProcessing && (
-          <KeyCombination
-            keys={saveShortcut.symbols}
-            size="md"
-            isDark={isDark}
-            className="ml-3"
-          />
-        )}
       </button>
       <button
         type="button"

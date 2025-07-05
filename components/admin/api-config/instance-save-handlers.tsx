@@ -3,17 +3,15 @@
 import { useApiConfigStore } from '@lib/stores/api-config-store';
 import { toast } from 'sonner';
 
-import { useTranslations } from 'next-intl';
-
 // --- 创建实例的保存处理逻辑 ---
 export const handleCreateInstance = async (
   data: any,
   providers: any[],
   addInstance: Function,
   setIsProcessing: (value: boolean) => void,
-  handleClearSelection: () => void
+  handleClearSelection: () => void,
+  t: (key: string) => string
 ) => {
-  const t = useTranslations('pages.admin.apiConfig.instanceSaveHandlers');
   setIsProcessing(true);
 
   // --- 提取setAsDefault状态和其他数据 ---
@@ -78,9 +76,9 @@ export const handleUpdateInstance = async (
   data: any,
   updateInstance: Function,
   setIsProcessing: (value: boolean) => void,
-  handleClearSelection: () => void
+  handleClearSelection: () => void,
+  t: (key: string) => string
 ) => {
-  const t = useTranslations('pages.admin.apiConfig.instanceSaveHandlers');
   setIsProcessing(true);
 
   try {

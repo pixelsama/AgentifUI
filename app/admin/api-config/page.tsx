@@ -1257,6 +1257,11 @@ export default function ApiConfigPage() {
     updateAppInstance: updateInstance,
   } = useApiConfigStore();
 
+  // 翻译函数
+  const tInstanceSaveHandlers = useTranslations(
+    'pages.admin.apiConfig.instanceSaveHandlers'
+  );
+
   const [selectedInstance, setSelectedInstance] =
     useState<ServiceInstance | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -1324,7 +1329,8 @@ export default function ApiConfigPage() {
                 providers,
                 addInstance,
                 setIsProcessing,
-                handleClearSelection
+                handleClearSelection,
+                tInstanceSaveHandlers
               )
             }
             onCancel={handleClearSelection}
@@ -1347,7 +1353,8 @@ export default function ApiConfigPage() {
                 data,
                 updateInstance,
                 setIsProcessing,
-                handleClearSelection
+                handleClearSelection,
+                tInstanceSaveHandlers
               )
             }
             onCancel={handleClearSelection}
