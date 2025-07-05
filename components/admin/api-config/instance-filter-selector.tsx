@@ -27,16 +27,12 @@ export const InstanceFilterSelector = memo(function InstanceFilterSelector({
   const { isDark } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 获取当前选中的提供商信息
-  // --- END COMMENT ---
   const selectedProvider = selectedProviderId
     ? providers.find(p => p.id === selectedProviderId)
     : null;
 
-  // --- BEGIN COMMENT ---
   // 处理筛选选择
-  // --- END COMMENT ---
   const handleFilterSelect = (providerId: string | null) => {
     onFilterChange(providerId);
     setIsOpen(false);

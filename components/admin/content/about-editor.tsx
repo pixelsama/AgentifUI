@@ -14,10 +14,7 @@ import { Plus, Trash2 } from 'lucide-react';
 
 import React from 'react';
 
-// --- BEGIN COMMENT ---
 // 编辑器现在直接处理翻译对象，不再需要独立的配置类型
-// --- END COMMENT ---
-
 interface AboutEditorProps {
   translations: Record<SupportedLocale, any>;
   currentLocale: SupportedLocale;
@@ -36,9 +33,7 @@ export function AboutEditor({
   const { isDark } = useTheme();
   const currentTranslation = translations[currentLocale] || {};
 
-  // --- BEGIN COMMENT ---
   // 统一的字段更新处理器，支持点状路径
-  // --- END COMMENT ---
   const handleFieldChange = (field: string, value: any) => {
     const newTranslations = JSON.parse(JSON.stringify(translations)); // Deep copy
     const fieldParts = field.split('.');

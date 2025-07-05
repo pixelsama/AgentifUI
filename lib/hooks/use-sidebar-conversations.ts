@@ -25,9 +25,7 @@ const supabase = createClient();
  * @returns 会话列表、加载状态、错误信息和操作函数
  */
 export function useSidebarConversations(limit: number = 20) {
-  // --- BEGIN COMMENT ---
   // 状态定义，使用更简化的状态管理
-  // --- END COMMENT ---
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -70,10 +68,8 @@ export function useSidebarConversations(limit: number = 20) {
     };
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 加载会话列表的优化版本
   // 使用统一数据服务，支持缓存和错误处理
-  // --- END COMMENT ---
   const loadConversations = useCallback(
     async (reset: boolean = false) => {
       if (!userId) {
@@ -88,10 +84,8 @@ export function useSidebarConversations(limit: number = 20) {
       setError(null);
 
       try {
-        // --- BEGIN COMMENT ---
         // 使用统一数据服务获取对话列表
         // 支持缓存、排序和分页
-        // --- END COMMENT ---
         const result = await dataService.findMany<Conversation>(
           'conversations',
           {
@@ -148,9 +142,7 @@ export function useSidebarConversations(limit: number = 20) {
     [userId, limit]
   );
 
-  // --- BEGIN COMMENT ---
   // 加载更多会话（可扩展功能）
-  // --- END COMMENT ---
   const loadMore = useCallback(async () => {
     if (!userId || isLoading || !hasMore) {
       return;
@@ -176,9 +168,7 @@ export function useSidebarConversations(limit: number = 20) {
     }
   }, [userId, loadConversations]);
 
-  // --- BEGIN COMMENT ---
   // 清理函数：组件卸载时清理订阅
-  // --- END COMMENT ---
   useEffect(() => {
     return () => {
       if (userId) {
@@ -189,9 +179,7 @@ export function useSidebarConversations(limit: number = 20) {
     };
   }, [userId]);
 
-  // --- BEGIN COMMENT ---
   // 删除对话的辅助函数
-  // --- END COMMENT ---
   const deleteConversation = useCallback(
     async (conversationId: string): Promise<boolean> => {
       if (!userId) return false;
@@ -229,9 +217,7 @@ export function useSidebarConversations(limit: number = 20) {
     [userId]
   );
 
-  // --- BEGIN COMMENT ---
   // 重命名对话的辅助函数
-  // --- END COMMENT ---
   const renameConversation = useCallback(
     async (conversationId: string, newTitle: string): Promise<boolean> => {
       if (!userId) return false;

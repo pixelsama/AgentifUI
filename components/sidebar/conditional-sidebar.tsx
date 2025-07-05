@@ -16,9 +16,7 @@ import { Sidebar } from './index';
 export function ConditionalSidebar() {
   const pathname = usePathname();
 
-  // --- BEGIN COMMENT ---
   // 需要隔离Sidebar的路由
-  // --- END COMMENT ---
   const shouldHideSidebar =
     pathname === '/' || // 首页
     pathname?.startsWith('/about') || // 关于页
@@ -30,15 +28,11 @@ export function ConditionalSidebar() {
     pathname?.startsWith('/phone-login') || // 手机登录
     pathname?.startsWith('/sso'); // SSO相关页面
 
-  // --- BEGIN COMMENT ---
   // 如果在需要隔离的路由，不渲染Sidebar
-  // --- END COMMENT ---
   if (shouldHideSidebar) {
     return null;
   }
 
-  // --- BEGIN COMMENT ---
   // 其他路由正常渲染Sidebar
-  // --- END COMMENT ---
   return <Sidebar />;
 }

@@ -18,10 +18,8 @@ import { NavBar } from './nav-bar';
 export function ConditionalNavBar() {
   const pathname = usePathname();
 
-  // --- BEGIN COMMENT ---
   // 需要隐藏NavBar的路由
   // 与ConditionalSidebar保持一致的路由判断逻辑
-  // --- END COMMENT ---
   const shouldHideNavBar =
     pathname === '/' || // 首页
     pathname?.startsWith('/about') || // 关于页
@@ -33,15 +31,11 @@ export function ConditionalNavBar() {
     pathname?.startsWith('/phone-login') || // 手机登录
     pathname?.startsWith('/sso'); // SSO相关页面
 
-  // --- BEGIN COMMENT ---
   // 如果在需要隐藏的路由，不渲染NavBar
-  // --- END COMMENT ---
   if (shouldHideNavBar) {
     return null;
   }
 
-  // --- BEGIN COMMENT ---
   // 其他路由正常渲染NavBar
-  // --- END COMMENT ---
   return <NavBar />;
 }

@@ -132,16 +132,12 @@ export function DropdownMenuV2({
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsOpen = onOpenChange || setInternalIsOpen;
 
-  // --- BEGIN COMMENT ---
   // 🎯 客户端挂载检测
-  // --- END COMMENT ---
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 🎯 计算trigger位置用于portal定位
-  // --- END COMMENT ---
   const updateTriggerRect = () => {
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
@@ -149,9 +145,7 @@ export function DropdownMenuV2({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 🎯 当菜单打开时更新位置
-  // --- END COMMENT ---
   useEffect(() => {
     if (isOpen) {
       updateTriggerRect();
@@ -166,18 +160,14 @@ export function DropdownMenuV2({
     }
   }, [isOpen]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 全局点击监听器：点击组件外部时关闭菜单
   // 这样可以确保点击页面任何地方都能关闭菜单
-  // --- END COMMENT ---
   useEffect(() => {
     if (!isOpen) return;
 
     const handleGlobalClick = (event: MouseEvent) => {
-      // --- BEGIN COMMENT ---
       // 🎯 修复：检查点击的元素，如果是dropdown内容区域则不关闭
       // 这样可以确保点击菜单项时不会被全局监听器干扰
-      // --- END COMMENT ---
       const target = event.target as Node;
 
       // 如果点击的是组件内部，不关闭菜单
@@ -199,9 +189,7 @@ export function DropdownMenuV2({
       setIsOpen(false);
     };
 
-    // --- BEGIN COMMENT ---
     // 🎯 使用setTimeout延迟添加监听器，避免与当前点击事件冲突
-    // --- END COMMENT ---
     const timeoutId = setTimeout(() => {
       document.addEventListener('mousedown', handleGlobalClick);
     }, 0);
@@ -212,9 +200,7 @@ export function DropdownMenuV2({
     };
   }, [isOpen, setIsOpen]);
 
-  // --- BEGIN COMMENT ---
   // 阻止背景滚动：当下拉菜单打开时
-  // --- END COMMENT ---
   useEffect(() => {
     if (!preventScroll) return;
 
@@ -238,18 +224,14 @@ export function DropdownMenuV2({
     setIsOpen(!isOpen);
   };
 
-  // --- BEGIN COMMENT ---
   // 阻止trigger点击事件冒泡
-  // --- END COMMENT ---
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     toggleMenu();
   };
 
-  // --- BEGIN COMMENT ---
   // 🎯 计算dropdown的固定位置
-  // --- END COMMENT ---
   const getDropdownStyle = (): React.CSSProperties => {
     if (!triggerRect) return {};
 
@@ -271,9 +253,7 @@ export function DropdownMenuV2({
     return style;
   };
 
-  // --- BEGIN COMMENT ---
   // 🎯 Dropdown内容 - 使用Portal渲染到body
-  // --- END COMMENT ---
   const dropdownContent = isOpen && triggerRect && (
     <div
       className={cn('fixed z-[9999]', popoverContainerClassName)}
@@ -282,9 +262,7 @@ export function DropdownMenuV2({
       <div
         className={cn(
           'rounded-md border shadow-lg backdrop-blur-sm',
-          // --- BEGIN COMMENT ---
           // 🎯 使用更深的颜色以区别于sidebar背景
-          // --- END COMMENT ---
           isDark
             ? 'border-stone-600/80 bg-stone-800/95'
             : 'border-stone-300/80 bg-white/95',

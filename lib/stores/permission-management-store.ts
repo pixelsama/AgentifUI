@@ -4,10 +4,7 @@ import type { Group } from '@lib/db/group-permissions';
 import type { AppVisibility, ServiceInstance } from '@lib/types/database';
 import { create } from 'zustand';
 
-// --- BEGIN COMMENT ---
 // 🎯 权限管理Store - 统一管理应用权限和群组分配
-// --- END COMMENT ---
-
 export interface AppWithPermissions extends ServiceInstance {
   // 当前应用的群组权限配置
   groupPermissions: Array<{
@@ -90,10 +87,7 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
   (set, get) => ({
     ...initialState,
 
-    // --- BEGIN COMMENT ---
     // 🔄 数据加载函数
-    // --- END COMMENT ---
-
     loadApps: async () => {
       set(state => ({
         loading: { ...state.loading, apps: true },
@@ -213,10 +207,7 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
       }
     },
 
-    // --- BEGIN COMMENT ---
     // 🎯 应用管理函数
-    // --- END COMMENT ---
-
     updateAppVisibility: async (appId: string, visibility: AppVisibility) => {
       set(state => ({
         loading: { ...state.loading, updating: true },
@@ -230,11 +221,8 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
         const result = await updateServiceInstance(appId, { visibility });
 
         if (result.success) {
-          // --- BEGIN COMMENT ---
           // 🎯 权限切换后的数据清理逻辑
           // 当从group_only切换到其他权限时，清理组权限表中的相关记录
-          // --- END COMMENT ---
-
           // 如果切换到非group_only权限，清理所有相关的组权限记录
           if (visibility !== 'group_only') {
             try {
@@ -288,10 +276,7 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
       }
     },
 
-    // --- BEGIN COMMENT ---
     // 👥 群组权限管理函数
-    // --- END COMMENT ---
-
     setGroupPermission: async (
       appId: string,
       groupId: string,
@@ -331,10 +316,7 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
       }
     },
 
-    // --- BEGIN COMMENT ---
     // 🔍 搜索和筛选函数
-    // --- END COMMENT ---
-
     setSearchTerm: (term: string) => {
       set({ searchTerm: term });
     },

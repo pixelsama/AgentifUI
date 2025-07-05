@@ -6,9 +6,7 @@ import { Loader2 } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 头像预览组件接口
-// --- END COMMENT ---
 interface AvatarPreviewProps {
   avatarUrl?: string | null;
   userName: string;

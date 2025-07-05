@@ -31,11 +31,9 @@ import { useFormatter, useTranslations } from 'next-intl';
 
 import { AvatarModal } from './avatar-modal';
 
-// --- BEGIN COMMENT ---
 // 个人资料表单组件
 // 采用紧凑现代化设计，优化UI布局和视觉效果
 // 支持SSO模式下的字段限制
-// --- END COMMENT ---
 interface ProfileFormProps {
   profile: DatabaseProfile &
     ExtendedProfile & {
@@ -51,10 +49,8 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
   const { mutate: refreshProfile } = useProfile(); // 添加刷新profile的功能
   const { formatDate } = useDateFormatter();
 
-  // --- BEGIN COMMENT ---
   // 检查是否为SSO单点登录模式
   // 在SSO模式下，限制某些字段的编辑
-  // --- END COMMENT ---
   const isSSOOnlyMode = process.env.NEXT_PUBLIC_SSO_ONLY_MODE === 'true';
 
   const [formData, setFormData] = useState({
@@ -68,9 +64,7 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
   } | null>(null);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 处理头像更新
-  // --- END COMMENT ---
   const handleAvatarUpdate = useCallback(
     async (avatarUrl: string | null) => {
       setMessage({
@@ -93,10 +87,8 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
     [t, refreshProfile, onSuccess]
   );
 
-  // --- BEGIN COMMENT ---
   // 处理表单字段变更
   // 在SSO模式下阻止full_name字段的修改
-  // --- END COMMENT ---
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -113,10 +105,8 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
     }));
   };
 
-  // --- BEGIN COMMENT ---
   // 处理表单提交
   // 根据SSO模式调整提交的数据
-  // --- END COMMENT ---
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -124,10 +114,8 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       setIsSubmitting(true);
       setMessage(null);
 
-      // --- BEGIN COMMENT ---
       // 根据SSO模式构建更新数据
       // SSO模式下不更新姓名和头像URL
-      // --- END COMMENT ---
       const updateData: any = {
         username: formData.username,
       };
@@ -140,10 +128,8 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       const result = await updateUserProfile(profile.id, updateData);
 
       if (result.success && result.data) {
-        // --- BEGIN COMMENT ---
         // 更新localStorage缓存，确保在其他页面能立即看到最新数据
         // 需要类型转换以匹配ExtendedProfile接口
-        // --- END COMMENT ---
         const extendedProfile: ExtendedProfile = {
           ...result.data,
           full_name: result.data.full_name || null,

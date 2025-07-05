@@ -17,18 +17,14 @@ export function useChatflowDetection() {
   const { currentAppInstance } = useCurrentApp();
   const { conversationAppId } = useChatInterface();
 
-  // --- BEGIN COMMENT ---
   // 🎯 确保应用列表已加载
-  // --- END COMMENT ---
   React.useEffect(() => {
     if (apps.length === 0) {
       fetchApps();
     }
   }, [apps.length, fetchApps]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 获取当前对话关联的应用
-  // --- END COMMENT ---
   const currentConversationApp = React.useMemo(() => {
     if (conversationAppId) {
       // 尝试多种匹配方式查找应用
@@ -40,9 +36,7 @@ export function useChatflowDetection() {
     return currentAppInstance;
   }, [conversationAppId, apps, currentAppInstance]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 判断是否为chatflow应用
-  // --- END COMMENT ---
   const isChatflowApp = React.useMemo(() => {
     if (!currentConversationApp) return false;
 

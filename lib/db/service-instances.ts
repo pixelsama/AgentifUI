@@ -210,11 +210,8 @@ export async function deleteServiceInstance(
   }
 }
 
-// --- BEGIN COMMENT ---
 // 兼容性函数，保持与现有代码的兼容性
 // 这些函数将逐步迁移到使用Result类型
-// --- END COMMENT ---
-
 /**
  * 获取指定提供商的所有服务实例（兼容版本）
  * @deprecated 请使用新版本并处理Result类型
@@ -295,11 +292,8 @@ export async function deleteServiceInstanceLegacy(
   return result.success && result.data;
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 新增：应用参数相关的数据库操作接口
 // 用于数据库优先的应用参数管理方案
-// --- END COMMENT ---
-
 /**
  * 从数据库获取应用参数配置
  * @param instanceId 应用实例ID

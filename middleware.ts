@@ -14,9 +14,7 @@ export async function middleware(request: NextRequest) {
   const url = new URL(request.url);
   const pathname = url.pathname;
 
-  // --- BEGIN COMMENT ---
   // 1. 优先处理CORS预检请求
-  // --- END COMMENT ---
   if (request.method === 'OPTIONS') {
     console.log(`[Middleware] CORS预检请求: ${pathname}`);
     return handleCorsPreflightRequest(request);
@@ -28,10 +26,8 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // --- BEGIN COMMENT ---
   // 2. 为所有API路由自动添加CORS头
   // 这样所有API都获得统一的CORS保护，无需手动添加
-  // --- END COMMENT ---
   if (pathname.startsWith('/api/')) {
     const origin = request.headers.get('origin');
     const corsHeaders = createCorsHeaders(origin);

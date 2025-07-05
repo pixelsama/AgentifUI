@@ -1,9 +1,7 @@
 // lib/services/dify/message-service.ts
-// --- BEGIN COMMENT ---
 // 该文件负责处理与 Dify 消息相关的 API 交互，例如获取历史消息。
 // 它遵循与 file-service.ts 和 chat-service.ts (如果存在) 类似的设计模式，
 // 即提供独立的、可导出的服务函数。
-// --- END COMMENT ---
 import type {
   DifyApiError,
   DifyAudioToTextRequestPayload,
@@ -14,13 +12,10 @@ import type {
   GetMessagesResponse,
 } from './types';
 
-// --- BEGIN COMMENT ---
 // 定义指向我们后端 Dify 代理 API 的基础 URL。
 // 与 file-service.ts 保持一致，方便统一管理代理路径。
-// --- END COMMENT ---
 const DIFY_PROXY_BASE_URL = '/api/dify';
 
-// --- BEGIN COMMENT ---
 /**
  * 获取指定会话的历史聊天记录。
  *
@@ -32,7 +27,6 @@ const DIFY_PROXY_BASE_URL = '/api/dify';
  * @returns 一个解析为 `GetMessagesResponse` 对象的 Promise，其中包含了消息列表和分页信息。
  * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象 (类似 DifyApiError)。
  */
-// --- END COMMENT ---
 export async function getConversationMessages(
   appId: string,
   params: GetMessagesParams
@@ -134,17 +128,11 @@ export async function getConversationMessages(
   }
 }
 
-// --- BEGIN COMMENT ---
 // 可以根据需要在此文件中添加更多与消息相关的服务函数，
 // 例如：发送消息、反馈消息等。
-// --- END COMMENT ---
-
 export {}; // 确保文件被视为一个 ES模块
 
-// --- BEGIN COMMENT ---
 // 消息反馈 API 服务函数
-// --- END COMMENT ---
-
 /**
  * 提交消息反馈
  *

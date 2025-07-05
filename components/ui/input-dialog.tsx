@@ -52,16 +52,12 @@ export function InputDialog({
   const [mounted, setMounted] = useState(false);
   const [inputValue, setInputValue] = useState(defaultValue);
 
-  // --- BEGIN COMMENT ---
   // 客户端挂载后才能使用Portal
-  // --- END COMMENT ---
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 当对话框打开时，重置输入值并聚焦
-  // --- END COMMENT ---
   useEffect(() => {
     if (isOpen) {
       setInputValue(defaultValue);
@@ -73,9 +69,7 @@ export function InputDialog({
     }
   }, [isOpen, defaultValue]);
 
-  // --- BEGIN COMMENT ---
   // 处理ESC键关闭
-  // --- END COMMENT ---
   useEffect(() => {
     if (!isOpen) return;
 
@@ -89,9 +83,7 @@ export function InputDialog({
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isOpen, onClose, isLoading]);
 
-  // --- BEGIN COMMENT ---
   // 处理点击外部关闭
-  // --- END COMMENT ---
   useEffect(() => {
     if (!isOpen) return;
 
@@ -116,9 +108,7 @@ export function InputDialog({
     };
   }, [isOpen, onClose, isLoading]);
 
-  // --- BEGIN COMMENT ---
   // 处理移动端滑动关闭
-  // --- END COMMENT ---
   useEffect(() => {
     if (!isOpen || !isMobile || !dialogRef.current || isLoading) return;
 
@@ -162,18 +152,14 @@ export function InputDialog({
     };
   }, [isOpen, isMobile, onClose, isLoading]);
 
-  // --- BEGIN COMMENT ---
   // 点击背景关闭
-  // --- END COMMENT ---
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && !isLoading) {
       onClose();
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 处理表单提交
-  // --- END COMMENT ---
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedValue = inputValue.trim();
@@ -182,16 +168,12 @@ export function InputDialog({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 检查输入是否有效
-  // --- END COMMENT ---
   const isInputValid = inputValue.trim().length > 0;
 
   if (!mounted) return null;
 
-  // --- BEGIN COMMENT ---
   // 桌面端模态框样式 - Stone风格设计
-  // --- END COMMENT ---
   const desktopDialog = (
     <div
       className={cn(
@@ -345,9 +327,7 @@ export function InputDialog({
     </div>
   );
 
-  // --- BEGIN COMMENT ---
   // 移动端底部弹出样式 - Stone风格设计，键盘友好
-  // --- END COMMENT ---
   const mobileDialog = (
     <div
       className={cn(
@@ -495,8 +475,6 @@ export function InputDialog({
     </div>
   );
 
-  // --- BEGIN COMMENT ---
   // 根据设备类型返回相应的对话框
-  // --- END COMMENT ---
   return createPortal(isMobile ? mobileDialog : desktopDialog, document.body);
 }

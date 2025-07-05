@@ -4,9 +4,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 
 import { useUserTimezone } from './use-user-timezone';
 
-// --- BEGIN COMMENT ---
 // 时间格式化选项接口
-// --- END COMMENT ---
 export interface DateFormatOptions {
   includeTime?: boolean;
   style?: 'short' | 'medium' | 'long' | 'full';
@@ -15,28 +13,22 @@ export interface DateFormatOptions {
   timezone?: string;
 }
 
-// --- BEGIN COMMENT ---
 // 时间问候语选项
-// --- END COMMENT ---
 export interface TimeGreetingOptions {
   timezone?: string;
   includeUsername?: boolean;
   username?: string | null;
 }
 
-// --- BEGIN COMMENT ---
 // 统一的时间格式化 Hook
 // 提供标准化的时间显示功能，支持时区和国际化
 // 使用 common.time 翻译路径，作为全局通用组件
-// --- END COMMENT ---
 export function useDateFormatter(defaultTimezone?: string) {
   const format = useFormatter();
   const t = useTranslations('common.time');
   const { timezone: userTimezone } = useUserTimezone();
 
-  // --- BEGIN COMMENT ---
   // 核心日期格式化函数
-  // --- END COMMENT ---
   const formatDate = useMemo(() => {
     return (
       dateInput: string | Date | null | undefined,
@@ -124,9 +116,7 @@ export function useDateFormatter(defaultTimezone?: string) {
     };
   }, [format, t, defaultTimezone, userTimezone]);
 
-  // --- BEGIN COMMENT ---
   // 相对时间格式化（如：2小时前）
-  // --- END COMMENT ---
   const formatRelativeTime = useMemo(() => {
     return (
       dateInput: string | Date | null | undefined,
@@ -152,11 +142,9 @@ export function useDateFormatter(defaultTimezone?: string) {
     };
   }, [format, formatDate, t]);
 
-  // --- BEGIN COMMENT ---
   // 基于时间的问候语生成
   // 🎯 这是核心的时间问候功能，使用 common.time.greeting 翻译路径
   // 🚨 修复：使用用户时区设置生成问候语
-  // --- END COMMENT ---
   const getTimeBasedGreeting = useMemo(() => {
     return (options: TimeGreetingOptions = {}): string => {
       try {
@@ -204,9 +192,7 @@ export function useDateFormatter(defaultTimezone?: string) {
     };
   }, [t, userTimezone]);
 
-  // --- BEGIN COMMENT ---
   // 格式化执行时间（毫秒转可读格式）
-  // --- END COMMENT ---
   const formatDuration = useMemo(() => {
     return (milliseconds: number): string => {
       if (milliseconds < 1000) {
@@ -218,9 +204,7 @@ export function useDateFormatter(defaultTimezone?: string) {
     };
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 获取当前用户时区
-  // --- END COMMENT ---
   const getCurrentTimezone = useMemo(() => {
     return (): string => {
       try {
@@ -232,9 +216,7 @@ export function useDateFormatter(defaultTimezone?: string) {
     };
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 验证时区是否有效
-  // --- END COMMENT ---
   const isValidTimezone = useMemo(() => {
     return (timezone: string): boolean => {
       try {
@@ -256,9 +238,7 @@ export function useDateFormatter(defaultTimezone?: string) {
   };
 }
 
-// --- BEGIN COMMENT ---
 // 预设的常用格式化选项
-// --- END COMMENT ---
 export const DateFormatPresets = {
   // 短日期：2024年1月15日
   shortDate: { style: 'short' as const },

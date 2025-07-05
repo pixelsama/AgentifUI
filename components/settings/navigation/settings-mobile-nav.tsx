@@ -26,9 +26,7 @@ export function SettingsMobileNav() {
   const t = useTranslations('pages.settings');
   const [isOpen, setIsOpen] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 根据当前路径获取当前选中的导航项
-  // --- END COMMENT ---
   // 根据当前路径查找匹配的导航项
   const navItems = getSettingsNavItems(t);
   const currentItem =

@@ -9,11 +9,8 @@ import { useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 北京信息科技大学SSO登录按钮组件
 // 提供统一的SSO登录入口界面
-// --- END COMMENT ---
-
 interface BistuSSOButtonProps {
   returnUrl?: string;
   className?: string;
@@ -40,14 +37,10 @@ export function BistuSSOButton({
 
       console.log('[SSO登录] 开始北信科SSO登录流程');
 
-      // --- BEGIN COMMENT ---
       // SSO登录前先清理前一个用户的缓存，防止数据污染
-      // --- END COMMENT ---
       clearCacheOnLogin();
 
-      // --- BEGIN COMMENT ---
       // 构建SSO登录URL
-      // --- END COMMENT ---
       const params = new URLSearchParams();
       if (returnUrl) {
         params.set('returnUrl', returnUrl);
@@ -57,17 +50,13 @@ export function BistuSSOButton({
 
       console.log('[SSO登录] 跳转到SSO认证页面');
 
-      // --- BEGIN COMMENT ---
       // 重定向到SSO登录接口
-      // --- END COMMENT ---
       window.location.href = ssoLoginUrl;
     } catch (error) {
       console.error('[SSO登录] 启动SSO登录失败:', error);
       setIsLoading(false);
 
-      // --- BEGIN COMMENT ---
       // 显示错误提示
-      // --- END COMMENT ---
       alert(t('startError'));
     }
   };
@@ -78,9 +67,7 @@ export function BistuSSOButton({
       variant={variant}
       size={size}
       className={cn(
-        // --- BEGIN COMMENT ---
         // 使用与登录按钮一致的样式
-        // --- END COMMENT ---
         'relative flex w-full items-center justify-center gap-2 font-serif',
         className
       )}
@@ -126,9 +113,7 @@ export function BistuSSOButton({
   );
 }
 
-// --- BEGIN COMMENT ---
 // 简化版的SSO登录按钮，用于快速集成
-// --- END COMMENT ---
 export function SimpleBistuSSOButton({
   returnUrl,
   className,
@@ -149,9 +134,7 @@ export function SimpleBistuSSOButton({
   );
 }
 
-// --- BEGIN COMMENT ---
 // 带有详细说明的SSO登录卡片
-// --- END COMMENT ---
 export function BistuSSOCard({
   returnUrl,
   className,

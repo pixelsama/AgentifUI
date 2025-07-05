@@ -1,8 +1,5 @@
-// --- BEGIN COMMENT ---
 // 该文件用于统一导出 markdown-block 目录下的所有原子化组件，
 // 方便在其他地方（如 AssistantMessage）导入。
-// --- END COMMENT ---
-
 export * from './code-block-header';
 export * from './inline-code';
 export * from './code-block';

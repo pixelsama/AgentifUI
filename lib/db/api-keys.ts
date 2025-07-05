@@ -204,11 +204,8 @@ export async function incrementApiKeyUsage(
   });
 }
 
-// --- BEGIN COMMENT ---
 // 兼容性函数，保持与现有代码的兼容性
 // 这些函数将逐步迁移到使用Result类型
-// --- END COMMENT ---
-
 /**
  * 获取指定服务实例的API密钥（兼容版本）
  * @deprecated 请使用新版本并处理Result类型

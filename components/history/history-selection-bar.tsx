@@ -8,10 +8,8 @@ import * as React from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 历史对话选择操作栏组件
 // 提供全选、取消选择和批量删除功能
-// --- END COMMENT ---
 interface HistorySelectionBarProps {
   isSelectionMode: boolean;
   selectedCount: number;
@@ -38,9 +36,7 @@ export function HistorySelectionBar({
   const { isDark } = useTheme();
   const t = useTranslations('history');
 
-  // --- BEGIN COMMENT ---
   // 如果不在选择模式且没有选中项，则不显示操作栏
-  // --- END COMMENT ---
   if (!isSelectionMode && selectedCount === 0) {
     return null;
   }

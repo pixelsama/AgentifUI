@@ -10,10 +10,8 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 
-// --- BEGIN COMMENT ---
 // ScrollToBottomButton 组件
 // 简化渲染逻辑：只在 /chat 路径下（非 /chat/new）且不在底部时显示
-// --- END COMMENT ---
 export const ScrollToBottomButton = () => {
   const { isAtBottom } = useChatScrollStore();
   const { colors, isDark } = useThemeColors();
@@ -21,18 +19,14 @@ export const ScrollToBottomButton = () => {
   const pathname = usePathname();
   const t = useTranslations('pages.chat.input');
 
-  // --- BEGIN COMMENT ---
   // 🎯 简化的渲染条件：
   // 1. 在 /chat 路径下（但不是 /chat/new）
   // 2. 不在底部
-  // --- END COMMENT ---
   const isInChatPage = pathname.startsWith('/chat') && pathname !== '/chat/new';
   const shouldRender = isInChatPage && !isAtBottom;
 
-  // --- BEGIN COMMENT ---
   // 动态计算 bottom 偏移量
   // 基于输入框高度（CSS 变量 --chat-input-height）
-  // --- END COMMENT ---
   const bottomOffset = `calc(var(--chat-input-height, 80px) + 5.5rem)`;
 
   const handleClick = () => {

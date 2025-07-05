@@ -35,20 +35,16 @@ export function NavBar() {
     return null;
   }
 
-  // --- BEGIN COMMENT ---
   // 🎯 根据当前页面路径选择合适的背景色
   // Settings页面使用settings专门的背景色，其他页面使用主题背景色
   // 确保navbar与页面完全融入，无违和感
-  // --- END COMMENT ---
   const isSettingsPage = pathname?.startsWith('/settings');
   const backgroundColor = isSettingsPage
     ? settingsColors.pageBackground.tailwind
     : themeColors.mainBackground.tailwind;
 
-  // --- BEGIN COMMENT ---
   // 计算左边距：桌面端始终为sidebar留出空间
   // 根据展开状态设置相应边距
-  // --- END COMMENT ---
   const getLeftMargin = () => {
     return isExpanded ? 'left-0 md:left-64' : 'left-0 md:left-16';
   };

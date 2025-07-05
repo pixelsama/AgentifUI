@@ -9,9 +9,7 @@ import { useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 社交登录图标组件
-// --- END COMMENT ---
 const GoogleIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24">
     <path
@@ -58,9 +56,7 @@ export function SocialAuthButtons({
   });
   const [error, setError] = useState('');
 
-  // --- BEGIN COMMENT ---
   // 处理GitHub社交登录
-  // --- END COMMENT ---
   const handleSocialAuth = async (provider: 'github') => {
     setIsLoading(prev => ({ ...prev, [provider]: true }));
     setError('');
@@ -68,9 +64,7 @@ export function SocialAuthButtons({
     try {
       const supabase = createClient();
 
-      // --- BEGIN COMMENT ---
       // 构建重定向URL，包含原始目标路径
-      // --- END COMMENT ---
       const baseUrl = window.location.origin;
       const callbackUrl = `${baseUrl}/api/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`;
 
@@ -89,9 +83,7 @@ export function SocialAuthButtons({
         throw error;
       }
 
-      // --- BEGIN COMMENT ---
       // OAuth重定向将自动处理，无需手动跳转
-      // --- END COMMENT ---
     } catch (err: any) {
       console.error(`GitHub 登录失败:`, err);
       setError(err.message || t('failed'));

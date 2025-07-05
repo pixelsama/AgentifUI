@@ -30,12 +30,10 @@ import { Providers } from './providers';
 
 // 🎯 新增：条件渲染Sidebar
 
-// --- BEGIN COMMENT ---
 // 🎯 Claude 风格的中英文字体配置
 // Inter + 思源黑体：现代简洁的界面字体
 // Crimson Pro + 思源宋体：优雅易读的阅读字体
 // Playfair Display：装饰性标题字体
-// --- END COMMENT ---
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -78,14 +76,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // --- BEGIN COMMENT ---
   // 获取当前语言环境和翻译消息
-  // --- END COMMENT ---
   const locale = await getLocale();
   const messages = await getMessages();
-  // --- BEGIN COMMENT ---
   // 🎯 组合所有字体变量类名，确保在整个应用中可用
-  // --- END COMMENT ---
   const fontClasses = cn(
     inter.variable,
     notoSansSC.variable,

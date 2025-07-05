@@ -10,9 +10,7 @@ import {
 } from '@components/chat';
 import { ChatInput } from '@components/chat-input';
 import { DynamicSuggestedQuestions } from '@components/chat/dynamic-suggested-questions';
-// --- BEGIN COMMENT ---
 // 🎯 新增：Chatflow 相关导入
-// --- END COMMENT ---
 import { ChatflowFloatingController } from '@components/chatflow/chatflow-floating-controller';
 import { ChatflowNodeTracker } from '@components/chatflow/chatflow-node-tracker';
 import { FilePreviewCanvas } from '@components/file-preview/file-preview-canvas';
@@ -46,21 +44,15 @@ export default function ChatPage() {
   const pathname = usePathname();
   const t = useTranslations('pages.chat.input');
 
-  // --- BEGIN COMMENT ---
   // 获取sidebar状态和mobile状态，用于计算backdrop边距
-  // --- END COMMENT ---
   const { isExpanded } = useSidebarStore();
   const isMobile = useMobile();
 
-  // --- BEGIN COMMENT ---
   // 🎯 获取chatflow执行状态清理方法
-  // --- END COMMENT ---
   const { resetExecution } = useChatflowExecutionStore();
 
-  // --- BEGIN COMMENT ---
   // 使用 useChatPageState hook 管理聊天页面状态
   // 这样可以减少页面组件中的状态管理逻辑
-  // --- END COMMENT ---
   const {
     isWelcomeScreen,
     isSubmitting,
@@ -72,14 +64,10 @@ export default function ChatPage() {
   const isPreviewOpen = useFilePreviewStore(state => state.isPreviewOpen);
   const { colors, isDark } = useThemeColors();
 
-  // --- BEGIN COMMENT ---
   // 🎯 使用封装的Hook检测chatflow应用
-  // --- END COMMENT ---
   const { isChatflowApp } = useChatflowDetection();
 
-  // --- BEGIN COMMENT ---
   // 🎯 使用封装的Hook管理chatflow状态
-  // --- END COMMENT ---
   const {
     messages,
     handleSubmit: originalHandleSubmit,
@@ -92,10 +80,8 @@ export default function ChatPage() {
     showFloatingController,
   } = useChatflowState(isChatflowApp);
 
-  // --- BEGIN COMMENT ---
   // 🎯 关键修复：路由切换时清理chatflow执行状态
   // 确保切换到历史对话时不会显示之前的节点数据
-  // --- END COMMENT ---
   useLayoutEffect(() => {
     if (
       pathname?.startsWith('/chat/') &&
@@ -112,9 +98,7 @@ export default function ChatPage() {
     }
   }, [pathname, conversationIdFromUrl, resetExecution]);
 
-  // --- BEGIN COMMENT ---
   // 使用分页加载钩子获取历史消息
-  // --- END COMMENT ---
   const {
     loading,
     hasMoreMessages,
@@ -125,9 +109,7 @@ export default function ChatPage() {
     isLoadingInitial,
   } = useConversationMessages();
 
-  // --- BEGIN COMMENT ---
   // 使用 wrapHandleSubmit 包装原始的 handleSubmit 函数
-  // --- END COMMENT ---
   const handleSubmit = wrapHandleSubmit(originalHandleSubmit);
 
   const scrollRef = useChatScroll(messages);
@@ -138,10 +120,8 @@ export default function ChatPage() {
 
   const chatInputHeightVar = `${inputHeight || 80}px`;
 
-  // --- BEGIN COMMENT ---
   // 合并scrollRef和setMessagesContainer
   // scrollRef是RefObject类型，直接设置current属性
-  // --- END COMMENT ---
   const setScrollRef = (element: HTMLDivElement | null) => {
     if (scrollRef) {
       scrollRef.current = element;
@@ -149,10 +129,8 @@ export default function ChatPage() {
     setMessagesContainer(element);
   };
 
-  // --- BEGIN COMMENT ---
   // 只在 /chat/new 路由下调用 useProfile，其他路由不需要
   // 使用缓存机制，避免loading状态和闪烁
-  // --- END COMMENT ---
   const isNewChat = conversationIdFromUrl === 'new';
   const { profile, isLoading: isProfileLoading } = isNewChat
     ? useProfile()

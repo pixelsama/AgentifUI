@@ -26,10 +26,8 @@ import { usePathname, useSearchParams } from 'next/navigation';
 // 每页加载的消息数量
 const MESSAGES_PER_PAGE = 20;
 
-// --- BEGIN COMMENT ---
 // 定义统一的加载状态类型
 // 包含状态、类型和锁定标志
-// --- END COMMENT ---
 export type LoadingState =
   | 'idle'
   | 'loading'
@@ -48,9 +46,7 @@ type LoadingStatus = {
  * 将数据库消息转换为前端消息对象
  */
 function dbMessageToChatMessage(dbMessage: Message): ChatMessage {
-  // --- BEGIN COMMENT ---
   // 从metadata中提取附件信息
-  // --- END COMMENT ---
   const attachments = dbMessage.metadata?.attachments || [];
 
   return {
@@ -77,10 +73,8 @@ export function useConversationMessages() {
   const { session } = useSupabaseAuth();
   const userId = session?.user?.id;
 
-  // --- BEGIN COMMENT ---
   // 简化状态管理，使用统一的加载状态对象
   // 将多个状态变量合并为一个结构化的状态对象
-  // --- END COMMENT ---
   const [dbConversationId, setDbConversationId] = useState<string | null>(null);
   const [difyConversationId, setDifyConversationId] = useState<string | null>(
     null
@@ -94,9 +88,7 @@ export function useConversationMessages() {
   const [error, setError] = useState<Error | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // --- BEGIN COMMENT ---
   // 合并多个ref到单一对象，提高可维护性
-  // --- END COMMENT ---
   const loaderState = useRef<{
     page: number;
     currentId: string | null;
@@ -116,10 +108,7 @@ export function useConversationMessages() {
   // 从chatStore获取当前消息状态和操作方法
   const { messages, addMessage, clearMessages, updateMessage } = useChatStore();
 
-  // --- BEGIN COMMENT ---
   // 添加辅助函数，简化状态管理
-  // --- END COMMENT ---
-
   // 开始加载
   const startLoading = useCallback((type: 'initial' | 'more') => {
     setLoading(prev => ({ ...prev, state: 'loading', type, isLocked: true }));
@@ -263,10 +252,8 @@ export function useConversationMessages() {
    */
   const loadInitialMessages = useCallback(
     async (dbConvId: string) => {
-      // --- BEGIN COMMENT ---
       // 防止重复加载或者加载已经变更的对话
       // 使用统一的加载状态对象检查是否正在加载
-      // --- END COMMENT ---
       if (!dbConvId || loading.isLocked) {
         return;
       }
@@ -283,9 +270,7 @@ export function useConversationMessages() {
       const signal = controller.signal;
 
       try {
-        // --- BEGIN COMMENT ---
         // 使用统一的状态管理方式设置加载状态
-        // --- END COMMENT ---
         startLoading('initial');
         loaderState.current.page = 1;
         loaderState.current.currentId = dbConvId;
@@ -294,18 +279,14 @@ export function useConversationMessages() {
           `[useConversationMessages] 开始加载初始消息，数据库对话ID=${dbConvId}`
         );
 
-        // --- BEGIN COMMENT ---
         // 在获取消息前先清空当前消息，避免旧消息闪烁
         // 保持骨架屏状态直到新消息完全加载完成
-        // --- END COMMENT ---
         clearMessages();
 
         // 设置当前数据库对话ID
         setDbConversationId(dbConvId);
 
-        // --- BEGIN COMMENT ---
         // 使用新的messageService获取最新消息
-        // --- END COMMENT ---
         const result = await messageService.getLatestMessages(
           dbConvId,
           MESSAGES_PER_PAGE,
@@ -362,13 +343,10 @@ export function useConversationMessages() {
           `[useConversationMessages] 加载了${latestMessages.length}条最新消息`
         );
 
-        // --- BEGIN COMMENT ---
         // 优化状态更新逻辑，确保骨架屏消失后直接显示新消息，避免闪烁问题
         // 1. 先批量添加消息到store
         // 2. 使用requestAnimationFrame确保DOM已更新
         // 3. 然后再设置加载状态为成功，关闭骨架屏
-        // --- END COMMENT ---
-
         // 批量添加消息，减少渲染次数
         useChatStore.setState({ messages: chatMessages });
 
@@ -414,10 +392,8 @@ export function useConversationMessages() {
    * 加载更多历史消息（使用新的messageService）
    */
   const loadMoreMessages = useCallback(async () => {
-    // --- BEGIN COMMENT ---
     // 使用统一的状态对象检查是否可以加载更多消息
     // 避免在初始加载过程中触发加载更多，防止骨架屏闪烁
-    // --- END COMMENT ---
     if (
       !dbConversationId ||
       loading.isLocked ||
@@ -448,10 +424,8 @@ export function useConversationMessages() {
     const signal = controller.signal;
 
     try {
-      // --- BEGIN COMMENT ---
       // 使用统一的状态管理方式设置加载状态
       // 仅在加载更多消息时将状态类型设置为'more'
-      // --- END COMMENT ---
       startLoading('more');
 
       // 计算要跳过的消息数
@@ -462,10 +436,8 @@ export function useConversationMessages() {
         `[useConversationMessages] 加载更多历史消息，页码=${currentPage + 1}，跳过=${skip}`
       );
 
-      // --- BEGIN COMMENT ---
       // 使用新的messageService获取所有消息，然后手动分页
       // 这是临时方案，后续可以优化为真正的游标分页
-      // --- END COMMENT ---
       const result = await messageService.getLatestMessages(
         dbConversationId,
         1000,
@@ -543,9 +515,7 @@ export function useConversationMessages() {
         `[useConversationMessages] 加载了${pageMessages.length}条历史消息`
       );
 
-      // --- BEGIN COMMENT ---
       // 加载完成后重置加载状态
-      // --- END COMMENT ---
       finishLoading('success');
 
       // 保持滚动位置，使用更可靠的方式
@@ -593,9 +563,7 @@ export function useConversationMessages() {
    * 检测滚动到顶部，自动加载更多消息
    */
   const handleScroll = useCallback(() => {
-    // --- BEGIN COMMENT ---
     // 使用统一的状态对象检查是否可以加载更多消息
-    // --- END COMMENT ---
     if (
       !messagesContainerRef.current ||
       !hasMoreMessages ||
@@ -613,11 +581,8 @@ export function useConversationMessages() {
     }
   }, [hasMoreMessages, loading, loadMoreMessages]);
 
-  // --- BEGIN COMMENT ---
   // 重置加载状态的功能已由resetLoader函数提供
   // 不再需要单独的resetLoadingState函数
-  // --- END COMMENT ---
-
   /**
    * 路由更改时加载消息
    */
@@ -625,12 +590,10 @@ export function useConversationMessages() {
     const externalId = getConversationIdFromPath();
     const currentMessages = useChatStore.getState().messages;
 
-    // --- BEGIN COMMENT ---
     // 检测是否是首次发送消息导致的路由变化
     // 1. 从 /chat/new 路径或 /chat/temp- 开头的路径切换到正常对话路径
     // 2. 在这种情况下，不应该清空消息或显示加载状态
     // 3. 增强检测：如果当前有未保存的用户消息和助手正在流式响应的消息，也应该视为首次消息场景
-    // --- END COMMENT ---
     const isFromNewChat =
       loaderState.current.previousPath === '/chat/new' ||
       (loaderState.current.previousPath?.includes('/chat/temp-') ?? false);
@@ -697,18 +660,13 @@ export function useConversationMessages() {
       return;
     }
 
-    // --- BEGIN COMMENT ---
     // 对于非首次发送消息的路由变化，执行正常的加载逻辑
     // 优化状态更新顺序，避免旧消息闪烁
     // 1. 先重置状态和清空消息
     // 2. 然后设置加载状态和初始加载状态
     // 3. 确保骨架屏显示直到新消息加载完成
-    // --- END COMMENT ---
-
-    // --- BEGIN COMMENT ---
     // 使用统一的状态管理方式重置加载状态
     // 并清空消息，避免显示旧消息
-    // --- END COMMENT ---
     resetLoader();
     clearMessages();
 
@@ -721,9 +679,7 @@ export function useConversationMessages() {
     if (externalId) {
       setDifyConversationId(externalId);
 
-      // --- BEGIN COMMENT ---
       // 使用统一的状态对象设置当前加载的对话ID
-      // --- END COMMENT ---
       loaderState.current.currentId = externalId;
 
       // 获取数据库对话ID并加载消息
@@ -743,9 +699,7 @@ export function useConversationMessages() {
         }
       })();
     } else {
-      // --- BEGIN COMMENT ---
       // 使用统一的状态管理方式清理状态
-      // --- END COMMENT ---
       setDifyConversationId(null);
       setDbConversationId(null);
       setHasMoreMessages(true);
@@ -755,11 +709,9 @@ export function useConversationMessages() {
 
     // 清理函数
     return () => {
-      // --- BEGIN COMMENT ---
       // 使用统一的状态管理方式清理加载状态
       // 如果组件卸载或路由改变，标记当前加载ID为null
       // 这样可以在异步操作完成后知道上下文已经改变
-      // --- END COMMENT ---
       if (loaderState.current.currentId === externalId) {
         loaderState.current.currentId = null;
       }
@@ -802,10 +754,8 @@ export function useConversationMessages() {
     setMessagesContainer,
     // 导出一些有用的状态
     isLoading: loading.state === 'loading',
-    // --- BEGIN COMMENT ---
     // 使用统一的加载状态对象推断初始加载和加载更多状态
     // 这样可以更精确地控制骨架屏的显示时机，避免闪烁问题
-    // --- END COMMENT ---
     isLoadingInitial: loading.state === 'loading' && loading.type === 'initial',
     isLoadingMore: loading.state === 'loading' && loading.type === 'more',
   };

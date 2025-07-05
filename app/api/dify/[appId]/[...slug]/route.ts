@@ -30,9 +30,7 @@ function adjustApiPathByAppType(
 
   // --- 工作流应用：需要workflows前缀，但排除通用API ---
   if (isWorkflowApp(appType as any)) {
-    // --- BEGIN COMMENT ---
     // 文件上传、音频转文本等通用API不需要workflows前缀
-    // --- END COMMENT ---
     const commonApis = ['files/upload', 'audio-to-text'];
     const isCommonApi = commonApis.some(api => originalPath.startsWith(api));
 
@@ -76,11 +74,9 @@ async function proxyToDify(
   const appId = params.appId;
   const slug = params.slug;
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：检查是否有临时配置（用于表单同步）
   // 如果请求体中包含 _temp_config，则使用临时配置而不是数据库配置
   // 🎯 修复：避免重复读取请求体，先克隆请求以保留原始请求体
-  // --- END COMMENT ---
   let tempConfig: { apiUrl: string; apiKey: string } | null = null;
   let requestBody: any = null;
 
@@ -132,10 +128,8 @@ async function proxyToDify(
   }
   // --- END OPTIMIZATION ---
 
-  // --- BEGIN COMMENT ---
   // 1. 获取 Dify 应用配置
   // 优先使用临时配置（表单同步），否则从数据库获取
-  // --- END COMMENT ---
   let difyApiKey: string;
   let difyApiUrl: string;
   let difyConfig: any = null;
@@ -208,9 +202,7 @@ async function proxyToDify(
     // 准备请求体和头部，处理特殊情况
     let finalBody: BodyInit | null = null;
 
-    // --- BEGIN COMMENT ---
     // 🎯 处理请求体：使用之前解析和清理过的请求体
-    // --- END COMMENT ---
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       if (tempConfig) {
         // 使用临时配置时，请求体应该为空（因为这些是 info/parameters 查询请求）
@@ -257,9 +249,7 @@ async function proxyToDify(
     }
 
     // 准备 fetch 选项
-    // --- BEGIN COMMENT ---
     // 🎯 临时配置请求应该使用 GET 方法调用 Dify API
-    // --- END COMMENT ---
     const actualMethod = tempConfig ? 'GET' : req.method;
 
     const fetchOptions: RequestInit & { duplex: 'half' } = {

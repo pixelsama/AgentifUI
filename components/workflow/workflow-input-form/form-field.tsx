@@ -222,9 +222,7 @@ export function FormField({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 为number类型生成范围提示信息
-  // --- END COMMENT ---
   const getNumberHint = () => {
     if (type !== 'number') return null;
 

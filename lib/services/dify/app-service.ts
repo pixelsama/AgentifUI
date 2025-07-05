@@ -25,9 +25,7 @@ export async function getAllDifyApps(): Promise<
   }>
 > {
   try {
-    // --- BEGIN COMMENT ---
     // 🎯 重构：支持多提供商，获取所有活跃提供商的应用实例
-    // --- END COMMENT ---
     const { createClient } = await import('@lib/supabase/client');
     const supabase = createClient();
 
@@ -88,9 +86,7 @@ export async function getPublicDifyApps(): Promise<
   }>
 > {
   try {
-    // --- BEGIN COMMENT ---
     // 🎯 重构：支持多提供商，获取所有活跃提供商的公开应用实例
-    // --- END COMMENT ---
     const { createClient } = await import('@lib/supabase/client');
     const supabase = createClient();
 
@@ -426,11 +422,8 @@ export async function getDifyAppParametersWithConfig(
     throw new Error('API URL 和 API Key 都是必需的');
   }
 
-  // --- BEGIN COMMENT ---
   // 🎯 架构修复：通过临时代理方式调用，避免直接调用外部API
   // 创建一个临时的服务实例配置，通过代理服务器调用
-  // --- END COMMENT ---
-
   try {
     console.log(`[Dify App Service] 使用表单配置通过代理同步参数: ${appId}`);
 
@@ -515,11 +508,8 @@ export async function getDifyAppInfoWithConfig(
     throw new Error('API URL 和 API Key 都是必需的');
   }
 
-  // --- BEGIN COMMENT ---
   // 🎯 架构修复：通过临时代理方式调用，避免直接调用外部API
   // 创建一个临时的服务实例配置，通过代理服务器调用
-  // --- END COMMENT ---
-
   try {
     console.log(
       `[Dify App Service] 使用表单配置通过代理同步基本信息: ${appId}`

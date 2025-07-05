@@ -8,18 +8,22 @@ import React, { useEffect, useRef } from 'react';
 
 import { AttachmentPreviewItem } from './attachment-preview-item';
 
-// --- BEGIN COMMENT ---
-// 附件预览栏 Props 定义
-// --- END COMMENT ---
+/**
+ * Attachment preview bar component properties
+ */
 interface AttachmentPreviewBarProps {
+  /** Dark mode flag */
   isDark?: boolean;
-  onHeightChange: (height: number) => void; // 回调函数，通知父组件高度变化
-  onRetryUpload: (id: string) => void; // 添加重试上传的回调
+  /** Callback function to notify parent component of height changes */
+  onHeightChange: (height: number) => void;
+  /** Retry upload callback */
+  onRetryUpload: (id: string) => void;
 }
 
-// --- BEGIN COMMENT ---
-// 附件预览栏组件
-// --- END COMMENT ---
+/**
+ * Attachment preview bar component
+ * @description Displays uploaded files with preview and manages height animations
+ */
 export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({
   isDark = false,
   onHeightChange,

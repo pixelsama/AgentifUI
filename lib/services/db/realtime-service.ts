@@ -59,9 +59,7 @@ export class RealtimeService {
       console.log(`[实时订阅] 添加处理函数到现有订阅: ${key}`);
     } else {
       // 创建新的订阅
-      // --- BEGIN COMMENT ---
       // 🔧 修复重复订阅问题：使用订阅键作为channel名称，确保每个订阅都有唯一的channel
-      // --- END COMMENT ---
       const channelKey = `channel-${key}`;
       const channel = this.supabase.channel(channelKey);
 
@@ -241,15 +239,11 @@ export const realtimeService = RealtimeService.getInstance();
 
 // 常用的订阅键生成器
 export const SubscriptionKeys = {
-  // --- BEGIN COMMENT ---
   // 🔧 修复重复订阅问题：为不同用途的Hook提供差异化的订阅键
-  // --- END COMMENT ---
   sidebarConversations: (userId: string) => `sidebar-conversations:${userId}`,
   allConversations: (userId: string) => `all-conversations:${userId}`,
 
-  // --- BEGIN COMMENT ---
   // 保持向后兼容性，现有代码可以继续使用
-  // --- END COMMENT ---
   userConversations: (userId: string) => `user-conversations:${userId}`,
 
   conversationMessages: (conversationId: string) =>

@@ -44,16 +44,12 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
   const router = useRouter();
   const t = useTranslations('sidebar');
 
-  // --- BEGIN COMMENT ---
   // 🎯 使用正确的快捷键映射
-  // --- END COMMENT ---
   const newChatShortcut = useFormattedShortcut('NEW_CHAT');
   const recentChatsShortcut = useFormattedShortcut('RECENT_CHATS');
   const appsMarketShortcut = useFormattedShortcut('APPS_MARKET');
 
-  // --- BEGIN COMMENT ---
   // 🎯 点击状态管理 - 用于控制点击时的立即切换效果
-  // --- END COMMENT ---
   const [isClicking, setIsClicking] = React.useState(false);
 
   const setCurrentConversationId = useChatStore(
@@ -67,9 +63,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
   const { setIsTransitioningToWelcome } = useChatTransitionStore();
   const { clearConversationState } = useChatInterface();
 
-  // --- BEGIN COMMENT ---
   // 🎯 自定义拉宽版PanelLeft图标 - 让右侧区域更宽
-  // --- END COMMENT ---
   const WidePanelLeft = ({ className }: { className?: string }) => (
     <svg
       width="20"
@@ -88,9 +82,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
     </svg>
   );
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：新对话处理函数
-  // --- END COMMENT ---
   const handleNewChat = () => {
     const isAlreadyOnNewChat = window.location.pathname === '/chat/new';
     if (isAlreadyOnNewChat) {
@@ -109,10 +101,8 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
       clearMessages();
       setCurrentConversationId(null);
 
-      // --- BEGIN COMMENT ---
       // 🎯 新增：清理use-chat-interface中的对话状态
       // 这确保difyConversationId、dbConversationUUID、conversationAppId都被正确清理
-      // --- END COMMENT ---
       clearConversationState();
 
       // 清理其他UI状态
@@ -149,20 +139,14 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               role="button"
               tabIndex={0}
               onClick={e => {
-                // --- BEGIN COMMENT ---
                 // 立即移除focus，避免影响父容器的cursor显示
-                // --- END COMMENT ---
                 e.currentTarget.blur();
 
-                // --- BEGIN COMMENT ---
                 // 🎯 设置点击状态，确保立即显示目标箭头
-                // --- END COMMENT ---
                 setIsClicking(true);
                 toggleSidebar();
 
-                // --- BEGIN COMMENT ---
                 // 延迟重置点击状态，让过渡动画完成
-                // --- END COMMENT ---
                 setTimeout(() => {
                   setIsClicking(false);
                 }, 200);
@@ -176,9 +160,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               aria-label={t('expand')}
               className={cn(
                 'group relative flex items-center justify-center px-2 py-2 text-sm font-medium',
-                // --- BEGIN COMMENT ---
                 // 使用resize cursor表示可以调整sidebar宽度：展开时向右箭头，收起时向左箭头
-                // --- END COMMENT ---
                 'cursor-e-resize',
                 'transition-all duration-150 ease-in-out',
                 'outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
@@ -245,20 +227,14 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
             role="button"
             tabIndex={0}
             onClick={e => {
-              // --- BEGIN COMMENT ---
               // 立即移除focus，避免影响父容器的cursor显示
-              // --- END COMMENT ---
               e.currentTarget.blur();
 
-              // --- BEGIN COMMENT ---
               // 🎯 设置点击状态，确保立即显示目标箭头
-              // --- END COMMENT ---
               setIsClicking(true);
               toggleSidebar();
 
-              // --- BEGIN COMMENT ---
               // 延迟重置点击状态，让过渡动画完成
-              // --- END COMMENT ---
               setTimeout(() => {
                 setIsClicking(false);
               }, 200);
@@ -272,9 +248,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
             aria-label={t('collapse')}
             className={cn(
               'group relative flex items-center justify-center px-2 py-2 text-sm font-medium',
-              // --- BEGIN COMMENT ---
               // 使用resize cursor表示可以调整sidebar宽度：展开时向左箭头，收起时向右箭头
-              // --- END COMMENT ---
               'cursor-w-resize',
               'transition-all duration-150 ease-in-out',
               'outline-none focus-visible:ring-2 focus-visible:ring-offset-2',

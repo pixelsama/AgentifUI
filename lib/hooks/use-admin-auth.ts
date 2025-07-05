@@ -65,10 +65,8 @@ export function useAdminAuth(
           return;
         }
 
-        // --- BEGIN COMMENT ---
         // 使用新的数据服务获取当前用户资料
         // getCurrentUserProfile 已经包含了缓存和错误处理
-        // --- END COMMENT ---
         const result = await getCurrentUserProfile();
 
         if (result.success && result.data) {

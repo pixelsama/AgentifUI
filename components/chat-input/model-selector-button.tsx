@@ -12,15 +12,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
-// --- BEGIN COMMENT ---
 // 🎯 多提供商支持：模型选择器现在支持来自不同提供商的模型
 // 过滤逻辑基于 app_type === 'model'，不再限制特定提供商
 // 保持向后兼容，现有的 Dify 模型仍然正常工作
-// --- END COMMENT ---
-
-// --- BEGIN COMMENT ---
 // 从chat-input.tsx导入全局焦点管理器
-// --- END COMMENT ---
 import { useFocusManager } from './chat-input';
 
 interface AppSelectorButtonProps {
@@ -36,33 +31,25 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isOptimisticSwitching, setIsOptimisticSwitching] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 获取全局焦点管理器
-  // --- END COMMENT ---
   const { focusInput } = useFocusManager();
   const t = useTranslations('pages.chat.modelSelector');
 
-  // --- BEGIN COMMENT ---
   // 获取可用的app列表
-  // --- END COMMENT ---
   useEffect(() => {
     fetchApps();
   }, [fetchApps]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 过滤出模型类型的应用
   // 支持多提供商：只要 app_type === 'model' 就显示，不限制提供商
   // 这样可以显示来自不同提供商（Dify、OpenAI、Claude等）的模型
-  // --- END COMMENT ---
   const modelApps = apps.filter(app => {
     const metadata = app.config?.app_metadata;
     return metadata?.app_type === 'model';
   });
 
-  // --- BEGIN COMMENT ---
   // 🎯 最后使用模型记忆机制
   // 当从非模型应用回到聊天界面时，自动恢复到最后使用的模型
-  // --- END COMMENT ---
   const getLastUsedModel = () => {
     try {
       return localStorage.getItem('last-used-model-app-id');
@@ -79,15 +66,11 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 🎯 简化模型选择逻辑：
   // 1. 如果当前应用是模型类型，直接使用
   // 2. 如果当前应用不是模型类型，尝试恢复最后使用的模型
   // 3. 如果没有最后使用的模型或该模型不可用，选择第一个可用模型
-  // --- END COMMENT ---
-  // --- BEGIN COMMENT ---
   // 🎯 修复：使用instance_id进行匹配，因为currentAppId存储的是instance_id而不是UUID
-  // --- END COMMENT ---
   const currentApp = modelApps.find(app => app.instance_id === currentAppId);
   const isCurrentAppModel = !!currentApp;
 
@@ -101,9 +84,7 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
     // 如果当前应用不是模型类型，尝试恢复最后使用的模型
     const lastUsedModelId = getLastUsedModel();
     if (lastUsedModelId) {
-      // --- BEGIN COMMENT ---
       // 🎯 修复：使用instance_id进行匹配，因为lastUsedModelId存储的是instance_id
-      // --- END COMMENT ---
       const lastUsedModel = modelApps.find(
         app => app.instance_id === lastUsedModelId
       );
@@ -118,9 +99,7 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
 
   const targetModelApp = getTargetModelApp();
 
-  // --- BEGIN COMMENT ---
   // 🎯 简化应用切换：移除自动跳转，让用户控制导航
-  // --- END COMMENT ---
   const handleAppChange = useCallback(
     async (newAppId: string) => {
       if (newAppId === currentAppId) {
@@ -136,40 +115,32 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
         // 开始乐观切换状态（显示spinner）
         setIsOptimisticSwitching(true);
 
-        // --- BEGIN COMMENT ---
         // 🎯 记录最后使用的模型（仅当切换到模型类型应用时）
         // 🎯 修复：使用instance_id进行匹配，因为newAppId是instance_id
-        // --- END COMMENT ---
         const targetApp = modelApps.find(app => app.instance_id === newAppId);
         if (targetApp) {
           setLastUsedModel(newAppId);
 
-          // --- BEGIN COMMENT ---
           // 🎯 静默切换应用，不强制跳转页面
           // switchToSpecificApp需要instance_id，不是数据库UUID
-          // --- END COMMENT ---
           await switchToSpecificApp(targetApp.instance_id);
         } else {
           throw new Error(`未找到应用: ${newAppId}`);
         }
 
-        // --- BEGIN COMMENT ---
         // 切换成功后清理聊天状态
-        // --- END COMMENT ---
         clearMessages();
 
         console.log(`已切换到app: ${newAppId}`);
       } catch (error) {
         console.error('切换app失败:', error);
-        // TODO: 显示用户友好的错误提示
+        // @future 显示用户友好的错误提示
       } finally {
         // 结束乐观切换状态
         setIsOptimisticSwitching(false);
 
-        // --- BEGIN COMMENT ---
         // 无论成功还是失败，都要确保恢复输入框焦点
         // 使用setTimeout确保在状态更新完成后执行
-        // --- END COMMENT ---
         setTimeout(() => focusInput(), 0);
       }
     },
@@ -183,10 +154,8 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
     ]
   );
 
-  // --- BEGIN COMMENT ---
   // 🎯 简化自动恢复逻辑：只在组件初始化时执行一次
   // 移除复杂的路径检查和定时器，避免竞态条件
-  // --- END COMMENT ---
   useEffect(() => {
     // 只在有模型应用且当前应用不是模型类型时才尝试恢复
     if (
@@ -200,9 +169,7 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
         `检测到非模型应用 ${currentAppId}，静默恢复到模型: ${targetModelApp.instance_id}`
       );
 
-      // --- BEGIN COMMENT ---
       // 🎯 修复：在静默切换前先记录到localStorage，确保首次登录时也能正确保存模型选择
-      // --- END COMMENT ---
       setLastUsedModel(targetModelApp.instance_id);
 
       // 静默切换，不显示loading状态，不强制跳转
@@ -217,13 +184,11 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
     targetModelApp?.instance_id,
   ]); // 移除handleAppChange依赖，避免循环
 
-  // --- BEGIN COMMENT ---
   // 🎯 显示状态判断：
   // 1. 如果正在验证或自动切换，显示loading状态
   // 2. 如果当前应用是模型类型，显示当前模型名称
   // 3. 如果有目标模型，显示目标模型名称
   // 4. 否则显示默认文本
-  // --- END COMMENT ---
   const getDisplayState = () => {
     // 如果当前应用是模型类型，显示当前模型
     if (isCurrentAppModel && currentApp) {
@@ -252,9 +217,7 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
 
   const displayState = getDisplayState();
 
-  // --- BEGIN COMMENT ---
   // 修改：处理下拉菜单的打开/关闭，确保操作后恢复焦点
-  // --- END COMMENT ---
   const handleToggleDropdown = useCallback(
     (e: React.MouseEvent) => {
       // 阻止事件冒泡，避免触发其他元素的点击事件
@@ -264,10 +227,8 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
       setIsOpen(prev => {
         const newIsOpen = !prev;
 
-        // --- BEGIN COMMENT ---
         // 如果是关闭下拉菜单，恢复输入框焦点
         // 如果是打开，焦点会自然地在下拉菜单上，这是期望的行为
-        // --- END COMMENT ---
         if (!newIsOpen) {
           setTimeout(() => focusInput(), 0);
         }
@@ -278,26 +239,20 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
     [focusInput]
   );
 
-  // --- BEGIN COMMENT ---
   // 修改：处理背景点击关闭下拉菜单，确保恢复焦点
-  // --- END COMMENT ---
   const handleBackdropClick = useCallback(() => {
     setIsOpen(false);
-    // --- BEGIN COMMENT ---
     // 背景点击关闭下拉菜单后，恢复输入框焦点
-    // --- END COMMENT ---
     setTimeout(() => focusInput(), 0);
   }, [focusInput]);
 
   // 获取当前选中的app名称
   const currentAppName = displayState.name;
 
-  // --- BEGIN COMMENT ---
   // 🎯 骨架屏：固定长度的响应式骨架屏
   // 移动端较短，桌面端较长
   // 🎯 修复：暗黑模式下使用更亮的颜色，确保与输入框背景有对比度
   // 🎯 修改：把原来显示"验证中..."的时机改成显示骨架屏
-  // --- END COMMENT ---
   if ((isLoading && modelApps.length === 0) || isValidating) {
     return (
       <div className={cn('flex items-center', className)}>
@@ -321,9 +276,7 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
       --- END MODIFIED COMMENT --- */}
       <button
         onClick={handleToggleDropdown}
-        // --- BEGIN COMMENT ---
         // 添加onMouseDown防止按钮点击时输入框失去焦点
-        // --- END COMMENT ---
         onMouseDown={e => e.preventDefault()}
         className={cn(
           'flex items-center space-x-1 rounded-md px-2 py-1 font-serif text-sm',
@@ -403,9 +356,7 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
                 <button
                   key={app.id}
                   onClick={() => handleAppChange(app.instance_id)}
-                  // --- BEGIN COMMENT ---
                   // 添加onMouseDown防止按钮点击时输入框失去焦点
-                  // --- END COMMENT ---
                   onMouseDown={e => e.preventDefault()}
                   className={cn(
                     'w-full px-3 py-2 text-left font-serif text-sm',

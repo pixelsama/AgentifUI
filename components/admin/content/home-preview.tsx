@@ -5,9 +5,7 @@ import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 
-// --- BEGIN COMMENT ---
 // 从 page.tsx 导入类型定义
-// --- END COMMENT ---
 interface FeatureCard {
   title: string;
   description: string;

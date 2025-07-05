@@ -1,15 +1,13 @@
 /**
  * 聊天界面交互钩子
  *
- * --- BEGIN COMMENT ---
- * 🎯 适用范围：仅用于对话类 Dify 应用（chatbot、agent、chatflow）
+ * @description 适用范围：仅用于对话类 Dify 应用（chatbot、agent、chatflow）
  * 这些应用的数据存储到 conversations + messages 表
  *
  * 任务类应用（workflow、text-generation）使用独立的组件和存储逻辑，
  * 数据存储到 app_executions 表，不使用此 hook
- * --- END COMMENT ---
  *
- * 提供完整的聊天功能，包括：
+ * @features 提供完整的聊天功能，包括：
  * - 消息发送和接收
  * - 流式响应处理
  * - 对话创建和管理
@@ -57,29 +55,34 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useChatMessages } from './use-chat-messages';
 import { useCreateConversation } from './use-create-conversation';
 
-// --- BEGIN COMMENT ---
 // 移除硬编码的 DIFY_APP_IDENTIFIER 和 currentUserIdentifier
 // 这些将从 store 和 auth hook 中获取
-// --- END COMMENT ---
-
-// --- BEGIN COMMENT ---
 // 🎯 优化流式体验：减少批量更新间隔，提高响应性
 // 从100ms降低到30ms，让流式效果更加丝滑
-// --- END COMMENT ---
 const CHUNK_APPEND_INTERVAL = 30;
 
-// --- BEGIN COMMENT ---
 // 🎯 多提供商支持：聊天接口现在支持多提供商环境
 // ensureAppReady 和 validateConfig 方法已更新为使用默认提供商 fallback
 // 在 /chat/new 发送消息时会自动选择合适的提供商和应用
-// --- END COMMENT ---
-
+/**
+ * 对话状态接口
+ * @description 管理对话的各种ID和状态
+ */
 interface ConversationState {
+  /** Dify对话ID（外部ID），用于路由和 API 调用 */
   difyConversationId: string | null;
+  /** 数据库对话ID（内部ID），用于消息持久化 */
   dbConversationUUID: string | null;
+  /** 历史对话的原始appId，优先于localStorage中的当前app */
   conversationAppId: string | null;
 }
 
+/**
+ * 聊天界面交互钩子
+ * @description 提供完整的聊天功能，支持多提供商环境
+ * @param onNodeEvent - 可选的节点事件回调函数
+ * @returns 聊天界面的各种状态和操作方法
+ */
 export function useChatInterface(
   onNodeEvent?: (
     event:
@@ -99,9 +102,7 @@ export function useChatInterface(
   const currentPathname = usePathname();
   const { isWelcomeScreen, setIsWelcomeScreen } = useChatInputStore();
 
-  // --- BEGIN COMMENT ---
   // 获取认证状态和当前应用信息，使用新的 hook
-  // --- END COMMENT ---
   const { session } = useSupabaseAuth();
   const currentUserId = session?.user?.id;
   const {
@@ -114,8 +115,6 @@ export function useChatInterface(
     ensureAppReady, // 新增：强制等待App配置就绪的方法
     validateConfig, // 新增：验证并切换App配置的方法
   } = useCurrentApp();
-  // --- END COMMENT ---
-
   const messages = useChatStore(state => state.messages);
   const addMessage = useChatStore(state => state.addMessage);
   const appendMessageChunk = useChatStore(state => state.appendMessageChunk);
@@ -140,18 +139,14 @@ export function useChatInterface(
     state => state.updateStatus
   );
 
-  // --- BEGIN COMMENT ---
   // 使用消息持久化钩子，传入当前用户ID
-  // --- END COMMENT ---
   const { saveMessage, saveStoppedAssistantMessage, saveErrorPlaceholder } =
     useChatMessages(currentUserId);
 
-  // --- BEGIN COMMENT ---
   // 状态管理：
   // difyConversationId: Dify对话ID（外部ID），用于路由和 API 调用
   // dbConversationUUID: 数据库对话ID（内部ID），用于消息持久化
   // conversationAppId: 历史对话的原始appId，优先于localStorage中的当前app
-  // --- END COMMENT ---
   const [difyConversationId, setDifyConversationId] = useState<string | null>(
     null
   );
@@ -163,18 +158,12 @@ export function useChatInterface(
   );
 
   const isSubmittingRef = useRef(false);
-  // --- BEGIN COMMENT ---
   // 用于累积数据块
-  // --- END COMMENT ---
   const chunkBufferRef = useRef('');
-  // --- BEGIN COMMENT ---
   // 用于刷新缓冲区的计时器
-  // --- END COMMENT ---
   const appendTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // --- BEGIN COMMENT ---
   // 用于流式状态检测的ref
-  // --- END COMMENT ---
   const lastStreamingCheckRef = useRef<{
     messageId: string;
     content: string;
@@ -186,9 +175,7 @@ export function useChatInterface(
       if (id && chunkBufferRef.current) {
         appendMessageChunk(id, chunkBufferRef.current);
         chunkBufferRef.current = '';
-        // --- BEGIN COMMENT ---
         // 如果需要更精确的计时，lastAppendTime 可以是一个 ref，或者在这里简单重置
-        // --- END COMMENT ---
       }
       if (appendTimerRef.current) {
         clearTimeout(appendTimerRef.current);
@@ -198,11 +185,9 @@ export function useChatInterface(
     [appendMessageChunk]
   );
 
-  // --- BEGIN COMMENT ---
   // 路由监听逻辑：
   // 1. 如果是有效的对话URL，获取Dify对话ID并查询数据库对话ID
   // 2. 如果是新对话或临时对话，重置状态
-  // --- END COMMENT ---
   useEffect(() => {
     // 如果当前路径包含对话ID（不是new或temp-开头），则尝试从 URL 中提取 Dify 对话 ID
     if (
@@ -231,10 +216,8 @@ export function useChatInterface(
             );
             setDbConversationUUID(result.data.id);
 
-            // --- BEGIN COMMENT ---
             // 🎯 关键修复：保存历史对话的原始appId
             // 这确保继续历史对话时使用正确的app，而不是localStorage中当前选中的app
-            // --- END COMMENT ---
             if (result.data.app_id) {
               setConversationAppId(result.data.app_id);
               console.log(
@@ -290,21 +273,17 @@ export function useChatInterface(
         return;
       }
 
-      // --- BEGIN COMMENT ---
       // 在提交前检查用户是否登录
-      // --- END COMMENT ---
       if (!currentUserId) {
         console.error('useChatInterface.handleSubmit: User not authenticated.');
-        // TODO: 可以通过 useNotificationStore 显示提示
+        // @future 可以通过 useNotificationStore 显示用户友好的提示
         return;
       }
 
-      // --- BEGIN COMMENT ---
       // 🎯 核心修改：智能App选择逻辑
       // 1. 如果是历史对话，优先使用对话记录中的原始appId
       // 2. 如果是新对话或历史对话没有appId，使用当前选中的app
       // 3. 强制等待App配置就绪，解决时序问题
-      // --- END COMMENT ---
       let appConfig: { appId: string; instance: ServiceInstance };
       try {
         console.log('[handleSubmit] 开始确定使用的App...');
@@ -335,9 +314,7 @@ export function useChatInterface(
       } catch (error) {
         console.error('[handleSubmit] App配置获取失败:', error);
 
-        // --- BEGIN COMMENT ---
         // 🎯 错误恢复机制：添加错误消息到聊天界面，提供用户反馈
-        // --- END COMMENT ---
         const errorMessage =
           error instanceof Error ? error.message : '应用配置获取失败';
         addMessage({
@@ -350,9 +327,7 @@ export function useChatInterface(
         return;
       }
 
-      // --- BEGIN COMMENT ---
       // 记录开始时间，用于性能分析
-      // --- END COMMENT ---
       const startTime = Date.now();
 
       isSubmittingRef.current = true;
@@ -371,9 +346,7 @@ export function useChatInterface(
             })
           : undefined;
 
-      // --- BEGIN COMMENT ---
       // 添加用户消息，设置初始状态为 pending，表示等待保存
-      // --- END COMMENT ---
       const userMessage = addMessage({
         text: message,
         isUser: true,
@@ -423,15 +396,11 @@ export function useChatInterface(
       let finalRealConvId: string | undefined;
       let finalTaskId: string | undefined;
 
-      // --- BEGIN COMMENT ---
       // 用于存储数据库对话ID，这是消息持久化的关键
       // 只有在获取到有效的数据库对话ID后，才能保存消息
-      // --- END COMMENT ---
       let finalDbConvUUID: string | null = null;
 
-      // --- BEGIN COMMENT ---
       // 🎯 新增：存储completionPromise，用于获取Dify metadata
-      // --- END COMMENT ---
       let completionPromise:
         | Promise<{
             usage?: any;
@@ -470,13 +439,10 @@ export function useChatInterface(
         };
 
         if (isNewConversationFlow) {
-          // --- BEGIN COMMENT ---
           // 新对话逻辑：
           // 1. 调用initiateNewConversation创建新对话
           // 2. 获取Dify对话ID (finalRealConvId)
           // 3. 查询数据库对话ID (finalDbConvUUID)
-          // --- END COMMENT ---
-
           const creationResult = await initiateNewConversation(
             basePayloadForNewConversation,
             appConfig.appId, // 使用确保就绪的 appId
@@ -501,10 +467,8 @@ export function useChatInterface(
                 });
               }
 
-              // --- BEGIN COMMENT ---
               // 🎯 简化修复：在回调中保存用户消息，助手消息在流式响应结束后保存
               // 这样确保时序正确，避免复杂的定时器逻辑
-              // --- END COMMENT ---
               console.log(
                 `[handleSubmit] 数据库ID回调完成，用户消息已保存，助手消息将在流式响应结束后保存`
               );
@@ -524,9 +488,7 @@ export function useChatInterface(
           finalRealConvId = creationResult.realConvId;
           finalTaskId = creationResult.taskId;
 
-          // --- BEGIN COMMENT ---
           // 🎯 修复：从新对话创建结果中获取completionPromise
-          // --- END COMMENT ---
           completionPromise = creationResult.completionPromise;
 
           if (finalRealConvId) {
@@ -540,10 +502,8 @@ export function useChatInterface(
               router.replace(`/chat/${finalRealConvId}`, { scroll: false });
             }
 
-            // --- BEGIN COMMENT ---
             // 查询数据库对话ID，这是消息持久化的关键
             // 注意：initiate函数内部已经创建了数据库记录，所以这里可以直接查询
-            // --- END COMMENT ---
             try {
               const result = await getConversationByExternalId(finalRealConvId);
 
@@ -566,16 +526,11 @@ export function useChatInterface(
             setCurrentTaskId(finalTaskId);
           }
         } else {
-          // --- BEGIN COMMENT ---
           // 现有对话逻辑：
           // 1. 首先获取数据库对话ID（如果还没有）
           // 2. 调用Dify API发送消息
           // 3. 更新各种ID和状态
-          // --- END COMMENT ---
-
-          // --- BEGIN COMMENT ---
           // 获取数据库对话ID，这是消息持久化的关键
-          // --- END COMMENT ---
           if (dbConversationUUID) {
             // 如果已经有数据库对话ID，直接使用
             finalDbConvUUID = dbConversationUUID;
@@ -600,11 +555,9 @@ export function useChatInterface(
             }
           }
 
-          // --- BEGIN COMMENT ---
           // 🎯 关键修复：历史对话中提前保存用户消息
           // 解决用户点击停止时消息丢失的问题
           // 在流式处理开始前就保存用户消息，确保不会因停止操作而丢失
-          // --- END COMMENT ---
           if (
             finalDbConvUUID &&
             userMessage &&
@@ -709,9 +662,7 @@ export function useChatInterface(
             undefined; // Fallback to currentConvId
           finalTaskId = streamServiceResponse.getTaskId() || undefined;
 
-          // --- BEGIN COMMENT ---
           // 🎯 新增：获取completionPromise用于metadata处理
-          // --- END COMMENT ---
           completionPromise = streamServiceResponse.completionPromise;
 
           // 更新Dify对话ID
@@ -791,12 +742,10 @@ export function useChatInterface(
               useChatStore.getState().streamingMessageId === assistantMessageId
             ) {
               chunkBufferRef.current += answerChunk;
-              // --- BEGIN COMMENT ---
               // 🎯 优化流式更新条件：
               // 1. 时间间隔：30ms（更频繁的更新）
               // 2. 内容触发：遇到换行或长度超过200字符（更小的批次）
               // 3. 确保每个字符都能及时显示
-              // --- END COMMENT ---
               if (
                 Date.now() - lastAppendTime >= CHUNK_APPEND_INTERVAL ||
                 chunkBufferRef.current.includes('\n') ||
@@ -830,10 +779,8 @@ export function useChatInterface(
 
         flushChunkBuffer(assistantMessageId);
 
-        // --- BEGIN COMMENT ---
         // 🎯 新增：等待并处理Dify metadata
         // 在流式响应结束后，尝试获取message_end事件中的完整metadata信息
-        // --- END COMMENT ---
         if (completionPromise) {
           try {
             console.log('[handleSubmit] 等待Dify流式完成信息...');
@@ -892,12 +839,9 @@ export function useChatInterface(
           );
         }
 
-        // --- BEGIN COMMENT ---
         // 在流式响应结束后，我们需要：
         // 1. 确保所有ID都是最新的
         // 2. 尝试保存用户消息和助手消息
-        // --- END COMMENT ---
-
         // 确保 Dify对话ID 和 数据库ID 都是最新的 (主要针对新对话)
         if (finalRealConvId) {
           // 更新Dify对话ID
@@ -934,13 +878,10 @@ export function useChatInterface(
           );
         }
 
-        // --- BEGIN COMMENT ---
         // 消息持久化逻辑：
         // 1. 只有在获取到有效的数据库对话ID后，才能保存消息
         // 2. 先保存用户消息，再保存助手消息
         // 🎯 修复：确保数据库ID的获取逻辑更加健壮
-        // --- END COMMENT ---
-
         // 🎯 修复：重新获取最新的数据库对话ID，确保不会因为作用域问题丢失
         let currentDbConvId = finalDbConvUUID || dbConversationUUID;
 
@@ -991,10 +932,8 @@ export function useChatInterface(
 
           // 保存助手消息
           if (assistantMessageId) {
-            // --- BEGIN COMMENT ---
             // 流式响应结束后，立即保存助手消息，不再延迟
             // 因为流式响应已经结束，消息内容应该是完整的
-            // --- END COMMENT ---
             console.log(
               `[handleSubmit] 立即保存助手消息，ID=${assistantMessageId}, 数据库对话ID=${currentDbConvId}`
             );
@@ -1119,12 +1058,9 @@ export function useChatInterface(
         streamError = error as Error;
         const errorMessage = streamError?.message || '未知错误'; // 确保错误消息不为空
 
-        // --- BEGIN COMMENT ---
         // 错误处理逻辑：
         // 1. 更新UI状态，显示错误信息
         // 2. 如果有数据库对话ID，尝试保存用户消息和错误占位助手消息
-        // --- END COMMENT ---
-
         if (assistantMessageId) {
           // 如果助手消息已创建，设置错误状态
           setMessageError(assistantMessageId, errorMessage);
@@ -1222,10 +1158,8 @@ export function useChatInterface(
           if (finalMessageState && finalMessageState.isStreaming) {
             finalizeStreamingMessage(assistantMessageId);
 
-            // --- BEGIN COMMENT ---
             // 🎯 修复：在finally块中统一处理助手消息保存
             // 无论是正常结束还是被停止，都确保助手消息被保存
-            // --- END COMMENT ---
             const currentDbConvId = finalDbConvUUID || dbConversationUUID;
             if (
               currentDbConvId &&
@@ -1340,11 +1274,9 @@ export function useChatInterface(
     ]
   );
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：直接发送消息功能
   // 相当于在输入框中输入消息然后点击发送按钮
   // 完全复用现有的handleSubmit逻辑，包括验证、状态管理等
-  // --- END COMMENT ---
   const sendDirectMessage = useCallback(
     async (messageText: string, files?: any[]) => {
       if (!messageText.trim()) {
@@ -1377,10 +1309,8 @@ export function useChatInterface(
     const currentStreamingId = state.streamingMessageId;
     const currentTaskId = state.currentTaskId;
 
-    // --- BEGIN COMMENT ---
     // 🎯 新增：停止前的状态检查和修复
     // 如果发现流式消息实际已经完成但状态未更新，先修复状态
-    // --- END COMMENT ---
     if (currentStreamingId) {
       const streamingMessage = state.messages.find(
         m => m.id === currentStreamingId
@@ -1420,10 +1350,8 @@ export function useChatInterface(
 
           console.log(`[handleStopProcessing] 僵尸流式状态已修复`);
 
-          // --- BEGIN COMMENT ---
           // 🎯 修复：僵尸状态修复后也需要重置关键状态，避免按钮失效
           // 确保用户可以重新提交，但不影响消息保存逻辑
-          // --- END COMMENT ---
           isSubmittingRef.current = false;
           console.log(
             '[handleStopProcessing] 僵尸状态修复完成，用户可以重新提交'
@@ -1433,9 +1361,7 @@ export function useChatInterface(
       }
     }
 
-    // --- BEGIN COMMENT ---
     // 检查用户是否登录
-    // --- END COMMENT ---
     if (!currentUserId) {
       console.error(
         'useChatInterface.handleStopProcessing: User not authenticated.'
@@ -1443,11 +1369,9 @@ export function useChatInterface(
       return;
     }
 
-    // --- BEGIN COMMENT ---
     // 🎯 修复：停止操作不需要验证应用配置，直接使用当前配置
     // 停止操作应该立即响应，不应该触发全屏验证spinner
     // 即使应用配置有问题，本地停止仍然有效
-    // --- END COMMENT ---
     let appConfig: { appId: string; instance: ServiceInstance } | null = null;
 
     // 尝试获取当前应用配置，但不强制验证
@@ -1498,13 +1422,11 @@ export function useChatInterface(
         setCurrentTaskId(null); // 清除任务ID
       }
 
-      // --- BEGIN COMMENT ---
       // 为中断的消息添加持久化处理
       // 1. 标记消息为手动中断
       // 2. 更新消息元数据，添加中断状态标记
       // 3. 如果数据库ID可用，立即保存中断消息
       // 4. 如果数据库ID不可用，尝试查询后保存
-      // --- END COMMENT ---
       const assistantMessage = useChatStore
         .getState()
         .messages.find(m => m.id === currentStreamingId);
@@ -1530,10 +1452,8 @@ export function useChatInterface(
         );
       }
 
-      // --- BEGIN COMMENT ---
       // 🎯 修复：智能用户消息保存逻辑（避免重复保存）
       // 只在新对话或用户消息确实未保存时才保存
-      // --- END COMMENT ---
       const currentDbConvId = dbConversationUUID;
       if (currentDbConvId) {
         // 查找最近的未保存用户消息
@@ -1613,10 +1533,8 @@ export function useChatInterface(
       }
     }
 
-    // --- BEGIN COMMENT ---
     // 🎯 修复：停止操作后重置关键状态，确保用户可以重新提交
     // 无条件重置，避免状态不一致导致的按钮失效问题
-    // --- END COMMENT ---
     setIsWaitingForResponse(false);
     isSubmittingRef.current = false;
 
@@ -1637,11 +1555,9 @@ export function useChatInterface(
     saveMessage,
   ]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：流式状态检测和自动修复机制
   // 定期检查是否有"僵尸"流式消息（流已结束但状态未更新）
   // 这可以解决某些app流式响应异常结束导致的状态不一致问题
-  // --- END COMMENT ---
   useEffect(() => {
     const checkStreamingState = () => {
       const state = useChatStore.getState();
@@ -1751,17 +1667,13 @@ export function useChatInterface(
     sendDirectMessage, // 🎯 新增：暴露直接发送消息的功能
     isProcessing: useChatStore(selectIsProcessing),
     isWaitingForResponse: useChatStore(state => state.isWaitingForResponse),
-    // --- BEGIN COMMENT ---
     // 暴露 AppId 加载状态和错误状态，以便 UI 层可以响应
-    // --- END COMMENT ---
     isAppConfigLoading: isLoadingAppId,
     appConfigError: errorLoadingAppId,
     isUserLoggedIn: !!currentUserId, // 方便 UI 判断用户是否登录
     difyConversationId, // 暴露 Dify 对话 ID
     conversationAppId, // 暴露历史对话的原始appId，用于调试和UI显示
-    // --- BEGIN COMMENT ---
     // 🎯 新增：暴露状态清理函数，用于新对话按钮和应用切换时清理对话状态
-    // --- END COMMENT ---
     clearConversationState: useCallback(() => {
       console.log('[useChatInterface] 清理对话状态');
       setDifyConversationId(null);

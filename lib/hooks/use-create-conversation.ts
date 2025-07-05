@@ -112,9 +112,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
     state => state.setSupabasePK
   );
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：打字机效果相关Actions
-  // --- END COMMENT ---
   const startTitleTypewriter = usePendingConversationStore(
     state => state.startTitleTypewriter
   );
@@ -128,9 +126,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
     state => state.setCurrentConversationId
   );
 
-  // --- BEGIN COMMENT ---
   // 添加常用应用管理hook
-  // --- END COMMENT ---
   const { addToFavorites } = useAutoAddFavoriteApp();
 
   const initiateNewConversation = useCallback(
@@ -172,9 +168,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
 
       const tempConvId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-      // --- BEGIN COMMENT ---
       // 🎯 使用新的addPendingWithLimit方法，支持自动"挤出"效果
-      // --- END COMMENT ---
       addPendingWithLimit(tempConvId, t('creating'), 20, evictedCount => {
         console.log(
           `[useCreateConversation] 新对话创建触发挤出效果，预计挤出${evictedCount}个对话`
@@ -292,10 +286,8 @@ export function useCreateConversation(): UseCreateConversationReturn {
               );
               updateStatusInPendingStore(tempConvId, 'title_fetching');
 
-              // --- BEGIN COMMENT ---
               // 立即创建数据库记录，不等待标题获取完成
               // 这确保在流式响应期间消息可以被保存
-              // --- END COMMENT ---
               const saveConversationToDb = async (
                 difyConvId: string,
                 convTitle: string,
@@ -338,10 +330,8 @@ export function useCreateConversation(): UseCreateConversationReturn {
                       `[useCreateConversation] 数据库记录创建成功，数据库ID: ${localConversation.id}, Dify对话ID: ${difyConvId}`
                     );
 
-                    // --- BEGIN COMMENT ---
                     // 🎯 在对话创建成功后添加应用到常用列表
                     // 这是最佳时机：确保对话真正创建成功，且只在新对话时执行一次
-                    // --- END COMMENT ---
                     console.log(
                       `[useCreateConversation] 添加应用到常用列表: ${appId}`
                     );
@@ -386,10 +376,8 @@ export function useCreateConversation(): UseCreateConversationReturn {
                 }
               };
 
-              // --- BEGIN COMMENT ---
               // 使用立即执行的异步函数处理数据库记录创建
               // 这避免了在非异步回调中使用await的问题
-              // --- END COMMENT ---
               (async () => {
                 // 立即创建数据库记录，使用临时标题
                 const tempTitle = t('creating');
@@ -416,9 +404,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
                       `[useCreateConversation] 标题获取成功，启动打字机效果: ${finalTitle}`
                     );
 
-                    // --- BEGIN COMMENT ---
                     // 🎯 启动打字机效果而不是直接更新标题
-                    // --- END COMMENT ---
                     startTitleTypewriter(tempConvId, finalTitle);
 
                     // 更新数据库中的标题
@@ -461,9 +447,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
                     );
                     const fallbackTitle = t('untitled');
 
-                    // --- BEGIN COMMENT ---
                     // 🎯 启动打字机效果显示默认标题
-                    // --- END COMMENT ---
                     startTitleTypewriter(tempConvId, fallbackTitle);
 
                     // 更新数据库中的标题

@@ -1,8 +1,6 @@
-// --- BEGIN COMMENT ---
 // lib/services/dify/workflow-service.ts
 // 实现与 Dify Workflow API 的交互逻辑。
 // 参考文档: POST /workflows/run
-// --- END COMMENT ---
 import { parseSseStream } from '@lib/utils/sse-parser';
 
 import {
@@ -20,9 +18,7 @@ import {
   GetDifyWorkflowLogsResponse,
 } from './types';
 
-// --- BEGIN COMMENT ---
 // 定义 Dify API 基础 URL (指向我们的后端代理)
-// --- END COMMENT ---
 const DIFY_API_BASE_URL = '/api/dify'; // 代理的基础路径
 
 /**
@@ -183,9 +179,7 @@ export async function streamDifyWorkflow(
       }
     );
 
-    // --- BEGIN COMMENT ---
     // 创建进度流生成器
-    // --- END COMMENT ---
     async function* processProgressStream(): AsyncGenerator<
       DifyWorkflowSseEvent,
       void,
@@ -571,11 +565,8 @@ export async function getDifyWorkflowRunDetail(
   }
 }
 
-// --- BEGIN COMMENT ---
 // 获取 Workflow 日志
 // GET /workflows/logs
-// --- END COMMENT ---
-
 /**
  * 获取 workflow 日志列表
  * 倒序返回 workflow 日志

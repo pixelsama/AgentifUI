@@ -11,13 +11,11 @@ interface StreamingTextProps {
   children: (displayedContent: string) => React.ReactNode; // 渲染函数
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 StreamingText组件：专注于流式文本渲染逻辑
 // 职责：
 // 1. 管理流式文本的逐字符显示
 // 2. 通过render prop模式让父组件决定如何渲染内容
 // 3. 不关心具体的渲染格式（Markdown、HTML等）
-// --- END COMMENT ---
 export const StreamingText: React.FC<StreamingTextProps> = ({
   content,
   isStreaming,
@@ -31,12 +29,10 @@ export const StreamingText: React.FC<StreamingTextProps> = ({
   const lastUpdateTimeRef = useRef<number>(Date.now());
   const currentIndexRef = useRef<number>(0);
 
-  // --- BEGIN COMMENT ---
   // 🎯 核心流式逻辑：
   // 1. 非流式状态：直接显示完整内容
   // 2. 流式状态：使用requestAnimationFrame实现丝滑逐字符显示
   // 3. 内容更新时：从当前位置继续，无缝衔接
-  // --- END COMMENT ---
   useEffect(() => {
     // 非流式状态或已完成，直接显示完整内容
     if (!isStreaming || isComplete) {
@@ -104,10 +100,8 @@ export const StreamingText: React.FC<StreamingTextProps> = ({
   );
 };
 
-// --- BEGIN COMMENT ---
 // 🎯 向后兼容的StreamingMarkdown组件
 // 保持原有的API，但内部使用StreamingText
-// --- END COMMENT ---
 interface StreamingMarkdownProps {
   content: string;
   isStreaming: boolean;

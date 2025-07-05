@@ -21,13 +21,11 @@ export function useWelcomeScreen() {
   const { messages } = useChatInterface();
   const pathname = usePathname();
 
-  // --- BEGIN COMMENT ---
   // 修改判断逻辑，支持应用详情页面作为欢迎界面
   // 1. 当路径为/chat/new时，总是显示欢迎界面
   // 2. 当路径为/apps/{type}/[instanceId]时，总是显示欢迎界面
   // 3. 当路径包含对话ID时，总是不显示欢迎界面
   // 4. 其他情况下，根据 isWelcomeScreen 状态和 messages 数组判断
-  // --- END COMMENT ---
   let isWelcome = false;
 
   // 判断当前路径是否包含对话ID

@@ -3,13 +3,10 @@
  *
  * 将数据库中的对话和 pending-conversation-store 中的临时对话整合在一起
  *
- * TODO: 数据库集成
- * 当数据库集成完成后，此 Hook 将从两个数据源获取对话：
+ * 此 Hook 将从两个数据源获取对话：
  * 1. 数据库中的正式对话（通过 useSidebarConversations 获取）
  * 2. 前端存储中的临时对话（通过 usePendingConversationStore 获取）
  *
- * 当对话创建完成并保存到数据库后，应该从 pendingConversationStore 中移除临时对话
- * 这样就可以使用数据库中的实际对话，而不是临时对话
  */
 import {
   PendingConversation,
@@ -23,10 +20,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useSidebarConversations } from './use-sidebar-conversations';
 
-// --- BEGIN COMMENT ---
 // 扩展 Conversation 类型，添加临时状态标志
 // user_id 可以为 undefined，以适应匿名用户的临时对话，并与 Partial<Conversation> 兼容
-// --- END COMMENT ---
 export interface CombinedConversation extends Partial<Conversation> {
   id: string; // 必需字段
   title: string; // 必需字段
@@ -38,9 +33,7 @@ export interface CombinedConversation extends Partial<Conversation> {
   tempId?: string; // 临时 ID
   supabase_pk?: string; // 数据库主键 (Supabase ID)
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：打字机效果相关状态
-  // --- END COMMENT ---
   titleTypewriterState?: {
     isTyping: boolean; // 是否正在打字
     targetTitle: string; // 目标标题（完整标题）
@@ -55,9 +48,7 @@ export interface CombinedConversation extends Partial<Conversation> {
  * @returns 整合后的对话列表、加载状态、错误信息和刷新函数
  */
 export function useCombinedConversations() {
-  // --- BEGIN COMMENT ---
   // 🎯 挤出机制：获取20个数据库对话，这样当有新对话创建时，总数会超过20个，触发挤出逻辑
-  // --- END COMMENT ---
   const {
     conversations: dbConversations,
     isLoading: isDbLoading,
@@ -65,16 +56,12 @@ export function useCombinedConversations() {
     refresh: refreshDbConversations,
   } = useSidebarConversations(20);
 
-  // --- BEGIN COMMENT ---
   // 获取当前登录用户ID
-  // --- END COMMENT ---
   const { session } = useSupabaseAuth();
   const currentUserId = session?.user?.id;
 
-  // --- BEGIN COMMENT ---
   // 获取临时对话列表
   // 使用 useRef 和 useEffect 确保能够监听到 pendingConversationStore 的变化
-  // --- END COMMENT ---
   const pendingConversations = usePendingConversationStore(
     state => state.pendingConversations
   );
@@ -86,9 +73,7 @@ export function useCombinedConversations() {
     setPendingArray(Array.from(pendingConversations.values()));
   }, [pendingConversations]);
 
-  // --- BEGIN COMMENT ---
   // 保存上一次的合并对话列表，避免路由切换时闪烁
-  // --- END COMMENT ---
   const [prevCombinedConversations, setPrevCombinedConversations] = useState<
     CombinedConversation[]
   >([]);
@@ -98,10 +83,8 @@ export function useCombinedConversations() {
     const finalConversations: CombinedConversation[] = [];
     const dbConvsRealIds = new Set<string>();
 
-    // --- BEGIN COMMENT ---
     // 如果数据库对话和临时对话都为空，但有上一次的合并对话列表，则直接返回上一次的列表
     // 这样可以避免在路由切换时侧边栏对话列表闪烁消失
-    // --- END COMMENT ---
     if (
       dbConversations.length === 0 &&
       pendingArray.length === 0 &&
@@ -144,9 +127,9 @@ export function useCombinedConversations() {
         settings: {},
         status: 'active', // Or map from pending.status if needed for display
         external_id: pending.realId || null, // This is the Dify ID
-        app_id: null, // TODO: Consider if pending items need app_id context
+        app_id: null, // @future 考虑临时项目是否需要app_id上下文
         last_message_preview: pending.title.substring(0, 50), // Example preview
-        metadata: {}, // TODO: Consider if pending items can have metadata
+        metadata: {}, // @future 考虑临时项目是否可以拥有元数据
 
         // Required CombinedConversation fields
         id: pending.realId || pending.tempId, // Primary ID: Dify realId if available, else tempId
@@ -161,9 +144,7 @@ export function useCombinedConversations() {
         tempId: pending.tempId,
         supabase_pk: pending.supabase_pk, // Use supabase_pk from pending store if available
 
-        // --- BEGIN COMMENT ---
         // 🎯 映射打字机效果状态
-        // --- END COMMENT ---
         titleTypewriterState: pending.titleTypewriterState,
       });
     });
@@ -209,10 +190,8 @@ export function useCombinedConversations() {
       return dateB - dateA;
     });
 
-    // --- BEGIN COMMENT ---
     // 🎯 新增：限制总对话数量为20个，实现"挤出"效果
     // 当有新的临时对话时，自动移除超出限制的最老对话
-    // --- END COMMENT ---
     const MAX_CONVERSATIONS = 20;
     if (finalConversations.length > MAX_CONVERSATIONS) {
       // 保留前20个对话（包括活跃的临时对话）
@@ -239,15 +218,11 @@ export function useCombinedConversations() {
     refreshDbConversations();
     // 强制刷新 pendingArray
     setPendingArray(Array.from(pendingConversations.values()));
-    // --- BEGIN COMMENT ---
     // 触发全局刷新事件，通知其他组件数据已更新
-    // --- END COMMENT ---
     conversationEvents.emit();
   };
 
-  // --- BEGIN COMMENT ---
   // 监听全局刷新事件
-  // --- END COMMENT ---
   useEffect(() => {
     const unsubscribe = conversationEvents.subscribe(() => {
       refreshDbConversations();
@@ -259,7 +234,6 @@ export function useCombinedConversations() {
     };
   }, [refreshDbConversations, pendingConversations]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 增强：安全的临时对话清理机制
   // 增加时间缓冲和更严格的清理条件，确保pending对话不会意外消失
   // 只清理满足以下所有条件的临时对话：
@@ -268,7 +242,6 @@ export function useCombinedConversations() {
   // 3. 状态为已完成（persisted_optimistic 或 title_resolved）
   // 4. 必须有数据库主键（确保真正保存到数据库）
   // 5. 标题必须是最终确定的
-  // --- END COMMENT ---
   useEffect(() => {
     const dbRealIds = new Set(dbConversations.map(c => c.external_id || c.id));
     const { removePending } = usePendingConversationStore.getState();
@@ -341,9 +314,7 @@ export function useCombinedConversations() {
     };
   }, [dbConversations, pendingArray]);
 
-  // --- BEGIN COMMENT ---
   // 当合并对话列表更新时，保存当前状态，用于路由切换时保持侧边栏稳定
-  // --- END COMMENT ---
   useEffect(() => {
     if (combinedConversations.length > 0) {
       setPrevCombinedConversations(combinedConversations);
@@ -358,9 +329,7 @@ export function useCombinedConversations() {
   };
 }
 
-// --- BEGIN COMMENT ---
 // 全局事件系统，用于同步对话数据更新
-// --- END COMMENT ---
 class ConversationEventEmitter {
   private listeners: Set<() => void> = new Set();
 

@@ -1,8 +1,9 @@
 // lib/services/dify/completion-service.ts
-// --- BEGIN COMMENT ---
-// 该文件负责处理与 Dify 文本生成应用相关的 API 交互
-// 文本生成应用使用 completion-messages 端点而不是 chat-messages
-// --- END COMMENT ---
+/**
+ * Dify 文本生成服务
+ * @description 处理与 Dify 文本生成应用相关的 API 交互
+ * 文本生成应用使用 completion-messages 端点而不是 chat-messages
+ */
 import type {
   DifyApiError,
   DifyCompletionRequestPayload,

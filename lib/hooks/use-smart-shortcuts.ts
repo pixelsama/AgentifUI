@@ -76,10 +76,8 @@ export function useSmartShortcuts(
   useEffect(() => {
     if (!enabled) return;
 
-    // --- BEGIN COMMENT ---
     // 🎯 默认快捷键定义
     // 按分类组织，便于在不同场景下选择性启用
-    // --- END COMMENT ---
     const defaultShortcuts: SmartShortcut[] = [
       // 导航类快捷键 - 即使在输入框中也可用
       {
@@ -144,10 +142,8 @@ export function useSmartShortcuts(
         target.isContentEditable ||
         target.closest('[contenteditable="true"]');
 
-      // --- BEGIN COMMENT ---
       // 🎯 智能快捷键过滤逻辑
       // 根据当前焦点状态和快捷键分类决定是否执行
-      // --- END COMMENT ---
       for (const shortcut of allShortcuts) {
         // 检查是否应该在当前上下文中执行此快捷键
         if (isInInput && shortcut.category === SHORTCUT_CATEGORIES.EDITING) {
@@ -241,10 +237,8 @@ export function useSmartShortcuts(
     clearConversationState,
   ]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 返回快捷键管理工具函数
   // 便于组件获取当前可用的快捷键信息
-  // --- END COMMENT ---
   return {
     /** 获取当前上下文可用的快捷键列表 */
     getAvailableShortcuts: (

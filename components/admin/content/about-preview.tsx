@@ -5,10 +5,7 @@ import { cn } from '@lib/utils';
 
 import React from 'react';
 
-// --- BEGIN COMMENT ---
 // 移除对 about-editor 的依赖，因为类型现在在 page.tsx 中管理
-// --- END COMMENT ---
-
 // 重新定义类型，因为它们将从 about-config.ts 中删除
 export interface ValueCard {
   id: string;
@@ -33,9 +30,7 @@ interface AboutPreviewProps {
 export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
   const { isDark } = useTheme();
 
-  // --- BEGIN COMMENT ---
   // 与About页面完全一致的颜色系统
-  // --- END COMMENT ---
   const getColors = () => {
     if (isDark) {
       return {
@@ -70,9 +65,7 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
 
   const colors = getColors();
 
-  // --- BEGIN COMMENT ---
   // 根据预览设备类型设置容器样式和尺寸
-  // --- END COMMENT ---
   const getDeviceStyles = () => {
     switch (previewDevice) {
       case 'mobile':
@@ -108,9 +101,7 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
 
   const deviceStyles = getDeviceStyles();
 
-  // --- BEGIN COMMENT ---
   // 根据设备调整字体大小和间距，与About页面保持一致
-  // --- END COMMENT ---
   const getResponsiveClasses = () => {
     switch (previewDevice) {
       case 'mobile':

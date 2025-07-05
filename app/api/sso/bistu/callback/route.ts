@@ -1,7 +1,5 @@
-// --- BEGIN COMMENT ---
 // 北京信息科技大学SSO回调处理
 // 处理CAS服务器的回调，验证ticket，创建或查找用户，建立会话
-// --- END COMMENT ---
 import { createBistuCASService } from '@lib/services/admin/sso/bistu-cas-service';
 import { SSOUserService } from '@lib/services/admin/user/sso-user-service';
 import { createAdminClient } from '@lib/supabase/server';
@@ -20,9 +18,7 @@ export async function GET(request: NextRequest) {
     `SSO callback received - ticket: ${ticket ? 'present' : 'missing'}, returnUrl: ${returnUrl}`
   );
 
-  // --- BEGIN COMMENT ---
   // 获取配置的应用URL，用于构建重定向URL
-  // --- END COMMENT ---
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   if (!appUrl) {
@@ -40,34 +36,24 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // --- BEGIN COMMENT ---
     // 初始化CAS服务
-    // --- END COMMENT ---
     const casService = createBistuCASService();
 
-    // --- BEGIN COMMENT ---
     // 构建service URL，必须与登录时的URL保持一致
     // 使用配置的NEXT_PUBLIC_APP_URL而不是当前请求的域名
-    // --- END COMMENT ---
     const serviceUrl = `${appUrl}/api/sso/bistu/callback`;
 
     console.log(`Validating ticket with service URL: ${serviceUrl}`);
 
-    // --- BEGIN COMMENT ---
     // 验证ticket并获取用户信息
-    // --- END COMMENT ---
     const userInfo = await casService.validateTicket(ticket, serviceUrl);
 
-    // --- BEGIN COMMENT ---
     // 打印原始XML响应内容到终端进行调试
-    // --- END COMMENT ---
     console.log('=== CAS原始XML响应内容 ===');
     console.log(userInfo.rawResponse || '无原始响应数据');
     console.log('=== CAS XML响应结束 ===');
 
-    // --- BEGIN COMMENT ---
     // 同时打印解析后的用户信息便于对比
-    // --- END COMMENT ---
     console.log('=== CAS解析后的用户信息 ===');
     console.log(JSON.stringify(userInfo, null, 2));
     console.log('=== 用户信息结束 ===');
@@ -92,10 +78,8 @@ export async function GET(request: NextRequest) {
       `Ticket validation successful for employee: ${userInfo.employeeNumber}`
     );
 
-    // --- BEGIN COMMENT ---
     // 验证学工号格式，添加详细调试信息
     // 确保employeeNumber为字符串类型
-    // --- END COMMENT ---
     const employeeNumberStr = String(userInfo.employeeNumber || '');
     console.log(
       `Validating employee number: "${employeeNumberStr}" (original type: ${typeof userInfo.employeeNumber}, string length: ${employeeNumberStr.length})`
@@ -120,19 +104,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // --- BEGIN COMMENT ---
     // 查找或创建用户
-    // --- END COMMENT ---
     let user = await SSOUserService.findUserByEmployeeNumber(employeeNumberStr);
 
     if (!user) {
       console.log(`Creating new user for employee: ${employeeNumberStr}`);
 
-      // --- BEGIN COMMENT ---
       // 获取SSO提供商信息
       // 原有实现（暂时注释掉，方便后续恢复）
-      // --- END COMMENT ---
-
       // --- 原有数据库查询实现（暂时注释） ---
       // const ssoProvider = await SSOUserService.getBistuSSOProvider();
       //
@@ -156,9 +135,7 @@ export async function GET(request: NextRequest) {
         ssoProvider.name
       );
 
-      // --- BEGIN COMMENT ---
       // 创建新用户，使用CAS返回的真实姓名
-      // --- END COMMENT ---
       try {
         const realName = userInfo.attributes?.name || userInfo.username;
         user = await SSOUserService.createSSOUser({
@@ -174,9 +151,7 @@ export async function GET(request: NextRequest) {
       } catch (createError) {
         console.error('Failed to create SSO user:', createError);
 
-        // --- BEGIN COMMENT ---
         // 根据错误类型返回不同的错误码
-        // --- END COMMENT ---
         let errorCode = 'user_creation_failed';
         if (createError instanceof Error) {
           if (createError.message === 'ACCOUNT_DATA_INCONSISTENT') {
@@ -193,9 +168,7 @@ export async function GET(request: NextRequest) {
     } else {
       console.log(`Found existing user: ${user.id} (${user.username})`);
 
-      // --- BEGIN COMMENT ---
       // 更新最后登录时间
-      // --- END COMMENT ---
       try {
         await SSOUserService.updateLastLogin(user.id);
       } catch (updateError) {
@@ -204,11 +177,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // --- BEGIN COMMENT ---
     // 简化SSO会话处理逻辑
     // 重定向到专门的SSO处理页面，而不是登录页面
     // 修复：确保使用正确的学工号构建邮箱，优先使用employeeNumberStr
-    // --- END COMMENT ---
     const userEmail = `${user.employee_number || employeeNumberStr}@bistu.edu.cn`;
     console.log(
       `Setting user email in URL: ${userEmail} (from employee_number: ${user.employee_number}, employeeNumberStr: ${employeeNumberStr})`
@@ -226,10 +197,8 @@ export async function GET(request: NextRequest) {
 
     const response = NextResponse.redirect(successUrl);
 
-    // --- BEGIN COMMENT ---
     // 设置简化的SSO用户信息cookie，前端可以使用这些信息进行登录
     // 修复：确保cookie中的邮箱和学工号一致
-    // --- END COMMENT ---
     const ssoUserData = {
       userId: user.id,
       email: userEmail,
@@ -256,9 +225,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('SSO callback processing failed:', error);
 
-    // --- BEGIN COMMENT ---
     // 处理回调过程中的错误
-    // --- END COMMENT ---
     const errorMessage =
       error instanceof Error ? error.message : '处理登录回调时发生错误';
     return NextResponse.redirect(

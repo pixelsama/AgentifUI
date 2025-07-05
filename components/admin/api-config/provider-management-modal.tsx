@@ -32,9 +32,7 @@ import { toast } from 'sonner';
 
 import React, { useEffect, useState } from 'react';
 
-// --- BEGIN COMMENT ---
 // 提供商类型枚举，基于数据库分析的建议
-// --- END COMMENT ---
 const PROVIDER_TYPES = [
   { value: 'llm', label: 'LLM (大语言模型)' },
   { value: 'platform', label: 'Platform (聚合平台)' },
@@ -45,9 +43,7 @@ const PROVIDER_TYPES = [
   { value: 'multimodal', label: 'Multimodal (多模态)' },
 ] as const;
 
-// --- BEGIN COMMENT ---
 // 认证类型枚举
-// --- END COMMENT ---
 const AUTH_TYPES = [
   { value: 'api_key', label: 'API Key' },
   { value: 'bearer_token', label: 'Bearer Token' },
@@ -90,9 +86,7 @@ export function ProviderManagementModal({
   });
   const [errors, setErrors] = useState<Partial<ProviderFormData>>({});
 
-  // --- BEGIN COMMENT ---
   // 加载提供商列表
-  // --- END COMMENT ---
   const loadProviders = async () => {
     setLoading(true);
     try {
@@ -110,18 +104,14 @@ export function ProviderManagementModal({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 组件挂载时加载数据
-  // --- END COMMENT ---
   useEffect(() => {
     if (open) {
       loadProviders();
     }
   }, [open]);
 
-  // --- BEGIN COMMENT ---
   // 表单验证函数
-  // --- END COMMENT ---
   const validateForm = (): boolean => {
     const newErrors: Partial<ProviderFormData> = {};
 
@@ -152,9 +142,7 @@ export function ProviderManagementModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  // --- BEGIN COMMENT ---
   // 重置表单
-  // --- END COMMENT ---
   const resetForm = () => {
     setFormData({
       name: '',
@@ -169,17 +157,13 @@ export function ProviderManagementModal({
     setIsCreating(false);
   };
 
-  // --- BEGIN COMMENT ---
   // 开始创建新提供商
-  // --- END COMMENT ---
   const startCreating = () => {
     resetForm();
     setIsCreating(true);
   };
 
-  // --- BEGIN COMMENT ---
   // 开始编辑提供商
-  // --- END COMMENT ---
   const startEditing = (provider: Provider) => {
     setFormData({
       name: provider.name,
@@ -194,9 +178,7 @@ export function ProviderManagementModal({
     setErrors({});
   };
 
-  // --- BEGIN COMMENT ---
   // 保存提供商（创建或更新）
-  // --- END COMMENT ---
   const saveProvider = async () => {
     if (!validateForm()) {
       return;
@@ -235,9 +217,7 @@ export function ProviderManagementModal({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 删除提供商
-  // --- END COMMENT ---
   const handleDeleteProvider = async (provider: Provider) => {
     if (!confirm(`确定要删除提供商"${provider.name}"吗？此操作不可撤销。`)) {
       return;
@@ -261,9 +241,7 @@ export function ProviderManagementModal({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 处理模态框关闭
-  // --- END COMMENT ---
   const handleClose = () => {
     resetForm();
     onOpenChange(false);

@@ -30,9 +30,7 @@ export function CustomSelect({
   const [isOpen, setIsOpen] = useState(false);
   const selectRef = useRef<HTMLDivElement>(null);
 
-  // --- BEGIN COMMENT ---
   // 点击外部关闭下拉框
-  // --- END COMMENT ---
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (

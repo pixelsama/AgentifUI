@@ -30,9 +30,7 @@ export async function GET(request: NextRequest) {
     );
 
     try {
-      // --- BEGIN COMMENT ---
       // 使用授权码交换会话，获取用户信息
-      // --- END COMMENT ---
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
@@ -43,10 +41,8 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      // --- BEGIN COMMENT ---
       // 检查用户是否已有profile，如果没有则创建
       // OAuth用户的profile会由数据库触发器自动创建，但我们需要更新认证来源
-      // --- END COMMENT ---
       if (data.user) {
         const { data: profile, error: profileError } = await supabase
           .from('profiles')

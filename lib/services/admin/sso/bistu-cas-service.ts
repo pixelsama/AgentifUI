@@ -1,21 +1,15 @@
-// --- BEGIN COMMENT ---
 // 北京信息科技大学CAS统一认证服务
 // 实现标准CAS 2.0/3.0协议的客户端
-// --- END COMMENT ---
 import { XMLParser } from 'fast-xml-parser';
 
-// --- BEGIN COMMENT ---
 // SSO配置接口
-// --- END COMMENT ---
 export interface BistuSSOConfig {
   baseUrl: string; // CAS服务器基础URL
   serviceUrl: string; // 应用回调服务URL
   version?: '2.0' | '3.0'; // CAS协议版本，默认2.0
 }
 
-// --- BEGIN COMMENT ---
 // CAS返回的用户信息接口
-// --- END COMMENT ---
 export interface BistuUserInfo {
   employeeNumber: string; // 学工号（主要标识）
   username: string; // 用户名
@@ -28,18 +22,14 @@ export interface BistuUserInfo {
   rawResponse?: string; // 原始XML响应（调试用）
 }
 
-// --- BEGIN COMMENT ---
 // CAS验证错误类型
-// --- END COMMENT ---
 export interface CASValidationError {
   code: string;
   message: string;
   details?: any;
 }
 
-// --- BEGIN COMMENT ---
 // 北京信息科技大学CAS服务实现类
-// --- END COMMENT ---
 export class BistuCASService {
   private config: BistuSSOConfig;
   private xmlParser: XMLParser;
@@ -50,10 +40,8 @@ export class BistuCASService {
       version: config.version || '2.0', // 默认使用CAS 2.0
     };
 
-    // --- BEGIN COMMENT ---
     // 初始化XML解析器，配置适合CAS响应的选项
     // 禁用属性值解析，确保文本内容保持原始类型
-    // --- END COMMENT ---
     this.xmlParser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: '@_',
@@ -70,9 +58,7 @@ export class BistuCASService {
    */
   generateLoginURL(returnUrl?: string): string {
     try {
-      // --- BEGIN COMMENT ---
       // 构建service参数，如果有returnUrl则附加到回调URL上
-      // --- END COMMENT ---
       const serviceUrl = returnUrl
         ? `${this.config.serviceUrl}?returnUrl=${encodeURIComponent(returnUrl)}`
         : this.config.serviceUrl;
@@ -138,17 +124,13 @@ export class BistuCASService {
     }
 
     try {
-      // --- BEGIN COMMENT ---
       // 构建验证请求参数
-      // --- END COMMENT ---
       const params = new URLSearchParams({
         service: service,
         ticket: ticket,
       });
 
-      // --- BEGIN COMMENT ---
       // 根据配置选择验证端点
-      // --- END COMMENT ---
       const validateEndpoint =
         this.config.version === '3.0'
           ? '/p3/serviceValidate'
@@ -160,18 +142,14 @@ export class BistuCASService {
         `Validating ticket at: ${validateUrl.replace(/ticket=[^&]+/, 'ticket=***')}`
       );
 
-      // --- BEGIN COMMENT ---
       // 发送验证请求
-      // --- END COMMENT ---
       const response = await fetch(validateUrl, {
         method: 'GET',
         headers: {
           Accept: 'application/xml, text/xml',
           'User-Agent': 'AgentifUI-BISTU-SSO-Client/1.0',
         },
-        // --- BEGIN COMMENT ---
         // 设置超时时间避免长时间等待
-        // --- END COMMENT ---
         signal: AbortSignal.timeout(10000), // 10秒超时
       });
 
@@ -182,9 +160,7 @@ export class BistuCASService {
       const xmlText = await response.text();
       console.log('Received CAS validation response');
 
-      // --- BEGIN COMMENT ---
       // 在CAS服务层也打印原始XML响应，方便调试
-      // --- END COMMENT ---
       console.log('=== CAS服务层收到的原始XML ===');
       console.log(xmlText);
       console.log('=== CAS服务层XML响应结束 ===');
@@ -213,9 +189,7 @@ export class BistuCASService {
     try {
       console.log('Parsing CAS response XML...');
 
-      // --- BEGIN COMMENT ---
       // 打印XML解析前的原始内容长度和前100个字符预览
-      // --- END COMMENT ---
       console.log(`XML长度: ${xmlText.length} 字符`);
       console.log(
         `XML预览: ${xmlText.substring(0, 200)}${xmlText.length > 200 ? '...' : ''}`
@@ -223,9 +197,7 @@ export class BistuCASService {
 
       const parsed = this.xmlParser.parse(xmlText);
 
-      // --- BEGIN COMMENT ---
       // 打印解析后的完整JSON结构
-      // --- END COMMENT ---
       console.log('=== XML解析后的完整结构 ===');
       console.log(JSON.stringify(parsed, null, 2));
       console.log('=== 解析结构结束 ===');
@@ -235,20 +207,16 @@ export class BistuCASService {
         throw new Error('Invalid CAS response: missing cas:serviceResponse');
       }
 
-      // --- BEGIN COMMENT ---
       // 检查认证成功的情况
-      // --- END COMMENT ---
       if (serviceResponse['cas:authenticationSuccess']) {
         const success = serviceResponse['cas:authenticationSuccess'];
         const user = success['cas:user'];
         const attributes = success['cas:attributes'] || {};
 
-        // --- BEGIN COMMENT ---
         // 提取用户信息，根据北信科CAS实际返回结果：
         // - cas:user 是学工号（如：2021011221）
         // - cas:attributes 包含 cas:name（真实姓名）和 cas:username（学工号）
         // 确保所有字段都转换为字符串类型
-        // --- END COMMENT ---
         const username = String(user || ''); // cas:user 字段，实际是学工号，确保为字符串
         const employeeNumber = String(user || ''); // 学工号就是 cas:user 字段的值，确保为字符串
         const realName = String(attributes['cas:name'] || ''); // 真实姓名
@@ -265,9 +233,7 @@ export class BistuCASService {
           attributes: {
             name: realName,
             username: casUsername, // cas:username字段，确保为字符串类型
-            // --- BEGIN COMMENT ---
             // 保存所有属性以备后续使用，移除 cas: 前缀
-            // --- END COMMENT ---
             ...Object.keys(attributes).reduce(
               (acc, key) => {
                 if (key.startsWith('cas:')) {
@@ -282,9 +248,7 @@ export class BistuCASService {
           rawResponse: xmlText,
         };
       }
-      // --- BEGIN COMMENT ---
       // 检查认证失败的情况
-      // --- END COMMENT ---
       else if (serviceResponse['cas:authenticationFailure']) {
         const failure = serviceResponse['cas:authenticationFailure'];
         const errorCode = failure['@_code'] || 'UNKNOWN_ERROR';
@@ -336,9 +300,7 @@ export class BistuCASService {
       return false;
     }
 
-    // --- BEGIN COMMENT ---
     // 根据北信科实际测试结果，学工号为10位数字（如：2021011221）
-    // --- END COMMENT ---
     const pattern = /^\d{10}$/;
     return pattern.test(employeeNumber.trim());
   }
@@ -357,16 +319,12 @@ export class BistuCASService {
   }
 }
 
-// --- BEGIN COMMENT ---
 // 创建默认的BISTU CAS服务实例
 // 使用环境变量配置，便于部署时调整
-// --- END COMMENT ---
 export function createBistuCASService(): BistuCASService {
-  // --- BEGIN COMMENT ---
   // ⚠️ 需要配置的环境变量:
   // BISTU_SSO_BASE_URL: 北信科CAS服务器地址，默认 https://sso.bistu.edu.cn
   // NEXT_PUBLIC_APP_URL: 当前应用的URL，用于构建回调地址
-  // --- END COMMENT ---
   const baseUrl = process.env.BISTU_SSO_BASE_URL || 'https://sso.bistu.edu.cn';
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 

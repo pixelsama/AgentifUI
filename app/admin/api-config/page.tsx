@@ -69,14 +69,10 @@ const InstanceForm = ({
   const { isDark } = useTheme();
   const { serviceInstances, apiKeys, providers } = useApiConfigStore();
 
-  // --- BEGIN COMMENT ---
   // 新建模式下的提供商选择状态
-  // --- END COMMENT ---
   const [selectedProviderId, setSelectedProviderId] = useState<string>('');
 
-  // --- BEGIN COMMENT ---
   // 监听提供商选择变化，自动更新API URL
-  // --- END COMMENT ---
   useEffect(() => {
     if (!isEditing && selectedProviderId) {
       const selectedProvider = providers.find(p => p.id === selectedProviderId);
@@ -129,10 +125,8 @@ const InstanceForm = ({
     },
   });
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：基准数据状态，用于正确判断是否有未保存的更改
   // 当同步参数或重置表单时，需要更新这个基准数据
-  // --- END COMMENT ---
   const [baselineData, setBaselineData] = useState({
     instance_id: instance?.instance_id || '',
     display_name: instance?.display_name || '',
@@ -163,14 +157,10 @@ const InstanceForm = ({
   const [setAsDefault, setSetAsDefault] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：实时验证instance_id格式
-  // --- END COMMENT ---
   const [instanceIdError, setInstanceIdError] = useState<string>('');
 
-  // --- BEGIN COMMENT ---
   // 🎯 实时验证instance_id格式的函数
-  // --- END COMMENT ---
   const validateInstanceId = (value: string) => {
     if (!value.trim()) {
       setInstanceIdError('');
@@ -236,9 +226,7 @@ const InstanceForm = ({
     };
 
     if (instance) {
-      // --- BEGIN COMMENT ---
       // 编辑模式：如果API URL为空，使用提供商的base_url
-      // --- END COMMENT ---
       if (!newData.config.api_url && instance.provider_id) {
         const currentProvider = providers.find(
           p => p.id === instance.provider_id
@@ -250,15 +238,11 @@ const InstanceForm = ({
 
       setFormData(newData);
       setBaselineData(newData);
-      // --- BEGIN COMMENT ---
       // 🎯 初始化时也验证instance_id格式
-      // --- END COMMENT ---
       validateInstanceId(newData.instance_id);
     } else {
-      // --- BEGIN COMMENT ---
       // 新建模式：初始化默认提供商选择
       // 优先使用筛选的提供商，其次是Dify，最后是第一个活跃的提供商
-      // --- END COMMENT ---
       const getInitialProviderId = () => {
         const activeProviders = providers.filter(p => p.is_active);
         if (activeProviders.length === 0) return '';
@@ -299,9 +283,7 @@ const InstanceForm = ({
       };
       setFormData(emptyData);
       setBaselineData(emptyData);
-      // --- BEGIN COMMENT ---
       // 🎯 新建时清空错误状态
-      // --- END COMMENT ---
       setInstanceIdError('');
     }
   }, [instance, providers]);
@@ -309,17 +291,13 @@ const InstanceForm = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // --- BEGIN COMMENT ---
     // 🎯 检查实时验证错误
-    // --- END COMMENT ---
     if (instanceIdError) {
       toast.error('应用ID格式错误', { description: instanceIdError });
       return;
     }
 
-    // --- BEGIN COMMENT ---
     // 🎯 新增：表单验证，确保Dify应用类型必填
-    // --- END COMMENT ---
     const validationErrors = validateDifyFormData(formData);
     if (validationErrors.length > 0) {
       toast.error('表单验证失败', {
@@ -331,26 +309,20 @@ const InstanceForm = ({
     // --- 自动设置 is_marketplace_app 字段与 app_type 保持一致 ---
     const dataToSave = {
       ...formData,
-      // --- BEGIN COMMENT ---
       // 🎯 确保instance_id去除首尾空格
-      // --- END COMMENT ---
       instance_id: formData.instance_id.trim(),
       config: {
         ...formData.config,
         app_metadata: {
           ...formData.config.app_metadata,
-          // --- BEGIN COMMENT ---
           // 🎯 确保dify_apptype字段被保存
-          // --- END COMMENT ---
           dify_apptype: formData.config.app_metadata.dify_apptype,
           is_marketplace_app:
             formData.config.app_metadata.app_type === 'marketplace',
         },
       },
       setAsDefault,
-      // --- BEGIN COMMENT ---
       // 新建模式下传递选择的提供商ID
-      // --- END COMMENT ---
       selectedProviderId: isEditing ? undefined : selectedProviderId,
     };
 
@@ -366,9 +338,7 @@ const InstanceForm = ({
       },
     }));
 
-    // --- BEGIN COMMENT ---
     // 🎯 修复：Dify参数保存后也更新基准数据
-    // --- END COMMENT ---
     setBaselineData(prev => ({
       ...prev,
       config: {
@@ -380,15 +350,11 @@ const InstanceForm = ({
     setShowDifyPanel(false);
   };
 
-  // --- BEGIN COMMENT ---
   // 🎯 修复：智能同步参数逻辑
   // 编辑模式：优先使用数据库配置，失败时fallback到表单配置
   // 添加模式：直接使用表单配置
-  // --- END COMMENT ---
   const handleSyncFromDify = async () => {
-    // --- BEGIN COMMENT ---
     // 🎯 新建模式下需要API URL和API Key，编辑模式下需要instance_id
-    // --- END COMMENT ---
     if (!isEditing && (!formData.config.api_url || !formData.apiKey)) {
       toast.warning('请先填写API URL和API Key');
       return;
@@ -401,9 +367,7 @@ const InstanceForm = ({
 
     setIsSyncing(true);
     try {
-      // --- BEGIN COMMENT ---
       // 🎯 新增：同步基本配置信息（name、description、tags）
-      // --- END COMMENT ---
       let appInfo: any = null;
       let difyParams: DifyAppParametersResponse | null = null;
       let actualInstanceId = formData.instance_id;
@@ -423,10 +387,8 @@ const InstanceForm = ({
         } catch (dbError) {
           console.log('[同步配置] 数据库配置失败，尝试使用表单配置:', dbError);
 
-          // --- BEGIN COMMENT ---
           // 🎯 改进：编辑模式下支持使用表单配置进行同步
           // 这样用户可以修改API Key后立即测试，无需先保存
-          // --- END COMMENT ---
           if (!formData.config.api_url) {
             throw new Error(
               'API URL为空，无法同步配置。请填写API URL或检查数据库配置。'
@@ -466,10 +428,8 @@ const InstanceForm = ({
           return;
         }
 
-        // --- BEGIN COMMENT ---
         // 🎯 改进：如果应用ID为空，自动生成临时UUID进行测试
         // 这样用户可以先测试API配置，无需预先想应用ID
-        // --- END COMMENT ---
         if (!actualInstanceId) {
           actualInstanceId = uuidv4();
           isAutoGenerated = true;
@@ -494,17 +454,12 @@ const InstanceForm = ({
         });
       }
 
-      // --- BEGIN COMMENT ---
       // 🎯 处理基本信息同步 - 去掉确认对话框，直接同步
-      // --- END COMMENT ---
       const updatedFormData = { ...formData };
 
       if (appInfo) {
-        // --- BEGIN COMMENT ---
         // 🎯 改进：总是同步基本信息，但给用户选择权
         // 不再限制只有空字段才同步，提高同步功能的实用性
-        // --- END COMMENT ---
-
         // 同步display_name（如果有变化则询问用户）
         if (appInfo.name && appInfo.name !== formData.display_name) {
           if (
@@ -528,9 +483,7 @@ const InstanceForm = ({
           }
         }
 
-        // --- BEGIN COMMENT ---
         // 🎯 同步tags（append模式，不替换现有tags）
-        // --- END COMMENT ---
         if (appInfo.tags && appInfo.tags.length > 0) {
           const currentTags = formData.config.app_metadata.tags || [];
           const newTags = appInfo.tags.filter(
@@ -546,9 +499,7 @@ const InstanceForm = ({
         }
       }
 
-      // --- BEGIN COMMENT ---
       // 🎯 处理参数同步（保持原有逻辑）
-      // --- END COMMENT ---
       if (difyParams) {
         const simplifiedParams: DifyParametersSimplifiedConfig = {
           opening_statement: difyParams.opening_statement || '',
@@ -574,9 +525,7 @@ const InstanceForm = ({
         updatedFormData.config.dify_parameters = simplifiedParams;
       }
 
-      // --- BEGIN COMMENT ---
       // 🎯 新增：如果是自动生成的ID，同步成功后自动填充到表单
-      // --- END COMMENT ---
       if (!isEditing && isAutoGenerated && actualInstanceId) {
         updatedFormData.instance_id = actualInstanceId;
         // 验证自动生成的ID
@@ -586,14 +535,10 @@ const InstanceForm = ({
       // 更新表单数据
       setFormData(updatedFormData);
 
-      // --- BEGIN COMMENT ---
       // 🎯 同步成功后更新基准数据
-      // --- END COMMENT ---
       setBaselineData(updatedFormData);
 
-      // --- BEGIN COMMENT ---
       // 🎯 添加数据验证，确保真正获取到数据才显示成功
-      // --- END COMMENT ---
       const syncedItems = [];
       if (appInfo) {
         syncedItems.push('基本信息');
@@ -608,9 +553,7 @@ const InstanceForm = ({
         );
       }
 
-      // --- BEGIN COMMENT ---
       // 🎯 改进：根据是否自动生成ID提供不同的成功提示
-      // --- END COMMENT ---
       let successMessage = `成功从 Dify API 同步${syncedItems.join('和')}！`;
       if (!isEditing && isAutoGenerated) {
         successMessage += ` 已自动生成应用ID：${actualInstanceId}`;
@@ -1336,9 +1279,7 @@ export default function ApiConfigPage() {
     );
   };
 
-  // --- BEGIN COMMENT ---
   // Provider管理相关处理函数
-  // --- END COMMENT ---
   const handleProviderChange = () => {
     // 重新加载providers数据
     window.dispatchEvent(new CustomEvent('reloadProviders'));

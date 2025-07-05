@@ -62,9 +62,7 @@ export const UserTable: React.FC<UserTableProps> = ({
   const { profile: currentUserProfile } = useProfile(); // 获取当前用户信息
   const { formatDate } = useDateFormatter();
 
-  // --- BEGIN COMMENT ---
   // 检查是否可以更改用户角色（防止管理员降级其他管理员）
-  // --- END COMMENT ---
   const canChangeUserRole = (
     targetUser: EnhancedUser,
     newRole: 'admin' | 'manager' | 'user'
@@ -87,9 +85,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     return true;
   };
 
-  // --- BEGIN COMMENT ---
   // 检查是否可以删除用户（防止删除管理员账号）
-  // --- END COMMENT ---
   const canDeleteUser = (targetUser: EnhancedUser) => {
     // 如果当前用户不是管理员，不允许删除
     if (currentUserProfile?.role !== 'admin') {
@@ -109,9 +105,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     return true;
   };
 
-  // --- BEGIN COMMENT ---
   // 检查是否可以编辑用户
-  // --- END COMMENT ---
   const canEditUser = (targetUser: EnhancedUser) => {
     // 管理员可以编辑所有用户（包括自己）
     if (currentUserProfile?.role === 'admin') {
@@ -122,9 +116,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     return targetUser.id === currentUserProfile?.id;
   };
 
-  // --- BEGIN COMMENT ---
   // 获取角色显示信息 - 使用stone主题配色
-  // --- END COMMENT ---
   const getRoleInfo = (role: string) => {
     switch (role) {
       case 'admin':
@@ -148,9 +140,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 获取状态显示信息 - 使用stone主题配色
-  // --- END COMMENT ---
   const getStatusInfo = (status: string) => {
     switch (status) {
       case 'active':
@@ -180,9 +170,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 获取stone主题标签样式
-  // --- END COMMENT ---
   const getBadgeClasses = (
     variant: 'success' | 'warning' | 'danger' | 'neutral'
   ) => {
@@ -203,9 +191,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     return variantMap[variant];
   };
 
-  // --- BEGIN COMMENT ---
   // 检查是否全选
-  // --- END COMMENT ---
   const isAllSelected =
     users.length > 0 && selectedUserIds.length === users.length;
   const isPartiallySelected = selectedUserIds.length > 0 && !isAllSelected;

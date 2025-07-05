@@ -1,11 +1,8 @@
 import { createClient } from '@lib/supabase/client';
 import { Result, failure, success } from '@lib/types/result';
 
-// --- BEGIN COMMENT ---
 // 群组权限管理服务
 // 只有管理员可以管理群组和权限
-// --- END COMMENT ---
-
 export interface Group {
   id: string;
   name: string;
@@ -64,10 +61,7 @@ export interface AppPermissionCheck {
   error_message: string | null;
 }
 
-// --- BEGIN COMMENT ---
 // 🔧 群组管理函数（仅管理员）
-// --- END COMMENT ---
-
 /**
  * 获取所有群组列表（仅管理员）
  */
@@ -193,10 +187,7 @@ export async function deleteGroup(groupId: string): Promise<Result<void>> {
   }
 }
 
-// --- BEGIN COMMENT ---
 // 👥 群组成员管理函数（仅管理员）
-// --- END COMMENT ---
-
 /**
  * 获取群组成员列表
  */
@@ -295,10 +286,7 @@ export async function removeGroupMember(
   }
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 群组应用权限管理函数（仅管理员）
-// --- END COMMENT ---
-
 /**
  * 获取群组应用权限列表
  */
@@ -345,12 +333,9 @@ export async function setGroupAppPermission(
   try {
     const supabase = createClient();
 
-    // --- BEGIN COMMENT ---
     // 🎯 权限设置逻辑优化
     // enabled=true: 插入/更新记录
     // enabled=false: 删除记录（避免唯一约束冲突）
-    // --- END COMMENT ---
-
     if (data.is_enabled) {
       // 启用权限：插入或更新记录
       const { data: permission, error } = await supabase
@@ -463,10 +448,7 @@ export async function removeAllGroupAppPermissions(
   }
 }
 
-// --- BEGIN COMMENT ---
 // 🔍 用户权限查询函数（所有用户可用）
-// --- END COMMENT ---
-
 /**
  * 获取用户可访问的应用列表
  */
@@ -566,10 +548,7 @@ export async function incrementAppUsage(
   }
 }
 
-// --- BEGIN COMMENT ---
 // 🔍 用户搜索功能（用于群组成员管理）
-// --- END COMMENT ---
-
 export interface SearchableUser {
   id: string;
   username: string | null;

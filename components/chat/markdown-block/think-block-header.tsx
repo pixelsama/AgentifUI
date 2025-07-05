@@ -3,49 +3,48 @@
 import { Spinner } from '@components/ui/spinner';
 // 移除 useTheme 和 useThemeColors 的导入，使用 CSS 变量替代
 import { useMobile } from '@lib/hooks/use-mobile';
-// --- BEGIN COMMENT --- 移除 react-i18next 的导入 --- END COMMENT ---
+// Removed react-i18next import
 // import { useTranslation } from 'react-i18next';
 import { cn } from '@lib/utils';
 
 import React from 'react';
 
-// --- BEGIN COMMENT --- 定义状态类型 --- END COMMENT ---
+/** Think block status types */
 export type ThinkBlockStatus = 'thinking' | 'completed' | 'stopped';
 
 /**
- * ThinkBlock 标题栏属性接口
+ * ThinkBlock header component properties
  */
 interface ThinkBlockHeaderProps {
-  // --- BEGIN COMMENT --- 使用 status 替代 isThinking --- END COMMENT ---
+  /** Current thinking status */
   status: ThinkBlockStatus;
-  // 内容区域是否展开
+  /** Whether content area is expanded */
   isOpen: boolean;
-  // 点击时触发的回调函数
+  /** Callback function triggered on click */
   onToggle: () => void;
-  // --- BEGIN COMMENT --- 移除 statusText prop --- END COMMENT ---
+  //
   // statusText: { ... };
 }
 
 /**
- * ThinkBlock 的水平按钮样式标题栏组件
- * 显示展开/折叠图标、状态文本 ("正在深度思考", "已深度思考", "思考已停止") 和加载 Spinner。
- * --- 中文注释: 该组件负责渲染 ThinkBlock 的可交互标题栏，样式类似按钮 ---
+ * ThinkBlock horizontal button-style header component
+ * @description Displays expand/collapse icon, status text and loading spinner
  */
 export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
-  // --- BEGIN COMMENT --- 使用 status --- END COMMENT ---
+  //
   status,
   isOpen,
   onToggle,
 }) => {
-  // --- BEGIN COMMENT --- 移除 useTranslation hook --- END COMMENT ---
+  //
   // const { t } = useTranslation();
   // 移除 useTheme 和 useThemeColors，使用 CSS 变量替代
   const isMobile = useMobile();
 
-  // --- BEGIN COMMENT --- 根据 status 判断是否正在思考 (用于 Spinner 和样式) --- END COMMENT ---
+  /** Check if currently thinking */
   const isThinking = status === 'thinking';
 
-  // --- BEGIN COMMENT --- 根据状态获取对应的显示文本，统一使用think的文本 --- END COMMENT ---
+  /** Get status text based on current status */
   const getStatusText = () => {
     switch (status) {
       case 'thinking':
@@ -61,17 +60,17 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
   return (
     <button
       className={cn(
-        // --- 中文注释: 基础布局：Flex, 垂直居中, 两端对齐 ---
+        // Base layout: flex, center vertically, space between
         'flex items-center justify-between',
-        // --- 中文注释: 尺寸和样式：宽度占满，调整垂直内边距使其更矮，圆角，下边距，可点击 ---
-        isMobile ? 'w-full' : 'w-[22%]', // 移动端占满宽度，桌面端保持22%
+        // Size and style: full width on mobile, 22% on desktop
+        isMobile ? 'w-full' : 'w-[22%]',
         'mb-1 cursor-pointer rounded-md border px-3 py-1.5 text-sm',
-        // --- 中文注释: 焦点样式和过渡效果 ---
+        // Focus style and transition effects
         'focus:outline-none'
       )}
-      onClick={onToggle} // --- 中文注释: 点击时调用切换函数 ---
-      aria-expanded={isOpen} // --- 中文注释: 无障碍属性，指示是否展开 ---
-      aria-controls="think-block-content" // --- 中文注释: 无障碍属性，关联内容区域 ---
+      onClick={onToggle}
+      aria-expanded={isOpen}
+      aria-controls="think-block-content"
       style={{
         backgroundColor: isThinking
           ? 'var(--md-think-thinking-bg)'
@@ -84,14 +83,11 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
           : 'var(--md-think-header-text)',
       }}
     >
-      {/* --- 左侧区域：图标和状态文本 --- */}
+      {/* Left area: icon and status text */}
       <div className="flex items-center">
-        {/* --- 展开/折叠图标 --- */}
+        {/* Expand/collapse icon */}
         <svg
-          className={cn(
-            'mr-2 h-4 w-4', // --- 中文注释: 图标大小，右边距 ---
-            isOpen ? 'rotate-90' : 'rotate-0' // --- 中文注释: 根据展开状态旋转 ---
-          )}
+          className={cn('mr-2 h-4 w-4', isOpen ? 'rotate-90' : 'rotate-0')}
           style={{
             color: isThinking
               ? 'var(--md-think-thinking-icon)'
@@ -108,32 +104,22 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
             d="M9 5l7 7-7 7"
           />
         </svg>
-        {/* --- 状态文本 --- */}
+        {/* Status text */}
         <span
-          className={cn(
-            'font-medium whitespace-nowrap' // 添加 whitespace-nowrap 防止文本换行
-          )}
+          className={cn('font-medium whitespace-nowrap')}
           style={{
             color: isThinking
               ? 'var(--md-think-thinking-text)'
               : 'var(--md-think-header-text)',
           }}
         >
-          {/* --- BEGIN COMMENT --- 调用函数获取中文文本 --- END COMMENT --- */}
           {getStatusText()}
         </span>
       </div>
 
-      {/* --- 右侧区域：Spinner (仅在思考中显示) --- */}
+      {/* Right area: Spinner (only shown when thinking) */}
       <div className="h-4 w-4 flex-shrink-0">
-        {' '}
-        {/* 添加 flex-shrink-0 防止 Spinner 被压缩 --- */}
-        {isThinking && (
-          <Spinner
-            size="md"
-            className="text-current" // 使用当前文本颜色，由父元素的 style 控制
-          />
-        )}
+        {isThinking && <Spinner size="md" className="text-current" />}
       </div>
     </button>
   );

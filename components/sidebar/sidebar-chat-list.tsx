@@ -64,9 +64,7 @@ export function SidebarChatList({
     refresh,
   } = useCombinedConversations();
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：打字机效果相关Actions
-  // --- END COMMENT ---
   const updateTypewriterDisplay = usePendingConversationStore(
     state => state.updateTypewriterDisplay
   );
@@ -74,19 +72,15 @@ export function SidebarChatList({
     state => state.completeTitleTypewriter
   );
 
-  // --- BEGIN COMMENT ---
   // Dialog状态管理
-  // --- END COMMENT ---
   const [showRenameDialog, setShowRenameDialog] = React.useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [isOperating, setIsOperating] = React.useState(false);
   const [selectedConversation, setSelectedConversation] =
     React.useState<CombinedConversation | null>(null);
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：下拉菜单状态管理
   // 记录当前打开的下拉菜单对应的对话ID
-  // --- END COMMENT ---
   const [openDropdownId, setOpenDropdownId] = React.useState<string | null>(
     null
   );
@@ -95,18 +89,14 @@ export function SidebarChatList({
     CombinedConversation[]
   >([]);
 
-  // --- BEGIN COMMENT ---
   // 当对话列表成功加载时，保存当前状态
-  // --- END COMMENT ---
   React.useEffect(() => {
     if (!isLoadingConversations && conversations.length > 0) {
       setPrevLoadedConversations(conversations);
     }
   }, [isLoadingConversations, conversations]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 检测对话列表变化，识别被挤出的对话（瞬间消失效果）
-  // --- END COMMENT ---
   React.useEffect(() => {
     const prevIds = new Set(prevLoadedConversations.map(conv => conv.id));
     const currentIds = new Set(conversations.map(conv => conv.id));
@@ -125,9 +115,7 @@ export function SidebarChatList({
     }
   }, [conversations, prevLoadedConversations]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 显示逻辑：直接显示当前对话列表（瞬间挤出效果）
-  // --- END COMMENT ---
   const displayConversations = React.useMemo(() => {
     return isLoadingConversations &&
       conversations.length === 0 &&
@@ -144,16 +132,12 @@ export function SidebarChatList({
     return displayConversations.filter(chat => chat.isPending === true);
   }, [displayConversations]);
 
-  // --- BEGIN COMMENT ---
   // 使用数据库中的历史对话，默认已经限制为20个
   // 使用 useSidebarConversations 获取的对话列表已经限制为20个
-  // --- END COMMENT ---
   const visibleUnpinnedChats = unpinnedChats;
 
-  // --- BEGIN COMMENT ---
   // 判断是否有更多历史对话（超过20个）
   // 使用 useCombinedConversations 返回的 total 属性
-  // --- END COMMENT ---
   const hasMoreChats =
     displayConversations.length === 20 || unpinnedChats.length === 20;
 
@@ -185,18 +169,14 @@ export function SidebarChatList({
         const result = await renameConversation(supabasePK, newTitle.trim());
 
         if (result.success) {
-          // --- BEGIN COMMENT ---
           // 重命名成功后直接更新页面标题，无需刷新页面
-          // --- END COMMENT ---
           if (selectedId === selectedConversation.id) {
             const baseTitle = 'AgentifUI';
             // 标题管理由DynamicTitle组件统一处理，无需手动设置
           }
 
           refresh();
-          // --- BEGIN COMMENT ---
           // 触发全局同步事件，通知所有组件数据已更新
-          // --- END COMMENT ---
           conversationEvents.emit();
           setShowRenameDialog(false);
         } else {
@@ -241,12 +221,8 @@ export function SidebarChatList({
 
       if (result.success) {
         refresh();
-        // --- BEGIN COMMENT ---
         // 删除对话后直接路由到 /chat/new
-        // --- END COMMENT ---
-        // --- BEGIN COMMENT ---
         // 触发全局同步事件，通知所有组件数据已更新
-        // --- END COMMENT ---
         conversationEvents.emit();
         if (selectedId === selectedConversation.id) {
           window.location.href = '/chat/new';
@@ -264,16 +240,12 @@ export function SidebarChatList({
     }
   }, [selectedConversation, selectedId, refresh]);
 
-  // --- BEGIN COMMENT ---
   // 添加辅助函数，判断聊天项是否应该处于选中状态
   // 考虑临时ID和正式ID之间的转换情况
-  // --- END COMMENT ---
-  // --- BEGIN COMMENT ---
   // 判断聊天项是否处于选中状态
   // 1. 检查当前路由是否是聊天页面
   // 2. 检查ID是否匹配（直接ID或临时ID）
   // 这样可以确保从聊天页面切换到其他页面时，聊天项不会保持选中状态
-  // --- END COMMENT ---
   const isChatActive = React.useCallback(
     (chat: CombinedConversation) => {
       // 首先检查是否有选中的ID
@@ -300,10 +272,8 @@ export function SidebarChatList({
     [selectedId]
   );
 
-  // --- BEGIN COMMENT ---
   // 🎯 处理侧边栏不可见时的打字机效果
   // 如果侧边栏内容不可见，但有待处理的打字机效果，直接完成它们
-  // --- END COMMENT ---
   React.useEffect(() => {
     if (!contentVisible) {
       // 查找所有需要打字机效果的对话
@@ -322,20 +292,16 @@ export function SidebarChatList({
 
   if (!contentVisible) return null;
 
-  // --- BEGIN COMMENT ---
   // 🎯 修改渲染逻辑，集成TypeWriter组件实现打字机效果
   // 使用统一的结构和高度，避免切换时的布局跳动
   // 考虑到右侧 more button 的占位，确保骨架屏宽度适当
-  // --- END COMMENT ---
   const renderChatItemContent = (
     chat: CombinedConversation,
     isItemLoading: boolean
   ) => {
     const title = chat.title || t('untitled');
 
-    // --- BEGIN COMMENT ---
     // 🎯 检查是否需要使用打字机效果
-    // --- END COMMENT ---
     const shouldUseTypewriter =
       chat.isPending &&
       chat.titleTypewriterState?.shouldStartTyping &&
@@ -356,9 +322,7 @@ export function SidebarChatList({
             )}
           />
         ) : shouldUseTypewriter ? (
-          // --- BEGIN COMMENT ---
           // 🎯 使用TypeWriter组件显示打字机效果，包装在h4标签中以应用装饰字体
-          // --- END COMMENT ---
           <h4
             className={cn(
               'w-full truncate font-serif text-xs leading-4 font-medium',
@@ -371,9 +335,7 @@ export function SidebarChatList({
               delay={200} // 短暂延迟
               className="font-serif text-xs leading-4 font-medium"
               onComplete={() => {
-                // --- BEGIN COMMENT ---
                 // 🎯 打字完成后更新store状态
-                // --- END COMMENT ---
                 completeTitleTypewriter(chat.id);
               }}
             />
@@ -393,12 +355,10 @@ export function SidebarChatList({
     );
   };
 
-  // --- BEGIN COMMENT ---
   // 修改 createMoreActions 函数，确保临时 ID 和真正对话 ID 之间切换时布局保持一致
   // 对于临时 ID 的对话，返回禁用状态的 more button 而不是 null，保持布局一致
   // 优化下拉菜单样式，使其与整体主题更加协调
   // 🎯 新增：集成下拉菜单状态管理，实现解构效果
-  // --- END COMMENT ---
   const createMoreActions = (
     chat: CombinedConversation,
     itemIsLoading: boolean
@@ -408,9 +368,7 @@ export function SidebarChatList({
     const isMenuOpen = openDropdownId === chat.id;
     const isItemSelected = isChatActive(chat);
 
-    // --- BEGIN COMMENT ---
     // 🎯 处理下拉菜单状态变化
-    // --- END COMMENT ---
     const handleMenuOpenChange = (isOpen: boolean) => {
       setOpenDropdownId(isOpen ? chat.id : null);
     };
@@ -456,9 +414,7 @@ export function SidebarChatList({
     );
   };
 
-  // --- BEGIN COMMENT ---
   // 🎯 修复：当没有对话时完全隐藏，与常用应用保持一致
-  // --- END COMMENT ---
   const hasAnyConversations =
     pendingChats.length > 0 || visibleUnpinnedChats.length > 0;
 
@@ -472,16 +428,14 @@ export function SidebarChatList({
         {/* --- BEGIN COMMENT ---
         // 近期对话粘性标题栏：模仿常用应用的样式，添加粘性定位
         // 🎯 修复：只有在有对话时才显示标题，避免出现后消失的问题
-        // --- END COMMENT --- */}
+        
         {hasAnyConversations && (
           <div
             className={cn(
               'sticky top-0 z-40 ml-[6px] flex items-center px-2 py-1 font-serif text-xs font-medium',
-              // --- BEGIN COMMENT ---
-              // 使用与sidebar相同的背景色，确保粘性效果完美
+                            // 使用与sidebar相同的背景色，确保粘性效果完美
               // 确保z-index足够高，完全覆盖下方内容
-              // --- END COMMENT ---
-              colors.sidebarBackground.tailwind
+                            colors.sidebarBackground.tailwind
             )}
           >
             <span
@@ -508,10 +462,8 @@ export function SidebarChatList({
                   chat.pendingStatus === 'creating' ||
                   chat.pendingStatus === 'title_fetching' ||
                   chat.pendingStatus === 'streaming_message';
-                // --- BEGIN COMMENT ---
                 // 使用辅助函数判断项目是否应该处于选中状态
                 // 处理临时ID和正式ID之间的转换情况
-                // --- END COMMENT ---
                 const isActive = isChatActive(chat);
 
                 return (
@@ -528,10 +480,8 @@ export function SidebarChatList({
                         <div
                           className={cn(
                             'transition-opacity',
-                            // --- BEGIN COMMENT ---
                             // 🎯 当有菜单打开时，禁用group-hover效果，避免其他item的more button在悬停时显示
                             // 但当前打开菜单的item的more button应该保持显示
-                            // --- END COMMENT ---
                             itemIsLoading
                               ? 'pointer-events-none' // 禁用交互但保持占位
                               : openDropdownId === chat.id
@@ -563,10 +513,8 @@ export function SidebarChatList({
             {' '}
             {/* 减小列表项之间的间距 */}
             {visibleUnpinnedChats.map(chat => {
-              // --- BEGIN COMMENT ---
               // 使用辅助函数判断项目是否应该处于选中状态
               // 处理已保存对话的选中逻辑，确保精确匹配
-              // --- END COMMENT ---
               const isActive = isChatActive(chat);
               // 🎯 新增：检查当前对话是否正在点击中
               const isClicking = clickingChatId === chat.id;
@@ -587,10 +535,8 @@ export function SidebarChatList({
                       <div
                         className={cn(
                           'transition-opacity',
-                          // --- BEGIN COMMENT ---
                           // 🎯 当有菜单打开时，禁用group-hover效果，避免其他item的more button在悬停时显示
                           // 但当前打开菜单的item的more button应该保持显示
-                          // --- END COMMENT ---
                           isClicking
                             ? 'pointer-events-none opacity-0' // 🎯 点击时隐藏more button，避免干扰
                             : openDropdownId === chat.id

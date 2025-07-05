@@ -108,9 +108,7 @@ export default function AboutPage() {
     checkUser();
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 在客户端挂载完成前显示加载状态，避免时序问题
-  // --- END COMMENT ---
   if (!mounted) {
     return (
       <main className="min-h-screen w-full overflow-x-hidden px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
@@ -130,9 +128,7 @@ export default function AboutPage() {
     );
   }
 
-  // --- BEGIN COMMENT ---
   // 从翻译文件获取价值观卡片数据 (数组结构)
-  // --- END COMMENT ---
   const valueCards = t.raw('values.items') as Array<{
     title: string;
     description: string;

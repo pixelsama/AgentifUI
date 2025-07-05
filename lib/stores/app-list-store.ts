@@ -3,10 +3,8 @@ import type { DifyAppParametersResponse } from '@lib/services/dify/types';
 import type { AppVisibility, ServiceInstanceConfig } from '@lib/types/database';
 import { create } from 'zustand';
 
-// --- BEGIN COMMENT ---
 // 🎯 应用信息接口，包含应用的基本信息和配置
 // 新增：provider_name 字段用于多提供商支持
-// --- END COMMENT ---
 export interface AppInfo {
   id: string;
   name: string;
@@ -88,9 +86,7 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     const now = Date.now();
     const state = get();
 
-    // --- BEGIN COMMENT ---
     // 🎯 修复缓存污染：先获取用户ID，检查用户变化
-    // --- END COMMENT ---
     const { createClient } = await import('@lib/supabase/client');
     const supabase = createClient();
     const {
@@ -103,9 +99,7 @@ export const useAppListStore = create<AppListState>((set, get) => ({
 
     // 🔧 关键修复：如果用户ID变化，立即清除缓存
     if (state.currentUserId !== user.id) {
-      // --- BEGIN COMMENT ---
       // 清理用户相关的应用缓存和参数缓存
-      // --- END COMMENT ---
       set({
         apps: [],
         lastFetchTime: 0,
@@ -148,9 +142,7 @@ export const useAppListStore = create<AppListState>((set, get) => ({
         throw new Error(result.error.message);
       }
 
-      // --- BEGIN COMMENT ---
       // 🎯 转换UserAccessibleApp到AppInfo格式，使用去重逻辑
-      // --- END COMMENT ---
       const appMap = new Map<string, AppInfo>();
 
       result.data.forEach((userApp: UserAccessibleApp) => {
@@ -209,9 +201,7 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     const now = Date.now();
     const state = get();
 
-    // --- BEGIN COMMENT ---
     // 🔧 管理员函数也需要用户隔离，避免缓存污染
-    // --- END COMMENT ---
     const { createClient } = await import('@lib/supabase/client');
     const supabase = createClient();
     const {
@@ -224,9 +214,7 @@ export const useAppListStore = create<AppListState>((set, get) => ({
 
     // 🔧 如果用户ID变化，清除缓存
     if (state.currentUserId !== user.id) {
-      // --- BEGIN COMMENT ---
       // 管理员模式下也需要清理用户相关缓存
-      // --- END COMMENT ---
       set({
         apps: [],
         lastFetchTime: 0,
@@ -264,9 +252,7 @@ export const useAppListStore = create<AppListState>((set, get) => ({
       const { getAllDifyApps } = await import('@lib/services/dify/app-service');
       const rawApps = await getAllDifyApps();
 
-      // --- BEGIN COMMENT ---
       // 🎯 为所有应用列表添加visibility信息
-      // --- END COMMENT ---
       const apps: AppInfo[] = rawApps.map(app => ({
         ...app,
         visibility: (app.visibility as AppVisibility) || 'public',

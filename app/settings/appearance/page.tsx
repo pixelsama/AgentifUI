@@ -12,10 +12,8 @@ import { useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 外观设置页面
 // 允许用户选择主题（亮色/暗色/系统）
-// --- END COMMENT ---
 export default function AppearanceSettingsPage() {
   const { theme, setTheme } = useTheme();
   const { timezone, updateTimezone } = useUserTimezone();
@@ -24,10 +22,8 @@ export default function AppearanceSettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isTimezoneUpdating, setIsTimezoneUpdating] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 处理主题变更
   // 目前只是更新前端状态，未来可以扩展为保存到用户偏好设置
-  // --- END COMMENT ---
   const handleThemeChange = (newTheme: string) => {
     setIsSaving(true);
 
@@ -40,10 +36,8 @@ export default function AppearanceSettingsPage() {
     }, 300);
   };
 
-  // --- BEGIN COMMENT ---
   // 处理时区变更
   // 使用localStorage存储用户时区偏好
-  // --- END COMMENT ---
   const handleTimezoneChange = (newTimezone: string) => {
     setIsTimezoneUpdating(true);
 

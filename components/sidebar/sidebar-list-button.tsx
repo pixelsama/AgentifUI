@@ -5,13 +5,11 @@ import { cn } from '@lib/utils';
 
 import type * as React from 'react';
 
-// --- BEGIN COMMENT ---
 // SidebarListButton 组件
 // 专门为侧边栏列表项设计的按钮组件，样式更加紧凑和美观
 // 不同于 SidebarButton，此组件不会占满整个侧边栏宽度
 // 支持响应式布局，在移动端和桌面端有不同的表现
 // 🎯 新增：支持more button和item区域的悬停分离效果
-// --- END COMMENT ---
 interface SidebarListButtonProps extends React.HTMLAttributes<HTMLDivElement> {
   icon: React.ReactNode;
   active?: boolean;
@@ -55,9 +53,7 @@ export function SidebarListButton({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 🎯 处理主要内容区域的点击（排除more button区域）
-  // --- END COMMENT ---
   const handleMainContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // 只有点击主要内容区域时才触发选择
     handleClick(e);
@@ -69,40 +65,28 @@ export function SidebarListButton({
       tabIndex={isDisabled ? -1 : 0}
       aria-disabled={isDisabled}
       className={cn(
-        // --- BEGIN COMMENT ---
         // 基础样式 - 🎯 进一步减小内边距，使按钮更加紧凑
         // 从 px-2.5 py-1.5 改为 px-2 py-1，减小整体尺寸
-        // --- END COMMENT ---
         'group relative flex items-center rounded-lg px-2 py-1 text-sm font-medium',
         'transition-all duration-300 ease-out',
 
-        // --- BEGIN COMMENT ---
         // 焦点状态样式
-        // --- END COMMENT ---
         'outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
         isDark
           ? 'focus-visible:ring-stone-500 focus-visible:ring-offset-gray-900'
           : 'focus-visible:ring-primary focus-visible:ring-offset-background',
 
-        // --- BEGIN COMMENT ---
         // 边框样式
-        // --- END COMMENT ---
         'border',
 
-        // --- BEGIN COMMENT ---
         // 禁用状态样式
-        // --- END COMMENT ---
-        // --- BEGIN COMMENT ---
         // 恢复cursor-pointer，现在父容器使用cursor-e-resize不会冲突
         // disabled时使用cursor-not-allowed
-        // --- END COMMENT ---
         isDisabled
           ? 'cursor-not-allowed border-transparent opacity-60'
           : 'cursor-pointer',
 
-        // --- BEGIN COMMENT ---
         // 🎯 亮色主题样式 - 统一悬停效果与header保持一致
-        // --- END COMMENT ---
         !isDark &&
           !isDisabled && [
             'text-stone-600',
@@ -114,9 +98,7 @@ export function SidebarListButton({
           ],
         !isDark && isDisabled && ['text-stone-400'],
 
-        // --- BEGIN COMMENT ---
         // 🎯 暗色主题样式 - 统一悬停效果与header保持一致
-        // --- END COMMENT ---
         isDark &&
           !isDisabled && [
             'text-gray-200',
@@ -128,9 +110,7 @@ export function SidebarListButton({
           ],
         isDark && isDisabled && ['text-gray-500'],
 
-        // --- BEGIN COMMENT ---
         // 响应式宽度样式
-        // --- END COMMENT ---
         'w-full', // 默认宽度为100%
 
         className
@@ -145,9 +125,7 @@ export function SidebarListButton({
       <div
         className={cn(
           'flex min-w-0 flex-1 items-center',
-          // --- BEGIN COMMENT ---
           // 恢复cursor-pointer，确保按钮区域有明确的交互提示
-          // --- END COMMENT ---
           !isDisabled && 'cursor-pointer'
         )}
         onClick={handleMainContentClick}
@@ -185,10 +163,8 @@ export function SidebarListButton({
         <div
           className={cn(
             'relative z-10 ml-0.5 flex-shrink-0'
-            // --- BEGIN COMMENT ---
             // 🎯 More button区域的独立悬停效果，覆盖整体悬停
             // 使用 hover:bg-transparent 来"取消"父级的悬停效果
-            // --- END COMMENT ---
           )}
           onClick={e => {
             e.stopPropagation(); // 防止点击 MoreButton 区域时选中聊天项

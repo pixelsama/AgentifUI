@@ -474,11 +474,8 @@ export async function getExecutionStats(
   }
 }
 
-// --- BEGIN COMMENT ---
 // 兼容性函数，保持与现有代码的兼容性
 // 这些函数将逐步迁移到使用Result类型
-// --- END COMMENT ---
-
 /**
  * 获取用户的执行记录列表（兼容版本）
  */

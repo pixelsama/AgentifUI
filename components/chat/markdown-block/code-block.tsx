@@ -90,13 +90,9 @@ export const CodeBlock: React.FC<CodeBlockProps> = React.memo(
 
     const codeRef = React.useRef<HTMLElement>(null);
 
-    // --- BEGIN COMMENT ---
     // 使用 useEffect 在组件挂载后或内容/状态变化后应用 Prism 高亮
-    // --- END COMMENT ---
     React.useEffect(() => {
-      // --- BEGIN COMMENT ---
       // 调试日志：打印 useEffect 触发时的状态 (已注释)
-      // --- END COMMENT ---
       /*
     console.log(
       '[CodeBlock Effect]', 
@@ -110,30 +106,21 @@ export const CodeBlock: React.FC<CodeBlockProps> = React.memo(
     );
     */
 
-      // --- BEGIN COMMENT ---
       // 确保 Prism 已加载，代码内容存在，ref 已附加，并且当前不处于流式输出状态
-      // --- END COMMENT ---
       if (!isStreaming && Prism && codeContent && codeRef.current) {
-        // --- BEGIN COMMENT ---
         // 调试日志：准备执行高亮 (已注释)
-        // --- END COMMENT ---
         /*
       console.log('[CodeBlock Highlighting]', parsedLanguage, codeContent?.slice(0, 50));
       */
         Prism.highlightElement(codeRef.current);
       }
-      // --- BEGIN COMMENT ---
       // 依赖项：当代码内容、语言或流式状态变化时，重新评估高亮逻辑
       // 当 isStreaming 从 true 变为 false 时，此 effect 会执行，并进行高亮
-      // --- END COMMENT ---
     }, [codeContent, parsedLanguage, isStreaming]);
 
-    // --- BEGIN COMMENT ---
     // Prism.highlightElement 会直接修改DOM，
     // 所以我们不再需要 dangerouslySetInnerHTML 和 getHighlightedCode。
     // 我们将直接把 codeContent 放入 <code> 标签，Prism.highlightElement 会读取它并修改。
-    // --- END COMMENT ---
-
     return (
       <div
         className="my-3 transform-gpu rounded-lg border shadow-sm"

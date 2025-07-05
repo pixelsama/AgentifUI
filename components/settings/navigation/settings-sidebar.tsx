@@ -16,10 +16,8 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-// --- BEGIN COMMENT ---
 // 定义设置选项，包括图标、标题和路径
 // 标题将通过翻译动态获取
-// --- END COMMENT ---
 export const getSettingsNavItems = (t: any) => [
   {
     title: t('navigation.overview'),
@@ -48,11 +46,8 @@ export const getSettingsNavItems = (t: any) => [
   },
 ];
 
-// --- BEGIN COMMENT ---
 // 静态导出已移除，统一使用 getSettingsNavItems(t) 获取国际化导航项
 // 如需在其他文件中使用，请导入翻译hooks并调用 getSettingsNavItems(t)
-// --- END COMMENT ---
-
 export function SettingsSidebar() {
   const pathname = usePathname();
   const { colors } = useSettingsColors();

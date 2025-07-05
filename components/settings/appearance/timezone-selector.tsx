@@ -14,12 +14,9 @@ import { useMemo, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 时区选择器组件 - 现代玻璃态设计
 // 采用现代粘性头部最佳实践，玻璃态效果、优雅渐变
 // 符合stone风格的现代化UI设计
-// --- END COMMENT ---
-
 interface TimezoneOption {
   value: string;
   cityKey: string;
@@ -33,9 +30,7 @@ interface TimezoneSelectorProps {
   className?: string;
 }
 
-// --- BEGIN COMMENT ---
 // 所有时区选项 - 完整列表
-// --- END COMMENT ---
 const ALL_TIMEZONES: TimezoneOption[] = [
   // UTC
   { value: 'UTC', cityKey: 'utc', region: 'utc', offset: '+00:00' },
@@ -222,9 +217,7 @@ export function TimezoneSelector({
   const t = useTranslations('pages.settings.appearanceSettings');
   const { formatDate } = useDateFormatter();
 
-  // --- BEGIN COMMENT ---
   // 获取当前时间预览
-  // --- END COMMENT ---
   const currentTime = useMemo(() => {
     try {
       return formatDate(new Date(), {
@@ -237,14 +230,10 @@ export function TimezoneSelector({
     }
   }, [formatDate, value]);
 
-  // --- BEGIN COMMENT ---
   // 获取当前选中时区信息
-  // --- END COMMENT ---
   const selectedTimezone = ALL_TIMEZONES.find(tz => tz.value === value);
 
-  // --- BEGIN COMMENT ---
   // 按地区分组时区
-  // --- END COMMENT ---
   const groupedTimezones = useMemo(() => {
     const grouped = ALL_TIMEZONES.reduce(
       (acc, timezone) => {
@@ -277,9 +266,7 @@ export function TimezoneSelector({
     return orderedGrouped;
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 处理时区选择
-  // --- END COMMENT ---
   const handleTimezoneSelect = (timezone: string) => {
     onChange(timezone);
     setIsModalOpen(false);

@@ -12,16 +12,12 @@ export type AccountStatus = 'active' | 'suspended' | 'pending';
 export type MessageRole = 'user' | 'assistant' | 'system';
 export type MessageStatus = 'sent' | 'delivered' | 'error';
 
-// --- BEGIN COMMENT ---
 // 🎯 更新：SSO协议类型，新增CAS协议支持
 // 基于最新迁移文件，支持CAS、SAML、OAuth2、OIDC四种协议
-// --- END COMMENT ---
 export type SsoProtocol = 'CAS' | 'SAML' | 'OAuth2' | 'OIDC';
 
-// --- BEGIN COMMENT ---
 // 🎯 新增：应用执行相关的枚举类型
 // 用于工作流和文本生成应用的执行记录管理
-// --- END COMMENT ---
 export type ExecutionType = 'workflow' | 'text-generation';
 export type ExecutionStatus =
   | 'pending'
@@ -31,10 +27,8 @@ export type ExecutionStatus =
   | 'stopped'
   | 'deleted';
 
-// --- BEGIN COMMENT ---
 // 🎯 更新：用户Profile接口，新增employee_number字段
 // 支持SSO用户的学工号管理
-// --- END COMMENT ---
 export interface Profile {
   id: string;
   email?: string;
@@ -64,10 +58,8 @@ export interface UserPreference {
   updated_at: string;
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 群组权限管理 - 简化版权限系统
 // 替代复杂的组织架构，使用简单的群组概念
-// --- END COMMENT ---
 export type AppVisibility = 'public' | 'group_only' | 'private';
 
 export interface Group {
@@ -106,13 +98,11 @@ export interface Conversation {
   created_at: string;
   updated_at: string;
   status: string;
-  // --- BEGIN COMMENT ---
   // 以下是新增字段，用于支持与 Dify 的集成
   // external_id: Dify 中的会话 ID
   // app_id: 关联的 Dify 应用 ID
   // last_message_preview: 最后一条消息的预览，用于在侧边栏显示
   // metadata: 存储额外的元数据，如固定状态等
-  // --- END COMMENT ---
   external_id: string | null;
   app_id: string | null;
   last_message_preview: string | null;
@@ -128,12 +118,10 @@ export interface Message {
   metadata: Record<string, any>;
   created_at: string;
   status: MessageStatus;
-  // --- BEGIN COMMENT ---
   // 以下是新增字段，用于支持与 Dify 的集成
   // external_id: Dify 中的消息 ID
   // token_count: 消息的 token 数量，用于统计使用量
   // is_synced: 消息是否已同步到 Dify
-  // --- END COMMENT ---
   external_id: string | null;
   token_count: number | null;
   is_synced: boolean;
@@ -152,20 +140,16 @@ export interface Provider {
   updated_at: string;
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 服务实例配置类型定义
 // 用于规范ServiceInstance.config字段的结构
-// --- END COMMENT ---
 export interface ServiceInstanceConfig {
   // 应用元数据配置
   app_metadata?: {
     // 应用类型：模型切换 | 应用市场
     app_type?: 'model' | 'marketplace';
 
-    // --- BEGIN COMMENT ---
     // 🎯 新增：Dify应用类型（必选字段）
     // 基于Dify官方API文档的五种应用类型
-    // --- END COMMENT ---
     dify_apptype?:
       | 'chatbot'
       | 'agent'
@@ -195,11 +179,9 @@ export interface ServiceInstanceConfig {
     [key: string]: any;
   };
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：Dify应用参数配置（替代API调用）
   // 这些参数原本需要调用Dify API获取，现在可以直接在数据库中配置
   // 使用标准的Dify API接口规范
-  // --- END COMMENT ---
   dify_parameters?: {
     // 开场白配置
     opening_statement?: string;
@@ -236,9 +218,7 @@ export interface ServiceInstanceConfig {
   [key: string]: any;
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 扩展ServiceInstance接口，添加可见性字段
-// --- END COMMENT ---
 export interface ServiceInstance {
   id: string;
   provider_id: string;
@@ -266,15 +246,10 @@ export interface ApiKey {
   updated_at: string;
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 SSO配置接口类型定义
 // 基于最新的SSO配置管理系统设计
-// --- END COMMENT ---
-
-// --- BEGIN COMMENT ---
 // 🎯 SSO提供商settings字段的标准化配置结构
 // 统一管理协议配置、安全设置和UI配置
-// --- END COMMENT ---
 export interface SsoProviderSettings {
   // 协议配置
   protocol_config: {
@@ -321,10 +296,8 @@ export interface SsoProviderSettings {
   [key: string]: any;
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 更新：SSO提供商接口，新增display_order和button_text字段
 // 支持动态SSO配置管理
-// --- END COMMENT ---
 export interface SsoProvider {
   id: string;
   name: string;
@@ -340,10 +313,8 @@ export interface SsoProvider {
   updated_at: string;
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 新增：SSO协议模板接口
 // 为不同SSO协议提供标准配置模板和验证规则
-// --- END COMMENT ---
 export interface SsoProtocolTemplate {
   id: string;
   protocol: SsoProtocol; // 协议类型
@@ -402,11 +373,9 @@ export interface ApiLog {
   created_at: string;
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 新增：应用执行记录接口
 // 用于存储工作流和文本生成应用的执行历史
 // 这些应用类型不同于对话类应用，每次执行都是独立的任务
-// --- END COMMENT ---
 export interface AppExecution {
   id: string;
   user_id: string;
@@ -428,9 +397,7 @@ export interface AppExecution {
   completed_at: string | null;
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 用户可访问应用的扩展信息 - 群组版本
-// --- END COMMENT ---
 export interface UserAccessibleApp {
   service_instance_id: string;
   display_name: string | null;
@@ -445,9 +412,7 @@ export interface UserAccessibleApp {
   group_name: string | null;
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 应用权限检查结果 - 简化版本
-// --- END COMMENT ---
 export interface AppPermissionCheck {
   has_access: boolean;
   // permission_level: AppPermissionLevel | null; // ❌ 已删除

@@ -21,9 +21,7 @@ interface FavoriteAppsState {
   favoriteApps: FavoriteApp[];
   isLoading: boolean;
   error: string | null;
-  // --- BEGIN COMMENT ---
   // 🎯 新增：展开/关闭状态，默认关闭
-  // --- END COMMENT ---
   isExpanded: boolean;
 
   // 操作方法
@@ -33,13 +31,9 @@ interface FavoriteAppsState {
   loadFavoriteApps: () => Promise<void>;
   clearFavoriteApps: () => void;
   isFavorite: (instanceId: string) => boolean;
-  // --- BEGIN COMMENT ---
   // 🎯 新增：简单的后台同步方法，非阻塞更新
-  // --- END COMMENT ---
   syncWithAppList: (apps: any[]) => void;
-  // --- BEGIN COMMENT ---
   // 🎯 新增：展开/关闭切换方法
-  // --- END COMMENT ---
   toggleExpanded: () => void;
   setExpanded: (expanded: boolean) => void;
 }
@@ -50,9 +44,7 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
       favoriteApps: [],
       isLoading: false,
       error: null,
-      // --- BEGIN COMMENT ---
       // 🎯 默认关闭状态
-      // --- END COMMENT ---
       isExpanded: false,
 
       addFavoriteApp: app => {
@@ -86,9 +78,7 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
                   new Date(b.lastUsedAt).getTime() -
                   new Date(a.lastUsedAt).getTime()
               ),
-              // --- BEGIN COMMENT ---
               // 🎯 移除数量限制，允许用户收藏任意数量的应用
-              // --- END COMMENT ---
             };
           }
         });
@@ -144,16 +134,12 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
         const state = get();
         if (state.favoriteApps.length === 0) return;
 
-        // --- BEGIN COMMENT ---
         // 🎯 增强同步：既更新应用信息，也清理已删除的应用
-        // --- END COMMENT ---
         const validFavoriteApps: FavoriteApp[] = [];
         let hasRemovedApps = false;
 
         state.favoriteApps.forEach(favoriteApp => {
-          // --- BEGIN COMMENT ---
           // 🎯 修复：使用instance_id进行匹配，因为favoriteApp.instanceId存储的是instance_id
-          // --- END COMMENT ---
           const matchedApp = apps.find(
             app => app.instance_id === favoriteApp.instanceId
           );
@@ -224,9 +210,7 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
   )
 );
 
-// --- BEGIN COMMENT ---
 // 🎯 导出便捷的hook用于在应用使用后自动添加到常用应用
-// --- END COMMENT ---
 export function useAutoAddFavoriteApp() {
   const { addFavoriteApp, updateLastUsed } = useFavoriteAppsStore();
 
@@ -234,10 +218,8 @@ export function useAutoAddFavoriteApp() {
     console.log(`[addToFavorites] 添加应用到常用列表: ${instanceId}`);
 
     try {
-      // --- BEGIN COMMENT ---
       // 🎯 重构：支持多提供商，在所有活跃提供商中查找应用实例
       // 不再硬编码只查找 Dify 提供商
-      // --- END COMMENT ---
       const { createClient } = await import('@lib/supabase/client');
       const supabase = createClient();
 

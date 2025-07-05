@@ -5,35 +5,21 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 export type SelectedItemType = 'chat' | 'app' | null;
 
 interface SidebarState {
-  // --- BEGIN COMMENT ---
   // 基础状态
-  // --- END COMMENT ---
   isExpanded: boolean; // 侧边栏是否展开
-  // --- BEGIN COMMENT ---
   // 客户端挂载状态
-  // --- END COMMENT ---
   isMounted: boolean; // 组件是否已在客户端挂载
-  // --- BEGIN COMMENT ---
   // 内容显示状态
-  // --- END COMMENT ---
   contentVisible: boolean; // 侧边栏内容是否可见
-  // --- BEGIN COMMENT ---
   // 移动端状态管理
-  // --- END COMMENT ---
   isMobileNavVisible: boolean; // 移动端导航是否可见
-  // --- BEGIN COMMENT ---
   // 动画状态管理
-  // --- END COMMENT ---
   isAnimating: boolean; // 侧边栏是否正在动画中
-  // --- BEGIN COMMENT ---
   // 选中状态管理
-  // --- END COMMENT ---
   selectedType: SelectedItemType; // 选中的项目类型：'chat' 或 'app' 或 null
   selectedId: string | number | null; // 选中项目的ID
 
-  // --- BEGIN COMMENT ---
   // 方法
-  // --- END COMMENT ---
   toggleSidebar: () => void;
   // 客户端挂载方法
   setMounted: () => void;
@@ -59,17 +45,11 @@ interface SidebarState {
 export const useSidebarStore = create<SidebarState>()(
   persist(
     (set, get) => ({
-      // --- BEGIN COMMENT ---
       // 基础状态 - 桌面端持久化记忆用户偏好
-      // --- END COMMENT ---
       isExpanded: false,
-      // --- BEGIN COMMENT ---
       // 客户端挂载状态 - 初始为 false
-      // --- END COMMENT ---
       isMounted: false,
-      // --- BEGIN COMMENT ---
       // 内容显示状态
-      // --- END COMMENT ---
       contentVisible: false,
       // 移动端状态
       isMobileNavVisible: false,
@@ -146,9 +126,7 @@ export const useSidebarStore = create<SidebarState>()(
         });
       },
 
-      // --- BEGIN COMMENT ---
       // 移动端方法
-      // --- END COMMENT ---
       showMobileNav: () => {
         set({
           isExpanded: true,
@@ -182,9 +160,7 @@ export const useSidebarStore = create<SidebarState>()(
         });
       },
 
-      // --- BEGIN COMMENT ---
       // 选中状态管理方法
-      // --- END COMMENT ---
       selectItem: (
         type: SelectedItemType,
         id: string | number | null,
@@ -216,9 +192,7 @@ export const useSidebarStore = create<SidebarState>()(
     {
       name: 'sidebar-desktop-preferences',
       storage: createJSONStorage(() => localStorage),
-      // --- BEGIN COMMENT ---
       // 只在桌面端持久化 isExpanded 状态，移动端使用默认行为
-      // --- END COMMENT ---
       partialize: state => {
         const isDesktop =
           typeof window !== 'undefined' && window.innerWidth >= 768;

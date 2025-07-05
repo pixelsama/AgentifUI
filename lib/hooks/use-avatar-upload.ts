@@ -7,9 +7,7 @@ import { useCallback, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 头像上传状态类型定义
-// --- END COMMENT ---
 export interface AvatarUploadState {
   isUploading: boolean;
   isDeleting: boolean;
@@ -18,17 +16,13 @@ export interface AvatarUploadState {
   status: 'idle' | 'uploading' | 'success' | 'error' | 'deleting';
 }
 
-// --- BEGIN COMMENT ---
 // 头像上传结果类型
-// --- END COMMENT ---
 export interface AvatarUploadResult {
   url: string;
   path: string;
 }
 
-// --- BEGIN COMMENT ---
 // 从头像URL中提取文件路径的辅助函数
-// --- END COMMENT ---
 const extractFilePathFromUrl = (url: string): string | null => {
   try {
     const urlObj = new URL(url);
@@ -44,10 +38,8 @@ const extractFilePathFromUrl = (url: string): string | null => {
   }
 };
 
-// --- BEGIN COMMENT ---
 // 头像上传Hook
 // 提供完整的头像上传、删除、URL生成功能
-// --- END COMMENT ---
 export function useAvatarUpload() {
   const [state, setState] = useState<AvatarUploadState>({
     isUploading: false,
@@ -60,9 +52,7 @@ export function useAvatarUpload() {
   const supabase = createClient();
   const t = useTranslations('pages.settings.avatarUpload');
 
-  // --- BEGIN COMMENT ---
   // 文件验证函数
-  // --- END COMMENT ---
   const validateFile = useCallback(
     (file: File): { valid: boolean; error?: string } => {
       const allowedTypes = [
@@ -96,10 +86,8 @@ export function useAvatarUpload() {
     [t]
   );
 
-  // --- BEGIN COMMENT ---
   // 生成安全的文件路径
   // 使用 user-{userId}/{uuid}-{filename} 格式
-  // --- END COMMENT ---
   const generateFilePath = useCallback(
     (userId: string, fileName: string): string => {
       const uuid = uuidv4();
@@ -111,9 +99,7 @@ export function useAvatarUpload() {
     []
   );
 
-  // --- BEGIN COMMENT ---
   // 上传头像函数（包含自动清理旧文件）
-  // --- END COMMENT ---
   const uploadAvatar = useCallback(
     async (file: File, userId: string): Promise<AvatarUploadResult> => {
       // 验证文件
@@ -221,9 +207,7 @@ export function useAvatarUpload() {
     [validateFile, generateFilePath, supabase, t]
   );
 
-  // --- BEGIN COMMENT ---
   // 删除头像函数
-  // --- END COMMENT ---
   const deleteAvatar = useCallback(
     async (filePath: string, userId: string): Promise<void> => {
       setState(prev => ({
@@ -279,9 +263,7 @@ export function useAvatarUpload() {
     [supabase, t]
   );
 
-  // --- BEGIN COMMENT ---
   // 重置状态函数
-  // --- END COMMENT ---
   const resetState = useCallback(() => {
     setState({
       isUploading: false,

@@ -13,12 +13,10 @@ module.exports = {
         foreground: 'var(--foreground)',
       },
       fontFamily: {
-        // --- BEGIN COMMENT ---
         // 🎯 全局衬线字体配置 - 所有字体族都指向衬线字体
         // sans: 现在也指向 Crimson Pro + 思源宋体，避免退化
         // serif: Crimson Pro + 思源宋体 - 优雅易读的阅读字体
         // display: Playfair Display + 思源宋体 - 装饰性标题字体
-        // --- END COMMENT ---
         sans: [
           'var(--font-crimson)',
           'var(--font-noto-serif)',

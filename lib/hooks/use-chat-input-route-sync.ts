@@ -4,10 +4,8 @@ import { useEffect } from 'react';
 
 import { usePathname } from 'next/navigation';
 
-// --- BEGIN COMMENT ---
 // 路由同步Hook
 // 自动将当前路由同步到ChatInputStore，确保输入框内容按路由隔离
-// --- END COMMENT ---
 export function useChatInputRouteSync() {
   const pathname = usePathname();
   const setCurrentRoute = useChatInputStore(state => state.setCurrentRoute);

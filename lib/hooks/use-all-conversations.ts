@@ -24,9 +24,7 @@ const supabase = createClient();
  * @returns 所有对话列表、加载状态、错误信息和操作函数
  */
 export function useAllConversations() {
-  // --- BEGIN COMMENT ---
   // 状态定义
-  // --- END COMMENT ---
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -67,10 +65,8 @@ export function useAllConversations() {
     };
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 加载所有对话的函数
   // 不限制数量，获取用户的所有历史对话
-  // --- END COMMENT ---
   const loadAllConversations = useCallback(
     async (reset: boolean = false) => {
       if (!userId) {
@@ -84,10 +80,8 @@ export function useAllConversations() {
       setError(null);
 
       try {
-        // --- BEGIN COMMENT ---
         // 使用统一数据服务获取所有对话
         // 不设置 limit，获取所有对话
-        // --- END COMMENT ---
         const result = await dataService.findMany<Conversation>(
           'conversations',
           {
@@ -157,9 +151,7 @@ export function useAllConversations() {
     }
   }, [userId, loadAllConversations]);
 
-  // --- BEGIN COMMENT ---
   // 清理函数：组件卸载时清理订阅
-  // --- END COMMENT ---
   useEffect(() => {
     return () => {
       if (userId) {
@@ -168,9 +160,7 @@ export function useAllConversations() {
     };
   }, [userId]);
 
-  // --- BEGIN COMMENT ---
   // 删除对话的辅助函数
-  // --- END COMMENT ---
   const deleteConversation = useCallback(
     async (conversationId: string): Promise<boolean> => {
       if (!userId) return false;
@@ -207,9 +197,7 @@ export function useAllConversations() {
     [userId]
   );
 
-  // --- BEGIN COMMENT ---
   // 重命名对话的辅助函数
-  // --- END COMMENT ---
   const renameConversation = useCallback(
     async (conversationId: string, newTitle: string): Promise<boolean> => {
       if (!userId) return false;

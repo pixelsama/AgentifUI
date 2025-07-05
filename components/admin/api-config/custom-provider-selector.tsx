@@ -27,24 +27,18 @@ export function CustomProviderSelector({
   const { isDark } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 获取当前选中的提供商信息
-  // --- END COMMENT ---
   const selectedProvider = selectedProviderId
     ? providers.find(p => p.id === selectedProviderId)
     : null;
 
-  // --- BEGIN COMMENT ---
   // 处理提供商选择
-  // --- END COMMENT ---
   const handleProviderSelect = (providerId: string) => {
     onProviderChange(providerId);
     setIsOpen(false);
   };
 
-  // --- BEGIN COMMENT ---
   // 过滤活跃的提供商
-  // --- END COMMENT ---
   const activeProviders = providers.filter(p => p.is_active);
 
   return (

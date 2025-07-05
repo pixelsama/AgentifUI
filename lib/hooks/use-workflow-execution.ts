@@ -22,9 +22,7 @@ export function useWorkflowExecution(instanceId: string) {
   const userId = profile?.id;
   const { formatDate } = useDateFormatter();
 
-  // --- BEGIN COMMENT ---
   // 添加常用应用管理hook
-  // --- END COMMENT ---
   const { addToFavorites } = useAutoAddFavoriteApp();
 
   // --- 安全地获取Store状态，避免频繁重渲染 ---
@@ -377,10 +375,8 @@ export function useWorkflowExecution(instanceId: string) {
           );
         }
 
-        // --- BEGIN COMMENT ---
         // 🎯 在工作流执行成功后添加应用到常用列表
         // 这是最佳时机：确保工作流真正执行成功，且只在首次执行时添加一次
-        // --- END COMMENT ---
         console.log(`[工作流执行] 添加应用到常用列表: ${instanceId}`);
         addToFavorites(instanceId);
 

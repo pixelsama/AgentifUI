@@ -6,12 +6,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // --- BEGIN ADDITION ---
-// --- BEGIN COMMENT ---
 // 格式化文件大小单位
 // @param bytes - 文件字节数
 // @param decimals - 保留的小数位数 (默认为2)
 // @returns 格式化后的文件大小字符串 (例如 "1.23 MB")
-// --- END COMMENT ---
 export function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return '0 Bytes';
 

@@ -9,17 +9,13 @@ import { Palette, Settings, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-// --- BEGIN COMMENT ---
 // 设置页面入口
 // 展示所有可用的设置选项，并提供导航链接
-// --- END COMMENT ---
 export default function SettingsPage() {
   const { colors } = useSettingsColors();
   const t = useTranslations('pages.settings');
 
-  // --- BEGIN COMMENT ---
   // 设置项描述，为每个设置页面提供说明文本
-  // --- END COMMENT ---
   const settingsDescriptions: Record<string, string> = {
     '/settings': t('descriptions.overview'),
     '/settings/profile': t('descriptions.profileDesc'),

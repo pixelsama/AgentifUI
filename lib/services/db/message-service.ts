@@ -201,10 +201,8 @@ export class MessageService {
       is_synced: true,
     };
 
-    // --- BEGIN COMMENT ---
     // 🎯 优化：对于助手消息，在保存的同时更新对话预览
     // 使用事务确保数据一致性，避免额外的数据库操作
-    // --- END COMMENT ---
     if (message.role === 'assistant') {
       return dataService.query(async () => {
         // 1. 保存消息
@@ -251,9 +249,7 @@ export class MessageService {
         return savedMessage;
       });
     } else {
-      // --- BEGIN COMMENT ---
       // 🎯 非助手消息，使用原有逻辑，不影响现有功能
-      // --- END COMMENT ---
       const result = await dataService.create<Message>('messages', messageData);
 
       if (result.success) {

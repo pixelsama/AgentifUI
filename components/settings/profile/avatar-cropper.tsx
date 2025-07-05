@@ -9,9 +9,7 @@ import { useCallback, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 头像裁切组件接口
-// --- END COMMENT ---
 interface AvatarCropperProps {
   imageUrl: string;
   onConfirm: (croppedFile: File) => void;
@@ -21,9 +19,7 @@ interface AvatarCropperProps {
   colors: any;
 }
 
-// --- BEGIN COMMENT ---
 // 裁切状态接口
-// --- END COMMENT ---
 interface CropState {
   crop: { x: number; y: number };
   zoom: number;
@@ -46,9 +42,7 @@ export function AvatarCropper({
     croppedAreaPixels: null,
   });
 
-  // --- BEGIN COMMENT ---
   // 简化滑块样式 - 连接式设计
-  // --- END COMMENT ---
   const progressPercentage = ((cropState.zoom - 1) / 2) * 100;
   const sliderStyles = `
     .custom-slider {
@@ -105,9 +99,7 @@ export function AvatarCropper({
     }
   `;
 
-  // --- BEGIN COMMENT ---
   // 裁切完成回调
-  // --- END COMMENT ---
   const onCropComplete = useCallback(
     (croppedArea: Area, croppedAreaPixels: Area) => {
       setCropState(prev => ({
@@ -118,9 +110,7 @@ export function AvatarCropper({
     []
   );
 
-  // --- BEGIN COMMENT ---
   // 确认裁切
-  // --- END COMMENT ---
   const handleConfirm = useCallback(async () => {
     if (!cropState.croppedAreaPixels) return;
 

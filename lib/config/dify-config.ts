@@ -10,10 +10,8 @@ export interface DifyAppConfig {
   appType?: string;
 }
 
-// --- BEGIN COMMENT ---
 // 缓存配置，避免重复请求
 // 新增缓存管理功能，支持手动清除和验证
-// --- END COMMENT ---
 const configCache: Record<
   string,
   { config: DifyAppConfig; timestamp: number }
@@ -117,11 +115,8 @@ async function getDifyConfigFromDatabase(
     return null;
   }
 
-  // --- BEGIN COMMENT ---
   // 🎯 重构：支持多提供商，在所有活跃提供商中查找应用实例
   // 不再硬编码只查找 Dify 提供商
-  // --- END COMMENT ---
-
   // 1. 直接查找对应的服务实例（包含提供商信息）
   const { data: instance, error: instanceError } = await supabase
     .from('service_instances')

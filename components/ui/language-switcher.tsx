@@ -15,13 +15,10 @@ import { useEffect, useState } from 'react';
 
 import { useLocale, useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 现代化语言切换器组件
 // 支持三种变体：floating（首页）、navbar（导航栏）、settings（设置页面）
 // 使用真正的 dropdown，参考 sidebar button 的悬停效果
 // 所有硬编码文本已国际化
-// --- END COMMENT ---
-
 interface LanguageSwitcherProps {
   variant?: 'floating' | 'navbar' | 'settings';
 }
@@ -34,9 +31,7 @@ export function LanguageSwitcher({
   const t = useTranslations('pages.settings.languageSettings');
   const [isOpen, setIsOpen] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 实际的语言切换逻辑：设置 Cookie 并刷新页面
-  // --- END COMMENT ---
   const handleLanguageChange = async (locale: SupportedLocale) => {
     // 设置 Cookie
     setLanguageCookie(locale);
@@ -48,9 +43,7 @@ export function LanguageSwitcher({
     window.location.reload();
   };
 
-  // --- BEGIN COMMENT ---
   // 点击外部区域关闭下拉菜单
-  // --- END COMMENT ---
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
@@ -63,9 +56,7 @@ export function LanguageSwitcher({
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 根据主题获取按钮样式：参考 sidebar button 的悬停效果
-  // --- END COMMENT ---
   const getButtonColors = () => {
     if (isDark) {
       return 'bg-stone-800/50 hover:bg-stone-600/60 text-gray-200 border-stone-600/30';
@@ -73,9 +64,7 @@ export function LanguageSwitcher({
     return 'bg-stone-200/50 hover:bg-stone-300/80 text-stone-600 border-stone-400/30';
   };
 
-  // --- BEGIN COMMENT ---
   // 获取下拉菜单的样式
-  // --- END COMMENT ---
   const getDropdownColors = () => {
     if (isDark) {
       return 'bg-stone-900/95 border-stone-600/30 text-gray-200';
@@ -83,9 +72,7 @@ export function LanguageSwitcher({
     return 'bg-white/95 border-stone-400/30 text-stone-600';
   };
 
-  // --- BEGIN COMMENT ---
   // 获取选中指示器的颜色 - 使用stone风格的primary色彩
-  // --- END COMMENT ---
   const getIndicatorColor = () => {
     if (isDark) {
       return 'bg-stone-300';
@@ -93,14 +80,10 @@ export function LanguageSwitcher({
     return 'bg-stone-700';
   };
 
-  // --- BEGIN COMMENT ---
   // 获取当前语言信息
-  // --- END COMMENT ---
   const currentLanguageInfo = getLanguageInfo(currentLocale);
 
-  // --- BEGIN COMMENT ---
   // settings变体：用于设置页面，与theme-card类似的样式
-  // --- END COMMENT ---
   if (variant === 'settings') {
     return (
       <div className="relative" data-language-switcher>
@@ -190,9 +173,7 @@ export function LanguageSwitcher({
     );
   }
 
-  // --- BEGIN COMMENT ---
   // floating变体：用于首页，带有动画效果
-  // --- END COMMENT ---
   if (variant === 'floating') {
     return (
       <motion.div
@@ -263,9 +244,7 @@ export function LanguageSwitcher({
     );
   }
 
-  // --- BEGIN COMMENT ---
   // navbar变体：用于导航栏，更紧凑的设计
-  // --- END COMMENT ---
   return (
     <div className="relative" data-language-switcher>
       <button

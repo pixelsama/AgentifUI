@@ -64,9 +64,7 @@ export function SidebarFavoriteApps({
     removeFavoriteApp,
     loadFavoriteApps,
     isLoading,
-    // --- BEGIN COMMENT ---
     // 🎯 新增：展开/关闭状态管理
-    // --- END COMMENT ---
     isExpanded: isAppsExpanded,
     toggleExpanded,
   } = useFavoriteAppsStore();
@@ -88,9 +86,7 @@ export function SidebarFavoriteApps({
     }
   }, [isExpanded, openDropdownId]);
 
-  // --- BEGIN COMMENT ---
   // 根据展开状态决定显示数量：关闭时显示3个，展开时显示所有
-  // --- END COMMENT ---
   const displayApps = isAppsExpanded ? favoriteApps : favoriteApps.slice(0, 3);
 
   // 判断应用是否处于选中状态 - 参考chat list的实现
@@ -330,10 +326,8 @@ export function SidebarFavoriteApps({
         <div
           className={cn(
             'sticky top-0 z-40 ml-[6px] px-2 py-1',
-            // --- BEGIN COMMENT ---
             // 使用与sidebar相同的背景色，确保粘性效果完美，无悬停效果
             // 确保z-index足够高，完全覆盖下方内容，避免透明效果
-            // --- END COMMENT ---
             colors.sidebarBackground.tailwind,
             favoriteApps.length > 3 && 'cursor-pointer'
           )}
@@ -403,9 +397,7 @@ export function SidebarFavoriteApps({
               <div
                 className={cn(
                   'group relative transition-opacity duration-300',
-                  // --- BEGIN COMMENT ---
                   // 简单的fade in/out效果
-                  // --- END COMMENT ---
                   isExtendedItem && !isAppsExpanded
                     ? 'pointer-events-none opacity-0'
                     : 'opacity-100'
@@ -441,10 +433,8 @@ export function SidebarFavoriteApps({
                     'transition-all duration-200 ease-in-out',
                     // 🎯 点击时的特殊样式
                     isClicking && 'cursor-wait opacity-75',
-                    // --- BEGIN COMMENT ---
                     // 🎨 统一悬停效果：与header保持完全一致
                     // 使用与header相同的 stone-300/80 和 stone-600/60
-                    // --- END COMMENT ---
                     isDark
                       ? 'text-gray-300 hover:bg-stone-600/60 hover:text-gray-100'
                       : 'text-gray-700 hover:bg-stone-300/80 hover:text-gray-900'

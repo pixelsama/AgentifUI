@@ -85,9 +85,7 @@ function AdminCard({ title, description, icon: Icon, href }: AdminCardProps) {
 export default function AdminPage() {
   const { isDark } = useTheme();
 
-  // --- BEGIN COMMENT ---
   // 管理功能卡片配置
-  // --- END COMMENT ---
   const adminCards: AdminCardProps[] = [
     {
       title: 'API 配置',

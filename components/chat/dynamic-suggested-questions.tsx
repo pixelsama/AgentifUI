@@ -28,27 +28,19 @@ export const DynamicSuggestedQuestions = ({
   const { currentAppInstance, isValidating, isLoading } = useCurrentApp();
   const { setMessage } = useChatInputStore();
 
-  // --- BEGIN COMMENT ---
   // 🎯 监听打字机完成状态
-  // --- END COMMENT ---
   const { isWelcomeTypewriterComplete } = useTypewriterStore();
 
-  // --- BEGIN COMMENT ---
   // 使用智能布局系统获取推荐问题的位置
-  // --- END COMMENT ---
   const { suggestedQuestions: questionsPosition, needsCompactLayout } =
     useWelcomeLayout();
 
-  // --- BEGIN COMMENT ---
   // 🎯 应用切换状态检测，与welcome-screen保持一致
-  // --- END COMMENT ---
   const [isAppSwitching, setIsAppSwitching] = useState(false);
   const [displayQuestions, setDisplayQuestions] = useState<string[]>([]);
   const [shouldShowQuestions, setShouldShowQuestions] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 🎯 应用切换检测逻辑，与welcome-screen完全一致
-  // --- END COMMENT ---
   useEffect(() => {
     const pathname = window.location.pathname;
     const isOnAppDetailPage =
@@ -93,37 +85,27 @@ export const DynamicSuggestedQuestions = ({
     isLoading,
   ]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 获取推荐问题，等待打字机完成后才开始处理
-  // --- END COMMENT ---
   useEffect(() => {
-    // --- BEGIN COMMENT ---
     // 🎯 核心条件：必须等待打字机完成
-    // --- END COMMENT ---
     if (!isWelcomeTypewriterComplete) {
       setShouldShowQuestions(false);
       return;
     }
 
-    // --- BEGIN COMMENT ---
     // 应用切换保护：验证期间或应用切换期间不更新推荐问题
-    // --- END COMMENT ---
     if (isValidating || isLoading || isAppSwitching) {
       setShouldShowQuestions(false);
       return;
     }
 
-    // --- BEGIN COMMENT ---
     // 🎯 应用实例完整性检查
-    // --- END COMMENT ---
     if (!currentAppInstance?.instance_id) {
       setShouldShowQuestions(false);
       return;
     }
 
-    // --- BEGIN COMMENT ---
     // 🎯 路径一致性检查
-    // --- END COMMENT ---
     const pathname = window.location.pathname;
     const isOnAppDetailPage =
       pathname.startsWith('/apps/') && pathname.split('/').length === 4;
@@ -136,13 +118,9 @@ export const DynamicSuggestedQuestions = ({
       }
     }
 
-    // --- BEGIN COMMENT ---
     // 🎯 延迟处理：在打字机完成后稍等片刻再开始渲染推荐问题
-    // --- END COMMENT ---
     const updateTimer = setTimeout(() => {
-      // --- BEGIN COMMENT ---
       // 🎯 从数据库config字段直接获取推荐问题
-      // --- END COMMENT ---
       const suggestedQuestions =
         currentAppInstance?.config?.dify_parameters?.suggested_questions;
 
@@ -179,28 +157,22 @@ export const DynamicSuggestedQuestions = ({
     isAppSwitching,
   ]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 智能布局计算：根据问题数量动态调整布局
   // 改用flexbox布局，让按钮根据内容宽度居中显示
-  // --- END COMMENT ---
   const layoutConfig = useMemo(() => {
     const count = displayQuestions.length;
 
     if (count === 0) return null;
 
-    // --- BEGIN COMMENT ---
     // 使用flexbox布局，支持按钮内容自适应宽度并居中
     // 最多显示6个问题
-    // --- END COMMENT ---
     return {
       maxDisplay: count > 6 ? 6 : count,
       description: `${count}个问题-flexbox居中`,
     };
   }, [displayQuestions.length]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 问题点击处理 - 修改为直接发送消息
-  // --- END COMMENT ---
   const handleQuestionClick = async (question: string) => {
     if (onQuestionClick) {
       // 🎯 直接发送消息，相当于在输入框中输入并点击发送
@@ -217,9 +189,7 @@ export const DynamicSuggestedQuestions = ({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 如果没有问题或不应该显示，则不渲染
-  // --- END COMMENT ---
   if (!shouldShowQuestions || !layoutConfig || displayQuestions.length === 0) {
     return null;
   }

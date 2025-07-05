@@ -13,20 +13,16 @@ import { useState } from 'react';
 
 import { useLocale, useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 语言设置页面
 // 允许用户选择显示语言，使用卡片形式类似于外观设置
-// --- END COMMENT ---
 export default function LanguageSettingsPage() {
   const { colors } = useSettingsColors();
   const t = useTranslations('pages.settings.languageSettings');
   const currentLocale = useLocale() as SupportedLocale;
   const [isSaving, setIsSaving] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 处理语言变更
   // 设置Cookie并刷新页面应用新语言
-  // --- END COMMENT ---
   const handleLanguageChange = (newLanguage: SupportedLocale) => {
     setIsSaving(true);
 

@@ -16,12 +16,10 @@ export const InlineCode: React.FC<InlineCodeProps> = React.memo(
   ({ children, className }) => {
     // 不使用任何 React 状态，完全依赖 CSS 变量
 
-    // --- BEGIN COMMENT ---
     // 现代化内联代码样式：
     // - 使用等宽字体 (font-mono)。
     // - 调整 padding、圆角、背景色和文字颜色，确保对比度和美观。
     // - 响应式设计，确保在不同屏幕尺寸和主题下均表现良好。
-    // --- END COMMENT ---
     return (
       <code
         className={cn(

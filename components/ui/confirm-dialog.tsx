@@ -47,16 +47,12 @@ export function ConfirmDialog({
   const dialogRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = React.useState(false);
 
-  // --- BEGIN COMMENT ---
   // 客户端挂载后才能使用Portal
-  // --- END COMMENT ---
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 处理ESC键关闭
-  // --- END COMMENT ---
   useEffect(() => {
     if (!isOpen) return;
 
@@ -70,9 +66,7 @@ export function ConfirmDialog({
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isOpen, onClose, isLoading]);
 
-  // --- BEGIN COMMENT ---
   // 处理点击外部关闭
-  // --- END COMMENT ---
   useEffect(() => {
     if (!isOpen) return;
 
@@ -97,9 +91,7 @@ export function ConfirmDialog({
     };
   }, [isOpen, onClose, isLoading]);
 
-  // --- BEGIN COMMENT ---
   // 处理移动端滑动关闭
-  // --- END COMMENT ---
   useEffect(() => {
     if (!isOpen || !isMobile || !dialogRef.current || isLoading) return;
 
@@ -143,18 +135,14 @@ export function ConfirmDialog({
     };
   }, [isOpen, isMobile, onClose, isLoading]);
 
-  // --- BEGIN COMMENT ---
   // 点击背景关闭
-  // --- END COMMENT ---
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && !isLoading) {
       onClose();
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 获取图标组件
-  // --- END COMMENT ---
   const getIcon = () => {
     const iconClass = 'w-6 h-6';
 
@@ -168,9 +156,7 @@ export function ConfirmDialog({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 获取Stone风格样式类
-  // --- END COMMENT ---
   const getVariantStyles = () => {
     if (variant === 'danger') {
       return {
@@ -195,9 +181,7 @@ export function ConfirmDialog({
 
   if (!mounted) return null;
 
-  // --- BEGIN COMMENT ---
   // 桌面端模态框样式 - Stone风格设计
-  // --- END COMMENT ---
   const desktopDialog = (
     <div
       className={cn(
@@ -311,9 +295,7 @@ export function ConfirmDialog({
     </div>
   );
 
-  // --- BEGIN COMMENT ---
   // 移动端底部弹出样式 - Stone风格设计
-  // --- END COMMENT ---
   const mobileDialog = (
     <div
       className={cn(
@@ -424,8 +406,6 @@ export function ConfirmDialog({
     </div>
   );
 
-  // --- BEGIN COMMENT ---
   // 根据设备类型返回相应的对话框
-  // --- END COMMENT ---
   return createPortal(isMobile ? mobileDialog : desktopDialog, document.body);
 }

@@ -17,14 +17,10 @@ export function SidebarContainer() {
   const { colors, isDark } = useThemeColors();
   const isMobile = useMobile();
 
-  // --- BEGIN COMMENT ---
   // 悬停状态管理 - 仅用于背景效果，不触发展开
-  // --- END COMMENT ---
   const [isHovering, setIsHovering] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 在移动端上禁用悬停事件，并确保cursor状态正确重置
-  // --- END COMMENT ---
   const handleMouseEnter = () => {
     if (!isMobile) {
       setIsHovering(true);
@@ -43,10 +39,8 @@ export function SidebarContainer() {
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 点击sidebar区域展开/收起
   // 需要排除按钮区域的点击事件
-  // --- END COMMENT ---
   const handleSidebarClick = (e: React.MouseEvent) => {
     // 检查点击的是否是按钮或其子元素
     const target = e.target as HTMLElement;
@@ -128,16 +122,12 @@ export function SidebarContainer() {
         styles.border,
         styles.text,
 
-        // --- BEGIN COMMENT ---
         // 悬停背景效果 - 仅在收起状态且非移动端时显示，使用展开状态的背景色
-        // --- END COMMENT ---
         !isExpanded && !isMobile && styles.hoverBg,
 
-        // --- BEGIN COMMENT ---
         // 点击区域提示 - 仅在收起状态时显示cursor-e-resize，表示可以向右展开
         // 防止文字选中 - 点击时不选中文字
         // 动画期间保持cursor状态，避免闪烁
-        // --- END COMMENT ---
         'select-none',
         (!isExpanded && !isMobile) || (isAnimating && !isMobile)
           ? 'cursor-e-resize'

@@ -1,8 +1,5 @@
-// --- BEGIN COMMENT ---
 // Dify 应用参数标准接口定义
 // 基于官方API规范：GET /parameters
-// --- END COMMENT ---
-
 /** 回答后推荐问题配置 */
 export interface DifySuggestedQuestionsAfterAnswer {
   enabled: boolean; // 是否开启

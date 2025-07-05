@@ -42,9 +42,7 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({
 }) => {
   const { isDark } = useTheme();
 
-  // --- BEGIN COMMENT ---
   // 生成统计卡片数据
-  // --- END COMMENT ---
   const statCards: StatCard[] = React.useMemo(() => {
     if (!stats) return [];
 
@@ -115,9 +113,7 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({
     ];
   }, [stats]);
 
-  // --- BEGIN COMMENT ---
   // 获取颜色样式
-  // --- END COMMENT ---
   const getColorClasses = (color: StatCard['color']) => {
     const colorMap = {
       blue: {

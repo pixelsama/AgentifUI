@@ -7,11 +7,9 @@ import { Check, Globe2 } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 语言卡片组件 - 现代化设计
 // 用于在设置页面中展示和选择不同的语言选项
 // 采用简洁现代的设计，突出语言特色
-// --- END COMMENT ---
 interface LanguageCardProps {
   language: SupportedLocale;
   currentLanguage: SupportedLocale;

@@ -60,9 +60,7 @@ const extractThinkContent = (
   mainContent: string;
   thinkClosed: boolean;
 } => {
-  // --- BEGIN COMMENT ---
   // 🔍 调试：检查details标签的位置和格式
-  // --- END COMMENT ---
   if (rawContent.includes('<details')) {
     console.log('[AssistantMessage] 检测到details标签:', {
       content: rawContent.substring(0, 200) + '...',
@@ -72,12 +70,9 @@ const extractThinkContent = (
     });
   }
 
-  // --- BEGIN COMMENT ---
   // 🎯 修复：支持两种标签：<think> 和 <details>
   // 优先检查 <think> 标签，如果没有则检查 <details> 标签
   // 新增：允许标签前有少量空白字符或很短的内容（如空字符串、换行符等）
-  // --- END COMMENT ---
-
   // 预处理：去除开头的空白字符，但保留原始内容用于后续处理
   const trimmedContent = rawContent.trim();
 
@@ -85,10 +80,8 @@ const extractThinkContent = (
   const thinkStartTag = '<think>';
   const thinkEndTag = '</think>';
 
-  // --- BEGIN COMMENT ---
   // 🎯 新逻辑：检查think标签是否在开头或接近开头位置
   // 允许前面有少量空白字符或很短的非重要内容
-  // --- END COMMENT ---
   const thinkStartIndex = rawContent.indexOf(thinkStartTag);
   if (thinkStartIndex !== -1) {
     // 检查think标签前的内容是否可以忽略（空白字符或很短的内容）
@@ -136,10 +129,8 @@ const extractThinkContent = (
   if (detailsMatch) {
     const detailsStartIndex = rawContent.indexOf(detailsMatch[0]);
 
-    // --- BEGIN COMMENT ---
     // 🎯 新逻辑：检查details标签是否在开头或接近开头位置
     // 允许前面有少量空白字符或很短的非重要内容
-    // --- END COMMENT ---
     const contentBeforeDetails = rawContent
       .substring(0, detailsStartIndex)
       .trim();
@@ -205,9 +196,7 @@ const extractThinkContent = (
 
 // --- 提取纯净的主要内容用于复制功能 ---
 const extractMainContentForCopy = (rawContent: string): string => {
-  // --- BEGIN COMMENT ---
   // 检查是否有未闭合的关键标签（think 和 details 都由 Think Block 处理）
-  // --- END COMMENT ---
   const openThinkCount = (rawContent.match(/<think(?:\s[^>]*)?>/gi) || [])
     .length;
   const closeThinkCount = (rawContent.match(/<\/think>/gi) || []).length;
@@ -266,15 +255,11 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(
       setIsOpen(prev => !prev);
     };
 
-    // --- BEGIN COMMENT ---
     // 预处理主内容，转义自定义HTML标签以避免浏览器解析错误
     // 与Think Block Content使用相同的处理逻辑
-    // --- END COMMENT ---
     const preprocessMainContent = (content: string): string => {
-      // --- BEGIN COMMENT ---
       // 关键修复：确保details标签后有足够的空行来分隔markdown内容
       // 这可以防止rehypeRaw插件影响后续markdown的解析
-      // --- END COMMENT ---
       let processedContent = content
         // 确保details结束标签后有两个换行符
         .replace(/(<\/details>)(\s*)([^\s])/g, '$1\n\n$3')
@@ -525,10 +510,8 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(
         );
       },
       a({ children, href, node, ...props }: any) {
-        // --- BEGIN COMMENT ---
         // 检查链接是否包含图片：如果包含图片，将其渲染为图片链接样式
         // 避免嵌套 <a> 标签导致的 HTML 错误
-        // --- END COMMENT ---
         const hasImageChild = node?.children?.some(
           (child: any) => child.tagName === 'img'
         );
@@ -601,10 +584,8 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(
           />
         );
       },
-      // --- BEGIN COMMENT ---
       // 图片处理：将图片渲染为链接形式，避免加载抖动问题
       // 如果图片在链接内，由 a 组件统一处理，这里返回 null 避免重复渲染
-      // --- END COMMENT ---
       img({ src, alt, node, ...props }: any) {
         // 确保src是字符串类型
         const imageUrl = typeof src === 'string' ? src : '';

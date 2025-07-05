@@ -29,10 +29,8 @@ interface ChatSkeletonItemProps {
 }
 
 export function ChatSkeletonItem({ isDark }: ChatSkeletonItemProps) {
-  // --- BEGIN COMMENT ---
   // 骨架屏项目，模拟聊天项目的外观
   // 不使用外框背景色，只显示内部元素的动画效果
-  // --- END COMMENT ---
   return (
     <div className="group relative px-3">
       <div className="flex h-9 items-center rounded-md">

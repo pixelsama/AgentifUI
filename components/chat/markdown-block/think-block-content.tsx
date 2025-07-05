@@ -36,10 +36,8 @@ export const ThinkBlockContent: React.FC<ThinkBlockContentProps> = ({
 }) => {
   // 移除 useTheme 和 useThemeColors，使用 CSS 变量替代
 
-  // --- BEGIN COMMENT ---
   // 预处理内容，转义自定义HTML标签以避免浏览器解析错误
   // 类似于代码块的处理方式，让不认识的标签显示为文本
-  // --- END COMMENT ---
   const preprocessContent = (content: string): string => {
     // 定义已知的安全HTML标签白名单
     const knownHtmlTags = new Set([
@@ -299,10 +297,8 @@ export const ThinkBlockContent: React.FC<ThinkBlockContentProps> = ({
 
     // 链接样式
     a({ className, children, node, ...props }: any) {
-      // --- BEGIN COMMENT ---
       // 检查链接是否包含图片：如果包含图片，将其渲染为图片链接样式
       // 避免嵌套 <a> 标签导致的 HTML 错误
-      // --- END COMMENT ---
       const hasImageChild = node?.children?.some(
         (child: any) => child.tagName === 'img'
       );
@@ -361,10 +357,8 @@ export const ThinkBlockContent: React.FC<ThinkBlockContentProps> = ({
       );
     },
 
-    // --- BEGIN COMMENT ---
     // 图片处理：将图片渲染为链接形式，避免加载抖动问题
     // 如果图片在链接内，由 a 组件统一处理，这里返回 null 避免重复渲染
-    // --- END COMMENT ---
     img({ src, alt, node, ...props }: any) {
       // 确保src是字符串类型
       const imageUrl = typeof src === 'string' ? src : '';

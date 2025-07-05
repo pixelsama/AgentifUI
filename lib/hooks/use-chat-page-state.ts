@@ -28,17 +28,13 @@ export function useChatPageState(conversationIdFromUrl: string | undefined) {
   const { isTransitioningToWelcome, setIsTransitioningToWelcome } =
     useChatTransitionStore();
 
-  // --- BEGIN COMMENT ---
   // 从侧边栏 store 获取选中状态和方法
   // 用于确保路由变化时侧边栏选中状态同步更新
-  // --- END COMMENT ---
   const selectItem = useSidebarStore(state => state.selectItem);
 
-  // --- BEGIN COMMENT ---
   // 使用 useLayoutEffect 处理 URL 参数变化，减少闪烁
   // 相比 useEffect，useLayoutEffect 会在浏览器绘制前同步执行
   // 这有助于减少欢迎页面的闪烁问题
-  // --- END COMMENT ---
   useLayoutEffect(() => {
     // 如果 URL 中的 conversationId 是 'new'，则设置为 null、清除消息历史并显示欢迎页面
     if (conversationIdFromUrl === 'new') {
@@ -84,9 +80,7 @@ export function useChatPageState(conversationIdFromUrl: string | undefined) {
       // 不是从对话界面到欢迎界面的过渡
       setIsTransitioningToWelcome(false);
 
-      // --- BEGIN COMMENT ---
       // 强制刷新消息状态，确保刷新页面后能正确显示对话内容
-      // --- END COMMENT ---
       setTimeout(() => {
         // 再次确认欢迎屏幕关闭，避免刷新后显示欢迎界面
         setIsWelcomeScreen(false);
@@ -124,10 +118,8 @@ export function useChatPageState(conversationIdFromUrl: string | undefined) {
     selectItem,
   ]);
 
-  // --- BEGIN COMMENT ---
   // 包装 handleSubmit 函数
   // 确保在提交消息时正确同步侧边栏选中状态
-  // --- END COMMENT ---
   const wrapHandleSubmit = useCallback(
     (
       originalHandleSubmit: (message: string, files?: any[]) => Promise<any>
@@ -140,10 +132,8 @@ export function useChatPageState(conversationIdFromUrl: string | undefined) {
         // 不是从对话界面到欢迎界面的过渡，使用滑动效果
         setIsTransitioningToWelcome(false);
 
-        // --- BEGIN COMMENT ---
         // 判断是否为新对话流程
         // 如果是新对话或临时ID，需要清除消息历史
-        // --- END COMMENT ---
         const urlIndicatesNew =
           window.location.pathname === '/chat/new' ||
           window.location.pathname.includes('/chat/temp-');
@@ -158,20 +148,16 @@ export function useChatPageState(conversationIdFromUrl: string | undefined) {
         } else if (currentConvId) {
           console.log(`[ChatPageState] 使用现有对话: ${currentConvId}`);
 
-          // --- BEGIN COMMENT ---
           // 确保侧边栏选中状态与当前对话ID同步
           // 保持当前展开状态
-          // --- END COMMENT ---
           selectItem('chat', currentConvId, true);
         }
 
         // 调用原始的 handleSubmit 函数
         const result = await originalHandleSubmit(message, files);
 
-        // --- BEGIN COMMENT ---
         // 如果是新对话，提交后可能会创建临时ID
         // 需要再次确保侧边栏选中状态与当前对话ID同步
-        // --- END COMMENT ---
         const newConvId = useChatStore.getState().currentConversationId;
         if (newConvId && newConvId !== currentConvId) {
           console.log(`[ChatPageState] 提交后更新对话ID: ${newConvId}`);

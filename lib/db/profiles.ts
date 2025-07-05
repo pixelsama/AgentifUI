@@ -24,10 +24,8 @@ const supabase = createClient();
  * @returns 用户资料对象的Result，如果未找到则返回null
  */
 export async function getCurrentUserProfile(): Promise<Result<Profile | null>> {
-  // --- BEGIN COMMENT ---
   // 首先获取当前用户ID，然后查询用户资料
   // 使用新的数据服务和缓存机制
-  // --- END COMMENT ---
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -108,9 +106,7 @@ export async function updateUserProfile(
   userId: string,
   updates: Partial<Omit<Profile, 'id' | 'created_at'>>
 ): Promise<Result<Profile>> {
-  // --- BEGIN COMMENT ---
   // 添加自动更新时间戳
-  // --- END COMMENT ---
   const updateData = {
     ...updates,
     updated_at: new Date().toISOString(),
@@ -181,11 +177,8 @@ export async function isUserAdmin(userId: string): Promise<Result<boolean>> {
   return failure(result.error || new Error('检查用户角色失败'));
 }
 
-// --- BEGIN COMMENT ---
 // 兼容性函数，保持与现有代码的兼容性
 // 这些函数将逐步迁移到使用Result类型
-// --- END COMMENT ---
-
 /**
  * 获取当前用户的资料（兼容版本）
  * @deprecated 请使用 getCurrentUserProfile() 并处理Result类型

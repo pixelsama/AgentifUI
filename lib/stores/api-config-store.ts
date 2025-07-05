@@ -26,9 +26,7 @@ import { ApiKey, Provider, ServiceInstance } from '@lib/types/database';
 import { Result } from '@lib/types/result';
 import { create } from 'zustand';
 
-// --- BEGIN COMMENT ---
 // 重新导出类型定义，供其他组件使用
-// --- END COMMENT ---
 export type { Provider, ServiceInstance, ApiKey } from '@lib/types/database';
 
 interface ApiConfigState {
@@ -63,9 +61,7 @@ interface ApiConfigState {
   setNewApiUrl: (url: string) => void;
 }
 
-// --- BEGIN COMMENT ---
 // 辅助函数：处理Result类型的返回值
-// --- END COMMENT ---
 function handleResult<T>(result: Result<T>, operation: string): T {
   if (!result.success) {
     throw new Error(`${operation}失败: ${result.error.message}`);
@@ -285,9 +281,7 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
         throw new Error('未找到要删除的应用实例');
       }
 
-      // --- BEGIN COMMENT ---
       // 🎯 新增：删除应用实例时同步从常用应用存储中移除
-      // --- END COMMENT ---
       const instanceId = existingInstance.instance_id;
 
       // 查找并删除相关的 API 密钥
@@ -311,9 +305,7 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
       const { serviceInstances } = get();
       set({ serviceInstances: serviceInstances.filter(si => si.id !== id) });
 
-      // --- BEGIN COMMENT ---
       // 🎯 新增：从常用应用存储中移除被删除的应用
-      // --- END COMMENT ---
       try {
         const { useFavoriteAppsStore } = await import('./favorite-apps-store');
         const { removeFavoriteApp } = useFavoriteAppsStore.getState();
@@ -373,10 +365,8 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
       const providers = handleResult(providersResult, '获取活跃提供商');
       console.timeEnd('[API Config] 获取提供商');
 
-      // --- BEGIN COMMENT ---
       // 🚀 优化：并行获取每个提供商的服务实例
       // 从串行查询改为并行查询，显著提升性能
-      // --- END COMMENT ---
       console.time('[API Config] 并行获取服务实例');
       const instancePromises = providers.map(provider =>
         getServiceInstancesByProvider(provider.id)
@@ -418,10 +408,8 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
         )
       );
 
-      // --- BEGIN COMMENT ---
       // 🚀 优化：并行获取每个服务实例的API密钥
       // 从串行查询改为并行查询，显著提升性能
-      // --- END COMMENT ---
       console.time('[API Config] 并行获取API密钥');
       const keyPromises = sortedServiceInstances.map(instance =>
         getApiKeyByServiceInstance(instance.id)

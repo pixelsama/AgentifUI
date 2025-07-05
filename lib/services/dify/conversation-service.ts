@@ -1,9 +1,9 @@
-// lib/services/dify/conversation-service.ts
-// --- BEGIN COMMENT ---
-// 该文件负责处理与 Dify 会话相关的 API 交互，例如获取会话列表。
-// 它遵循与 message-service.ts 和 chat-service.ts 类似的设计模式，
-// 即提供独立的、可导出的服务函数。
-// --- END COMMENT ---
+/**
+ * Dify 对话服务
+ * @description 处理与 Dify 会话相关的 API 交互，例如获取会话列表
+ * 遵循与 message-service.ts 和 chat-service.ts 类似的设计模式，
+ * 即提供独立的、可导出的服务函数
+ */
 import type {
   DeleteConversationRequestPayload,
   DeleteConversationResponse,
@@ -16,13 +16,10 @@ import type {
   RenameConversationResponse,
 } from './types';
 
-// --- BEGIN COMMENT ---
 // 定义指向我们后端 Dify 代理 API 的基础 URL。
 // 与其他服务保持一致，方便统一管理代理路径。
-// --- END COMMENT ---
 const DIFY_PROXY_BASE_URL = '/api/dify';
 
-// --- BEGIN COMMENT ---
 /**
  * 获取用户的会话列表。
  *
@@ -35,7 +32,6 @@ const DIFY_PROXY_BASE_URL = '/api/dify';
  * @returns 一个解析为 `GetConversationsResponse` 对象的 Promise，其中包含了会话列表和分页信息。
  * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象 (类似 DifyApiError)。
  */
-// --- END COMMENT ---
 export async function getConversations(
   appId: string,
   params: GetConversationsParams
@@ -141,7 +137,6 @@ export async function getConversations(
   }
 }
 
-// --- BEGIN COMMENT ---
 /**
  * 删除指定的会话。
  *
@@ -154,7 +149,6 @@ export async function getConversations(
  * @returns 一个解析为 `DeleteConversationResponse` 对象的 Promise，表示操作结果。
  * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象 (类似 DifyApiError)。
  */
-// --- END COMMENT ---
 export async function deleteConversation(
   appId: string,
   conversationId: string,
@@ -248,7 +242,6 @@ export async function deleteConversation(
   }
 }
 
-// --- BEGIN COMMENT ---
 /**
  * 重命名指定的会话或触发异步标题生成。
  *
@@ -268,7 +261,6 @@ export async function deleteConversation(
  * @returns 一个解析为 `RenameConversationResponse` 对象的 Promise，其中包含了更新后的会话信息（包括其 `name` 即标题）。
  * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象 (类似 DifyApiError)。
  */
-// --- END COMMENT ---
 export async function renameConversation(
   appId: string,
   conversationId: string,
@@ -362,7 +354,6 @@ export async function renameConversation(
   }
 }
 
-// --- BEGIN COMMENT ---
 /**
  * 获取指定对话的变量。
  *
@@ -375,7 +366,6 @@ export async function renameConversation(
  * @returns 一个解析为 `GetConversationVariablesResponse` 对象的 Promise，其中包含了变量列表和分页信息。
  * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象 (类似 DifyApiError)。
  */
-// --- END COMMENT ---
 export async function getConversationVariables(
   appId: string,
   conversationId: string,
@@ -481,7 +471,5 @@ export async function getConversationVariables(
   }
 }
 
-// --- BEGIN COMMENT ---
 // 可以根据需要在此文件中添加更多与会话相关的服务函数，
 // 例如：创建会话等。
-// --- END COMMENT ---

@@ -13,11 +13,9 @@ interface ChatContainerProps {
   isDark?: boolean;
   className?: string;
   widthClass: string;
-  // --- BEGIN COMMENT ---
   // 是否正在从对话界面过渡到欢迎界面
   // 当为 true 时，使用闪烁效果而不是滑动
   // 当为 false 时，保持现有的滑动效果
-  // --- END COMMENT ---
   isTransitioningToWelcome?: boolean;
 }
 
@@ -32,9 +30,7 @@ export const ChatContainer = ({
   widthClass,
   isTransitioningToWelcome = false,
 }: ChatContainerProps) => {
-  // --- BEGIN COMMENT ---
   // 获取主题颜色和智能布局位置
-  // --- END COMMENT ---
   const { colors } = useThemeColors();
   const { input: inputPosition } = useWelcomeLayout();
 
@@ -50,10 +46,8 @@ export const ChatContainer = ({
     className
   );
 
-  // --- BEGIN COMMENT ---
   // 动态计算样式，根据当前状态决定定位和变形
   // 欢迎界面使用智能布局系统，对话界面保持原有逻辑
-  // --- END COMMENT ---
   const dynamicStyles: React.CSSProperties = isWelcomeScreen
     ? {
         // 欢迎界面：使用智能布局系统计算的位置

@@ -44,9 +44,7 @@ export function useLogout() {
     try {
       console.log('[登出] 开始执行退出登录流程');
 
-      // --- BEGIN COMMENT ---
       // 首先清理所有敏感缓存，确保用户数据安全
-      // --- END COMMENT ---
       clearCacheOnLogout();
 
       // 调用 Supabase Auth 的登出方法
@@ -64,9 +62,7 @@ export function useLogout() {
     } catch (error) {
       console.error('[登出] 退出登录失败:', error);
 
-      // --- BEGIN COMMENT ---
       // 即使登出失败，也要清理本地缓存以确保安全
-      // --- END COMMENT ---
       try {
         clearCacheOnLogout();
         console.log('[登出] 失败情况下仍成功清理缓存');

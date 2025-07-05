@@ -36,9 +36,7 @@ export function SidebarButton({
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isDisabled) return;
 
-    // --- BEGIN COMMENT ---
     // 立即移除focus，避免影响父容器的cursor显示
-    // --- END COMMENT ---
     e.currentTarget.blur();
 
     onClick?.(e);
@@ -72,10 +70,8 @@ export function SidebarButton({
           : 'focus-visible:ring-primary focus-visible:ring-offset-background',
         'border border-transparent',
         'h-10',
-        // --- BEGIN COMMENT ---
         // 恢复cursor-pointer，现在父容器使用cursor-e-resize不会冲突
         // disabled时使用cursor-not-allowed
-        // --- END COMMENT ---
         isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
         !isDark &&
           !isDisabled && [

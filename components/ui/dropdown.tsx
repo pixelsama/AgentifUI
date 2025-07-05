@@ -38,9 +38,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
 
-  // --- BEGIN COMMENT ---
   // 计算dropdown位置（固定向左上方弹出）
-  // --- END COMMENT ---
   const calculatePosition = () => {
     if (!triggerRef.current) return;
 
@@ -57,9 +55,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
     setPosition(newPosition);
   };
 
-  // --- BEGIN COMMENT ---
   // 点击外部关闭下拉菜单
-  // --- END COMMENT ---
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -79,9 +75,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
     };
   }, [isOpen]);
 
-  // --- BEGIN COMMENT ---
   // 当菜单打开时计算位置
-  // --- END COMMENT ---
   useEffect(() => {
     if (isOpen) {
       calculatePosition();

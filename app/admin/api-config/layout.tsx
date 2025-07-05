@@ -32,9 +32,7 @@ interface ApiConfigLayoutProps {
   children: ReactNode;
 }
 
-// --- BEGIN COMMENT ---
 // 根据Dify应用类型获取对应图标
-// --- END COMMENT ---
 const getAppTypeIcon = (difyAppType?: string) => {
   switch (difyAppType) {
     case 'chatbot':
@@ -52,9 +50,7 @@ const getAppTypeIcon = (difyAppType?: string) => {
   }
 };
 
-// --- BEGIN COMMENT ---
 // 根据Dify应用类型获取类型标签和颜色
-// --- END COMMENT ---
 const getAppTypeInfo = (difyAppType?: string) => {
   switch (difyAppType) {
     case 'chatbot':
@@ -95,18 +91,14 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     null
   );
 
-  // --- BEGIN COMMENT ---
   // 从URL查询参数获取筛选状态
-  // --- END COMMENT ---
   const [filterProviderId, setFilterProviderId] = useState<string | null>(
     () => {
       return searchParams.get('provider') || null;
     }
   );
 
-  // --- BEGIN COMMENT ---
   // 初始化数据加载
-  // --- END COMMENT ---
   useEffect(() => {
     if (!hasInitiallyLoaded) {
       loadInstances().finally(() => {
@@ -115,9 +107,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     }
   }, [hasInitiallyLoaded, loadInstances]);
 
-  // --- BEGIN COMMENT ---
   // 处理筛选变化并同步URL
-  // --- END COMMENT ---
   const handleFilterChange = (providerId: string | null) => {
     // 如果值没有变化，直接返回
     if (providerId === filterProviderId) return;
@@ -135,9 +125,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     const newUrl = `${pathname}?${params.toString()}`;
     router.replace(newUrl, { scroll: false });
 
-    // --- BEGIN COMMENT ---
     // 通知page组件筛选状态变化，用于新建应用时自动设置提供商
-    // --- END COMMENT ---
     window.dispatchEvent(
       new CustomEvent('filterChanged', {
         detail: { providerId },
@@ -145,9 +133,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     );
   };
 
-  // --- BEGIN COMMENT ---
   // 监听URL变化同步筛选状态（优化避免循环）
-  // --- END COMMENT ---
   useEffect(() => {
     const urlProviderId = searchParams.get('provider');
     // 只在真正不同时才更新，避免循环
@@ -162,9 +148,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     }
   }, [searchParams]); // 移除filterProviderId依赖，避免循环
 
-  // --- BEGIN COMMENT ---
   // 🎯 根据筛选条件过滤应用实例
-  // --- END COMMENT ---
   const filteredInstances = useMemo(() => {
     if (!filterProviderId) {
       return instances; // 显示全部
@@ -174,17 +158,13 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     );
   }, [instances, filterProviderId]);
 
-  // --- BEGIN COMMENT ---
   // 监听page组件的状态变化，完全同步page的表单状态
-  // --- END COMMENT ---
   useEffect(() => {
     const handleAddFormToggled = (event: CustomEvent) => {
       const { showAddForm: newShowAddForm, selectedInstance } = event.detail;
       setShowAddForm(newShowAddForm);
-      // --- BEGIN COMMENT ---
       // 当显示添加表单时，清除所有选中状态
       // 当显示编辑表单时，设置对应的选中状态
-      // --- END COMMENT ---
       if (newShowAddForm) {
         setSelectedInstanceId(null);
       } else if (selectedInstance) {
@@ -271,9 +251,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     try {
       await deleteInstance(instanceToDelete.id);
 
-      // --- BEGIN COMMENT ---
       // 通知page组件实例被删除
-      // --- END COMMENT ---
       window.dispatchEvent(
         new CustomEvent('instanceDeleted', {
           detail: { instanceId },
@@ -325,9 +303,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     try {
       await setDefaultInstance(instanceToSet.id);
 
-      // --- BEGIN COMMENT ---
       // 通知page组件默认应用已更改
-      // --- END COMMENT ---
       window.dispatchEvent(
         new CustomEvent('defaultInstanceChanged', {
           detail: { instanceId },

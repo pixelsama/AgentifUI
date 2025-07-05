@@ -6,11 +6,9 @@ import { ArrowUpIcon, MoreHorizontal, Paperclip } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 主题卡片组件 - 高颜值版本
 // 模拟真实的聊天界面预览，包含输入框、消息气泡、按钮等元素
 // 使用项目中的实际设计风格和配色方案
-// --- END COMMENT ---
 interface ThemeCardProps {
   title: string;
   theme: 'light' | 'dark' | 'system';
@@ -28,10 +26,8 @@ export function ThemeCard({
   const t = useTranslations('pages.settings.appearanceSettings.preview');
   const isActive = currentTheme === theme;
 
-  // --- BEGIN COMMENT ---
   // 根据主题类型获取预览样式配置
   // 完全基于项目中的真实颜色设计
-  // --- END COMMENT ---
   const getPreviewStyles = () => {
     switch (theme) {
       case 'light':

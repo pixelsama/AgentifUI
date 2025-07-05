@@ -3,11 +3,9 @@
 import { useFilePreviewStore } from '@lib/stores/ui/file-preview-store';
 import { cn } from '@lib/utils';
 
-// --- BEGIN COMMENT ---
 // 文件预览面板的背景遮罩组件
 // 仅在移动设备 (md 断点以下) 显示，并在预览打开时出现
 // 点击遮罩会调用 closePreview 关闭面板
-// --- END COMMENT ---
 export function FilePreviewBackdrop() {
   const { isPreviewOpen, closePreview } = useFilePreviewStore();
 

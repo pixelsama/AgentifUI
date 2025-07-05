@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 
-// --- BEGIN COMMENT ---
 // 定义待处理会话的状态和结构
-// --- END COMMENT ---
 export interface PendingConversation {
   tempId: string; // 客户端生成的临时 ID
   realId?: string; // 从后端获取的真实对话 ID
@@ -20,9 +18,7 @@ export interface PendingConversation {
   updatedAt: string; // 最后更新时间
   supabase_pk?: string; // 数据库主键 (Supabase ID)，当已存入DB但仍在pending状态时使用
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：打字机效果相关状态
-  // --- END COMMENT ---
   titleTypewriterState?: {
     isTyping: boolean; // 是否正在打字
     targetTitle: string; // 目标标题（完整标题）
@@ -31,23 +27,15 @@ export interface PendingConversation {
   };
 }
 
-// --- BEGIN COMMENT ---
 // 定义 Store 的 State 接口
-// --- END COMMENT ---
 interface PendingConversationState {
-  // --- BEGIN COMMENT ---
   // 使用 Map 存储待处理会话，以便通过 tempId 或 realId 高效查找和更新
   // Key 可以是 tempId，value 是 PendingConversation 对象
-  // --- END COMMENT ---
   pendingConversations: Map<string, PendingConversation>;
 
-  // --- BEGIN COMMENT ---
   // Actions
-  // --- END COMMENT ---
   addPending: (tempId: string, initialTitle?: string) => void;
-  // --- BEGIN COMMENT ---
   // 🎯 新增：智能添加临时对话，支持"挤出"第五个对话的动态效果
-  // --- END COMMENT ---
   addPendingWithLimit: (
     tempId: string,
     initialTitle?: string,
@@ -65,32 +53,24 @@ interface PendingConversationState {
   markAsOptimistic: (id: string) => void; // 将对话标记为乐观持久化状态
   setSupabasePK: (id: string, supabasePK: string) => void; // 设置已存入DB的pending对话的Supabase PK
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：打字机效果相关Actions
-  // --- END COMMENT ---
   startTitleTypewriter: (id: string, targetTitle: string) => void; // 开始标题打字机效果
   updateTypewriterDisplay: (id: string, displayTitle: string) => void; // 更新打字机显示的标题
   completeTitleTypewriter: (id: string) => void; // 完成标题打字机效果
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：原子性状态更新，避免竞态条件
-  // --- END COMMENT ---
   markAsPersistedComplete: (
     id: string,
     supabasePK: string,
     finalTitle?: string
   ) => void; // 原子性标记为完全持久化状态
 
-  // --- BEGIN COMMENT ---
   // Selectors / Getters (可选，但推荐，以便在 store 外部安全地访问状态)
-  // --- END COMMENT ---
   getPendingByTempId: (tempId: string) => PendingConversation | undefined;
   getPendingByRealId: (realId: string) => PendingConversation | undefined;
 }
 
-// --- BEGIN COMMENT ---
 // 创建 Zustand Store
-// --- END COMMENT ---
 export const usePendingConversationStore = create<PendingConversationState>(
   (set, get) => ({
     pendingConversations: new Map(),
@@ -317,9 +297,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
       });
     },
 
-    // --- BEGIN COMMENT ---
     // 🎯 实现打字机效果相关Actions
-    // --- END COMMENT ---
     startTitleTypewriter: (id: string, targetTitle: string) => {
       set(state => {
         const newMap = new Map(state.pendingConversations);
@@ -426,10 +404,8 @@ export const usePendingConversationStore = create<PendingConversationState>(
       });
     },
 
-    // --- BEGIN COMMENT ---
     // 🎯 新增：智能添加临时对话，支持"挤出"第五个对话的动态效果
     // 当对话总数达到限制时，自动移除最老的对话
-    // --- END COMMENT ---
     addPendingWithLimit: (
       tempId: string,
       initialTitle = 'Creating...',
@@ -454,9 +430,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
           isTitleFinal: false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          // --- BEGIN COMMENT ---
           // 🎯 初始化打字机效果状态
-          // --- END COMMENT ---
           titleTypewriterState: {
             isTyping: false,
             targetTitle: initialTitle,
@@ -468,11 +442,9 @@ export const usePendingConversationStore = create<PendingConversationState>(
         // 添加新对话
         newMap.set(tempId, newPending);
 
-        // --- BEGIN COMMENT ---
         // 🎯 注意：由于此store只管理临时对话，真正的"挤出"逻辑
         // 需要在整合数据的地方（useCombinedConversations）处理
         // 这里先通知回调函数，让上层决定如何处理
-        // --- END COMMENT ---
         if (onNeedEviction && typeof onNeedEviction === 'function') {
           // 计算当前临时对话数量，如果超过限制则通知
           const pendingCount = newMap.size;
@@ -486,9 +458,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
       });
     },
 
-    // --- BEGIN COMMENT ---
     // 🎯 新增：原子性状态更新，避免竞态条件
-    // --- END COMMENT ---
     markAsPersistedComplete: (
       id: string,
       supabasePK: string,
@@ -530,7 +500,5 @@ export const usePendingConversationStore = create<PendingConversationState>(
   })
 );
 
-// --- BEGIN COMMENT ---
 // 可以在这里添加一些辅助 selector，如果需要的话
 // 例如：selectIsAnyPending, selectPendingTitles, etc.
-// --- END COMMENT ---

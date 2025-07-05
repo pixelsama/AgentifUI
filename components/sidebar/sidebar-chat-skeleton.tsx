@@ -15,10 +15,8 @@ interface SidebarChatSkeletonProps {
  * 用于显示正在创建的新对话的占位符
  */
 export function SidebarChatSkeleton({ isDark }: SidebarChatSkeletonProps) {
-  // --- BEGIN COMMENT ---
   // 骨架屏组件，显示对话创建中的加载状态
   // 样式与 SidebarButton 保持一致，确保尺寸和外观一致
-  // --- END COMMENT ---
   return (
     <div
       className={cn(

@@ -242,9 +242,7 @@ export function ChatflowExecutionBar({
       isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
     );
 
-    // --- BEGIN COMMENT ---
     // 🎯 优化：迭代/循环中的节点使用左侧指示条+连接点设计，提供清晰的层级视觉指示
-    // --- END COMMENT ---
     const nestedStyles =
       node.isInIteration || node.isInLoop
         ? cn(

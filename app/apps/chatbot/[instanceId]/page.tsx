@@ -42,14 +42,10 @@ export default function AppDetailPage() {
   const instanceId = params.instanceId as string;
   const t = useTranslations('pages.apps');
 
-  // --- BEGIN COMMENT ---
   // 获取用户资料，用于欢迎界面显示
-  // --- END COMMENT ---
   const { profile } = useProfile();
 
-  // --- BEGIN COMMENT ---
   // 使用聊天接口逻辑，获取messages状态和相关方法
-  // --- END COMMENT ---
   const {
     messages,
     handleSubmit: originalHandleSubmit,
@@ -59,51 +55,33 @@ export default function AppDetailPage() {
     sendDirectMessage,
   } = useChatInterface();
 
-  // --- BEGIN COMMENT ---
   // 使用统一的欢迎界面逻辑，现在支持应用详情页面
-  // --- END COMMENT ---
   const { isWelcomeScreen, setIsWelcomeScreen } = useWelcomeScreen();
 
-  // --- BEGIN COMMENT ---
   // 获取聊天布局状态，用于输入框高度管理
-  // --- END COMMENT ---
   const { inputHeight } = useChatLayoutStore();
   const chatInputHeightVar = `${inputHeight || 80}px`;
 
-  // --- BEGIN COMMENT ---
   // 本地状态管理
-  // --- END COMMENT ---
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 添加滚动管理，确保消息列表能正确滚动
-  // --- END COMMENT ---
   const scrollRef = useChatScroll(messages);
 
-  // --- BEGIN COMMENT ---
   // Sidebar选中状态管理
-  // --- END COMMENT ---
   const { selectItem } = useSidebarStore();
 
-  // --- BEGIN COMMENT ---
   // 聊天状态管理
-  // --- END COMMENT ---
   const { clearMessages, setCurrentConversationId } = useChatStore();
 
-  // --- BEGIN COMMENT ---
   // 应用初始化状态
-  // --- END COMMENT ---
   const [isInitializing, setIsInitializing] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：确保loader最少显示0.7秒，让布局有足够时间稳定
-  // --- END COMMENT ---
   const [hasMinimumLoadTime, setHasMinimumLoadTime] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 🎯 最小加载时间控制：确保loader至少显示0.7秒
-  // --- END COMMENT ---
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasMinimumLoadTime(true);
@@ -112,9 +90,7 @@ export default function AppDetailPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 应用相关状态
-  // --- END COMMENT ---
   const { apps, fetchApps } = useAppListStore();
   const {
     currentAppId,
@@ -124,29 +100,21 @@ export default function AppDetailPage() {
     error: appError,
   } = useCurrentApp();
 
-  // --- BEGIN COMMENT ---
   // 获取当前应用实例数据
-  // --- END COMMENT ---
   const currentApp = apps.find(app => app.instance_id === instanceId);
 
-  // --- BEGIN COMMENT ---
   // 主题同步：确保输入框样式跟随主题变化
-  // --- END COMMENT ---
   const setDarkMode = useChatInputStore(state => state.setDarkMode);
   useEffect(() => {
     setDarkMode(isDark);
   }, [isDark, setDarkMode]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 关键修复：使用useLayoutEffect确保在路由切换时立即清理状态
   // 这比useEffect更早执行，能在渲染前清理状态，避免显示错误内容
-  // --- END COMMENT ---
   const { clearConversationState } = useChatInterface();
 
   useLayoutEffect(() => {
-    // --- BEGIN COMMENT ---
     // 🎯 修复：正确判断当前是否在chatbot页面
-    // --- END COMMENT ---
     if (pathname === `/apps/chatbot/${instanceId}`) {
       console.log('[AppDetail] 路由切换到应用详情页面，立即清理聊天状态');
 
@@ -157,10 +125,8 @@ export default function AppDetailPage() {
       // 设置当前对话 ID 为 null
       setCurrentConversationId(null);
 
-      // --- BEGIN COMMENT ---
       // 🎯 新增：清理use-chat-interface中的对话状态
       // 这确保difyConversationId、dbConversationUUID、conversationAppId都被正确清理
-      // --- END COMMENT ---
       clearConversationState();
 
       // 强制设置欢迎屏幕状态为 true
@@ -180,10 +146,8 @@ export default function AppDetailPage() {
     clearConversationState,
   ]);
 
-  // --- BEGIN COMMENT ---
   // 页面初始化：切换到目标应用并同步sidebar选中状态
   // 🎯 优化：简化初始化逻辑，避免验证反弹，改善用户体验
-  // --- END COMMENT ---
   useEffect(() => {
     const initializeApp = async () => {
       if (!instanceId) return;
@@ -193,10 +157,8 @@ export default function AppDetailPage() {
 
         console.log('[AppDetail] 开始初始化应用:', instanceId);
 
-        // --- BEGIN COMMENT ---
         // 🎯 优化：简化加载状态判断
         // 只有在真正需要等待时才显示加载状态
-        // --- END COMMENT ---
         const needsAppListFetch = apps.length === 0;
         const currentAppMatches = currentAppId === instanceId;
 
@@ -226,11 +188,9 @@ export default function AppDetailPage() {
         // 立即设置sidebar选中状态
         selectItem('app', instanceId);
 
-        // --- BEGIN COMMENT ---
         // 🎯 关键优化：简化应用切换逻辑
         // 只有在当前应用确实不匹配时才进行切换
         // 避免不必要的验证调用
-        // --- END COMMENT ---
         if (!currentAppMatches) {
           console.log(
             '[AppDetail] 需要切换应用，从',
@@ -264,9 +224,7 @@ export default function AppDetailPage() {
             : t('errors.initializationFailed')
         );
       } finally {
-        // --- BEGIN COMMENT ---
         // 🎯 确保在所有情况下都清除初始化状态
-        // --- END COMMENT ---
         setIsInitializing(false);
       }
     };
@@ -283,9 +241,7 @@ export default function AppDetailPage() {
     selectItem,
   ]);
 
-  // --- BEGIN COMMENT ---
   // 页面卸载时清除选中状态（当离开应用详情页面时）
-  // --- END COMMENT ---
   useEffect(() => {
     return () => {
       // 检查是否离开了应用详情页面
@@ -296,16 +252,11 @@ export default function AppDetailPage() {
     };
   }, [selectItem]);
 
-  // --- BEGIN COMMENT ---
   // 包装handleSubmit，实现UI切换逻辑
-  // --- END COMMENT ---
   const handleSubmit = useCallback(
     async (message: string, files?: any[]) => {
       try {
-        // --- BEGIN COMMENT ---
         // 🎯 简化UI切换逻辑：立即响应用户操作
-        // --- END COMMENT ---
-
         // 立即设置提交状态为 true
         setIsSubmitting(true);
 
@@ -321,9 +272,7 @@ export default function AppDetailPage() {
       } catch (error) {
         console.error('[AppDetail] 发送消息失败:', error);
 
-        // --- BEGIN COMMENT ---
         // 发送失败时恢复UI状态
-        // --- END COMMENT ---
         setIsSubmitting(false);
         setIsWelcomeScreen(true);
       }
@@ -331,9 +280,7 @@ export default function AppDetailPage() {
     [originalHandleSubmit, setIsWelcomeScreen]
   );
 
-  // --- BEGIN COMMENT ---
   // 错误状态
-  // --- END COMMENT ---
   if (initError) {
     return (
       <div
@@ -382,9 +329,7 @@ export default function AppDetailPage() {
     );
   }
 
-  // --- BEGIN COMMENT ---
   // 加载状态 - 🎯 确保最少显示0.7秒
-  // --- END COMMENT ---
   if (
     !hasMinimumLoadTime ||
     isInitializing ||

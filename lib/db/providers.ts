@@ -174,11 +174,8 @@ export async function deleteProvider(id: string): Promise<Result<boolean>> {
   }
 }
 
-// --- BEGIN COMMENT ---
 // 兼容性函数，保持与现有代码的兼容性
 // 这些函数将逐步迁移到使用Result类型
-// --- END COMMENT ---
-
 /**
  * 获取所有活跃的服务提供商（兼容版本）
  * @deprecated 请使用新版本并处理Result类型

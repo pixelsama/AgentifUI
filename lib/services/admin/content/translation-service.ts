@@ -4,9 +4,7 @@ import {
   isValidLocale,
 } from '@lib/config/language-config';
 
-// --- BEGIN COMMENT ---
 // 翻译服务接口定义
-// --- END COMMENT ---
 export interface TranslationResponse {
   locale: string;
   section?: string;
@@ -44,29 +42,21 @@ export interface BatchUpdateResult {
   totalErrors: number;
 }
 
-// --- BEGIN COMMENT ---
 // 翻译管理服务类
-// --- END COMMENT ---
 export class TranslationService {
   private static readonly API_BASE = '/api/admin/translations';
 
-  // --- BEGIN COMMENT ---
   // 获取支持的语言列表
-  // --- END COMMENT ---
   static getSupportedLanguages(): SupportedLocale[] {
     return getSupportedLocales();
   }
 
-  // --- BEGIN COMMENT ---
   // 验证语言代码
-  // --- END COMMENT ---
   static isValidLanguage(locale: string): locale is SupportedLocale {
     return isValidLocale(locale);
   }
 
-  // --- BEGIN COMMENT ---
   // 获取所有支持的语言信息
-  // --- END COMMENT ---
   static async getLanguageMetadata(): Promise<{
     supportedLocales: SupportedLocale[];
     availableLanguages: number;
@@ -81,9 +71,7 @@ export class TranslationService {
     return response.json();
   }
 
-  // --- BEGIN COMMENT ---
   // 读取指定语言的翻译内容
-  // --- END COMMENT ---
   static async getTranslations(
     locale: SupportedLocale,
     section?: string
@@ -102,9 +90,7 @@ export class TranslationService {
     return response.json();
   }
 
-  // --- BEGIN COMMENT ---
   // 获取所有语言的特定部分翻译
-  // --- END COMMENT ---
   static async getAllTranslationsForSection(
     section: string
   ): Promise<Record<SupportedLocale, any>> {
@@ -126,9 +112,7 @@ export class TranslationService {
     return results as Record<SupportedLocale, any>;
   }
 
-  // --- BEGIN COMMENT ---
   // 更新单个语言的翻译
-  // --- END COMMENT ---
   static async updateTranslation(
     request: UpdateTranslationRequest
   ): Promise<TranslationUpdateResult> {
@@ -150,9 +134,7 @@ export class TranslationService {
     return response.json();
   }
 
-  // --- BEGIN COMMENT ---
   // 批量更新多语言翻译
-  // --- END COMMENT ---
   static async batchUpdateTranslations(
     request: BatchUpdateRequest
   ): Promise<BatchUpdateResult> {
@@ -175,18 +157,14 @@ export class TranslationService {
     return response.json();
   }
 
-  // --- BEGIN COMMENT ---
   // 专门用于About页面的翻译管理
-  // --- END COMMENT ---
   static async getAboutPageTranslations(): Promise<
     Record<SupportedLocale, any>
   > {
     return this.getAllTranslationsForSection('pages.about');
   }
 
-  // --- BEGIN COMMENT ---
   // 更新About页面翻译
-  // --- END COMMENT ---
   static async updateAboutPageTranslations(
     updates: Record<SupportedLocale, any>,
     mode: 'merge' | 'replace' = 'merge'
@@ -198,18 +176,14 @@ export class TranslationService {
     });
   }
 
-  // --- BEGIN COMMENT ---
   // 专门用于Home页面的翻译管理
-  // --- END COMMENT ---
   static async getHomePageTranslations(): Promise<
     Record<SupportedLocale, any>
   > {
     return this.getAllTranslationsForSection('pages.home');
   }
 
-  // --- BEGIN COMMENT ---
   // 更新Home页面翻译
-  // --- END COMMENT ---
   static async updateHomePageTranslations(
     updates: Record<SupportedLocale, any>,
     mode: 'merge' | 'replace' = 'merge'
@@ -221,9 +195,7 @@ export class TranslationService {
     });
   }
 
-  // --- BEGIN COMMENT ---
   // 获取特定部分的翻译结构模板 (用于管理界面初始化)
-  // --- END COMMENT ---
   static async getTranslationTemplate(
     section: string,
     baseLocale: SupportedLocale = 'zh-CN'
@@ -237,9 +209,7 @@ export class TranslationService {
     }
   }
 
-  // --- BEGIN COMMENT ---
   // 验证翻译数据结构的完整性
-  // --- END COMMENT ---
   static validateTranslationStructure(
     template: any,
     data: any,
@@ -289,9 +259,7 @@ export class TranslationService {
     };
   }
 
-  // --- BEGIN COMMENT ---
   // 创建翻译备份 (在更新前)
-  // --- END COMMENT ---
   static async createBackup(
     section: string
   ): Promise<{ timestamp: string; data: Record<SupportedLocale, any> }> {
@@ -305,9 +273,7 @@ export class TranslationService {
     return { timestamp, data };
   }
 
-  // --- BEGIN COMMENT ---
   // 恢复翻译备份
-  // --- END COMMENT ---
   static async restoreFromBackup(
     section: string,
     timestamp: string

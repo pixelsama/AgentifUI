@@ -11,13 +11,41 @@ import React, { useEffect, useRef, useState } from 'react';
 import { MessageSkeleton } from './message-skeleton';
 import { AssistantMessage, UserMessage } from './messages';
 
+/**
+ * 聊天加载器组件属性
+ * @description 定义聊天加载器组件的属性接口
+ */
 interface ChatLoaderProps {
+  /** 消息列表 */
   messages: ChatMessage[];
+  /** 是否正在等待响应 */
   isWaitingForResponse?: boolean;
+  /** 是否正在初始加载 */
   isLoadingInitial?: boolean;
+  /** 自定义CSS类名 */
   className?: string;
 }
 
+/**
+ * 聊天加载器组件
+ * @description 负责渲染聊天消息列表，支持流式更新和自动滚动管理
+ *
+ * @features
+ * - 自动滚动到最新消息
+ * - 支持流式消息更新
+ * - 响应式布局适配
+ * - 骨架屏加载状态
+ * - 等待响应动画
+ *
+ * @future 计划功能
+ * - 支持富文本消息渲染
+ * - 添加消息时间戳显示
+ * - 支持消息状态指示（发送中、已送达、已读）
+ * - 支持消息操作（点赞、复制、重新生成）
+ * - 支持图片、文件等多媒体消息
+ * - 支持消息引用和回复
+ * - 支持消息搜索和过滤
+ */
 export const ChatLoader = ({
   messages,
   isWaitingForResponse = false,
@@ -156,10 +184,3 @@ export const ChatLoader = ({
     </div>
   );
 };
-
-// TODO: 后续扩展功能
-// 1. 支持富文本消息
-// 2. 添加消息时间戳
-// 3. 支持消息状态（发送中、已送达、已读）
-// 4. 支持消息反馈（点赞、复制等操作）
-// 5. 支持图片、文件等多媒体消息

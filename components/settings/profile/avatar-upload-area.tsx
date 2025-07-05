@@ -7,9 +7,7 @@ import React, { useRef } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 头像上传区域组件接口
-// --- END COMMENT ---
 interface AvatarUploadAreaProps {
   onFileSelect: (file: File) => void;
   onDrop: (e: React.DragEvent) => void;

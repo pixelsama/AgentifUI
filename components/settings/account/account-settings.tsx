@@ -13,10 +13,8 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
-// --- BEGIN COMMENT ---
 // 账号设置组件
 // 包含所有账号相关逻辑：数据加载、状态管理、退出登录等
-// --- END COMMENT ---
 export function AccountSettings() {
   const { colors } = useSettingsColors();
   const { isDark } = useTheme();
@@ -32,9 +30,7 @@ export function AccountSettings() {
   const router = useRouter();
   const supabase = createClient();
 
-  // --- BEGIN COMMENT ---
   // 加载用户账号数据
-  // --- END COMMENT ---
   useEffect(() => {
     async function loadUserAccount() {
       try {
@@ -64,9 +60,7 @@ export function AccountSettings() {
     loadUserAccount();
   }, [router, supabase.auth, t]);
 
-  // --- BEGIN COMMENT ---
   // 处理退出登录
-  // --- END COMMENT ---
   const handleLogout = async () => {
     if (showConfirm) {
       try {
@@ -82,9 +76,7 @@ export function AccountSettings() {
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 取消退出登录
-  // --- END COMMENT ---
   const cancelLogout = () => {
     setShowConfirm(false);
   };

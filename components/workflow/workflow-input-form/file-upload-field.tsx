@@ -21,9 +21,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
 // 定义上传文件的状态接口，与聊天输入组件保持一致
-// --- END COMMENT ---
 interface UploadFile {
   id: string; // 本地生成的唯一ID
   file: File; // 原始 File 对象
@@ -71,15 +69,11 @@ export function FileUploadField({
   const t = useTranslations('pages.workflow.fileUpload');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // --- BEGIN COMMENT ---
   // 本地文件状态管理，用于跟踪上传状态
-  // --- END COMMENT ---
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
 
-  // --- BEGIN COMMENT ---
   // 当外部value prop发生变化时，同步uploadFiles状态
   // 支持表单重置时清空文件列表
-  // --- END COMMENT ---
   useEffect(() => {
     // 如果value为空（null、undefined、空数组），清空文件列表
     if (!value || (Array.isArray(value) && value.length === 0)) {
@@ -112,15 +106,11 @@ export function FileUploadField({
     }
   }, [value]);
 
-  // --- BEGIN COMMENT ---
   // 用ref跟踪上次的成功文件ID列表，避免无限循环
-  // --- END COMMENT ---
   const lastSuccessIdsRef = useRef('');
 
-  // --- BEGIN COMMENT ---
   // 当uploadFiles状态变化时，通知父组件
   // 根据number_limits决定返回单个文件对象还是文件数组
-  // --- END COMMENT ---
   useEffect(() => {
     const successfulFiles = uploadFiles
       .filter(file => file.status === 'success' && file.uploadedId)
@@ -143,9 +133,7 @@ export function FileUploadField({
     if (lastSuccessIdsRef.current !== currentSuccessIds) {
       lastSuccessIdsRef.current = currentSuccessIds;
 
-      // --- BEGIN COMMENT ---
       // 根据isSingleFileMode判断是单文件还是多文件
-      // --- END COMMENT ---
       if (isSingleFileMode) {
         // 单文件模式：返回第一个文件对象或null
         const singleFile =
@@ -158,9 +146,7 @@ export function FileUploadField({
     }
   }, [uploadFiles, isSingleFileMode]); // 添加isSingleFileMode依赖
 
-  // --- BEGIN COMMENT ---
   // 根据文件类型推断 Dify 文件 type 字段
-  // --- END COMMENT ---
   const getDifyFileType = (
     file: UploadFile
   ): 'image' | 'document' | 'audio' | 'video' | 'custom' => {
@@ -183,9 +169,7 @@ export function FileUploadField({
     return 'custom';
   };
 
-  // --- BEGIN COMMENT ---
   // 更新文件状态的辅助函数
-  // --- END COMMENT ---
   const updateFileStatus = useCallback(
     (
       id: string,
@@ -211,9 +195,7 @@ export function FileUploadField({
     []
   );
 
-  // --- BEGIN COMMENT ---
   // 上传单个文件到Dify - 使用当前应用ID，与聊天输入框保持一致
-  // --- END COMMENT ---
   const uploadFileToDify = useCallback(
     async (uploadFile: UploadFile) => {
       const userIdToUse = session?.user?.id || 'workflow-user-id';
@@ -221,10 +203,8 @@ export function FileUploadField({
       try {
         updateFileStatus(uploadFile.id, 'uploading', 0);
 
-        // --- BEGIN COMMENT ---
         // 使用当前应用ID，如果没有则fallback到instanceId
         // 与聊天输入框的逻辑保持一致
-        // --- END COMMENT ---
         const appIdToUse = currentAppId || instanceId;
 
         const response = await uploadDifyFile(
@@ -246,9 +226,7 @@ export function FileUploadField({
     [currentAppId, instanceId, session?.user?.id, updateFileStatus]
   );
 
-  // --- BEGIN COMMENT ---
   // 处理文件选择
-  // --- END COMMENT ---
   const handleFileSelect = useCallback(
     (newFiles: File[]) => {
       const newUploadFiles = newFiles.map(file => {
@@ -286,9 +264,7 @@ export function FileUploadField({
     setUploadFiles(prev => prev.filter(file => file.id !== id));
   };
 
-  // --- BEGIN COMMENT ---
   // 重试上传
-  // --- END COMMENT ---
   const handleRetryUpload = useCallback(
     (id: string) => {
       const uploadFile = uploadFiles.find(file => file.id === id);
@@ -316,25 +292,19 @@ export function FileUploadField({
     return null;
   }
 
-  // --- BEGIN COMMENT ---
   // 计算状态统计
-  // --- END COMMENT ---
   const isUploading = uploadFiles.some(f => f.status === 'uploading');
   const hasError = uploadFiles.some(f => f.status === 'error');
   const successCount = uploadFiles.filter(f => f.status === 'success').length;
-  // --- BEGIN COMMENT ---
   // 根据isSingleFileMode和配置确定最大文件数
   // file-list类型使用max_length字段，file类型使用number_limits字段
-  // --- END COMMENT ---
   const maxFiles = isSingleFileMode
     ? 1
     : config.max_length || config.number_limits || 1;
   const canUploadMore = uploadFiles.length < maxFiles;
 
-  // --- BEGIN COMMENT ---
   // 根据Dify文件类型标识符生成文件类型提示和accept字符串
   // 参考file-type-selector.tsx的逻辑
-  // --- END COMMENT ---
   const getFileTypeInfo = () => {
     const types = config.allowed_file_types;
     if (!types || types.length === 0) {

@@ -85,9 +85,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
     setHasChanges(false);
     setIsInitialized(false);
 
-    // --- BEGIN COMMENT ---
     // 🎯 更新：初始化所有配置字段的默认值
-    // --- END COMMENT ---
     const initializeConfig = () => {
       const initializedConfig: DifyParametersSimplifiedConfig = {
         opening_statement: config.opening_statement || '',
@@ -99,10 +97,8 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
         retriever_resource: config.retriever_resource || { enabled: false },
         annotation_reply: config.annotation_reply || { enabled: false },
         user_input_form: config.user_input_form || [],
-        // --- BEGIN COMMENT ---
         // 🎯 修复：不要覆盖从 Dify 同步来的 file_upload 配置
         // 只有当 config.file_upload 为 undefined 时才设置默认值
-        // --- END COMMENT ---
         file_upload: config.file_upload,
         system_parameters: config.system_parameters || {
           file_size_limit: 15,
@@ -122,15 +118,10 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
     const initializeFileUploadState = () => {
       const fileUploadConfig = config.file_upload;
 
-      // --- BEGIN COMMENT ---
       // 🎯 文件上传配置初始化完成，移除调试日志
-      // --- END COMMENT ---
-
-      // --- BEGIN COMMENT ---
       // 🎯 修复：根据实际的 Dify API 返回格式检测文件上传是否启用
       // 实际格式：{enabled: true, image: {...}, allowed_file_types: [...]}
       // 而不是我们之前假设的：{image: {enabled: true, ...}}
-      // --- END COMMENT ---
       const hasFileUpload = !!(
         fileUploadConfig?.enabled || // 检查顶层的 enabled 字段
         fileUploadConfig?.image?.enabled || // 兼容标准格式
@@ -148,11 +139,8 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
       let customFileTypesValue = '';
 
       if (hasFileUpload && fileUploadConfig) {
-        // --- BEGIN COMMENT ---
         // 🎯 修复：根据实际的 Dify API 返回格式获取配置参数
         // 优先从顶层字段获取，然后从具体文件类型配置获取
-        // --- END COMMENT ---
-
         // 从顶层配置或第一个启用的文件类型获取通用配置
         let configSource = null;
         if (fileUploadConfig.allowed_file_upload_methods) {
@@ -200,11 +188,9 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
           }
         }
 
-        // --- BEGIN COMMENT ---
         // 🎯 修复：根据实际的 API 返回格式设置启用的文件类型
         // 从 allowed_file_types 字段或具体的文件类型配置中获取
         // 注意：Dify 中"其他文件类型"与前四个类型是互斥的
-        // --- END COMMENT ---
         if (fileUploadConfig.allowed_file_types) {
           // 从顶层的 allowed_file_types 字段获取
           const allowedTypes = fileUploadConfig.allowed_file_types;
@@ -375,9 +361,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
   };
 
   const generateFileUploadConfig = () => {
-    // --- BEGIN COMMENT ---
     // 🎯 修复：根据用户选择的文件类型生成对应的配置
-    // --- END COMMENT ---
     const fileUploadConfig: any = {};
 
     const transferMethods =

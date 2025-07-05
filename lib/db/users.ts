@@ -99,9 +99,7 @@ export async function getUserList(filters: UserFilters = {}): Promise<
       pageSize = 20,
     } = filters;
 
-    // --- BEGIN COMMENT ---
     // 获取用户信息，包含auth.users表的邮箱和手机号信息
-    // --- END COMMENT ---
     let query = supabase.from('profiles').select('*', { count: 'exact' });
 
     // 应用筛选条件
@@ -137,10 +135,8 @@ export async function getUserList(filters: UserFilters = {}): Promise<
       return failure(new Error(`获取用户列表失败: ${profilesError.message}`));
     }
 
-    // --- BEGIN COMMENT ---
     // 获取auth.users表中的邮箱和手机号信息
     // 对于管理员，显示完整的联系信息
-    // --- END COMMENT ---
     const userIds = (profiles || []).map(p => p.id);
     let authUsers: any[] = [];
 
@@ -171,9 +167,7 @@ export async function getUserList(filters: UserFilters = {}): Promise<
     const total = count || 0;
     const totalPages = Math.ceil(total / pageSize);
 
-    // --- BEGIN COMMENT ---
     // 合并profiles和auth.users数据，并获取群组信息
-    // --- END COMMENT ---
     const enhancedUsers: EnhancedUser[] = await Promise.all(
       (profiles || []).map(async (profile: any) => {
         const authUser = authUsers.find(au => au.id === profile.id);

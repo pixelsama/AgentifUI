@@ -15,14 +15,9 @@ export default function AppsLayout({ children }: AppsLayoutProps) {
   const isMobile = useMobile();
   const { isDark } = useTheme();
 
-  // --- BEGIN COMMENT ---
   // 🎯 移除重复的 setMounted 调用，现在由全局 ClientLayout 统一管理
-  // --- END COMMENT ---
-
-  // --- BEGIN COMMENT ---
   // 计算主内容区域的左边距
   // 根据sidebar展开状态设置边距，推动主内容
-  // --- END COMMENT ---
   const getMainMarginLeft = () => {
     if (isMobile) return 'ml-0';
     return isExpanded ? 'ml-64' : 'ml-16';

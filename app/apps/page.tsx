@@ -1,11 +1,9 @@
 'use client';
 
 import { AppFilters, AppHeader, AppList, AppLoading } from '@components/apps';
-// --- BEGIN COMMENT ---
 // 🎯 多提供商支持：应用市场现在支持来自不同提供商的应用
 // 过滤逻辑基于 app_type === 'marketplace'，不再限制特定提供商
 // 这样可以显示来自不同提供商的应用市场应用
-// --- END COMMENT ---
 import type { AppInstance } from '@components/apps/types';
 // NavBar 已移至根布局，无需导入
 import { useMobile } from '@lib/hooks';
@@ -37,10 +35,8 @@ export default function AppsPage() {
   );
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // --- BEGIN COMMENT ---
   // 🎯 效仿模型选择器：简洁的应用获取逻辑
   // 只需要一行代码，无需复杂的用户状态判断
-  // --- END COMMENT ---
   useEffect(() => {
     fetchApps();
   }, [fetchApps]);
@@ -150,10 +146,8 @@ export default function AppsPage() {
     return app.isPopular || isFavorite;
   });
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：动态提取所有应用的 tags 作为分类
   // 从应用市场的所有应用中提取唯一的 tags，并按使用频率排序
-  // --- END COMMENT ---
   const extractTagCategories = (apps: AppInstance[]): string[] => {
     const tagCounts = new Map<string, number>();
 

@@ -18,15 +18,10 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
   const isMobile = useMobile();
   const { colors, isDark } = useSettingsColors();
 
-  // --- BEGIN COMMENT ---
   // 🎯 移除重复的 setMounted 调用，现在由全局 ClientLayout 统一管理
-  // --- END COMMENT ---
-
-  // --- BEGIN COMMENT ---
   // 计算主内容区域的左边距
   // 仅在桌面端且侧边栏锁定时，根据展开状态设置边距
   // 悬停展开时不设置边距（覆盖模式）
-  // --- END COMMENT ---
   const getMainMarginLeft = () => {
     if (isMobile) return 'ml-0';
     return isExpanded ? 'ml-64' : 'ml-16';

@@ -52,9 +52,7 @@ export function MessageSkeleton() {
   );
 }
 
-// --- BEGIN COMMENT ---
 // 添加 MessageSkeletonGroup 组件，用于显示多个消息骨架屏
-// --- END COMMENT ---
 interface MessageSkeletonGroupProps {
   count?: number;
   className?: string;

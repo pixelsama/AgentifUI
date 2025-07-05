@@ -1,8 +1,6 @@
 // lib/services/dify/annotation-service.ts
-// --- BEGIN COMMENT ---
 // 该文件负责处理与 Dify 标注相关的 API 交互，例如获取标注列表。
 // 它遵循与其他服务文件类似的设计模式，提供独立的、可导出的服务函数。
-// --- END COMMENT ---
 import type {
   CreateDifyAnnotationRequest,
   CreateDifyAnnotationResponse,
@@ -18,13 +16,10 @@ import type {
   UpdateDifyAnnotationResponse,
 } from './types';
 
-// --- BEGIN COMMENT ---
 // 定义指向我们后端 Dify 代理 API 的基础 URL。
 // 与其他服务保持一致，方便统一管理代理路径。
-// --- END COMMENT ---
 const DIFY_PROXY_BASE_URL = '/api/dify';
 
-// --- BEGIN COMMENT ---
 /**
  * 获取应用的标注列表。
  *
@@ -36,7 +31,6 @@ const DIFY_PROXY_BASE_URL = '/api/dify';
  * @returns 一个解析为 `DifyAnnotationListResponse` 对象的 Promise，其中包含了标注列表和分页信息。
  * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象 (类似 DifyApiError)。
  */
-// --- END COMMENT ---
 export async function getDifyAnnotations(
   appId: string,
   params: GetDifyAnnotationsParams = {}
@@ -142,7 +136,6 @@ export async function getDifyAnnotations(
   }
 }
 
-// --- BEGIN COMMENT ---
 /**
  * 创建一个新的标注。
  *
@@ -151,7 +144,6 @@ export async function getDifyAnnotations(
  * @returns 一个解析为 `CreateDifyAnnotationResponse` 对象的 Promise，包含创建的标注信息。
  * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象。
  */
-// --- END COMMENT ---
 export async function createDifyAnnotation(
   appId: string,
   request: CreateDifyAnnotationRequest
@@ -237,7 +229,6 @@ export async function createDifyAnnotation(
   }
 }
 
-// --- BEGIN COMMENT ---
 /**
  * 更新一个已存在的标注。
  *
@@ -247,7 +238,6 @@ export async function createDifyAnnotation(
  * @returns 一个解析为 `UpdateDifyAnnotationResponse` 对象的 Promise，包含更新后的标注信息。
  * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象。
  */
-// --- END COMMENT ---
 export async function updateDifyAnnotation(
   appId: string,
   annotationId: string,
@@ -340,7 +330,6 @@ export async function updateDifyAnnotation(
   }
 }
 
-// --- BEGIN COMMENT ---
 /**
  * 删除一个标注。
  *
@@ -349,7 +338,6 @@ export async function updateDifyAnnotation(
  * @returns 一个解析为 void 的 Promise，表示删除成功（204 状态码）。
  * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象。
  */
-// --- END COMMENT ---
 export async function deleteDifyAnnotation(
   appId: string,
   annotationId: string
@@ -432,7 +420,6 @@ export async function deleteDifyAnnotation(
   }
 }
 
-// --- BEGIN COMMENT ---
 /**
  * 启用或禁用标注回复设置，并配置嵌入模型。
  * 此接口异步执行。
@@ -443,7 +430,6 @@ export async function deleteDifyAnnotation(
  * @returns 一个解析为 `DifyAsyncJobResponse` 对象的 Promise，包含异步任务信息。
  * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象。
  */
-// --- END COMMENT ---
 export async function setDifyAnnotationReplySettings(
   appId: string,
   action: DifyAnnotationReplyAction,
@@ -542,7 +528,6 @@ export async function setDifyAnnotationReplySettings(
   }
 }
 
-// --- BEGIN COMMENT ---
 /**
  * 查询异步执行的标注回复初始设置任务的状态。
  *
@@ -552,7 +537,6 @@ export async function setDifyAnnotationReplySettings(
  * @returns 一个解析为 `DifyAsyncJobStatusResponse` 对象的 Promise，包含任务状态信息。
  * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象。
  */
-// --- END COMMENT ---
 export async function getDifyAnnotationReplyJobStatus(
   appId: string,
   action: DifyAnnotationReplyAction,

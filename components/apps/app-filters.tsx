@@ -33,9 +33,7 @@ export function AppFilters({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 🎯 监听滚动状态，控制左右滚动按钮的显示
-  // --- END COMMENT ---
   const updateScrollButtons = () => {
     if (scrollContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } =
@@ -54,9 +52,7 @@ export function AppFilters({
     }
   }, [categories]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 滚动控制函数
-  // --- END COMMENT ---
   const scrollCategories = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
       const scrollAmount = 200;
@@ -73,10 +69,8 @@ export function AppFilters({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 🎯 重构：基于用户友好的tag分类，而非技术性的Dify应用类型
   // 预定义常见标签的图标映射，提供更好的视觉体验
-  // --- END COMMENT ---
   const getCategoryDisplay = (category: string) => {
     if (category === t('categoryKeys.all')) {
       return { icon: '🏪', label: t('categories.all') };
@@ -85,10 +79,8 @@ export function AppFilters({
       return { icon: '⭐', label: t('categories.favorite') };
     }
 
-    // --- BEGIN COMMENT ---
     // 🎯 创建分类映射函数 - 避免使用中文作为对象键
     // 通过翻译键来匹配分类，确保代码的国际化友好性
-    // --- END COMMENT ---
     const getCategoryMapping = (cat: string) => {
       // 功能分类（核心应用场景）
       if (cat === t('categories.writing'))

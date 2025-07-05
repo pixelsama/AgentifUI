@@ -75,24 +75,16 @@ interface ChatInputProps {
   isProcessing?: boolean;
   isWaitingForResponse?: boolean;
   isWaiting?: boolean;
-  // --- BEGIN COMMENT ---
   // 是否处于欢迎界面状态
-  // --- END COMMENT ---
   isWelcomeScreen?: boolean;
-  // --- BEGIN COMMENT ---
   // 是否正在从对话界面过渡到欢迎界面
   // 当为 true 时，使用闪烁效果而不是滑动
-  // --- END COMMENT ---
   isTransitioningToWelcome?: boolean;
-  // --- BEGIN COMMENT ---
   // 🎯 新增：是否需要模型验证
   // 默认为true，在应用市场等不需要模型的场景可以设为false
-  // --- END COMMENT ---
   requireModelValidation?: boolean;
-  // --- BEGIN COMMENT ---
   // 🎯 新增：是否显示模型选择器
   // 默认为true，在某些场景下可能不需要显示
-  // --- END COMMENT ---
   showModelSelector?: boolean;
 }
 
@@ -124,9 +116,7 @@ export const ChatInput = ({
     isDark,
   } = useChatInputStore();
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：本地提交状态，防止重复点击
-  // --- END COMMENT ---
   const [isLocalSubmitting, setIsLocalSubmitting] = useState(false);
 
   // 附件状态
@@ -144,9 +134,7 @@ export const ChatInput = ({
   // 使用高度重置钩子
   useInputHeightReset(isWelcomeScreen);
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：路由同步Hook，确保输入框内容按路由隔离
-  // --- END COMMENT ---
   useChatInputRouteSync();
 
   // 创建输入框引用
@@ -222,10 +210,8 @@ export const ChatInput = ({
     isReady: isAppReady,
   } = useCurrentApp();
 
-  // --- BEGIN COMMENT ---
   // 🎯 检查是否有可用的模型以及是否选择了有效模型
   // 只有在需要模型验证时才进行检查
-  // --- END COMMENT ---
   const { apps } = useAppListStore();
   const availableModels = apps.filter(app => {
     const metadata = app.config?.app_metadata;
@@ -234,29 +220,23 @@ export const ChatInput = ({
   const hasAvailableModels = availableModels.length > 0;
 
   // 检查当前选择的模型是否有效
-  // --- BEGIN COMMENT ---
   // 🎯 修复：使用instance_id进行匹配，因为currentAppId存储的是instance_id而不是UUID
-  // --- END COMMENT ---
   const currentSelectedModel = availableModels.find(
     app => app.instance_id === currentAppId
   );
   const hasValidSelectedModel = !!currentSelectedModel;
 
-  // --- BEGIN COMMENT ---
   // 🎯 修复：只有在需要模型验证且显示模型选择器时才检查模型状态
   // 历史对话不显示模型选择器，因此不需要模型验证
-  // --- END COMMENT ---
   const canSubmitWithModel =
     !requireModelValidation ||
     !showModelSelector ||
     (hasAvailableModels && hasValidSelectedModel);
   // --- END 中文注释 ---
 
-  // --- BEGIN COMMENT ---
   // 🎯 修复：监听isWaiting状态变化来清空输入框
   // 当验证成功并开始等待响应时立即清空，而不是等待整个流式响应结束
   // 使用ref来避免在清空过程中重复触发
-  // --- END COMMENT ---
   const previousIsWaitingRef = useRef(isWaiting);
 
   useEffect(() => {
@@ -266,9 +246,7 @@ export const ChatInput = ({
       clearMessage();
       clearAttachments();
       useChatScrollStore.getState().scrollToBottom('smooth');
-      // --- BEGIN COMMENT ---
       // 🎯 重置本地提交状态，因为已进入等待响应状态
-      // --- END COMMENT ---
       setIsLocalSubmitting(false);
     }
 
@@ -278,9 +256,7 @@ export const ChatInput = ({
 
   // 提交消息（修复清空时机：通过监听isWaiting状态变化来清空）
   const handleLocalSubmit = async () => {
-    // --- BEGIN COMMENT ---
     // 🎯 防重复点击：如果已经在提交中，直接返回
-    // --- END COMMENT ---
     if (isLocalSubmitting) {
       console.log('[ChatInput] 检测到重复点击，忽略此次提交');
       return;
@@ -292,9 +268,7 @@ export const ChatInput = ({
     // --- END 中文注释 ---
 
     try {
-      // --- BEGIN COMMENT ---
       // 🎯 立即设置本地提交状态，防止重复点击
-      // --- END COMMENT ---
       setIsLocalSubmitting(true);
 
       // 1. 暂存当前状态 (在调用 onSubmit 前)
@@ -321,19 +295,13 @@ export const ChatInput = ({
 
       // 3. 检查是否可以提交 (使用暂存的消息)
       if (savedMessage.trim() && onSubmit) {
-        // --- BEGIN COMMENT ---
         // 🎯 修复：不再在这里清空，而是通过监听isWaiting状态变化来清空
         // 这样在验证成功后立即清空，而不是等待整个流式响应结束
-        // --- END COMMENT ---
-
         // --- BEGIN 中文注释 --- 调用提交函数，清空操作由useEffect监听isWaiting状态变化处理
         await onSubmit(savedMessage, filesToSend);
         // --- END 中文注释 ---
 
-        // --- BEGIN COMMENT ---
         // 🎯 修复：清空操作已移到useEffect中，这里不再需要
-        // --- END COMMENT ---
-
         console.log('[ChatInput] 提交成功');
       } else {
         // 如果因为消息为空不能提交，理论上按钮已禁用，但以防万一
@@ -342,10 +310,8 @@ export const ChatInput = ({
     } catch (error) {
       // --- BEGIN 中文注释 --- 提交失败，恢复状态 ---
       console.error('[ChatInput] 消息提交失败，执行回滚', error);
-      // --- BEGIN COMMENT ---
       // 🎯 修复：如果验证失败（isWaiting没有变为true），需要恢复状态
       // 如果验证成功但后续失败，输入框已经被清空，也需要恢复
-      // --- END COMMENT ---
       setMessage(savedMessage);
       useAttachmentStore.getState().setFiles(savedAttachments);
       // 调用通知 Store 显示错误消息
@@ -356,9 +322,7 @@ export const ChatInput = ({
       );
       // --- END 中文注释 ---
     } finally {
-      // --- BEGIN COMMENT ---
       // 🎯 无论成功还是失败，都重置本地提交状态
-      // --- END COMMENT ---
       setIsLocalSubmitting(false);
     }
   };
@@ -386,9 +350,7 @@ export const ChatInput = ({
     return 'custom';
   }
 
-  // --- BEGIN COMMENT ---
   // 🎯 修复：在回车提交前，增加验证状态检查
-  // --- END COMMENT ---
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
       e.preventDefault();
@@ -440,19 +402,15 @@ export const ChatInput = ({
     // 让我们先不加 isComposing 到依赖，看看效果。如果需要更精确控制，再调整。
   }, [message, isProcessing, isWaitingForResponse]);
 
-  // --- BEGIN COMMENT ---
   // 组件首次挂载时自动聚焦输入框
-  // --- END COMMENT ---
   useEffect(() => {
     // 确保在非欢迎屏幕（即实际聊天界面）时，或者即使用户要求任何时候都聚焦
     // 当前逻辑：只要组件挂载就尝试聚焦
     useFocusManager.getState().focusInput();
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 监听欢迎界面状态变化，确保切换到新对话时自动聚焦
   // 这解决了从临时对话切换到新对话时焦点丢失的问题
-  // --- END COMMENT ---
   useEffect(() => {
     // 当切换到欢迎界面时（新对话），自动聚焦输入框
     // 添加短暂延迟确保界面过渡完成
@@ -465,10 +423,8 @@ export const ChatInput = ({
     }
   }, [isWelcomeScreen]);
 
-  // --- BEGIN COMMENT ---
   // 监听外部传入的isWelcomeScreen prop变化
   // 确保当组件接收到新的欢迎界面状态时也能正确聚焦
-  // --- END COMMENT ---
   useEffect(() => {
     // 当外部传入的欢迎界面状态变为true时，自动聚焦输入框
     if (externalIsWelcomeScreen) {
@@ -493,9 +449,7 @@ export const ChatInput = ({
         updateFileStatus(fileId, 'uploading', 0); // 立即标记为上传中
 
         // 调用上传服务
-        // --- BEGIN COMMENT ---
         // 使用当前的 appId 进行上传，如果没有则使用默认值
-        // --- END COMMENT ---
         const appIdToUse = currentAppId || 'chat-input-warning-no-app-id';
         const userIdToUse =
           session?.user?.id || 'chat-input-warning-no-user-id'; // 使用匿名用户ID
@@ -553,9 +507,7 @@ export const ChatInput = ({
 
       // 2. 重新调用上传服务
       try {
-        // --- BEGIN COMMENT ---
         // 使用当前的 appId 进行上传，如果没有则使用默认值
-        // --- END COMMENT ---
         const appIdToUse = currentAppId || 'chat-input-warning-no-app-id';
         const userIdToUse =
           session?.user?.id || 'chat-input-warning-no-user-id'; // 使用匿名用户ID
@@ -596,16 +548,12 @@ export const ChatInput = ({
   const isUploading = attachments.some(f => f.status === 'uploading');
   const hasError = attachments.some(f => f.status === 'error');
 
-  // --- BEGIN COMMENT ---
   // 🎯 修改：只有消息发送时的验证才显示spinner
   // 应用切换时的验证不影响输入框状态
-  // --- END COMMENT ---
   const isValidatingConfig = isValidatingForMessageOnly;
 
-  // --- BEGIN COMMENT ---
   // 优先使用外部传入的欢迎屏幕状态，如果没有则使用内部状态
   // 这样可以确保在页面组件中控制欢迎屏幕的显示状态
-  // --- END COMMENT ---
   const effectiveIsWelcomeScreen = externalIsWelcomeScreen || isWelcomeScreen;
 
   return (

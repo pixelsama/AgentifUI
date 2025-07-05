@@ -1,8 +1,5 @@
-// --- BEGIN COMMENT ---
 // lib/services/dify/index.ts
 // 统一导出所有 Dify 服务函数
-// --- END COMMENT ---
-
 // Chat 服务
 export { streamDifyChat, stopDifyStreamingTask } from './chat-service';
 

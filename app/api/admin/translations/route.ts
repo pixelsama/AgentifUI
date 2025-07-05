@@ -7,20 +7,14 @@ import path from 'path';
 
 import { NextRequest, NextResponse } from 'next/server';
 
-// --- BEGIN COMMENT ---
 // 翻译文件路径配置
-// --- END COMMENT ---
 const MESSAGES_DIR = path.join(process.cwd(), 'messages');
 const LOCK_TIMEOUT = 5000; // 5秒锁超时
 
-// --- BEGIN COMMENT ---
 // 文件锁管理
-// --- END COMMENT ---
 const fileLocks = new Map<string, { timestamp: number; processId: string }>();
 
-// --- BEGIN COMMENT ---
 // 获取文件锁
-// --- END COMMENT ---
 async function acquireLock(filePath: string): Promise<void> {
   const lockKey = path.basename(filePath);
   const now = Date.now();
@@ -41,17 +35,13 @@ async function acquireLock(filePath: string): Promise<void> {
   fileLocks.set(lockKey, { timestamp: now, processId });
 }
 
-// --- BEGIN COMMENT ---
 // 释放文件锁
-// --- END COMMENT ---
 function releaseLock(filePath: string): void {
   const lockKey = path.basename(filePath);
   fileLocks.delete(lockKey);
 }
 
-// --- BEGIN COMMENT ---
 // 读取翻译文件
-// --- END COMMENT ---
 async function readTranslationFile(locale: string): Promise<any> {
   const filePath = path.join(MESSAGES_DIR, `${locale}.json`);
 
@@ -65,9 +55,7 @@ async function readTranslationFile(locale: string): Promise<any> {
   }
 }
 
-// --- BEGIN COMMENT ---
 // 写入翻译文件 (带原子性保证)
-// --- END COMMENT ---
 async function writeTranslationFile(locale: string, data: any): Promise<void> {
   const filePath = path.join(MESSAGES_DIR, `${locale}.json`);
   const tempPath = `${filePath}.tmp`;
@@ -97,9 +85,7 @@ async function writeTranslationFile(locale: string, data: any): Promise<void> {
   }
 }
 
-// --- BEGIN COMMENT ---
 // 深度合并对象
-// --- END COMMENT ---
 function deepMerge(target: any, source: any): any {
   const result = { ...target };
 
@@ -118,16 +104,12 @@ function deepMerge(target: any, source: any): any {
   return result;
 }
 
-// --- BEGIN COMMENT ---
 // 根据路径获取嵌套对象值
-// --- END COMMENT ---
 function getNestedValue(obj: any, path: string): any {
   return path.split('.').reduce((current, key) => current?.[key], obj);
 }
 
-// --- BEGIN COMMENT ---
 // 根据路径设置嵌套对象值
-// --- END COMMENT ---
 function setNestedValue(obj: any, path: string, value: any): void {
   const keys = path.split('.');
   const lastKey = keys.pop()!;
@@ -138,9 +120,7 @@ function setNestedValue(obj: any, path: string, value: any): void {
   target[lastKey] = value;
 }
 
-// --- BEGIN COMMENT ---
 // GET: 读取翻译内容
-// --- END COMMENT ---
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -191,9 +171,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// --- BEGIN COMMENT ---
 // PUT: 更新翻译内容
-// --- END COMMENT ---
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
@@ -268,9 +246,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// --- BEGIN COMMENT ---
 // POST: 批量更新多语言翻译
-// --- END COMMENT ---
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

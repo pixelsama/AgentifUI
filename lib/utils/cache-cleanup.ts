@@ -5,9 +5,7 @@
 import { clearDifyConfigCache } from '@lib/config/dify-config';
 import { clearProfileCache } from '@lib/hooks/use-profile';
 
-// --- BEGIN COMMENT ---
 // 所有需要清理的localStorage键名
-// --- END COMMENT ---
 const CACHE_KEYS = {
   // 用户相关缓存
   USER_PROFILE: 'user_profile_cache',
@@ -25,34 +23,26 @@ const CACHE_KEYS = {
   RESIZABLE_PANE_PREFIX: 'split-pane-',
 } as const;
 
-// --- BEGIN COMMENT ---
 // 敏感缓存：包含用户敏感信息，必须在登出时清理
-// --- END COMMENT ---
 const SENSITIVE_CACHE_KEYS = [
   CACHE_KEYS.USER_PROFILE,
   CACHE_KEYS.LAST_USED_MODEL_APP,
 ];
 
-// --- BEGIN COMMENT ---
 // 用户相关缓存：与特定用户绑定，切换用户时需要清理
-// --- END COMMENT ---
 const USER_SPECIFIC_CACHE_KEYS = [
   CACHE_KEYS.USER_PROFILE,
   CACHE_KEYS.LAST_USED_MODEL_APP,
 ];
 
-// --- BEGIN COMMENT ---
 // 全局配置缓存：可以跨用户保留的配置
-// --- END COMMENT ---
 const GLOBAL_CONFIG_CACHE_KEYS = [
   CACHE_KEYS.THEME,
   // CACHE_KEYS.ABOUT_PAGE_CONFIG, // 已被移除
 ];
 
-// --- BEGIN COMMENT ---
 // 登出时需要清理的缓存
 // 将敏感缓存和用户特定缓存合并
-// --- END COMMENT ---
 const LOGOUT_CLEANUP_KEYS = [
   ...new Set([...SENSITIVE_CACHE_KEYS, ...USER_SPECIFIC_CACHE_KEYS]),
 ];

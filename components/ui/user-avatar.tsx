@@ -5,10 +5,8 @@ import { getAvatarBgColor, getInitials } from '@lib/utils/avatar';
 
 import React, { useState } from 'react';
 
-// --- BEGIN COMMENT ---
 // 统一的用户头像组件接口
 // 支持图片头像和自动生成头像，自动处理加载失败的情况
-// --- END COMMENT ---
 interface UserAvatarProps {
   // 用户信息
   avatarUrl?: string | null;

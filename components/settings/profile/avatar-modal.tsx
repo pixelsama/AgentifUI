@@ -15,9 +15,7 @@ import { AvatarCropper } from './avatar-cropper';
 import { AvatarPreview } from './avatar-preview';
 import { AvatarUploadArea } from './avatar-upload-area';
 
-// --- BEGIN COMMENT ---
 // 头像模态框组件接口定义
-// --- END COMMENT ---
 interface AvatarModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -55,15 +53,11 @@ export function AvatarModal({
   const [isDragOver, setIsDragOver] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  // --- BEGIN COMMENT ---
   // 简化状态管理：主要使用useAvatarUpload的状态，只保留UI相关状态
-  // --- END COMMENT ---
   const [showCropper, setShowCropper] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // --- BEGIN COMMENT ---
   // 重置状态
-  // --- END COMMENT ---
   const resetState = useCallback(() => {
     avatarUpload.resetState();
     setPreviewUrl(null);
@@ -72,9 +66,7 @@ export function AvatarModal({
     setSelectedFile(null);
   }, [avatarUpload]);
 
-  // --- BEGIN COMMENT ---
   // 处理模态框关闭
-  // --- END COMMENT ---
   const handleClose = useCallback(() => {
     if (!avatarUpload.state.isUploading && !avatarUpload.state.isDeleting) {
       resetState();
@@ -87,9 +79,7 @@ export function AvatarModal({
     onClose,
   ]);
 
-  // --- BEGIN COMMENT ---
   // 文件验证
-  // --- END COMMENT ---
   const validateFile = useCallback(
     (file: File): { valid: boolean; error?: string } => {
       const allowedTypes = [
@@ -119,9 +109,7 @@ export function AvatarModal({
     [t]
   );
 
-  // --- BEGIN COMMENT ---
   // 处理文件选择 - 进入裁切模式
-  // --- END COMMENT ---
   const handleFileSelect = useCallback(
     (file: File) => {
       // 验证文件
@@ -140,9 +128,7 @@ export function AvatarModal({
     [validateFile]
   );
 
-  // --- BEGIN COMMENT ---
   // 处理文件输入变化
-  // --- END COMMENT ---
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -154,9 +140,7 @@ export function AvatarModal({
     [handleFileSelect]
   );
 
-  // --- BEGIN COMMENT ---
   // 处理拖拽事件
-  // --- END COMMENT ---
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -180,9 +164,7 @@ export function AvatarModal({
     [handleFileSelect]
   );
 
-  // --- BEGIN COMMENT ---
   // 确认裁切并上传
-  // --- END COMMENT ---
   const handleCropConfirm = useCallback(
     async (croppedFile: File) => {
       if (!profile?.id) return;
@@ -205,9 +187,7 @@ export function AvatarModal({
     [profile?.id, avatarUpload, onAvatarUpdate, handleClose]
   );
 
-  // --- BEGIN COMMENT ---
   // 取消裁切，返回上传界面
-  // --- END COMMENT ---
   const handleCropCancel = useCallback(() => {
     setShowCropper(false);
     setSelectedFile(null);
@@ -217,9 +197,7 @@ export function AvatarModal({
     }
   }, [previewUrl]);
 
-  // --- BEGIN COMMENT ---
   // 处理删除头像（真实实现）
-  // --- END COMMENT ---
   const handleDeleteAvatar = useCallback(async () => {
     if (!profile?.id || !currentAvatarUrl) return;
 

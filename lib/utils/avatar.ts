@@ -3,9 +3,7 @@
  * 用于生成用户头像的首字母和背景颜色
  */
 
-// --- BEGIN COMMENT ---
 // 生成用户头像的首字母
-// --- END COMMENT ---
 export const getInitials = (name: string): string => {
   if (!name || name.trim() === '') {
     return 'U'; // 默认返回 U (User)
@@ -20,9 +18,7 @@ export const getInitials = (name: string): string => {
     .slice(0, 2);
 };
 
-// --- BEGIN COMMENT ---
 // 根据用户名生成一致的石色系背景颜色
-// --- END COMMENT ---
 export const getAvatarBgColor = (name: string): string => {
   const colors = [
     '#78716c', // stone-500

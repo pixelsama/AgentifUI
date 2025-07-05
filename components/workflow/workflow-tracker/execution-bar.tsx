@@ -217,9 +217,7 @@ export function ExecutionBar({ node, index, delay = 0 }: ExecutionBarProps) {
       isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
     );
 
-    // --- BEGIN COMMENT ---
     // 🎯 关键修复：迭代/循环中的节点使用左侧指示条+连接点设计，提供清晰的层级视觉指示
-    // --- END COMMENT ---
     const nestedStyles =
       node.isInIteration || node.isInLoop
         ? cn(

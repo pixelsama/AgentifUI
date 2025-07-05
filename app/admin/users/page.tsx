@@ -28,9 +28,7 @@ export default function UsersManagementPage() {
   const { isDark } = useTheme();
   const { profile: currentUserProfile } = useProfile(); // 获取当前用户信息
 
-  // --- BEGIN COMMENT ---
   // 从用户管理store获取状态和操作
-  // --- END COMMENT ---
   const {
     users,
     stats,
@@ -57,9 +55,7 @@ export default function UsersManagementPage() {
     clearError,
   } = useUserManagementStore();
 
-  // --- BEGIN COMMENT ---
   // 检查是否可以更改用户角色（防止管理员降级其他管理员）
-  // --- END COMMENT ---
   const canChangeUserRole = (
     targetUser: any,
     newRole: 'admin' | 'manager' | 'user'
@@ -84,9 +80,7 @@ export default function UsersManagementPage() {
     return true;
   };
 
-  // --- BEGIN COMMENT ---
   // 检查是否可以删除用户（防止删除管理员账号）
-  // --- END COMMENT ---
   const canDeleteUser = (targetUser: any) => {
     // 如果当前用户不是管理员，不允许删除
     if (currentUserProfile?.role !== 'admin') {
@@ -108,9 +102,7 @@ export default function UsersManagementPage() {
     return true;
   };
 
-  // --- BEGIN COMMENT ---
   // 检查批量操作是否包含受保护的用户
-  // --- END COMMENT ---
   const canBatchChangeRole = (newRole: 'admin' | 'manager' | 'user') => {
     if (currentUserProfile?.role !== 'admin') {
       return false;
@@ -141,18 +133,14 @@ export default function UsersManagementPage() {
     return true;
   };
 
-  // --- BEGIN COMMENT ---
   // 页面初始化时加载数据
-  // --- END COMMENT ---
   useEffect(() => {
     loadUsers();
     loadStats();
     loadFilterOptions();
   }, [loadUsers, loadStats, loadFilterOptions]);
 
-  // --- BEGIN COMMENT ---
   // 处理错误提示
-  // --- END COMMENT ---
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -160,9 +148,7 @@ export default function UsersManagementPage() {
     }
   }, [error, clearError]);
 
-  // --- BEGIN COMMENT ---
   // 处理筛选重置
-  // --- END COMMENT ---
   const handleResetFilters = () => {
     updateFilters({
       role: undefined,
@@ -172,16 +158,12 @@ export default function UsersManagementPage() {
     });
   };
 
-  // --- BEGIN COMMENT ---
   // 处理用户选择
-  // --- END COMMENT ---
   const handleSelectUser = (userId: string) => {
     toggleUserSelection(userId);
   };
 
-  // --- BEGIN COMMENT ---
   // 处理全选/取消全选
-  // --- END COMMENT ---
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
       selectUsers(users.map(user => user.id));
@@ -190,9 +172,7 @@ export default function UsersManagementPage() {
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 处理用户角色更改（带安全检查）
-  // --- END COMMENT ---
   const handleChangeRole = async (
     user: any,
     role: 'admin' | 'manager' | 'user'
@@ -211,9 +191,7 @@ export default function UsersManagementPage() {
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 处理用户状态更改
-  // --- END COMMENT ---
   const handleChangeStatus = async (
     user: any,
     status: 'active' | 'suspended' | 'pending'
@@ -232,9 +210,7 @@ export default function UsersManagementPage() {
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 处理用户删除（带安全检查）
-  // --- END COMMENT ---
   const handleDeleteUser = async (user: any) => {
     if (!canDeleteUser(user)) {
       return;
@@ -252,9 +228,7 @@ export default function UsersManagementPage() {
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 处理批量角色更改（带安全检查）
-  // --- END COMMENT ---
   const handleBatchChangeRole = async (role: 'admin' | 'manager' | 'user') => {
     if (!canBatchChangeRole(role)) {
       return;
@@ -266,9 +240,7 @@ export default function UsersManagementPage() {
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 处理批量状态更改
-  // --- END COMMENT ---
   const handleBatchChangeStatus = async (
     status: 'active' | 'suspended' | 'pending'
   ) => {
@@ -278,23 +250,17 @@ export default function UsersManagementPage() {
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 处理查看用户（暂时用toast代替）
-  // --- END COMMENT ---
   const handleViewUser = (user: any) => {
     toast.success(`查看用户：${user.full_name || user.email}`);
   };
 
-  // --- BEGIN COMMENT ---
   // 处理编辑用户（暂时用toast代替）
-  // --- END COMMENT ---
   const handleEditUser = (user: any) => {
     toast.success(`编辑用户：${user.full_name || user.email}`);
   };
 
-  // --- BEGIN COMMENT ---
   // 分页控制
-  // --- END COMMENT ---
   const PaginationControls = () => {
     if (pagination.totalPages <= 1) return null;
 

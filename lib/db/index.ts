@@ -1,6 +1,4 @@
-// --- BEGIN COMMENT ---
 // 导入服务实例，用于内部函数使用
-// --- END COMMENT ---
 import { cacheService as cacheServiceInstance } from '@lib/services/db/cache-service';
 import { realtimeService as realtimeServiceInstance } from '@lib/services/db/realtime-service';
 
@@ -47,15 +45,8 @@ export {
   ValidationError,
 } from '@lib/types/result';
 
-// --- BEGIN COMMENT ---
-
-// --- END COMMENT ---
-
-// --- BEGIN COMMENT ---
 // 兼容性导出：保留原有函数接口
 // 这些函数已经内部升级为使用新的数据服务，但保持相同的API
-// --- END COMMENT ---
-
 // API密钥相关函数
 export {
   getApiKeyByServiceInstance,
@@ -92,10 +83,7 @@ export {
   updateAppParametersInDb,
 } from './service-instances';
 
-// --- BEGIN COMMENT ---
 // 应用执行记录相关函数：新版本和兼容版本
-// --- END COMMENT ---
-
 // 新的优化版本（返回Result类型）
 export {
   getUserExecutions,
@@ -115,10 +103,7 @@ export {
   getExecutionByIdLegacy,
 } from './app-executions';
 
-// --- BEGIN COMMENT ---
 // 用户资料相关函数：新版本和兼容版本
-// --- END COMMENT ---
-
 // 新的优化版本（返回Result类型）
 export {
   getCurrentUserProfile,
@@ -130,11 +115,8 @@ export {
   isUserAdmin,
 } from './profiles';
 
-// --- BEGIN COMMENT ---
 // 群组管理相关函数（计划添加）
 // 暂时通过群组权限获取基本群组信息
-// --- END COMMENT ---
-
 // 兼容版本（保持原有API）
 export {
   getCurrentUserProfileLegacy,
@@ -163,10 +145,8 @@ export {
   updateConversationMetadata,
 } from './conversations';
 
-// --- BEGIN COMMENT ---
 // 消息相关函数：新版本通过messageService提供
 // 保留原有函数的导出以确保兼容性
-// --- END COMMENT ---
 export {
   saveMessage,
   saveMessages,
@@ -177,10 +157,7 @@ export {
   getMessageByContentAndRole,
 } from './messages';
 
-// --- BEGIN COMMENT ---
 // 新的高级功能函数
-// --- END COMMENT ---
-
 /**
  * 清除所有缓存
  */
@@ -225,10 +202,7 @@ export function cleanupAllResources(): void {
   console.log('[数据库服务] 已清理所有缓存和实时订阅');
 }
 
-// --- BEGIN COMMENT ---
 // 开发调试用函数
-// --- END COMMENT ---
-
 /**
  * 开发模式：打印服务状态
  */

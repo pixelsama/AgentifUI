@@ -10,10 +10,8 @@ interface NavButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-// --- BEGIN COMMENT ---
 // NavBar 专属的可重用按钮组件
 // 设计为圆角、响应式，并支持亮/暗主题
-// --- END COMMENT ---
 export function NavButton({
   icon,
   children,

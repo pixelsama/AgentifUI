@@ -22,10 +22,8 @@ import { useRouter } from 'next/navigation';
 import { HistoryList } from './history-list';
 import { HistorySelectionBar } from './history-selection-bar';
 
-// --- BEGIN COMMENT ---
 // 历史对话页面组件
 // 显示所有历史对话，支持搜索功能和多选删除功能
-// --- END COMMENT ---
 export function History() {
   const { isDark } = useTheme();
   const { colors } = useThemeColors();
@@ -34,9 +32,7 @@ export function History() {
   const router = useRouter();
   const { widthClass, paddingClass } = useChatWidth();
 
-  // --- BEGIN COMMENT ---
   // 多选功能状态管理
-  // --- END COMMENT ---
   const [isSelectionMode, setIsSelectionMode] = React.useState(false);
   const [selectedConversations, setSelectedConversations] = React.useState<
     Set<string>
@@ -45,9 +41,7 @@ export function History() {
     React.useState(false);
   const [isBatchDeleting, setIsBatchDeleting] = React.useState(false);
 
-  // --- BEGIN COMMENT ---
   // 获取所有历史对话列表，不限制数量
-  // --- END COMMENT ---
   const {
     conversations,
     isLoading,
@@ -58,9 +52,7 @@ export function History() {
     renameConversation,
   } = useAllConversations();
 
-  // --- BEGIN COMMENT ---
   // 监听全局对话数据更新事件
-  // --- END COMMENT ---
   React.useEffect(() => {
     const unsubscribe = conversationEvents.subscribe(() => {
       refresh();
@@ -71,9 +63,7 @@ export function History() {
     };
   }, [refresh]);
 
-  // --- BEGIN COMMENT ---
   // 当对话列表发生变化时，清理无效的选中项
-  // --- END COMMENT ---
   React.useEffect(() => {
     if (selectedConversations.size > 0) {
       const validIds = new Set(
@@ -94,16 +84,12 @@ export function History() {
     }
   }, [conversations, selectedConversations]);
 
-  // --- BEGIN COMMENT ---
   // 处理搜索输入变化
-  // --- END COMMENT ---
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  // --- BEGIN COMMENT ---
   // 过滤对话列表，根据搜索查询
-  // --- END COMMENT ---
   const filteredConversations = React.useMemo(() => {
     if (!searchQuery.trim()) return conversations;
 
@@ -115,9 +101,7 @@ export function History() {
     );
   }, [conversations, searchQuery]);
 
-  // --- BEGIN COMMENT ---
   // 多选功能处理函数
-  // --- END COMMENT ---
   const handleToggleSelectionMode = () => {
     setIsSelectionMode(!isSelectionMode);
     if (isSelectionMode) {
@@ -202,9 +186,7 @@ export function History() {
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：新对话处理函数，统一管理状态清理
-  // --- END COMMENT ---
   const { clearConversationState } = useChatInterface();
 
   const handleNewChat = () => {
@@ -217,10 +199,8 @@ export function History() {
       useChatStore.getState().clearMessages();
       useChatStore.getState().setCurrentConversationId(null);
 
-      // --- BEGIN COMMENT ---
       // 🎯 新增：清理use-chat-interface中的对话状态
       // 这确保difyConversationId、dbConversationUUID、conversationAppId都被正确清理
-      // --- END COMMENT ---
       clearConversationState();
 
       // 清理其他UI状态
@@ -236,9 +216,7 @@ export function History() {
     }, 100);
   };
 
-  // --- BEGIN COMMENT ---
   // 处理对话项点击
-  // --- END COMMENT ---
   const handleConversationClick = (id: string) => {
     // 如果在选择模式下，不跳转，而是切换选择状态
     if (isSelectionMode) {
@@ -275,7 +253,7 @@ export function History() {
               </h1>
               {/* --- BEGIN COMMENT ---
               // 显示对话总数的美观文字
-              // --- END COMMENT --- */}
+              
               <div
                 className={cn(
                   'mt-1 text-sm',

@@ -1,9 +1,7 @@
 import { create } from 'zustand';
 
-// --- BEGIN COMMENT ---
 // 获取当前路由的工具函数
 // 支持SSR环境，避免hydration错误
-// --- END COMMENT ---
 const getCurrentRoute = (): string => {
   if (typeof window !== 'undefined') {
     return window.location.pathname;
@@ -12,25 +10,19 @@ const getCurrentRoute = (): string => {
 };
 
 interface ChatInputState {
-  // --- BEGIN COMMENT ---
   // 🎯 新增：按路由存储消息内容
   // 每个路由维护独立的输入框内容，提升用户体验
-  // --- END COMMENT ---
   messagesByRoute: Record<string, string>;
   currentRoute: string;
 
-  // --- BEGIN COMMENT ---
   // 🎯 兼容接口：保持原有API不变
   // 通过函数方式获取当前路由的消息
-  // --- END COMMENT ---
   message: string; // 改为普通属性，通过computed更新
   getMessage: () => string; // 手动getter函数
   setMessage: (message: string) => void;
   clearMessage: () => void;
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：路由管理功能
-  // --- END COMMENT ---
   setCurrentRoute: (route: string) => void;
   clearAllMessages: () => void;
   clearRouteMessage: (route: string) => void;
@@ -50,16 +42,12 @@ interface ChatInputState {
 }
 
 export const useChatInputStore = create<ChatInputState>((set, get) => ({
-  // --- BEGIN COMMENT ---
   // 🎯 新增：按路由存储的消息内容
-  // --- END COMMENT ---
   messagesByRoute: {},
   currentRoute: getCurrentRoute(),
 
-  // --- BEGIN COMMENT ---
   // 🎯 兼容接口：message属性
   // 返回当前路由的消息内容，如果没有则返回空字符串
-  // --- END COMMENT ---
   message: '',
 
   getMessage: () => {
@@ -67,10 +55,8 @@ export const useChatInputStore = create<ChatInputState>((set, get) => ({
     return state.messagesByRoute[state.currentRoute] || '';
   },
 
-  // --- BEGIN COMMENT ---
   // 🎯 兼容接口：setMessage
   // 设置当前路由的消息内容，防止重复更新
-  // --- END COMMENT ---
   setMessage: (message: string) => {
     const state = get();
     const currentMessage = state.messagesByRoute[state.currentRoute] || '';
@@ -88,10 +74,8 @@ export const useChatInputStore = create<ChatInputState>((set, get) => ({
     }));
   },
 
-  // --- BEGIN COMMENT ---
   // 🎯 兼容接口：clearMessage
   // 清空当前路由的消息内容
-  // --- END COMMENT ---
   clearMessage: () => {
     const state = get();
     set(state => ({
@@ -104,9 +88,7 @@ export const useChatInputStore = create<ChatInputState>((set, get) => ({
     }));
   },
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：路由管理功能
-  // --- END COMMENT ---
   setCurrentRoute: (route: string) => {
     const state = get();
     if (state.currentRoute !== route) {

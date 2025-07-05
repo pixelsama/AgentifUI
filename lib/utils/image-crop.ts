@@ -1,8 +1,5 @@
-// --- BEGIN COMMENT ---
 // 图片裁切工具函数
 // 用于将裁切区域转换为实际的图片文件
-// --- END COMMENT ---
-
 export interface Area {
   x: number;
   y: number;
@@ -10,9 +7,7 @@ export interface Area {
   height: number;
 }
 
-// --- BEGIN COMMENT ---
 // 创建裁切后的图片
-// --- END COMMENT ---
 export const createCroppedImage = async (
   imageSrc: string,
   pixelCrop: Area,
@@ -77,9 +72,7 @@ export const createCroppedImage = async (
   });
 };
 
-// --- BEGIN COMMENT ---
 // 获取图片的自然尺寸
-// --- END COMMENT ---
 export const getImageDimensions = (
   imageSrc: string
 ): Promise<{

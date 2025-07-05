@@ -35,16 +35,12 @@ export function LogoutConfirmDialog({
   const [mounted, setMounted] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 客户端挂载后才能使用Portal
-  // --- END COMMENT ---
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // --- BEGIN COMMENT ---
   // 处理ESC键关闭
-  // --- END COMMENT ---
   useEffect(() => {
     if (!isOpen) return;
 
@@ -58,9 +54,7 @@ export function LogoutConfirmDialog({
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isOpen, onClose, isLoggingOut]);
 
-  // --- BEGIN COMMENT ---
   // 处理点击外部关闭
-  // --- END COMMENT ---
   useEffect(() => {
     if (!isOpen) return;
 
@@ -85,9 +79,7 @@ export function LogoutConfirmDialog({
     };
   }, [isOpen, onClose, isLoggingOut]);
 
-  // --- BEGIN COMMENT ---
   // 处理移动端滑动关闭
-  // --- END COMMENT ---
   useEffect(() => {
     if (!isOpen || !isMobile || !dialogRef.current || isLoggingOut) return;
 
@@ -131,18 +123,14 @@ export function LogoutConfirmDialog({
     };
   }, [isOpen, isMobile, onClose, isLoggingOut]);
 
-  // --- BEGIN COMMENT ---
   // 点击背景关闭
-  // --- END COMMENT ---
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && !isLoggingOut) {
       onClose();
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 处理退出登录确认
-  // --- END COMMENT ---
   const handleConfirmLogout = async () => {
     try {
       setIsLoggingOut(true);
@@ -157,9 +145,7 @@ export function LogoutConfirmDialog({
 
   if (!mounted) return null;
 
-  // --- BEGIN COMMENT ---
   // 桌面端模态框样式 - Stone风格设计
-  // --- END COMMENT ---
   const desktopDialog = (
     <div
       className={cn(
@@ -273,9 +259,7 @@ export function LogoutConfirmDialog({
     </div>
   );
 
-  // --- BEGIN COMMENT ---
   // 移动端底部弹出样式 - Stone风格设计
-  // --- END COMMENT ---
   const mobileDialog = (
     <div
       className={cn(
@@ -386,8 +370,6 @@ export function LogoutConfirmDialog({
     </div>
   );
 
-  // --- BEGIN COMMENT ---
   // 根据设备类型返回相应的对话框
-  // --- END COMMENT ---
   return createPortal(isMobile ? mobileDialog : desktopDialog, document.body);
 }

@@ -1,8 +1,5 @@
-// --- BEGIN COMMENT ---
 // 统一的CORS配置系统
 // 整个项目只有一个CORS配置，通过环境变量控制允许的域名
-// --- END COMMENT ---
-
 export interface CorsConfig {
   allowedOrigins: string[];
   allowedMethods: string[];
@@ -12,9 +9,7 @@ export interface CorsConfig {
   maxAge: number;
 }
 
-// --- BEGIN COMMENT ---
 // 默认的CORS配置
-// --- END COMMENT ---
 const DEFAULT_CORS_CONFIG: Omit<CorsConfig, 'allowedOrigins'> = {
   allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: [
@@ -29,9 +24,7 @@ const DEFAULT_CORS_CONFIG: Omit<CorsConfig, 'allowedOrigins'> = {
   maxAge: 86400, // 24小时
 };
 
-// --- BEGIN COMMENT ---
 // 获取允许的域名列表
-// --- END COMMENT ---
 function getAllowedOrigins(): string[] {
   const origins: string[] = [];
 
@@ -52,10 +45,8 @@ function getAllowedOrigins(): string[] {
   return [...new Set(origins)].filter(Boolean);
 }
 
-// --- BEGIN COMMENT ---
 // 获取开发环境默认域名
 // 完全基于环境变量，无硬编码
-// --- END COMMENT ---
 function getDevOrigins(): string[] {
   const origins: string[] = [];
 
@@ -76,9 +67,7 @@ function getDevOrigins(): string[] {
   return [...new Set(origins)];
 }
 
-// --- BEGIN COMMENT ---
 // 检查域名是否被允许
-// --- END COMMENT ---
 function isOriginAllowed(
   requestOrigin: string | null,
   allowedOrigins: string[]
@@ -105,9 +94,7 @@ function isOriginAllowed(
   return null;
 }
 
-// --- BEGIN COMMENT ---
 // 获取CORS配置
-// --- END COMMENT ---
 export function getCorsConfig(): CorsConfig {
   const isDevelopment = process.env.NODE_ENV === 'development';
   let allowedOrigins = getAllowedOrigins();
@@ -128,9 +115,7 @@ export function getCorsConfig(): CorsConfig {
   };
 }
 
-// --- BEGIN COMMENT ---
 // 创建CORS响应头
-// --- END COMMENT ---
 export function createCorsHeaders(requestOrigin: string | null): Headers {
   const config = getCorsConfig();
   const headers = new Headers();
@@ -161,9 +146,7 @@ export function createCorsHeaders(requestOrigin: string | null): Headers {
   return headers;
 }
 
-// --- BEGIN COMMENT ---
 // 处理CORS预检请求
-// --- END COMMENT ---
 export function handleCorsPreflightRequest(request: Request): Response {
   const origin = request.headers.get('origin');
   const corsHeaders = createCorsHeaders(origin);
@@ -174,9 +157,7 @@ export function handleCorsPreflightRequest(request: Request): Response {
   });
 }
 
-// --- BEGIN COMMENT ---
 // 为API响应添加CORS头的统一函数
-// --- END COMMENT ---
 export function withCorsHeaders(
   response: Response,
   request: Request

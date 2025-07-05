@@ -57,10 +57,8 @@ export function SidebarContent() {
       }, 20); // 桌面端保留延迟动画
       return () => clearTimeout(timer);
     }
-    // --- BEGIN COMMENT ---
     // 🎯 移除 store 方法的依赖，避免路由切换时的重新执行和闪烁
     // zustand store 方法在路由切换时可能改变引用，导致不必要的重新渲染
-    // --- END COMMENT ---
   }, [isExpanded, isMobile]);
 
   /**

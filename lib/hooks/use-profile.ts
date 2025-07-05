@@ -17,17 +17,13 @@ export interface Profile {
   updated_at: string | null;
   created_at: string | null;
   employee_number?: string | null; // 新增：学工号字段（可选，仅SSO用户有值）
-  // --- BEGIN COMMENT ---
   // auth.users表的信息：用于settings页面显示
-  // --- END COMMENT ---
   auth_last_sign_in_at?: string | null;
 }
 
-// --- BEGIN COMMENT ---
 // 用户资料缓存配置
 // 使用sessionStorage提高安全性，关闭标签页自动清理
 // 缩短缓存时间，减少敏感信息暴露时间
-// --- END COMMENT ---
 const PROFILE_CACHE_KEY = 'user_profile_cache';
 const CACHE_EXPIRY_TIME = 2 * 60 * 1000; // 缩短为2分钟缓存过期时间，提高安全性
 
@@ -43,17 +39,13 @@ const getProfileFromCache = (userId: string): Profile | null => {
   try {
     if (typeof window === 'undefined') return null; // SSR安全检查
 
-    // --- BEGIN COMMENT ---
     // 使用sessionStorage提高安全性，关闭标签页自动清理
-    // --- END COMMENT ---
     const cached = sessionStorage.getItem(PROFILE_CACHE_KEY);
     if (!cached) return null;
 
     const cacheData: ProfileCache = JSON.parse(cached);
 
-    // --- BEGIN COMMENT ---
     // 严格的用户ID校验，防止跨用户数据污染
-    // --- END COMMENT ---
     if (cacheData.userId !== userId) {
       console.warn(
         `[用户缓存] 用户ID不匹配，清理缓存 (缓存:${cacheData.userId}, 当前:${userId})`
@@ -62,9 +54,7 @@ const getProfileFromCache = (userId: string): Profile | null => {
       return null;
     }
 
-    // --- BEGIN COMMENT ---
     // 检查缓存是否过期
-    // --- END COMMENT ---
     if (Date.now() - cacheData.timestamp > CACHE_EXPIRY_TIME) {
       console.log(`[用户缓存] 缓存已过期，清理缓存`);
       sessionStorage.removeItem(PROFILE_CACHE_KEY);
@@ -93,9 +83,7 @@ const setProfileToCache = (profile: Profile, userId: string): void => {
       userId,
     };
 
-    // --- BEGIN COMMENT ---
     // 使用sessionStorage存储，提高安全性
-    // --- END COMMENT ---
     sessionStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(cacheData));
     console.log(`[用户缓存] 已缓存用户资料: ${userId}`);
   } catch (error) {
@@ -103,17 +91,13 @@ const setProfileToCache = (profile: Profile, userId: string): void => {
   }
 };
 
-// --- BEGIN COMMENT ---
 // 导出清除缓存的函数，供其他组件使用
 // 更新为清理sessionStorage
-// --- END COMMENT ---
 export const clearProfileCache = (): void => {
   try {
     if (typeof window === 'undefined') return;
 
-    // --- BEGIN COMMENT ---
     // 清理sessionStorage中的用户资料缓存
-    // --- END COMMENT ---
     sessionStorage.removeItem(PROFILE_CACHE_KEY);
     console.log('[用户缓存] 已清理用户资料缓存');
   } catch (error) {
@@ -180,9 +164,7 @@ export function useProfile(userId?: string): UseProfileResult {
         setPageLoading('profile', true);
       }
 
-      // --- BEGIN COMMENT ---
       // 查询用户资料信息
-      // --- END COMMENT ---
       const supabase = createClient();
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -200,9 +182,7 @@ export function useProfile(userId?: string): UseProfileResult {
         return;
       }
 
-      // --- BEGIN COMMENT ---
       // 获取auth.users中的last_sign_in_at信息
-      // --- END COMMENT ---
       let authLastSignInAt: string | null = null;
       if (session?.user) {
         authLastSignInAt = session.user.last_sign_in_at || null;
@@ -217,9 +197,7 @@ export function useProfile(userId?: string): UseProfileResult {
         created_at: profileData.created_at,
         updated_at: profileData.updated_at,
         employee_number: profileData.employee_number, // 新增：包含学工号数据
-        // --- BEGIN COMMENT ---
         // 添加auth信息用于settings页面显示
-        // --- END COMMENT ---
         auth_last_sign_in_at: authLastSignInAt,
       };
 

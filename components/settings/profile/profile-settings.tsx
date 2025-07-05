@@ -10,24 +10,18 @@ import { useTranslations } from 'next-intl';
 
 import { ProfileForm } from './profile-form';
 
-// --- BEGIN COMMENT ---
 // 个人资料设置组件
 // 包含所有数据加载、状态管理和UI逻辑
-// --- END COMMENT ---
 export function ProfileSettings() {
   const { colors } = useSettingsColors();
   const { isDark } = useTheme();
   const t = useTranslations('pages.settings.profileSettings');
   const tCommon = useTranslations('common.ui');
 
-  // --- BEGIN COMMENT ---
   // 使用useProfile hook获取包含组织信息的完整用户资料
-  // --- END COMMENT ---
   const { profile, isLoading, error } = useProfile();
 
-  // --- BEGIN COMMENT ---
   // 处理资料更新成功
-  // --- END COMMENT ---
   const handleProfileUpdateSuccess = () => {
     // 刷新页面数据
     window.location.reload();

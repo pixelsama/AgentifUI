@@ -28,9 +28,7 @@ export function useCurrentApp() {
     switchToApp, // 新增：切换app
   } = useCurrentAppStore();
 
-  // --- BEGIN COMMENT ---
   // 包装操作方法，提供更好的类型安全和错误处理
-  // --- END COMMENT ---
   const switchApp = useCallback(
     (appId: string, instance: ServiceInstance) => {
       if (!appId || !instance) {
@@ -48,9 +46,7 @@ export function useCurrentApp() {
 
   const initializeApp = useCallback(async () => {
     try {
-      // --- BEGIN COMMENT ---
       // 🔒 安全检查：确保用户已登录才初始化应用
-      // --- END COMMENT ---
       const { createClient } = await import('@lib/supabase/client');
       const supabase = createClient();
       const {
@@ -77,11 +73,9 @@ export function useCurrentApp() {
     }
   }, [refreshCurrentApp]);
 
-  // --- BEGIN COMMENT ---
   // 新增：强制等待App配置就绪的方法
   // 解决时序问题：确保在使用appId前，配置已完全加载
   // 支持切换到指定app
-  // --- END COMMENT ---
   const ensureAppReady = useCallback(
     async (
       targetAppId?: string
@@ -253,9 +247,7 @@ export function useCurrentApp() {
     ]
   );
 
-  // --- BEGIN COMMENT ---
   // 新增：切换到指定app的便捷方法
-  // --- END COMMENT ---
   const switchToSpecificApp = useCallback(
     async (appId: string) => {
       try {

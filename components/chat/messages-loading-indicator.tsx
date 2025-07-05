@@ -28,10 +28,8 @@ export function MessagesLoadingIndicator({
   const t = useTranslations('loading');
   const [isAtTop, setIsAtTop] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 监听滚动容器的滚动事件
   // 使用防抖处理并延迟初始检测，避免初始加载完成后立即触发加载更多
-  // --- END COMMENT ---
   const initialCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialLoadCompleteRef = useRef<boolean>(false);

@@ -31,10 +31,8 @@ interface CurrentAppState {
   switchToApp: (appId: string) => Promise<void>; // 新增：切换到指定app
 }
 
-// --- BEGIN COMMENT ---
 // 🎯 重构：完全移除硬编码，仅依赖数据库的 is_default 字段
 // 获取默认提供商的辅助函数，支持多提供商环境
-// --- END COMMENT ---
 async function getDefaultProviderForApp(): Promise<Provider> {
   // 获取系统默认提供商（基于 is_default 字段）
   const defaultProviderResult = await getDefaultProvider();
@@ -68,12 +66,10 @@ export const useCurrentAppStore = create<CurrentAppState>()(
           errorLoadingAppId: null,
           lastValidatedAt: Date.now(), // 更新验证时间戳
         });
-        // --- BEGIN COMMENT ---
-        // TODO (后续): 当 appId 改变时，可能需要触发相关数据的重新加载，
+        // @future 当 appId 改变时，可能需要触发相关数据的重新加载
         // 例如，对话列表 useConversations 可能需要根据新的 appId 刷新。
         // 这可以通过在 useConversations 中也订阅 currentAppId 来实现，
         // 或者在这里调用一个全局的刷新函数/事件。
-        // --- END COMMENT ---
       },
 
       clearCurrentApp: () => {
@@ -94,10 +90,8 @@ export const useCurrentAppStore = create<CurrentAppState>()(
           return;
         }
 
-        // --- BEGIN COMMENT ---
         // 🔒 安全检查：确保用户已登录才初始化应用存储
         // 防止未认证用户触发缓存创建
-        // --- END COMMENT ---
         try {
           const { createClient } = await import('../supabase/client');
           const supabase = createClient();
@@ -121,10 +115,8 @@ export const useCurrentAppStore = create<CurrentAppState>()(
         set({ isLoadingAppId: true, errorLoadingAppId: null });
 
         try {
-          // --- BEGIN COMMENT ---
           // 🎯 重构：使用默认提供商替代硬编码的 Dify 提供商
           // 支持多提供商环境，优先使用系统默认提供商
-          // --- END COMMENT ---
           const provider = await getDefaultProviderForApp();
 
           const defaultInstanceResult = await getDefaultServiceInstance(
@@ -148,11 +140,9 @@ export const useCurrentAppStore = create<CurrentAppState>()(
               lastValidatedAt: Date.now(), // 设置验证时间戳
             });
           } else {
-            // --- BEGIN COMMENT ---
             // 如果数据库中没有配置默认的服务实例，这是一个需要处理的场景。
             // UI 层应该提示用户选择一个应用，或者管理员需要配置一个默认应用。
             // 当前我们将 appId 设为 null，并记录错误。
-            // --- END COMMENT ---
             const errorMessage = `未找到提供商"${provider.name}"的默认服务实例。请配置一个默认的应用实例。`;
             console.warn(errorMessage);
             set({
@@ -173,9 +163,7 @@ export const useCurrentAppStore = create<CurrentAppState>()(
         }
       },
 
-      // --- BEGIN COMMENT ---
       // 新增刷新当前应用的方法，用于重新获取最新的应用实例信息
-      // --- END COMMENT ---
       refreshCurrentApp: async () => {
         const currentState = get();
 
@@ -226,21 +214,17 @@ export const useCurrentAppStore = create<CurrentAppState>()(
         }
       },
 
-      // --- BEGIN COMMENT ---
       // 新增：验证并刷新配置方法
       // 检查当前配置是否仍然有效，如果无效则重新获取
       // 支持验证特定app或默认app
       // 用于解决管理端配置变更后的同步问题
-      // --- END COMMENT ---
       validateAndRefreshConfig: async (
         targetAppId?: string,
         context: 'message' | 'switch' | 'general' = 'general'
       ) => {
         const currentState = get();
 
-        // --- BEGIN COMMENT ---
         // 🎯 根据上下文设置不同的验证状态
-        // --- END COMMENT ---
         if (context === 'message') {
           set({ isValidating: true, isValidatingForMessage: true });
         } else {
@@ -410,10 +394,8 @@ export const useCurrentAppStore = create<CurrentAppState>()(
         }
       },
 
-      // --- BEGIN COMMENT ---
       // 新增：切换到指定app的方法
       // 🎯 重构：支持多提供商，在所有活跃提供商中查找应用实例
-      // --- END COMMENT ---
       switchToApp: async (appId: string) => {
         console.log(`[switchToApp] 开始切换到app: ${appId}`);
 
@@ -490,7 +472,6 @@ export const useCurrentAppStore = create<CurrentAppState>()(
   )
 );
 
-// --- BEGIN COMMENT ---
 // 使用建议:
 // 在应用的主布局组件 (例如 app/providers.tsx 或 app/layout.tsx) 的顶层，
 // 使用 useEffect 来调用一次 initializeDefaultAppId，以确保应用加载时会尝试设置默认应用。
@@ -507,4 +488,3 @@ export const useCurrentAppStore = create<CurrentAppState>()(
 //
 //   return <>{children}</>;
 // }
-// --- END COMMENT ---

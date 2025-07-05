@@ -1,9 +1,7 @@
 import { File, FileText, Image, Music, Video } from 'lucide-react';
 
-// --- BEGIN COMMENT ---
 // 文件类型配置常量
 // 从管理界面提取，用于聊天界面的文件上传功能
-// --- END COMMENT ---
 export const FILE_TYPE_CONFIG = {
   文档: {
     icon: FileText,

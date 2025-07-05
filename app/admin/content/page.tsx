@@ -19,9 +19,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-// --- BEGIN COMMENT ---
 // 临时类型定义，因为about-config.ts已被删除
-// --- END COMMENT ---
 interface ValueCard {
   id: string;
   title: string;
@@ -37,9 +35,7 @@ interface AboutPageConfig {
   copyrightText: string;
 }
 
-// --- BEGIN COMMENT ---
 // 主页预览配置类型
-// --- END COMMENT ---
 interface FeatureCard {
   title: string;
   description: string;

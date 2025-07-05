@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 
-// --- BEGIN COMMENT ---
 // 定义单个附件文件的状态接口
-// --- END COMMENT ---
 export interface AttachmentFile {
   id: string; // 本地生成的唯一ID
   file: File; // 原始 File 对象
@@ -15,9 +13,7 @@ export interface AttachmentFile {
   uploadedId?: string; // 上传成功后 Dify 返回的文件 ID
 }
 
-// --- BEGIN COMMENT ---
 // 定义附件 Store 的 State 和 Actions 接口
-// --- END COMMENT ---
 interface AttachmentStoreState {
   files: AttachmentFile[];
   addFiles: (files: File[]) => void;
@@ -33,15 +29,11 @@ interface AttachmentStoreState {
   setFiles: (files: AttachmentFile[]) => void;
 }
 
-// --- BEGIN COMMENT ---
 // 创建附件 Store
-// --- END COMMENT ---
 export const useAttachmentStore = create<AttachmentStoreState>((set, get) => ({
   files: [],
 
-  // --- BEGIN COMMENT ---
   // 添加一个或多个文件到 Store
-  // --- END COMMENT ---
   addFiles: newFiles => {
     const newAttachments = newFiles.map(file => {
       const id = `${file.name}-${file.lastModified}-${file.size}`; // 生成一个相对唯一的ID
@@ -68,9 +60,7 @@ export const useAttachmentStore = create<AttachmentStoreState>((set, get) => ({
     }));
   },
 
-  // --- BEGIN COMMENT ---
   // 根据 ID 移除文件，并释放可能的预览 URL
-  // --- END COMMENT ---
   removeFile: id => {
     set(state => {
       const fileToRemove = state.files.find(f => f.id === id);
@@ -100,9 +90,7 @@ export const useAttachmentStore = create<AttachmentStoreState>((set, get) => ({
   // --- END MODIFICATION ---
 
   // --- BEGIN ADDITION ---
-  // --- BEGIN COMMENT ---
   // 更新指定文件的 uploadedId (通常在上传成功后调用)
-  // --- END COMMENT ---
   updateFileUploadedId: (id, uploadedId) => {
     set(state => ({
       files: state.files.map(f =>
@@ -114,9 +102,7 @@ export const useAttachmentStore = create<AttachmentStoreState>((set, get) => ({
   },
   // --- END ADDITION ---
 
-  // --- BEGIN COMMENT ---
   // 清空所有文件，并释放预览 URL
-  // --- END COMMENT ---
   clearFiles: () => {
     set({ files: [] });
   },

@@ -21,9 +21,7 @@ export function SidebarFooter() {
   return (
     <div className={cn('mt-auto flex flex-col gap-1.5 p-3')}>
       {!isMobile &&
-        // --- BEGIN COMMENT ---
         // 在slim状态下显示右侧tooltip，展开状态下不显示tooltip
-        // --- END COMMENT ---
         (isExpanded ? (
           <SidebarButton
             icon={

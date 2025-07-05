@@ -42,9 +42,7 @@ export const UserFiltersComponent: React.FC<UserFiltersProps> = ({
   const { isDark } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 角色选项
-  // --- END COMMENT ---
   const roleOptions = [
     { value: '', label: '所有角色', icon: <Users className="h-4 w-4" /> },
     { value: 'admin', label: '管理员', icon: <Shield className="h-4 w-4" /> },
@@ -56,9 +54,7 @@ export const UserFiltersComponent: React.FC<UserFiltersProps> = ({
     },
   ];
 
-  // --- BEGIN COMMENT ---
   // 状态选项
-  // --- END COMMENT ---
   const statusOptions = [
     { value: '', label: '所有状态', icon: <Users className="h-4 w-4" /> },
     { value: 'active', label: '活跃', icon: <UserCheck className="h-4 w-4" /> },
@@ -70,9 +66,7 @@ export const UserFiltersComponent: React.FC<UserFiltersProps> = ({
     { value: 'pending', label: '待激活', icon: <Clock className="h-4 w-4" /> },
   ];
 
-  // --- BEGIN COMMENT ---
   // 认证来源选项（直接对应Supabase的provider值）
-  // --- END COMMENT ---
   const authSourceOptions = [
     { value: '', label: '全部认证来源' },
     { value: 'email', label: '📧 邮箱' },
@@ -81,9 +75,7 @@ export const UserFiltersComponent: React.FC<UserFiltersProps> = ({
     { value: 'google', label: '🔍 Google' },
   ];
 
-  // --- BEGIN COMMENT ---
   // 排序选项
-  // --- END COMMENT ---
   const sortOptions = [
     { value: 'created_at', label: '注册时间' },
     { value: 'last_sign_in_at', label: '最后登录' },
@@ -91,9 +83,7 @@ export const UserFiltersComponent: React.FC<UserFiltersProps> = ({
     { value: 'full_name', label: '姓名' },
   ];
 
-  // --- BEGIN COMMENT ---
   // 处理搜索输入
-  // --- END COMMENT ---
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onFiltersChange({ search: e.target.value });
   };

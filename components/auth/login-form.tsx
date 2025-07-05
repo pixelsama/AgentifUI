@@ -22,9 +22,7 @@ export function LoginForm() {
   const { isDark } = useTheme();
   const t = useTranslations('pages.auth.login');
 
-  // --- BEGIN COMMENT ---
   // 检查是否启用北信科专用模式
-  // --- END COMMENT ---
   const ssoOnlyMode = process.env.NEXT_PUBLIC_SSO_ONLY_MODE === 'true';
 
   const [formData, setFormData] = useState({
@@ -51,9 +49,7 @@ export function LoginForm() {
     try {
       console.log('[登录] 开始邮箱密码登录流程');
 
-      // --- BEGIN COMMENT ---
       // 登录前先清理前一个用户的缓存，防止数据污染
-      // --- END COMMENT ---
       clearCacheOnLogin();
 
       // 使用 Supabase Auth 进行登录

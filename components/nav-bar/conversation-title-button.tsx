@@ -1,13 +1,9 @@
 'use client';
 
 import { ConfirmDialog, InputDialog } from '@components/ui';
-// --- BEGIN COMMENT ---
 // 🎯 新增：导入完整对话列表hook，用于查找历史对话
-// --- END COMMENT ---
 import { useAllConversations } from '@lib/hooks/use-all-conversations';
-// --- BEGIN COMMENT ---
 // 导入聊天接口Hook以获取对话关联的应用ID
-// --- END COMMENT ---
 import { useChatInterface } from '@lib/hooks/use-chat-interface';
 import {
   CombinedConversation,
@@ -50,35 +46,25 @@ export function ConversationTitleButton({
   const { isExpanded, selectItem } = useSidebarStore();
   const { conversations, refresh } = useCombinedConversations();
   const t = useTranslations('navbar.conversation');
-  // --- BEGIN COMMENT ---
   // 🎯 新增：获取完整对话列表，用于查找历史对话标题
-  // --- END COMMENT ---
   const { conversations: allConversations } = useAllConversations();
   const { isDark } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isOperating, setIsOperating] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 应用相关状态
-  // --- END COMMENT ---
   const { apps } = useAppListStore();
   const { favoriteApps, addFavoriteApp, removeFavoriteApp, isFavorite } =
     useFavoriteAppsStore();
 
-  // --- BEGIN COMMENT ---
   // 获取对话关联的应用ID，用于显示应用名称标签
-  // --- END COMMENT ---
   const { conversationAppId } = useChatInterface();
 
-  // --- BEGIN COMMENT ---
   // 模态框状态管理
-  // --- END COMMENT ---
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  // --- BEGIN COMMENT ---
   // 检查是否为历史对话页面：必须是 /chat/[conversationId] 格式，且不是 /chat/new
-  // --- END COMMENT ---
   const isHistoricalChatPage = React.useMemo(() => {
     if (!pathname) return false;
 
@@ -90,26 +76,20 @@ export function ConversationTitleButton({
     return conversationId !== 'new' && conversationId !== 'history';
   }, [pathname]);
 
-  // --- BEGIN COMMENT ---
   // 检查是否为应用详情页面：/apps/{type}/[instanceId] 格式
-  // --- END COMMENT ---
   const isAppDetailPage =
     pathname &&
     pathname.startsWith('/apps/') &&
     pathname.split('/').length === 4;
 
-  // --- BEGIN COMMENT ---
   // 获取当前应用信息（仅在应用详情页面）
-  // --- END COMMENT ---
   const currentApp = useMemo(() => {
     if (!isAppDetailPage || !params.instanceId) return null;
     return apps.find(app => app.instance_id === params.instanceId);
   }, [isAppDetailPage, params.instanceId, apps]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 修复：直接使用与sidebar相同的数据源，移除复杂的备用机制
   // 这样确保导航栏能正确显示打字机效果和实时标题更新
-  // --- END COMMENT ---
   const currentConversation = React.useMemo(() => {
     if (!currentConversationId) return null;
 
@@ -123,10 +103,8 @@ export function ConversationTitleButton({
     );
   }, [conversations, currentConversationId]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：当combinedConversations找不到对话时，从完整对话列表中查找
   // 这样确保从history页面点击历史对话时能瞬间显示正确标题
-  // --- END COMMENT ---
   const fallbackConversation = React.useMemo(() => {
     if (currentConversation || !currentConversationId) return null;
 
@@ -157,10 +135,8 @@ export function ConversationTitleButton({
   // 优先使用combinedConversations中的对话，其次使用fallback对话
   const finalConversation = currentConversation || fallbackConversation;
 
-  // --- BEGIN COMMENT ---
   // 🎯 新增：获取当前对话关联的应用信息，用于显示应用名称标签
   // 优先使用对话记录中的app_id，其次使用conversationAppId（用于创建中的对话）
-  // --- END COMMENT ---
   const currentConversationApp = React.useMemo(() => {
     if (!finalConversation && !conversationAppId) return null;
 
@@ -174,10 +150,8 @@ export function ConversationTitleButton({
     );
   }, [finalConversation, conversationAppId, apps]);
 
-  // --- BEGIN COMMENT ---
   // 🎯 支持打字机效果的标题显示，与sidebar逻辑保持一致
   // 🎯 修复：当finalConversation为空但conversationAppId存在时，显示"创建中..."
-  // --- END COMMENT ---
   const getDisplayTitle = () => {
     // 🎯 新增：处理对话创建中的状态
     if (!finalConversation) {
@@ -209,14 +183,10 @@ export function ConversationTitleButton({
 
   const conversationTitle = getDisplayTitle();
 
-  // --- BEGIN COMMENT ---
   // 移除动态隐藏策略，现在使用简单的点击模式
-  // --- END COMMENT ---
   const shouldHide = false;
 
-  // --- BEGIN COMMENT ---
   // 处理重命名功能 - 使用InputDialog组件
-  // --- END COMMENT ---
   const handleRename = () => {
     setIsOpen(false);
     setShowRenameDialog(true);
@@ -242,9 +212,7 @@ export function ConversationTitleButton({
       const result = await renameConversation(supabasePK, newTitle.trim());
 
       if (result.success) {
-        // --- BEGIN COMMENT ---
         // 重命名成功后更新页面标题
-        // --- END COMMENT ---
         const baseTitle = 'AgentifUI';
         // 标题管理由DynamicTitle组件统一处理，无需手动设置
 
@@ -252,9 +220,7 @@ export function ConversationTitleButton({
 
         // 刷新对话列表
         refresh();
-        // --- BEGIN COMMENT ---
         // 触发全局同步事件，通知所有组件数据已更新
-        // --- END COMMENT ---
         conversationEvents.emit();
         setShowRenameDialog(false);
       } else {
@@ -269,9 +235,7 @@ export function ConversationTitleButton({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 处理删除功能 - 使用ConfirmDialog组件
-  // --- END COMMENT ---
   const handleDelete = () => {
     setIsOpen(false);
     setShowDeleteDialog(true);
@@ -297,12 +261,8 @@ export function ConversationTitleButton({
       const result = await deleteConversation(supabasePK);
 
       if (result.success) {
-        // --- BEGIN COMMENT ---
         // 删除成功后跳转到新对话页面 - 与sidebar逻辑一致
-        // --- END COMMENT ---
-        // --- BEGIN COMMENT ---
         // 触发全局同步事件，通知所有组件数据已更新
-        // --- END COMMENT ---
         conversationEvents.emit();
         window.location.href = '/chat/new';
       } else {
@@ -318,9 +278,7 @@ export function ConversationTitleButton({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 处理应用收藏操作（应用详情页面使用）
-  // --- END COMMENT ---
   const handleToggleFavorite = async () => {
     if (!currentApp) return;
 
@@ -340,9 +298,7 @@ export function ConversationTitleButton({
           dify_apptype: appMetadata?.dify_apptype,
         });
 
-        // --- BEGIN COMMENT ---
         // 收藏成功后，更新sidebar的选中状态，确保常用应用列表中显示为选中
-        // --- END COMMENT ---
         selectItem('app', instanceId, true);
       }
     } catch (error) {
@@ -350,9 +306,7 @@ export function ConversationTitleButton({
     }
   };
 
-  // --- BEGIN COMMENT ---
   // 条件渲染：在历史对话页面显示对话标题，在应用详情页面显示应用信息
-  // --- END COMMENT ---
   if (isAppDetailPage && currentApp) {
     // 应用详情页面渲染
     const appMetadata = currentApp.config?.app_metadata;
@@ -451,10 +405,8 @@ export function ConversationTitleButton({
     );
   }
 
-  // --- BEGIN COMMENT ---
   // 历史对话页面渲染：只在历史对话页面且有当前对话ID时显示
   // 🎯 修复：当conversationAppId存在时（对话创建中），即使finalConversation为空也应该显示
-  // --- END COMMENT ---
   if (
     !isHistoricalChatPage ||
     !currentConversationId ||
@@ -468,9 +420,7 @@ export function ConversationTitleButton({
       <div
         className={cn(
           'relative flex items-center gap-2 transition-all duration-300 ease-in-out',
-          // --- BEGIN COMMENT ---
           // 动态隐藏策略：悬停时透明度降为0并稍微向左移动
-          // --- END COMMENT ---
           shouldHide
             ? 'pointer-events-none -translate-x-2 opacity-0'
             : 'translate-x-0 opacity-100',

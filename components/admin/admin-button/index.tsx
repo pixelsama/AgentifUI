@@ -21,16 +21,12 @@ export function AdminButton() {
   const { isDark } = useTheme();
   const t = useTranslations('pages.admin');
 
-  // --- BEGIN COMMENT ---
   // 非管理员用户不显示此按钮
-  // --- END COMMENT ---
   if (!isAdmin) {
     return null;
   }
 
-  // --- BEGIN COMMENT ---
   // 根据主题获取按钮样式：参考 sidebar button 的悬停效果
-  // --- END COMMENT ---
   const getButtonColors = () => {
     if (isDark) {
       return 'bg-stone-800/50 hover:bg-stone-600/60 text-gray-200 border-stone-600/30';
