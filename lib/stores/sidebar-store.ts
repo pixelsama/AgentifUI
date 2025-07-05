@@ -131,9 +131,7 @@ export const useSidebarStore = create<SidebarState>()(
         set({
           isExpanded: true,
           isMobileNavVisible: true,
-          // --- BEGIN MODIFIED COMMENT ---
-          // 移动端上立即显示内容
-          // --- END MODIFIED COMMENT ---
+          // Show content immediately on mobile
           contentVisible: true,
         });
       },
@@ -153,9 +151,7 @@ export const useSidebarStore = create<SidebarState>()(
         set({
           isExpanded: newState,
           isMobileNavVisible: newState,
-          // --- BEGIN MODIFIED COMMENT ---
-          // 同步内容显示状态
-          // --- END MODIFIED COMMENT ---
+          // Sync content visibility state
           contentVisible: newState,
         });
       },

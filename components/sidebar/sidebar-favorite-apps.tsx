@@ -287,9 +287,7 @@ export function SidebarFavoriteApps({
           }}
           disabled={isAppBusy} // 🎯 应用忙碌时禁用
         >
-          {/* --- BEGIN COMMENT ---
-          根据应用类型显示不同的按钮文本
-          --- END COMMENT --- */}
+          {/* Show different button text based on application type */}
           {app.dify_apptype === 'workflow'
             ? t('startWorkflow')
             : app.dify_apptype === 'text-generation'
@@ -319,9 +317,7 @@ export function SidebarFavoriteApps({
 
   return (
     <div className="flex flex-col">
-      {/* --- BEGIN COMMENT ---
-      粘性标题：保持原有样式，只添加粘性定位
-      --- END COMMENT --- */}
+      {/* Sticky header: maintain original style, only add sticky positioning */}
       {displayApps.length > 0 && (
         <div
           className={cn(
@@ -334,9 +330,7 @@ export function SidebarFavoriteApps({
           onClick={favoriteApps.length > 3 ? toggleExpanded : undefined}
         >
           <div className="flex items-center">
-            {/* --- BEGIN COMMENT ---
-            标题文字和展开按钮紧凑布局：去掉数字组件，按钮紧贴文字
-            --- END COMMENT --- */}
+            {/* Title text and expand button compact layout: remove number component, button close to text */}
             <span
               className={cn(
                 'font-serif text-xs leading-none font-medium',
@@ -346,9 +340,7 @@ export function SidebarFavoriteApps({
               {t('favoriteApps')}
             </span>
 
-            {/* --- BEGIN COMMENT ---
-            展开按钮：仅在有超过3个应用时显示，紧贴文字
-            --- END COMMENT --- */}
+            {/* Expand button: only show when there are more than 3 apps, close to text */}
             {favoriteApps.length > 3 && (
               <ChevronRight
                 className={cn(
@@ -374,9 +366,7 @@ export function SidebarFavoriteApps({
         </div>
       )}
 
-      {/* --- BEGIN COMMENT ---
-      应用列表：添加顶部间距，保持与标题的分离
-      --- END COMMENT --- */}
+      {/* App list: add top spacing, maintain separation from title */}
       {displayApps.length > 0 && (
         <div className="space-y-1 px-3 pt-1">
           {displayApps.map((app, index) => {

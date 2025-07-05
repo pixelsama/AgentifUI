@@ -13,10 +13,8 @@ interface DifyApiParams {
 }
 
 /**
- * --- BEGIN COMMENT ---
- * 🎯 新增：根据Dify应用类型调整API路径的函数
- * 不同类型的Dify应用使用不同的API端点
- * --- END COMMENT ---
+ * 🎯 New: Function to adjust API path based on Dify app type
+ * Different types of Dify apps use different API endpoints
  */
 function adjustApiPathByAppType(
   slug: string[],
@@ -25,12 +23,12 @@ function adjustApiPathByAppType(
   const originalPath = slug.join('/');
 
   if (!appType) {
-    return originalPath; // --- 如果没有应用类型信息，保持原路径 ---
+    return originalPath; // If no app type info, keep original path
   }
 
-  // --- 工作流应用：需要workflows前缀，但排除通用API ---
+  // Workflow apps: need workflows prefix, but exclude common APIs
   if (isWorkflowApp(appType as any)) {
-    // 文件上传、音频转文本等通用API不需要workflows前缀
+    // Common APIs like file upload, audio-to-text don't need workflows prefix
     const commonApis = ['files/upload', 'audio-to-text'];
     const isCommonApi = commonApis.some(api => originalPath.startsWith(api));
 
@@ -39,7 +37,7 @@ function adjustApiPathByAppType(
     }
   }
 
-  // --- 文本生成应用：使用completion-messages端点 ---
+  // Text generation apps: use completion-messages endpoint
   if (isTextGenerationApp(appType as any)) {
     if (originalPath === 'messages' || originalPath === 'chat-messages') {
       return 'completion-messages';
@@ -52,40 +50,40 @@ function adjustApiPathByAppType(
   return originalPath;
 }
 
-// --- 辅助函数：创建带有 Content-Type 的最小化响应头 ---
+// Helper function: create minimal response headers with Content-Type
 function createMinimalHeaders(contentType?: string): Headers {
   const headers = new Headers();
 
-  // 如果提供了 Content-Type，则设置它
+  // Set Content-Type if provided
   if (contentType) {
     headers.set('Content-Type', contentType);
   }
   return headers;
 }
 
-// --- 核心辅助函数：执行到 Dify 的代理请求 ---
+// Core helper function: execute proxy request to Dify
 async function proxyToDify(
-  req: NextRequest, // 原始 Next.js 请求对象
-  // 修改点 1：接收包含 params 的 context 对象
-  context: { params: Promise<DifyApiParams> } // 统一使用 Promise 类型
+  req: NextRequest, // Original Next.js request object
+  // Modification point 1: receive context object containing params
+  context: { params: Promise<DifyApiParams> } // Unified use of Promise type
 ) {
-  // 修改点 2：使用 await 获取 params 的值
+  // Modification point 2: use await to get the value of params
   const params = await context.params;
   const appId = params.appId;
   const slug = params.slug;
 
-  // 🎯 新增：检查是否有临时配置（用于表单同步）
-  // 如果请求体中包含 _temp_config，则使用临时配置而不是数据库配置
-  // 🎯 修复：避免重复读取请求体，先克隆请求以保留原始请求体
+  // 🎯 New: Check if there is temporary configuration (for form synchronization)
+  // If the request body contains _temp_config, use temporary configuration instead of database configuration
+  // 🎯 Fix: Avoid reading the request body repeatedly, clone the request to preserve the original request body
   let tempConfig: { apiUrl: string; apiKey: string } | null = null;
   let requestBody: any = null;
 
   if (req.method === 'POST') {
     try {
-      // 克隆请求以避免消费原始请求体
+      // Clone request to avoid consuming original request body
       const clonedReq = req.clone();
       const body = await clonedReq.json();
-      requestBody = body; // 保存解析后的请求体
+      requestBody = body; // Save parsed request body
 
       if (
         body._temp_config &&
@@ -97,21 +95,20 @@ async function proxyToDify(
           `[App: ${appId}] [${req.method}] 检测到临时配置，将使用表单提供的配置`
         );
 
-        // 移除临时配置字段，避免传递给 Dify API
+        // Remove temporary configuration fields to avoid passing to Dify API
         const { _temp_config, ...cleanBody } = body;
         requestBody = cleanBody;
       }
     } catch (error) {
-      // 如果解析请求体失败，继续使用正常流程
+      // If parsing the request body fails, continue using normal process
       console.log(
-        `[App: ${appId}] [${req.method}] 无法解析请求体，使用正常配置流程`
+        `[App: ${appId}] [${req.method}] Failed to parse request body, using normal configuration process`
       );
       requestBody = null;
     }
   }
 
-  // --- BEGIN OPTIMIZATION: Validate slug ---
-  // 检查 slug 是否有效，防止构造无效的目标 URL
+  // Validate slug to prevent constructing invalid target URLs
   if (!slug || slug.length === 0) {
     console.error(
       `[App: ${appId}] [${req.method}] Invalid request: Slug path is missing.`
@@ -120,34 +117,37 @@ async function proxyToDify(
       JSON.stringify({ error: 'Invalid request: slug path is missing.' }),
       {
         status: 400,
-        headers: createMinimalHeaders('application/json'), // 使用辅助函数
+        headers: createMinimalHeaders('application/json'), // Use helper function
       }
     );
 
     return baseResponse;
   }
-  // --- END OPTIMIZATION ---
 
-  // 1. 获取 Dify 应用配置
-  // 优先使用临时配置（表单同步），否则从数据库获取
+  // 1. Get Dify app configuration
+  // Use temporary configuration (form synchronization) first, otherwise get from database
   let difyApiKey: string;
   let difyApiUrl: string;
   let difyConfig: any = null;
 
   if (tempConfig) {
-    // 使用临时配置
-    console.log(`[App: ${appId}] [${req.method}] 使用临时配置`);
+    // Use temporary configuration
+    console.log(
+      `[App: ${appId}] [${req.method}] Using temporary configuration`
+    );
     difyApiKey = tempConfig.apiKey;
     difyApiUrl = tempConfig.apiUrl;
   } else {
-    // 从数据库获取配置
-    console.log(`[App: ${appId}] [${req.method}] 从数据库获取配置...`);
+    // Get configuration from database
+    console.log(
+      `[App: ${appId}] [${req.method}] Getting configuration from database...`
+    );
     difyConfig = await getDifyAppConfig(appId);
 
-    // 验证数据库配置
+    // Validate database configuration
     if (!difyConfig) {
       console.error(`[App: ${appId}] [${req.method}] Configuration not found.`);
-      // 返回 400 Bad Request，表明客户端提供的 appId 无效或未配置
+      // Return 400 Bad Request, indicating that the provided appId is invalid or not configured
       const baseResponse = NextResponse.json(
         { error: `Configuration for Dify app '${appId}' not found.` },
         { status: 400 }
@@ -160,12 +160,12 @@ async function proxyToDify(
     difyApiUrl = difyConfig.apiUrl;
   }
 
-  // 再次检查获取到的 key 和 url 是否有效
+  // Check if the obtained key and url are valid again
   if (!difyApiKey || !difyApiUrl) {
     console.error(
       `[App: ${appId}] [${req.method}] Invalid configuration loaded (missing key or URL).`
     );
-    // 返回 500 Internal Server Error，表明服务器端配置问题
+    // Return 500 Internal Server Error, indicating server-side configuration issues
     const baseResponse = NextResponse.json(
       { error: `Server configuration error for app '${appId}'.` },
       { status: 500 }
@@ -178,40 +178,40 @@ async function proxyToDify(
   );
 
   try {
-    // 3. 构造目标 Dify URL
+    // 3. Construct target Dify URL
     const slugPath = adjustApiPathByAppType(slug, difyConfig?.appType);
     const targetUrl = `${difyApiUrl}/${slugPath}${req.nextUrl.search}`;
     console.log(
       `[App: ${appId}] [${req.method}] Proxying request to target URL: ${targetUrl}`
     );
 
-    // 4. 准备转发请求头
+    // 4. Prepare forwarding request headers
     const headers = new Headers();
-    // 只复制必要的请求头
+    // Only copy necessary request headers
     if (req.headers.get('Content-Type')) {
       headers.set('Content-Type', req.headers.get('Content-Type')!);
     }
     if (req.headers.get('Accept')) {
       headers.set('Accept', req.headers.get('Accept')!);
     }
-    // 添加 Dify 认证头
+    // Add Dify authentication header
     headers.set('Authorization', `Bearer ${difyApiKey}`);
-    // 可以根据需要添加其他固定请求头
+    // Add other fixed request headers as needed
 
-    // 5. 执行 fetch 请求转发
-    // 准备请求体和头部，处理特殊情况
+    // 5. Execute fetch request forwarding
+    // Prepare request body and headers, handle special cases
     let finalBody: BodyInit | null = null;
 
-    // 🎯 处理请求体：使用之前解析和清理过的请求体
+    // 🎯 Handle request body: use previously parsed and cleaned request body
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       if (tempConfig) {
-        // 使用临时配置时，请求体应该为空（因为这些是 info/parameters 查询请求）
+        // When using temporary configuration, the request body should be empty (because these are info/parameters query requests)
         finalBody = null;
       } else if (requestBody !== null) {
-        // 使用之前解析过的请求体
+        // Use previously parsed request body
         finalBody = JSON.stringify(requestBody);
       } else {
-        // 如果没有解析过请求体，使用原始请求体
+        // If no request body has been parsed, use the original request body
         finalBody = req.body;
       }
     }
@@ -219,7 +219,7 @@ async function proxyToDify(
     const finalHeaders = new Headers(headers);
     const originalContentType = req.headers.get('Content-Type');
 
-    // 特殊处理 multipart/form-data 请求（文件上传和语音转文本）
+    // Special handling for multipart/form-data requests (file upload and audio-to-text)
     if (
       (slugPath === 'files/upload' || slugPath === 'audio-to-text') &&
       originalContentType?.includes('multipart/form-data')
@@ -228,10 +228,10 @@ async function proxyToDify(
         `[App: ${appId}] [${req.method}] Handling multipart/form-data for ${slugPath}`
       );
       try {
-        // 解析表单数据
+        // Parse form data
         const formData = await req.formData();
         finalBody = formData;
-        // 重要：移除 Content-Type，让 fetch 自动设置包含正确 boundary 的 multipart/form-data
+        // Important: remove Content-Type, let fetch automatically set multipart/form-data with correct boundary
         finalHeaders.delete('Content-Type');
       } catch (formError) {
         console.error(
@@ -248,8 +248,8 @@ async function proxyToDify(
       }
     }
 
-    // 准备 fetch 选项
-    // 🎯 临时配置请求应该使用 GET 方法调用 Dify API
+    // Prepare fetch options
+    // 🎯 Temporary configuration requests should use GET method to call Dify API
     const actualMethod = tempConfig ? 'GET' : req.method;
 
     const fetchOptions: RequestInit & { duplex: 'half' } = {
@@ -258,7 +258,7 @@ async function proxyToDify(
       body: finalBody,
       redirect: 'manual',
       cache: 'no-store',
-      // 【重要】添加 duplex 选项并使用类型断言解决 TS(2769)
+      // [Important] Add duplex option and use type assertion to solve TS(2769)
       duplex: 'half',
     };
 
@@ -267,17 +267,16 @@ async function proxyToDify(
       `[App: ${appId}] [${req.method}] Dify response status: ${response.status}`
     );
 
-    // --- BEGIN MODIFICATION / 开始修改 ---
-    // 直接处理成功的 204 No Content 响应
+    // Handle successful 204 No Content responses directly
     if (response.status === 204) {
       console.log(
-        `[App: ${appId}] [${req.method}] 收到 204 No Content，直接转发响应.`
+        `[App: ${appId}] [${req.method}] Received 204 No Content, forwarding response directly.`
       );
-      // 转发 204 状态和必要的响应头, 确保 body 为 null
-      // 克隆需要转发的响应头
+      // Forward 204 status and necessary response headers, ensure body is null
+      // Clone headers to forward
       const headersToForward = new Headers();
       response.headers.forEach((value, key) => {
-        // 避免转发对 204 无意义或无效的头，如 content-length, content-type
+        // Avoid forwarding headers meaningless or invalid for 204, such as content-length, content-type
         if (
           !['content-length', 'content-type', 'transfer-encoding'].includes(
             key.toLowerCase()
@@ -287,7 +286,7 @@ async function proxyToDify(
         }
       });
 
-      // 返回 204 响应，body 必须为 null，中间件会自动添加CORS头
+      // Return 204 response, body must be null, middleware will automatically add CORS headers
       const baseResponse = new Response(null, {
         status: 204,
         statusText: 'No Content',
@@ -296,20 +295,18 @@ async function proxyToDify(
 
       return baseResponse;
     }
-    // --- END MODIFICATION / 结束修改 ---
 
-    // 6. 处理并转发 Dify 的响应
+    // 6. Handle and forward Dify'
     if (response.ok && response.body) {
       const responseContentType = response.headers.get('content-type');
 
-      // --- BEGIN SSE Robust Handling ---
-      // 处理流式响应（SSE）- 使用手动读取/写入以增强健壮性
+      // Handle streaming responses (SSE) - use manual read/write for enhanced robustness
       if (responseContentType?.includes('text/event-stream')) {
         console.log(
           `[App: ${appId}] [${req.method}] Streaming response detected. Applying robust handling.`
         );
 
-        // 保留 Dify 返回的 SSE 相关头，并补充我们标准的 CORS 头
+        // Keep SSE headers returned by Dify, and supplement our standard CORS headers
         const sseHeaders = createMinimalHeaders(); // Start with minimal CORS headers
         response.headers.forEach((value, key) => {
           // Copy essential SSE headers from Dify response
@@ -322,22 +319,22 @@ async function proxyToDify(
           }
         });
 
-        // 创建一个新的可读流，用于手动将数据块推送给客户端
+        // Create a new readable stream, used to manually push data blocks to the client
         const stream = new ReadableStream({
           async start(controller) {
             console.log(
               `[App: ${appId}] [${req.method}] SSE Stream: Starting to read from Dify.`
             );
-            const reader = response.body!.getReader(); // 确定 response.body 存在
-            const decoder = new TextDecoder(); // 用于调试日志输出
+            const reader = response.body!.getReader(); // Ensure response.body exists
+            const decoder = new TextDecoder(); // Used for debugging log output
 
-            // 处理客户端断开连接
+            // Handle client disconnection
             req.signal.addEventListener('abort', () => {
               console.log(
                 `[App: ${appId}] [${req.method}] SSE Stream: Client disconnected, cancelling Dify read.`
               );
               reader.cancel('Client disconnected');
-              // 注意：controller 可能已经 close，这里尝试 close 可能会报错，但通常无害
+              // Note: controller may already be closed, trying to close here may cause an error, but is usually harmless
               try {
                 controller.close();
               } catch {
@@ -347,12 +344,12 @@ async function proxyToDify(
 
             try {
               while (true) {
-                // 检查客户端是否已断开
+                // Check if the client has disconnected
                 if (req.signal.aborted) {
                   console.log(
                     `[App: ${appId}] [${req.method}] SSE Stream: Abort signal detected before read, stopping.`
                   );
-                  // 无需手动取消 reader，addEventListener 中的 cancel 会处理
+                  // No need to manually cancel reader, cancel in addEventListener will handle it
                   break;
                 }
 
@@ -362,34 +359,34 @@ async function proxyToDify(
                   console.log(
                     `[App: ${appId}] [${req.method}] SSE Stream: Dify stream finished.`
                   );
-                  break; // Dify 流结束，退出循环
+                  break; // Dify stream finished, exit loop
                 }
 
-                // 将从 Dify 读取到的数据块推送到我们创建的流中
+                // Push the data block read from Dify to the stream we created
                 controller.enqueue(value);
-                // 可选：打印解码后的数据块用于调试
+                // Optional: print decoded data blocks for debugging
                 // console.log(`[App: ${appId}] [${req.method}] SSE Chunk:`, decoder.decode(value, { stream: true }));
               }
             } catch (error) {
-              // 如果读取 Dify 流时发生错误（例如 Dify 服务器断开）
+              // If an error occurs while reading the Dify stream (e.g. Dify server disconnected)
               console.error(
                 `[App: ${appId}] [${req.method}] SSE Stream: Error reading from Dify stream:`,
                 error
               );
-              // 在我们创建的流上触发错误，通知下游消费者
+              // Trigger an error on the stream we created, notify downstream consumers
               controller.error(error);
             } finally {
               console.log(
                 `[App: ${appId}] [${req.method}] SSE Stream: Finalizing stream controller.`
               );
-              // 确保无论如何都关闭控制器 (如果尚未关闭或出错)
+              // Ensure the controller is closed regardless (if not already closed or errored)
               try {
                 controller.close();
               } catch {
                 /* Ignore if already closed or errored */
               }
-              // 确保 reader 被释放 (cancel 也会释放锁，这里是双重保险)
-              // reader.releaseLock(); // reader 在 done=true 或 error 后会自动释放
+              // Ensure reader is released (cancel will also release the lock, this is a double check)
+              // reader.releaseLock(); // reader will automatically release after done=true or error
             }
           },
           cancel(reason) {
@@ -397,13 +394,13 @@ async function proxyToDify(
               `[App: ${appId}] [${req.method}] SSE Stream: Our stream was cancelled. Reason:`,
               reason
             );
-            // 如果我们创建的流被取消（例如 Response 对象的 cancel() 被调用），
-            // 理论上 reader 应该已经在 abort 事件监听中被 cancel 了。
-            // 如果需要，这里可以添加额外的清理逻辑。
+            // If the stream we created is cancelled (e.g. cancel() is called on the Response object)
+            // Theoretically, reader should already be cancelled in the abort event listener.
+            // If needed, additional cleanup logic can be added here.
           },
         });
 
-        // 返回包含我们手动创建的流的响应，中间件会自动添加CORS头
+        // Return the response containing the stream we manually created, middleware will automatically add CORS headers
         const baseResponse = new Response(stream, {
           status: response.status,
           statusText: response.statusText,
@@ -412,9 +409,8 @@ async function proxyToDify(
 
         return baseResponse;
       }
-      // --- END SSE Robust Handling ---
 
-      // 处理音频响应（文本转语音）- 保留简单的直接管道方式
+      // Handle audio response (text-to-speech) - keep simple direct pipe method
       else if (responseContentType?.startsWith('audio/')) {
         console.log(`[App: ${appId}] [${req.method}] Audio response detected.`);
         const audioHeaders = createMinimalHeaders(); // Start with minimal CORS
@@ -428,7 +424,7 @@ async function proxyToDify(
             audioHeaders.set(key, value);
           }
         });
-        // 对于一次性流，直接管道通常是高效且足够稳定的，中间件会自动添加CORS头
+        // For one-time streams, direct pipe is usually efficient and stable enough, middleware will automatically add CORS headers
         const baseResponse = new Response(response.body, {
           status: response.status,
           statusText: response.statusText,
@@ -437,50 +433,48 @@ async function proxyToDify(
 
         return baseResponse;
       }
-      // 处理常规响应 (主要是 JSON 或 Text)
+      // Handle regular response (mainly JSON or Text)
       else {
-        // 处理非流式响应
+        // Handle non-streaming response
         const responseData = await response.text();
         try {
           const jsonData = JSON.parse(responseData);
           console.log(
             `[App: ${appId}] [${req.method}] Returning native Response with minimal headers for success JSON.`
           );
-          // --- REFACTOR: Use minimal header helper ---
+          // Use minimal header helper
           const baseResponse = new Response(JSON.stringify(jsonData), {
             status: response.status,
             statusText: response.statusText,
-            headers: createMinimalHeaders('application/json'), // 使用辅助函数
+            headers: createMinimalHeaders('application/json'), // Use helper function
           });
 
           return baseResponse;
-          // --- END REFACTOR ---
         } catch (parseError) {
-          // 非 JSON，返回文本
+          // Not JSON, return text
           console.log(
             `[App: ${appId}] [${req.method}] JSON parse failed, returning plain text with minimal headers.`
           );
-          // --- REFACTOR: Use minimal header helper ---
+          // Use minimal header helper
           const originalDifyContentType =
             response.headers.get('content-type') || 'text/plain';
           const baseResponse = new Response(responseData, {
             status: response.status,
             statusText: response.statusText,
-            headers: createMinimalHeaders(originalDifyContentType), // 使用辅助函数，并传递原始类型
+            headers: createMinimalHeaders(originalDifyContentType), // Use helper function and pass original type
           });
 
           return baseResponse;
-          // --- END REFACTOR ---
         }
       }
     } else {
-      // 处理无响应体或失败的情况
+      // Handle cases with no response body or failure
       if (!response.body) {
         console.log(
           `[App: ${appId}] [${req.method}] Empty response body with status: ${response.status}`
         );
       }
-      // 尝试读取错误信息
+      // Try to read error information
       try {
         const errorText = await response.text();
         try {
@@ -488,39 +482,37 @@ async function proxyToDify(
           console.log(
             `[App: ${appId}] [${req.method}] Returning native Response with minimal headers for error JSON.`
           );
-          // --- REFACTOR: Use minimal header helper ---
+          // Use minimal header helper
           const baseResponse = new Response(JSON.stringify(errorJson), {
             status: response.status,
             statusText: response.statusText,
-            headers: createMinimalHeaders('application/json'), // 使用辅助函数
+            headers: createMinimalHeaders('application/json'), // Use helper function
           });
 
           return baseResponse;
-          // --- END REFACTOR ---
         } catch {
-          // 错误响应不是 JSON，返回文本
+          // Error response is not JSON, return text
           console.log(
             `[App: ${appId}] [${req.method}] Error response is not JSON, returning plain text with minimal headers.`
           );
-          // --- REFACTOR: Use minimal header helper ---
+          // Use minimal header helper
           const originalDifyErrorContentType =
             response.headers.get('content-type') || 'text/plain';
           const baseResponse = new Response(errorText, {
             status: response.status,
             statusText: response.statusText,
-            headers: createMinimalHeaders(originalDifyErrorContentType), // 使用辅助函数
+            headers: createMinimalHeaders(originalDifyErrorContentType), // Use helper function
           });
 
           return baseResponse;
-          // --- END REFACTOR ---
         }
       } catch (readError) {
-        // 如果连读取错误响应都失败了
+        // If even reading the error response fails
         console.error(
           `[App: ${appId}] [${req.method}] Failed to read Dify error response body:`,
           readError
         );
-        const finalErrorHeaders = createMinimalHeaders('application/json'); // 使用辅助函数
+        const finalErrorHeaders = createMinimalHeaders('application/json'); // Use helper function
         const baseResponse = new Response(
           JSON.stringify({
             error: `Failed to read Dify error response body. Status: ${response.status}`,
@@ -535,7 +527,7 @@ async function proxyToDify(
       }
     }
   } catch (error: any) {
-    // 捕获 fetch 或响应处理中的错误
+    // Catch errors in fetch or response processing
     console.error(
       `[App: ${appId}] [${req.method}] Dify proxy fetch/processing error:`,
       error
@@ -552,8 +544,8 @@ async function proxyToDify(
   }
 }
 
-// --- 导出对应 HTTP 方法的处理函数 ---
-// 为每个 HTTP 方法创建符合 Next.js 15 要求的处理函数
+// Export corresponding HTTP method handler functions
+// Create handler functions that meet the requirements of Next.js 15 for each HTTP method
 
 export async function GET(
   req: NextRequest,
@@ -590,8 +582,10 @@ export async function PATCH(
   return proxyToDify(req, context);
 }
 
-// --- BEGIN OPTIMIZATION: Explicit OPTIONS handler ---
-// 添加明确的 OPTIONS 请求处理函数，以确保 CORS 预检请求在各种部署环境下都能正确响应
+/**
+ * Explicit OPTIONS handler
+ * @description Adds explicit OPTIONS request handler to ensure CORS preflight requests respond correctly in various deployment environments
+ */
 export async function OPTIONS(req: NextRequest) {
   console.log('[OPTIONS Request] Responding to preflight request.');
   const baseResponse = new Response(null, {
@@ -601,4 +595,3 @@ export async function OPTIONS(req: NextRequest) {
 
   return baseResponse;
 }
-// --- END OPTIMIZATION ---

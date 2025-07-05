@@ -40,9 +40,7 @@ export const InstanceFilterSelector = memo(function InstanceFilterSelector({
 
   return (
     <div className={cn('relative', className)}>
-      {/* --- BEGIN COMMENT ---
-      主标题按钮：模仿conversation-title-button的样式
-      --- END COMMENT --- */}
+      {/* Main title button: mimic conversation-title-button style */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
@@ -90,9 +88,7 @@ export const InstanceFilterSelector = memo(function InstanceFilterSelector({
         </div>
       </button>
 
-      {/* --- BEGIN COMMENT ---
-      实例数量显示
-      --- END COMMENT --- */}
+      {/* Instance count display */}
       <div
         className={cn(
           'mt-1 font-serif text-xs',
@@ -102,9 +98,7 @@ export const InstanceFilterSelector = memo(function InstanceFilterSelector({
         共 {instanceCount} 个
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      下拉菜单：完全模仿conversation-title-button的样式
-      --- END COMMENT --- */}
+      {/* Dropdown menu: fully mimic conversation-title-button style */}
       {isOpen && (
         <>
           {/* 背景遮罩 */}
@@ -198,9 +192,7 @@ export const InstanceFilterSelector = memo(function InstanceFilterSelector({
                 </button>
               ))}
 
-            {/* --- BEGIN COMMENT ---
-            如果没有活跃的提供商，显示提示信息
-            --- END COMMENT --- */}
+            {/* Show hint message if no active providers available */}
             {providers.filter(p => p.is_active).length === 0 && (
               <div
                 className={cn(

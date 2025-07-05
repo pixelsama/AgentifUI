@@ -2,9 +2,9 @@ import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 /**
- * Next.js 配置
- * @description 配置 Next.js，使用传统 webpack 避免 Turbopack 字体加载问题
- * 集成 next-intl 插件
+ * Next.js Configuration
+ * @description Configure Next.js with traditional webpack to avoid Turbopack font loading issues
+ * Integrate next-intl plugin
  */
 
 const withNextIntl = createNextIntlPlugin();
@@ -12,30 +12,30 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig: NextConfig = {
   /* config options here */
 
-  // 生产环境自动移除 console.log
+  // Automatically remove console.log in production
   compiler: {
     removeConsole:
       process.env.NODE_ENV === 'production'
         ? {
-            exclude: ['error', 'warn'], // 保留 console.error 和 console.warn
+            exclude: ['error', 'warn'], // Keep console.error and console.warn
           }
         : false,
   },
 
-  // 在构建时忽略 ESLint 错误
+  // Ignore ESLint errors during build
   eslint: {
     ignoreDuringBuilds: true,
   },
 
-  // 在构建时忽略 TypeScript 错误（可选）
+  // Ignore TypeScript errors during build (optional)
   typescript: {
-    ignoreBuildErrors: false, // 设为 true 可同时忽略 TS 错误
+    ignoreBuildErrors: false, // Set to true to ignore TS errors as well
   },
 
-  // Webpack 配置：解决 Supabase Realtime WebSocket 问题
+  // Webpack configuration: Fix Supabase Realtime WebSocket issues
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // 服务端：确保 WebSocket 依赖正确加载
+      // Server-side: Ensure WebSocket dependencies load correctly
       config.externals = config.externals || [];
       config.externals.push({
         bufferutil: 'bufferutil',
@@ -43,7 +43,7 @@ const nextConfig: NextConfig = {
       });
     }
 
-    // 忽略 Supabase Realtime 的动态导入警告
+    // Ignore Supabase Realtime dynamic import warnings
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
       {
@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
     return config;
   },
 
-  // 使用传统 webpack，字体加载正常
+  // Use traditional webpack for proper font loading
 };
 
 export default withNextIntl(nextConfig);

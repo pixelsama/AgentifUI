@@ -208,9 +208,7 @@ export const DynamicSuggestedQuestions = ({
       )}
       style={questionsPosition}
     >
-      {/* --- BEGIN COMMENT ---
-      问题容器：使用flexbox布局，支持多行换行，每行都居中对齐
-      --- END COMMENT --- */}
+      {/* Question container: uses flexbox layout, supports multi-line wrapping with center alignment on each line */}
       <div className="flex flex-wrap items-start justify-center gap-3">
         {questionsToShow.map((question, index) => (
           <SuggestedQuestionButton
@@ -223,9 +221,7 @@ export const DynamicSuggestedQuestions = ({
         ))}
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      如果有更多问题，显示提示
-      --- END COMMENT --- */}
+      {/* Show hint if there are more questions */}
       {displayQuestions.length > layoutConfig.maxDisplay && (
         <div
           className={cn(

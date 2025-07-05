@@ -47,9 +47,7 @@ body.render-ready {
   --page-height: auto; /* 默认高度为自动 */
   --page-overflow: visible; /* 默认溢出为可见 */
 
-  /* --- BEGIN COMMENT ---
-  Toast通知颜色变量
-  --- END COMMENT --- */
+  /* Toast notification color variables */
   --toast-bg: 255 255 255;
   --toast-text: 15 23 42;
   --toast-border: 226 232 240;
@@ -107,9 +105,7 @@ body.render-ready {
   --chart-4: 245 158 11;
   --chart-5: 239 68 68;
 
-  /* --- BEGIN COMMENT ---
-  深色模式Toast通知颜色变量
-  --- END COMMENT --- */
+  /* Dark mode toast notification color variables */
   --toast-bg: 30 41 59;
   --toast-text: 248 250 252;
   --toast-border: 51 65 85;
@@ -131,13 +127,9 @@ body {
   overflow-y: auto; /* 默认允许垂直滚动 */
 }
 
-/* --- BEGIN COMMENT ---
-🎯 全局字体规则 - 确保所有路由都使用统一的字体
---- END COMMENT --- */
+/* Global font rules - ensure all routes use consistent fonts */
 @layer utilities {
-  /* --- BEGIN COMMENT ---
-  隐藏滚动条但保持滚动功能的工具类 - 增强版
-  --- END COMMENT --- */
+  /* Hide scrollbar while maintaining scroll functionality - enhanced version */
   .no-scrollbar {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
@@ -179,10 +171,8 @@ body {
 }
 
 @layer base {
-  /* --- BEGIN COMMENT ---
-  🔥 全局衬线字体设置 - 保持之前的字体大小，全部使用衬线字体
-  保留font-size-adjust确保中英文高度一致，但简化其他设置
-  --- END COMMENT --- */
+  /* Global serif font settings - maintain previous font sizes, use serif fonts throughout
+     Keep font-size-adjust to ensure consistent height between Chinese and English text */
   html,
   body,
   * {
@@ -272,9 +262,7 @@ body {
     font-weight: 700;
   }
 
-  /* --- BEGIN COMMENT ---
-  🎯 特殊字体类 - 现在全局默认就是serif，保留.font-sans用于特殊需要
-  --- END COMMENT --- */
+  /* 🎯 特殊字体类 - 现在全局默认就是serif，保留.font-sans用于特殊需要 */
   .font-sans {
     font-family:
       var(--font-inter),
@@ -346,14 +334,10 @@ body {
       var(--font-crimson), var(--font-noto-serif), Georgia, serif !important;
   }
 
-  /* --- BEGIN MODIFIED COMMENT ---
-   * 🎯 全局标题统一使用衬线字体，包括Markdown内容标题
-   * 修改前：使用 Playfair Display (装饰性字体)
-   * 修改后：使用 Crimson Pro + 思源宋体 (衬线字体)
-   * 这确保了所有###、##等Markdown标题都是serif字体
-   * 注意：欢迎屏幕标题保持装饰性设计
-   * --- END MODIFIED COMMENT ---
-   */
+  /* Global heading font unification using serif fonts, including Markdown content headings
+     Changed from Playfair Display (decorative font) to Crimson Pro + Noto Serif (serif fonts)
+     This ensures all ###, ## Markdown headings use serif fonts
+     Note: Welcome screen headings maintain decorative design */
   h1,
   h2,
   h3,
@@ -366,9 +350,7 @@ body {
   }
 }
 
-/* --- BEGIN COMMENT ---
-🔥 最后的保险 - 现在所有字体都指向serif，保持一致性
---- END COMMENT --- */
+/* Final font fallback - all fonts now point to serif for consistency */
 @layer utilities {
   .force-font-sans {
     font-family:
@@ -400,9 +382,7 @@ body {
   }
 }
 
-/* --- BEGIN COMMENT ---
-🎯 代码块字体大小调整重置 - 等宽字体不需要font-size-adjust
---- END COMMENT --- */
+/* Code block font size adjustment reset - monospace fonts don't need font-size-adjust */
 .font-mono,
 code,
 pre,
@@ -547,13 +527,8 @@ body.default-page {
   animation: slideInDown 200ms ease-out forwards;
 }
 
-/* --- BEGIN MODIFIED COMMENT ---
- * 🎯 Markdown标题也使用衬线字体，保持与正文一致
- * 修改前：使用 Playfair Display + 思源黑体 (装饰性字体)
- * 修改后：使用 Crimson Pro + 思源宋体 (衬线字体)
- * --- END MODIFIED COMMENT ---
- */
-.markdown-body h1,
+/* 🎯 Markdown标题也使用衬线字体，保持与正文一致 */
+*/ .markdown-body h1,
 .markdown-body h2,
 .markdown-body h3,
 .markdown-body h4,
@@ -563,9 +538,7 @@ body.default-page {
     var(--font-crimson), var(--font-noto-serif), Georgia, serif !important;
 }
 
-/* --- BEGIN COMMENT ---
-Chatflow 执行进度条相关样式
---- END COMMENT --- */
+/* Chatflow execution progress bar related styles */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -615,10 +588,8 @@ Chatflow 执行进度条相关样式
   animation: node-status-transition 0.3s ease-out;
 }
 
-/* --- BEGIN COMMENT ---
-🎯 Chatflow Iteration 层级指示样式
-紧贴bar左边缘的装饰线，与bar风格保持一致
---- END COMMENT --- */
+/* Chatflow Iteration hierarchy indicator styles
+   Decorative line close to bar left edge, consistent with bar style */
 
 /* 迭代节点容器 */
 .iteration-node {
@@ -669,9 +640,7 @@ Chatflow 执行进度条相关样式
   background: #57534e; /* stone-600 */
 }
 
-/* --- BEGIN COMMENT ---
-🎯 悬停效果：装饰线变宽变亮，连接点也相应变化
---- END COMMENT --- */
+/* Hover effect: decorative line becomes wider and brighter, connection point changes accordingly */
 .iteration-node:hover::before {
   width: 4px;
   left: -2px;
@@ -701,10 +670,8 @@ Chatflow 执行进度条相关样式
   background: #78716c; /* stone-500 */
 }
 
-/* --- BEGIN COMMENT ---
-🎯 Chatflow Loop 层级指示样式
-与Iteration保持完全一致的样式和行为
---- END COMMENT --- */
+/* Chatflow Loop hierarchy indicator styles
+   Maintain completely consistent styles and behavior with Iteration */
 
 /* 循环节点容器 */
 .loop-node {

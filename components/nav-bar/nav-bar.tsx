@@ -62,21 +62,15 @@ export function NavBar() {
         )}
       >
         <div className="flex items-center space-x-2">
-          {/* --- BEGIN MODIFIED COMMENT ---
-          左侧：当前对话标题按钮，支持动态隐藏策略，仅在历史对话页面显示
-          --- END MODIFIED COMMENT --- */}
+          {/* Left side: current conversation title button, supports dynamic hiding strategy, only shows on history chat page */}
           <ConversationTitleButton />
         </div>
 
         <div className="flex items-center space-x-2">
-          {/* --- BEGIN COMMENT ---
-          工作流历史记录按钮（仅在工作流和文本生成页面显示）
-          --- END COMMENT --- */}
+          {/* Workflow history button (only shows on workflow and text generation pages) */}
           <WorkflowHistoryButton />
 
-          {/* --- BEGIN COMMENT ---
-          用户头像按钮
-          --- END COMMENT --- */}
+          {/* User avatar button */}
           <DesktopUserAvatar />
         </div>
       </header>

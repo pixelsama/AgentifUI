@@ -153,14 +153,10 @@ export function RegisterForm() {
         </div>
       )}
 
-      {/* --- BEGIN COMMENT --- */}
-      {/* 社交登录区域 */}
-      {/* --- END COMMENT --- */}
+      {/* Social login area */}
       <SocialAuthButtons type="register" redirectTo="/chat" />
 
-      {/* --- BEGIN COMMENT --- */}
-      {/* 分割线 */}
-      {/* --- END COMMENT --- */}
+      {/* Divider line */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <div
@@ -386,9 +382,7 @@ export function RegisterForm() {
       </form>
 
       <div className="space-y-3 text-center">
-        {/* --- BEGIN COMMENT --- */}
-        {/* 手机号登录链接 */}
-        {/* --- END COMMENT --- */}
+        {/* Phone login link */}
         <div>
           <Link
             href="/phone-login"

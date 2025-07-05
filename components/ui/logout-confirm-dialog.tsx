@@ -17,10 +17,10 @@ interface LogoutConfirmDialogProps {
 }
 
 /**
- * 退出登录确认对话框组件 - Stone风格设计
- * 桌面端：居中模态框，圆润石头风格
- * 移动端：底部弹出样式，更大的触摸区域
- * 支持国际化和响应式设计
+ * Logout confirmation dialog component - Stone style design
+ * Desktop: Centered modal with rounded stone style
+ * Mobile: Bottom sheet style with larger touch areas
+ * Supports internationalization and responsive design
  */
 export function LogoutConfirmDialog({
   isOpen,
@@ -35,12 +35,12 @@ export function LogoutConfirmDialog({
   const [mounted, setMounted] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // 客户端挂载后才能使用Portal
+  // Can only use Portal after client-side mounting
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // 处理ESC键关闭
+  // Handle ESC key close
   useEffect(() => {
     if (!isOpen) return;
 
@@ -54,7 +54,7 @@ export function LogoutConfirmDialog({
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isOpen, onClose, isLoggingOut]);
 
-  // 处理点击外部关闭
+  // Handle click outside to close
   useEffect(() => {
     if (!isOpen) return;
 
@@ -68,7 +68,7 @@ export function LogoutConfirmDialog({
       }
     };
 
-    // 添加延迟，避免打开时立即关闭
+    // Add delay to prevent immediate close when opening
     const timer = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside);
     }, 100);
@@ -79,7 +79,7 @@ export function LogoutConfirmDialog({
     };
   }, [isOpen, onClose, isLoggingOut]);
 
-  // 处理移动端滑动关闭
+  // Handle mobile swipe to close
   useEffect(() => {
     if (!isOpen || !isMobile || !dialogRef.current || isLoggingOut) return;
 
@@ -104,10 +104,10 @@ export function LogoutConfirmDialog({
       const deltaY = currentY - startY;
 
       if (deltaY > 100) {
-        // 向下滑动超过阈值，关闭弹窗
+        // If the swipe down exceeds the threshold, close the dialog
         onClose();
       } else {
-        // 恢复原位
+        // Restore to original position
         dialog.style.transform = '';
       }
     };
@@ -123,7 +123,7 @@ export function LogoutConfirmDialog({
     };
   }, [isOpen, isMobile, onClose, isLoggingOut]);
 
-  // 点击背景关闭
+  // Click background to close
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && !isLoggingOut) {
       onClose();
@@ -168,9 +168,7 @@ export function LogoutConfirmDialog({
           isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         )}
       >
-        {/* --- BEGIN COMMENT ---
-        桌面端图标区域 - 居中设计
-        --- END COMMENT --- */}
+        {/* Desktop icon area - centered design */}
         <div className="flex flex-col items-center px-8 pt-8 pb-6">
           <div
             className={cn(
@@ -203,9 +201,7 @@ export function LogoutConfirmDialog({
           </p>
         </div>
 
-        {/* --- BEGIN COMMENT ---
-        桌面端按钮区域 - 水平布局
-        --- END COMMENT --- */}
+        {/* Desktop button area - horizontal layout */}
         <div className="flex items-center gap-3 p-6 pt-0 pb-8">
           <button
             onClick={onClose}
@@ -238,9 +234,7 @@ export function LogoutConfirmDialog({
           </button>
         </div>
 
-        {/* --- BEGIN COMMENT ---
-        关闭按钮 - 右上角
-        --- END COMMENT --- */}
+        {/* Close button - top right corner */}
         <button
           onClick={onClose}
           disabled={isLoggingOut}
@@ -259,7 +253,7 @@ export function LogoutConfirmDialog({
     </div>
   );
 
-  // 移动端底部弹出样式 - Stone风格设计
+  // Mobile bottom sheet style - Stone style design
   const mobileDialog = (
     <div
       className={cn(
@@ -283,9 +277,7 @@ export function LogoutConfirmDialog({
         )}
         style={{ maxHeight: '90vh', overflowY: 'auto' }}
       >
-        {/* --- BEGIN COMMENT ---
-        移动端顶部拖动条 - 更粗更明显
-        --- END COMMENT --- */}
+        {/* Mobile top drag handle - thicker and more visible */}
         <div className="flex items-center justify-center pt-4 pb-2">
           <div
             className={cn(
@@ -295,9 +287,7 @@ export function LogoutConfirmDialog({
           ></div>
         </div>
 
-        {/* --- BEGIN COMMENT ---
-        移动端图标和内容区域
-        --- END COMMENT --- */}
+        {/* Mobile icon and content area */}
         <div className="flex flex-col items-center px-6 pt-4 pb-8">
           <div
             className={cn(
@@ -329,9 +319,7 @@ export function LogoutConfirmDialog({
             {t('message')}
           </p>
 
-          {/* --- BEGIN COMMENT ---
-          移动端按钮区域 - 垂直排列，更大的触摸区域
-          --- END COMMENT --- */}
+          {/* Mobile button area - vertical layout with larger touch areas */}
           <div className="w-full space-y-3">
             <button
               onClick={handleConfirmLogout}
@@ -370,6 +358,6 @@ export function LogoutConfirmDialog({
     </div>
   );
 
-  // 根据设备类型返回相应的对话框
+  // Return the corresponding dialog based on the device type
   return createPortal(isMobile ? mobileDialog : desktopDialog, document.body);
 }

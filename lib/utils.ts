@@ -5,11 +5,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- BEGIN ADDITION ---
-// 格式化文件大小单位
-// @param bytes - 文件字节数
-// @param decimals - 保留的小数位数 (默认为2)
-// @returns 格式化后的文件大小字符串 (例如 "1.23 MB")
+/**
+ * Format file size to human readable string
+ * @param bytes - File size in bytes
+ * @param decimals - Number of decimal places (default: 2)
+ * @returns Formatted file size string (e.g. "1.23 MB")
+ */
 export function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return '0 Bytes';
 
@@ -21,4 +22,3 @@ export function formatBytes(bytes: number, decimals = 2): string {
 
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
-// --- END ADDITION ---

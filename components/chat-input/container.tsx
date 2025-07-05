@@ -4,9 +4,7 @@ import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { useWelcomeLayout } from '@lib/hooks/use-welcome-layout';
 import { cn } from '@lib/utils';
 
-// --- BEGIN MODIFIED COMMENT ---
-// 容器组件 - 使用智能布局系统
-// --- END MODIFIED COMMENT ---
+// Container component - uses intelligent layout system
 interface ChatContainerProps {
   children: React.ReactNode;
   isWelcomeScreen?: boolean;
@@ -34,10 +32,8 @@ export const ChatContainer = ({
   const { colors } = useThemeColors();
   const { input: inputPosition } = useWelcomeLayout();
 
-  // --- BEGIN MODIFIED COMMENT ---
-  // 基本样式，包括绝对定位和宽度
-  // 简化过渡效果，使用闪烁效果而非滑动
-  // --- END MODIFIED COMMENT ---
+  // Base styles including absolute positioning and width
+  // Simplified transition effects using opacity instead of sliding
   const baseClasses = cn(
     'absolute left-1/2 w-full', // 定位和宽度
     widthClass,

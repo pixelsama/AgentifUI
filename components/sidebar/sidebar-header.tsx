@@ -119,14 +119,10 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
 
   return (
     <div className={cn('flex flex-col gap-2 px-3 py-4')}>
-      {/* --- BEGIN COMMENT ---
-      布局容器 - 展开时水平排列按钮和文字
-      --- END COMMENT --- */}
+      {/* Layout container - horizontal arrangement of buttons and text when expanded */}
       <div className={cn('flex items-center', isExpanded ? 'gap-2' : '')}>
-        {/* --- BEGIN COMMENT ---
-        侧栏控制按钮 - 固定大小，默认显示窗口图标，悬停时fade到箭头图标
-        在slim状态下显示右侧tooltip
-        --- END COMMENT --- */}
+        {/* Sidebar control button - fixed size, shows window icon by default, fades to arrow icon on hover */}
+        {/* Shows right-side tooltip in slim state */}
         {!isExpanded ? (
           <TooltipWrapper
             content={t('expand')}
@@ -184,9 +180,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
                 )}
               />
 
-              {/* --- BEGIN COMMENT ---
-              图标容器 - 包含默认图标和悬停图标的叠加效果
-              --- END COMMENT --- */}
+              {/* Icon container - contains default icon and hover icon overlay effects */}
               <span
                 className={cn(
                   'relative z-10 flex h-5 w-5 flex-shrink-0 items-center justify-center',
@@ -272,9 +266,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               )}
             />
 
-            {/* --- BEGIN COMMENT ---
-            图标容器 - 包含默认图标和悬停图标的叠加效果
-            --- END COMMENT --- */}
+            {/* Icon container - contains default icon and hover icon overlay effects */}
             <span
               className={cn(
                 'relative z-10 flex h-5 w-5 flex-shrink-0 items-center justify-center',
@@ -307,9 +299,7 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
           </div>
         )}
 
-        {/* --- BEGIN COMMENT ---
-        项目名称 - 展开时作为独立文字显示，样式与按钮一致
-        --- END COMMENT --- */}
+        {/* Project name - displayed as independent text when expanded, style consistent with buttons */}
         {isExpanded && (
           <div
             className={cn(

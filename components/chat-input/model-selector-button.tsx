@@ -269,11 +269,9 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
 
   return (
     <div className={cn('relative', className)}>
-      {/* --- BEGIN MODIFIED COMMENT ---
-      主按钮：无边框无背景，serif字体，stone配色
-      移除宽度限制，允许向左扩展显示完整名称
-      修改：使用自定义点击处理器确保焦点管理
-      --- END MODIFIED COMMENT --- */}
+      {/* Main button: borderless, no background, serif font, stone color scheme */}
+      {/* Remove width restrictions, allow leftward expansion to show full name */}
+      {/* Modified: use custom click handler to ensure focus management */}
       <button
         onClick={handleToggleDropdown}
         // 添加onMouseDown防止按钮点击时输入框失去焦点
@@ -281,10 +279,8 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
         className={cn(
           'flex items-center space-x-1 rounded-md px-2 py-1 font-serif text-sm',
           'transition-colors duration-200',
-          // --- BEGIN MODIFIED COMMENT ---
-          // 添加固定高度和垂直居中对齐，确保serif字体垂直居中
-          // cursor控制：只有在下拉框关闭时显示pointer
-          // --- END MODIFIED COMMENT ---
+          // Add fixed height and vertical center alignment, ensure serif font is vertically centered
+          // Cursor control: only show pointer when dropdown is closed
           'h-8 min-h-[2rem]',
           !isOpen ? 'cursor-pointer' : '',
           isDark
@@ -292,10 +288,8 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
             : 'text-stone-600 hover:bg-stone-100'
         )}
       >
-        {/* --- BEGIN MODIFIED COMMENT ---
-        应用名称：移除宽度限制和truncate，允许显示完整名称
-        添加垂直居中对齐确保serif字体正确显示
-        --- END MODIFIED COMMENT --- */}
+        {/* App name: remove width restrictions and truncate, allow full name display */}
+        {/* Add vertical center alignment to ensure serif font displays correctly */}
         <span
           className={cn(
             'font-serif whitespace-nowrap',
@@ -305,10 +299,8 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
           {currentAppName}
         </span>
 
-        {/* --- BEGIN COMMENT ---
-        右侧图标区域：固定宽度，显示v/反v或spinner
-        支持验证状态的spinner显示
-        --- END COMMENT --- */}
+        {/* Right icon area: fixed width, shows chevron up/down or spinner */}
+        {/* Supports spinner display for validation state */}
         <div className="flex h-4 w-4 flex-shrink-0 items-center justify-center">
           {isOptimisticSwitching || isValidating ? (
             <Loader2 className="h-3 w-3 animate-spin" />
@@ -320,18 +312,14 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
         </div>
       </button>
 
-      {/* --- BEGIN COMMENT ---
-      下拉菜单：只显示模型类型的应用
-      修改：使用自定义点击处理器确保焦点管理
-      --- END COMMENT --- */}
+      {/* Dropdown menu: only shows model-type applications */}
+      {/* Modified: use custom click handler to ensure focus management */}
       {isOpen && (
         <>
           {/* 背景遮罩 */}
           <div className="fixed inset-0 z-10" onClick={handleBackdropClick} />
 
-          {/* --- BEGIN MODIFIED COMMENT ---
-          下拉选项：调整定位，确保与按钮左对齐，允许更宽的下拉菜单
-          --- END MODIFIED COMMENT --- */}
+          {/* Dropdown options: adjust positioning, ensure left alignment with button, allow wider dropdown */}
           <div
             className={cn(
               'absolute bottom-full left-0 mb-1 max-w-[16rem] min-w-[8rem]',
@@ -361,11 +349,9 @@ export function AppSelectorButton({ className }: AppSelectorButtonProps) {
                   className={cn(
                     'w-full px-3 py-2 text-left font-serif text-sm',
                     'transition-colors duration-150',
-                    // --- BEGIN MODIFIED COMMENT ---
-                    // 移除truncate，允许显示完整的应用名称
-                    // 使用whitespace-nowrap防止换行，但允许水平滚动
-                    // 添加cursor pointer
-                    // --- END MODIFIED COMMENT ---
+                    // Remove truncate, allow full app name display
+                    // Use whitespace-nowrap to prevent line breaks, but allow horizontal scrolling
+                    // Add cursor pointer
                     'cursor-pointer whitespace-nowrap',
                     isDark ? 'hover:bg-stone-600/60' : 'hover:bg-stone-200/60',
                     app.instance_id === currentAppId &&

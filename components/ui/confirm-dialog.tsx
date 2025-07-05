@@ -204,9 +204,7 @@ export function ConfirmDialog({
           isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         )}
       >
-        {/* --- BEGIN COMMENT ---
-        桌面端图标区域 - 居中设计
-        --- END COMMENT --- */}
+        {/* Desktop icon area - center design */}
         <div className="flex flex-col items-center px-8 pt-8 pb-6">
           <div
             className={cn(
@@ -239,9 +237,7 @@ export function ConfirmDialog({
           </p>
         </div>
 
-        {/* --- BEGIN COMMENT ---
-        桌面端按钮区域 - 水平布局
-        --- END COMMENT --- */}
+        {/* Desktop button area - horizontal layout */}
         <div className="flex items-center gap-3 p-6 pt-0 pb-8">
           <button
             onClick={onClose}
@@ -274,9 +270,7 @@ export function ConfirmDialog({
           </button>
         </div>
 
-        {/* --- BEGIN COMMENT ---
-        关闭按钮 - 右上角
-        --- END COMMENT --- */}
+        {/* Close button - top right corner */}
         <button
           onClick={onClose}
           disabled={isLoading}
@@ -319,9 +313,7 @@ export function ConfirmDialog({
         )}
         style={{ maxHeight: '90vh', overflowY: 'auto' }}
       >
-        {/* --- BEGIN COMMENT ---
-        移动端顶部拖动条 - 更粗更明显
-        --- END COMMENT --- */}
+        {/* Mobile top drag bar - thicker and more visible */}
         <div className="flex items-center justify-center pt-4 pb-2">
           <div
             className={cn(
@@ -331,9 +323,7 @@ export function ConfirmDialog({
           ></div>
         </div>
 
-        {/* --- BEGIN COMMENT ---
-        移动端图标和内容区域
-        --- END COMMENT --- */}
+        {/* Mobile icon and content area */}
         <div className="flex flex-col items-center px-6 pt-4 pb-8">
           <div
             className={cn(
@@ -365,9 +355,7 @@ export function ConfirmDialog({
             {message}
           </p>
 
-          {/* --- BEGIN COMMENT ---
-          移动端按钮区域 - 垂直排列，更大的触摸区域
-          --- END COMMENT --- */}
+          {/* Mobile button area - vertical layout with larger touch area */}
           <div className="w-full space-y-3">
             <button
               onClick={onConfirm}

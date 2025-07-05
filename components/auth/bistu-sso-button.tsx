@@ -74,9 +74,7 @@ export function BistuSSOButton({
       disabled={disabled || isLoading}
       onClick={handleSSOLogin}
     >
-      {/* --- BEGIN COMMENT --- */}
-      {/* 根据loading状态显示不同图标 */}
-      {/* --- END COMMENT --- */}
+      {/* Show different icons based on loading state */}
       {isLoading ? (
         <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
           <circle
@@ -105,9 +103,7 @@ export function BistuSSOButton({
         </svg>
       )}
 
-      {/* --- BEGIN COMMENT --- */}
-      {/* 按钮文本内容 */}
-      {/* --- END COMMENT --- */}
+      {/* Button text content */}
       {isLoading ? t('jumpingButton') : children || t('button')}
     </Button>
   );
@@ -157,9 +153,7 @@ export function BistuSSOCard({
       )}
     >
       <div className="space-y-4 text-center">
-        {/* --- BEGIN COMMENT --- */}
-        {/* 标题和说明 */}
-        {/* --- END COMMENT --- */}
+        {/* Title and description */}
         <div>
           <h3
             className={cn(
@@ -179,14 +173,10 @@ export function BistuSSOCard({
           </p>
         </div>
 
-        {/* --- BEGIN COMMENT --- */}
-        {/* 登录按钮 */}
-        {/* --- END COMMENT --- */}
+        {/* Login button */}
         <BistuSSOButton returnUrl={returnUrl} className="w-full font-serif" />
 
-        {/* --- BEGIN COMMENT --- */}
-        {/* 帮助信息 */}
-        {/* --- END COMMENT --- */}
+        {/* Help information */}
         <div
           className={cn(
             'font-serif text-xs',

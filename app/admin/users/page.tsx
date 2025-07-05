@@ -331,9 +331,7 @@ export default function UsersManagementPage() {
       )}
     >
       <div className="mx-auto max-w-7xl p-6">
-        {/* --- BEGIN COMMENT ---
-        页面标题和操作栏 - 优化视觉层次和间距
-        --- END COMMENT --- */}
+        {/* Page title and action bar */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1
@@ -358,9 +356,7 @@ export default function UsersManagementPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* --- BEGIN COMMENT ---
-            刷新按钮 - 优化样式和交互
-            --- END COMMENT --- */}
+            {/* Refresh button */}
             <button
               onClick={() => {
                 loadUsers();
@@ -385,9 +381,7 @@ export default function UsersManagementPage() {
               <span className="hidden sm:inline">刷新数据</span>
             </button>
 
-            {/* --- BEGIN COMMENT ---
-            添加用户按钮 - 优化样式和视觉效果
-            --- END COMMENT --- */}
+            {/* Add user button */}
             <button
               onClick={() => toast.success('添加用户功能开发中')}
               className={cn(
@@ -403,23 +397,17 @@ export default function UsersManagementPage() {
           </div>
         </div>
 
-        {/* --- BEGIN COMMENT ---
-      统计卡片
-      --- END COMMENT --- */}
+        {/* Statistics cards */}
         <UserStatsCards stats={stats} isLoading={loading.stats} />
 
-        {/* --- BEGIN COMMENT ---
-      筛选组件
-      --- END COMMENT --- */}
+        {/* Filter component */}
         <UserFiltersComponent
           filters={filters}
           onFiltersChange={updateFilters}
           onReset={handleResetFilters}
         />
 
-        {/* --- BEGIN COMMENT ---
-        批量操作栏 - 优化设计和交互体验
-        --- END COMMENT --- */}
+        {/* Batch operation bar */}
         {selectedUserIds.length > 0 && (
           <div
             className={cn(
@@ -465,9 +453,7 @@ export default function UsersManagementPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                {/* --- BEGIN COMMENT ---
-              批量角色操作
-              --- END COMMENT --- */}
+                {/* Batch role operations */}
                 <button
                   onClick={() => handleBatchChangeRole('admin')}
                   disabled={loading.batchOperating}
@@ -510,9 +496,7 @@ export default function UsersManagementPage() {
                   设为普通用户
                 </button>
 
-                {/* --- BEGIN COMMENT ---
-              批量状态操作
-              --- END COMMENT --- */}
+                {/* Batch status operations */}
                 <button
                   onClick={() => handleBatchChangeStatus('active')}
                   disabled={loading.batchOperating}
@@ -545,9 +529,7 @@ export default function UsersManagementPage() {
           </div>
         )}
 
-        {/* --- BEGIN COMMENT ---
-        用户表格
-        --- END COMMENT --- */}
+        {/* User table */}
         <UserTable
           users={users}
           selectedUserIds={selectedUserIds}
@@ -561,9 +543,7 @@ export default function UsersManagementPage() {
           onChangeStatus={handleChangeStatus}
         />
 
-        {/* --- BEGIN COMMENT ---
-        分页控制
-        --- END COMMENT --- */}
+        {/* Pagination controls */}
         <PaginationControls />
       </div>
     </div>

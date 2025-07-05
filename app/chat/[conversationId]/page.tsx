@@ -10,11 +10,9 @@ import {
 } from '@components/chat';
 import { ChatInput } from '@components/chat-input';
 import { DynamicSuggestedQuestions } from '@components/chat/dynamic-suggested-questions';
-// 🎯 新增：Chatflow 相关导入
 import { ChatflowFloatingController } from '@components/chatflow/chatflow-floating-controller';
 import { ChatflowNodeTracker } from '@components/chatflow/chatflow-node-tracker';
 import { FilePreviewCanvas } from '@components/file-preview/file-preview-canvas';
-// NavBar 已移至根布局，无需导入
 import { useChatInterface, useChatStateSync } from '@lib/hooks';
 import { useMobile } from '@lib/hooks';
 import { useChatPageState } from '@lib/hooks/use-chat-page-state';
@@ -44,15 +42,15 @@ export default function ChatPage() {
   const pathname = usePathname();
   const t = useTranslations('pages.chat.input');
 
-  // 获取sidebar状态和mobile状态，用于计算backdrop边距
+  // Get sidebar state and mobile state, used to calculate backdrop margin
   const { isExpanded } = useSidebarStore();
   const isMobile = useMobile();
 
-  // 🎯 获取chatflow执行状态清理方法
+  // Get chatflow execution state cleanup method
   const { resetExecution } = useChatflowExecutionStore();
 
-  // 使用 useChatPageState hook 管理聊天页面状态
-  // 这样可以减少页面组件中的状态管理逻辑
+  // Use useChatPageState hook to manage chat page state
+  // This can reduce the state management logic in the page component
   const {
     isWelcomeScreen,
     isSubmitting,
@@ -64,10 +62,10 @@ export default function ChatPage() {
   const isPreviewOpen = useFilePreviewStore(state => state.isPreviewOpen);
   const { colors, isDark } = useThemeColors();
 
-  // 🎯 使用封装的Hook检测chatflow应用
+  // Use the wrapped hook to detect chatflow apps
   const { isChatflowApp } = useChatflowDetection();
 
-  // 🎯 使用封装的Hook管理chatflow状态
+  // Use the wrapped hook to manage chatflow state
   const {
     messages,
     handleSubmit: originalHandleSubmit,
@@ -80,8 +78,8 @@ export default function ChatPage() {
     showFloatingController,
   } = useChatflowState(isChatflowApp);
 
-  // 🎯 关键修复：路由切换时清理chatflow执行状态
-  // 确保切换到历史对话时不会显示之前的节点数据
+  // 🎯 Critical fix: Clean up chatflow execution state when switching routes
+  // Ensure that when switching to historical conversations, previous node data is not displayed
   useLayoutEffect(() => {
     if (
       pathname?.startsWith('/chat/') &&
@@ -91,14 +89,14 @@ export default function ChatPage() {
     ) {
       console.log('[ChatPage] 路由切换到历史对话，清理chatflow执行状态');
 
-      // 清理chatflow执行状态，确保不会显示之前的节点数据
+      // Clean up chatflow execution state, ensure previous node data is not displayed
       resetExecution();
 
       console.log('[ChatPage] chatflow执行状态清理完成');
     }
   }, [pathname, conversationIdFromUrl, resetExecution]);
 
-  // 使用分页加载钩子获取历史消息
+  // Use the pagination loading hook to get historical messages
   const {
     loading,
     hasMoreMessages,
@@ -109,7 +107,7 @@ export default function ChatPage() {
     isLoadingInitial,
   } = useConversationMessages();
 
-  // 使用 wrapHandleSubmit 包装原始的 handleSubmit 函数
+  // Use wrapHandleSubmit to wrap the original handleSubmit function
   const handleSubmit = wrapHandleSubmit(originalHandleSubmit);
 
   const scrollRef = useChatScroll(messages);
@@ -120,8 +118,8 @@ export default function ChatPage() {
 
   const chatInputHeightVar = `${inputHeight || 80}px`;
 
-  // 合并scrollRef和setMessagesContainer
-  // scrollRef是RefObject类型，直接设置current属性
+  // Merge scrollRef and setMessagesContainer
+  // scrollRef is RefObject type, directly set current property
   const setScrollRef = (element: HTMLDivElement | null) => {
     if (scrollRef) {
       scrollRef.current = element;
@@ -129,8 +127,8 @@ export default function ChatPage() {
     setMessagesContainer(element);
   };
 
-  // 只在 /chat/new 路由下调用 useProfile，其他路由不需要
-  // 使用缓存机制，避免loading状态和闪烁
+  // Only call useProfile on /chat/new route, other routes do not need to call
+  // Use cache mechanism to avoid loading state and flickering
   const isNewChat = conversationIdFromUrl === 'new';
   const { profile, isLoading: isProfileLoading } = isNewChat
     ? useProfile()
@@ -144,7 +142,7 @@ export default function ChatPage() {
         colors.mainText.tailwind
       )}
     >
-      {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
+      {/* 🎯 NavBar has been moved to the root layout, no need to render again */}
       <div
         className={cn(
           'relative flex min-h-0 flex-1 flex-col overflow-hidden',
@@ -156,21 +154,17 @@ export default function ChatPage() {
           { '--chat-input-height': chatInputHeightVar } as React.CSSProperties
         }
       >
-        {/* --- BEGIN COMMENT ---
-        页面级 loading，使用 PageLoadingSpinner 组件确保全屏覆盖
-        只在 /chat/new 路由下显示 loading 状态
-        只有在profile还在初始加载时才显示页面级loading
-        --- END COMMENT --- */}
+        {/* Page-level loading, use PageLoadingSpinner component to ensure full-screen coverage
+             Only show loading state on /chat/new route
+             Only show page-level loading when profile is still in initial loading */}
         <PageLoadingSpinner isLoading={isNewChat && isProfileLoading} />
 
         {/* 主要内容 */}
         <div className="min-h-0 flex-1">
-          {/* --- BEGIN COMMENT ---
-          显示欢迎屏幕的条件：
-          1. 新聊天页面且没有消息
-          2. 或者欢迎状态且没有消息且不在提交中
-          --- END COMMENT --- */}
-          {/*暂时使用全名来替代username（昵称），因为username可能为空*/}
+          {/* Conditions for showing welcome screen:
+               1. New chat page with no messages
+               2. Or welcome state with no messages and not submitting */}
+          {/* Use full name instead of username (nickname) for now, because username may be empty */}
           {isNewChat && messages.length === 0 ? (
             <WelcomeScreen username={profile?.username} />
           ) : messages.length === 0 && !isSubmitting && isWelcomeScreen ? (
@@ -180,14 +174,12 @@ export default function ChatPage() {
               ref={setScrollRef}
               className="chat-scroll-container h-full overflow-y-auto scroll-smooth"
             >
-              {/* --- BEGIN COMMENT ---
-              显示"加载更多"按钮或加载指示器的条件：
-              1. 非初始加载状态(避免与初始骨架屏重叠)
-              2. 非新对话或临时对话路径
-              3. 确实有更多消息可加载
-              4. 已经有消息显示（非空消息列表）
-              5. 不在加载更多的状态中（避免闪烁）
-              --- END COMMENT --- */}
+              {/* Conditions for showing "load more" button or loading indicator:
+                   1. Not in initial loading state (avoid overlap with initial skeleton)
+                   2. Not new conversation or temporary conversation path
+                   3. Actually have more messages to load
+                   4. Already have messages displayed (non-empty message list)
+                   5. Not in loading more state (avoid flickering) */}
               {!isLoadingInitial &&
                 hasMoreMessages &&
                 messages.length > 0 &&
@@ -210,10 +202,8 @@ export default function ChatPage() {
                 isLoadingInitial={isLoadingInitial}
               />
 
-              {/* --- BEGIN COMMENT ---
-              🎯 新增：Chatflow 节点跟踪器 - 仅在chatflow应用时显示
-              弹窗由用户主动点击悬浮球控制，或发送消息时自动弹出
-              --- END COMMENT --- */}
+              {/* 🎯 New: Chatflow node tracker - only show for chatflow apps
+                   Popup controlled by user clicking floating ball, or auto-popup when sending messages */}
               {isChatflowApp && showNodeTracker && (
                 <ChatflowNodeTracker
                   isVisible={showNodeTracker}
@@ -229,17 +219,15 @@ export default function ChatPage() {
 
         <ScrollToBottomButton />
 
-        {/* --- BEGIN COMMENT ---
-        🎯 新增：Chatflow 悬浮控制器 - 仅在chatflow应用时显示
-        --- END COMMENT --- */}
+        {/* 🎯 New: Chatflow floating controller - only show for chatflow apps */}
         {isChatflowApp && (
           <ChatflowFloatingController
             isVisible={showFloatingController}
             isTrackerVisible={showNodeTracker}
             onToggleTracker={() => setShowNodeTracker(!showNodeTracker)}
             onClose={() => {
-              // 悬浮球不能关闭，因为它是chatflow应用的核心功能
-              // 如果需要隐藏，可以关闭跟踪器
+              // The floating ball cannot be closed, because it is the core function of the chatflow app
+              // If you need to hide it, you can close the tracker
               setShowNodeTracker(false);
             }}
           />
@@ -258,11 +246,9 @@ export default function ChatPage() {
           showModelSelector={isNewChat && messages.length === 0}
         />
 
-        {/* --- BEGIN COMMENT ---
-        显示动态推荐问题的条件：
-        1. 新聊天页面且没有消息
-        2. 或者欢迎状态且没有消息且不在提交中
-        --- END COMMENT --- */}
+        {/* Conditions for showing dynamic suggested questions:
+             1. New chat page with no messages
+             2. Or welcome state with no messages and not submitting */}
         {isNewChat && messages.length === 0 && (
           <DynamicSuggestedQuestions onQuestionClick={sendDirectMessage} />
         )}

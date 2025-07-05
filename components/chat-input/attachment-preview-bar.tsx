@@ -23,6 +23,12 @@ interface AttachmentPreviewBarProps {
 /**
  * Attachment preview bar component
  * @description Displays uploaded files with preview and manages height animations
+ *
+ * @features
+ * - Dynamic height calculation and animation
+ * - File count limit warnings
+ * - Responsive file preview grid
+ * - Upload retry functionality
  */
 export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({
   isDark = false,
@@ -33,64 +39,52 @@ export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({
   const { uploadConfig } = useFileTypes();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // --- BEGIN MODIFICATION ---
-  // 监听文件列表变化或窗口大小变化，动态计算并通知高度，并设置样式以实现动画
+  // Monitor file list changes or window size changes, dynamically calculate and notify height with animation styles
   useEffect(() => {
     let calculatedHeight = 0;
     const container = containerRef.current;
 
     const calculateAndApplyHeight = () => {
       if (container) {
-        // --- BEGIN COMMENT ---
-        // 先移除临时高度，计算实际内容高度
-        // --- END COMMENT ---
-        container.style.height = ''; // 清除旧高度
+        // First remove temporary height, calculate actual content height
+        container.style.height = ''; // Clear old height
         calculatedHeight = files.length > 0 ? container.scrollHeight : 0;
 
-        // --- BEGIN COMMENT ---
-        // 应用计算出的高度到 style，触发 CSS transition
-        // --- END COMMENT ---
+        // Apply calculated height to style, trigger CSS transition
         container.style.height = `${calculatedHeight}px`;
 
-        // --- BEGIN COMMENT ---
-        // 通知父组件高度变化
-        // --- END COMMENT ---
+        // Notify parent component of height change
         onHeightChange(calculatedHeight);
       }
     };
 
-    // --- BEGIN COMMENT ---
-    // 使用 requestAnimationFrame 确保在 DOM 更新后计算高度
-    // --- END COMMENT ---
+    // Use requestAnimationFrame to ensure height calculation after DOM update
     const rafId = requestAnimationFrame(calculateAndApplyHeight);
 
-    // 使用 ResizeObserver 监听容器内容尺寸变化
+    // Use ResizeObserver to monitor container content size changes
     const resizeObserver = new ResizeObserver(() => {
       requestAnimationFrame(calculateAndApplyHeight);
     });
     if (container) {
-      // 监听内部的 flex 容器，而不是带 overflow 的外部容器
+      // Monitor inner flex container, not outer container with overflow
       const innerFlexContainer = container.querySelector(':scope > div');
       if (innerFlexContainer) {
         resizeObserver.observe(innerFlexContainer);
       }
     }
 
-    // 清理函数
+    // Cleanup function
     return () => {
       cancelAnimationFrame(rafId);
       resizeObserver.disconnect();
-      // 清除高度样式，以便下次正确计算
+      // Clear height style for correct calculation next time
       if (container) {
         container.style.height = '';
       }
     };
-  }, [files.length, onHeightChange]); // 依赖文件数量变化
-  // --- END MODIFICATION ---
+  }, [files.length, onHeightChange]); // Depends on file count changes
 
-  // --- BEGIN COMMENT ---
-  // 如果没有文件，返回空的容器
-  // --- END COMMENT ---
+  // If no files, return empty container
   if (files.length === 0) {
     return (
       <div
@@ -111,13 +105,9 @@ export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({
       )}
       style={{ height: 0 }}
     >
-      {/* --- BEGIN COMMENT ---
-      // 内层容器用于 padding 和 flex 布局，ResizeObserver 监听这个元素
-      // --- END COMMENT ---*/}
+      {/* Inner container for padding and flex layout, ResizeObserver monitors this element */}
       <div className="px-3 pt-3 pb-2">
-        {/* --- BEGIN COMMENT ---
-        // 如果超出数量限制，显示警告信息
-        // --- END COMMENT --- */}
+        {/* If file count exceeds limit, show warning message */}
         {uploadConfig.enabled &&
           uploadConfig.maxFiles > 0 &&
           files.length > uploadConfig.maxFiles && (
@@ -134,9 +124,7 @@ export const AttachmentPreviewBar: React.FC<AttachmentPreviewBarProps> = ({
             </div>
           )}
 
-        {/* --- BEGIN COMMENT ---
-        // 文件列表容器
-        // --- END COMMENT --- */}
+        {/* File list container */}
         <div className="flex flex-wrap gap-2">
           {files.map(file => (
             <AttachmentPreviewItem

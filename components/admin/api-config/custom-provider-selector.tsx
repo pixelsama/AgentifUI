@@ -43,9 +43,7 @@ export function CustomProviderSelector({
 
   return (
     <div className={cn('relative', className)}>
-      {/* --- BEGIN COMMENT ---
-      主选择按钮：响应式设计
-      --- END COMMENT --- */}
+      {/* Main selection button: responsive design */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -91,14 +89,10 @@ export function CustomProviderSelector({
         </div>
       </button>
 
-      {/* --- BEGIN COMMENT ---
-      错误信息显示
-      --- END COMMENT --- */}
+      {/* Error message display */}
       {error && <p className="mt-1 font-serif text-sm text-red-600">{error}</p>}
 
-      {/* --- BEGIN COMMENT ---
-      下拉选项菜单：响应式设计
-      --- END COMMENT --- */}
+      {/* Dropdown options menu: responsive design */}
       {isOpen && (
         <>
           {/* 背景遮罩 */}

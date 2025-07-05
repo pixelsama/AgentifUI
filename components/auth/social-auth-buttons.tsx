@@ -104,9 +104,7 @@ export function SocialAuthButtons({
         </div>
       )}
 
-      {/* --- BEGIN COMMENT --- */}
-      {/* GitHub登录按钮 - 主要使用的OAuth方式 */}
-      {/* --- END COMMENT --- */}
+      {/* GitHub login button - primary OAuth method */}
       <Button
         type="button"
         variant="outline"

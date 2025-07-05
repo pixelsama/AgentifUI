@@ -425,17 +425,16 @@ export function SidebarChatList({
   return (
     <>
       <div className="flex flex-col space-y-1">
-        {/* --- BEGIN COMMENT ---
-        // 近期对话粘性标题栏：模仿常用应用的样式，添加粘性定位
-        // 🎯 修复：只有在有对话时才显示标题，避免出现后消失的问题
-        
+        {/* Recent chats sticky header: mimic favorite apps style, add sticky positioning */}
+        {/* Fix: only show title when there are conversations to avoid appearing then disappearing */}
+
         {hasAnyConversations && (
           <div
             className={cn(
               'sticky top-0 z-40 ml-[6px] flex items-center px-2 py-1 font-serif text-xs font-medium',
-                            // 使用与sidebar相同的背景色，确保粘性效果完美
+              // 使用与sidebar相同的背景色，确保粘性效果完美
               // 确保z-index足够高，完全覆盖下方内容
-                            colors.sidebarBackground.tailwind
+              colors.sidebarBackground.tailwind
             )}
           >
             <span
@@ -555,16 +554,12 @@ export function SidebarChatList({
                 </div>
               );
             })}
-            {/* --- BEGIN COMMENT ---
-            🎯 移除查看全部历史按钮，已提升到Header区域
-            --- END COMMENT --- */}
+            {/* Remove view all history button, moved to Header area */}
           </div>
         </div>
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      重命名对话框
-      --- END COMMENT --- */}
+      {/* Rename dialog */}
       <InputDialog
         isOpen={showRenameDialog}
         onClose={() => !isOperating && setShowRenameDialog(false)}
@@ -578,9 +573,7 @@ export function SidebarChatList({
         maxLength={50}
       />
 
-      {/* --- BEGIN COMMENT ---
-      删除确认对话框
-      --- END COMMENT --- */}
+      {/* Delete confirmation dialog */}
       <ConfirmDialog
         isOpen={showDeleteDialog}
         onClose={() => !isOperating && setShowDeleteDialog(false)}

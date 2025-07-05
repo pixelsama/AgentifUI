@@ -42,10 +42,8 @@ export const FileTypeSelector = ({
   const attachmentFiles = useAttachmentStore(state => state.files);
   const t = useTranslations('pages.chat');
 
-  // --- BEGIN COMMENT ---
-  // 检查是否可以上传文件的逻辑
-  // 考虑管理界面配置和当前已上传文件数量
-  // --- END COMMENT ---
+  // Logic to check if files can be uploaded
+  // Considers admin interface configuration and current uploaded file count
   const canUpload = uploadConfig.enabled && uploadConfig.maxFiles > 0;
   const hasReachedLimit = attachmentFiles.length >= uploadConfig.maxFiles;
   const isDisabled = disabled || !canUpload || hasReachedLimit;
@@ -196,9 +194,7 @@ export const FileTypeSelector = ({
           </div>
         ) : (
           <>
-            {/* --- BEGIN COMMENT ---
-            // 显示上传配置信息
-            // --- END COMMENT --- */}
+            {/* Display upload configuration information */}
             <div
               className={cn(
                 'mb-1 border-b px-3 py-1 font-serif text-xs',

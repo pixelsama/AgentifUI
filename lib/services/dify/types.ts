@@ -562,43 +562,46 @@ export interface DifyStopTaskResponse {
   result: 'success'; // 固定返回 success
 }
 
-// --- BEGIN ADDITION ---
-// Dify 文件上传 API 响应体
-// POST /files/upload
+/**
+ * Dify file upload API response
+ * @description POST /files/upload
+ */
 export interface DifyFileUploadResponse {
-  id: string; // 文件 ID (UUID)
+  id: string; // File ID (UUID)
   name: string;
   size: number;
   extension: string;
   mime_type: string;
-  created_by: string | number; // 用户 ID (可能是数字或字符串)
-  created_at: number; // Unix 时间戳
+  created_by: string | number; // User ID (can be number or string)
+  created_at: number; // Unix timestamp
 }
-// --- END ADDITION ---
 
-// --- BEGIN MESSAGES API TYPES ---
+/**
+ * Messages API Type Definitions
+ * @description Type definitions for Dify messages API endpoints
+ */
 
-// /messages API - 通用错误响应结构
-// 这个可以作为 message-service.ts 抛出错误的类型参考
+// /messages API - Common error response structure
+// This can be used as type reference for message-service.ts error handling
 export interface DifyApiError {
-  status: number; // HTTP 状态码
-  code: string; // Dify 内部错误码或 HTTP 状态码字符串
-  message: string; // 错误描述
-  [key: string]: any; // 允许其他可能的错误字段，如 Dify 返回的 validation_errors 等
+  status: number; // HTTP status code
+  code: string; // Dify internal error code or HTTP status code string
+  message: string; // Error description
+  [key: string]: any; // Allow other possible error fields like validation_errors from Dify
 }
 
-// /messages API - 消息文件对象结构
+// /messages API - Message file object structure
 export interface DifyMessageFile {
-  id: string; // 文件 ID
-  type: string; // 文件类型，例如 "image" (图片)
-  url: string; // 文件的预览地址
-  belongs_to: 'user' | 'assistant'; // 文件归属方，"user" (用户) 或 "assistant" (助手)
+  id: string; // File ID
+  type: string; // File type, e.g. "image"
+  url: string; // File preview URL
+  belongs_to: 'user' | 'assistant'; // File owner: "user" or "assistant"
 }
 
-// /messages API - 消息反馈信息结构
+// /messages API - Message feedback information structure
 export interface DifyMessageFeedback {
-  rating: 'like' | 'dislike' | null; // 点赞 'like' / 点踩 'dislike'，或者可能为 null
-  // 根据实际 API 可能还有其他反馈相关的字段，例如 content
+  rating: 'like' | 'dislike' | null; // Like 'like' / Dislike 'dislike', or null
+  // May have other feedback-related fields based on actual API, e.g. content
 }
 
 // /messages API - 单条消息对象结构 (与 SSE 中的 DifyMessage 不同，这是获取历史消息的特定结构)
@@ -628,9 +631,10 @@ export interface GetMessagesResponse {
   has_more: boolean; // 是否还有更早的聊天记录可以加载
   limit: number; // 本次请求实际返回的聊天记录条数
 }
-// --- END MESSAGES API TYPES ---
-
-// --- BEGIN CONVERSATIONS API TYPES ---
+/**
+ * Conversations API Type Definitions
+ * @description Type definitions for Dify conversations API endpoints
+ */
 // /conversations API - 获取会话列表的参数
 export interface GetConversationsParams {
   user: string; // 用户标识，必需
@@ -703,7 +707,7 @@ export interface GetConversationVariablesResponse {
   data: ConversationVariable[]; // 变量列表
 }
 
-// --- END CONVERSATIONS API TYPES ---
+// End of Conversations API types
 
 // 应用参数相关类型定义 (GET /parameters)
 /**

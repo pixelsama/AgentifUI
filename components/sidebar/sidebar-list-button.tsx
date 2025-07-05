@@ -118,10 +118,8 @@ export function SidebarListButton({
       onKeyDown={handleKeyDown}
       {...props}
     >
-      {/* --- BEGIN COMMENT ---
-      🎯 主要内容区域：包含图标和文本，点击处理
-      移除独立的悬停效果，使用整体的悬停效果
-      --- END COMMENT --- */}
+      {/* Main content area: contains icon and text, handles click events */}
+      {/* Removed independent hover effects, uses overall hover effect */}
       <div
         className={cn(
           'flex min-w-0 flex-1 items-center',
@@ -155,10 +153,8 @@ export function SidebarListButton({
         )}
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      🎯 More Actions区域：独立的悬停和点击处理
-      使用更高的CSS优先级来覆盖整体的悬停效果
-      --- END COMMENT --- */}
+      {/* More Actions area: independent hover and click handling */}
+      {/* Uses higher CSS priority to override overall hover effects */}
       {moreActionsTrigger && (
         <div
           className={cn(

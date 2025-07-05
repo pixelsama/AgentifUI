@@ -1,10 +1,8 @@
-// 该文件用于统一导出 markdown-block 目录下的所有原子化组件，
-// 方便在其他地方（如 AssistantMessage）导入。
+// This file provides unified exports for all atomic components in the markdown-block directory,
+// making it convenient to import them in other places (e.g. AssistantMessage).
 export * from './code-block-header';
 export * from './inline-code';
 export * from './code-block';
 export * from './markdown-table';
 export * from './markdown-blockquote';
-// --- BEGIN MODIFIED COMMENT ---
-// 更新：添加了 MarkdownTableContainer 和 MarkdownBlockquote 的导出。
-// --- END MODIFIED COMMENT ---
+// Update: Added exports for MarkdownTableContainer and MarkdownBlockquote

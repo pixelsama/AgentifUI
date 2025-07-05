@@ -91,11 +91,8 @@ export function Home() {
   return (
     <AnimatePresence>
       <div className="relative w-full px-4 py-12 sm:px-6 lg:px-8">
-        {/* --- BEGIN COMMENT ---
-        右上角工具栏：管理员按钮（左）+ 语言切换器（右）
-        使用绝对定位，响应式设计
-        移动端隐藏，避免布局问题
-        --- END COMMENT --- */}
+        {/* Top-right toolbar: Admin button (left) + Language switcher (right) */}
+        {/* Uses absolute positioning with responsive design, hidden on mobile to avoid layout issues */}
         <div className="fixed top-4 right-4 z-50 hidden flex-col items-end gap-2 sm:flex sm:flex-row sm:items-center sm:gap-3 lg:top-6 lg:right-6">
           <AdminButton />
           <LanguageSwitcher variant="floating" />

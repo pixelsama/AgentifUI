@@ -49,9 +49,7 @@ export function CustomSelect({
 
   return (
     <div ref={selectRef} className={cn('relative', className)}>
-      {/* --- BEGIN COMMENT ---
-      选择器触发按钮
-      --- END COMMENT --- */}
+      {/* Selector trigger button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -77,9 +75,7 @@ export function CustomSelect({
         />
       </button>
 
-      {/* --- BEGIN COMMENT ---
-      下拉选项列表
-      --- END COMMENT --- */}
+      {/* Dropdown options list */}
       {isOpen && (
         <div
           className={cn(

@@ -84,16 +84,12 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <div className={cn('relative inline-block', className)} ref={dropdownRef}>
-      {/* --- BEGIN COMMENT ---
-      触发器
-      --- END COMMENT --- */}
+      {/* Trigger */}
       <div ref={triggerRef} onClick={() => setIsOpen(!isOpen)}>
         {trigger}
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      下拉菜单 - 使用fixed定位基于整个page
-      --- END COMMENT --- */}
+      {/* Dropdown menu - uses fixed positioning based on entire page */}
       {isOpen && (
         <div
           className={cn(

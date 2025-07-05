@@ -219,9 +219,7 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({
             )}
           >
             <div className="flex flex-col space-y-2">
-              {/* --- BEGIN COMMENT ---
-              图标
-              --- END COMMENT --- */}
+              {/* Icon */}
               <div
                 className={cn(
                   'flex h-8 w-8 items-center justify-center rounded-lg',
@@ -231,9 +229,7 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({
                 <div className={cn('scale-75', colors.icon)}>{card.icon}</div>
               </div>
 
-              {/* --- BEGIN COMMENT ---
-              数据内容
-              --- END COMMENT --- */}
+              {/* Data content */}
               <div className="min-w-0">
                 <p
                   className={cn(
@@ -252,9 +248,7 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({
                   {card.value}
                 </p>
 
-                {/* --- BEGIN COMMENT ---
-                趋势信息（如果有）
-                --- END COMMENT --- */}
+                {/* Trend information (if available) */}
                 {card.trend && (
                   <div className="mt-1 flex items-center gap-1">
                     {card.trend.isPositive ? (

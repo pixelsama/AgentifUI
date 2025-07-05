@@ -110,30 +110,20 @@ export function LoginForm() {
         </div>
       )}
 
-      {/* --- BEGIN COMMENT --- */}
-      {/* 登录选项区域 */}
-      {/* --- END COMMENT --- */}
+      {/* Login options area */}
       <div className="space-y-6">
-        {/* --- BEGIN COMMENT --- */}
-        {/* 条件渲染：仅在SSO专用模式下显示北信科SSO登录 */}
-        {/* --- END COMMENT --- */}
+        {/* Conditional rendering: only show BISTU SSO login in SSO-only mode */}
         {ssoOnlyMode && <BistuSSOCard returnUrl="/chat" />}
 
-        {/* --- BEGIN COMMENT --- */}
-        {/* 条件渲染：仅在非SSO专用模式下显示社交登录 */}
-        {/* --- END COMMENT --- */}
+        {/* Conditional rendering: only show social login in non-SSO-only mode */}
         {!ssoOnlyMode && (
           <>
-            {/* --- BEGIN COMMENT --- */}
-            {/* 社交登录区域 */}
-            {/* --- END COMMENT --- */}
+            {/* Social login area */}
             <SocialAuthButtons type="login" redirectTo="/chat" />
           </>
         )}
 
-        {/* --- BEGIN COMMENT --- */}
-        {/* 分割线：根据模式调整显示文本 */}
-        {/* --- END COMMENT --- */}
+        {/* Divider line: adjust display text based on mode */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div
@@ -157,9 +147,7 @@ export function LoginForm() {
           </div>
         </div>
 
-        {/* --- BEGIN COMMENT --- */}
-        {/* 邮箱密码登录 - 始终显示 */}
-        {/* --- END COMMENT --- */}
+        {/* Email password login - always shown */}
         <>
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-5">
@@ -241,9 +229,7 @@ export function LoginForm() {
               </div>
             </div>
 
-            {/* --- BEGIN COMMENT --- */}
-            {/* 条件渲染：仅在非SSO专用模式下显示忘记密码链接 */}
-            {/* --- END COMMENT --- */}
+            {/* Conditional rendering: only show forgot password link in non-SSO-only mode */}
             {!ssoOnlyMode && (
               <div className="flex items-center justify-end">
                 <div className="text-sm">
@@ -274,14 +260,10 @@ export function LoginForm() {
             </div>
           </form>
 
-          {/* --- BEGIN COMMENT --- */}
-          {/* 条件渲染：仅在非SSO专用模式下显示手机号登录和注册链接 */}
-          {/* --- END COMMENT --- */}
+          {/* Conditional rendering: only show phone login and register links in non-SSO-only mode */}
           {!ssoOnlyMode && (
             <div className="mt-6 space-y-3 text-center">
-              {/* --- BEGIN COMMENT --- */}
-              {/* 手机号登录链接 */}
-              {/* --- END COMMENT --- */}
+              {/* Phone login link */}
               <div>
                 <Link
                   href="/phone-login"

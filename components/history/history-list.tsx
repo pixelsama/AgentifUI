@@ -25,28 +25,46 @@ import * as React from 'react';
 
 import { useFormatter, useTranslations } from 'next-intl';
 
-// --- BEGIN COMMENT ---
-// 历史对话列表组件
-// 显示对话列表，支持搜索、删除、重命名等功能和多选功能
-// --- END COMMENT ---
+/**
+ * History list component properties
+ * @description Defines the props interface for the history list component
+ */
 interface HistoryListProps {
+  /** List of conversations to display */
   conversations: Conversation[];
+  /** Whether the list is currently loading */
   isLoading: boolean;
+  /** Callback when a conversation is clicked */
   onConversationClick: (id: string) => void;
+  /** Current search query */
   searchQuery: string;
+  /** Total number of conversations */
   total: number;
+  /** Callback to delete a conversation */
   onDelete: (conversationId: string) => Promise<boolean>;
+  /** Callback to rename a conversation */
   onRename: (conversationId: string, newTitle: string) => Promise<boolean>;
+  /** Callback to refresh the conversation list */
   onRefresh: () => void;
+  /** Whether selection mode is enabled */
   isSelectionMode?: boolean;
+  /** Set of selected conversation IDs */
   selectedConversations?: Set<string>;
+  /** Callback when a conversation is selected/deselected */
   onSelectConversation?: (id: string, selected: boolean) => void;
 }
 
-// --- BEGIN COMMENT ---
-// 历史对话列表组件
-// 确保组件正确返回 React 元素
-// --- END COMMENT ---
+/**
+ * History list component
+ * @description Displays conversation list with search, delete, rename and multi-selection functionality
+ *
+ * @features
+ * - Conversation list display
+ * - Search functionality
+ * - Delete and rename operations
+ * - Multi-selection support
+ * - Loading and empty states
+ */
 export function HistoryList({
   conversations,
   isLoading,
@@ -65,22 +83,14 @@ export function HistoryList({
   const format = useFormatter();
   const { formatDate } = useDateFormatter();
 
-  // --- BEGIN COMMENT ---
-  // Dialog状态管理
-  // --- END COMMENT ---
+  // Dialog state management
   const [showRenameDialog, setShowRenameDialog] = React.useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [isOperating, setIsOperating] = React.useState(false);
   const [selectedConversation, setSelectedConversation] =
     React.useState<Conversation | null>(null);
 
-  // --- BEGIN COMMENT ---
-  // 移除滚动加载更多功能，因为现在加载所有对话
-  // --- END COMMENT ---
-
-  // --- BEGIN COMMENT ---
-  // 处理重命名对话
-  // --- END COMMENT ---
+  // Handle conversation rename
   const handleRename = async (conversation: Conversation) => {
     if (!conversation.id) return;
 
@@ -96,16 +106,11 @@ export function HistoryList({
       const success = await onRename(selectedConversation.id, newTitle.trim());
 
       if (success) {
-        // --- BEGIN COMMENT ---
-        // 重命名成功后，刷新列表以显示新标题
-        // 标题管理由DynamicTitle组件统一处理，无需手动设置
-        // --- END COMMENT ---
-
-        // 刷新列表以显示新标题
+        // Refresh list to display new title
+        // Title management is handled by DynamicTitle component, no manual setting needed
         onRefresh();
-        // --- BEGIN COMMENT ---
-        // 触发全局同步事件，通知所有组件数据已更新
-        // --- END COMMENT ---
+
+        // Trigger global sync event to notify all components of data update
         conversationEvents.emit();
         setShowRenameDialog(false);
       } else {
@@ -118,9 +123,7 @@ export function HistoryList({
     }
   };
 
-  // --- BEGIN COMMENT ---
-  // 处理删除对话
-  // --- END COMMENT ---
+  // Handle conversation deletion
   const handleDelete = async (conversation: Conversation) => {
     if (!conversation.id) return;
 
@@ -136,11 +139,10 @@ export function HistoryList({
       const success = await onDelete(selectedConversation.id);
 
       if (success) {
-        // 刷新列表以更新显示
+        // Refresh list to update display
         onRefresh();
-        // --- BEGIN COMMENT ---
-        // 触发全局同步事件，通知所有组件数据已更新
-        // --- END COMMENT ---
+
+        // Trigger global sync event to notify all components of data update
         conversationEvents.emit();
         setShowDeleteDialog(false);
       } else {
@@ -153,22 +155,18 @@ export function HistoryList({
     }
   };
 
-  // --- BEGIN COMMENT ---
-  // 处理对话项点击，包含标题设置逻辑
-  // --- END COMMENT ---
+  // Handle conversation item click with title setting logic
   const handleConversationItemClick = (conversation: Conversation) => {
     const conversationId = conversation.external_id || conversation.id || '';
     const title = conversation.title || t('newChat');
     const baseTitle = 'AgentifUI';
     const fullTitle = `${title} | ${baseTitle}`;
 
-    // 调用父组件的点击处理函数
+    // Call parent component's click handler
     onConversationClick(conversationId);
   };
 
-  // --- BEGIN COMMENT ---
-  // 渲染对话项
-  // --- END COMMENT ---
+  // Render individual conversation item
   const renderConversationItem = (conversation: Conversation) => {
     const title = conversation.title || t('newChat');
     const preview = conversation.last_message_preview || t('noMessagePreview');
@@ -180,9 +178,7 @@ export function HistoryList({
       ? selectedConversations.has(conversationId)
       : false;
 
-    // --- BEGIN COMMENT ---
-    // 处理选择复选框点击事件
-    // --- END COMMENT ---
+    // Handle checkbox click event
     const handleCheckboxClick = (e: React.MouseEvent) => {
       e.stopPropagation();
       if (conversationId && onSelectConversation) {
@@ -190,9 +186,7 @@ export function HistoryList({
       }
     };
 
-    // --- BEGIN COMMENT ---
-    // 处理项目点击事件，在选择模式下切换选择状态，否则正常跳转
-    // --- END COMMENT ---
+    // Handle item click event - toggle selection in selection mode, otherwise navigate normally
     const handleItemClick = () => {
       if (isSelectionMode && conversationId && onSelectConversation) {
         onSelectConversation(conversationId, !isSelected);
@@ -207,18 +201,18 @@ export function HistoryList({
         className={cn(
           'group relative flex cursor-pointer items-start rounded-lg p-4',
           'transition-all duration-200 ease-in-out',
-          // 在选择模式下，选中的项目有不同的样式
+          // In selection mode, selected items have different styling
           isSelectionMode &&
             isSelected &&
             (isDark
               ? 'border-stone-500 bg-stone-700/40'
               : 'border-stone-400 bg-stone-100'),
-          // 普通悬停样式
+          // Normal hover styling
           !isSelected &&
             (isDark
               ? 'border border-stone-600 hover:border-stone-500 hover:bg-stone-700/50'
               : 'border border-stone-300 hover:border-stone-400 hover:bg-stone-200/70'),
-          // 选中状态的边框
+          // Selected state border
           isSelected &&
             (isDark ? 'border border-stone-500' : 'border border-stone-400'),
           !isSelected &&
@@ -227,7 +221,7 @@ export function HistoryList({
         )}
         onClick={handleItemClick}
       >
-        {/* --- 左侧选择区域 --- */}
+        {/* Left selection area */}
         {(isSelectionMode || isSelected) && (
           <div className="mt-1 mr-3 flex items-center">
             <button
@@ -262,9 +256,9 @@ export function HistoryList({
           </div>
         )}
 
-        {/* --- 右侧内容区域 --- */}
+        {/* Right content area */}
         <div className="flex min-w-0 flex-1 flex-col">
-          {/* 标题和日期 */}
+          {/* Title and date */}
           <div className="mb-2 flex items-center justify-between">
             <h3
               className={cn(
@@ -285,7 +279,7 @@ export function HistoryList({
                 {date}
               </span>
 
-              {/* 更多操作按钮 - 在选择模式下隐藏 */}
+              {/* More options button - hidden in selection mode */}
               {!isSelectionMode && (
                 <div
                   className={cn('ml-2', 'transition-opacity duration-200')}
@@ -296,12 +290,11 @@ export function HistoryList({
                       const dropdownId = `history-dropdown-${conversation.id}`;
                       const buttonRect =
                         e.currentTarget.getBoundingClientRect();
-                      // --- BEGIN COMMENT ---
-                      // 调整下拉菜单的位置，向左偏移一点，确保完全可见
-                      // --- END COMMENT ---
+
+                      // Adjust dropdown position, offset left to ensure full visibility
                       const position = {
-                        top: buttonRect.bottom + 5, // 向下偏移5px，增加间距
-                        left: buttonRect.left - 120, // 向左偏移，使菜单在按钮下方居中显示
+                        top: buttonRect.bottom + 5, // Offset down 5px for spacing
+                        left: buttonRect.left - 120, // Offset left to center menu below button
                       };
                       useDropdownStore
                         .getState()
@@ -321,7 +314,7 @@ export function HistoryList({
                     <MoreHorizontal className="h-4 w-4" />
                   </button>
 
-                  {/* 下拉菜单内容 */}
+                  {/* Dropdown menu content */}
                   <DropdownMenu
                     id={`history-dropdown-${conversation.id}`}
                     minWidth={150}
@@ -329,7 +322,7 @@ export function HistoryList({
                       isDark
                         ? 'border border-stone-700 bg-stone-800'
                         : 'border border-stone-200 bg-white',
-                      'overflow-hidden rounded-md shadow-lg' // 增加阴影和圆角
+                      'overflow-hidden rounded-md shadow-lg' // Add shadow and rounded corners
                     )}
                   >
                     <DropdownMenu.Item
@@ -353,7 +346,7 @@ export function HistoryList({
             </div>
           </div>
 
-          {/* 预览内容 */}
+          {/* Preview content */}
           <p
             className={cn(
               'line-clamp-2 font-serif text-sm',
@@ -369,9 +362,9 @@ export function HistoryList({
 
   return (
     <>
-      {/* 移除内部滚动容器，直接渲染内容 */}
+      {/* Render content directly without internal scroll container */}
       {isLoading && conversations.length === 0 ? (
-        // 加载状态
+        // Loading state
         <div className="flex flex-col space-y-4 pt-2">
           {Array.from({ length: 5 }).map((_, index) => (
             <div
@@ -384,7 +377,7 @@ export function HistoryList({
           ))}
         </div>
       ) : conversations.length === 0 ? (
-        // 空状态
+        // Empty state
         <div
           className={cn(
             'flex h-full flex-col items-center justify-center py-16',
@@ -406,13 +399,11 @@ export function HistoryList({
           )}
         </div>
       ) : (
-        // 对话列表
+        // Conversation list
         <div className="flex flex-col pt-2 pb-6">
           {conversations.map(renderConversationItem)}
 
-          {/* --- BEGIN COMMENT ---
-          // 显示对话总数信息，在列表底部
-          // --- END COMMENT --- */}
+          {/* Display conversation count info at bottom of list */}
           {conversations.length > 0 && (
             <div
               className={cn(
@@ -433,9 +424,7 @@ export function HistoryList({
         </div>
       )}
 
-      {/* --- BEGIN COMMENT ---
-      重命名对话框
-      --- END COMMENT --- */}
+      {/* Rename dialog */}
       <InputDialog
         isOpen={showRenameDialog}
         onClose={() => !isOperating && setShowRenameDialog(false)}
@@ -449,9 +438,7 @@ export function HistoryList({
         maxLength={50}
       />
 
-      {/* --- BEGIN COMMENT ---
-      删除确认对话框
-      --- END COMMENT --- */}
+      {/* Delete confirmation dialog */}
       <ConfirmDialog
         isOpen={showDeleteDialog}
         onClose={() => !isOperating && setShowDeleteDialog(false)}

@@ -186,9 +186,7 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
       style={welcomePosition}
     >
       <div className="w-full">
-        {/* --- BEGIN COMMENT ---
-        主标题容器：使用Hook提供的最高优先级宽度设置
-        --- END COMMENT --- */}
+        {/* Main title container: uses highest priority width settings provided by Hook */}
         <h2
           className={cn(
             'mx-auto mb-2 font-bold',
@@ -197,13 +195,10 @@ export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
           )}
           style={welcomeTextTitle}
         >
-          {/* --- BEGIN COMMENT ---
-          🎯 优化：智能打字机效果，根据文字长度动态调整速度
-          短文本：慢速打字，营造仪式感
-          长文本：快速打字，避免等待过久
-          🎯 添加key属性，确保应用切换时重新开始打字动画
-          🎯 添加onComplete回调，通知推荐问题组件开始渲染
-          --- END COMMENT --- */}
+          {/* Optimized: Intelligent typewriter effect with dynamic speed adjustment based on text length */}
+          {/* Short text: slow typing for ceremonial feel; Long text: fast typing to avoid waiting */}
+          {/* Added key property to restart typewriter animation on app switch */}
+          {/* Added onComplete callback to notify suggested questions component to start rendering */}
           <TypeWriter
             key={typewriterKey} // 🎯 强制重新开始打字动画
             text={finalText}

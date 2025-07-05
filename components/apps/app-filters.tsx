@@ -181,10 +181,8 @@ export function AppFilters({
         />
       </div>
 
-      {/* --- BEGIN COMMENT --- */}
-      {/* 🎯 重构：单行分类标签 + 横向滚动 + 固定视图切换 */}
-      {/* 确保不管有多少tag都保持单行，视图切换按钮始终可见 */}
-      {/* --- END COMMENT --- */}
+      {/* Single-line category tags with horizontal scrolling and fixed view toggle */}
+      {/* Ensures single line layout regardless of tag count, view toggle always visible */}
       <div className="flex items-center gap-3">
         {/* 左滚动按钮 */}
         {canScrollLeft && (

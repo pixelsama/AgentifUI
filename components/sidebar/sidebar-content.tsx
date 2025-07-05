@@ -113,9 +113,7 @@ export function SidebarContent() {
 
   return (
     <div className="relative flex-1 overflow-hidden">
-      {/* --- BEGIN COMMENT ---
-      删除顶部分割线：移除dark模式下的横线分割
-      --- END COMMENT --- */}
+      {/* Removed top divider: no horizontal line separation in dark mode */}
 
       {/* Scrollable Content Area */}
       <div
@@ -139,17 +137,13 @@ export function SidebarContent() {
             : 'hidden' // 折叠时直接隐藏
         )}
       >
-        {/* --- BEGIN COMMENT ---
-        常用应用区域：直接放置，无额外包装，支持粘性滚动
-        --- END COMMENT --- */}
+        {/* Favorite apps area: directly placed without extra wrapping, supports sticky scrolling */}
         <SidebarFavoriteApps
           isDark={isDark ?? false}
           contentVisible={contentVisible}
         />
 
-        {/* --- BEGIN COMMENT ---
-        对话列表区域：添加顶部间距，与常用应用分开
-        --- END COMMENT --- */}
+        {/* Chat list area: adds top spacing, separated from favorite apps */}
         <div className="mt-4 min-h-0 flex-1">
           <SidebarChatList
             isDark={isDark ?? false}
@@ -161,9 +155,7 @@ export function SidebarContent() {
         </div>
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      删除底部分割线：移除dark模式下的横线分割
-      --- END COMMENT --- */}
+      {/* Removed bottom divider: no horizontal line separation in dark mode */}
     </div>
   );
 }

@@ -341,17 +341,15 @@ interface WelcomeLayoutPositions {
 }
 
 /**
- * 欢迎界面布局管理Hook
- * 提供智能的组件定位，防止遮挡并确保合适的间距
+ * Welcome screen layout management hook
+ * @description Provides intelligent component positioning to prevent overlapping and ensure proper spacing
  *
- * --- BEGIN COMMENT ---
- * 🎯 使用说明：
- * 1. 调整 DEFAULT_WELCOME_LAYOUT 中的参数来微调布局
- * 2. inputOffsetFromCenter: 控制整体高度（正值向下，负值向上）
- * 3. minSpacing: 控制组件间距
- * 4. estimatedHeights: 组件高度估算，影响布局计算
- * 5. compactLayoutThreshold: 紧凑模式触发阈值
- * --- END COMMENT ---
+ * @usage
+ * 1. Adjust DEFAULT_WELCOME_LAYOUT parameters to fine-tune layout
+ * 2. inputOffsetFromCenter: Controls overall height (positive moves down, negative moves up)
+ * 3. minSpacing: Controls component spacing
+ * 4. estimatedHeights: Component height estimation, affects layout calculation
+ * 5. compactLayoutThreshold: Compact mode trigger threshold
  */
 export function useWelcomeLayout(): WelcomeLayoutPositions {
   const { inputHeight } = useChatLayoutStore();
@@ -510,14 +508,12 @@ export function useWelcomeLayout(): WelcomeLayoutPositions {
 }
 
 /**
- * 创建自定义移动端宽度的布局配置
- * @param mobileWidthVw 移动端视口宽度百分比（如90表示90vw）
- * @param minWidthPx 最小宽度（像素）
+ * Create custom mobile width layout configuration
+ * @param mobileWidthVw Mobile viewport width percentage (e.g., 90 means 90vw)
+ * @param minWidthPx Minimum width in pixels
  *
- * --- BEGIN COMMENT ---
- * 🎯 重要提示：移动端使用width而不是maxWidth
- * 这样可以强制文字占用指定宽度，避免文字收缩过窄
- * --- END COMMENT ---
+ * @important Mobile uses width instead of maxWidth
+ * This forces text to occupy specified width, preventing text from shrinking too narrow
  */
 export function createMobileWidthLayout(
   mobileWidthVw: number = 90,

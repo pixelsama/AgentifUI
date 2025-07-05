@@ -8,13 +8,24 @@ import debounce from 'lodash/debounce';
 
 import { useCallback, useEffect, useRef } from 'react';
 
-// --- BEGIN MODIFIED COMMENT ---
-// 移除了未使用的 throttle 导入
-// --- END MODIFIED COMMENT ---
+// Removed unused throttle import
 
-// 滚动阈值，单位像素，距离底部多少像素被认为是"在底部"
+// Scroll threshold in pixels - distance from bottom considered "at bottom"
 const SCROLL_THRESHOLD = 50;
 
+/**
+ * Chat scroll management hook
+ * @description Manages auto-scrolling behavior during chat streaming and user interactions
+ *
+ * @param messages - Array of chat messages
+ * @returns Scroll container ref
+ *
+ * @features
+ * - Auto-scroll during message streaming
+ * - Respect user scroll intentions
+ * - Debounced scroll event handling
+ * - Programmatic vs user scroll detection
+ */
 export function useChatScroll(messages: ChatMessage[]) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -28,18 +39,18 @@ export function useChatScroll(messages: ChatMessage[]) {
 
   const isGenerating = useChatStore(selectIsProcessing);
 
-  // 跟踪用户是否正在与滚动条交互
+  // Track whether user is actively interacting with scrollbar
   const isUserInteractingRef = useRef(false);
-  // 用于检测用户滚动交互结束的计时器
+  // Timer for detecting end of user scroll interaction
   const userInteractionEndTimerRef = useRef<NodeJS.Timeout | null>(null);
-  // 用于跟踪程序化滚动
+  // Track programmatic scrolling
   const isProgrammaticScroll = useRef(false);
 
-  // 🎯 新增：跟踪用户是否有意向上滚动的标志
-  // 一旦用户在流式期间向上滚动，就记住这个意图，直到流式结束
+  // Track user's intentional upward scroll during streaming
+  // Once user scrolls up during streaming, remember this intent until streaming ends
   const userIntentionallyScrolledUp = useRef(false);
 
-  // Effect 1: 设置滚动监听器，处理用户交互，并同步滚动状态
+  // Effect 1: Set up scroll listener, handle user interactions, and sync scroll state
   useEffect(() => {
     const element = scrollRef.current;
     if (!element) return;
@@ -65,23 +76,23 @@ export function useChatScroll(messages: ChatMessage[]) {
       const currentIsAtBottom =
         el.scrollHeight - el.scrollTop - el.clientHeight < SCROLL_THRESHOLD;
 
-      // 🎯 修复：始终更新 isAtBottom 状态，不管是否在程序化滚动中
-      // 这确保按钮的显示/隐藏逻辑能正确工作
+      // Always update isAtBottom state regardless of programmatic scroll
+      // This ensures button show/hide logic works correctly
       setIsAtBottom(currentIsAtBottom);
 
-      // 🎯 修复：改进用户滚动意图检测逻辑
+      // Improved user scroll intent detection logic
       if (!isProgrammaticScroll.current) {
-        // 用户主动滚动
+        // User-initiated scroll
         const newScrolledUpState = !currentIsAtBottom;
 
-        // 🎯 关键修复：如果用户在流式期间向上滚动，记住这个意图
+        // Key fix: If user scrolls up during streaming, remember this intent
         if (
           isGenerating &&
           newScrolledUpState &&
           !userIntentionallyScrolledUp.current
         ) {
           console.log(
-            '[useChatScroll] 检测到用户在流式期间向上滚动，记住用户意图'
+            '[useChatScroll] Detected user scroll up during streaming, remembering user intent'
           );
           userIntentionallyScrolledUp.current = true;
         }
@@ -90,11 +101,13 @@ export function useChatScroll(messages: ChatMessage[]) {
           setUserScrolledUp(newScrolledUpState);
         }
       } else {
-        // 🎯 修复：即使在程序化滚动期间，也要检查用户是否有向上滚动的意图
-        // 如果用户之前表达了向上滚动的意图，且当前不在底部，保持 userScrolledUp 状态
+        // Even during programmatic scroll, check if user has upward scroll intent
+        // If user previously expressed upward scroll intent and not at bottom, maintain userScrolledUp state
         if (userIntentionallyScrolledUp.current && !currentIsAtBottom) {
           if (!userScrolledUp) {
-            console.log('[useChatScroll] 程序化滚动期间保持用户向上滚动意图');
+            console.log(
+              '[useChatScroll] Maintaining user upward scroll intent during programmatic scroll'
+            );
             setUserScrolledUp(true);
           }
         }
@@ -103,7 +116,7 @@ export function useChatScroll(messages: ChatMessage[]) {
 
     element.addEventListener('scroll', handleScroll, { passive: true });
 
-    // 初始状态同步
+    // Initial state sync
     const initialIsAtBottom =
       element.scrollHeight - element.scrollTop - element.clientHeight <
       SCROLL_THRESHOLD;
@@ -126,14 +139,14 @@ export function useChatScroll(messages: ChatMessage[]) {
     userScrolledUp,
   ]);
 
-  // 🎯 修复：改进自动滚动逻辑，尊重用户的滚动意图
+  // Improved auto-scroll logic that respects user scroll intentions
   useEffect(() => {
     const element = scrollRef.current;
     if (!element) {
       return;
     }
 
-    // 🎯 关键修复：只有在用户没有表达向上滚动意图时才自动滚动
+    // Key fix: Only auto-scroll when user hasn't expressed upward scroll intent
     if (
       isGenerating &&
       !userScrolledUp &&
@@ -146,17 +159,19 @@ export function useChatScroll(messages: ChatMessage[]) {
     }
   }, [messages, isGenerating, userScrolledUp, storeScrollToBottom, scrollRef]);
 
-  // 🎯 修复：当流式生成结束时，重置用户意图标志
+  // Reset user intent flag when streaming generation ends
   useEffect(() => {
     if (!isGenerating) {
-      // 流式生成结束，重置用户向上滚动意图标志
+      // Streaming generation ended, reset user upward scroll intent flag
       if (userIntentionallyScrolledUp.current) {
-        console.log('[useChatScroll] 流式生成结束，重置用户向上滚动意图标志');
+        console.log(
+          '[useChatScroll] Streaming ended, resetting user upward scroll intent flag'
+        );
         userIntentionallyScrolledUp.current = false;
       }
 
-      // 如果用户之前处于向上滚动状态，保持这个状态
-      // 不要自动重置为 false，让用户自己决定是否滚动到底部
+      // If user was previously in upward scroll state, maintain this state
+      // Don't auto-reset to false, let user decide whether to scroll to bottom
     }
   }, [isGenerating]);
 

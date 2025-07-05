@@ -319,9 +319,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
 
   return (
     <div className="flex h-full overflow-hidden">
-      {/* --- BEGIN COMMENT ---
-      左侧导航：固定宽度，从admin导航栏下方开始
-      --- END COMMENT --- */}
+      {/* Left sidebar: fixed width, starts from below admin navigation */}
       <div
         className={cn(
           'fixed left-16 z-40 flex w-80 flex-shrink-0 flex-col',
@@ -338,9 +336,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
           )}
         >
           <div className="mb-2 flex items-center justify-between">
-            {/* --- BEGIN COMMENT ---
-            使用新的筛选选择器替换原有的标题
-            --- END COMMENT --- */}
+            {/* Use new filter selector to replace original title */}
             <InstanceFilterSelector
               providers={providers}
               selectedProviderId={filterProviderId}
@@ -587,9 +583,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
         </div>
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      分割线：从admin导航栏下方开始的全高度垂直分割线
-      --- END COMMENT --- */}
+      {/* Divider: full-height vertical line starting from below admin navigation */}
       <div
         className={cn(
           'fixed left-96 z-40 w-px',
@@ -598,9 +592,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
         )}
       ></div>
 
-      {/* --- BEGIN COMMENT ---
-      右侧内容区域：调整左边距以适应固定侧边栏
-      --- END COMMENT --- */}
+      {/* Right content area: adjust left margin to accommodate fixed sidebar */}
       <div className="ml-80 h-full flex-1 overflow-hidden pl-px">
         {children}
       </div>

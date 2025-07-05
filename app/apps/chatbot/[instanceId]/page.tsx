@@ -378,9 +378,7 @@ export default function AppDetailPage() {
     >
       {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
 
-      {/* --- BEGIN COMMENT ---
-      主要内容区域 - 使用简化的布局结构
-      --- END COMMENT --- */}
+      {/* Main content area with simplified layout */}
       <div
         className={cn(
           'relative flex min-h-0 flex-1 flex-col overflow-hidden',
@@ -392,9 +390,7 @@ export default function AppDetailPage() {
       >
         {/* 主要内容 */}
         <div className="min-h-0 flex-1">
-          {/* --- BEGIN COMMENT ---
-          简化显示逻辑：使用useWelcomeScreen统一判断
-          --- END COMMENT --- */}
+          {/* Simplified display logic using useWelcomeScreen */}
           {isWelcomeScreen && messages.length === 0 ? (
             <div
               className={cn(
@@ -430,9 +426,7 @@ export default function AppDetailPage() {
         {/* 输入框背景 */}
         <ChatInputBackdrop />
 
-        {/* --- BEGIN COMMENT ---
-        聊天输入框 - 简化配置
-        --- END COMMENT --- */}
+        {/* Chat input with simplified configuration */}
         <ChatInput
           onSubmit={handleSubmit}
           placeholder={t('startChatWith', {
@@ -445,9 +439,7 @@ export default function AppDetailPage() {
           requireModelValidation={false}
         />
 
-        {/* --- BEGIN COMMENT ---
-        显示动态推荐问题的条件：欢迎界面且没有消息
-        --- END COMMENT --- */}
+        {/* Show dynamic suggested questions when on welcome screen with no messages */}
         {isWelcomeScreen && messages.length === 0 && (
           <DynamicSuggestedQuestions onQuestionClick={sendDirectMessage} />
         )}

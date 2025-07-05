@@ -197,21 +197,21 @@ export const ChatInput = ({
     [setInputHeight, textAreaHeight, currentLayoutInputHeight]
   ); // attachmentBarHeight 从依赖中移除
 
-  // --- BEGIN 中文注释 --- 用户ID 应用ID信息 ---
+  // User ID and App ID information
   const { session } = useSupabaseAuth();
   const activeUserId = session?.user?.id;
   const {
     currentAppId,
     isLoading: isLoadingAppId,
-    isValidating: isValidatingAppConfig, // 新增：验证状态
-    isValidatingForMessage: isValidatingForMessageOnly, // 🎯 新增：专门用于消息发送的验证状态
+    isValidating: isValidatingAppConfig, // New: validation state
+    isValidatingForMessage: isValidatingForMessageOnly, // New: validation state specifically for message sending
     error: errorLoadingAppId,
     hasCurrentApp,
     isReady: isAppReady,
   } = useCurrentApp();
 
-  // 🎯 检查是否有可用的模型以及是否选择了有效模型
-  // 只有在需要模型验证时才进行检查
+  // Check if there are available models and if a valid model is selected
+  // Only check when model validation is required
   const { apps } = useAppListStore();
   const availableModels = apps.filter(app => {
     const metadata = app.config?.app_metadata;
@@ -219,20 +219,19 @@ export const ChatInput = ({
   });
   const hasAvailableModels = availableModels.length > 0;
 
-  // 检查当前选择的模型是否有效
-  // 🎯 修复：使用instance_id进行匹配，因为currentAppId存储的是instance_id而不是UUID
+  // Check if currently selected model is valid
+  // Fix: Use instance_id for matching, as currentAppId stores instance_id not UUID
   const currentSelectedModel = availableModels.find(
     app => app.instance_id === currentAppId
   );
   const hasValidSelectedModel = !!currentSelectedModel;
 
-  // 🎯 修复：只有在需要模型验证且显示模型选择器时才检查模型状态
-  // 历史对话不显示模型选择器，因此不需要模型验证
+  // Fix: Only check model status when model validation is required and model selector is shown
+  // History conversations don't show model selector, so no model validation needed
   const canSubmitWithModel =
     !requireModelValidation ||
     !showModelSelector ||
     (hasAvailableModels && hasValidSelectedModel);
-  // --- END 中文注释 ---
 
   // 🎯 修复：监听isWaiting状态变化来清空输入框
   // 当验证成功并开始等待响应时立即清空，而不是等待整个流式响应结束
@@ -262,10 +261,9 @@ export const ChatInput = ({
       return;
     }
 
-    // --- BEGIN 中文注释 --- 状态暂存与恢复逻辑 ---
+    // State backup and restore logic
     let savedMessage = '';
     let savedAttachments: AttachmentFile[] = [];
-    // --- END 中文注释 ---
 
     try {
       // 🎯 立即设置本地提交状态，防止重复点击
@@ -297,9 +295,8 @@ export const ChatInput = ({
       if (savedMessage.trim() && onSubmit) {
         // 🎯 修复：不再在这里清空，而是通过监听isWaiting状态变化来清空
         // 这样在验证成功后立即清空，而不是等待整个流式响应结束
-        // --- BEGIN 中文注释 --- 调用提交函数，清空操作由useEffect监听isWaiting状态变化处理
+        // Call submit function, clearing is handled by useEffect monitoring isWaiting state changes
         await onSubmit(savedMessage, filesToSend);
-        // --- END 中文注释 ---
 
         // 🎯 修复：清空操作已移到useEffect中，这里不再需要
         console.log('[ChatInput] 提交成功');
@@ -308,19 +305,21 @@ export const ChatInput = ({
         console.log('[ChatInput] 没有可提交的消息内容。');
       }
     } catch (error) {
-      // --- BEGIN 中文注释 --- 提交失败，恢复状态 ---
-      console.error('[ChatInput] 消息提交失败，执行回滚', error);
-      // 🎯 修复：如果验证失败（isWaiting没有变为true），需要恢复状态
-      // 如果验证成功但后续失败，输入框已经被清空，也需要恢复
+      // Submit failed, restore state
+      console.error(
+        '[ChatInput] Message submission failed, executing rollback',
+        error
+      );
+      // Fix: If validation failed (isWaiting didn't become true), need to restore state
+      // If validation succeeded but subsequent failure, input has been cleared, also need to restore
       setMessage(savedMessage);
       useAttachmentStore.getState().setFiles(savedAttachments);
-      // 调用通知 Store 显示错误消息
+      // Call notification Store to show error message
       useNotificationStore.getState().showNotification(
         `${t('input.messageSendFailed')}: ${(error as Error)?.message || t('input.unknownError')}`,
         'error',
-        3000 // 持续 3 秒
+        3000 // Duration 3 seconds
       );
-      // --- END 中文注释 ---
     } finally {
       // 🎯 无论成功还是失败，都重置本地提交状态
       setIsLocalSubmitting(false);
@@ -355,18 +354,16 @@ export const ChatInput = ({
     if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
       e.preventDefault();
 
-      // --- BEGIN 中文注释 ---
-      // 在回车提交前，进行与按钮禁用逻辑完全一致的检查
+      // Before Enter submission, perform checks consistent with button disable logic
       const shouldBlockSubmit =
-        isLocalSubmitting || // 🎯 新增：正在本地提交中
-        isWaiting || // 正在等待响应
-        isValidatingAppConfig || // 🎯 新增：正在验证配置
-        isProcessing || // 正在处理上一条消息
-        attachments.some(f => f.status === 'uploading') || // 有文件正在上传
-        attachments.some(f => f.status === 'error') || // 有文件上传失败
-        !message.trim() || // 消息为空
-        !canSubmitWithModel; // 🎯 新增：没有可用模型或没有选择有效模型
-      // --- END 中文注释 ---
+        isLocalSubmitting || // New: currently submitting locally
+        isWaiting || // Waiting for response
+        isValidatingAppConfig || // New: validating configuration
+        isProcessing || // Processing previous message
+        attachments.some(f => f.status === 'uploading') || // Files uploading
+        attachments.some(f => f.status === 'error') || // File upload failed
+        !message.trim() || // Message is empty
+        !canSubmitWithModel; // New: no available models or no valid model selected
 
       if (!shouldBlockSubmit) {
         handleLocalSubmit();
@@ -436,8 +433,8 @@ export const ChatInput = ({
     }
   }, [externalIsWelcomeScreen]);
 
-  // --- BEGIN 中文注释 --- 文件类型选择处理 ---
-  // 处理文件类型选择后的文件上传
+  // File type selection handling
+  // Handle file upload after file type selection
   const handleFileSelect = (files: FileList | null, accept: string) => {
     if (files && files.length > 0) {
       const filesArray = Array.from(files);
@@ -448,37 +445,36 @@ export const ChatInput = ({
         const fileId = `${file.name}-${file.lastModified}-${file.size}`;
         updateFileStatus(fileId, 'uploading', 0); // 立即标记为上传中
 
-        // 调用上传服务
-        // 使用当前的 appId 进行上传，如果没有则使用默认值
+        // Call upload service
+        // Use current appId for upload, use default if not available
         const appIdToUse = currentAppId || 'chat-input-warning-no-app-id';
         const userIdToUse =
-          session?.user?.id || 'chat-input-warning-no-user-id'; // 使用匿名用户ID
+          session?.user?.id || 'chat-input-warning-no-user-id'; // Use anonymous user ID
 
         uploadDifyFile(appIdToUse, file, userIdToUse, progress => {
-          // 更新进度
+          // Update progress
           updateFileStatus(fileId, 'uploading', progress);
         })
           .then(response => {
-            // 上传成功
+            // Upload successful
             updateFileUploadedId(fileId, response.id);
             console.log(
-              `[ChatInput] 文件上传成功: ${fileId} -> ${response.id}`
+              `[ChatInput] File upload successful: ${fileId} -> ${response.id}`
             );
           })
           .catch(error => {
-            // 上传失败
+            // Upload failed
             updateFileStatus(
               fileId,
               'error',
               undefined,
               error.message || t('input.uploadFailed')
             );
-            console.error(`[ChatInput] 文件上传失败: ${fileId}`, error);
+            console.error(`[ChatInput] File upload failed: ${fileId}`, error);
           });
       });
     }
   };
-  // --- END 中文注释 ---
 
   // --- 重试上传逻辑 ---
   const handleRetryUpload = useCallback(
@@ -598,9 +594,7 @@ export const ChatInput = ({
             />
           </div>
 
-          {/* --- BEGIN COMMENT ---
-          中间区域：应用选择器按钮，可以向左延伸
-          --- END COMMENT --- */}
+          {/* Middle area: App selector button, can extend left */}
           <div className="flex flex-1 items-center justify-end space-x-2">
             {showModelSelector && <AppSelectorButton />}
             <ChatButton

@@ -46,10 +46,8 @@ export const CodeBlockHeader: React.FC<CodeBlockHeaderProps> = React.memo(
           </span>
         </div>
 
-        {/* --- BEGIN COMMENT ---
-      🎯 按钮组：导出按钮在左，复制按钮在右
-      使用flex布局，间距适中，保持视觉平衡
-      --- END COMMENT --- */}
+        {/* Button group: export button on left, copy button on right */}
+        {/* Uses flex layout with moderate spacing to maintain visual balance */}
         {codeContent && (
           <div className="flex items-center gap-1">
             {/* 导出按钮 */}

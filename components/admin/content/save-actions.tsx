@@ -30,9 +30,7 @@ export function SaveActions({
           : 'border-stone-200 from-stone-50 to-white'
       )}
     >
-      {/* --- BEGIN COMMENT ---
-      状态提示
-      --- END COMMENT --- */}
+      {/* Status indicator */}
       <div className="flex items-center gap-2">
         {hasChanges && (
           <>
@@ -72,9 +70,7 @@ export function SaveActions({
         )}
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      操作按钮
-      --- END COMMENT --- */}
+      {/* Action buttons */}
       <div className="flex items-center gap-3">
         <button
           onClick={onReset}

@@ -251,9 +251,8 @@ export function History() {
               >
                 {t('title')}
               </h1>
-              {/* --- BEGIN COMMENT ---
-              // 显示对话总数的美观文字
-              
+              {/* Display conversation count with elegant styling */}
+
               <div
                 className={cn(
                   'mt-1 text-sm',

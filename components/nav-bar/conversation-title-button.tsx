@@ -427,9 +427,7 @@ export function ConversationTitleButton({
           className
         )}
       >
-        {/* --- BEGIN COMMENT ---
-        主按钮：优化样式，移除左侧图标，添加cursor控制逻辑
-        --- END COMMENT --- */}
+        {/* Main button: optimized styling, removed left icon, added cursor control logic */}
         <button
           onClick={() => setIsOpen(!isOpen)}
           disabled={isOperating || !finalConversation}
@@ -438,9 +436,7 @@ export function ConversationTitleButton({
             'transition-all duration-200 ease-in-out',
             'disabled:cursor-not-allowed disabled:opacity-50',
             'h-8 min-h-[2rem]',
-            // --- BEGIN MODIFIED COMMENT ---
-            // cursor控制：只有在下拉框关闭且未操作且对话已存在时显示pointer
-            // --- END MODIFIED COMMENT ---
+            // Cursor control: only show pointer when dropdown is closed, not operating, and conversation exists
             !isOpen && !isOperating && finalConversation
               ? 'cursor-pointer'
               : '',
@@ -449,9 +445,7 @@ export function ConversationTitleButton({
               : 'text-stone-600 hover:bg-stone-200/80 hover:shadow-sm hover:shadow-stone-300/50 active:bg-stone-300/50'
           )}
         >
-          {/* --- BEGIN MODIFIED COMMENT ---
-          对话标题：显示标题文本，只在操作时显示loading状态
-          --- END MODIFIED COMMENT --- */}
+          {/* Conversation title: display title text, only show loading state when operating */}
           <span
             className={cn(
               'font-serif whitespace-nowrap',
@@ -473,9 +467,7 @@ export function ConversationTitleButton({
             )}
           </span>
 
-          {/* --- BEGIN COMMENT ---
-          右侧图标区域：显示v/反v
-          --- END COMMENT --- */}
+          {/* Right icon area: shows chevron up/down */}
           <div className="flex h-4 w-4 flex-shrink-0 items-center justify-center">
             {isOpen ? (
               <ChevronUp className="h-3 w-3" />
@@ -485,9 +477,7 @@ export function ConversationTitleButton({
           </div>
         </button>
 
-        {/* --- BEGIN COMMENT ---
-        🎯 修改：应用名称标签移到按钮外部，避免悬停时一起被选中
-        --- END COMMENT --- */}
+        {/* Modified: move app name label outside button to avoid being selected together on hover */}
         {currentConversationApp && (
           <span
             className={cn(
@@ -503,9 +493,7 @@ export function ConversationTitleButton({
           </span>
         )}
 
-        {/* --- BEGIN COMMENT ---
-        下拉菜单：完全模仿app-selector的样式
-        --- END COMMENT --- */}
+        {/* Dropdown menu: completely mimics app-selector styling */}
         {isOpen && (
           <>
             {/* 背景遮罩 */}
@@ -514,9 +502,7 @@ export function ConversationTitleButton({
               onClick={() => setIsOpen(false)}
             />
 
-            {/* --- BEGIN MODIFIED COMMENT ---
-            下拉选项：改为左侧对齐，避免与sidebar冲突，缩小横向宽度
-            --- END MODIFIED COMMENT --- */}
+            {/* Dropdown options: changed to left alignment to avoid sidebar conflict, reduced horizontal width */}
             <div
               className={cn(
                 'absolute top-full left-0 mt-1 max-w-[12rem] min-w-[8rem]',
@@ -536,9 +522,7 @@ export function ConversationTitleButton({
                   'whitespace-nowrap transition-colors duration-150',
                   'flex items-center space-x-2',
                   'disabled:cursor-not-allowed disabled:opacity-50',
-                  // --- BEGIN MODIFIED COMMENT ---
-                  // 添加cursor pointer控制
-                  // --- END MODIFIED COMMENT ---
+                  // Add cursor pointer control
                   !isOperating ? 'cursor-pointer' : '',
                   isDark
                     ? 'text-stone-300 hover:bg-stone-600/60'
@@ -558,9 +542,7 @@ export function ConversationTitleButton({
                   'whitespace-nowrap transition-colors duration-150',
                   'flex items-center space-x-2',
                   'disabled:cursor-not-allowed disabled:opacity-50',
-                  // --- BEGIN MODIFIED COMMENT ---
-                  // 添加cursor pointer控制
-                  // --- END MODIFIED COMMENT ---
+                  // Add cursor pointer control
                   !isOperating ? 'cursor-pointer' : '',
                   'mb-1',
                   isDark
@@ -576,9 +558,7 @@ export function ConversationTitleButton({
         )}
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      重命名对话框
-      --- END COMMENT --- */}
+      {/* Rename dialog */}
       <InputDialog
         isOpen={showRenameDialog}
         onClose={() => !isOperating && setShowRenameDialog(false)}
@@ -592,9 +572,7 @@ export function ConversationTitleButton({
         maxLength={50}
       />
 
-      {/* --- BEGIN COMMENT ---
-      删除确认对话框
-      --- END COMMENT --- */}
+      {/* Delete confirmation dialog */}
       <ConfirmDialog
         isOpen={showDeleteDialog}
         onClose={() => !isOperating && setShowDeleteDialog(false)}

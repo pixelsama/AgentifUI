@@ -45,9 +45,7 @@ export const ScrollToBottomButton = () => {
         // 定位与层级
         'absolute bottom-0 left-1/2 z-10 mb-4 -translate-x-1/2',
 
-        // --- BEGIN MODIFIED COMMENT ---
-        // 基础样式 (移除 all transition, 添加 transform transition)
-        // --- END MODIFIED COMMENT ---
+        // Base styles (removed all transition, added transform transition only)
         'cursor-pointer rounded-full p-1.5 shadow-md transition-transform duration-150 ease-in-out', // 仅保留 transform 过渡
 
         // 颜色主题

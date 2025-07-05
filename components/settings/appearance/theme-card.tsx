@@ -113,10 +113,8 @@ export function ThemeCard({
             : 'border-stone-200 hover:border-stone-300'
       )}
     >
-      {/* --- BEGIN COMMENT ---
-      模拟聊天界面预览
-      包含侧边栏、主内容区、消息气泡、输入框等真实元素
-      --- END COMMENT --- */}
+      {/* Chat interface preview simulation */}
+      {/* Contains sidebar, main content area, message bubbles, input box and other real elements */}
       <div className={cn('h-32 w-full', styles.mainBg)}>
         <div className="flex h-full">
           {/* 模拟侧边栏 */}

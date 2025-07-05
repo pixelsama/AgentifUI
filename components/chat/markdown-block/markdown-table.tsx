@@ -4,47 +4,54 @@ import { cn } from '@lib/utils';
 
 import React from 'react';
 
-// --- BEGIN MODIFIED COMMENT ---
-// 移除了 useThemeColors 的导入，改用 CSS 变量
-// --- END MODIFIED COMMENT ---
+// Uses CSS variables instead of useThemeColors hook for better performance
 // import { useThemeColors } from "@lib/hooks/use-theme-colors";
 
+/**
+ * Markdown table container component properties
+ */
 interface MarkdownTableProps {
+  /** Table content to render */
   children: React.ReactNode;
+  /** Additional CSS classes */
   className?: string;
 }
 
+/**
+ * Markdown table container component
+ * @description Renders a responsive table container with proper styling for markdown content
+ *
+ * @features
+ * - Responsive horizontal scrolling
+ * - CSS variable-based theming
+ * - Rounded corners with overflow handling
+ * - Adaptive width sizing
+ */
 export const MarkdownTableContainer: React.FC<MarkdownTableProps> = ({
   children,
   className,
 }) => {
-  // --- BEGIN MODIFIED COMMENT ---
-  // 移除了 useThemeColors hook 的使用
-  // --- END MODIFIED COMMENT ---
+  // Removed useThemeColors hook usage for better performance
   // const { colors } = useThemeColors();
 
   return (
     <div
       className={cn(
         'my-4 overflow-x-auto',
-        'w-fit max-w-full', // 使容器宽度适应内容，但不超过可用空间
+        'w-fit max-w-full', // Container width adapts to content while respecting available space
         className
       )}
     >
       <table
         className={cn(
           'border-collapse',
-          'overflow-hidden rounded-lg' // 圆角和溢出隐藏
-          // --- BEGIN MODIFIED COMMENT ---
-          // 移除了 colors.userMessageBackground.tailwind (背景将透明化，由父级决定)
-          // 移除了 divide-y 和相关的颜色类 (内部边框由子元素处理)
-          // 移除了 border 和相关的颜色类 (外部边框通过 style 应用 CSS 变量)
-          // --- END MODIFIED COMMENT ---
+          'overflow-hidden rounded-lg' // Rounded corners with overflow hidden
+          // Background is transparent, determined by parent element
+          // Internal borders handled by child elements
+          // External border applied via CSS variables in style prop
         )}
         style={{
-          // --- BEGIN MODIFIED COMMENT ---
-          // 使用 CSS 变量设置表格边框
-          // --- END MODIFIED COMMENT ---
+          // Table border using CSS variables for theme consistency
           border: '1px solid var(--md-table-border)',
         }}
       >

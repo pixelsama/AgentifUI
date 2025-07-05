@@ -102,9 +102,7 @@ export const UserFiltersComponent: React.FC<UserFiltersProps> = ({
           : 'border-stone-200/50 bg-white/90'
       )}
     >
-      {/* --- BEGIN COMMENT ---
-      搜索栏 - 始终显示
-      --- END COMMENT --- */}
+      {/* Search bar - always visible */}
       <div className="p-4">
         <div className="flex items-center gap-4">
           {/* --- 搜索框 --- */}
@@ -176,9 +174,7 @@ export const UserFiltersComponent: React.FC<UserFiltersProps> = ({
         </div>
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      可折叠的高级筛选区域
-      --- END COMMENT --- */}
+      {/* Collapsible advanced filter area */}
       {isExpanded && (
         <div
           className={cn(

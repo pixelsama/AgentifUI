@@ -589,9 +589,7 @@ const InstanceForm = ({
               {isEditing ? '编辑应用实例' : '添加应用实例'}
             </h3>
 
-            {/* --- BEGIN COMMENT --- */}
-            {/* 🎯 新增：未保存更改提示 */}
-            {/* --- END COMMENT --- */}
+            {/* Unsaved changes indicator */}
             {(JSON.stringify(formData) !== JSON.stringify(baselineData) ||
               formData.apiKey) && (
               <div
@@ -725,9 +723,7 @@ const InstanceForm = ({
                 </span>
               </button>
 
-              {/* --- BEGIN COMMENT --- */}
-              {/* 🎯 新增：从 Dify API 同步参数按钮 */}
-              {/* --- END COMMENT --- */}
+              {/* Sync parameters from Dify API button */}
               <button
                 type="button"
                 onClick={handleSyncFromDify}
@@ -768,9 +764,7 @@ const InstanceForm = ({
           </div>
         </div>
 
-        {/* --- BEGIN COMMENT ---
-        服务提供商选择/显示区域
-        --- END COMMENT --- */}
+        {/* Service provider selection/display area */}
         <div
           className={cn(
             'mb-6 rounded-lg border p-4',
@@ -871,9 +865,7 @@ const InstanceForm = ({
                   disabled={isEditing}
                 />
 
-                {/* --- BEGIN COMMENT --- */}
-                {/* 🎯 新增：UUID生成按钮（仅在新建模式下显示） */}
-                {/* --- END COMMENT --- */}
+                {/* UUID generation button (only shown in create mode) */}
                 {!isEditing && (
                   <button
                     type="button"
@@ -920,9 +912,7 @@ const InstanceForm = ({
                 </p>
               )}
 
-              {/* --- BEGIN COMMENT --- */}
-              {/* 🎯 新增：实时错误提示 */}
-              {/* --- END COMMENT --- */}
+              {/* Real-time error message */}
               {instanceIdError && (
                 <p
                   className={cn(
@@ -976,9 +966,7 @@ const InstanceForm = ({
             selectedProviderId={selectedProviderId}
           />
 
-          {/* --- BEGIN COMMENT --- */}
-          {/* 🎯 同步配置按钮 - 仅在新建模式下显示 */}
-          {/* --- END COMMENT --- */}
+          {/* Sync configuration button - only shown in create mode */}
           {!isEditing && (
             <div className="flex justify-center">
               <button
@@ -1184,10 +1172,7 @@ const InstanceForm = ({
             </p>
           </div>
 
-          {/* --- BEGIN COMMENT --- */}
-          {/* 🎯 新增：Dify应用类型选择器 */}
-          {/* 在现有app_type选择器下方添加，保持一致的设计风格 */}
-          {/* --- END COMMENT --- */}
+          {/* Dify application type selector */}
           <DifyAppTypeSelector
             value={formData.config.app_metadata.dify_apptype}
             onChange={(type: DifyAppType) => {

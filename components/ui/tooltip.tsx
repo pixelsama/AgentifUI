@@ -387,6 +387,5 @@ export function TooltipProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// --- BEGIN: 重新导出 hideTooltip ---
+// Export hideTooltip function for external use
 export const hideActiveTooltip = tooltipState.hideTooltip;
-// --- END: 重新导出 hideTooltip ---

@@ -187,9 +187,7 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
           <div className={deviceStyles.content}>
             <main className={deviceStyles.mainClass}>
               <div className={deviceStyles.innerContainer}>
-                {/* --- BEGIN COMMENT ---
-                标题部分 - 与About页面完全一致
-                --- END COMMENT --- */}
+                {/* Title section - fully consistent with About page */}
                 <section
                   className={cn('text-center', responsive.spacing.section)}
                 >
@@ -212,9 +210,7 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
                   </p>
                 </section>
 
-                {/* --- BEGIN COMMENT ---
-                使命部分 - 与About页面完全一致
-                --- END COMMENT --- */}
+                {/* Mission section - fully consistent with About page */}
                 <section className={responsive.spacing.section}>
                   <h2
                     className={cn(responsive.missionTitle, colors.headingColor)}
@@ -231,9 +227,7 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
                   </p>
                 </section>
 
-                {/* --- BEGIN COMMENT ---
-                价值观部分 - 与About页面完全一致，根据设备类型使用正确的网格布局
-                --- END COMMENT --- */}
+                {/* Values section - fully consistent with About page, uses correct grid layout based on device type */}
                 <section className={responsive.spacing.section}>
                   <h2
                     className={cn(responsive.valuesTitle, colors.headingColor)}
@@ -284,9 +278,7 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
                   </div>
                 </section>
 
-                {/* --- BEGIN COMMENT ---
-                行动呼吁按钮 - 与About页面完全一致
-                --- END COMMENT --- */}
+                {/* Call-to-action button - fully consistent with About page */}
                 <section
                   className={cn('text-center', responsive.spacing.section)}
                 >
@@ -301,9 +293,7 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
                   </button>
                 </section>
 
-                {/* --- BEGIN COMMENT ---
-                底部信息 - 与About页面完全一致
-                --- END COMMENT --- */}
+                {/* Footer information - fully consistent with About page */}
                 <div
                   className={cn(
                     'text-center',

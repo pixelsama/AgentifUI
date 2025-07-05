@@ -1,16 +1,14 @@
 /**
- * 对话消息加载钩子
+ * Conversation messages loading hook
+ * @description Provides paginated loading, history queries, and scroll loading for conversation messages
  *
- * --- BEGIN COMMENT ---
- * 🎯 适用范围：仅用于对话类 Dify 应用（chatbot、agent、chatflow）
- * 这些应用的历史消息存储在 conversations + messages 表中
+ * @scope Only for conversation-type Dify applications (chatbot, agent, chatflow)
+ * These applications store historical messages in conversations + messages tables
  *
- * 任务类应用（workflow、text-generation）的执行记录存储在 app_executions 表中，
- * 不使用此 hook 进行历史记录加载
- * --- END COMMENT ---
+ * Task-type applications (workflow, text-generation) store execution records in app_executions table
+ * and do not use this hook for history loading
  *
- * 提供消息的分页加载、历史记录查询和滚动加载功能
- * 更新为使用新的统一数据服务和messageService
+ * Updated to use new unified data service and messageService
  */
 import { getConversationByExternalId } from '@lib/db/conversations';
 import { messageService } from '@lib/services/db/message-service';
@@ -23,11 +21,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { usePathname, useSearchParams } from 'next/navigation';
 
-// 每页加载的消息数量
+// Number of messages to load per page
 const MESSAGES_PER_PAGE = 20;
 
-// 定义统一的加载状态类型
-// 包含状态、类型和锁定标志
+// Define unified loading state type
+// Contains state, type and lock flag
 export type LoadingState =
   | 'idle'
   | 'loading'
@@ -35,7 +33,7 @@ export type LoadingState =
   | 'error'
   | 'complete';
 
-// 加载状态对象类型
+// Loading status object type
 type LoadingStatus = {
   state: LoadingState;
   type: 'initial' | 'more' | 'none';
@@ -43,14 +41,14 @@ type LoadingStatus = {
 };
 
 /**
- * 将数据库消息转换为前端消息对象
+ * Convert database message to frontend message object
  */
 function dbMessageToChatMessage(dbMessage: Message): ChatMessage {
-  // 从metadata中提取附件信息
+  // Extract attachment information from metadata
   const attachments = dbMessage.metadata?.attachments || [];
 
   return {
-    id: `db-${dbMessage.id}`, // 添加前缀，保证ID唯一性
+    id: `db-${dbMessage.id}`, // Add prefix to ensure ID uniqueness
     text: dbMessage.content,
     isUser: dbMessage.role === 'user',
     role: dbMessage.role,
@@ -65,16 +63,16 @@ function dbMessageToChatMessage(dbMessage: Message): ChatMessage {
 }
 
 /**
- * 对话消息加载钩子
- * 提供分页加载消息的功能
+ * Conversation messages loading hook
+ * Provides paginated message loading functionality
  */
 export function useConversationMessages() {
   const pathname = usePathname();
   const { session } = useSupabaseAuth();
   const userId = session?.user?.id;
 
-  // 简化状态管理，使用统一的加载状态对象
-  // 将多个状态变量合并为一个结构化的状态对象
+  // Simplify state management using unified loading state object
+  // Merge multiple state variables into one structured state object
   const [dbConversationId, setDbConversationId] = useState<string | null>(null);
   const [difyConversationId, setDifyConversationId] = useState<string | null>(
     null
@@ -159,56 +157,56 @@ export function useConversationMessages() {
    * 按创建时间对消息进行排序，确保消息顺序正确
    */
   const sortMessagesByTime = useCallback((messages: Message[]): Message[] => {
-    // 首先按创建时间排序
-    // 如果创建时间相同，按sequence_index排序作为第二顺序
-    // 如果上述均相同，按ID排序确保稳定性
+    // First sort by creation time
+    // If creation time is the same, sort by sequence_index as secondary order
+    // If both are the same, sort by ID to ensure stability
     return [...messages].sort((a, b) => {
-      // 获取聊天窗口的创建时间
+      // Get the creation time of the chat window
       const timeA = new Date(a.created_at).getTime();
       const timeB = new Date(b.created_at).getTime();
 
-      // 计算时间差的绝对值
+      // Calculate the absolute difference between the times
       const timeDiff = Math.abs(timeA - timeB);
 
-      // 如果时间相差在一秒内，认为可能是同一轮对话的消息
-      // 此时优先使用sequence_index排序
+      // If the time difference is within one second, it is considered to be the same message in the same conversation
+      // At this time, use sequence_index to sort first
       if (timeDiff < 1000) {
-        // 获取序列索引
+        // Get the sequence index
         const seqA = a.metadata?.sequence_index ?? (a.role === 'user' ? 0 : 1);
         const seqB = b.metadata?.sequence_index ?? (b.role === 'user' ? 0 : 1);
 
         if (seqA !== seqB) {
-          return seqA - seqB; // 用户消息(0)在前，助手消息(1)在后
+          return seqA - seqB; // User message (0) before assistant message (1)
         }
       }
 
-      // 时间差超过阈值或sequence_index相同，按时间排序
+      // If the time difference exceeds the threshold or sequence_index is the same, sort by time
       if (timeA !== timeB) {
         return timeA - timeB;
       }
 
-      // 最后按ID排序确保稳定性
+      // Finally, sort by ID to ensure stability
       return a.id.localeCompare(b.id);
     });
   }, []);
 
   /**
-   * 确保消息以正确的顺序组织，并且用户-助手消息对保持合理的顺序
+   * Ensure messages are organized in the correct order and the user-assistant message pairs maintain a reasonable order
    */
   const organizeMessages = useCallback(
     (messages: Message[]): Message[] => {
-      // 先按创建时间排序
+      // First sort by creation time
       const sortedMessages = sortMessagesByTime(messages);
 
-      // stableMessages中已经考虑了sequence_index对于时间接近的消息
-      // 所以这里可以直接返回排序后的结果
+      // stableMessages has already considered the sequence_index for messages that are close in time
+      // So here we can directly return the sorted result
       return sortedMessages;
     },
     [sortMessagesByTime]
   );
 
   /**
-   * 从Dify对话ID获取数据库对话ID（使用新的优化接口）
+   * Get the database conversation ID from the Dify conversation ID (using the new optimized interface)
    */
   const fetchDbConversationId = useCallback(async (externalId: string) => {
     try {
@@ -248,29 +246,29 @@ export function useConversationMessages() {
   }, []);
 
   /**
-   * 加载初始消息（使用新的messageService）
+   * Load initial messages (using the new messageService)
    */
   const loadInitialMessages = useCallback(
     async (dbConvId: string) => {
-      // 防止重复加载或者加载已经变更的对话
-      // 使用统一的加载状态对象检查是否正在加载
+      // Prevent duplicate loading or loading a changed conversation
+      // Use the unified loading state object to check if loading is in progress
       if (!dbConvId || loading.isLocked) {
         return;
       }
 
-      // 获取滚动控制函数
+      // Get the scroll control function
       const resetScrollState = useChatScrollStore.getState().resetScrollState;
 
-      // 取消任何进行中的请求
+      // Cancel any ongoing requests
       cancelCurrentRequest();
 
-      // 创建新的AbortController
+      // Create a new AbortController
       const controller = new AbortController();
       loaderState.current.abortController = controller;
       const signal = controller.signal;
 
       try {
-        // 使用统一的状态管理方式设置加载状态
+        // Use the unified state management method to set the loading state
         startLoading('initial');
         loaderState.current.page = 1;
         loaderState.current.currentId = dbConvId;
@@ -279,26 +277,26 @@ export function useConversationMessages() {
           `[useConversationMessages] 开始加载初始消息，数据库对话ID=${dbConvId}`
         );
 
-        // 在获取消息前先清空当前消息，避免旧消息闪烁
-        // 保持骨架屏状态直到新消息完全加载完成
+        // Before getting messages, clear the current messages to avoid old messages flickering
+        // Keep the skeleton screen state until the new messages are fully loaded
         clearMessages();
 
-        // 设置当前数据库对话ID
+        // Set the current database conversation ID
         setDbConversationId(dbConvId);
 
-        // 使用新的messageService获取最新消息
+        // Use the new messageService to get the latest messages
         const result = await messageService.getLatestMessages(
           dbConvId,
           MESSAGES_PER_PAGE,
           { cache: true }
         );
 
-        // 如果请求已被取消或对话ID已改变，则放弃处理结果
+        // If the request has been cancelled or the conversation ID has changed, discard the result
         if (signal.aborted || loaderState.current.currentId !== dbConvId) {
           console.log(
             `[useConversationMessages] 请求已取消或对话ID已变更，放弃加载结果`
           );
-          finishLoading('idle'); // 重置加载状态
+          finishLoading('idle'); // Reset the loading state
           return;
         }
 
@@ -314,10 +312,10 @@ export function useConversationMessages() {
 
         const dbMessages = result.data;
 
-        // 记录总消息数
+        // Record the total number of messages
         loaderState.current.totalMessages = dbMessages.length;
 
-        // 如果消息总数不足一页，就不需要显示"加载更多"按钮
+        // If the total number of messages is less than one page, there is no need to display the "Load more" button
         if (dbMessages.length <= MESSAGES_PER_PAGE) {
           setHasMoreMessages(false);
         } else {
@@ -330,41 +328,41 @@ export function useConversationMessages() {
           return;
         }
 
-        // 按时间排序并组织消息顺序
+        // Sort by time and organize message order
         const organizedMessages = organizeMessages(dbMessages);
 
-        // 取最后的MESSAGES_PER_PAGE条消息
+        // Get the last MESSAGES_PER_PAGE messages
         const latestMessages = organizedMessages.slice(-MESSAGES_PER_PAGE);
 
-        // 将数据库消息转换为前端消息对象
+        // Convert database messages to frontend message objects
         const chatMessages = latestMessages.map(dbMessageToChatMessage);
 
         console.log(
           `[useConversationMessages] 加载了${latestMessages.length}条最新消息`
         );
 
-        // 优化状态更新逻辑，确保骨架屏消失后直接显示新消息，避免闪烁问题
-        // 1. 先批量添加消息到store
-        // 2. 使用requestAnimationFrame确保DOM已更新
-        // 3. 然后再设置加载状态为成功，关闭骨架屏
-        // 批量添加消息，减少渲染次数
+        // Optimize the state update logic to ensure that the skeleton screen disappears and the new messages are displayed directly, avoiding flickering issues
+        // 1. First batch add messages to the store
+        // 2. Use requestAnimationFrame to ensure that the DOM is updated
+        // 3. Then set the loading state to success and close the skeleton screen
+        // Batch add messages to reduce rendering times
         useChatStore.setState({ messages: chatMessages });
 
-        // 使用requestAnimationFrame确保DOM已更新后再关闭骨架屏
+        // Use requestAnimationFrame to ensure that the DOM is updated before
         requestAnimationFrame(() => {
-          // 确保滚动到底部，使用可靠的方法
+          // Ensure that the scroll is at the bottom, using a reliable method
           resetScrollState();
 
-          // 再次使用requestAnimationFrame确保上面的操作已完成
+          // Use requestAnimationFrame again to ensure that the above operation is completed
           requestAnimationFrame(() => {
-            // 设置加载成功状态
+            // Set the loading success state
             finishLoading('success');
 
-            // 记录该对话已经加载成功，避免重复加载
+            // Record that this conversation has been loaded successfully to avoid duplicate loading
             if (dbConvId) {
               loaderState.current.loadedConversations.add(dbConvId);
 
-              // 获取当前路径中的对话ID
+              // Get the conversation ID in the current path
               const pathConversationId = getConversationIdFromPath();
               if (
                 pathConversationId &&
@@ -377,7 +375,7 @@ export function useConversationMessages() {
           });
         });
       } catch (error) {
-        // 如果是取消请求导致的错误，则不处理
+        // If the error is caused by cancellation of the request, do not process it
         if (signal.aborted) return;
 
         console.error(`[useConversationMessages] 加载初始消息失败:`, error);
@@ -389,11 +387,11 @@ export function useConversationMessages() {
   );
 
   /**
-   * 加载更多历史消息（使用新的messageService）
+   * Load more historical messages (using the new messageService)
    */
   const loadMoreMessages = useCallback(async () => {
-    // 使用统一的状态对象检查是否可以加载更多消息
-    // 避免在初始加载过程中触发加载更多，防止骨架屏闪烁
+    // Use the unified state object to check if more messages can be loaded
+    // Avoid triggering load more during initial loading to prevent the skeleton screen from flickering
     if (
       !dbConversationId ||
       loading.isLocked ||
@@ -405,30 +403,30 @@ export function useConversationMessages() {
       return;
     }
 
-    // 记录当前滚动位置，防止加载完成后滚动位置丢失
+    // Record the current scroll position to prevent the scroll position from being lost after loading
     let scrollPosition = 0;
     const scrollContainer = document.querySelector('.chat-scroll-container');
     if (scrollContainer) {
       scrollPosition = scrollContainer.scrollTop;
     }
 
-    // 获取滚动控制函数
+    // Get the scroll control function
     const scrollToBottom = useChatScrollStore.getState().scrollToBottom;
 
-    // 取消任何进行中的请求
+    // Cancel any ongoing requests
     cancelCurrentRequest();
 
-    // 创建新的AbortController
+    // Create a new AbortController
     const controller = new AbortController();
     loaderState.current.abortController = controller;
     const signal = controller.signal;
 
     try {
-      // 使用统一的状态管理方式设置加载状态
-      // 仅在加载更多消息时将状态类型设置为'more'
+      // Use the unified state management method to set the loading state
+      // Only set the state type to 'more' when loading more messages
       startLoading('more');
 
-      // 计算要跳过的消息数
+      // Calculate the number
       const currentPage = loaderState.current.page;
       const skip = currentPage * MESSAGES_PER_PAGE;
 
@@ -436,15 +434,15 @@ export function useConversationMessages() {
         `[useConversationMessages] 加载更多历史消息，页码=${currentPage + 1}，跳过=${skip}`
       );
 
-      // 使用新的messageService获取所有消息，然后手动分页
-      // 这是临时方案，后续可以优化为真正的游标分页
+      // Use the new messageService to get all messages, then manually paginate
+      // This is a temporary solution, and the real cursor pagination can be optimized later
       const result = await messageService.getLatestMessages(
         dbConversationId,
         1000,
         { cache: true }
-      ); // 获取大量消息用于分页
+      ); // Get a large number of messages for pagination
 
-      // 如果请求已被取消或对话ID已改变，则放弃处理结果
+      // If the request has been cancelled or the conversation ID has changed, discard the result
       if (
         signal.aborted ||
         loaderState.current.currentId !== dbConversationId
@@ -467,10 +465,10 @@ export function useConversationMessages() {
 
       const allMessages = result.data;
 
-      // 更新总消息数
+      // Update the total number of messages
       loaderState.current.totalMessages = allMessages.length;
 
-      // 如果已经加载了所有消息
+      // If all messages have been loaded
       if (skip >= allMessages.length) {
         setHasMoreMessages(false);
         finishLoading('complete');
@@ -478,56 +476,56 @@ export function useConversationMessages() {
         return;
       }
 
-      // 按时间排序并组织消息顺序
+      // Sort by time and organize message order
       const organizedMessages = organizeMessages(allMessages);
 
-      // 获取当前页的消息
+      // Get the messages on the current page
       const endIndex = Math.max(0, organizedMessages.length - skip);
       const startIndex = Math.max(0, endIndex - MESSAGES_PER_PAGE);
       const pageMessages = organizedMessages.slice(startIndex, endIndex);
 
-      // 检查是否还有更多消息可加载
+      // Check if there are more messages to load
       if (startIndex === 0) {
         setHasMoreMessages(false);
-        // 如果没有更多消息，设置加载状态为完成
+        // If there are no more messages, set the loading state to complete
         finishLoading('complete');
       }
 
-      // 记录当前滚动位置
+      // Record the current scroll position
       const scrollContainer = messagesContainerRef.current;
       const oldScrollHeight = scrollContainer?.scrollHeight || 0;
       const oldScrollTop = scrollContainer?.scrollTop || 0;
 
-      // 将数据库消息转换为前端消息对象
+      // Convert database messages to frontend message objects
       const newChatMessages = pageMessages.map(dbMessageToChatMessage);
 
-      // 当前消息
+      // Current messages
       const currentMessages = useChatStore.getState().messages;
 
-      // 批量添加到现有消息的前面
+      // Batch add to the existing messages
       const updatedMessages = [...newChatMessages, ...currentMessages];
       useChatStore.setState({ messages: updatedMessages });
 
-      // 增加页码
+      // Increase the page number
       loaderState.current.page = currentPage + 1;
 
       console.log(
         `[useConversationMessages] 加载了${pageMessages.length}条历史消息`
       );
 
-      // 加载完成后重置加载状态
+      // After loading, reset the loading state
       finishLoading('success');
 
-      // 保持滚动位置，使用更可靠的方式
+      // Keep the scroll position, using a more reliable method
       if (scrollContainer) {
-        // 使用requestAnimationFrame确保DOM已更新
+        // Use requestAnimationFrame to ensure that the DOM is updated
         requestAnimationFrame(() => {
           if (scrollContainer) {
-            // 计算新旧高度差
+            // Calculate the difference in height
             const newScrollHeight = scrollContainer.scrollHeight;
             const heightDiff = newScrollHeight - oldScrollHeight;
 
-            // 调整滚动位置
+            // Adjust the scroll position
             if (heightDiff > 0) {
               scrollContainer.scrollTop = oldScrollTop + heightDiff;
               console.log(
@@ -538,7 +536,7 @@ export function useConversationMessages() {
         });
       }
     } catch (error) {
-      // 如果是取消请求导致的错误，则不处理
+      // If the error is caused by cancellation of the request, do not process it
       if (signal.aborted) {
         return;
       }
@@ -547,23 +545,23 @@ export function useConversationMessages() {
       setError(error instanceof Error ? error : new Error(String(error)));
       finishLoading('error');
     } finally {
-      // 解锁加载状态
+      // Unlock the loading state
       finishLoading('idle');
     }
   }, [dbConversationId, loading, hasMoreMessages, organizeMessages]);
 
   /**
-   * 设置消息容器引用，用于滚动检测
+   * Set the message container reference, used for scroll detection
    */
   const setMessagesContainer = useCallback((element: HTMLDivElement | null) => {
     messagesContainerRef.current = element;
   }, []);
 
   /**
-   * 检测滚动到顶部，自动加载更多消息
+   * Check if the scroll is at the top, and automatically load more messages
    */
   const handleScroll = useCallback(() => {
-    // 使用统一的状态对象检查是否可以加载更多消息
+    // Use the unified state object to check if more messages can be loaded
     if (
       !messagesContainerRef.current ||
       !hasMoreMessages ||
@@ -574,15 +572,15 @@ export function useConversationMessages() {
     }
 
     const { scrollTop } = messagesContainerRef.current;
-    const scrollThreshold = 50; // 滚动到距顶部50px内触发加载
+    const scrollThreshold = 50; // Scroll to within 50px of the top to trigger loading
 
     if (scrollTop < scrollThreshold) {
       loadMoreMessages();
     }
   }, [hasMoreMessages, loading, loadMoreMessages]);
 
-  // 重置加载状态的功能已由resetLoader函数提供
-  // 不再需要单独的resetLoadingState函数
+  // The function to reset the loading state is provided by the resetLoader function
+  // No longer need to use the resetLoadingState function separately
   /**
    * 路由更改时加载消息
    */
@@ -590,10 +588,10 @@ export function useConversationMessages() {
     const externalId = getConversationIdFromPath();
     const currentMessages = useChatStore.getState().messages;
 
-    // 检测是否是首次发送消息导致的路由变化
-    // 1. 从 /chat/new 路径或 /chat/temp- 开头的路径切换到正常对话路径
-    // 2. 在这种情况下，不应该清空消息或显示加载状态
-    // 3. 增强检测：如果当前有未保存的用户消息和助手正在流式响应的消息，也应该视为首次消息场景
+    // Check if the route change is caused by the first message sent
+    // 1. Switch from the /chat/new path or paths starting with /chat/temp- to the normal conversation path
+    // 2. In this case, the message should not be cleared or the loading state should not be displayed
+    // 3. Enhanced detection: If there are unsaved user messages and assistant messages that are streaming, it should also be considered a first message scenario
     const isFromNewChat =
       loaderState.current.previousPath === '/chat/new' ||
       (loaderState.current.previousPath?.includes('/chat/temp-') ?? false);
@@ -601,12 +599,12 @@ export function useConversationMessages() {
       externalId && externalId !== 'new' && !externalId.includes('temp-');
     const hasExistingMessages = currentMessages.length > 0;
 
-    // 检查是否有正在流式响应的助手消息
+    // Check if there are assistant messages that are streaming
     const hasStreamingMessage = currentMessages.some(
       msg => msg.isStreaming === true
     );
 
-    // 检查是否有未保存的用户消息（处于发送状态）
+    // Check if there are unsaved user messages (in the sending state)
     const hasPendingUserMessage = currentMessages.some(
       msg =>
         msg.isUser === true &&
@@ -614,45 +612,45 @@ export function useConversationMessages() {
           msg.persistenceStatus === 'saving')
     );
 
-    // 首次发送消息的条件：
-    // 1. 传统条件：从新对话路径切换到存在的对话路径，且已有消息
-    // 2. 增强条件：当前有流式响应或未保存的用户消息，表明这是首次发送
+    // The conditions for the first message sent:
+    // 1. Traditional condition: Switch from the new conversation path to the existing conversation path, and there are existing messages
+    // 2. Enhanced condition: There are streaming assistant messages or unsaved user messages, indicating that this is the first message
     const isFirstMessageTransition =
       (isFromNewChat && isToExistingChat && hasExistingMessages) ||
       (hasExistingMessages && (hasStreamingMessage || hasPendingUserMessage));
 
-    // 记录当前路径用于下次判断
+    // Record the current path for next judgment
     loaderState.current.previousPath = pathname;
 
     console.log(
       `[useConversationMessages] 路由变化检测: 是否首次发送=${isFirstMessageTransition}, 从=${isFromNewChat}, 到=${isToExistingChat}, 消息数=${hasExistingMessages}`
     );
 
-    // 获取滚动控制函数
+    // Get the scroll control function
     const resetScrollState = useChatScrollStore.getState().resetScrollState;
 
-    // 取消任何进行中的请求
+    // Cancel any ongoing requests
     cancelCurrentRequest();
 
-    // 如果是首次发送消息导致的路由变化，跳过清空和加载消息的步骤
+    // If the route change is caused by the first message sent, skip the steps of clearing and loading messages
     if (isFirstMessageTransition) {
       console.log(
         `[useConversationMessages] 首次发送消息导致的路由变化，保留现有消息`
       );
-      // 跳过重置状态和清空消息的步骤，直接设置加载完成
+      // Skip the steps of resetting the state and clearing messages, and directly set the loading to complete
       finishLoading('success');
 
-      // 记录已经加载过
+      // Record that this conversation has been loaded successfully to avoid duplicate loading
       if (externalId) {
         loaderState.current.loadedConversations.add(externalId);
       }
 
-      // 确保滚动到底部
+      // Ensure that the scroll is at the bottom
       resetScrollState();
       return;
     }
 
-    // 检查是否已经加载过该对话
+    // Check if this conversation has already been loaded
     if (externalId && loaderState.current.loadedConversations.has(externalId)) {
       console.log(
         `[useConversationMessages] 已经加载过对话 ${externalId}，跳过重复加载`
@@ -660,63 +658,62 @@ export function useConversationMessages() {
       return;
     }
 
-    // 对于非首次发送消息的路由变化，执行正常的加载逻辑
-    // 优化状态更新顺序，避免旧消息闪烁
-    // 1. 先重置状态和清空消息
-    // 2. 然后设置加载状态和初始加载状态
-    // 3. 确保骨架屏显示直到新消息加载完成
-    // 使用统一的状态管理方式重置加载状态
-    // 并清空消息，避免显示旧消息
+    // For non-first message sent route changes, execute the normal loading logic
+    // Optimize the state update order to avoid old messages flickering
+    // 1. First reset the state and clear the messages
+    // 2. Then set the loading state and initial loading state
+    // 3. Ensure that the skeleton screen is displayed until the new messages are fully loaded
+    // Use the unified state management method to reset the loading state
+    // and clear the messages, avoiding displaying old messages
     resetLoader();
     clearMessages();
 
-    // 立即设置加载状态，确保UI显示骨架屏
+    // Immediately set the loading state, ensuring that the UI displays the skeleton screen
     startLoading('initial');
 
-    // 确保滚动回顶部，避免在新对话加载时显示滚动按钮
+    // Ensure that the scroll is at the top, avoiding the scroll button from being displayed when loading a new conversation
     resetScrollState();
 
     if (externalId) {
       setDifyConversationId(externalId);
 
-      // 使用统一的状态对象设置当前加载的对话ID
+      // Use the unified state object to set the current loaded conversation ID
       loaderState.current.currentId = externalId;
 
-      // 获取数据库对话ID并加载消息
+      // Get the database conversation ID and load messages
       (async () => {
-        // 尝试查询数据库对话ID
+        // Try to query the database conversation ID
         const dbConvId = await fetchDbConversationId(externalId);
 
-        // 确保当前路径仍然是请求的对话
+        // Ensure that the current path is still the requested conversation
         if (loaderState.current.currentId === externalId && dbConvId) {
-          // 设置为当前数据库对话ID
+          // Set the current database conversation ID
           loaderState.current.currentId = dbConvId;
-          // 加载初始消息
+          // Load initial messages
           loadInitialMessages(dbConvId);
         } else if (loaderState.current.currentId === externalId) {
-          // 没有找到对应的数据库对话ID，设置完成状态
+          // If the database conversation ID is not found, set the completion state
           finishLoading('complete');
         }
       })();
     } else {
-      // 使用统一的状态管理方式清理状态
+      // Use the unified state management method to clean up the state
       setDifyConversationId(null);
       setDbConversationId(null);
-      setHasMoreMessages(true);
-      // 如果不是对话页面，重置为idle状态
+      setHasMoreMessages(true); // If it is not a conversation page, reset to idle state
       resetLoader();
     }
 
-    // 清理函数
+    // Clean up function
     return () => {
-      // 使用统一的状态管理方式清理加载状态
-      // 如果组件卸载或路由改变，标记当前加载ID为null
-      // 这样可以在异步操作完成后知道上下文已经改变
+      // Use the unified state management method to clean up the loading state
+      // If the component is unloaded or the route changes, mark the current loaded ID as null
+      // This can be used to know that the context has changed after the asynchronous operation is completed
       if (loaderState.current.currentId === externalId) {
         loaderState.current.currentId = null;
       }
 
-      // 取消任何进行中的请求
+      // Cancel any ongoing requests
       cancelCurrentRequest();
     };
   }, [
@@ -729,7 +726,7 @@ export function useConversationMessages() {
   ]);
 
   /**
-   * 添加和移除滚动事件监听器
+   * Add and remove scroll event listeners
    */
   useEffect(() => {
     const messagesContainer = messagesContainerRef.current;
@@ -752,10 +749,10 @@ export function useConversationMessages() {
     error,
     loadMoreMessages,
     setMessagesContainer,
-    // 导出一些有用的状态
+    // Export some useful states
     isLoading: loading.state === 'loading',
-    // 使用统一的加载状态对象推断初始加载和加载更多状态
-    // 这样可以更精确地控制骨架屏的显示时机，避免闪烁问题
+    // Use the unified loading state object to infer the initial loading and load more states
+    // This can more accurately control the display timing of the skeleton screen, avoiding flickering issues
     isLoadingInitial: loading.state === 'loading' && loading.type === 'initial',
     isLoadingMore: loading.state === 'loading' && loading.type === 'more',
   };

@@ -25,10 +25,10 @@ interface InputDialogProps {
 }
 
 /**
- * 响应式输入对话框组件 - Stone风格设计
- * 桌面端：居中模态框，圆润石头风格
- * 移动端：底部弹出样式，键盘友好设计
- * 用于重命名等需要用户输入的操作
+ * Responsive input dialog component - Stone style design
+ * Desktop: Centered modal, rounded stone style
+ * Mobile: Bottom sheet style, keyboard-friendly design
+ * Used for renaming and other user input operations
  */
 export function InputDialog({
   isOpen,
@@ -52,16 +52,16 @@ export function InputDialog({
   const [mounted, setMounted] = useState(false);
   const [inputValue, setInputValue] = useState(defaultValue);
 
-  // 客户端挂载后才能使用Portal
+  // Can only use Portal after client-side mounting
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // 当对话框打开时，重置输入值并聚焦
+  // When the dialog is opened, reset the input value and focus
   useEffect(() => {
     if (isOpen) {
       setInputValue(defaultValue);
-      // 延迟聚焦，确保组件已渲染
+      // Delay focus to ensure the component has rendered
       setTimeout(() => {
         inputRef.current?.focus();
         inputRef.current?.select();
@@ -69,7 +69,7 @@ export function InputDialog({
     }
   }, [isOpen, defaultValue]);
 
-  // 处理ESC键关闭
+  // Handle ESC key close
   useEffect(() => {
     if (!isOpen) return;
 
@@ -83,7 +83,7 @@ export function InputDialog({
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isOpen, onClose, isLoading]);
 
-  // 处理点击外部关闭
+  // Handle click outside to close
   useEffect(() => {
     if (!isOpen) return;
 
@@ -97,7 +97,7 @@ export function InputDialog({
       }
     };
 
-    // 添加延迟，避免打开时立即关闭
+    // Add delay to avoid closing immediately when opened
     const timer = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside);
     }, 100);
@@ -108,7 +108,7 @@ export function InputDialog({
     };
   }, [isOpen, onClose, isLoading]);
 
-  // 处理移动端滑动关闭
+  // Handle mobile swipe to close
   useEffect(() => {
     if (!isOpen || !isMobile || !dialogRef.current || isLoading) return;
 
@@ -133,10 +133,10 @@ export function InputDialog({
       const deltaY = currentY - startY;
 
       if (deltaY > 100) {
-        // 向下滑动超过阈值，关闭弹窗
+        // If the swipe down exceeds the threshold, close the dialog
         onClose();
       } else {
-        // 恢复原位
+        // Restore to original position
         dialog.style.transform = '';
       }
     };
@@ -152,14 +152,14 @@ export function InputDialog({
     };
   }, [isOpen, isMobile, onClose, isLoading]);
 
-  // 点击背景关闭
+  // Click background to close
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && !isLoading) {
       onClose();
     }
   };
 
-  // 处理表单提交
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedValue = inputValue.trim();
@@ -168,12 +168,12 @@ export function InputDialog({
     }
   };
 
-  // 检查输入是否有效
+  // Check if the input is valid
   const isInputValid = inputValue.trim().length > 0;
 
   if (!mounted) return null;
 
-  // 桌面端模态框样式 - Stone风格设计
+  // Desktop modal style - Stone style design
   const desktopDialog = (
     <div
       className={cn(
@@ -197,9 +197,7 @@ export function InputDialog({
         )}
       >
         <form onSubmit={handleSubmit}>
-          {/* --- BEGIN COMMENT ---
-          桌面端图标和标题区域 - 居中设计
-          --- END COMMENT --- */}
+          {/* Desktop icon and title area - centered design */}
           <div className="flex flex-col items-center px-8 pt-8 pb-6">
             <div
               className={cn(
@@ -223,9 +221,7 @@ export function InputDialog({
             </h3>
           </div>
 
-          {/* --- BEGIN COMMENT ---
-          桌面端输入区域
-          --- END COMMENT --- */}
+          {/* Desktop input area */}
           <div className="px-8 pb-6">
             <label
               className={cn(
@@ -267,9 +263,7 @@ export function InputDialog({
             </div>
           </div>
 
-          {/* --- BEGIN COMMENT ---
-          桌面端按钮区域 - 水平布局
-          --- END COMMENT --- */}
+          {/* Desktop button area - horizontal layout */}
           <div className="flex items-center gap-3 p-8 pt-6">
             <button
               type="button"
@@ -304,9 +298,7 @@ export function InputDialog({
             </button>
           </div>
 
-          {/* --- BEGIN COMMENT ---
-          关闭按钮 - 右上角
-          --- END COMMENT --- */}
+          {/* Close button - top right corner */}
           <button
             type="button"
             onClick={onClose}
@@ -327,7 +319,7 @@ export function InputDialog({
     </div>
   );
 
-  // 移动端底部弹出样式 - Stone风格设计，键盘友好
+  // Mobile bottom sheet style - Stone style design, keyboard-friendly
   const mobileDialog = (
     <div
       className={cn(
@@ -352,9 +344,7 @@ export function InputDialog({
         style={{ maxHeight: '90vh', overflowY: 'auto' }}
       >
         <form onSubmit={handleSubmit}>
-          {/* --- BEGIN COMMENT ---
-          移动端顶部拖动条 - 更粗更明显
-          --- END COMMENT --- */}
+          {/* Mobile top drag handle - thicker and more visible */}
           <div className="flex items-center justify-center pt-4 pb-2">
             <div
               className={cn(
@@ -364,9 +354,7 @@ export function InputDialog({
             ></div>
           </div>
 
-          {/* --- BEGIN COMMENT ---
-          移动端图标和标题区域
-          --- END COMMENT --- */}
+          {/* Mobile icon and title area */}
           <div className="flex flex-col items-center px-6 pt-4 pb-6">
             <div
               className={cn(
@@ -389,9 +377,7 @@ export function InputDialog({
               {title}
             </h3>
 
-            {/* --- BEGIN COMMENT ---
-            移动端输入区域 - 更大的触摸区域
-            --- END COMMENT --- */}
+            {/* Mobile input area - larger touch areas */}
             <div className="w-full">
               <label
                 className={cn(
@@ -432,9 +418,7 @@ export function InputDialog({
                 )}
               </div>
 
-              {/* --- BEGIN COMMENT ---
-              移动端按钮区域 - 垂直排列，更大的触摸区域
-              --- END COMMENT --- */}
+              {/* Mobile button area - vertical layout, larger touch areas */}
               <div className="w-full space-y-3">
                 <button
                   type="submit"
@@ -475,6 +459,6 @@ export function InputDialog({
     </div>
   );
 
-  // 根据设备类型返回相应的对话框
+  // Return the corresponding dialog based on the device type
   return createPortal(isMobile ? mobileDialog : desktopDialog, document.body);
 }

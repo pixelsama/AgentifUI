@@ -77,9 +77,7 @@ export function AboutEditor({
 
   return (
     <div className="space-y-6">
-      {/* --- BEGIN COMMENT ---
-      语言切换器
-      --- END COMMENT --- */}
+      {/* Language switcher */}
       <div>
         <label
           className={cn(
@@ -113,9 +111,7 @@ export function AboutEditor({
         </Select>
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      页面标题设置
-      --- END COMMENT --- */}
+      {/* Page title settings */}
       <div>
         <label
           className={cn(
@@ -138,9 +134,7 @@ export function AboutEditor({
         />
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      副标题设置
-      --- END COMMENT --- */}
+      {/* Subtitle settings */}
       <div>
         <label
           className={cn(
@@ -163,9 +157,7 @@ export function AboutEditor({
         />
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      使命描述
-      --- END COMMENT --- */}
+      {/* Mission description */}
       <div>
         <label
           className={cn(
@@ -190,9 +182,7 @@ export function AboutEditor({
         />
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      价值观卡片管理
-      --- END COMMENT --- */}
+      {/* Values card management */}
       <div>
         <div className="mb-3 flex items-center justify-between">
           <label
@@ -286,9 +276,7 @@ export function AboutEditor({
         </div>
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      按钮文字
-      --- END COMMENT --- */}
+      {/* Button text */}
       <div>
         <label
           className={cn(
@@ -311,9 +299,7 @@ export function AboutEditor({
         />
       </div>
 
-      {/* --- BEGIN COMMENT ---
-      版权信息
-      --- END COMMENT --- */}
+      {/* Copyright information */}
       <div>
         <label
           className={cn(

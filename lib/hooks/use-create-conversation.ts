@@ -1,23 +1,20 @@
 /**
- * 新对话创建钩子
+ * New conversation creation hook
+ * @description Provides creation and initialization functionality for new conversations
  *
- * --- BEGIN COMMENT ---
- * 🎯 适用范围：仅用于对话类 Dify 应用（chatbot、agent、chatflow）
- * 这些应用的数据存储到 conversations + messages 表
+ * @scope Only for conversation-type Dify applications (chatbot, agent, chatflow)
+ * These applications store data in conversations + messages tables
  *
- * 任务类应用（workflow、text-generation）使用独立的组件和存储逻辑，
- * 数据存储到 app_executions 表，不使用此 hook
- * --- END COMMENT ---
+ * Task-type applications (workflow, text-generation) use independent components and storage logic,
+ * storing data in app_executions table and not using this hook
  *
- * 提供新对话的创建和初始化功能，包括：
- * - Dify API 调用和流式响应处理
- * - 数据库对话记录创建
- * - 路由和状态管理
- * - 对话标题自动生成
- * - 常用应用管理
+ * @features
+ * - Dify API calls and streaming response handling
+ * - Database conversation record creation
+ * - Routing and state management
+ * - Automatic conversation title generation
+ * - Favorite apps management
  */
-// For userId
-// import { useCurrentAppStore } from '@lib/stores/current-app-store'; // appId is passed as param
 import { createConversation } from '@lib/db';
 import { streamDifyChat } from '@lib/services/dify/chat-service';
 import { renameConversation } from '@lib/services/dify/conversation-service';
@@ -35,14 +32,9 @@ import type {
   DifySseParallelBranchFinishedEvent,
   DifySseParallelBranchStartedEvent,
 } from '@lib/services/dify/types';
-// 使用新的优化版本
 import { useChatStore } from '@lib/stores/chat-store';
-// To set local conversation ID
 import { useAutoAddFavoriteApp } from '@lib/stores/favorite-apps-store';
-import {
-  PendingConversation,
-  usePendingConversationStore,
-} from '@lib/stores/pending-conversation-store';
+import { usePendingConversationStore } from '@lib/stores/pending-conversation-store';
 import { useSupabaseAuth } from '@lib/supabase/hooks';
 
 import { useCallback, useState } from 'react';
@@ -70,7 +62,7 @@ interface UseCreateConversationReturn {
         | DifySseLoopStartedEvent
         | DifySseLoopNextEvent
         | DifySseLoopCompletedEvent
-    ) => void // 🎯 新增：支持节点事件回调
+    ) => void // 🎯 New: Support node event callbacks
   ) => Promise<{
     tempConvId: string;
     realConvId?: string;
@@ -112,7 +104,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
     state => state.setSupabasePK
   );
 
-  // 🎯 新增：打字机效果相关Actions
+  // 🎯 New: Actions related to typewriter effect
   const startTitleTypewriter = usePendingConversationStore(
     state => state.startTitleTypewriter
   );
@@ -126,7 +118,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
     state => state.setCurrentConversationId
   );
 
-  // 添加常用应用管理hook
+  // Add favorite app management hook
   const { addToFavorites } = useAutoAddFavoriteApp();
 
   const initiateNewConversation = useCallback(
@@ -150,7 +142,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
           | DifySseLoopStartedEvent
           | DifySseLoopNextEvent
           | DifySseLoopCompletedEvent
-      ) => void // 🎯 新增：支持节点事件回调
+      ) => void // 🎯 New: Support node event callbacks
     ): Promise<{
       tempConvId: string;
       realConvId?: string;
@@ -168,16 +160,16 @@ export function useCreateConversation(): UseCreateConversationReturn {
 
       const tempConvId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-      // 🎯 使用新的addPendingWithLimit方法，支持自动"挤出"效果
+      // 🎯 Use the new addPendingWithLimit method, support automatic "eviction" effect
       addPendingWithLimit(tempConvId, t('creating'), 20, evictedCount => {
         console.log(
-          `[useCreateConversation] 新对话创建触发挤出效果，预计挤出${evictedCount}个对话`
+          `[useCreateConversation] New conversation creation triggers eviction effect, expected to evict ${evictedCount} conversations`
         );
-        // 这里可以添加动画效果或通知用户
+        // Here you can add animation effects or notify users
       });
       updateStatusInPendingStore(tempConvId, 'creating');
 
-      // --- BEGIN EARLY HIGHLIGHT ---
+      // Early URL and state update for immediate UI feedback
       try {
         const currentPath = window.location.pathname;
         if (
@@ -185,7 +177,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
           !currentPath.startsWith('/chat/temp-') ||
           currentPath.startsWith('/apps/')
         ) {
-          // 🎯 添加应用详情页面的路径支持
+          // 🎯 Add support for application detail page paths
           console.log(
             `[useCreateConversation] Early highlight: Updating URL to /chat/${tempConvId}`
           );
@@ -202,14 +194,13 @@ export function useCreateConversation(): UseCreateConversationReturn {
         console.log(
           `[useCreateConversation] Early highlight: Selecting item in SidebarStore: ${tempConvId}`
         );
-        selectItem('chat', tempConvId, true); // 保持当前展开状态
+        selectItem('chat', tempConvId, true); // Keep current expanded state
       } catch (highlightError) {
         console.error(
           '[useCreateConversation] Error during early highlight:',
           highlightError
         );
       }
-      // --- END EARLY HIGHLIGHT ---
 
       let streamResponse: DifyStreamResponse | null = null;
       let realConvIdFromStream: string | null = null;
@@ -247,7 +238,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
                 currentPath === '/chat/new' ||
                 currentPath.startsWith('/apps/')
               ) {
-                // 🎯 添加应用详情页面的路径支持
+                // 🎯 Add support for application detail page paths
                 console.log(
                   `[useCreateConversation] Updating URL (from new/temp/apps) to /chat/${id}`
                 );
@@ -270,7 +261,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
                   sidebarStoreState.selectedId === tempConvId ||
                   sidebarStoreState.selectedId === null
                 ) {
-                  sidebarStoreState.selectItem('chat', id, true); // 保持当前展开状态
+                  sidebarStoreState.selectItem('chat', id, true); // Keep current expanded state
                 }
               } catch (error) {
                 console.error(
@@ -286,8 +277,8 @@ export function useCreateConversation(): UseCreateConversationReturn {
               );
               updateStatusInPendingStore(tempConvId, 'title_fetching');
 
-              // 立即创建数据库记录，不等待标题获取完成
-              // 这确保在流式响应期间消息可以被保存
+              // Immediately create database records, without waiting for title acquisition to complete
+              // This ensures that messages can be saved during streaming responses
               const saveConversationToDb = async (
                 difyConvId: string,
                 convTitle: string,
@@ -308,7 +299,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
                 }
                 try {
                   console.log(
-                    `[useCreateConversation] 立即创建数据库记录: difyId=${difyConvId}, title=${convTitle}, userId=${currentUserId}, appId=${appId}`
+                    `[useCreateConversation] Immediately create database records: difyId=${difyConvId}, title=${convTitle}, userId=${currentUserId}, appId=${appId}`
                   );
 
                   const result = await createConversation({
@@ -327,25 +318,25 @@ export function useCreateConversation(): UseCreateConversationReturn {
                   if (result.success && result.data) {
                     const localConversation = result.data;
                     console.log(
-                      `[useCreateConversation] 数据库记录创建成功，数据库ID: ${localConversation.id}, Dify对话ID: ${difyConvId}`
+                      `[useCreateConversation] Database records created successfully, database ID: ${localConversation.id}, Dify conversation ID: ${difyConvId}`
                     );
 
-                    // 🎯 在对话创建成功后添加应用到常用列表
-                    // 这是最佳时机：确保对话真正创建成功，且只在新对话时执行一次
+                    // 🎯 Add application to favorite list after conversation creation
+                    // This is the best time: ensure that the conversation is truly created successfully, and only executed once when creating a new conversation
                     console.log(
-                      `[useCreateConversation] 添加应用到常用列表: ${appId}`
+                      `[useCreateConversation] Add application to favorite list: ${appId}`
                     );
                     addToFavorites(appId);
 
-                    // 🎯 增强：使用原子性更新，避免竞态条件
+                    // 🎯 Enhance: Use atomic update to avoid race conditions
                     const { markAsPersistedComplete } =
                       usePendingConversationStore.getState();
                     markAsPersistedComplete(difyConvId, localConversation.id);
 
-                    // 立即调用回调函数，通知数据库ID创建完成
+                    // Immediately call the callback function to notify that the database ID has been created
                     if (typeof onDbIdCreated === 'function') {
                       console.log(
-                        `[useCreateConversation] 立即通知数据库ID创建完成: difyId=${difyConvId}, dbId=${localConversation.id}`
+                        `[useCreateConversation] Immediately notify that the database ID has been created: difyId=${difyConvId}, dbId=${localConversation.id}`
                       );
                       onDbIdCreated(difyConvId, localConversation.id);
                     }
@@ -353,7 +344,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
                     return localConversation.id;
                   } else {
                     console.error(
-                      `[useCreateConversation] 创建对话失败:`,
+                      `[useCreateConversation] Conversation creation failed:`,
                       result.error
                     );
                     throw new Error(
@@ -376,13 +367,13 @@ export function useCreateConversation(): UseCreateConversationReturn {
                 }
               };
 
-              // 使用立即执行的异步函数处理数据库记录创建
-              // 这避免了在非异步回调中使用await的问题
+              // Use immediately executed asynchronous functions to process database record creation
+              // This avoids the problem of using await in non-asynchronous callbacks
               (async () => {
-                // 立即创建数据库记录，使用临时标题
+                // Immediately create database records, using temporary title
                 const tempTitle = t('creating');
                 console.log(
-                  `[useCreateConversation] 立即创建数据库记录，Dify对话ID=${id}`
+                  `[useCreateConversation] Immediately create database records, Dify conversation ID=${id}`
                 );
                 const dbId = await saveConversationToDb(
                   id,
@@ -390,7 +381,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
                   tempConvId
                 );
 
-                // 异步获取正式标题并更新数据库记录
+                // Asynchronously get the official title and update the database record
                 renameConversation(appId, id, {
                   user: userIdentifier,
                   auto_generate: true,
@@ -401,13 +392,13 @@ export function useCreateConversation(): UseCreateConversationReturn {
                         ? renameResponse.name
                         : t('untitled');
                     console.log(
-                      `[useCreateConversation] 标题获取成功，启动打字机效果: ${finalTitle}`
+                      `[useCreateConversation] Title acquisition successful, start typewriter effect: ${finalTitle}`
                     );
 
-                    // 🎯 启动打字机效果而不是直接更新标题
+                    // 🎯 Start typewriter effect instead of directly updating the title
                     startTitleTypewriter(tempConvId, finalTitle);
 
-                    // 更新数据库中的标题
+                    // Update the title in the database
                     if (dbId && finalTitle !== tempTitle) {
                       try {
                         const {
@@ -415,23 +406,23 @@ export function useCreateConversation(): UseCreateConversationReturn {
                         } = require('@lib/db/conversations');
                         await updateConversation(dbId, { title: finalTitle });
                         console.log(
-                          `[useCreateConversation] 数据库标题更新成功: ${finalTitle}`
+                          `[useCreateConversation] Database title update successful: ${finalTitle}`
                         );
                       } catch (updateError) {
                         console.error(
-                          `[useCreateConversation] 更新数据库标题失败:`,
+                          `[useCreateConversation] Update database title failed:`,
                           updateError
                         );
                       }
                     }
 
-                    // 只有当前路由确实是这个对话时才更新选中状态
+                    // Only update the selected state when the current route is indeed this conversation
                     try {
                       const currentPath = window.location.pathname;
                       if (currentPath === `/chat/${id}`) {
                         const { selectItem } =
                           require('@lib/stores/sidebar-store').useSidebarStore.getState();
-                        selectItem('chat', id, true); // 保持当前展开状态
+                        selectItem('chat', id, true); // Keep current expanded state
                       }
                     } catch (error) {
                       console.error(
@@ -442,15 +433,15 @@ export function useCreateConversation(): UseCreateConversationReturn {
                   })
                   .catch(async renameError => {
                     console.error(
-                      `[useCreateConversation] 标题获取失败，使用默认标题:`,
+                      `[useCreateConversation] Title acquisition failed, use default title:`,
                       renameError
                     );
                     const fallbackTitle = t('untitled');
 
-                    // 🎯 启动打字机效果显示默认标题
+                    // 🎯 Start typewriter effect to display the default title
                     startTitleTypewriter(tempConvId, fallbackTitle);
 
-                    // 更新数据库中的标题
+                    // Update the title in the database
                     if (dbId) {
                       try {
                         const {
@@ -460,23 +451,23 @@ export function useCreateConversation(): UseCreateConversationReturn {
                           title: fallbackTitle,
                         });
                         console.log(
-                          `[useCreateConversation] 使用默认标题更新数据库: ${fallbackTitle}`
+                          `[useCreateConversation] Update database with default title: ${fallbackTitle}`
                         );
                       } catch (updateError) {
                         console.error(
-                          `[useCreateConversation] 更新默认标题失败:`,
+                          `[useCreateConversation] Update default title failed:`,
                           updateError
                         );
                       }
                     }
 
-                    // 只有当前路由确实是这个对话时才更新选中状态
+                    // Only update the selected state when the current route is indeed this conversation
                     try {
                       const currentPath = window.location.pathname;
                       if (currentPath === `/chat/${id}`) {
                         const { selectItem } =
                           require('@lib/stores/sidebar-store').useSidebarStore.getState();
-                        selectItem('chat', id, true); // 保持当前展开状态
+                        selectItem('chat', id, true); // Keep current expanded state
                       }
                     } catch (error) {
                       console.error(
@@ -487,13 +478,13 @@ export function useCreateConversation(): UseCreateConversationReturn {
                   });
               })().catch(error => {
                 console.error(
-                  '[useCreateConversation] 数据库记录创建过程发生错误:',
+                  '[useCreateConversation] Error occurred during database record creation:',
                   error
                 );
               });
             }
           },
-          onNodeEvent // 🎯 传递节点事件回调，支持chatflow节点控制
+          onNodeEvent // 🎯 Pass node event callbacks, support chatflow node control
         );
 
         if (!realConvIdFromStream)
@@ -520,7 +511,7 @@ export function useCreateConversation(): UseCreateConversationReturn {
             currentPath === '/chat/new' ||
             currentPath.startsWith('/apps/')
           ) {
-            // 🎯 添加应用详情页面的路径支持
+            // 🎯 Add support for application detail page paths
             console.log(
               `[useCreateConversation] Updating URL (fallback) from ${currentPath} to /chat/${realConvIdFromStream}`
             );

@@ -59,25 +59,25 @@ export const UserTable: React.FC<UserTableProps> = ({
   onChangeStatus,
 }) => {
   const { isDark } = useTheme();
-  const { profile: currentUserProfile } = useProfile(); // 获取当前用户信息
+  const { profile: currentUserProfile } = useProfile(); // Get current user information
   const { formatDate } = useDateFormatter();
 
-  // 检查是否可以更改用户角色（防止管理员降级其他管理员）
+  // Check if the user can change the user role (prevent admin from demoting other admins)
   const canChangeUserRole = (
     targetUser: EnhancedUser,
     newRole: 'admin' | 'manager' | 'user'
   ) => {
-    // 如果当前用户不是管理员，不允许任何角色更改
+    // If the current user is not an admin, do not allow any role to be changed
     if (currentUserProfile?.role !== 'admin') {
       return false;
     }
 
-    // 防止管理员修改自己的角色
+    // Prevent admin from modifying their own role
     if (targetUser.id === currentUserProfile?.id) {
       return false;
     }
 
-    // 防止非超级管理员降级其他管理员
+    // Prevent non-super admin from demoting other admins
     if (targetUser.role === 'admin' && newRole !== 'admin') {
       return false;
     }
@@ -85,19 +85,19 @@ export const UserTable: React.FC<UserTableProps> = ({
     return true;
   };
 
-  // 检查是否可以删除用户（防止删除管理员账号）
+  // Check if the user can be deleted (prevent deleting admin accounts)
   const canDeleteUser = (targetUser: EnhancedUser) => {
-    // 如果当前用户不是管理员，不允许删除
+    // If the current user is not an admin, do not allow deletion
     if (currentUserProfile?.role !== 'admin') {
       return false;
     }
 
-    // 防止删除自己
+    // Prevent deleting yourself
     if (targetUser.id === currentUserProfile?.id) {
       return false;
     }
 
-    // 防止删除其他管理员
+    // Prevent deleting other admins
     if (targetUser.role === 'admin') {
       return false;
     }
@@ -105,18 +105,18 @@ export const UserTable: React.FC<UserTableProps> = ({
     return true;
   };
 
-  // 检查是否可以编辑用户
+  // Check if the user can be edited
   const canEditUser = (targetUser: EnhancedUser) => {
-    // 管理员可以编辑所有用户（包括自己）
+    // Admins can edit all users (including themselves)
     if (currentUserProfile?.role === 'admin') {
       return true;
     }
 
-    // 其他角色只能编辑自己
+    // Other roles can only edit themselves
     return targetUser.id === currentUserProfile?.id;
   };
 
-  // 获取角色显示信息 - 使用stone主题配色
+  // Get role display information - use stone theme colors
   const getRoleInfo = (role: string) => {
     switch (role) {
       case 'admin':
@@ -140,7 +140,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     }
   };
 
-  // 获取状态显示信息 - 使用stone主题配色
+  // Get status display information - use stone theme colors
   const getStatusInfo = (status: string) => {
     switch (status) {
       case 'active':
@@ -170,7 +170,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     }
   };
 
-  // 获取stone主题标签样式
+  // Get stone theme label style
   const getBadgeClasses = (
     variant: 'success' | 'warning' | 'danger' | 'neutral'
   ) => {
@@ -191,7 +191,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     return variantMap[variant];
   };
 
-  // 检查是否全选
+  // Check if all are selected
   const isAllSelected =
     users.length > 0 && selectedUserIds.length === users.length;
   const isPartiallySelected = selectedUserIds.length > 0 && !isAllSelected;
@@ -291,9 +291,6 @@ export const UserTable: React.FC<UserTableProps> = ({
     >
       <div className="overflow-x-auto">
         <table className="w-full table-fixed">
-          {/* --- BEGIN COMMENT ---
-          表头 - 优化样式和列宽分配
-          --- END COMMENT --- */}
           <thead
             className={cn(
               'border-b',
@@ -382,9 +379,6 @@ export const UserTable: React.FC<UserTableProps> = ({
             </tr>
           </thead>
 
-          {/* --- BEGIN COMMENT ---
-          表格内容 - 优化行样式、固定行高和悬停效果
-          --- END COMMENT --- */}
           <tbody>
             {users.map(user => {
               const isSelected = selectedUserIds.includes(user.id);
@@ -395,7 +389,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                 <tr
                   key={user.id}
                   className={cn(
-                    'h-20 border-b transition-all duration-200', // 固定行高
+                    'h-20 border-b transition-all duration-200', // Fixed row height
                     isDark ? 'border-stone-700/50' : 'border-stone-200/50',
                     isSelected
                       ? isDark
@@ -407,9 +401,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                     'hover:shadow-sm'
                   )}
                 >
-                  {/* --- BEGIN COMMENT ---
-                  选择框列
-                  --- END COMMENT --- */}
                   <td className="px-4 py-4">
                     <button
                       onClick={() => onSelectUser(user.id)}
@@ -428,12 +419,8 @@ export const UserTable: React.FC<UserTableProps> = ({
                     </button>
                   </td>
 
-                  {/* --- BEGIN COMMENT ---
-                  用户信息列 - 包含头像和用户信息
-                  --- END COMMENT --- */}
                   <td className="px-4 py-4">
                     <div className="flex items-center space-x-3">
-                      {/* 用户头像 */}
                       <div className="flex-shrink-0">
                         <UserAvatar
                           avatarUrl={user.avatar_url}
@@ -442,7 +429,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                         />
                       </div>
 
-                      {/* 用户信息 */}
                       <div className="flex min-w-0 flex-1 flex-col">
                         <div className="flex items-center space-x-1">
                           <span
@@ -469,9 +455,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                     </div>
                   </td>
 
-                  {/* --- BEGIN COMMENT ---
-                  联系方式列 - 优化布局和截断
-                  --- END COMMENT --- */}
                   <td className="px-4 py-4">
                     <div className="min-w-0 space-y-1">
                       <p
@@ -505,9 +488,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                     </div>
                   </td>
 
-                  {/* --- BEGIN COMMENT ---
-                  群组信息列 - 显示用户所属的群组信息
-                  --- END COMMENT --- */}
                   <td className="px-4 py-4">
                     <div className="flex h-16 flex-col justify-center space-y-1">
                       {user.groups && user.groups.length > 0 ? (
@@ -552,9 +532,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                     </div>
                   </td>
 
-                  {/* --- BEGIN COMMENT ---
-                  角色权限列 - 优化标签设计，确保不换行
-                  --- END COMMENT --- */}
                   <td className="px-4 py-4">
                     <span
                       className={cn(
@@ -567,9 +544,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                     </span>
                   </td>
 
-                  {/* --- BEGIN COMMENT ---
-                  账户状态列 - 优化标签设计，确保不换行
-                  --- END COMMENT --- */}
                   <td className="px-4 py-4">
                     <span
                       className={cn(
@@ -582,9 +556,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                     </span>
                   </td>
 
-                  {/* --- BEGIN COMMENT ---
-                  最后登录时间列 - 优化时间显示
-                  --- END COMMENT --- */}
                   <td className="px-4 py-4">
                     <p
                       className={cn(
@@ -603,9 +574,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                     </p>
                   </td>
 
-                  {/* --- BEGIN COMMENT ---
-                  注册时间列 - 优化时间显示
-                  --- END COMMENT --- */}
                   <td className="px-4 py-4">
                     <p
                       className={cn(
@@ -621,9 +589,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                     </p>
                   </td>
 
-                  {/* --- BEGIN COMMENT ---
-                  操作菜单列 - 优化按钮样式
-                  --- END COMMENT --- */}
                   <td className="px-4 py-4">
                     <Dropdown
                       trigger={
@@ -640,7 +605,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                       }
                     >
                       <div className="py-1">
-                        {/* --- 查看用户 --- */}
                         <button
                           onClick={() => onViewUser(user)}
                           className={cn(
@@ -654,7 +618,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                           查看详情
                         </button>
 
-                        {/* --- 编辑用户 --- */}
                         <button
                           onClick={() => onEditUser(user)}
                           disabled={!canEditUser(user)}
@@ -680,7 +643,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                           )}
                         />
 
-                        {/* --- 角色更改子菜单 --- */}
                         <div
                           className={cn(
                             'px-4 py-2 font-serif text-xs font-semibold tracking-wider uppercase',
@@ -742,7 +704,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                           )}
                         />
 
-                        {/* --- 状态更改子菜单 --- */}
                         <div
                           className={cn(
                             'px-4 py-2 font-serif text-xs font-semibold tracking-wider uppercase',
@@ -792,7 +753,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                           )}
                         />
 
-                        {/* --- 删除用户 --- */}
                         <button
                           onClick={() => onDeleteUser(user)}
                           disabled={!canDeleteUser(user)}

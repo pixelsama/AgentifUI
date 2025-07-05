@@ -367,11 +367,9 @@ export function useChatInterface(
 
       let currentConvId = useChatStore.getState().currentConversationId;
 
-      // --- BEGIN MODIFIED COMMENT ---
-      // 修改判断新对话的逻辑，使用difyConversationId而不是currentConvId
-      // 1. 如果 URL 是 /chat/new 或者包含 temp-，则是新对话
-      // 2. 如果没有difyConversationId，也视为新对话
-      // --- END MODIFIED COMMENT ---
+      // Modified logic for determining new conversations using difyConversationId instead of currentConvId
+      // 1. If URL is /chat/new or contains temp-, it's a new conversation
+      // 2. If no difyConversationId exists, also treat as new conversation
       const urlIndicatesNew =
         window.location.pathname === '/chat/new' ||
         window.location.pathname.includes('/chat/temp-');
@@ -1212,10 +1210,8 @@ export function useChatInterface(
               }
             }
 
-            // --- BEGIN MODIFIED COMMENT ---
-            // 流式响应结束时（骨架屏消失时），确保在侧边栏中高亮当前对话项
-            // 保持当前侧边栏展开状态
-            // --- END MODIFIED COMMENT ---
+            // When streaming response ends (skeleton disappears), ensure current conversation is highlighted in sidebar
+            // Maintain current sidebar expanded state
             const currentConvId = useChatStore.getState().currentConversationId;
             if (currentConvId) {
               try {

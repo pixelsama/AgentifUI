@@ -85,35 +85,39 @@ function AdminCard({ title, description, icon: Icon, href }: AdminCardProps) {
 export default function AdminPage() {
   const { isDark } = useTheme();
 
-  // 管理功能卡片配置
+  // Admin function card configuration
   const adminCards: AdminCardProps[] = [
     {
       title: 'API 配置',
-      description: '管理应用实例、配置参数和API密钥，确保系统正常运行',
+      description:
+        'Manage application instances, configuration parameters and API keys to ensure system runs properly',
       icon: Key,
       href: '/admin/api-config',
     },
     {
       title: '关于与通知',
-      description: '管理About页面内容和系统通知推送，提升用户体验',
+      description:
+        'Manage About page content and system notifications to improve user experience',
       icon: Bell,
       href: '/admin/content',
     },
     {
       title: '用户管理',
-      description: '管理用户账户、权限和访问控制，维护系统安全',
+      description:
+        'Manage user accounts, permissions and access control to maintain system security',
       icon: Users,
       href: '/admin/users',
     },
     {
       title: '群组管理',
-      description: '管理用户和群组，配置群组应用权限',
+      description:
+        'Manage users and groups, configure group application permissions',
       icon: Building2,
       href: '/admin/groups',
     },
     {
       title: '应用权限管理',
-      description: '管理应用可见性和群组权限',
+      description: 'Manage application visibility and group permissions',
       icon: ShieldCheck,
       href: '/admin/permissions',
     },
@@ -122,9 +126,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-full">
       <div className="mx-auto max-w-7xl p-6">
-        {/* --- BEGIN COMMENT ---
-        页面标题和描述 - 左对齐布局，符合项目风格
-        --- END COMMENT --- */}
+        {/* Page title and description - left-aligned layout, consistent with project style */}
         <div className="mb-8">
           <h1
             className={cn(
@@ -146,9 +148,7 @@ export default function AdminPage() {
           </p>
         </div>
 
-        {/* --- BEGIN COMMENT ---
-        管理功能卡片网格 - 优化布局和间距
-        --- END COMMENT --- */}
+        {/* Admin function card grid - optimized layout and spacing */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {adminCards.map(card => (
             <AdminCard

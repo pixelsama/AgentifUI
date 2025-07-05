@@ -2,21 +2,35 @@ import { create } from 'zustand';
 
 type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
+/**
+ * Notification state interface
+ * @description Defines the structure for notification store state and actions
+ */
 interface NotificationState {
+  /** Notification message content */
   message: string | null;
+  /** Notification type */
   type: NotificationType;
-  duration: number; // --- BEGIN MODIFIED COMMENT --- 单位：毫秒 --- END MODIFIED COMMENT ---
+  /** Display duration in milliseconds */
+  duration: number;
+  /** Whether notification is currently visible */
   isVisible: boolean;
+  /** Show notification with message and optional type/duration */
   showNotification: (
     message: string,
     type?: NotificationType,
     duration?: number
   ) => void;
+  /** Hide current notification */
   hideNotification: () => void;
 }
 
 let timeoutId: NodeJS.Timeout | null = null;
 
+/**
+ * Notification store
+ * @description Zustand store for managing notification display state and auto-hide behavior
+ */
 export const useNotificationStore = create<NotificationState>((set, get) => ({
   message: null,
   type: 'info',
@@ -24,26 +38,26 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   isVisible: false,
 
   showNotification: (message, type = 'warning', duration = 3000) => {
-    // 如果当前有定时器，先清除，避免快速连续触发导致问题
+    // Clear existing timer to avoid issues with rapid consecutive triggers
     if (timeoutId) {
       clearTimeout(timeoutId);
       timeoutId = null;
     }
-    // 设置新的通知状态并显示
+    // Set new notification state and show
     set({ message, type, duration, isVisible: true });
-    // 设置自动隐藏的定时器
+    // Set auto-hide timer
     timeoutId = setTimeout(() => {
       get().hideNotification();
     }, duration);
   },
 
   hideNotification: () => {
-    // 清除可能存在的定时器
+    // Clear any existing timer
     if (timeoutId) {
       clearTimeout(timeoutId);
       timeoutId = null;
     }
-    // 隐藏通知并重置消息
+    // Hide notification and reset message
     set({ isVisible: false, message: null });
   },
 }));
