@@ -13,7 +13,11 @@
     "format:check": "prettier --check .",
     "format:staged": "lint-staged",
     "code:fix": "pnpm run lint:fix && pnpm run format",
-    "prepare": "husky"
+    "prepare": "husky",
+    "type-check": "tsc --noEmit",
+    "i18n:check": "uv run scripts/i18n-refactor-helper.py quick-check",
+    "i18n:validate": "uv run scripts/validate-i18n-consistency.py",
+    "i18n:detect": "uv run scripts/i18n-refactor-helper.py detect-missing"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [

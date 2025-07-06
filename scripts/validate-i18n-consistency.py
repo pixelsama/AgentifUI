@@ -32,31 +32,31 @@ def load_translation_files() -> Dict[str, Dict]:
     for lang in languages:
         file_path = f"messages/{lang}.json"
         if not os.path.exists(file_path):
-            print(f"❌ 文件不存在: {file_path}")
+            print(f"❌ File not found: {file_path}")
             sys.exit(1)
         
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 translations[lang] = json.load(f)
-            print(f"✅ 成功加载: {file_path}")
+            print(f"✅ Successfully loaded: {file_path}")
         except json.JSONDecodeError as e:
-            print(f"❌ JSON格式错误 {file_path}: {e}")
+            print(f"❌ JSON format error in {file_path}: {e}")
             sys.exit(1)
         except Exception as e:
-            print(f"❌ 加载失败 {file_path}: {e}")
+            print(f"❌ Failed to load {file_path}: {e}")
             sys.exit(1)
     
     return translations
 
 def validate_structure_consistency(translations: Dict[str, Dict]) -> bool:
     """验证所有翻译文件的结构一致性"""
-    print("\n🔍 验证结构一致性...")
+    print("\n🔍 Validating structure consistency...")
     
     # 获取所有语言的键集合
     all_keys = {}
     for lang, data in translations.items():
         all_keys[lang] = get_all_keys(data)
-        print(f"  {lang}: {len(all_keys[lang])} 个键")
+        print(f"  {lang}: {len(all_keys[lang])} keys")
     
     # 以中文为基准检查其他语言
     base_lang = 'zh-CN'
@@ -73,7 +73,7 @@ def validate_structure_consistency(translations: Dict[str, Dict]) -> bool:
         # 检查缺失的键
         missing_keys = base_keys - current_keys
         if missing_keys:
-            print(f"❌ {lang} 缺失键 ({len(missing_keys)}个):")
+            print(f"❌ {lang} missing keys ({len(missing_keys)} keys):")
             for key in sorted(missing_keys):
                 print(f"    - {key}")
             inconsistent = True
@@ -81,19 +81,19 @@ def validate_structure_consistency(translations: Dict[str, Dict]) -> bool:
         # 检查多余的键
         extra_keys = current_keys - base_keys
         if extra_keys:
-            print(f"❌ {lang} 多余键 ({len(extra_keys)}个):")
+            print(f"❌ {lang} extra keys ({len(extra_keys)} keys):")
             for key in sorted(extra_keys):
                 print(f"    + {key}")
             inconsistent = True
         
         if not missing_keys and not extra_keys:
-            print(f"✅ {lang} 结构完全一致")
+            print(f"✅ {lang} structure is consistent")
     
     return not inconsistent
 
 def validate_file_consistency() -> bool:
     """验证文件行数一致性"""
-    print("\n📊 验证文件行数一致性...")
+    print("\n📊 Validating file line consistency...")
     
     languages = ['zh-CN', 'en-US', 'es-ES', 'zh-TW', 'ja-JP']
     line_counts = {}
@@ -102,39 +102,39 @@ def validate_file_consistency() -> bool:
         file_path = f"messages/{lang}.json"
         with open(file_path, 'r', encoding='utf-8') as f:
             line_counts[lang] = len(f.readlines())
-        print(f"  {lang}: {line_counts[lang]} 行")
+        print(f"  {lang}: {line_counts[lang]} lines")
     
     # 检查是否所有文件行数相同
     unique_counts = set(line_counts.values())
     if len(unique_counts) == 1:
-        print("✅ 所有文件行数一致")
+        print("✅ All files have consistent line counts")
         return True
     else:
-        print("❌ 文件行数不一致")
+        print("❌ File line counts are inconsistent")
         return False
 
 def validate_json_format(translations: Dict[str, Dict]) -> bool:
     """验证JSON格式正确性"""
-    print("\n🔧 验证JSON格式...")
+    print("\n🔧 Validating JSON format...")
     
     for lang, data in translations.items():
         try:
             # 尝试重新序列化以验证格式
             json.dumps(data, ensure_ascii=False, indent=2)
-            print(f"✅ {lang} JSON格式正确")
+            print(f"✅ {lang} JSON format is valid")
         except Exception as e:
-            print(f"❌ {lang} JSON格式错误: {e}")
+            print(f"❌ {lang} JSON format error: {e}")
             return False
     
     return True
 
 def main():
     """主函数"""
-    print("🚀 开始验证i18n翻译文件一致性...")
+    print("🚀 Starting i18n translation file consistency validation...")
     
     # 检查是否在正确的目录
     if not os.path.exists("messages"):
-        print("❌ 未找到messages目录，请在项目根目录运行此脚本")
+        print("❌ Messages directory not found, please run this script from project root")
         sys.exit(1)
     
     # 加载翻译文件
@@ -150,10 +150,10 @@ def main():
     # 输出结果
     print("\n" + "="*50)
     if all(validations):
-        print("🎉 所有验证通过！翻译文件结构完全一致")
+        print("🎉 All validations passed! Translation file structures are fully consistent")
         return 0
     else:
-        print("❌ 验证失败！请修复上述问题")
+        print("❌ Validation failed! Please fix the issues above")
         return 1
 
 if __name__ == "__main__":

@@ -1,125 +1,152 @@
 ---
-description: 
-globs: app/api/dify/**/route.ts,lib/services/dify/**/*.ts,lib/hooks/use-*.ts
 alwaysApply: false
 ---
-# Dify API Integration Standards and Development Guide
 
-This document defines best practices and development processes for integrating Dify API in the AgentifUI project, aiming to ensure code clarity, modularity, low coupling, and easy maintenance and extension.
+# Dify API 集成开发规范
 
-## Core Principle: Separation of Concerns
+## 核心原则：关注点分离
 
-To achieve clear architecture, we divide the Dify API integration logic into three main layers:
+Dify API集成分为三层架构：
 
-1.  **Next.js API Routes (Backend Proxy)**:
-    *   **Location**: `app/api/dify/[appId]/[...slug]/route.ts`
-    *   **Responsibilities**:
-        *   Receive requests from frontend Service layer.
-        *   Based on `appId` in request path, securely obtain corresponding Dify API Base URL and API Key from configuration sources (environment variables, database, etc.).
-        *   **Execute Authentication**: Add `Authorization: Bearer {apiKey}` to request headers.
-        *   Transparently **forward** requests to real Dify API endpoints.
-        *   **Forward** Dify API responses (including streaming responses, JSON, files, etc.) back to frontend Service layer.
-        *   Handle basic HTTP details and CORS configuration.
-    *   **Key Point**: Does not care about specific business logic (whether chat or file upload), only responsible for authentication and forwarding.
+### 1. 代理层 (Backend Proxy)
+- **位置**: `app/api/dify/[appId]/[...slug]/route.ts`
+- **职责**: 认证、请求转发、响应代理
+- **原则**: 不关心业务逻辑，只负责安全转发
 
-2.  **Dify Service Layer (Frontend Services)**:
-    *   **Location**: `lib/services/dify/*.ts` (divided by functional domains, such as `chat-service.ts`, `file-service.ts`, etc.)
-    *   **Responsibilities**:
-        *   Define API call functions related to specific Dify functional domains.
-        *   Based on interface definitions in `types.ts`, construct request body (`payload`) sent to **backend proxy**.
-        *   Know which Dify functionality to call (corresponding to `slug` in proxy URL).
-        *   Call **backend proxy** URL (format: `/api/dify/{appId}/{slug}`), **never directly call Dify API**.
-        *   Handle responses returned by **backend proxy** (parse JSON, handle streams, format data, error handling).
-        *   Provide concise, typed, business-logic-related interfaces to upper layers (React Hooks or components).
-    *   **Key Point**: Does not care about authentication details (API Key/URL), only focuses on business logic and interaction with proxy.
+### 2. 服务层 (Service Layer)
+- **位置**: `lib/services/dify/*.ts` (按功能域划分)
+- **职责**: 业务逻辑、API调用、数据处理
+- **原则**: 不关心认证细节，只调用代理层
 
-3.  **Dify Type Definitions**:
-    *   **Location**: `lib/services/dify/types.ts`
-    *   **Responsibilities**:
-        *   Define all TypeScript data structures, request body interfaces, response body interfaces (including SSE events) related to Dify API interaction.
-        *   Serve as "contract" for data format between Service layer and (possible) Hook layer.
-    *   **Key Point**: All Dify-related data structures should be uniformly defined in this file to maintain consistency.
+### 3. 类型层 (Type Definitions)
+- **位置**: `lib/services/dify/types.ts`
+- **职责**: 统一定义所有TypeScript数据结构
+- **原则**: 作为服务层的数据契约
 
-## How to Add New Dify API Integration (Subsequent Development Process)
+## 新增Dify API的开发流程
 
-Follow these steps to clearly add new Dify functionality support in a "building blocks" manner:
+### 步骤1: 定义类型
+在 `types.ts` 中添加请求和响应的TypeScript接口
 
-1.  **Step 1: Define Types (types.ts)**
-    *   Consult Dify API documentation to understand request parameters and response structure of new API.
-    *   In `lib/services/dify/types.ts` file, add corresponding TypeScript interfaces or type aliases for new request body and response body (including possible SSE events).
+### 步骤2: 选择/创建服务文件
+根据功能域选择合适的服务文件，或创建新的服务文件
 
-2.  **Step 2: Choose or Create Service File (lib/services/dify/)**
-    *   Based on **functional domain** of new API (e.g., file processing, app management, dataset operations, etc.), determine which Service file it should belong to.
-    *   If no suitable Service file exists, create a new file in `lib/services/dify/` directory, e.g., `file-service.ts` or `app-service.ts`.
-    *   **Maintain Single Responsibility**: Each Service file should focus on a specific functional domain.
+### 步骤3: 实现服务函数
+```typescript
+export async function newDifyFunction(
+  appId: string,
+  payload: RequestType
+): Promise<ResponseType> {
+  const slug = 'api/path';
+  const apiUrl = `/api/dify/${appId}/${slug}`;
+  
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: { 'Content-Type': 'application/json' }
+  });
+  
+  if (!response.ok) {
+    throw new Error(`API调用失败: ${response.statusText}`);
+  }
+  
+  return response.json();
+}
+```
 
-3.  **Step 3: Implement Service Function (*-service.ts)**
-    *   In selected Service file, create a new async function to call that Dify API.
-    *   **Function Signature**: Accept necessary parameters, such as `appId`, `user` identifier, and data specific to that API (like file objects, query parameters, etc.). Return a Promise whose type should conform to response type defined in `types.ts`.
-    *   **Construct Payload**: Use passed parameters and interfaces in `types.ts` to build request body sent to **backend proxy**.
-    *   **Determine Slug**: Clarify the Dify path corresponding to this API, which will be part of **backend proxy** URL (`slug`).
-    *   **Call Proxy**: Use `fetch` to call backend proxy URL, format: `` `/api/dify/${appId}/${slug}` ``. Ensure correct HTTP method (`method`) and request body (`body`) are passed. **Do not add `Authorization` header, this is proxy's responsibility.**
-    *   **Handle Response**:
-        *   Check `response.ok` status.
-        *   Handle `response.body` based on expected response type (JSON, text/event-stream, audio/*, etc.).
-        *   Use types defined in `types.ts` to parse and return data.
-        *   Implement robust error handling logic, throw or return clear error messages to upper layers.
-    *   **Example (Pseudo-code)**:
-        ```typescript
-        // lib/services/dify/file-service.ts
-        import type { DifyFileUploadPayload, DifyFileUploadResponse } from './types';
+### 步骤4: 前端使用
+```typescript
+import { newDifyFunction } from '@lib/services/dify/service-name';
 
-        export async function uploadDifyFile(
-          appId: string,
-          payload: DifyFileUploadPayload // Use type defined in types.ts
-        ): Promise<DifyFileUploadResponse> { // Return type also from types.ts
-          const slug = 'files/upload'; // Dify API path
-          const apiUrl = `/api/dify/${appId}/${slug}`; // Point to backend proxy
+// 在组件或Hook中使用
+const result = await newDifyFunction(appId, params);
+```
 
-          try {
-            const response = await fetch(apiUrl, {
-              method: 'POST',
-              // Body usually FormData, proxy will handle
-              body: payload.formData, // Assume payload contains FormData
-              // No need for Content-Type and Authorization
-            });
+## 核心优势
 
-            if (!response.ok) {
-              // Handle error response...
-              throw new Error(`Failed to upload file: ${response.statusText}`);
-            }
+- **清晰性**: 职责分离，代码易理解
+- **模块化**: 按功能域划分，积木式组合
+- **低耦合**: 各层独立，变更影响最小
+- **易维护**: 问题定位准确，配置修改集中
+- **可扩展**: 新功能开发流程标准化
 
-            const result: DifyFileUploadResponse = await response.json();
-            return result; // Return result conforming to type definition
+## 开发要求
 
-          } catch (error) {
-            console.error('[Dify File Service] Upload failed:', error);
-            throw error; // Re-throw error
-          }
-        }
-        ```
+在开发Dify相关功能时，请严格遵循此标准。这确保了：
 
-4.  **Step 4: (Usually Not Needed) Check/Update Backend Proxy (route.ts)**
-    *   In most cases, existing proxy (`app/api/dify/[appId]/[...slug]/route.ts`) is already generic enough and needs no modification.
-    *   **Only in special cases** need to check or update:
-        *   If new API needs special request headers (besides `Authorization` and `Content-Type`).
-        *   If new API returns a special `Content-Type` that proxy hasn't handled yet.
-        *   If new API needs specific CORS configuration.
+- **维护性**: 更容易定位和修复问题，修改配置（如API Key）只需要在一个地方（代理层）修改
+- **扩展性**: 添加新功能只需要按照流程创建新的类型和服务函数，对现有代码影响最小
+# Dify API 集成开发规范
 
-5.  **Step 5: Frontend Usage**
-    *   In frontend components or Hooks that need to use that Dify functionality:
-    *   Import the newly created function from corresponding Service file.
-    *   Call that function and handle its returned Promise (success or failure).
-    *   Update UI state as needed.
+## 核心原则：关注点分离
 
-## Benefits
+Dify API集成分为三层架构：
 
-Following this standard will bring:
+### 1. 代理层 (Backend Proxy)
+- **位置**: `app/api/dify/[appId]/[...slug]/route.ts`
+- **职责**: 认证、请求转发、响应代理
+- **原则**: 不关心业务逻辑，只负责安全转发
 
-*   **Clarity**: Each part has clear responsibilities, code is easy to understand.
-*   **Modularity**: Functions are divided by domain into different Service files, composable like building blocks.
-*   **Low Coupling**: Service layer doesn't depend on authentication details, proxy layer doesn't depend on business logic, changes have minimal impact scope.
-*   **Maintainability**: Easier to locate and fix issues, changing configuration (like API Key) only requires changing one place (proxy layer).
-*   **Extensibility**: Adding new functionality only requires following the process to create new types and Service functions, minimal impact on existing code.
+### 2. 服务层 (Service Layer)
+- **位置**: `lib/services/dify/*.ts` (按功能域划分)
+- **职责**: 业务逻辑、API调用、数据处理
+- **原则**: 不关心认证细节，只调用代理层
 
-Please strictly follow this standard when developing Dify-related functionality in the future.
+### 3. 类型层 (Type Definitions)
+- **位置**: `lib/services/dify/types.ts`
+- **职责**: 统一定义所有TypeScript数据结构
+- **原则**: 作为服务层的数据契约
+
+## 新增Dify API的开发流程
+
+### 步骤1: 定义类型
+在 `types.ts` 中添加请求和响应的TypeScript接口
+
+### 步骤2: 选择/创建服务文件
+根据功能域选择合适的服务文件，或创建新的服务文件
+
+### 步骤3: 实现服务函数
+```typescript
+export async function newDifyFunction(
+  appId: string,
+  payload: RequestType
+): Promise<ResponseType> {
+  const slug = 'api/path';
+  const apiUrl = `/api/dify/${appId}/${slug}`;
+  
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: { 'Content-Type': 'application/json' }
+  });
+  
+  if (!response.ok) {
+    throw new Error(`API调用失败: ${response.statusText}`);
+  }
+  
+  return response.json();
+}
+```
+
+### 步骤4: 前端使用
+```typescript
+import { newDifyFunction } from '@lib/services/dify/service-name';
+
+// 在组件或Hook中使用
+const result = await newDifyFunction(appId, params);
+```
+
+## 核心优势
+
+- **清晰性**: 职责分离，代码易理解
+- **模块化**: 按功能域划分，积木式组合
+- **低耦合**: 各层独立，变更影响最小
+- **易维护**: 问题定位准确，配置修改集中
+- **可扩展**: 新功能开发流程标准化
+
+## 开发要求
+
+在开发Dify相关功能时，请严格遵循此标准。这确保了：
+
+- **维护性**: 更容易定位和修复问题，修改配置（如API Key）只需要在一个地方（代理层）修改
+- **扩展性**: 添加新功能只需要按照流程创建新的类型和服务函数，对现有代码影响最小

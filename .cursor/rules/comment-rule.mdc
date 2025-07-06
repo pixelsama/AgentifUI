@@ -1,21 +1,20 @@
 ---
-description: 
-globs: 
-alwaysApply: true
+description: Must read when writing code comments or documenting functions
+alwaysApply: false
 ---
-# Comment Rule
 
-## Core Requirements
+# 注释规范
 
-- **Language**: All comments MUST be in English
-- **Purpose**: Explain *why*, not just *what* (unless complex)
-- **Style**: Concise and clear
-- **Format**: Use standard JSDoc for interfaces/functions, simple comments for logic
+## 核心要求
 
-## Standard Comment Formats
+- **语言**: 所有注释必须使用英文
+- **目的**: 解释*为什么*，而不仅仅是*做什么*
+- **风格**: 简洁明了
+- **格式**: 接口/函数使用JSDoc，逻辑使用简单注释
 
-### JSDoc for Interfaces and Types
+## 标准格式
 
+### JSDoc - 接口和类型
 ```typescript
 /**
  * Chat message data structure
@@ -31,43 +30,38 @@ export interface ChatMessage {
 }
 ```
 
-### JSDoc for Functions
-
+### JSDoc - 函数
 ```typescript
 /**
  * Send chat message to Dify API with streaming response
  * 
  * @param payload - Request payload to send to Dify API
  * @param appId - Dify application ID
- * @param onConversationIdReceived - Optional callback when conversationId is received
  * @returns Promise containing async generator and conversation metadata
  * @throws Error if fetch request fails or API returns error status
  */
 export async function streamDifyChat(
   payload: DifyChatRequestPayload,
-  appId: string,
-  onConversationIdReceived?: (id: string) => void
+  appId: string
 ): Promise<DifyStreamResponse> {
   // Implementation...
 }
 ```
 
-### Simple Comments for Logic
-
+### 简单注释 - 逻辑说明
 ```typescript
 // Check response status, throw error if not 2xx
 if (!response.ok) {
   throw new Error(`API request failed: ${response.status}`);
 }
 
-// Extract conversation_id and task_id from message_end event
+// Extract conversation_id from message_end event
 if (event.conversation_id && !conversationId) {
   conversationId = event.conversation_id;
 }
 ```
 
-### File Header Comments
-
+### 文件头注释
 ```typescript
 /**
  * Dify Chat Service
@@ -76,86 +70,9 @@ if (event.conversation_id && !conversationId) {
  */
 ```
 
-## Tailwind CSS Comment Standards
+## 禁止模式
 
-### Class Grouping
-
-```tsx
-<div className={cn(
-  // Base styles
-  "bg-white rounded-lg shadow-md",
-  
-  // Responsive layout
-  "flex flex-col md:flex-row lg:items-center",
-  
-  // Responsive spacing
-  "p-4 md:p-6 lg:p-8",
-  
-  // Conditional styles
-  isActive && "border-blue-500 border-2"
-)}>
-```
-
-### Responsive Component Comments
-
-```tsx
-{/* Mobile navigation - hidden behind hamburger menu */}
-{isMobileView && <MobileNavigation />}
-
-{/* Desktop navigation - always visible */}
-{!isMobileView && <DesktopNavigation />}
-```
-
-### Complex Layout Logic
-
-```tsx
-{/* 
-  Responsive layout strategy:
-  - Mobile: single column, image top, text below
-  - Tablet+: two columns, image left, text right
-*/}
-<div className="flex flex-col md:flex-row">
-  {/* Content */}
-</div>
-```
-
-## React Component Documentation
-
-### Component Props Documentation
-
-```tsx
-/**
- * Chat loader component properties
- * @description Defines the props interface for the chat loader component
- */
-interface ChatLoaderProps {
-  /** Message list to display */
-  messages: ChatMessage[];
-  /** Whether waiting for response */
-  isWaitingForResponse?: boolean;
-  /** Custom CSS class name */
-  className?: string;
-}
-
-/**
- * Chat loader component
- * @description Renders chat message list with streaming updates and auto-scroll
- * 
- * @features
- * - Auto-scroll to latest messages
- * - Streaming message updates
- * - Loading states
- * - Error handling
- */
-export const ChatLoader = ({ messages, isWaitingForResponse }: ChatLoaderProps) => {
-  // Implementation...
-};
-```
-
-## Forbidden Patterns
-
-❌ **Do NOT use these patterns:**
-
+❌ **不要使用这些模式:**
 ```typescript
 // --- BEGIN COMMENT ---
 // Complex comment with separators
@@ -166,8 +83,7 @@ export const ChatLoader = ({ messages, isWaitingForResponse }: ChatLoaderProps) 
 // HACK: Temporary workaround
 ```
 
-✅ **Use these instead:**
-
+✅ **使用这些替代:**
 ```typescript
 /**
  * Standard JSDoc comment
@@ -178,50 +94,122 @@ export const ChatLoader = ({ messages, isWaitingForResponse }: ChatLoaderProps) 
 // @future Consider implementing this feature
 ```
 
-## Best Practices
+## 最佳实践
 
-### 1. Comment Placement
-- Place comments **before** the code they describe
-- Use JSDoc for public APIs (functions, interfaces, classes)
-- Use simple comments for internal logic
+1. **注释位置**: 在描述的代码之前放置注释
+2. **注释内容**: 关注**为什么**而不是**做什么**
+3. **保持更新**: 代码变更时同步更新注释
+4. **删除过时**: 移除过时或显而易见的注释
+5. **术语一致**: 在整个项目中使用一致的术语
 
-### 2. Comment Content
-- Focus on **why** rather than **what**
-- Explain business logic and complex algorithms
-- Document edge cases and important assumptions
+## 目标
 
-### 3. Maintenance
-- Keep comments up-to-date with code changes
-- Remove outdated or obvious comments
-- Use consistent terminology throughout
-
-### 4. Examples of Good Comments
-
-```typescript
-// Validate user permissions before allowing access
-if (!hasPermission(user, 'admin')) {
-  throw new UnauthorizedError();
-}
-
-// Batch updates to improve performance with large datasets
-const batchSize = 100;
-for (let i = 0; i < items.length; i += batchSize) {
-  await processBatch(items.slice(i, i + batchSize));
-}
-
-/**
- * Cache service configuration
- * @description TTL is set to 5 minutes to balance performance and data freshness
- */
-const CACHE_TTL = 5 * 60 * 1000;
-```
-
-## Goal
-
-The primary goal is to create **self-documenting code** that is easy to understand and maintain. Use comments thoughtfully to enhance code clarity without cluttering the codebase.
+主要目标是创建**自文档化代码**，使其易于理解和维护。使用注释时要仔细考虑，以增强代码清晰度，而不会使代码库混乱。
 
 
 ```
 
 Following these comment standards will make responsive design intentions clearer and improve code readability and maintainability.
 
+# 注释规范
+
+## 核心要求
+
+- **语言**: 所有注释必须使用英文
+- **目的**: 解释*为什么*，而不仅仅是*做什么*
+- **风格**: 简洁明了
+- **格式**: 接口/函数使用JSDoc，逻辑使用简单注释
+
+## 标准格式
+
+### JSDoc - 接口和类型
+```typescript
+/**
+ * Chat message data structure
+ * @description Contains message basic information and persistence-related fields
+ */
+export interface ChatMessage {
+  /** Unique message ID (generated by frontend) */
+  id: string;
+  /** Message content */
+  text: string;
+  /** Whether this is a user message */
+  isUser: boolean;
+}
+```
+
+### JSDoc - 函数
+```typescript
+/**
+ * Send chat message to Dify API with streaming response
+ * 
+ * @param payload - Request payload to send to Dify API
+ * @param appId - Dify application ID
+ * @returns Promise containing async generator and conversation metadata
+ * @throws Error if fetch request fails or API returns error status
+ */
+export async function streamDifyChat(
+  payload: DifyChatRequestPayload,
+  appId: string
+): Promise<DifyStreamResponse> {
+  // Implementation...
+}
+```
+
+### 简单注释 - 逻辑说明
+```typescript
+// Check response status, throw error if not 2xx
+if (!response.ok) {
+  throw new Error(`API request failed: ${response.status}`);
+}
+
+// Extract conversation_id from message_end event
+if (event.conversation_id && !conversationId) {
+  conversationId = event.conversation_id;
+}
+```
+
+### 文件头注释
+```typescript
+/**
+ * Dify Chat Service
+ * @description Implements interaction logic with Dify chat-related APIs
+ * @module lib/services/dify/chat-service
+ */
+```
+
+## 禁止模式
+
+❌ **不要使用这些模式:**
+```typescript
+// --- BEGIN COMMENT ---
+// Complex comment with separators
+// --- END COMMENT ---
+
+// TODO: Fix this later
+// FIXME: Broken implementation
+// HACK: Temporary workaround
+```
+
+✅ **使用这些替代:**
+```typescript
+/**
+ * Standard JSDoc comment
+ */
+
+// Simple inline comment
+
+// @future Consider implementing this feature
+```
+
+## 最佳实践
+
+1. **注释位置**: 在描述的代码之前放置注释
+2. **注释内容**: 关注**为什么**而不是**做什么**
+3. **保持更新**: 代码变更时同步更新注释
+4. **删除过时**: 移除过时或显而易见的注释
+5. **术语一致**: 在整个项目中使用一致的术语
+
+## 目标
+
+主要目标是创建**自文档化代码**，使其易于理解和维护。使用注释时要仔细考虑，以增强代码清晰度，而不会使代码库混乱。

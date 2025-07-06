@@ -37,7 +37,7 @@ pnpm run lint
 pnpm run lint:fix
 
 # TypeScript type checking
-npx tsc --noEmit
+pnpm run type-check
 
 # Build project (includes type checking)
 pnpm run build
@@ -99,7 +99,7 @@ pnpm run build
 # In your CI pipeline
 pnpm run format:check  # Fail if formatting needed
 pnpm run lint         # Fail on linting errors
-npx tsc --noEmit      # Fail on type errors
+pnpm run type-check      # Fail on type errors
 pnpm run build        # Fail on build errors
 ```
 

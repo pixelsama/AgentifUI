@@ -1,6 +1,6 @@
 #!/bin/sh
 echo "🔍 Running TypeScript type check before commit..."
-npx tsc --noEmit || exit 1
+pnpm run type-check || exit 1
 echo "✅ TypeScript check passed!"
 
 echo "🎨 Running code formatting on staged files..."

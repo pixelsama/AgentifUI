@@ -103,7 +103,7 @@ pnpm run format:check
 pnpm run code:fix
 
 # Run type checking
-npx tsc --noEmit
+pnpm run type-check
 
 # Build project
 pnpm run build

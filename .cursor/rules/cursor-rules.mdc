@@ -1,0 +1,55 @@
+---
+alwaysApply: true
+---
+
+# Cursor Rules Guide
+
+This document provides an overview of all available development rules and when to use them.
+
+## 📋 Available Rules
+
+### Core Development Rules
+
+- **comment-rule**: Must read when writing code comments or documenting functions
+- **development-workflow-rule**: Must read before starting any development task or code changes
+- **git-commit-rule**: Must read before making any git commits or writing commit messages
+
+### Specialized Domain Rules
+
+- **database-development-rule**: Must read before making any database schema changes or migrations
+- **i18n-development**: Must read when adding translation keys or working with i18n
+- **debug**: Must read when debugging issues or investigating bugs
+
+### Technical Integration Rules
+
+- **cursor-rules**: Guidelines for writing and optimizing cursor rules themselves
+
+## 🎯 When to Use Each Rule
+
+### Before Starting Development
+1. **development-workflow-rule** - Read this first for any coding task
+2. **comment-rule** - When you need to document your code
+3. **git-commit-rule** - Before making any commits
+
+### Domain-Specific Tasks
+- **Database changes** → **database-development-rule**
+- **Translation work** → **i18n-development**
+- **Bug investigation** → **debug**
+
+### Rule Management
+- **Writing new rules** → **cursor-rules**
+
+## 🔧 How to Use Rules
+
+1. **Automatic**: Some rules apply automatically based on file patterns
+2. **Manual**: Use `@rule-name` to reference specific rules when needed
+3. **Fetch**: Use the fetch_rules tool to get detailed rule content
+
+## 📝 Best Practices
+
+- Read the relevant rule before starting work in that domain
+- Follow the guidelines strictly for consistency
+- Update rules when patterns change
+- Keep rules focused and actionable
+
+*This guide helps ensure consistent development practices across the AgentifUI project.*

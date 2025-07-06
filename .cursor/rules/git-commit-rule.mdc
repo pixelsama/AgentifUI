@@ -1,155 +1,172 @@
 ---
-description: if I tell you commit to the git,you should follow this rule
-globs: 
+description: Must read before making any git commits or writing commit messages
 alwaysApply: false
 ---
-# Git Commit Rule
 
-## Commit Mode Selection
+# Git 提交规范
 
-### Simple Mode (Recommended for simple changes)
-Single-line commits, suitable for:
-- Simple bug fixes
-- Small feature additions
-- Dependency updates
-- Documentation updates
-- Style adjustments
-
-### Detailed Mode (For complex changes)
-Multi-line commits, suitable for:
-- Complex new features
-- Major refactoring
-- Breaking changes
-- Important fixes requiring detailed explanation
-
-## Simple Mode Format
+## 基本格式
 
 ```
-<type>(<scope>): <subject in English>
+<type>(<scope>): <subject>
+
+[body]
+
+[footer]
 ```
 
-### Simple Mode Examples
+## 类型 (Type)
+
+- **feat**: 新功能
+- **fix**: 修复bug
+- **docs**: 文档更新
+- **style**: 代码格式（不影响功能）
+- **refactor**: 重构代码
+- **perf**: 性能优化
+- **test**: 测试相关
+- **chore**: 构建工具、依赖等
+
+## 作用域 (Scope)
+
+- **api**: 后端API相关
+- **ui**: 通用UI组件
+- **chat**: 聊天功能
+- **sidebar**: 侧边栏
+- **auth**: 认证授权
+- **admin**: 管理面板
+- **workflow**: 工作流
+- **mobile**: 移动端适配
+- **db**: 数据库相关
+- **config**: 配置文件
+- **deps**: 依赖更新
+- **core**: 核心功能
+- **all**: 多个模块
+
+## 主题 (Subject)
+
+- 使用英文描述
+- 以动词开头
+- 不超过50个字符
+- 不以句号结尾
+- 使用祈使语气（如 "add..." 而不是 "added..."）
+
+## 示例
+
+### 简单提交
 ```bash
-git commit -m "feat(api): add user login API"
+git commit -m "feat(chat): add message streaming functionality"
 git commit -m "fix(ui): fix button style issue"
-git commit -m "feat(chat): add message sending functionality"
-git commit -m "fix(sidebar): fix mobile display issue"
-git commit -m "chore(deps): update React version"
-git commit -m "docs: update configuration documentation"
-git commit -m "refactor(auth): optimize authentication logic"
-git commit -m "perf(api): improve query performance"
+git commit -m "docs: update API documentation"
 ```
 
-## Detailed Mode Format
-
-```
-<type>(<scope>): <subject in English>
-
-<body in English> (optional)
-
-<footer> (optional)
-```
-
-### Detailed Mode Examples
-```bash
-git commit -m "feat(api): add user authentication API endpoints" \
-           -m "" \
-           -m "Implement JWT-based authentication mechanism supporting user login and token refresh functionality." \
-           -m "Added corresponding unit tests and documentation." \
-           -m "" \
-           -m "Closes #123"
-```
-
-### Breaking Changes Example
+### 复杂提交
 ```bash
 git commit -m "feat(auth): refactor user authentication system" \
            -m "" \
-           -m "Upgrade to new authentication architecture providing better security and performance." \
+           -m "Upgrade to new authentication architecture providing better security." \
            -m "" \
-           -m "BREAKING CHANGE: Old authentication tokens will no longer be valid, users need to log in again."
+           -m "BREAKING CHANGE: Old authentication tokens will no longer be valid."
 ```
 
-## High-Risk Commits
-
-For commits that modify core functionality and may need to be reverted:
-
-### Risk Flag
-- **RISKY_REVERT_CANDIDATE**: Add this flag to subject line for high-risk commits that may require rollback
-
-### High-Risk Example
+### 高风险提交
+对于可能需要回滚的核心功能修改，添加风险标记：
 ```bash
-git commit -m "fix(core): enhance state management - RISKY_REVERT_CANDIDATE" \
-           -m "" \
-           -m "Core state management changes that may cause unexpected behavior." \
-           -m "REVERT: git revert HEAD if issues occur"
+git commit -m "fix(core): enhance state management - RISKY_REVERT_CANDIDATE"
 ```
 
-## Types
+## 最佳实践
 
-- **feat**: New features or enhancements
-- **fix**: Bug fixes
-- **docs**: Documentation-only changes
-- **style**: Formatting, missing semicolons, etc.
-- **refactor**: Code changes that neither fix bugs nor add features
-- **perf**: Performance improvements
-- **test**: Adding or correcting tests
-- **chore**: Build process, auxiliary tools, libraries, etc.
-- **revert**: Reverting previous commits
+1. **明确描述**: 提交信息要能清楚说明变更内容
+2. **原子提交**: 每次提交只包含一个逻辑变更
+3. **及时提交**: 完成一个功能点就提交，避免大批量提交
+4. **英文描述**: 统一使用英文编写提交信息
 
-## Scope (Optional)
 
-- **api**: Backend API-related changes
-- **ui**: Generic UI components (buttons, inputs, etc.)
-- **chat**: Chat-related components and functionality
-- **sidebar**: Sidebar components and navigation
-- **auth**: Authentication/authorization components and logic
-- **admin**: Admin panel components
-- **workflow**: Workflow-related components
-- **settings**: Settings and configuration components
-- **mobile**: Mobile-specific components and responsive design
-- **embed**: Embedded components and integrations
-- **nav**: Navigation components (nav-bar, etc.)
-- **home**: Home page components
-- **db**: Database-related changes
-- **config**: Configuration changes
-- **deps**: Dependency updates
-- **core**: Core functionality
-- **route**: Route changes
-- **hooks**: Custom React hooks
-- **store**: State management (Zustand stores)
-- **utils**: Utility functions and helpers
-- **types**: TypeScript type definitions
-- **style**: Styles and CSS changes
-- **all**: Multiple parts of the codebase
 
-## Subject Rules
+- Focus on what changed and why
+- Use proper grammar and spelling
 
-- Use English description
-- Start with a verb
-- No period at the end
-- Maximum 50 characters
-- Use imperative present tense (e.g., "add..." not "added...")
 
-## Detailed Mode Format Rules
+# Git 提交规范
 
-- **First `-m`**: Main commit message (type, scope, subject)
-- **Second `-m`**: Empty string `""` for blank line between subject and body
-- **Subsequent `-m`**: Detailed explanation, reasons, impact
-- **Last `-m`**: Footer information (issue references, breaking changes)
+## 基本格式
 
-## Scope Selection Guide
+```
+<type>(<scope>): <subject>
 
-- **Component-specific**: Use specific scope for changes to specific components (chat, sidebar, auth)
-- **Generic UI**: Use `ui` for reusable UI components (buttons, inputs, modals)
-- **Cross-component**: Use `core` for changes affecting multiple components
-- **Infrastructure**: Use `config`, `deps`, `utils` for non-functional changes
-- **Multiple areas**: Use `all` for changes spanning multiple unrelated areas
+[body]
 
-## English Language Guidelines
+[footer]
+```
 
-- Use clear and concise English
-- Avoid unnecessary technical jargon
-- Start with action verbs
+## 类型 (Type)
+
+- **feat**: 新功能
+- **fix**: 修复bug
+- **docs**: 文档更新
+- **style**: 代码格式（不影响功能）
+- **refactor**: 重构代码
+- **perf**: 性能优化
+- **test**: 测试相关
+- **chore**: 构建工具、依赖等
+
+## 作用域 (Scope)
+
+- **api**: 后端API相关
+- **ui**: 通用UI组件
+- **chat**: 聊天功能
+- **sidebar**: 侧边栏
+- **auth**: 认证授权
+- **admin**: 管理面板
+- **workflow**: 工作流
+- **mobile**: 移动端适配
+- **db**: 数据库相关
+- **config**: 配置文件
+- **deps**: 依赖更新
+- **core**: 核心功能
+- **all**: 多个模块
+
+## 主题 (Subject)
+
+- 使用英文描述
+- 以动词开头
+- 不超过50个字符
+- 不以句号结尾
+- 使用祈使语气（如 "add..." 而不是 "added..."）
+
+## 示例
+
+### 简单提交
+```bash
+git commit -m "feat(chat): add message streaming functionality"
+git commit -m "fix(ui): fix button style issue"
+git commit -m "docs: update API documentation"
+```
+
+### 复杂提交
+```bash
+git commit -m "feat(auth): refactor user authentication system" \
+           -m "" \
+           -m "Upgrade to new authentication architecture providing better security." \
+           -m "" \
+           -m "BREAKING CHANGE: Old authentication tokens will no longer be valid."
+```
+
+### 高风险提交
+对于可能需要回滚的核心功能修改，添加风险标记：
+```bash
+git commit -m "fix(core): enhance state management - RISKY_REVERT_CANDIDATE"
+```
+
+## 最佳实践
+
+1. **明确描述**: 提交信息要能清楚说明变更内容
+2. **原子提交**: 每次提交只包含一个逻辑变更
+3. **及时提交**: 完成一个功能点就提交，避免大批量提交
+4. **英文描述**: 统一使用英文编写提交信息
+
+
+
 - Focus on what changed and why
 - Use proper grammar and spelling
 
