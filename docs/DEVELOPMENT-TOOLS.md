@@ -1,222 +1,144 @@
-# Development Tools Guide
+# 开发工具指南
 
-This document provides a comprehensive guide to the development tools and code quality systems used in AgentifUI.
+本文档为贡献者提供开发工具和代码质量系统的使用指南。
 
-## 🛠 Tool Overview
+## 工具概览
 
-| Tool            | Purpose                              | Auto-run              |
-| --------------- | ------------------------------------ | --------------------- |
-| **Prettier**    | Code formatting (TS/TSX/JSON/MD/CSS) | ✅ On save, On commit |
-| **ESLint**      | Code quality & consistency checks    | ✅ On commit          |
-| **Husky**       | Git hooks management                 | ✅ Automatic          |
-| **lint-staged** | Run tools only on staged files       | ✅ On commit          |
-| **TypeScript**  | Type checking                        | Manual                |
+| 工具           | 用途         | 自动运行          |
+| -------------- | ------------ | ----------------- |
+| **Prettier**   | 代码格式化   | ✅ 保存时，提交时 |
+| **ESLint**     | 代码质量检查 | ✅ 提交时         |
+| **Husky**      | Git 钩子管理 | ✅ 自动           |
+| **TypeScript** | 类型检查     | 手动              |
 
-## 📋 Available Commands
+## 可用命令
 
-### Code Formatting
+### 代码格式化
 
 ```bash
-# Format entire project
+# 格式化整个项目
 pnpm run format
 
-# Check if files need formatting (CI/CD friendly)
+# 检查是否需要格式化
 pnpm run format:check
 
-# Format and fix linting issues in one command
+# 格式化并修复 lint 问题
 pnpm run code:fix
 ```
 
-### Code Quality
+### 代码质量
 
 ```bash
-# Run ESLint checks
+# 运行 ESLint 检查
 pnpm run lint
 
-# Fix auto-fixable ESLint issues
+# 修复可自动修复的问题
 pnpm run lint:fix
 
-# TypeScript type checking
+# TypeScript 类型检查
 pnpm run type-check
 
-# Build project (includes type checking)
+# 构建项目（包含类型检查）
 pnpm run build
 ```
 
-## ⚙️ Configuration Files
+## 自动化工作流
 
-### `.prettierrc.json`
+### 开发环境 (VSCode)
 
-- Code formatting rules (indentation, quotes, semicolons, etc.)
-- Import sorting configuration
-- Tailwind CSS class sorting
-- Plugin configurations
+- **保存时**: Prettier 自动格式化当前文件
+- **实时**: ESLint 显示警告/错误
 
-### `.prettierignore`
+### Git 提交
 
-- Files and directories excluded from formatting
-- Build outputs, dependencies, generated files
-- Temporary exclusions for problematic files
+- **提交前钩子**: 自动运行 lint-staged
+- **仅处理暂存文件**: 只格式化要提交的文件
+- **自动修复**: ESLint 自动修复可修复的问题
 
-### `.husky/pre-commit`
-
-- Git pre-commit hook
-- Automatically runs lint-staged on commit
-- Prevents commits with formatting issues
-
-### `package.json` - lint-staged
-
-- Configures which tools run on which file types
-- TypeScript files: ESLint + Prettier
-- Other files: Prettier only
-
-### `.vscode/settings.json`
-
-- VSCode workspace settings
-- Default formatter configuration
-- Format on save settings
-- Language-specific formatter assignments
-
-## 🔄 Automated Workflows
-
-### 1. Development (VSCode)
-
-- **On Save**: Prettier formats the current file
-- **On Paste**: Prettier formats pasted content
-- **Real-time**: ESLint shows warnings/errors
-
-### 2. Git Commit
-
-- **Pre-commit Hook**: Husky runs lint-staged
-- **Staged Files Only**: Only formats files you're committing
-- **Auto-fix**: ESLint auto-fixes issues when possible
-- **Format**: Prettier formats all staged files
-- **Backup**: Git stash saves original state
-
-### 3. CI/CD (Recommended)
+### CI/CD 建议
 
 ```bash
-# In your CI pipeline
-pnpm run format:check  # Fail if formatting needed
-pnpm run lint         # Fail on linting errors
-pnpm run type-check      # Fail on type errors
-pnpm run build        # Fail on build errors
+pnpm run format:check  # 检查格式化
+pnpm run lint         # 检查代码质量
+pnpm run type-check   # 检查类型
+pnpm run build        # 构建项目
 ```
 
-## 🎯 Best Practices
+## 最佳实践
 
-### For Developers
+### 开发者设置
 
-1. **Install VSCode Extensions**:
+1. **安装 VSCode 扩展**:
    - Prettier - Code formatter
    - ESLint
    - Tailwind CSS IntelliSense
 
-2. **Use Project Commands**:
-   - Run `pnpm run format` for entire project
-   - Use `pnpm run code:fix` before committing
-   - Let VSCode auto-format on save
+2. **使用项目命令**:
+   - 提交前运行 `pnpm run code:fix`
+   - 让 VSCode 自动格式化
+   - 信任自动化工具
 
-3. **Trust the Automation**:
-   - Let Husky handle pre-commit formatting
-   - Don't manually format before committing
-   - Focus on code logic, let tools handle style
+### 团队协作
 
-### For Teams
+- 所有开发者使用相同的配置
+- 代码审查专注于逻辑而非格式
+- 格式化自动保持一致
 
-1. **Consistent Setup**:
-   - All developers use same VSCode settings
-   - Shared Prettier and ESLint configurations
-   - Automated enforcement via Git hooks
+## 故障排除
 
-2. **Code Review Focus**:
-   - No need to review formatting issues
-   - Focus on logic, architecture, and functionality
-   - Formatting is automatically consistent
+### Prettier 在 VSCode 中不工作
 
-## 🚨 Troubleshooting
+1. 安装 "Prettier - Code formatter" 扩展
+2. 检查 `.vscode/settings.json` 配置
+3. 重启 VSCode
 
-### Prettier Not Working in VSCode
-
-1. **Check Extension**: Install "Prettier - Code formatter" extension
-2. **Check Settings**: Verify `.vscode/settings.json` is correct
-3. **Reload VSCode**: Sometimes settings need a restart
-4. **Check File Type**: Ensure file type is supported
-
-### Pre-commit Hook Failing
+### 提交前钩子失败
 
 ```bash
-# If hook fails, check what's wrong
+# 检查问题
 pnpm run format:check
 pnpm run lint
 
-# Fix issues manually
+# 修复问题
 pnpm run code:fix
 
-# Try commit again
+# 重新提交
 git commit -m "your message"
 ```
 
-### Formatting Conflicts
+### 格式化冲突
 
 ```bash
-# If you have formatting conflicts
-git stash                    # Save your changes
-pnpm run format             # Format everything
-git stash pop               # Restore your changes
-# Resolve any merge conflicts
-```
+# 保存更改
+git stash
 
-### Performance Issues
-
-```bash
-# For large projects, lint-staged only processes staged files
-# If you need to format everything:
+# 格式化所有文件
 pnpm run format
 
-# To check specific files:
-pnpm dlx prettier --check "src/**/*.{ts,tsx}"
+# 恢复更改
+git stash pop
+
+# 解决合并冲突
 ```
 
-## 📁 File Support
+## 支持的文件类型
 
-| File Type | Prettier | ESLint | Auto-format |
-| --------- | -------- | ------ | ----------- |
-| `.ts`     | ✅       | ✅     | ✅          |
-| `.tsx`    | ✅       | ✅     | ✅          |
-| `.js`     | ✅       | ✅     | ✅          |
-| `.jsx`    | ✅       | ✅     | ✅          |
-| `.json`   | ✅       | ❌     | ✅          |
-| `.md`     | ✅       | ❌     | ✅          |
-| `.css`    | ✅       | ❌     | ✅          |
-| `.scss`   | ✅       | ❌     | ✅          |
-| `.yaml`   | ✅       | ❌     | ✅          |
-| `.html`   | ✅       | ❌     | ✅          |
+| 文件类型 | Prettier | ESLint | 自动格式化 |
+| -------- | -------- | ------ | ---------- |
+| `.ts`    | ✅       | ✅     | ✅         |
+| `.tsx`   | ✅       | ✅     | ✅         |
+| `.js`    | ✅       | ✅     | ✅         |
+| `.jsx`   | ✅       | ✅     | ✅         |
+| `.json`  | ✅       | ❌     | ✅         |
+| `.md`    | ✅       | ❌     | ✅         |
+| `.css`   | ✅       | ❌     | ✅         |
 
-## 🔧 Customization
+## 配置文件
 
-### Adding New File Types
+- `.prettierrc.json` - 代码格式化规则
+- `.prettierignore` - 排除的文件和目录
+- `.husky/pre-commit` - Git 提交前钩子
+- `package.json` - lint-staged 配置
+- `.vscode/settings.json` - VSCode 工作区设置
 
-1. **Update `.prettierrc.json`** if special formatting needed
-2. **Update `package.json` lint-staged** to include new patterns
-3. **Update `.vscode/settings.json`** for editor support
-
-### Excluding Files
-
-1. **Add to `.prettierignore`** to exclude from formatting
-2. **Add to `.eslintignore`** to exclude from linting
-3. **Update lint-staged patterns** if needed
-
-### Changing Rules
-
-1. **Prettier rules**: Edit `.prettierrc.json`
-2. **ESLint rules**: Edit `eslint.config.mjs`
-3. **Test changes**: Run `pnpm run format:check` and `pnpm run lint`
-
-## 📚 Additional Resources
-
-- [Prettier Configuration](https://prettier.io/docs/en/configuration.html)
-- [ESLint Configuration](https://eslint.org/docs/user-guide/configuring/)
-- [Husky Documentation](https://typicode.github.io/husky/)
-- [lint-staged Documentation](https://github.com/okonet/lint-staged)
-- [VSCode Prettier Extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+通过遵循这些工具和流程，可以确保代码质量和一致性。
