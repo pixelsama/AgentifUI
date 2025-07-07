@@ -9,6 +9,7 @@ import { HomePreview } from '@components/admin/content/home-preview';
 import { PreviewToolbar } from '@components/admin/content/preview-toolbar';
 import { ResizableSplitPane } from '@components/ui/resizable-split-pane';
 import type { SupportedLocale } from '@lib/config/language-config';
+import { getCurrentLocaleFromCookie } from '@lib/config/language-config';
 import { clearTranslationCache } from '@lib/hooks/use-dynamic-translations';
 import { useTheme } from '@lib/hooks/use-theme';
 import { TranslationService } from '@lib/services/admin/content/translation-service';
@@ -85,7 +86,9 @@ export default function ContentManagementPage() {
   const [originalHomeTranslations, setOriginalHomeTranslations] =
     useState<Record<SupportedLocale, any> | null>(null);
 
-  const [currentLocale, setCurrentLocale] = useState<SupportedLocale>('zh-CN');
+  const [currentLocale, setCurrentLocale] = useState<SupportedLocale>(
+    getCurrentLocaleFromCookie()
+  );
   const [supportedLocales, setSupportedLocales] = useState<SupportedLocale[]>(
     []
   );

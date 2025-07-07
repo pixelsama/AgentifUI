@@ -1,6 +1,5 @@
 'use client';
 
-import { RebuildButton } from '@components/admin/rebuild-button';
 import { ReturnToChatButton } from '@components/admin/return-to-chat-button';
 import { useTheme } from '@lib/hooks/use-theme';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
@@ -222,7 +221,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            <RebuildButton />
             <ReturnToChatButton />
           </div>
         </div>

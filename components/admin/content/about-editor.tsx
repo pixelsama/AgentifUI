@@ -8,6 +8,10 @@ import {
   SelectValue,
 } from '@components/ui/select';
 import type { SupportedLocale } from '@lib/config/language-config';
+import {
+  SUPPORTED_LANGUAGES,
+  getLanguageInfo,
+} from '@lib/config/language-config';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { Plus, Trash2 } from 'lucide-react';
@@ -96,20 +100,53 @@ export function AboutEditor({
         >
           <SelectTrigger
             className={cn(
-              'w-full rounded-lg border px-3 py-2 text-sm',
+              'w-full transition-all duration-200 focus:ring-2 focus:ring-offset-2',
               isDark
-                ? 'border-stone-600 bg-stone-700 text-stone-100'
-                : 'border-stone-300 bg-white text-stone-900'
+                ? 'border-stone-600 bg-stone-800 text-stone-100 hover:border-stone-500 hover:bg-stone-700 focus:ring-stone-400'
+                : 'border-stone-300 bg-white text-stone-900 hover:border-stone-400 hover:bg-stone-50 focus:ring-stone-500'
             )}
           >
-            <SelectValue placeholder={t('common.selectLanguage')} />
+            <SelectValue>
+              <div className="flex items-center gap-2">
+                <span className="text-xs opacity-60">
+                  {getLanguageInfo(currentLocale).code}
+                </span>
+                <span className="font-medium">
+                  {getLanguageInfo(currentLocale).nativeName}
+                </span>
+              </div>
+            </SelectValue>
           </SelectTrigger>
-          <SelectContent>
-            {supportedLocales.map(locale => (
-              <SelectItem key={locale} value={locale}>
-                {locale}
-              </SelectItem>
-            ))}
+          <SelectContent
+            className={cn(
+              'border shadow-lg',
+              isDark
+                ? 'border-stone-600 bg-stone-800'
+                : 'border-stone-200 bg-white'
+            )}
+          >
+            {supportedLocales.map(locale => {
+              const langInfo = getLanguageInfo(locale);
+              return (
+                <SelectItem
+                  key={locale}
+                  value={locale}
+                  className={cn(
+                    'cursor-pointer transition-colors',
+                    isDark
+                      ? 'hover:bg-stone-700 focus:bg-stone-700'
+                      : 'hover:bg-stone-100 focus:bg-stone-100'
+                  )}
+                >
+                  <div className="flex w-full items-center justify-between">
+                    <span className="font-medium">{langInfo.nativeName}</span>
+                    <span className="ml-2 text-xs opacity-60">
+                      {langInfo.code}
+                    </span>
+                  </div>
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>

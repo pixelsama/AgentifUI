@@ -3,6 +3,7 @@
 import { AdminButton } from '@components/admin/admin-button';
 import { Button } from '@components/ui/button';
 import { LanguageSwitcher } from '@components/ui/language-switcher';
+import { PageLoader } from '@components/ui/page-loader';
 import { useDynamicTranslations } from '@lib/hooks/use-dynamic-translations';
 import { useTheme } from '@lib/hooks/use-theme';
 import { createClient } from '@lib/supabase/client';
@@ -84,6 +85,11 @@ export function Home() {
   };
 
   const colors = getColors();
+
+  // Show loading state while dynamic translations load
+  if (isLoading) {
+    return <PageLoader />;
+  }
 
   useEffect(() => {
     const getCurrentUser = async () => {

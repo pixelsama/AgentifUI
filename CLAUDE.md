@@ -158,6 +158,29 @@ Example JSDoc:
 - Implement services in appropriate `lib/services/dify/*.ts` files
 - Use the proxy layer for secure API calls
 
+## Git Commit Guidelines
+
+### Commit Message Format
+
+- Follow conventional commit format: `type(scope): description`
+- **NEVER include Claude Code footer or co-authorship lines**
+- Examples:
+  ```
+  feat(auth): add SSO login support
+  fix(chat): resolve message ordering issue
+  refactor(admin): optimize content management UI
+  ```
+
+### Prohibited Footer Content
+
+**DO NOT add these lines to any commit:**
+
+```
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
 ## Important Notes
 
 - **Database**: Uses Supabase with comprehensive RLS policies

@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@components/ui/button';
+import { PageLoader } from '@components/ui/page-loader';
 import { useDynamicTranslations } from '@lib/hooks/use-dynamic-translations';
 import { useTheme } from '@lib/hooks/use-theme';
 import { createClient } from '@lib/supabase/client';
@@ -120,23 +121,7 @@ export default function AboutPage() {
 
   // Show loading state while mounting or dynamic translations load
   if (!mounted || isLoading) {
-    return (
-      <main className="min-h-screen w-full overflow-x-hidden px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-        <div className="mx-auto max-w-5xl">
-          <div className="py-20 text-center">
-            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-current" />
-            <div
-              className={cn(
-                'text-lg',
-                isDark ? 'text-stone-400' : 'text-stone-600'
-              )}
-            >
-              {staticT('loading')}
-            </div>
-          </div>
-        </div>
-      </main>
-    );
+    return <PageLoader />;
   }
 
   // Extract value cards data from translations (using static raw method for array data)
