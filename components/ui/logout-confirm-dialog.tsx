@@ -130,7 +130,7 @@ export function LogoutConfirmDialog({
     }
   };
 
-  // 处理退出登录确认
+  // Handle logout confirmation
   const handleConfirmLogout = async () => {
     try {
       setIsLoggingOut(true);
@@ -145,7 +145,7 @@ export function LogoutConfirmDialog({
 
   if (!mounted) return null;
 
-  // 桌面端模态框样式 - Stone风格设计
+  // Desktop modal style - Stone design with compact layout
   const desktopDialog = (
     <div
       className={cn(
@@ -159,61 +159,65 @@ export function LogoutConfirmDialog({
       <div
         ref={dialogRef}
         className={cn(
-          'mx-auto w-full max-w-lg rounded-2xl shadow-2xl',
+          'mx-auto w-full max-w-md rounded-xl shadow-2xl',
           'transform transition-all duration-300 ease-out',
           isDark
-            ? 'border border-stone-700/50 bg-stone-900/95 shadow-black/40'
-            : 'border border-stone-200/50 bg-white/95 shadow-stone-900/20',
+            ? 'border border-stone-600/60 bg-stone-800/95 shadow-black/50'
+            : 'border border-stone-300/60 bg-white/95 shadow-stone-800/15',
           'backdrop-blur-sm',
           isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         )}
       >
-        {/* Desktop icon area - centered design */}
-        <div className="flex flex-col items-center px-8 pt-8 pb-6">
-          <div
-            className={cn(
-              'mb-6 flex h-16 w-16 items-center justify-center rounded-full',
-              'ring-1 ring-inset',
-              isDark
-                ? 'bg-red-900/20 text-red-400 ring-stone-700/50'
-                : 'bg-red-50 text-red-500 ring-stone-200/50'
-            )}
-          >
-            <LogOut className="h-6 w-6" />
+        {/* Desktop compact header with horizontal layout */}
+        <div className="px-6 pt-6 pb-4">
+          <div className="flex items-start">
+            <div
+              className={cn(
+                'mr-4 flex h-10 w-10 items-center justify-center rounded-lg',
+                'ring-1 ring-inset',
+                isDark
+                  ? 'bg-red-900/20 text-red-400 ring-stone-600/50'
+                  : 'bg-red-50 text-red-500 ring-stone-200/60'
+              )}
+            >
+              <LogOut className="h-5 w-5" />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <h3
+                className={cn(
+                  'mb-2 font-serif text-lg font-semibold',
+                  isDark ? 'text-stone-100' : 'text-stone-900'
+                )}
+              >
+                {t('title')}
+              </h3>
+
+              <p
+                className={cn(
+                  'font-serif text-sm leading-relaxed',
+                  isDark ? 'text-stone-400' : 'text-stone-600'
+                )}
+              >
+                {t('message')}
+              </p>
+            </div>
           </div>
-
-          <h3
-            className={cn(
-              'mb-3 text-center font-serif text-xl font-semibold',
-              isDark ? 'text-stone-100' : 'text-stone-900'
-            )}
-          >
-            {t('title')}
-          </h3>
-
-          <p
-            className={cn(
-              'max-w-sm text-center font-serif text-sm leading-relaxed',
-              isDark ? 'text-stone-400' : 'text-stone-600'
-            )}
-          >
-            {t('message')}
-          </p>
         </div>
 
-        {/* Desktop button area - horizontal layout */}
-        <div className="flex items-center gap-3 p-6 pt-0 pb-8">
+        {/* Desktop button area - right-aligned horizontal layout */}
+        <div className="flex justify-end gap-2 px-6 py-4 pt-6">
           <button
             onClick={onClose}
             disabled={isLoggingOut}
             className={cn(
-              'flex-1 rounded-xl px-6 py-3 font-serif text-sm',
+              'rounded-lg px-4 py-2 font-serif text-sm',
               'border transition-all duration-200',
               'disabled:cursor-not-allowed disabled:opacity-50',
-              'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+              'focus:ring-2 focus:ring-offset-1 focus:outline-none',
               isDark
-                ? 'border-stone-600 text-stone-300 hover:bg-stone-700/50 focus:ring-stone-500/30 focus:ring-offset-stone-900'
-                : 'border-stone-300 text-stone-700 hover:bg-stone-50 focus:ring-stone-500/30 focus:ring-offset-white'
+                ? 'border-stone-600 text-stone-300 hover:bg-stone-700/50 focus:ring-stone-500/40 focus:ring-offset-stone-800'
+                : 'border-stone-300 text-stone-700 hover:bg-stone-100 focus:ring-stone-500/40 focus:ring-offset-white'
             )}
           >
             {t('cancel')}
@@ -222,32 +226,32 @@ export function LogoutConfirmDialog({
             onClick={handleConfirmLogout}
             disabled={isLoggingOut}
             className={cn(
-              'flex-1 rounded-xl px-6 py-3 font-serif text-sm',
+              'rounded-lg px-4 py-2 font-serif text-sm font-medium',
               'transition-all duration-200',
               'disabled:cursor-not-allowed disabled:opacity-50',
-              'focus:ring-2 focus:ring-offset-2 focus:outline-none',
-              'bg-red-600 text-white shadow-lg shadow-red-900/20 hover:bg-red-700 focus:ring-red-500/30',
-              isDark ? 'focus:ring-offset-stone-900' : 'focus:ring-offset-white'
+              'focus:ring-2 focus:ring-offset-1 focus:outline-none',
+              'bg-red-600 text-white shadow-md shadow-red-900/20 hover:bg-red-700 focus:ring-red-500/40',
+              isDark ? 'focus:ring-offset-stone-800' : 'focus:ring-offset-white'
             )}
           >
             {isLoggingOut ? t('loggingOut') : t('confirm')}
           </button>
         </div>
 
-        {/* Close button - top right corner */}
+        {/* Close button - top right corner, smaller and more subtle */}
         <button
           onClick={onClose}
           disabled={isLoggingOut}
           className={cn(
-            'absolute top-4 right-4 rounded-full p-2',
+            'absolute top-3 right-3 rounded-md p-1.5',
             'disabled:cursor-not-allowed disabled:opacity-50',
             'transition-colors duration-200',
             isDark
-              ? 'text-stone-500 hover:bg-stone-800/50 hover:text-stone-300'
+              ? 'text-stone-500 hover:bg-stone-700/60 hover:text-stone-300'
               : 'text-stone-400 hover:bg-stone-100 hover:text-stone-600'
           )}
         >
-          <X className="h-5 w-5" />
+          <X className="h-4 w-4" />
         </button>
       </div>
     </div>
@@ -325,11 +329,11 @@ export function LogoutConfirmDialog({
               onClick={handleConfirmLogout}
               disabled={isLoggingOut}
               className={cn(
-                'w-full rounded-2xl py-4 font-serif text-base',
+                'w-full rounded-2xl py-4 font-serif text-base font-medium',
                 'transition-all duration-200',
                 'disabled:cursor-not-allowed disabled:opacity-50',
                 'focus:ring-2 focus:ring-offset-2 focus:outline-none',
-                'bg-red-600 text-white shadow-lg shadow-red-900/20 hover:bg-red-700 focus:ring-red-500/30',
+                'bg-red-600 text-white shadow-lg shadow-red-900/30 hover:bg-red-700 focus:ring-red-500/40',
                 isDark
                   ? 'focus:ring-offset-stone-900'
                   : 'focus:ring-offset-white'
@@ -346,8 +350,8 @@ export function LogoutConfirmDialog({
                 'disabled:cursor-not-allowed disabled:opacity-50',
                 'focus:ring-2 focus:ring-offset-2 focus:outline-none',
                 isDark
-                  ? 'border-stone-600 text-stone-300 hover:bg-stone-700/50 focus:ring-stone-500/30 focus:ring-offset-stone-900'
-                  : 'border-stone-300 text-stone-700 hover:bg-stone-50 focus:ring-stone-500/30 focus:ring-offset-white'
+                  ? 'border-stone-600 text-stone-300 hover:bg-stone-700/50 focus:ring-stone-500/40 focus:ring-offset-stone-900'
+                  : 'border-stone-300 text-stone-700 hover:bg-stone-50 focus:ring-stone-500/40 focus:ring-offset-white'
               )}
             >
               {t('cancel')}

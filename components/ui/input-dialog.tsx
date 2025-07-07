@@ -187,33 +187,33 @@ export function InputDialog({
       <div
         ref={dialogRef}
         className={cn(
-          'mx-auto w-full max-w-lg rounded-2xl shadow-2xl',
+          'mx-auto w-full max-w-md rounded-xl shadow-2xl',
           'transform transition-all duration-300 ease-out',
           isDark
-            ? 'border border-stone-700/50 bg-stone-900/95 shadow-black/40'
-            : 'border border-stone-200/50 bg-white/95 shadow-stone-900/20',
+            ? 'border border-stone-600/60 bg-stone-800/95 shadow-black/50'
+            : 'border border-stone-300/60 bg-white/95 shadow-stone-800/15',
           'backdrop-blur-sm',
           isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         )}
       >
         <form onSubmit={handleSubmit}>
-          {/* Desktop icon and title area - centered design */}
-          <div className="flex flex-col items-center px-8 pt-8 pb-6">
+          {/* Desktop compact header with horizontal layout */}
+          <div className="flex items-center px-6 pt-6 pb-4">
             <div
               className={cn(
-                'mb-6 flex h-16 w-16 items-center justify-center rounded-full',
+                'mr-4 flex h-10 w-10 items-center justify-center rounded-lg',
                 'ring-1 ring-inset',
                 isDark
-                  ? 'bg-stone-700/50 text-stone-400 ring-stone-700/50'
-                  : 'bg-stone-100 text-stone-500 ring-stone-200/50'
+                  ? 'bg-stone-700/60 text-stone-300 ring-stone-600/50'
+                  : 'bg-stone-100 text-stone-600 ring-stone-200/60'
               )}
             >
-              <Pen className="h-6 w-6" />
+              <Pen className="h-5 w-5" />
             </div>
 
             <h3
               className={cn(
-                'mb-2 text-center font-serif text-xl font-semibold',
+                'flex-1 font-serif text-lg font-semibold',
                 isDark ? 'text-stone-100' : 'text-stone-900'
               )}
             >
@@ -221,11 +221,11 @@ export function InputDialog({
             </h3>
           </div>
 
-          {/* Desktop input area */}
-          <div className="px-8 pb-6">
+          {/* Desktop compact input area */}
+          <div className="px-6 pb-4">
             <label
               className={cn(
-                'mb-3 block font-serif text-sm font-medium',
+                'mb-2 block font-serif text-sm font-medium',
                 isDark ? 'text-stone-300' : 'text-stone-700'
               )}
             >
@@ -241,19 +241,19 @@ export function InputDialog({
                 maxLength={maxLength}
                 disabled={isLoading}
                 className={cn(
-                  'w-full rounded-xl px-4 py-3 font-serif text-base',
-                  'border-2 transition-all duration-200',
+                  'w-full rounded-lg px-3 py-2.5 font-serif text-sm',
+                  'border transition-all duration-200',
                   'disabled:cursor-not-allowed disabled:opacity-50',
-                  'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+                  'focus:ring-2 focus:ring-offset-1 focus:outline-none',
                   isDark
-                    ? 'border-stone-600 bg-stone-800/50 text-white placeholder-stone-500 focus:border-stone-500 focus:ring-stone-500/30 focus:ring-offset-stone-900'
-                    : 'border-stone-300 bg-stone-50/50 text-stone-900 placeholder-stone-500 focus:border-stone-600 focus:ring-stone-500/30 focus:ring-offset-white'
+                    ? 'border-stone-600 bg-stone-700/50 text-white placeholder-stone-400 focus:border-stone-500 focus:ring-stone-500/40 focus:ring-offset-stone-800'
+                    : 'border-stone-300 bg-stone-50/80 text-stone-900 placeholder-stone-500 focus:border-stone-500 focus:ring-stone-500/40 focus:ring-offset-white'
                 )}
               />
               {maxLength && (
                 <div
                   className={cn(
-                    'absolute right-0 -bottom-6 text-xs',
+                    'absolute right-0 -bottom-5 text-xs',
                     isDark ? 'text-stone-500' : 'text-stone-400'
                   )}
                 >
@@ -263,20 +263,20 @@ export function InputDialog({
             </div>
           </div>
 
-          {/* Desktop button area - horizontal layout */}
-          <div className="flex items-center gap-3 p-8 pt-6">
+          {/* Desktop button area - right-aligned horizontal layout */}
+          <div className="flex justify-end gap-2 px-6 py-4 pt-6">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
               className={cn(
-                'flex-1 rounded-xl px-6 py-3 font-serif text-sm',
+                'rounded-lg px-4 py-2 font-serif text-sm',
                 'border transition-all duration-200',
                 'disabled:cursor-not-allowed disabled:opacity-50',
-                'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+                'focus:ring-2 focus:ring-offset-1 focus:outline-none',
                 isDark
-                  ? 'border-stone-600 text-stone-300 hover:bg-stone-700/50 focus:ring-stone-500/30 focus:ring-offset-stone-900'
-                  : 'border-stone-300 text-stone-700 hover:bg-stone-50 focus:ring-stone-500/30 focus:ring-offset-white'
+                  ? 'border-stone-600 text-stone-300 hover:bg-stone-700/50 focus:ring-stone-500/40 focus:ring-offset-stone-800'
+                  : 'border-stone-300 text-stone-700 hover:bg-stone-100 focus:ring-stone-500/40 focus:ring-offset-white'
               )}
             >
               {finalCancelText}
@@ -285,34 +285,34 @@ export function InputDialog({
               type="submit"
               disabled={isLoading || !isInputValid}
               className={cn(
-                'flex-1 rounded-xl px-6 py-3 font-serif text-sm',
+                'rounded-lg px-4 py-2 font-serif text-sm font-medium',
                 'transition-all duration-200',
                 'disabled:cursor-not-allowed disabled:opacity-50',
-                'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+                'focus:ring-2 focus:ring-offset-1 focus:outline-none',
                 isDark
-                  ? 'bg-stone-600 text-white shadow-lg shadow-stone-900/20 hover:bg-stone-700 focus:ring-stone-500/30 focus:ring-offset-stone-900'
-                  : 'bg-stone-600 text-white shadow-lg shadow-stone-900/10 hover:bg-stone-700 focus:ring-stone-500/30 focus:ring-offset-white'
+                  ? 'bg-stone-600 text-white shadow-md shadow-stone-900/30 hover:bg-stone-700 focus:ring-stone-500/40 focus:ring-offset-stone-800'
+                  : 'bg-stone-700 text-white shadow-md shadow-stone-900/15 hover:bg-stone-800 focus:ring-stone-500/40 focus:ring-offset-white'
               )}
             >
               {isLoading ? t('loading') : confirmText}
             </button>
           </div>
 
-          {/* Close button - top right corner */}
+          {/* Close button - top right corner, smaller and more subtle */}
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
             className={cn(
-              'absolute top-4 right-4 rounded-full p-2',
+              'absolute top-3 right-3 rounded-md p-1.5',
               'disabled:cursor-not-allowed disabled:opacity-50',
               'transition-colors duration-200',
               isDark
-                ? 'text-stone-500 hover:bg-stone-800/50 hover:text-stone-300'
+                ? 'text-stone-500 hover:bg-stone-700/60 hover:text-stone-300'
                 : 'text-stone-400 hover:bg-stone-100 hover:text-stone-600'
             )}
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </form>
       </div>

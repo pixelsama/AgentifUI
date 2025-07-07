@@ -76,42 +76,39 @@ export function SidebarListButton({
           ? 'focus-visible:ring-stone-500 focus-visible:ring-offset-gray-900'
           : 'focus-visible:ring-primary focus-visible:ring-offset-background',
 
-        // 边框样式
-        'border',
+        // Disabled state styling
+        isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
 
-        // 禁用状态样式
-        // 恢复cursor-pointer，现在父容器使用cursor-e-resize不会冲突
-        // disabled时使用cursor-not-allowed
-        isDisabled
-          ? 'cursor-not-allowed border-transparent opacity-60'
-          : 'cursor-pointer',
-
-        // 🎯 亮色主题样式 - 统一悬停效果与header保持一致
+        // Light theme minimalist styles - remove borders, keep selected and hover consistent
         !isDark &&
           !isDisabled && [
             'text-stone-600',
-            // 只有在没有打开下拉菜单且没有禁用悬停时才显示悬停效果
-            !hasOpenDropdown && !disableHover && 'hover:bg-stone-300/80',
-            active
-              ? 'border-stone-400/80 bg-stone-300 shadow-sm'
-              : 'border-transparent',
+            // Selected state: use same background as hover, slightly deeper
+            active ? 'bg-stone-300/90' : '',
+            // Hover effect: only show when not selected and no dropdown is open
+            !active &&
+              !hasOpenDropdown &&
+              !disableHover &&
+              'hover:bg-stone-300/80',
           ],
         !isDark && isDisabled && ['text-stone-400'],
 
-        // 🎯 暗色主题样式 - 统一悬停效果与header保持一致
+        // Dark theme minimalist styles - remove borders, keep selected and hover consistent
         isDark &&
           !isDisabled && [
             'text-gray-200',
-            // 只有在没有打开下拉菜单且没有禁用悬停时才显示悬停效果
-            !hasOpenDropdown && !disableHover && 'hover:bg-stone-600/60',
-            active
-              ? 'border-stone-600 bg-stone-700 shadow-sm'
-              : 'border-transparent',
+            // Selected state: use same background as hover, slightly deeper
+            active ? 'bg-stone-600/80' : '',
+            // Hover effect: only show when not selected and no dropdown is open
+            !active &&
+              !hasOpenDropdown &&
+              !disableHover &&
+              'hover:bg-stone-600/60',
           ],
         isDark && isDisabled && ['text-gray-500'],
 
-        // 响应式宽度样式
-        'w-full', // 默认宽度为100%
+        // Responsive width styling
+        'w-full', // Default width 100%
 
         className
       )}

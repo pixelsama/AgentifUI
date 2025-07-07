@@ -24,9 +24,9 @@ interface ConfirmDialogProps {
 }
 
 /**
- * 响应式确认对话框组件 - Stone风格设计
- * 桌面端：居中模态框，圆润石头风格
- * 移动端：底部弹出样式，更大的触摸区域
+ * Responsive confirmation dialog component - Stone style design
+ * Desktop: Centered modal with compact rectangular layout
+ * Mobile: Bottom sheet style with larger touch areas
  */
 export function ConfirmDialog({
   isOpen,
@@ -47,12 +47,12 @@ export function ConfirmDialog({
   const dialogRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = React.useState(false);
 
-  // 客户端挂载后才能使用Portal
+  // Can only use Portal after client-side mounting
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  // 处理ESC键关闭
+  // Handle ESC key close
   useEffect(() => {
     if (!isOpen) return;
 
@@ -66,7 +66,7 @@ export function ConfirmDialog({
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isOpen, onClose, isLoading]);
 
-  // 处理点击外部关闭
+  // Handle click outside to close
   useEffect(() => {
     if (!isOpen) return;
 
@@ -80,7 +80,7 @@ export function ConfirmDialog({
       }
     };
 
-    // 添加延迟，避免打开时立即关闭
+    // Add delay to avoid closing immediately when opened
     const timer = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside);
     }, 100);
@@ -91,7 +91,7 @@ export function ConfirmDialog({
     };
   }, [isOpen, onClose, isLoading]);
 
-  // 处理移动端滑动关闭
+  // Handle mobile swipe to close
   useEffect(() => {
     if (!isOpen || !isMobile || !dialogRef.current || isLoading) return;
 
@@ -116,10 +116,10 @@ export function ConfirmDialog({
       const deltaY = currentY - startY;
 
       if (deltaY > 100) {
-        // 向下滑动超过阈值，关闭弹窗
+        // If the swipe down exceeds the threshold, close the dialog
         onClose();
       } else {
-        // 恢复原位
+        // Restore to original position
         dialog.style.transform = '';
       }
     };
@@ -135,14 +135,14 @@ export function ConfirmDialog({
     };
   }, [isOpen, isMobile, onClose, isLoading]);
 
-  // 点击背景关闭
+  // Click background to close
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && !isLoading) {
       onClose();
     }
   };
 
-  // 获取图标组件
+  // Get icon component
   const getIcon = () => {
     const iconClass = 'w-6 h-6';
 
@@ -156,24 +156,18 @@ export function ConfirmDialog({
     }
   };
 
-  // 获取Stone风格样式类
+  // Get icon and background styles based on variant
   const getVariantStyles = () => {
     if (variant === 'danger') {
       return {
         iconColor: isDark ? 'text-red-400' : 'text-red-500',
         iconBg: isDark ? 'bg-red-900/20' : 'bg-red-50',
-        confirmButton: isDark
-          ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500/30 text-white shadow-lg shadow-red-900/20'
-          : 'bg-red-600 hover:bg-red-700 focus:ring-red-500/30 text-white shadow-lg shadow-red-900/10',
       };
     }
 
     return {
       iconColor: isDark ? 'text-stone-400' : 'text-stone-500',
-      iconBg: isDark ? 'bg-stone-700/50' : 'bg-stone-100',
-      confirmButton: isDark
-        ? 'bg-stone-600 hover:bg-stone-700 focus:ring-stone-500/30 text-white shadow-lg shadow-stone-900/20'
-        : 'bg-stone-600 hover:bg-stone-700 focus:ring-stone-500/30 text-white shadow-lg shadow-stone-900/10',
+      iconBg: isDark ? 'bg-stone-700/60' : 'bg-stone-100',
     };
   };
 
@@ -181,7 +175,7 @@ export function ConfirmDialog({
 
   if (!mounted) return null;
 
-  // 桌面端模态框样式 - Stone风格设计
+  // Desktop modal style - Stone design with compact layout
   const desktopDialog = (
     <div
       className={cn(
@@ -195,61 +189,65 @@ export function ConfirmDialog({
       <div
         ref={dialogRef}
         className={cn(
-          'mx-auto w-full max-w-lg rounded-2xl shadow-2xl',
+          'mx-auto w-full max-w-md rounded-xl shadow-2xl',
           'transform transition-all duration-300 ease-out',
           isDark
-            ? 'border border-stone-700/50 bg-stone-900/95 shadow-black/40'
-            : 'border border-stone-200/50 bg-white/95 shadow-stone-900/20',
+            ? 'border border-stone-600/60 bg-stone-800/95 shadow-black/50'
+            : 'border border-stone-300/60 bg-white/95 shadow-stone-800/15',
           'backdrop-blur-sm',
           isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         )}
       >
-        {/* Desktop icon area - center design */}
-        <div className="flex flex-col items-center px-8 pt-8 pb-6">
-          <div
-            className={cn(
-              'mb-6 flex h-16 w-16 items-center justify-center rounded-full',
-              'ring-1 ring-inset',
-              variantStyles.iconBg,
-              variantStyles.iconColor,
-              isDark ? 'ring-stone-700/50' : 'ring-stone-200/50'
-            )}
-          >
-            {getIcon()}
+        {/* Desktop compact header with horizontal layout */}
+        <div className="px-6 pt-6 pb-4">
+          <div className="flex items-start">
+            <div
+              className={cn(
+                'mr-4 flex h-10 w-10 items-center justify-center rounded-lg',
+                'ring-1 ring-inset',
+                variantStyles.iconBg,
+                variantStyles.iconColor,
+                isDark ? 'ring-stone-600/50' : 'ring-stone-200/60'
+              )}
+            >
+              <div className="h-5 w-5">{getIcon()}</div>
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <h3
+                className={cn(
+                  'mb-2 font-serif text-lg font-semibold',
+                  isDark ? 'text-stone-100' : 'text-stone-900'
+                )}
+              >
+                {title}
+              </h3>
+
+              <p
+                className={cn(
+                  'font-serif text-sm leading-relaxed',
+                  isDark ? 'text-stone-400' : 'text-stone-600'
+                )}
+              >
+                {message}
+              </p>
+            </div>
           </div>
-
-          <h3
-            className={cn(
-              'mb-3 text-center font-serif text-xl font-semibold',
-              isDark ? 'text-stone-100' : 'text-stone-900'
-            )}
-          >
-            {title}
-          </h3>
-
-          <p
-            className={cn(
-              'max-w-sm text-center font-serif text-sm leading-relaxed',
-              isDark ? 'text-stone-400' : 'text-stone-600'
-            )}
-          >
-            {message}
-          </p>
         </div>
 
-        {/* Desktop button area - horizontal layout */}
-        <div className="flex items-center gap-3 p-6 pt-0 pb-8">
+        {/* Desktop button area - right-aligned horizontal layout */}
+        <div className="flex justify-end gap-2 px-6 py-4 pt-6">
           <button
             onClick={onClose}
             disabled={isLoading}
             className={cn(
-              'flex-1 rounded-xl px-6 py-3 font-serif text-sm',
+              'rounded-lg px-4 py-2 font-serif text-sm',
               'border transition-all duration-200',
               'disabled:cursor-not-allowed disabled:opacity-50',
-              'focus:ring-2 focus:ring-offset-2 focus:outline-none',
+              'focus:ring-2 focus:ring-offset-1 focus:outline-none',
               isDark
-                ? 'border-stone-600 text-stone-300 hover:bg-stone-700/50 focus:ring-stone-500/30 focus:ring-offset-stone-900'
-                : 'border-stone-300 text-stone-700 hover:bg-stone-50 focus:ring-stone-500/30 focus:ring-offset-white'
+                ? 'border-stone-600 text-stone-300 hover:bg-stone-700/50 focus:ring-stone-500/40 focus:ring-offset-stone-800'
+                : 'border-stone-300 text-stone-700 hover:bg-stone-100 focus:ring-stone-500/40 focus:ring-offset-white'
             )}
           >
             {finalCancelText}
@@ -258,38 +256,44 @@ export function ConfirmDialog({
             onClick={onConfirm}
             disabled={isLoading}
             className={cn(
-              'flex-1 rounded-xl px-6 py-3 font-serif text-sm',
+              'rounded-lg px-4 py-2 font-serif text-sm font-medium',
               'transition-all duration-200',
               'disabled:cursor-not-allowed disabled:opacity-50',
-              'focus:ring-2 focus:ring-offset-2 focus:outline-none',
-              variantStyles.confirmButton,
-              isDark ? 'focus:ring-offset-stone-900' : 'focus:ring-offset-white'
+              'focus:ring-2 focus:ring-offset-1 focus:outline-none',
+              // Enhanced styling for the confirm button with better contrast
+              variant === 'danger'
+                ? isDark
+                  ? 'bg-red-600 text-white shadow-md shadow-red-900/30 hover:bg-red-700 focus:ring-red-500/40 focus:ring-offset-stone-800'
+                  : 'bg-red-600 text-white shadow-md shadow-red-900/15 hover:bg-red-700 focus:ring-red-500/40 focus:ring-offset-white'
+                : isDark
+                  ? 'bg-stone-600 text-white shadow-md shadow-stone-900/30 hover:bg-stone-700 focus:ring-stone-500/40 focus:ring-offset-stone-800'
+                  : 'bg-stone-700 text-white shadow-md shadow-stone-900/15 hover:bg-stone-800 focus:ring-stone-500/40 focus:ring-offset-white'
             )}
           >
             {isLoading ? t('loading') : confirmText}
           </button>
         </div>
 
-        {/* Close button - top right corner */}
+        {/* Close button - top right corner, smaller and more subtle */}
         <button
           onClick={onClose}
           disabled={isLoading}
           className={cn(
-            'absolute top-4 right-4 rounded-full p-2',
+            'absolute top-3 right-3 rounded-md p-1.5',
             'disabled:cursor-not-allowed disabled:opacity-50',
             'transition-colors duration-200',
             isDark
-              ? 'text-stone-500 hover:bg-stone-800/50 hover:text-stone-300'
+              ? 'text-stone-500 hover:bg-stone-700/60 hover:text-stone-300'
               : 'text-stone-400 hover:bg-stone-100 hover:text-stone-600'
           )}
         >
-          <X className="h-5 w-5" />
+          <X className="h-4 w-4" />
         </button>
       </div>
     </div>
   );
 
-  // 移动端底部弹出样式 - Stone风格设计
+  // Mobile bottom sheet style - Stone design
   const mobileDialog = (
     <div
       className={cn(
@@ -313,7 +317,7 @@ export function ConfirmDialog({
         )}
         style={{ maxHeight: '90vh', overflowY: 'auto' }}
       >
-        {/* Mobile top drag bar - thicker and more visible */}
+        {/* Mobile top drag handle - thicker and more visible */}
         <div className="flex items-center justify-center pt-4 pb-2">
           <div
             className={cn(
@@ -355,20 +359,24 @@ export function ConfirmDialog({
             {message}
           </p>
 
-          {/* Mobile button area - vertical layout with larger touch area */}
+          {/* Mobile button area - vertical layout with larger touch areas */}
           <div className="w-full space-y-3">
             <button
               onClick={onConfirm}
               disabled={isLoading}
               className={cn(
-                'w-full rounded-2xl py-4 font-serif text-base',
+                'w-full rounded-2xl py-4 font-serif text-base font-medium',
                 'transition-all duration-200',
                 'disabled:cursor-not-allowed disabled:opacity-50',
                 'focus:ring-2 focus:ring-offset-2 focus:outline-none',
-                variantStyles.confirmButton,
-                isDark
-                  ? 'focus:ring-offset-stone-900'
-                  : 'focus:ring-offset-white'
+                // Mobile confirm button styling with proper variant handling
+                variant === 'danger'
+                  ? isDark
+                    ? 'bg-red-600 text-white shadow-lg shadow-red-900/30 hover:bg-red-700 focus:ring-red-500/40 focus:ring-offset-stone-900'
+                    : 'bg-red-600 text-white shadow-lg shadow-red-900/15 hover:bg-red-700 focus:ring-red-500/40 focus:ring-offset-white'
+                  : isDark
+                    ? 'bg-stone-600 text-white shadow-lg shadow-stone-900/30 hover:bg-stone-700 focus:ring-stone-500/40 focus:ring-offset-stone-900'
+                    : 'bg-stone-700 text-white shadow-lg shadow-stone-900/15 hover:bg-stone-800 focus:ring-stone-500/40 focus:ring-offset-white'
               )}
             >
               {isLoading ? t('loading') : confirmText}
@@ -394,6 +402,6 @@ export function ConfirmDialog({
     </div>
   );
 
-  // 根据设备类型返回相应的对话框
+  // Return the corresponding dialog based on the device type
   return createPortal(isMobile ? mobileDialog : desktopDialog, document.body);
 }

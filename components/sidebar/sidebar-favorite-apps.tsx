@@ -321,40 +321,77 @@ export function SidebarFavoriteApps({
       {displayApps.length > 0 && (
         <div
           className={cn(
-            'sticky top-0 z-40 ml-[6px] px-2 py-1',
-            // 使用与sidebar相同的背景色，确保粘性效果完美，无悬停效果
-            // 确保z-index足够高，完全覆盖下方内容，避免透明效果
+            'group sticky top-0 z-40 ml-[6px] px-2 py-1',
+            // Use same background as sidebar for perfect sticky effect
+            // Ensure high z-index to cover content below
             colors.sidebarBackground.tailwind,
-            favoriteApps.length > 3 && 'cursor-pointer'
+            favoriteApps.length > 3 &&
+              'cursor-pointer rounded-md transition-all duration-300 ease-out hover:bg-stone-200/40 dark:hover:bg-stone-700/40'
           )}
           onClick={favoriteApps.length > 3 ? toggleExpanded : undefined}
         >
-          <div className="flex items-center">
-            {/* Title text and expand button compact layout: remove number component, button close to text */}
-            <span
-              className={cn(
-                'font-serif text-xs leading-none font-medium',
-                isDark ? 'text-stone-400' : 'text-stone-500'
-              )}
-            >
-              {t('favoriteApps')}
-            </span>
-
-            {/* Expand button: only show when there are more than 3 apps, close to text */}
-            {favoriteApps.length > 3 && (
-              <ChevronRight
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              {/* Title text with expand hint */}
+              <span
                 className={cn(
-                  'ml-0.5 h-2.5 w-2.5 transition-transform duration-200',
-                  isAppsExpanded && 'rotate-90',
-                  isDark ? 'text-stone-400/70' : 'text-stone-500/70'
+                  'font-serif text-xs leading-none font-medium',
+                  isDark ? 'text-stone-400' : 'text-stone-500'
                 )}
-              />
+              >
+                {t('favoriteApps')}
+              </span>
+
+              {/* Expand button: only show when there are more than 3 apps */}
+              {favoriteApps.length > 3 && (
+                <ChevronRight
+                  className={cn(
+                    'ml-1.5 h-3 w-3 transition-all duration-300 ease-out',
+                    'transform-gpu will-change-transform',
+                    isAppsExpanded && 'rotate-90',
+                    'group-hover:scale-110',
+                    isDark ? 'text-stone-400/80' : 'text-stone-500/80'
+                  )}
+                />
+              )}
+            </div>
+
+            {/* Animated dots indicator showing there are more apps */}
+            {favoriteApps.length > 3 && (
+              <div
+                className={cn(
+                  'flex items-center space-x-1 transition-all duration-300 ease-out',
+                  isAppsExpanded
+                    ? 'scale-90 opacity-40'
+                    : 'opacity-60 group-hover:scale-105 group-hover:opacity-100'
+                )}
+              >
+                <div className="flex space-x-0.5">
+                  {[...Array(Math.min(3, favoriteApps.length - 3))].map(
+                    (_, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          'h-1 w-1 rounded-full transition-all duration-300 ease-out',
+                          'transform-gpu will-change-transform',
+                          !isAppsExpanded && `animation-delay-${i * 100}`,
+                          'group-hover:scale-125',
+                          isDark ? 'bg-stone-500/60' : 'bg-stone-400/60'
+                        )}
+                        style={{
+                          animationDelay: `${i * 100}ms`,
+                        }}
+                      />
+                    )
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </div>
       )}
 
-      {/* 加载状态 */}
+      {/* Loading state */}
       {isLoading && (
         <div
           className={cn(
@@ -370,28 +407,39 @@ export function SidebarFavoriteApps({
       {displayApps.length > 0 && (
         <div className="space-y-1 px-3 pt-1">
           {displayApps.map((app, index) => {
-            // 🎯 修复跨页面切换延迟：在路由跳转期间允许sidebar store状态立即生效
-            // 1. 如果sidebar store中选中了这个应用，立即显示为选中（路由跳转期间）
-            // 2. 如果在非应用页面且store中没选中，确保不显示选中状态
+            // Fix cross-page switching delay: allow sidebar store state to take effect immediately during routing
+            // 1. If this app is selected in sidebar store, show as selected immediately (during route transition)
+            // 2. If on non-app page and not selected in store, ensure no selected state is shown
             const isInAppPage = window.location.pathname.startsWith('/apps/');
             const isSelectedByStore =
               selectedType === 'app' && selectedId === app.instanceId;
             const isSelected =
               isSelectedByStore || (isInAppPage && isAppActive(app));
-            // 检查当前应用是否正在点击中
+            // Check if current app is being clicked
             const isClicking = clickingAppId === app.instanceId;
-            // 计算是否是扩展项（超过前3个的应用）
+            // Calculate if this is an extended item (apps beyond the first 3)
             const isExtendedItem = index >= 3;
 
             return (
               <div
                 className={cn(
-                  'group relative transition-opacity duration-300',
-                  // 简单的fade in/out效果
+                  'group relative transition-all duration-300 ease-out',
+                  'transform-gpu will-change-transform',
+                  // Enhanced animation for extended items
                   isExtendedItem && !isAppsExpanded
-                    ? 'pointer-events-none opacity-0'
-                    : 'opacity-100'
+                    ? 'pointer-events-none translate-y-[-4px] scale-95 opacity-0'
+                    : 'translate-y-0 scale-100 opacity-100',
+                  // Staggered animation delay for extended items
+                  isExtendedItem &&
+                    isAppsExpanded &&
+                    `animation-delay-${(index - 3) * 50}`
                 )}
+                style={{
+                  animationDelay:
+                    isExtendedItem && isAppsExpanded
+                      ? `${(index - 3) * 50}ms`
+                      : '0ms',
+                }}
                 key={app.instanceId}
               >
                 <SidebarListButton
@@ -405,7 +453,7 @@ export function SidebarFavoriteApps({
                     <div
                       className={cn(
                         'transition-opacity',
-                        // 🎯 点击时隐藏more button，避免干扰
+                        // Hide more button when clicking to avoid interference
                         isClicking
                           ? 'pointer-events-none opacity-0'
                           : openDropdownId === app.instanceId
@@ -421,21 +469,21 @@ export function SidebarFavoriteApps({
                   className={cn(
                     'w-full justify-start font-medium',
                     'transition-all duration-200 ease-in-out',
-                    // 🎯 点击时的特殊样式
+                    // Special styling when clicking
                     isClicking && 'cursor-wait opacity-75',
-                    // 🎨 统一悬停效果：与header保持完全一致
-                    // 使用与header相同的 stone-300/80 和 stone-600/60
+                    // Unified hover effect: keep completely consistent with header
+                    // Use same stone-300/80 and stone-600/60 as header
                     isDark
                       ? 'text-gray-300 hover:bg-stone-600/60 hover:text-gray-100'
                       : 'text-gray-700 hover:bg-stone-300/80 hover:text-gray-900'
                   )}
                 >
                   <div className="flex min-w-0 flex-1 items-center">
-                    {/* 应用名称 - 使用与近期对话一致的样式 */}
+                    {/* App name - use consistent styling with recent chats */}
                     <span className="truncate font-serif text-xs font-medium">
                       {app.displayName}
                     </span>
-                    {/* 🎯 新增：点击时显示状态提示 */}
+                    {/* Show status hint when clicking */}
                     {isClicking && (
                       <span
                         className={cn(
