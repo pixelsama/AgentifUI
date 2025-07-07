@@ -26,13 +26,13 @@ export function PageLoader({ className }: PageLoaderProps) {
   return (
     <div
       className={cn(
-        'flex min-h-[50vh] w-full flex-col items-center justify-center',
+        'flex min-h-screen w-full flex-col items-center justify-center',
         className
       )}
     >
-      <div className="relative flex flex-col items-center">
+      <div className="flex flex-col items-center">
         {/* Loading animation spinner */}
-        <div className="mb-4 h-16 w-16">
+        <div className="mb-6 h-16 w-16">
           <svg
             className="text-primary h-full w-full animate-spin"
             xmlns="http://www.w3.org/2000/svg"
@@ -56,24 +56,14 @@ export function PageLoader({ className }: PageLoaderProps) {
         </div>
 
         {/* Loading text content */}
-        <div className="text-center">
-          <h3
-            className={cn(
-              'text-lg font-medium',
-              isDark ? 'text-gray-100' : 'text-gray-900'
-            )}
-          >
-            {t('title')}
-          </h3>
-          <p
-            className={cn(
-              'mt-1 text-sm',
-              isDark ? 'text-gray-400' : 'text-gray-500'
-            )}
-          >
-            {t('description')}
-          </p>
-        </div>
+        <h3
+          className={cn(
+            'text-lg font-medium',
+            isDark ? 'text-gray-100' : 'text-gray-900'
+          )}
+        >
+          {t('title')}
+        </h3>
       </div>
     </div>
   );

@@ -1905,8 +1905,7 @@
     "loadingFailed": "載入訊息失敗: {error}",
     "spinner": "載入中",
     "pageLoader": {
-      "title": "載入中",
-      "description": "請稍候，正在獲取資料..."
+      "title": "載入中"
     }
   },
   "dynamicTitle": {

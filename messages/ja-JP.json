@@ -1905,8 +1905,7 @@
     "loadingFailed": "メッセージの読み込みに失敗しました: {error}",
     "spinner": "読み込み中",
     "pageLoader": {
-      "title": "読み込み中",
-      "description": "お待ちください、データを取得中..."
+      "title": "読み込み中"
     }
   },
   "dynamicTitle": {

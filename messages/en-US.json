@@ -1905,8 +1905,7 @@
     "loadingFailed": "Failed to load messages: {error}",
     "spinner": "Loading",
     "pageLoader": {
-      "title": "Loading",
-      "description": "Please wait, fetching data..."
+      "title": "Loading"
     }
   },
   "dynamicTitle": {

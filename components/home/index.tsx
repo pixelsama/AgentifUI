@@ -19,6 +19,7 @@ export function Home() {
   const { isDark } = useTheme();
   const supabase = createClient();
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
   const staticT = useTranslations('pages.home');
   const { t: dynamicT, isLoading } = useDynamicTranslations({
     sections: ['pages.home'],
@@ -29,6 +30,25 @@ export function Home() {
     const dynamicValue = dynamicT(key, 'pages.home');
     return dynamicValue || staticT(key, params);
   };
+
+  // Ensure client-side rendering consistency
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Check current user authentication status
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      // 🔒 安全修复：使用 getUser() 进行服务器端验证
+      // 避免依赖可能被篡改的本地 session 数据
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    };
+
+    getCurrentUser();
+  }, []);
 
   const handleStartClick = async () => {
     try {
@@ -86,23 +106,10 @@ export function Home() {
 
   const colors = getColors();
 
-  // Show loading state while dynamic translations load
-  if (isLoading) {
+  // Show loading state while mounting or dynamic translations load
+  if (!mounted || isLoading) {
     return <PageLoader />;
   }
-
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      // 🔒 安全修复：使用 getUser() 进行服务器端验证
-      // 避免依赖可能被篡改的本地 session 数据
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setCurrentUser(user);
-    };
-
-    getCurrentUser();
-  }, []);
 
   return (
     <AnimatePresence>
