@@ -72,9 +72,6 @@ export function SidebarFavoriteApps({
   // 下拉菜单状态管理
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
-  // 新增：点击状态管理，提供即时反馈
-  const [clickingAppId, setClickingAppId] = useState<string | null>(null);
-
   useEffect(() => {
     loadFavoriteApps();
   }, [loadFavoriteApps]);
@@ -118,15 +115,7 @@ export function SidebarFavoriteApps({
   // 3. 简化应用切换逻辑，避免验证反弹
   // 4. 保持sidebar选中状态的即时反馈
   const handleAppClick = async (app: FavoriteApp) => {
-    // 🎯 防止重复点击
-    if (clickingAppId === app.instanceId) {
-      console.log('[FavoriteApps] 防止重复点击:', app.instanceId);
-      return;
-    }
-
     try {
-      // 🎯 立即设置点击状态，提供短暂的视觉反馈
-      setClickingAppId(app.instanceId);
       console.log('[FavoriteApps] 开始切换到常用应用:', app.displayName);
 
       // 🎯 立即设置sidebar选中状态，提供即时反馈
@@ -151,24 +140,12 @@ export function SidebarFavoriteApps({
 
       // 🎯 错误处理：恢复sidebar状态
       selectItem(null, null);
-    } finally {
-      // 🎯 快速清除点击状态，避免按钮卡住
-      // 使用短延迟确保用户能看到点击反馈
-      setTimeout(() => {
-        setClickingAppId(null);
-      }, 200);
     }
   };
 
   // 🎯 优化：发起新对话使用相同的优化策略
   const handleStartNewChat = async (app: FavoriteApp) => {
-    // 防止重复点击
-    if (clickingAppId === app.instanceId) {
-      return;
-    }
-
     try {
-      setClickingAppId(app.instanceId);
       console.log('[FavoriteApps] 发起新对话:', app.displayName);
 
       // 立即设置sidebar选中状态
@@ -186,10 +163,6 @@ export function SidebarFavoriteApps({
     } catch (error) {
       console.error('[FavoriteApps] 发起新对话失败:', error);
       selectItem(null, null);
-    } finally {
-      setTimeout(() => {
-        setClickingAppId(null);
-      }, 200);
     }
   };
 
@@ -251,14 +224,8 @@ export function SidebarFavoriteApps({
   // 创建下拉菜单
   const createMoreActions = (app: FavoriteApp) => {
     const isMenuOpen = openDropdownId === app.instanceId;
-    // 🎯 检查当前应用是否正在处理中
-    const isAppBusy = clickingAppId === app.instanceId;
 
     const handleMenuOpenChange = (isOpen: boolean) => {
-      // 🎯 如果应用正在处理中，不允许打开菜单
-      if (isAppBusy && isOpen) {
-        return;
-      }
       setOpenDropdownId(isOpen ? app.instanceId : null);
     };
 
@@ -271,7 +238,7 @@ export function SidebarFavoriteApps({
         trigger={
           <MoreButtonV2
             aria-label={t('moreOptions')}
-            disabled={isAppBusy} // 🎯 应用忙碌时禁用
+            disabled={false}
             isMenuOpen={isMenuOpen}
             isItemSelected={false}
             disableHover={!!openDropdownId && !isMenuOpen}
@@ -285,7 +252,7 @@ export function SidebarFavoriteApps({
             setOpenDropdownId(null);
             handleStartNewChat(app);
           }}
-          disabled={isAppBusy} // 🎯 应用忙碌时禁用
+          disabled={false}
         >
           {/* Show different button text based on application type */}
           {app.dify_apptype === 'workflow'
@@ -300,7 +267,7 @@ export function SidebarFavoriteApps({
             setOpenDropdownId(null);
             handleHideApp(app);
           }}
-          disabled={isAppBusy} // 🎯 应用忙碌时禁用
+          disabled={false}
         >
           {t('hideApp')}
         </DropdownMenuV2.Item>
@@ -415,8 +382,6 @@ export function SidebarFavoriteApps({
               selectedType === 'app' && selectedId === app.instanceId;
             const isSelected =
               isSelectedByStore || (isInAppPage && isAppActive(app));
-            // Check if current app is being clicked
-            const isClicking = clickingAppId === app.instanceId;
             // Calculate if this is an extended item (apps beyond the first 3)
             const isExtendedItem = index >= 3;
 
@@ -446,21 +411,19 @@ export function SidebarFavoriteApps({
                   icon={getAppIcon(app)}
                   onClick={() => handleAppClick(app)}
                   active={isSelected}
-                  isLoading={isClicking} // 🎯 显示点击加载状态
+                  isLoading={false}
                   hasOpenDropdown={openDropdownId === app.instanceId}
-                  disableHover={!!openDropdownId || isClicking} // 🎯 点击时禁用悬停
+                  disableHover={!!openDropdownId}
                   moreActionsTrigger={
                     <div
                       className={cn(
                         'transition-opacity',
                         // Hide more button when clicking to avoid interference
-                        isClicking
-                          ? 'pointer-events-none opacity-0'
-                          : openDropdownId === app.instanceId
-                            ? 'opacity-100' // 当前打开菜单的item，more button保持显示
-                            : openDropdownId
-                              ? 'opacity-0' // 有其他菜单打开时，此item的more button不显示
-                              : 'opacity-0 group-hover:opacity-100 focus-within:opacity-100' // 正常状态下的悬停显示
+                        openDropdownId === app.instanceId
+                          ? 'opacity-100' // 当前打开菜单的item，more button保持显示
+                          : openDropdownId
+                            ? 'opacity-0' // 有其他菜单打开时，此item的more button不显示
+                            : 'opacity-0 group-hover:opacity-100 focus-within:opacity-100' // 正常状态下的悬停显示
                       )}
                     >
                       {createMoreActions(app)}
@@ -470,7 +433,6 @@ export function SidebarFavoriteApps({
                     'w-full justify-start font-medium',
                     'transition-all duration-200 ease-in-out',
                     // Special styling when clicking
-                    isClicking && 'cursor-wait opacity-75',
                     // Unified hover effect: keep completely consistent with header
                     // Use same stone-300/80 and stone-600/60 as header
                     isDark
@@ -484,14 +446,6 @@ export function SidebarFavoriteApps({
                       {app.displayName}
                     </span>
                     {/* Show status hint when clicking */}
-                    {isClicking && (
-                      <span
-                        className={cn(
-                          'ml-2 font-serif text-xs opacity-75',
-                          isDark ? 'text-gray-400' : 'text-gray-500'
-                        )}
-                      ></span>
-                    )}
                   </div>
                 </SidebarListButton>
               </div>

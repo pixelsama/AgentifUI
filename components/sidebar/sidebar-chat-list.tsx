@@ -42,7 +42,6 @@ interface SidebarChatListProps {
   contentVisible: boolean;
   selectedId: string | null;
   onSelectChat: (chatId: string) => void;
-  clickingChatId?: string | null;
 }
 
 export function SidebarChatList({
@@ -50,7 +49,6 @@ export function SidebarChatList({
   contentVisible,
   selectedId,
   onSelectChat,
-  clickingChatId = null,
 }: SidebarChatListProps) {
   const { isExpanded } = useSidebarStore();
   const isMobile = useMobile();
@@ -515,9 +513,6 @@ export function SidebarChatList({
               // 使用辅助函数判断项目是否应该处于选中状态
               // 处理已保存对话的选中逻辑，确保精确匹配
               const isActive = isChatActive(chat);
-              // 🎯 新增：检查当前对话是否正在点击中
-              const isClicking = clickingChatId === chat.id;
-              // 🎯 修复：点击状态不应该影响内容渲染，只影响图标显示
               const itemIsLoading = false;
 
               return (
@@ -527,22 +522,20 @@ export function SidebarChatList({
                     icon={<SidebarChatIcon size="sm" isDark={isDark} />}
                     active={isActive}
                     onClick={() => onSelectChat(chat.id)}
-                    isLoading={isClicking}
+                    isLoading={false}
                     hasOpenDropdown={openDropdownId === chat.id}
-                    disableHover={!!openDropdownId || isClicking}
+                    disableHover={!!openDropdownId}
                     moreActionsTrigger={
                       <div
                         className={cn(
                           'transition-opacity',
                           // 🎯 当有菜单打开时，禁用group-hover效果，避免其他item的more button在悬停时显示
                           // 但当前打开菜单的item的more button应该保持显示
-                          isClicking
-                            ? 'pointer-events-none opacity-0' // 🎯 点击时隐藏more button，避免干扰
-                            : openDropdownId === chat.id
-                              ? 'opacity-100' // 当前打开菜单的item，more button保持显示
-                              : openDropdownId
-                                ? 'opacity-0' // 有其他菜单打开时，此item的more button不显示
-                                : 'opacity-0 group-hover:opacity-100 focus-within:opacity-100' // 正常状态下的悬停显示
+                          openDropdownId === chat.id
+                            ? 'opacity-100' // 当前打开菜单的item，more button保持显示
+                            : openDropdownId
+                              ? 'opacity-0' // 有其他菜单打开时，此item的more button不显示
+                              : 'opacity-0 group-hover:opacity-100 focus-within:opacity-100' // 正常状态下的悬停显示
                         )}
                       >
                         {createMoreActions(chat, itemIsLoading)}

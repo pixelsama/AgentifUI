@@ -557,7 +557,7 @@ export const ChatInput = ({
   // 这样可以确保在页面组件中控制欢迎屏幕的显示状态
   const effectiveIsWelcomeScreen = externalIsWelcomeScreen || isWelcomeScreen;
 
-  // 🎯 按钮淡入动画控制逻辑 - 更快的动画速度
+  // 🎯 按钮淡入动画控制逻辑 - 简化版本，统一处理所有动画
   useEffect(() => {
     // 首次挂载时，快速显示按钮
     if (isInitialMount) {
@@ -566,6 +566,12 @@ export const ChatInput = ({
         setIsInitialMount(false);
       }, 50);
       return () => clearTimeout(mountTimer);
+    }
+
+    // 🎯 防止消息发送期间的动画干扰
+    if (isProcessing || isLocalSubmitting) {
+      // 消息发送期间保持当前状态，不触发动画
+      return;
     }
 
     // 处理状态变化的动画
@@ -580,7 +586,13 @@ export const ChatInput = ({
       // 其他状态变化时立即显示
       setShowButtons(true);
     }
-  }, [effectiveIsWelcomeScreen, isTransitioningToWelcome, isInitialMount]);
+  }, [
+    effectiveIsWelcomeScreen,
+    isTransitioningToWelcome,
+    isInitialMount,
+    isProcessing,
+    isLocalSubmitting,
+  ]);
 
   return (
     <ChatContainer

@@ -40,11 +40,6 @@ export function SidebarContent() {
   );
   const { setIsWelcomeScreen } = useChatInputStore();
 
-  // 🎯 新增：点击状态管理，提供即时反馈（模仿favorite apps）
-  const [clickingChatId, setClickingChatId] = React.useState<string | null>(
-    null
-  );
-
   // 处理侧边栏展开/收起的内容显示逻辑
   React.useEffect(() => {
     // 首先通知store更新内容可见性的基本状态
@@ -69,15 +64,7 @@ export function SidebarContent() {
     async (chatId: number | string) => {
       const chatIdStr = String(chatId);
 
-      // 🎯 防止重复点击
-      if (clickingChatId === chatIdStr) {
-        console.log('[ChatList] 防止重复点击:', chatIdStr);
-        return;
-      }
-
       try {
-        // 🎯 立即设置点击状态，提供短暂的视觉反馈
-        setClickingChatId(chatIdStr);
         console.log('[ChatList] 开始切换到对话:', chatIdStr);
 
         // 1. 更新侧边栏选中状态 - 保持当前展开状态
@@ -94,21 +81,9 @@ export function SidebarContent() {
         console.log('[ChatList] 路由跳转已发起:', `/chat/${chatId}`);
       } catch (error) {
         console.error('[ChatList] 切换对话失败:', error);
-      } finally {
-        // 🎯 快速清除点击状态，避免按钮卡住
-        // 使用短延迟确保用户能看到点击反馈
-        setTimeout(() => {
-          setClickingChatId(null);
-        }, 200);
       }
     },
-    [
-      clickingChatId,
-      selectItem,
-      setCurrentConversationId,
-      setIsWelcomeScreen,
-      router,
-    ]
+    [selectItem, setCurrentConversationId, setIsWelcomeScreen, router]
   );
 
   return (
@@ -150,7 +125,6 @@ export function SidebarContent() {
             contentVisible={contentVisible}
             selectedId={selectedType === 'chat' ? String(selectedId) : null}
             onSelectChat={handleSelectChat}
-            clickingChatId={clickingChatId}
           />
         </div>
       </div>
