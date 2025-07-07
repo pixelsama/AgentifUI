@@ -114,6 +114,17 @@ export function useSmartShortcuts(
         description: '应用市场',
         preventDefault: true,
       },
+      {
+        keys: {
+          key: ',',
+          metaKey: platformKeys.isMac,
+          ctrlKey: !platformKeys.isMac,
+        },
+        category: SHORTCUT_CATEGORIES.NAVIGATION,
+        handler: () => router.push('/settings'),
+        description: '设置',
+        preventDefault: true,
+      },
       // 系统类快捷键 - 始终可用
       {
         keys: {
@@ -275,6 +286,16 @@ export function useSmartShortcuts(
           category: SHORTCUT_CATEGORIES.NAVIGATION,
           handler: () => {},
           description: '应用市场',
+        },
+        {
+          keys: {
+            key: ',',
+            metaKey: platformKeys.isMac,
+            ctrlKey: !platformKeys.isMac,
+          },
+          category: SHORTCUT_CATEGORIES.NAVIGATION,
+          handler: () => {},
+          description: '设置',
         },
         {
           keys: {
