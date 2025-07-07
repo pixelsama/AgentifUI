@@ -64,8 +64,8 @@ async function writeTranslationFile(locale: string, data: any): Promise<void> {
     // 获取文件锁
     await acquireLock(filePath);
 
-    // 写入临时文件
-    const fileContent = JSON.stringify(data, null, 2) + '\\n';
+    // Write to temporary file without adding newline - let prettier handle formatting
+    const fileContent = JSON.stringify(data, null, 2);
     await fs.writeFile(tempPath, fileContent, 'utf-8');
 
     // 原子性重命名

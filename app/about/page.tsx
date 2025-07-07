@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@components/ui/button';
+import { useDynamicTranslations } from '@lib/hooks/use-dynamic-translations';
 import { useTheme } from '@lib/hooks/use-theme';
 import { createClient } from '@lib/supabase/client';
 import { cn } from '@lib/utils';
@@ -14,9 +15,18 @@ import { useRouter } from 'next/navigation';
 export default function AboutPage() {
   const router = useRouter();
   const { isDark } = useTheme();
-  const t = useTranslations('pages.about');
+  const staticT = useTranslations('pages.about');
+  const { t: dynamicT, isLoading } = useDynamicTranslations({
+    sections: ['pages.about'],
+  });
   const [mounted, setMounted] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Enhanced translation function that tries dynamic first, then static fallback
+  const t = (key: string, params?: any) => {
+    const dynamicValue = dynamicT(key, 'pages.about');
+    return dynamicValue || staticT(key, params);
+  };
 
   // 确保客户端渲染一致性
   useEffect(() => {
@@ -108,19 +118,20 @@ export default function AboutPage() {
     checkUser();
   }, []);
 
-  // 在客户端挂载完成前显示加载状态，避免时序问题
-  if (!mounted) {
+  // Show loading state while mounting or dynamic translations load
+  if (!mounted || isLoading) {
     return (
       <main className="min-h-screen w-full overflow-x-hidden px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <div className="py-20 text-center">
+            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-current" />
             <div
               className={cn(
                 'text-lg',
                 isDark ? 'text-stone-400' : 'text-stone-600'
               )}
             >
-              {t('loading')}
+              {staticT('loading')}
             </div>
           </div>
         </div>
@@ -128,8 +139,8 @@ export default function AboutPage() {
     );
   }
 
-  // 从翻译文件获取价值观卡片数据 (数组结构)
-  const valueCards = t.raw('values.items') as Array<{
+  // Extract value cards data from translations (using static raw method for array data)
+  const valueCards = staticT.raw('values.items') as Array<{
     title: string;
     description: string;
   }>;

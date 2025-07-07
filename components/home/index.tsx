@@ -3,6 +3,7 @@
 import { AdminButton } from '@components/admin/admin-button';
 import { Button } from '@components/ui/button';
 import { LanguageSwitcher } from '@components/ui/language-switcher';
+import { useDynamicTranslations } from '@lib/hooks/use-dynamic-translations';
 import { useTheme } from '@lib/hooks/use-theme';
 import { createClient } from '@lib/supabase/client';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -17,7 +18,16 @@ export function Home() {
   const { isDark } = useTheme();
   const supabase = createClient();
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const t = useTranslations('pages.home');
+  const staticT = useTranslations('pages.home');
+  const { t: dynamicT, isLoading } = useDynamicTranslations({
+    sections: ['pages.home'],
+  });
+
+  // Enhanced translation function with dynamic/static fallback
+  const t = (key: string, params?: any) => {
+    const dynamicValue = dynamicT(key, 'pages.home');
+    return dynamicValue || staticT(key, params);
+  };
 
   const handleStartClick = async () => {
     try {
@@ -133,7 +143,7 @@ export function Home() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mb-16 grid grid-cols-1 gap-8 md:grid-cols-3"
           >
-            {(t.raw('features') as any[]).map((feature, index) => (
+            {(staticT.raw('features') as any[]).map((feature, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}

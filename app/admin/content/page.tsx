@@ -9,6 +9,7 @@ import { HomePreview } from '@components/admin/content/home-preview';
 import { PreviewToolbar } from '@components/admin/content/preview-toolbar';
 import { ResizableSplitPane } from '@components/ui/resizable-split-pane';
 import type { SupportedLocale } from '@lib/config/language-config';
+import { clearTranslationCache } from '@lib/hooks/use-dynamic-translations';
 import { useTheme } from '@lib/hooks/use-theme';
 import { TranslationService } from '@lib/services/admin/content/translation-service';
 import { cn } from '@lib/utils';
@@ -161,6 +162,10 @@ export default function ContentManagementPage() {
         await TranslationService.updateHomePageTranslations(homeTranslations);
         setOriginalHomeTranslations({ ...homeTranslations });
       }
+
+      // Clear dynamic translation cache to force refresh on frontend
+      clearTranslationCache();
+
       toast.success(t('messages.saveSuccess'));
     } catch (error) {
       console.error('Save configuration failed:', error);
