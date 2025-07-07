@@ -133,20 +133,25 @@ export function useDynamicTranslations(config: UseDynamicTranslationsConfig) {
    *
    * @param key - Translation key (e.g., 'title', 'subtitle')
    * @param section - Section prefix (e.g., 'pages.about')
+   * @param params - Optional parameters for translation interpolation
    * @returns Translated string
    */
   const t = useCallback(
-    (key: string, section: string) => {
+    (key: string, section: string, params?: any) => {
       // Try dynamic translation first
       if (dynamicData) {
         const dynamicValue = getNestedValue(dynamicData, `${section}.${key}`);
         if (dynamicValue) {
+          // Handle parameter substitution for dynamic translations
+          if (params && typeof dynamicValue === 'string') {
+            return interpolateString(dynamicValue, params);
+          }
           return dynamicValue;
         }
       }
 
-      // Fallback to static translation
-      return staticT(`${section}.${key}`);
+      // Fallback to static translation with parameters
+      return staticT(`${section}.${key}`, params);
     },
     [dynamicData, staticT]
   );
@@ -164,4 +169,21 @@ export function useDynamicTranslations(config: UseDynamicTranslationsConfig) {
  */
 function getNestedValue(obj: any, path: string): any {
   return path.split('.').reduce((current, key) => current?.[key], obj);
+}
+
+/**
+ * Interpolate parameters into a string template
+ * @description Replaces {param} placeholders with actual values
+ *
+ * @param template - String template with {param} placeholders
+ * @param params - Object containing parameter values
+ * @returns Interpolated string
+ */
+function interpolateString(
+  template: string,
+  params: Record<string, any>
+): string {
+  return template.replace(/\{(\w+)\}/g, (match, key) => {
+    return params[key] !== undefined ? String(params[key]) : match;
+  });
 }

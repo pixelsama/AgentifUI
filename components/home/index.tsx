@@ -27,7 +27,7 @@ export function Home() {
 
   // Enhanced translation function with dynamic/static fallback
   const t = (key: string, params?: any) => {
-    const dynamicValue = dynamicT(key, 'pages.home');
+    const dynamicValue = dynamicT(key, 'pages.home', params);
     return dynamicValue || staticT(key, params);
   };
 

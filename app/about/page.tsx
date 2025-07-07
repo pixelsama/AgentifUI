@@ -25,7 +25,7 @@ export default function AboutPage() {
 
   // Enhanced translation function that tries dynamic first, then static fallback
   const t = (key: string, params?: any) => {
-    const dynamicValue = dynamicT(key, 'pages.about');
+    const dynamicValue = dynamicT(key, 'pages.about', params);
     return dynamicValue || staticT(key, params);
   };
 
