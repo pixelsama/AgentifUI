@@ -1903,7 +1903,11 @@
     "retry": "Retry",
     "failed": "Loading failed",
     "loadingFailed": "Failed to load messages: {error}",
-    "spinner": "Loading"
+    "spinner": "Loading",
+    "pageLoader": {
+      "title": "Loading",
+      "description": "Please wait, fetching data..."
+    }
   },
   "dynamicTitle": {
     "base": "AgentifUI",

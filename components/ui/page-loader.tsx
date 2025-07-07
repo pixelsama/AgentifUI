@@ -5,12 +5,23 @@ import { cn } from '@lib/utils';
 
 import React from 'react';
 
+import { useTranslations } from 'next-intl';
+
+/**
+ * Page loader component props
+ * @description Configuration options for the page loading component
+ */
 interface PageLoaderProps {
   className?: string;
 }
 
+/**
+ * Page loader component with spinning animation and localized text
+ * @description Displays a centered loading spinner with internationalized loading messages
+ */
 export function PageLoader({ className }: PageLoaderProps) {
   const { isDark } = useTheme();
+  const t = useTranslations('loading.pageLoader');
 
   return (
     <div
@@ -20,7 +31,7 @@ export function PageLoader({ className }: PageLoaderProps) {
       )}
     >
       <div className="relative flex flex-col items-center">
-        {/* 加载动画 */}
+        {/* Loading animation spinner */}
         <div className="mb-4 h-16 w-16">
           <svg
             className="text-primary h-full w-full animate-spin"
@@ -44,7 +55,7 @@ export function PageLoader({ className }: PageLoaderProps) {
           </svg>
         </div>
 
-        {/* 加载文本 */}
+        {/* Loading text content */}
         <div className="text-center">
           <h3
             className={cn(
@@ -52,7 +63,7 @@ export function PageLoader({ className }: PageLoaderProps) {
               isDark ? 'text-gray-100' : 'text-gray-900'
             )}
           >
-            正在加载
+            {t('title')}
           </h3>
           <p
             className={cn(
@@ -60,7 +71,7 @@ export function PageLoader({ className }: PageLoaderProps) {
               isDark ? 'text-gray-400' : 'text-gray-500'
             )}
           >
-            请稍候，正在获取数据...
+            {t('description')}
           </p>
         </div>
       </div>
@@ -68,7 +79,10 @@ export function PageLoader({ className }: PageLoaderProps) {
   );
 }
 
-// 骨架屏组件
+/**
+ * Skeleton loading component
+ * @description Basic skeleton component for loading states with pulse animation
+ */
 export function Skeleton({
   className,
   ...props
@@ -81,7 +95,10 @@ export function Skeleton({
   );
 }
 
-// 资料页面骨架屏
+/**
+ * Profile page skeleton loader
+ * @description Skeleton placeholder for profile settings page layout
+ */
 export function ProfileSkeleton() {
   return (
     <div className="mx-auto w-full max-w-md space-y-6 p-4">
@@ -109,7 +126,10 @@ export function ProfileSkeleton() {
   );
 }
 
-// 聊天页面骨架屏
+/**
+ * Chat page skeleton loader
+ * @description Skeleton placeholder for chat interface with message bubbles and input area
+ */
 export function ChatSkeleton() {
   return (
     <div className="flex h-full flex-col">

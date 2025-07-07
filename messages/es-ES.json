@@ -1903,7 +1903,11 @@
     "retry": "Reintentar",
     "failed": "Error al cargar",
     "loadingFailed": "Error al cargar mensajes: {error}",
-    "spinner": "Cargando"
+    "spinner": "Cargando",
+    "pageLoader": {
+      "title": "Cargando",
+      "description": "Por favor espere, obteniendo datos..."
+    }
   },
   "dynamicTitle": {
     "base": "AgentifUI",
