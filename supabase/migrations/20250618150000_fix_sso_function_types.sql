@@ -1,10 +1,9 @@
--- 修复SSO相关数据库函数的返回类型问题
--- 解决 account_status 枚举类型与 TEXT 类型不匹配的错误
--- 修正版：auth_source 字段在当前数据库中是 TEXT 类型，不是枚举类型
+-- Fix return types for SSO-related database functions
+-- Resolves mismatch between 'account_status' enum and TEXT types
+-- Note: 'auth_source' is a TEXT field, not an enum.
 
 -- --- BEGIN COMMENT ---
--- 1. 删除现有函数，然后重新创建以修复返回类型
--- 注意：根据数据库设计文档，auth_source 是 TEXT 类型，不是枚举类型
+-- 1. Recreate the function to fix return types.
 -- --- END COMMENT ---
 DROP FUNCTION IF EXISTS find_user_by_employee_number(TEXT);
 
@@ -15,15 +14,15 @@ RETURNS TABLE(
   username TEXT,
   employee_number TEXT,
   last_login TIMESTAMP WITH TIME ZONE,
-  auth_source TEXT,              -- 修复：使用 TEXT 类型（不是枚举）
-  status account_status          -- 修复：使用正确的枚举类型
+  auth_source TEXT,              -- Correct: Use TEXT type
+  status account_status          -- Correct: Use the correct enum type
 ) 
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
   -- --- BEGIN COMMENT ---
-  -- 验证输入参数
+  -- Validate input parameters
   -- --- END COMMENT ---
   IF emp_num IS NULL OR LENGTH(TRIM(emp_num)) = 0 THEN
     RAISE EXCEPTION 'Employee number cannot be null or empty';
@@ -45,7 +44,7 @@ END;
 $$;
 
 -- --- BEGIN COMMENT ---
--- 2. 修复 create_sso_user 函数，确保使用正确的数据类型
+-- 2. Fix the create_sso_user function to use correct data types.
 -- --- END COMMENT ---
 CREATE OR REPLACE FUNCTION create_sso_user(
   emp_number TEXT,
@@ -62,7 +61,7 @@ DECLARE
   counter INTEGER := 0;
 BEGIN
   -- --- BEGIN COMMENT ---
-  -- 验证输入参数
+  -- Validate input parameters
   -- --- END COMMENT ---
   IF emp_number IS NULL OR LENGTH(TRIM(emp_number)) = 0 THEN
     RAISE EXCEPTION 'Employee number cannot be null or empty';
@@ -77,17 +76,17 @@ BEGIN
   END IF;
 
   -- --- BEGIN COMMENT ---
-  -- 检查学工号是否已存在
+  -- Check if employee number already exists
   -- --- END COMMENT ---
   IF EXISTS (SELECT 1 FROM profiles WHERE employee_number = TRIM(emp_number)) THEN
     RAISE EXCEPTION 'Employee number % already exists', emp_number;
   END IF;
 
-  -- 生成新的用户ID
+  -- Generate a new user ID
   new_user_id := gen_random_uuid();
   
   -- --- BEGIN COMMENT ---
-  -- 确保用户名唯一，如果冲突则添加数字后缀
+  -- Ensure username is unique, adding a numeric suffix if it conflicts
   -- --- END COMMENT ---
   final_username := TRIM(user_name);
   WHILE EXISTS (SELECT 1 FROM profiles WHERE username = final_username) LOOP
@@ -96,7 +95,7 @@ BEGIN
   END LOOP;
   
   -- --- BEGIN COMMENT ---
-  -- 创建用户记录，使用正确的数据类型
+  -- Create user record with correct data types
   -- --- END COMMENT ---
   INSERT INTO profiles (
     id,
@@ -115,10 +114,10 @@ BEGIN
     TRIM(emp_number),
     final_username,
     TRIM(user_name),
-    'bistu_sso',                     -- 使用 TEXT 类型值
+    'cas_sso',                     -- Use TEXT type value
     sso_provider_uuid::TEXT,
-    'active'::account_status,        -- 使用正确的枚举类型
-    'user'::user_role,              -- 使用正确的枚举类型
+    'active'::account_status,        -- Use the correct enum type
+    'user'::user_role,              -- Use the correct enum type
     NOW(),
     NOW(),
     NOW()
@@ -128,29 +127,29 @@ BEGIN
 EXCEPTION
   WHEN OTHERS THEN
     -- --- BEGIN COMMENT ---
-    -- 记录错误并重新抛出
+    -- Log error and re-throw
     -- --- END COMMENT ---
     RAISE EXCEPTION 'Failed to create SSO user: %', SQLERRM;
 END;
 $$;
 
 -- --- BEGIN COMMENT ---
--- 3. 更新函数注释
+-- 3. Update function comments
 -- --- END COMMENT ---
-COMMENT ON FUNCTION find_user_by_employee_number(TEXT) IS '根据学工号查找用户信息，用于SSO登录验证（已修复返回类型）';
-COMMENT ON FUNCTION create_sso_user(TEXT, TEXT, UUID) IS '创建北信SSO用户账户，自动处理用户名冲突（已修复数据类型）';
+COMMENT ON FUNCTION find_user_by_employee_number(TEXT) IS 'Finds a user by employee number for SSO login validation (return types fixed).';
+COMMENT ON FUNCTION create_sso_user(TEXT, TEXT, UUID) IS 'Creates an SSO user account, handling username conflicts (data types fixed).';
 
 -- --- BEGIN COMMENT ---
--- 4. 验证函数修复是否成功
+-- 4. Validate that the function fix was successful
 -- --- END COMMENT ---
 DO $$ 
 BEGIN
-    -- 测试函数是否能正常调用（不会实际创建数据）
+    -- Test if the function can be called without errors (does not actually create data)
     PERFORM find_user_by_employee_number('test_validation_only');
     RAISE NOTICE 'find_user_by_employee_number function validation successful';
 EXCEPTION
     WHEN OTHERS THEN
-        -- 如果是因为没有找到用户，这是正常的
+        -- If the error is about the user not being found, that is expected.
         IF SQLERRM LIKE '%Employee number cannot be null or empty%' THEN
             RAISE NOTICE 'find_user_by_employee_number function validation failed: %', SQLERRM;
         ELSE

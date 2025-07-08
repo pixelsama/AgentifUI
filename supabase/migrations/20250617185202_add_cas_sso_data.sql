@@ -1,23 +1,23 @@
--- 北京信息科技大学SSO集成支持 - 数据部分
--- 创建日期: 2025-01-08
--- 描述: 添加对北信CAS统一认证系统的支持（数据和函数部分）
+-- SSO Integration Support - Data Part
+-- Creation Date: 2025-01-08
+-- Description: Adds support for a generic CAS-based SSO system (data and functions).
 
 -- --- BEGIN COMMENT ---
--- 此迁移假设CAS枚举值已在前一个迁移中添加
+-- This migration assumes that the 'CAS' enum value has been added in a previous migration.
 -- --- END COMMENT ---
 
 -- --- BEGIN COMMENT ---
--- 1. 添加学工号字段到profiles表
+-- 1. Add employee_number field to the profiles table
 -- --- END COMMENT ---
-ALTER TABLE profiles 
+ALTER TABLE profiles
 ADD COLUMN IF NOT EXISTS employee_number TEXT;
 
 -- --- BEGIN COMMENT ---
--- 2. 添加学工号唯一约束（如果字段已存在但没有约束）
+-- 2. Add a unique constraint for employee_number if it doesn't already exist
 -- --- END COMMENT ---
 DO $$ BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint 
+    SELECT 1 FROM pg_constraint
     WHERE conname = 'profiles_employee_number_key'
   ) THEN
     ALTER TABLE profiles ADD CONSTRAINT profiles_employee_number_key UNIQUE (employee_number);
@@ -25,18 +25,18 @@ DO $$ BEGIN
 END $$;
 
 -- --- BEGIN COMMENT ---
--- 3. 添加索引优化查询性能
+-- 3. Add an index to optimize query performance
 -- --- END COMMENT ---
-CREATE INDEX IF NOT EXISTS idx_profiles_employee_number 
+CREATE INDEX IF NOT EXISTS idx_profiles_employee_number
 ON profiles(employee_number) WHERE employee_number IS NOT NULL;
 
 -- --- BEGIN COMMENT ---
--- 4. 添加字段注释
+-- 4. Add a comment to the field
 -- --- END COMMENT ---
-COMMENT ON COLUMN profiles.employee_number IS '学工号：北京信息科技大学统一身份标识';
+COMMENT ON COLUMN profiles.employee_number IS 'Employee ID: A unique identifier for SSO';
 
 -- --- BEGIN COMMENT ---
--- 5. 插入北京信息科技大学SSO提供商配置
+-- 5. Insert a generic SSO provider configuration
 -- --- END COMMENT ---
 INSERT INTO sso_providers (
   id,
@@ -48,17 +48,17 @@ INSERT INTO sso_providers (
   updated_at
 ) VALUES (
   '10000000-0000-0000-0000-000000000001',
-  '北京信息科技大学',
+  'Example CAS Provider',
   'CAS'::sso_protocol,
   jsonb_build_object(
-    'base_url', 'https://sso.bistu.edu.cn',
+    'base_url', 'https://sso.example.com',
     'login_endpoint', '/login',
     'logout_endpoint', '/logout',
     'validate_endpoint', '/serviceValidate',
     'validate_endpoint_v3', '/p3/serviceValidate',
     'version', '2.0',
     'attributes_enabled', true,
-    'description', '北京信息科技大学统一认证系统',
+    'description', 'Example CAS Provider Configuration',
     'support_attributes', jsonb_build_array('employeeNumber', 'log_username')
   ),
   true,
@@ -69,7 +69,7 @@ INSERT INTO sso_providers (
   updated_at = NOW();
 
 -- --- BEGIN COMMENT ---
--- 6. 创建学工号查找函数
+-- 6. Create a function to find a user by employee number
 -- --- END COMMENT ---
 CREATE OR REPLACE FUNCTION find_user_by_employee_number(emp_num TEXT)
 RETURNS TABLE(
@@ -80,20 +80,20 @@ RETURNS TABLE(
   last_login TIMESTAMP WITH TIME ZONE,
   auth_source TEXT,
   status TEXT
-) 
+)
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
   -- --- BEGIN COMMENT ---
-  -- 验证输入参数
+  -- Validate input parameters
   -- --- END COMMENT ---
   IF emp_num IS NULL OR LENGTH(TRIM(emp_num)) = 0 THEN
     RAISE EXCEPTION 'Employee number cannot be null or empty';
   END IF;
 
   RETURN QUERY
-  SELECT 
+  SELECT
     p.id,
     p.full_name,
     p.username,
@@ -108,7 +108,7 @@ END;
 $$;
 
 -- --- BEGIN COMMENT ---
--- 7. 创建SSO用户创建函数
+-- 7. Create a function to create an SSO user
 -- --- END COMMENT ---
 CREATE OR REPLACE FUNCTION create_sso_user(
   emp_number TEXT,
@@ -125,41 +125,41 @@ DECLARE
   counter INTEGER := 0;
 BEGIN
   -- --- BEGIN COMMENT ---
-  -- 验证输入参数
+  -- Validate input parameters
   -- --- END COMMENT ---
   IF emp_number IS NULL OR LENGTH(TRIM(emp_number)) = 0 THEN
     RAISE EXCEPTION 'Employee number cannot be null or empty';
   END IF;
-  
+
   IF user_name IS NULL OR LENGTH(TRIM(user_name)) = 0 THEN
     RAISE EXCEPTION 'Username cannot be null or empty';
   END IF;
-  
+
   IF sso_provider_uuid IS NULL THEN
     RAISE EXCEPTION 'SSO provider UUID cannot be null';
   END IF;
 
   -- --- BEGIN COMMENT ---
-  -- 检查学工号是否已存在
+  -- Check if the employee number already exists
   -- --- END COMMENT ---
   IF EXISTS (SELECT 1 FROM profiles WHERE employee_number = TRIM(emp_number)) THEN
     RAISE EXCEPTION 'Employee number % already exists', emp_number;
   END IF;
 
-  -- 生成新的用户ID
+  -- Generate a new user ID
   new_user_id := gen_random_uuid();
-  
+
   -- --- BEGIN COMMENT ---
-  -- 确保用户名唯一，如果冲突则添加数字后缀
+  -- Ensure the username is unique, adding a numeric suffix if it conflicts
   -- --- END COMMENT ---
   final_username := TRIM(user_name);
   WHILE EXISTS (SELECT 1 FROM profiles WHERE username = final_username) LOOP
     counter := counter + 1;
     final_username := TRIM(user_name) || '_' || counter;
   END LOOP;
-  
+
   -- --- BEGIN COMMENT ---
-  -- 创建用户记录
+  -- Create the user record
   -- --- END COMMENT ---
   INSERT INTO profiles (
     id,
@@ -177,8 +177,8 @@ BEGIN
     new_user_id,
     TRIM(emp_number),
     final_username,
-    TRIM(user_name), -- 初始显示名使用用户名，后续可通过其他方式获取真实姓名
-    'bistu_sso',
+    TRIM(user_name), -- Use the username as the initial display name
+    'cas_sso',
     sso_provider_uuid::TEXT,
     'active',
     'user',
@@ -186,19 +186,19 @@ BEGIN
     NOW(),
     NOW()
   );
-  
+
   RETURN new_user_id;
 EXCEPTION
   WHEN OTHERS THEN
     -- --- BEGIN COMMENT ---
-    -- 记录错误并重新抛出
+    -- Log the error and re-throw
     -- --- END COMMENT ---
     RAISE EXCEPTION 'Failed to create SSO user: %', SQLERRM;
 END;
 $$;
 
 -- --- BEGIN COMMENT ---
--- 8. 创建SSO用户登录时间更新函数
+-- 8. Create a function to update the login time for an SSO user
 -- --- END COMMENT ---
 CREATE OR REPLACE FUNCTION update_sso_user_login(user_uuid UUID)
 RETURNS BOOLEAN
@@ -207,23 +207,23 @@ SECURITY DEFINER
 AS $$
 BEGIN
   -- --- BEGIN COMMENT ---
-  -- 验证输入参数
+  -- Validate input parameters
   -- --- END COMMENT ---
   IF user_uuid IS NULL THEN
     RAISE EXCEPTION 'User UUID cannot be null';
   END IF;
 
   -- --- BEGIN COMMENT ---
-  -- 更新最后登录时间
+  -- Update the last login time
   -- --- END COMMENT ---
-  UPDATE profiles 
-  SET 
+  UPDATE profiles
+  SET
     last_login = NOW(),
     updated_at = NOW()
   WHERE id = user_uuid
     AND status = 'active';
-  
-  -- 返回是否更新成功
+
+  -- Return whether the update was successful
   RETURN FOUND;
 EXCEPTION
   WHEN OTHERS THEN
@@ -232,29 +232,29 @@ END;
 $$;
 
 -- --- BEGIN COMMENT ---
--- 9. 添加函数注释
+-- 9. Add comments to the functions
 -- --- END COMMENT ---
-COMMENT ON FUNCTION find_user_by_employee_number(TEXT) IS '根据学工号查找用户信息，用于SSO登录验证';
-COMMENT ON FUNCTION create_sso_user(TEXT, TEXT, UUID) IS '创建北信SSO用户账户，自动处理用户名冲突';
-COMMENT ON FUNCTION update_sso_user_login(UUID) IS '更新SSO用户最后登录时间';
+COMMENT ON FUNCTION find_user_by_employee_number(TEXT) IS 'Finds a user by their employee number, for SSO login validation.';
+COMMENT ON FUNCTION create_sso_user(TEXT, TEXT, UUID) IS 'Creates an SSO user account, automatically handling username conflicts.';
+COMMENT ON FUNCTION update_sso_user_login(UUID) IS 'Updates the last login time for an SSO user.';
 
 -- --- BEGIN COMMENT ---
--- 10. 创建SSO相关的RLS策略
+-- 10. Create RLS policies related to SSO
 -- --- END COMMENT ---
 
--- 确保SSO用户可以查看自己的信息
+-- Ensure SSO users can view their own profiles
 DO $$ BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM pg_policies 
-    WHERE tablename = 'profiles' 
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'profiles'
     AND policyname = 'sso_users_can_view_own_profile'
   ) THEN
     CREATE POLICY "sso_users_can_view_own_profile" ON profiles
       FOR SELECT USING (
         auth.uid() = id OR
         EXISTS (
-          SELECT 1 FROM profiles admin_check 
-          WHERE admin_check.id = auth.uid() 
+          SELECT 1 FROM profiles admin_check
+          WHERE admin_check.id = auth.uid()
           AND admin_check.role = 'admin'
         )
       );
@@ -262,31 +262,31 @@ DO $$ BEGIN
 END $$;
 
 -- --- BEGIN COMMENT ---
--- 11. 创建SSO统计视图（可选，用于管理员监控）
+-- 11. Create an SSO statistics view (optional, for admin monitoring)
 -- --- END COMMENT ---
 CREATE OR REPLACE VIEW sso_user_statistics AS
-SELECT 
-  'bistu_sso'::text as provider_name,
+SELECT
+  'cas_sso'::text as provider_name,
   COUNT(*) as total_users,
   COUNT(CASE WHEN last_login >= NOW() - INTERVAL '30 days' THEN 1 END) as active_users_30d,
   COUNT(CASE WHEN last_login >= NOW() - INTERVAL '7 days' THEN 1 END) as active_users_7d,
   COUNT(CASE WHEN created_at >= NOW() - INTERVAL '30 days' THEN 1 END) as new_users_30d,
   MIN(created_at) as first_user_created,
   MAX(last_login) as last_login_time
-FROM profiles 
-WHERE auth_source = 'bistu_sso'
+FROM profiles
+WHERE auth_source = 'cas_sso'
   AND status = 'active';
 
-COMMENT ON VIEW sso_user_statistics IS '北信SSO用户统计信息，用于管理员监控和分析';
+COMMENT ON VIEW sso_user_statistics IS 'SSO user statistics for admin monitoring and analysis.';
 
 -- --- BEGIN COMMENT ---
--- 12. 授予必要的权限
+-- 12. Grant necessary permissions
 -- --- END COMMENT ---
 
--- 确保认证用户可以执行SSO相关函数
+-- Ensure authenticated users can execute SSO-related functions
 GRANT EXECUTE ON FUNCTION find_user_by_employee_number(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION create_sso_user(TEXT, TEXT, UUID) TO service_role;
 GRANT EXECUTE ON FUNCTION update_sso_user_login(UUID) TO authenticated;
 
--- 管理员可以查看SSO统计
+-- Admins can view SSO statistics
 GRANT SELECT ON sso_user_statistics TO authenticated; 

@@ -45,7 +45,7 @@ export interface Profile {
   status: AccountStatus;
   last_login: string | null;
   sso_provider_id: string | null;
-  employee_number?: string | null; // 新增：学工号字段，用于SSO用户身份标识（如北信科学工号）
+  employee_number?: string | null; // 新增：学工号字段，用于SSO用户身份标识
 }
 
 export interface UserPreference {
@@ -313,19 +313,6 @@ export interface SsoProvider {
   updated_at: string;
 }
 
-// 🎯 新增：SSO协议模板接口
-// 为不同SSO协议提供标准配置模板和验证规则
-export interface SsoProtocolTemplate {
-  id: string;
-  protocol: SsoProtocol; // 协议类型
-  name: string; // 模板显示名称
-  description: string | null; // 协议详细描述
-  config_schema: Record<string, any>; // JSON Schema格式的配置验证规则
-  default_settings: Record<string, any>; // 默认配置模板
-  created_at: string;
-  updated_at: string;
-}
-
 export interface DomainSsoMapping {
   id: string;
   domain: string;
@@ -433,7 +420,6 @@ export namespace Database {
     service_instances: ServiceInstance;
     api_keys: ApiKey;
     sso_providers: SsoProvider;
-    sso_protocol_templates: SsoProtocolTemplate; // 新增：SSO协议模板表
     domain_sso_mappings: DomainSsoMapping;
     auth_settings: AuthSettings;
     ai_configs: AiConfig;

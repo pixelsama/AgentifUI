@@ -22,7 +22,7 @@ export function LoginForm() {
   const { isDark } = useTheme();
   const t = useTranslations('pages.auth.login');
 
-  // 检查是否启用北信科专用模式
+  // 检查是否启用SSO模式
   const ssoOnlyMode = process.env.NEXT_PUBLIC_SSO_ONLY_MODE === 'true';
 
   const [formData, setFormData] = useState({

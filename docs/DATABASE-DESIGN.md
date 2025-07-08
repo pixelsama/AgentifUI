@@ -35,22 +35,22 @@
 
 扩展自 `auth.users`，包含用户的基本信息和状态。
 
-| 字段名          | 类型                     | 描述         | 约束                                                      |
-| --------------- | ------------------------ | ------------ | --------------------------------------------------------- |
-| id              | UUID                     | 用户ID       | 主键，引用 auth.users(id)                                 |
-| full_name       | TEXT                     | 用户全名     |                                                           |
-| username        | TEXT                     | 用户名       | 唯一                                                      |
-| avatar_url      | TEXT                     | 头像URL      |                                                           |
-| email           | TEXT                     | 用户邮箱     | 从 auth.users 同步                                        |
-| phone           | TEXT                     | 用户手机号   | 从 auth.users 同步                                        |
-| role            | user_role                | 用户角色     | DEFAULT 'user'::user_role                                 |
-| status          | account_status           | 账号状态     | DEFAULT 'active'::account_status                          |
-| created_at      | TIMESTAMP WITH TIME ZONE | 创建时间     | DEFAULT CURRENT_TIMESTAMP                                 |
-| updated_at      | TIMESTAMP WITH TIME ZONE | 更新时间     | DEFAULT CURRENT_TIMESTAMP                                 |
-| last_login      | TIMESTAMP WITH TIME ZONE | 最后登录时间 |                                                           |
-| auth_source     | TEXT                     | 认证来源     | DEFAULT 'email'，支持 email/google/github/phone/bistu_sso |
-| sso_provider_id | UUID                     | SSO提供商ID  | 引用 sso_providers(id)                                    |
-| employee_number | TEXT                     | 学工号       | 北京信息科技大学统一身份标识，唯一约束                    |
+| 字段名          | 类型                     | 描述         | 约束                                                    |
+| --------------- | ------------------------ | ------------ | ------------------------------------------------------- |
+| id              | UUID                     | 用户ID       | 主键，引用 auth.users(id)                               |
+| full_name       | TEXT                     | 用户全名     |                                                         |
+| username        | TEXT                     | 用户名       | 唯一                                                    |
+| avatar_url      | TEXT                     | 头像URL      |                                                         |
+| email           | TEXT                     | 用户邮箱     | 从 auth.users 同步                                      |
+| phone           | TEXT                     | 用户手机号   | 从 auth.users 同步                                      |
+| role            | user_role                | 用户角色     | DEFAULT 'user'::user_role                               |
+| status          | account_status           | 账号状态     | DEFAULT 'active'::account_status                        |
+| created_at      | TIMESTAMP WITH TIME ZONE | 创建时间     | DEFAULT CURRENT_TIMESTAMP                               |
+| updated_at      | TIMESTAMP WITH TIME ZONE | 更新时间     | DEFAULT CURRENT_TIMESTAMP                               |
+| last_login      | TIMESTAMP WITH TIME ZONE | 最后登录时间 |                                                         |
+| auth_source     | TEXT                     | 认证来源     | DEFAULT 'email'，支持 email/google/github/phone/cas_sso |
+| sso_provider_id | UUID                     | SSO提供商ID  | 引用 sso_providers(id)                                  |
+| employee_number | TEXT                     | 员工编号     | SSO统一身份标识，唯一约束                               |
 
 **枚举类型定义：**
 
@@ -479,7 +479,7 @@ API密钥使用AES-256-GCM加密算法存储，格式为"iv:authTag:encryptedDat
 
 **函数：** `find_user_by_employee_number(emp_num TEXT)`
 
-根据学工号查找用户信息，专用于北信科SSO登录。
+根据员工编号查找用户信息，专用于CAS SSO登录。
 
 **函数：** `create_sso_user(emp_number TEXT, user_name TEXT, sso_provider_uuid UUID)`
 

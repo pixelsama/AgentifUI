@@ -9,13 +9,13 @@
 -- --- END COMMENT ---
 ALTER TABLE sso_providers 
 ADD COLUMN IF NOT EXISTS display_order INTEGER DEFAULT 0,  -- 登录页面按钮显示顺序（数字越小越靠前）
-ADD COLUMN IF NOT EXISTS button_text TEXT;                 -- 登录按钮显示文本（如：北京信息科技大学统一认证）
+ADD COLUMN IF NOT EXISTS button_text TEXT;                 -- 登录按钮显示文本（如：Example University SSO）
 
 -- --- BEGIN COMMENT ---
 -- 2. 为现有字段和新增字段添加详细注释，便于开发者理解
 -- --- END COMMENT ---
 COMMENT ON COLUMN sso_providers.id IS 'SSO提供商唯一标识符，用于API路由(/api/sso/{id}/*)和服务实例缓存';
-COMMENT ON COLUMN sso_providers.name IS '提供商显示名称，用于管理界面展示和日志记录，如：北京信息科技大学';
+COMMENT ON COLUMN sso_providers.name IS '提供商显示名称，用于管理界面展示和日志记录，如：Example University';
 COMMENT ON COLUMN sso_providers.protocol IS 'SSO协议类型，支持CAS、OIDC、SAML等，决定使用哪个服务实现类';
 COMMENT ON COLUMN sso_providers.enabled IS '是否启用该提供商，false时不会在登录页面显示且API拒绝访问';
 COMMENT ON COLUMN sso_providers.display_order IS '登录页面按钮显示顺序，数字越小越靠前，相同值按name字母序排序';
@@ -31,7 +31,7 @@ COMMENT ON COLUMN sso_providers.settings IS '
 SSO提供商完整配置，JSONB格式，避免字段冗余的统一配置结构：
 {
   "protocol_config": {
-    "base_url": "string",               // SSO服务器基础URL，如：https://sso.bistu.edu.cn
+    "base_url": "string",               // SSO服务器基础URL，如：https://sso.example.com
     "endpoints": {
       "login": "string",                // 登录端点路径，如：/login
       "logout": "string",               // 注销端点路径，如：/logout
@@ -55,7 +55,7 @@ SSO提供商完整配置，JSONB格式，避免字段冗余的统一配置结构
   "ui": {
     "icon": "string",                   // 按钮图标（emoji或图片URL），如：🏛️
     "logo_url": "string",               // 机构logo图片URL，用于管理界面展示
-    "description": "string",            // 详细描述文本，如：北京信息科技大学统一认证系统
+    "description": "string",            // 详细描述文本，如：Example University SSO System
     "theme": "string"                   // 按钮主题标识：primary/secondary/default/outline
   }
 }';
@@ -222,46 +222,7 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- --- BEGIN COMMENT ---
--- 9. 更新现有北信科配置，保持向后兼容，统一配置结构
--- 这里将原有的分散配置整合到标准的settings结构中
--- --- END COMMENT ---
-UPDATE sso_providers 
-SET 
-  button_text = '北京信息科技大学统一认证',     -- 设置友好的按钮文本
-  display_order = 1,                          -- 设为第一个显示的SSO选项
-  settings = settings || jsonb_build_object(
-    'ui', jsonb_build_object(
-      'icon', '🏛️',                          -- 大学图标
-      'logo_url', '',                         -- Logo URL待后续配置
-      'description', '北京信息科技大学统一认证系统',
-      'theme', 'primary'                      -- 使用主要主题样式
-    ),
-    'security', jsonb_build_object(
-      'require_https', true,                  -- 生产环境要求HTTPS
-      'validate_certificates', true,          -- 验证SSL证书
-      'allowed_redirect_hosts', array['bistu.edu.cn'] -- 只允许学校域名重定向
-    ),
-    'protocol_config', jsonb_build_object(
-      'base_url', COALESCE(settings->>'base_url', 'https://sso.bistu.edu.cn'),
-      'version', COALESCE(settings->>'version', '2.0'),
-      'timeout', 10000,
-      'endpoints', jsonb_build_object(
-        'login', COALESCE(settings->>'login_endpoint', '/login'),
-        'logout', COALESCE(settings->>'logout_endpoint', '/logout'),
-        'validate', COALESCE(settings->>'validate_endpoint', '/serviceValidate'),
-        'validate_v3', COALESCE(settings->>'validate_endpoint_v3', '/p3/serviceValidate')
-      ),
-      'attributes_mapping', jsonb_build_object(
-        'employee_id', 'cas:user',            -- 工号映射到CAS用户名
-        'username', 'cas:username',           -- 用户名映射
-        'full_name', 'cas:name'               -- 全名映射
-      )
-    )
-  )
-WHERE name = '北京信息科技大学';
-
--- --- BEGIN COMMENT ---
--- 10. 创建更新时间触发器，自动维护updated_at字段
+-- 9. 创建更新时间触发器，自动维护updated_at字段
 -- --- END COMMENT ---
 CREATE TRIGGER update_sso_protocol_templates_modtime
   BEFORE UPDATE ON sso_protocol_templates

@@ -1,13 +1,13 @@
 -- --- BEGIN COMMENT ---
--- 修复SSO数据库函数中的UUID类型转换问题
--- 问题：column "sso_provider_id" is of type uuid but expression is of type text
--- 原因：create_sso_user函数中错误地将UUID转换为TEXT类型
--- 解决：移除错误的::TEXT转换，直接使用UUID类型
+-- Fix UUID type conversion issue in SSO database function
+-- Issue: column "sso_provider_id" is of type uuid but expression is of type text
+-- Cause: The create_sso_user function incorrectly cast a UUID to TEXT.
+-- Solution: Remove the incorrect ::TEXT cast and use the UUID type directly.
 -- --- END COMMENT ---
 
 -- --- BEGIN COMMENT ---
--- 1. 修复 create_sso_user 函数的UUID类型转换问题
--- 根据数据库设计文档，profiles表中sso_provider_id字段是UUID类型
+-- 1. Fix the UUID type conversion issue in the create_sso_user function
+-- The sso_provider_id column in the profiles table is of type UUID.
 -- --- END COMMENT ---
 CREATE OR REPLACE FUNCTION create_sso_user(
   emp_number TEXT,
@@ -24,7 +24,7 @@ DECLARE
   counter INTEGER := 0;
 BEGIN
   -- --- BEGIN COMMENT ---
-  -- 验证输入参数
+  -- Validate input parameters
   -- --- END COMMENT ---
   IF emp_number IS NULL OR LENGTH(TRIM(emp_number)) = 0 THEN
     RAISE EXCEPTION 'Employee number cannot be null or empty';
@@ -39,17 +39,17 @@ BEGIN
   END IF;
 
   -- --- BEGIN COMMENT ---
-  -- 检查学工号是否已存在
+  -- Check if the employee number already exists
   -- --- END COMMENT ---
   IF EXISTS (SELECT 1 FROM profiles WHERE employee_number = TRIM(emp_number)) THEN
     RAISE EXCEPTION 'Employee number % already exists', emp_number;
   END IF;
 
-  -- 生成新的用户ID
+  -- Generate a new user ID
   new_user_id := gen_random_uuid();
   
   -- --- BEGIN COMMENT ---
-  -- 确保用户名唯一，如果冲突则添加数字后缀
+  -- Ensure the username is unique, adding a numeric suffix if it conflicts
   -- --- END COMMENT ---
   final_username := TRIM(user_name);
   WHILE EXISTS (SELECT 1 FROM profiles WHERE username = final_username) LOOP
@@ -58,8 +58,8 @@ BEGIN
   END LOOP;
   
   -- --- BEGIN COMMENT ---
-  -- 创建用户记录，确保数据类型正确匹配
-  -- 关键修复：sso_provider_id字段是UUID类型，直接使用UUID值，不转换为TEXT
+  -- Create the user record, ensuring data types match correctly.
+  -- Key fix: The sso_provider_id field is of type UUID, so use the UUID value directly without casting to TEXT.
   -- --- END COMMENT ---
   INSERT INTO profiles (
     id,
@@ -78,10 +78,10 @@ BEGIN
     TRIM(emp_number),
     final_username,
     TRIM(user_name),
-    'bistu_sso',                     -- TEXT类型值
-    sso_provider_uuid,               -- 直接使用UUID类型，移除错误的::TEXT转换
-    'active'::account_status,        -- 枚举类型
-    'user'::user_role,              -- 枚举类型
+    'cas_sso',                     -- TEXT value
+    sso_provider_uuid,               -- Use UUID type directly, removing the incorrect ::TEXT cast
+    'active'::account_status,        -- Enum type
+    'user'::user_role,              -- Enum type
     NOW(),
     NOW(),
     NOW()
@@ -91,27 +91,27 @@ BEGIN
 EXCEPTION
   WHEN OTHERS THEN
     -- --- BEGIN COMMENT ---
-    -- 记录详细错误信息并重新抛出
+    -- Log detailed error information and re-throw
     -- --- END COMMENT ---
     RAISE EXCEPTION 'Failed to create SSO user: %', SQLERRM;
 END;
 $$;
 
 -- --- BEGIN COMMENT ---
--- 2. 更新函数注释和权限
+-- 2. Update function comments and permissions
 -- --- END COMMENT ---
 COMMENT ON FUNCTION create_sso_user(TEXT, TEXT, UUID) IS 
-'创建北信SSO用户账户，修复了UUID类型转换问题 - sso_provider_id直接使用UUID类型';
+'Creates an SSO user account, fixing a UUID type conversion issue - sso_provider_id now uses the UUID type directly.';
 
 -- --- BEGIN COMMENT ---
--- 3. 确保函数权限正确设置
+-- 3. Ensure function permissions are set correctly
 -- --- END COMMENT ---
 GRANT EXECUTE ON FUNCTION create_sso_user(TEXT, TEXT, UUID) TO service_role;
 
 -- --- BEGIN COMMENT ---
--- 修复说明：
--- 1. 移除了错误的 sso_provider_uuid::TEXT 转换
--- 2. 直接使用 UUID 类型值插入到 sso_provider_id 字段
--- 3. 这解决了 "column sso_provider_id is of type uuid but expression is of type text" 错误
--- 4. 符合数据库设计文档中 profiles.sso_provider_id 为 UUID 类型的定义
+-- Fix explanation:
+-- 1. Removed the incorrect `sso_provider_uuid::TEXT` cast.
+-- 2. Used the UUID type value directly for insertion into the `sso_provider_id` field.
+-- 3. This resolves the "column sso_provider_id is of type uuid but expression is of type text" error.
+-- 4. This aligns with the database design where profiles.sso_provider_id is defined as a UUID.
 -- --- END COMMENT ---
