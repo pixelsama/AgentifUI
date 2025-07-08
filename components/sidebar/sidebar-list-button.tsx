@@ -11,7 +11,7 @@ import type * as React from 'react';
 // 支持响应式布局，在移动端和桌面端有不同的表现
 // 🎯 新增：支持more button和item区域的悬停分离效果
 interface SidebarListButtonProps extends React.HTMLAttributes<HTMLDivElement> {
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   active?: boolean;
   isLoading?: boolean;
   moreActionsTrigger?: React.ReactNode;
@@ -136,17 +136,23 @@ export function SidebarListButton({
             />
           </span>
         ) : (
-          <span
-            className={cn(
-              '-ml-0.5 flex h-4 w-4 items-center justify-center',
-              isDark ? 'text-gray-400' : 'text-gray-500'
-            )}
-          >
-            {icon}
-          </span>
+          icon && (
+            <span
+              className={cn(
+                '-ml-0.5 flex h-4 w-4 items-center justify-center',
+                isDark ? 'text-gray-400' : 'text-gray-500'
+              )}
+            >
+              {icon}
+            </span>
+          )
         )}
         {children && (
-          <div className="ml-1.5 min-w-0 flex-1 truncate">{children}</div>
+          <div
+            className={cn('min-w-0 flex-1 truncate', icon ? 'ml-1.5' : 'ml-0')}
+          >
+            {children}
+          </div>
         )}
       </div>
 

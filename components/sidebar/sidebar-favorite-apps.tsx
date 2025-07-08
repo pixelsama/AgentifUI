@@ -293,7 +293,7 @@ export function SidebarFavoriteApps({
             // Ensure high z-index to cover content below
             colors.sidebarBackground.tailwind,
             favoriteApps.length > 3 &&
-              'cursor-pointer rounded-md transition-all duration-300 ease-out hover:bg-stone-200/40 dark:hover:bg-stone-700/40'
+              'cursor-pointer rounded-md transition-all duration-300 ease-out'
           )}
           onClick={favoriteApps.length > 3 ? toggleExpanded : undefined}
         >
@@ -316,44 +316,11 @@ export function SidebarFavoriteApps({
                     'ml-1.5 h-3 w-3 transition-all duration-300 ease-out',
                     'transform-gpu will-change-transform',
                     isAppsExpanded && 'rotate-90',
-                    'group-hover:scale-110',
                     isDark ? 'text-stone-400/80' : 'text-stone-500/80'
                   )}
                 />
               )}
             </div>
-
-            {/* Animated dots indicator showing there are more apps */}
-            {favoriteApps.length > 3 && (
-              <div
-                className={cn(
-                  'flex items-center space-x-1 transition-all duration-300 ease-out',
-                  isAppsExpanded
-                    ? 'scale-90 opacity-40'
-                    : 'opacity-60 group-hover:scale-105 group-hover:opacity-100'
-                )}
-              >
-                <div className="flex space-x-0.5">
-                  {[...Array(Math.min(3, favoriteApps.length - 3))].map(
-                    (_, i) => (
-                      <div
-                        key={i}
-                        className={cn(
-                          'h-1 w-1 rounded-full transition-all duration-300 ease-out',
-                          'transform-gpu will-change-transform',
-                          !isAppsExpanded && `animation-delay-${i * 100}`,
-                          'group-hover:scale-125',
-                          isDark ? 'bg-stone-500/60' : 'bg-stone-400/60'
-                        )}
-                        style={{
-                          animationDelay: `${i * 100}ms`,
-                        }}
-                      />
-                    )
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}

@@ -34,7 +34,6 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
 // 使用新的 SidebarListButton 组件
-import { SidebarChatIcon } from './sidebar-chat-icon';
 import { SidebarListButton } from './sidebar-list-button';
 
 interface SidebarChatListProps {
@@ -467,7 +466,6 @@ export function SidebarChatList({
                   <div className="group relative" key={chat.tempId || chat.id}>
                     {/* 使用新的 SidebarListButton 替代 SidebarButton */}
                     <SidebarListButton
-                      icon={<SidebarChatIcon size="sm" isDark={isDark} />}
                       active={isActive}
                       onClick={() => onSelectChat(chat.id)}
                       isLoading={itemIsLoading}
@@ -519,7 +517,6 @@ export function SidebarChatList({
                 <div className="group relative" key={chat.id}>
                   {/* 使用新的 SidebarListButton 替代 SidebarButton */}
                   <SidebarListButton
-                    icon={<SidebarChatIcon size="sm" isDark={isDark} />}
                     active={isActive}
                     onClick={() => onSelectChat(chat.id)}
                     isLoading={false}
