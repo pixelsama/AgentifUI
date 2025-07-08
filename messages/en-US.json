@@ -618,16 +618,14 @@
         }
       },
       "sso": {
-        "bistu": {
-          "title": "Beijing Information Science & Technology University Unified Authentication",
-          "subtitle": "Login with your student/employee ID and password",
-          "button": "Login with BISTU Unified Authentication",
-          "simpleButton": "🏛️ BISTU Unified Authentication",
-          "jumpingButton": "Redirecting...",
-          "helpText": "Account will be created automatically on first login",
-          "contactText": "Please contact system administrator if you have any questions",
-          "startError": "Failed to start SSO login, please try again later"
-        },
+        "title": "Single Sign-On Authentication",
+        "subtitle": "Login with your unified authentication account",
+        "button": "Login with SSO",
+        "simpleButton": "🏛️ Single Sign-On",
+        "jumpingButton": "Redirecting...",
+        "helpText": "Account will be created automatically on first login",
+        "contactText": "Please contact system administrator if you have any questions",
+        "startError": "Failed to start SSO login, please try again later",
         "processing": {
           "title": "SSO Login",
           "processing": "Processing SSO login...",

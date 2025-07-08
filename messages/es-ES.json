@@ -618,16 +618,14 @@
         }
       },
       "sso": {
-        "bistu": {
-          "title": "Autenticación Unificada de la Universidad de Ciencia y Tecnología de la Información de Beijing",
-          "subtitle": "Inicia sesión con tu ID de estudiante/empleado y contraseña",
-          "button": "Iniciar sesión con Autenticación Unificada BISTU",
-          "simpleButton": "🏛️ Autenticación Unificada BISTU",
-          "jumpingButton": "Redirigiendo...",
-          "helpText": "La cuenta se creará automáticamente en el primer inicio de sesión",
-          "contactText": "Por favor contacta al administrador del sistema si tienes alguna pregunta",
-          "startError": "Error al iniciar el inicio de sesión SSO, por favor inténtalo más tarde"
-        },
+        "title": "Autenticación Single Sign-On",
+        "subtitle": "Inicia sesión con tu cuenta de autenticación unificada",
+        "button": "Iniciar sesión con SSO",
+        "simpleButton": "🏛️ Single Sign-On",
+        "jumpingButton": "Redirigiendo...",
+        "helpText": "La cuenta se creará automáticamente en el primer inicio de sesión",
+        "contactText": "Por favor contacta al administrador del sistema si tienes alguna pregunta",
+        "startError": "Error al iniciar el inicio de sesión SSO, por favor inténtalo más tarde",
         "processing": {
           "title": "Inicio de Sesión SSO",
           "processing": "Procesando inicio de sesión SSO...",

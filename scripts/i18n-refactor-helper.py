@@ -12,7 +12,7 @@ from pathlib import Path
 
 class I18nConsistencyChecker:
     def __init__(self):
-        self.languages = ['zh-CN', 'en-US', 'es-ES', 'zh-TW', 'ja-JP']
+        self.languages = ['zh-CN', 'en-US', 'es-ES', 'zh-TW', 'ja-JP', 'fr-FR', 'it-IT', 'ru-RU', 'pt-PT', 'de-DE']
         self.messages_dir = Path("messages")
         
     def get_all_keys(self, obj: Any, prefix: str = "") -> Set[str]:

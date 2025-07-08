@@ -618,16 +618,14 @@
         }
       },
       "sso": {
-        "bistu": {
-          "title": "北京資訊科技大學統一認證",
-          "subtitle": "使用您的學工號和密碼登入",
-          "button": "使用北信科統一認證登入",
-          "simpleButton": "🏛️ 北信科統一認證",
-          "jumpingButton": "正在跳轉...",
-          "helpText": "首次登入將自動建立帳戶",
-          "contactText": "如有問題請聯絡系統管理員",
-          "startError": "啟動SSO登入失敗，請稍後重試"
-        },
+        "title": "統一身份認證",
+        "subtitle": "使用您的統一認證帳號登入",
+        "button": "使用統一認證登入",
+        "simpleButton": "🏛️ 統一身份認證",
+        "jumpingButton": "正在跳轉...",
+        "helpText": "首次登入將自動建立帳戶",
+        "contactText": "如有問題請聯繫系統管理員",
+        "startError": "啟動SSO登入失敗，請稍後重試",
         "processing": {
           "title": "SSO 登入",
           "processing": "正在處理SSO登入...",

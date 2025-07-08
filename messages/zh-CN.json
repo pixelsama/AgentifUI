@@ -618,16 +618,14 @@
         }
       },
       "sso": {
-        "bistu": {
-          "title": "北京信息科技大学统一认证",
-          "subtitle": "使用您的学工号和密码登录",
-          "button": "使用北信科统一认证登录",
-          "simpleButton": "🏛️ 北信科统一认证",
-          "jumpingButton": "正在跳转...",
-          "helpText": "首次登录将自动创建账户",
-          "contactText": "如有问题请联系系统管理员",
-          "startError": "启动SSO登录失败，请稍后重试"
-        },
+        "title": "统一身份认证",
+        "subtitle": "使用您的统一认证账号登录",
+        "button": "使用统一认证登录",
+        "simpleButton": "🏛️ 统一身份认证",
+        "jumpingButton": "正在跳转...",
+        "helpText": "首次登录将自动创建账户",
+        "contactText": "如有问题请联系系统管理员",
+        "startError": "启动SSO登录失败，请稍后重试",
         "processing": {
           "title": "SSO 登录",
           "processing": "正在处理SSO登录...",

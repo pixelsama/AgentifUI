@@ -618,16 +618,14 @@
         }
       },
       "sso": {
-        "bistu": {
-          "title": "Единая аутентификация Пекинского университета информационных наук и технологий",
-          "subtitle": "Войдите, используя свой студенческий/служебный ID и пароль",
-          "button": "Войти через единую аутентификацию BISTU",
-          "simpleButton": "🏛️ Единая аутентификация BISTU",
-          "jumpingButton": "Перенаправление...",
-          "helpText": "Учетная запись будет создана автоматически при первом входе",
-          "contactText": "Пожалуйста, свяжитесь с системным администратором, если у вас есть вопросы",
-          "startError": "Не удалось начать вход через SSO, попробуйте позже"
-        },
+        "title": "Autenticação Single Sign-On",
+        "subtitle": "Faça login com sua conta de autenticação unificada",
+        "button": "Entrar com SSO",
+        "simpleButton": "🏛️ Single Sign-On",
+        "jumpingButton": "Redirecionando...",
+        "helpText": "A conta será criada automaticamente no primeiro login",
+        "contactText": "Entre em contato com o administrador do sistema se tiver dúvidas",
+        "startError": "Falha ao iniciar login SSO, tente novamente mais tarde",
         "processing": {
           "title": "Вход через SSO",
           "processing": "Обработка входа через SSO...",

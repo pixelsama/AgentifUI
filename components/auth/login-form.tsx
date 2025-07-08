@@ -13,8 +13,8 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { createClient } from '../../lib/supabase/client';
-import { BistuSSOCard } from './bistu-sso-button';
 import { SocialAuthButtons } from './social-auth-buttons';
+import { SSOCard } from './sso-button';
 
 export function LoginForm() {
   const router = useRouter();
@@ -112,8 +112,8 @@ export function LoginForm() {
 
       {/* Login options area */}
       <div className="space-y-6">
-        {/* Conditional rendering: only show BISTU SSO login in SSO-only mode */}
-        {ssoOnlyMode && <BistuSSOCard returnUrl="/chat" />}
+        {/* Conditional rendering: only show SSO login in SSO-only mode */}
+        {ssoOnlyMode && <SSOCard returnUrl="/chat" />}
 
         {/* Conditional rendering: only show social login in non-SSO-only mode */}
         {!ssoOnlyMode && (

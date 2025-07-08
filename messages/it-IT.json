@@ -618,16 +618,14 @@
         }
       },
       "sso": {
-        "bistu": {
-          "title": "Autenticazione Unificata dell'Università di Scienza e Tecnologia dell'Informazione di Pechino",
-          "subtitle": "Accedi con il tuo ID studente/dipendente e la password",
-          "button": "Accedi con l'Autenticazione Unificata BISTU",
-          "simpleButton": "🏛️ Autenticazione Unificata BISTU",
-          "jumpingButton": "Reindirizzamento in corso...",
-          "helpText": "L'account verrà creato automaticamente al primo accesso",
-          "contactText": "Contatta l'amministratore di sistema se hai domande",
-          "startError": "Avvio del login SSO fallito, riprova più tardi"
-        },
+        "title": "Autenticazione Single Sign-On",
+        "subtitle": "Accedi con il tuo account di autenticazione unificata",
+        "button": "Accedi con SSO",
+        "simpleButton": "🏛️ Single Sign-On",
+        "jumpingButton": "Reindirizzamento in corso...",
+        "helpText": "L'account verrà creato automaticamente al primo accesso",
+        "contactText": "Contatta l'amministratore di sistema se hai domande",
+        "startError": "Avvio del login SSO fallito, riprova più tardi",
         "processing": {
           "title": "Login SSO",
           "processing": "Elaborazione login SSO...",

@@ -26,7 +26,7 @@ def get_all_keys(obj: Any, prefix: str = "") -> Set[str]:
 
 def load_translation_files() -> Dict[str, Dict]:
     """加载所有翻译文件"""
-    languages = ['zh-CN', 'en-US', 'es-ES', 'zh-TW', 'ja-JP']
+    languages = ['zh-CN', 'en-US', 'es-ES', 'zh-TW', 'ja-JP', 'fr-FR', 'it-IT', 'ru-RU', 'pt-PT', 'de-DE']
     translations = {}
     
     for lang in languages:

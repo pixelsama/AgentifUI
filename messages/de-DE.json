@@ -618,16 +618,14 @@
         }
       },
       "sso": {
-        "bistu": {
-          "title": "Einheitliche Authentifizierung der Beijing Information Science & Technology University",
-          "subtitle": "Melden Sie sich mit Ihrer Studenten-/Mitarbeiter-ID und Passwort an",
-          "button": "Mit BISTU einheitlicher Authentifizierung anmelden",
-          "simpleButton": "🏛️ BISTU einheitliche Authentifizierung",
-          "jumpingButton": "Weiterleitung...",
-          "helpText": "Konto wird bei der ersten Anmeldung automatisch erstellt",
-          "contactText": "Bitte kontaktieren Sie den Systemadministrator, wenn Sie Fragen haben",
-          "startError": "SSO-Anmeldung konnte nicht gestartet werden, bitte versuchen Sie es später erneut"
-        },
+        "title": "Single Sign-On Authentifizierung",
+        "subtitle": "Melden Sie sich mit Ihrem einheitlichen Authentifizierungskonto an",
+        "button": "Mit SSO anmelden",
+        "simpleButton": "🏛️ Single Sign-On",
+        "jumpingButton": "Weiterleitung...",
+        "helpText": "Konto wird bei der ersten Anmeldung automatisch erstellt",
+        "contactText": "Bitte kontaktieren Sie den Systemadministrator, wenn Sie Fragen haben",
+        "startError": "SSO-Anmeldung konnte nicht gestartet werden, bitte versuchen Sie es später erneut",
         "processing": {
           "title": "SSO-Anmeldung",
           "processing": "SSO-Anmeldung wird verarbeitet...",

@@ -618,16 +618,14 @@
         }
       },
       "sso": {
-        "bistu": {
-          "title": "Authentification unifiée de l'Université des sciences et technologies de l'information de Pékin",
-          "subtitle": "Connectez-vous avec votre identifiant d'étudiant/employé et votre mot de passe",
-          "button": "Se connecter avec l'authentification unifiée BISTU",
-          "simpleButton": "🏛️ Authentification unifiée BISTU",
-          "jumpingButton": "Redirection en cours...",
-          "helpText": "Le compte sera créé automatiquement lors de la première connexion",
-          "contactText": "Veuillez contacter l'administrateur système si vous avez des questions",
-          "startError": "Échec du démarrage de la connexion SSO, veuillez réessayer plus tard"
-        },
+        "title": "Authentification Single Sign-On",
+        "subtitle": "Connectez-vous avec votre compte d'authentification unifiée",
+        "button": "Se connecter avec SSO",
+        "simpleButton": "🏛️ Single Sign-On",
+        "jumpingButton": "Redirection en cours...",
+        "helpText": "Le compte sera créé automatiquement lors de la première connexion",
+        "contactText": "Veuillez contacter l'administrateur système si vous avez des questions",
+        "startError": "Échec du démarrage de la connexion SSO, veuillez réessayer plus tard",
         "processing": {
           "title": "Connexion SSO",
           "processing": "Traitement de la connexion SSO en cours...",

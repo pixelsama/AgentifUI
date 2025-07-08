@@ -9,9 +9,9 @@ import { useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// 北京信息科技大学SSO登录按钮组件
+// SSO登录按钮组件
 // 提供统一的SSO登录入口界面
-interface BistuSSOButtonProps {
+interface SSOButtonProps {
   returnUrl?: string;
   className?: string;
   variant?: 'gradient' | 'outline' | 'secondary';
@@ -20,22 +20,20 @@ interface BistuSSOButtonProps {
   children?: React.ReactNode;
 }
 
-export function BistuSSOButton({
+export function SSOButton({
   returnUrl,
   className,
   variant = 'gradient',
   size = 'default',
   disabled = false,
   children,
-}: BistuSSOButtonProps) {
+}: SSOButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const t = useTranslations('pages.auth.sso.bistu');
+  const t = useTranslations('pages.auth.sso');
 
   const handleSSOLogin = async () => {
     try {
       setIsLoading(true);
-
-      console.log('[SSO登录] 开始北信科SSO登录流程');
 
       // SSO登录前先清理前一个用户的缓存，防止数据污染
       clearCacheOnLogin();
@@ -47,8 +45,6 @@ export function BistuSSOButton({
       }
 
       const ssoLoginUrl = `/api/sso/bistu/login${params.toString() ? '?' + params.toString() : ''}`;
-
-      console.log('[SSO登录] 跳转到SSO认证页面');
 
       // 重定向到SSO登录接口
       window.location.href = ssoLoginUrl;
@@ -67,14 +63,12 @@ export function BistuSSOButton({
       variant={variant}
       size={size}
       className={cn(
-        // 使用与登录按钮一致的样式
         'relative flex w-full items-center justify-center gap-2 font-serif',
         className
       )}
       disabled={disabled || isLoading}
       onClick={handleSSOLogin}
     >
-      {/* Show different icons based on loading state */}
       {isLoading ? (
         <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
           <circle
@@ -103,35 +97,30 @@ export function BistuSSOButton({
         </svg>
       )}
 
-      {/* Button text content */}
       {isLoading ? t('jumpingButton') : children || t('button')}
     </Button>
   );
 }
 
 // 简化版的SSO登录按钮，用于快速集成
-export function SimpleBistuSSOButton({
+export function SimpleSSOButton({
   returnUrl,
   className,
 }: {
   returnUrl?: string;
   className?: string;
 }) {
-  const t = useTranslations('pages.auth.sso.bistu');
+  const t = useTranslations('pages.auth.sso');
 
   return (
-    <BistuSSOButton
-      returnUrl={returnUrl}
-      className={className}
-      variant="gradient"
-    >
+    <SSOButton returnUrl={returnUrl} className={className} variant="gradient">
       <span className="font-serif text-sm">{t('simpleButton')}</span>
-    </BistuSSOButton>
+    </SSOButton>
   );
 }
 
 // 带有详细说明的SSO登录卡片
-export function BistuSSOCard({
+export function SSOCard({
   returnUrl,
   className,
 }: {
@@ -139,7 +128,7 @@ export function BistuSSOCard({
   className?: string;
 }) {
   const { isDark } = useTheme();
-  const t = useTranslations('pages.auth.sso.bistu');
+  const t = useTranslations('pages.auth.sso');
 
   return (
     <div
@@ -174,7 +163,7 @@ export function BistuSSOCard({
         </div>
 
         {/* Login button */}
-        <BistuSSOButton returnUrl={returnUrl} className="w-full font-serif" />
+        <SSOButton returnUrl={returnUrl} className="w-full font-serif" />
 
         {/* Help information */}
         <div
