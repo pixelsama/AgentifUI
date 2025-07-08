@@ -7,14 +7,63 @@ i18n一致性检查脚本
 import json
 import os
 import sys
+import re
 from typing import Dict, Set, List, Any, Optional
 from pathlib import Path
 
 class I18nConsistencyChecker:
     def __init__(self):
-        self.languages = ['zh-CN', 'en-US', 'es-ES', 'zh-TW', 'ja-JP', 'fr-FR', 'it-IT', 'ru-RU', 'pt-PT', 'de-DE']
+        self.languages = self.load_languages_from_ts(verbose=True)
+        if not self.languages:
+            print("❌ Error: Could not load languages from config file. Aborting.", file=sys.stderr)
+            sys.exit(1)
+            
         self.messages_dir = Path("messages")
-        
+            
+
+    def load_languages_from_ts(self, verbose: bool = True) -> List[str]:
+        """从 lib/config/language-config.ts 加载支持的语言列表"""
+        # 脚本位于 scripts/ 目录，TS 文件路径相对于项目根目录
+        project_root = Path(__file__).resolve().parent.parent
+        ts_file_path = project_root / "lib/config/language-config.ts"
+    
+        if not ts_file_path.exists():
+            print(f"❌ Language config file not found at: {ts_file_path}", file=sys.stderr)
+            return []
+
+        try:
+            content = ts_file_path.read_text(encoding="utf-8")
+
+            # 查找 SUPPORTED_LANGUAGES 对象体（非贪婪匹配）
+            match = re.search(
+                r"export\s+const\s+SUPPORTED_LANGUAGES\s*=\s*{(.+?)}\s*as\s+const;",
+                content,
+                re.DOTALL,
+            )
+            if not match:
+                print("❌ Could not find SUPPORTED_LANGUAGES in the config file.", file=sys.stderr)
+                return []
+
+            obj_content = match.group(1)
+
+            # 匹配更通用的语言代码（支持 en, zh-Hans, es-419, sr-Latn-RS 等）
+            lang_codes = re.findall(
+                r"\s*['\"]([a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*)['\"]\s*:",
+                obj_content,
+            )
+
+            if lang_codes:
+                if verbose:
+                    print(f"✅ Loaded {len(lang_codes)} languages: {', '.join(lang_codes)}")
+            else:
+                print("❌ No languages found in language-config.ts", file=sys.stderr)
+
+            return lang_codes
+
+        except Exception as e:
+            print(f"❌ Error reading or parsing {ts_file_path}: {e}", file=sys.stderr)
+            return []
+
     def get_all_keys(self, obj: Any, prefix: str = "") -> Set[str]:
         """递归获取所有键路径"""
         keys = set()

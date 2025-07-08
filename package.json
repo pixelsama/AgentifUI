@@ -17,7 +17,8 @@
     "type-check": "tsc --noEmit",
     "i18n:check": "uv run scripts/i18n-refactor-helper.py quick-check",
     "i18n:validate": "uv run scripts/validate-i18n-consistency.py",
-    "i18n:detect": "uv run scripts/i18n-refactor-helper.py detect-missing"
+    "i18n:detect": "uv run scripts/i18n-refactor-helper.py detect-missing",
+    "deploy": "pnpm build && PORT=${PORT:-3000} pm2 restart AgentifUI || pm2 start \"pnpm start\" --name AgentifUI"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [
