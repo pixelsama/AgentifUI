@@ -25,7 +25,7 @@ interface UserStatsCardsProps {
   isLoading: boolean;
 }
 
-// 统计卡片数据
+// Statistics card data
 interface StatCard {
   title: string;
   value: number | string;
@@ -45,7 +45,7 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({
   const { isDark } = useTheme();
   const t = useTranslations('pages.admin.users.stats');
 
-  // 生成统计卡片数据
+  // Generate statistics card data
   const statCards: StatCard[] = React.useMemo(() => {
     if (!stats) return [];
 
@@ -116,7 +116,7 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({
     ];
   }, [stats, t]);
 
-  // 获取颜色样式
+  // Get color styles
   const getColorClasses = (color: StatCard['color']) => {
     const colorMap = {
       blue: {
@@ -218,8 +218,13 @@ export const UserStatsCards: React.FC<UserStatsCardsProps> = ({
               'rounded-xl border p-4 transition-all duration-200 hover:scale-105 hover:shadow-lg',
               colors.bg,
               colors.border,
-              'backdrop-blur-sm'
+              'backdrop-blur-sm',
+              'animate-fade-in'
             )}
+            style={{
+              animationDelay: `${index * 100}ms`,
+              animationFillMode: 'both',
+            }}
           >
             <div className="flex flex-col space-y-2">
               {/* Icon */}

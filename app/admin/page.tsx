@@ -7,6 +7,7 @@ import {
   Bell,
   Building2,
   Key,
+  KeyRound,
   ShieldCheck,
   Users,
 } from 'lucide-react';
@@ -107,6 +108,12 @@ export default function AdminPage() {
       description: tLayout('menuItems.users.description'),
       icon: Users,
       href: '/admin/users',
+    },
+    {
+      title: tLayout('menuItems.ssoProviders.text'),
+      description: tLayout('menuItems.ssoProviders.description'),
+      icon: KeyRound,
+      href: '/admin/sso-providers',
     },
     {
       title: tLayout('menuItems.groups.text'),

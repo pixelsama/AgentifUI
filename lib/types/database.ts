@@ -313,6 +313,19 @@ export interface SsoProvider {
   updated_at: string;
 }
 
+// 🎯 新增：创建SSO提供商时的数据类型
+export interface CreateSsoProviderData {
+  name: string;
+  protocol: SsoProtocol;
+  settings: SsoProviderSettings;
+  client_id?: string | null;
+  client_secret?: string | null;
+  metadata_url?: string | null;
+  enabled?: boolean;
+  display_order?: number;
+  button_text?: string | null;
+}
+
 export interface DomainSsoMapping {
   id: string;
   domain: string;

@@ -12,6 +12,7 @@ import {
   FileText,
   Home,
   Key,
+  KeyRound,
   Menu,
   PanelLeft,
   PanelLeftClose,
@@ -79,6 +80,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: Users,
       href: '/admin/users',
       description: t('menuItems.users.description'),
+    },
+    {
+      text: t('menuItems.ssoProviders.text'),
+      icon: KeyRound,
+      href: '/admin/sso-providers',
+      description: t('menuItems.ssoProviders.description'),
     },
     {
       text: t('menuItems.groups.text'),
