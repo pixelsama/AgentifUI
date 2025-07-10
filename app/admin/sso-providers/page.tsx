@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { useTranslations } from 'next-intl';
 
