@@ -72,14 +72,12 @@ export function SidebarContainer() {
   const getSidebarStyles = () => {
     if (isDark) {
       return {
-        shadow: 'shadow-xl shadow-black/40',
         border: 'border-r-stone-700/50',
         text: 'text-stone-300',
         hoverBg: 'hover:bg-stone-700', // 悬停时使用展开状态的背景色
       };
     } else {
       return {
-        shadow: 'shadow-xl shadow-stone-300/60',
         border: 'border-r-stone-300/60',
         text: 'text-stone-700',
         hoverBg: 'hover:bg-stone-200', // 悬停时使用展开状态的背景色
@@ -118,7 +116,6 @@ export function SidebarContainer() {
           ? colors.sidebarBackground.tailwind
           : colors.mainBackground.tailwind,
         'backdrop-blur-sm',
-        styles.shadow,
         styles.border,
         styles.text,
 

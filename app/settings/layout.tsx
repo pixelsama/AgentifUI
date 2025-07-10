@@ -31,13 +31,6 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
     <div
       className={cn('flex h-full min-h-screen', colors.pageBackground.tailwind)}
     >
-      {/* 🎯 Sidebar 已移至根布局，无需重复渲染 */}
-
-      {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
-
-      {/* 
-        移动端导航按钮 - 仅在客户端挂载后显示 
-      */}
       <div className="fixed top-4 left-4 z-50 md:hidden">
         {isMounted && <MobileNavButton />}
       </div>
@@ -49,7 +42,6 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
           getMainMarginLeft(),
           'transition-[margin-left] duration-150 ease-in-out',
           colors.textColor.tailwind,
-          // --- 为navbar留出顶部空间 ---
           'pt-12'
         )}
       >

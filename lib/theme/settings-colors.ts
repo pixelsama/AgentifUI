@@ -170,7 +170,7 @@ export const lightSettingsColors = {
 export const darkSettingsColors = {
   // 设置页面主背景色
   pageBackground: {
-    tailwind: 'bg-stone-900',
+    tailwind: 'bg-stone-800',
     rgb: 'rgb(28, 25, 23)',
     hex: '#1c1917',
   },
