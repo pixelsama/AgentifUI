@@ -66,7 +66,7 @@ const CACHE_DURATION = 30 * 60 * 1000; // 30分钟 - 延长缓存时间，减少
 
 export const useAppListStore = create<AppListState>((set, get) => ({
   apps: [],
-  isLoading: false,
+  isLoading: false, // 🔧 恢复初始状态为false，通过其他方式解决时序问题
   error: null,
   lastFetchTime: 0,
 
@@ -85,6 +85,11 @@ export const useAppListStore = create<AppListState>((set, get) => ({
   fetchApps: async () => {
     const now = Date.now();
     const state = get();
+
+    // 🔧 立即设置loading状态，避免初始闪烁
+    if (state.apps.length === 0) {
+      set({ isLoading: true });
+    }
 
     // 🎯 修复缓存污染：先获取用户ID，检查用户变化
     const { createClient } = await import('@lib/supabase/client');

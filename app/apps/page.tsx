@@ -271,9 +271,9 @@ export default function AppsPage() {
     }
   };
 
-  // 🎯 效仿模型选择器：简化加载状态判断
-  // 只需要判断isLoading，无需复杂的用户状态加载逻辑
-  if (isLoading && rawApps.length === 0) {
+  // 🔧 修复时序问题：只要在加载中就显示加载状态
+  // 避免在初始加载时短暂显示"应用不存在"
+  if (isLoading) {
     return <AppLoading />;
   }
 

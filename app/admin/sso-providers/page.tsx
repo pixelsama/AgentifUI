@@ -1,9 +1,3 @@
-/**
- * SSO Providers Management Page
- * @description Modern, elegant SSO provider management interface with comprehensive CRUD operations
- * @module app/admin/sso-providers/page
- */
-
 'use client';
 
 import { SsoFilters } from '@components/admin/sso-providers/sso-filters';
@@ -27,18 +21,6 @@ import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
-
-/**
- * SSO Providers Management Page
- * @description Modern, elegant SSO provider management interface with comprehensive CRUD operations
- * @module app/admin/sso-providers/page
- */
-
-/**
- * SSO Providers Management Page
- * @description Modern, elegant SSO provider management interface with comprehensive CRUD operations
- * @module app/admin/sso-providers/page
- */
 
 export default function SsoProvidersPage() {
   const { isDark } = useTheme();
