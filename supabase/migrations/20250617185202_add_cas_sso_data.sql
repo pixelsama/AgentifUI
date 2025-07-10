@@ -38,6 +38,7 @@ COMMENT ON COLUMN profiles.employee_number IS 'Employee ID: A unique identifier 
 -- --- BEGIN COMMENT ---
 -- 5. Insert a generic SSO provider configuration
 -- --- END COMMENT ---
+
 INSERT INTO sso_providers (
   id,
   name,
@@ -47,19 +48,36 @@ INSERT INTO sso_providers (
   created_at,
   updated_at
 ) VALUES (
-  '10000000-0000-0000-0000-000000000001',
-  'Example CAS Provider',
+  gen_random_uuid(),
+  'CAS Provider',
   'CAS'::sso_protocol,
   jsonb_build_object(
-    'base_url', 'https://sso.example.com',
-    'login_endpoint', '/login',
-    'logout_endpoint', '/logout',
-    'validate_endpoint', '/serviceValidate',
-    'validate_endpoint_v3', '/p3/serviceValidate',
-    'version', '2.0',
-    'attributes_enabled', true,
-    'description', 'Example CAS Provider Configuration',
-    'support_attributes', jsonb_build_array('employeeNumber', 'log_username')
+    'ui', jsonb_build_object(
+      'icon', '🏛️',
+      'theme', 'primary'
+    ),
+    'security', jsonb_build_object(
+      'require_https', true,
+      'validate_certificates', true,
+      'allowed_redirect_hosts', jsonb_build_array()
+    ),
+    'protocol_config', jsonb_build_object(
+      'timeout', 10000,
+      'version', '2.0',
+      'base_url', 'https://your-cas-server.example.com',
+      'endpoints', jsonb_build_object(
+        'login', '/login',
+        'logout', '/logout',
+        'validate', '/serviceValidate',
+        'validate_v3', '/p3/serviceValidate'
+      ),
+      'attributes_mapping', jsonb_build_object(
+        'email', 'cas:mail',
+        'username', 'cas:username',
+        'full_name', 'cas:name',
+        'employee_id', 'cas:user'
+      )
+    )
   ),
   true,
   NOW(),
