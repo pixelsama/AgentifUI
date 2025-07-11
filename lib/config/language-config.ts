@@ -9,6 +9,11 @@ export interface LanguageInfo {
 // 支持的语言配置
 // 与 i18n/request.ts 中的 supportedLocales 保持一致
 export const SUPPORTED_LANGUAGES = {
+  'en-US': {
+    name: 'English (US)',
+    nativeName: 'English',
+    code: 'en-US',
+  },
   'zh-CN': {
     name: 'Simplified Chinese',
     nativeName: '简体中文',
@@ -18,11 +23,6 @@ export const SUPPORTED_LANGUAGES = {
     name: 'Traditional Chinese',
     nativeName: '繁體中文',
     code: 'zh-TW',
-  },
-  'en-US': {
-    name: 'English (US)',
-    nativeName: 'English',
-    code: 'en-US',
   },
   'ja-JP': {
     name: 'Japanese',
@@ -34,15 +34,20 @@ export const SUPPORTED_LANGUAGES = {
     nativeName: 'Español',
     code: 'es-ES',
   },
-  'de-DE': {
-    name: 'German',
-    nativeName: 'Deutsch',
-    code: 'de-DE',
+  'pt-PT': {
+    name: 'Portuguese',
+    nativeName: 'Português',
+    code: 'pt-PT',
   },
   'fr-FR': {
     name: 'French',
     nativeName: 'Français',
     code: 'fr-FR',
+  },
+  'de-DE': {
+    name: 'German',
+    nativeName: 'Deutsch',
+    code: 'de-DE',
   },
   'ru-RU': {
     name: 'Russian',
@@ -53,11 +58,6 @@ export const SUPPORTED_LANGUAGES = {
     name: 'Italian',
     nativeName: 'Italiano',
     code: 'it-IT',
-  },
-  'pt-PT': {
-    name: 'Portuguese',
-    nativeName: 'Português',
-    code: 'pt-PT',
   },
 } as const;
 

@@ -22,7 +22,10 @@
   },
   "pnpm": {
     "ignoredBuiltDependencies": [
+      "@tailwindcss/oxide",
       "bufferutil",
+      "sharp",
+      "unrs-resolver",
       "utf-8-validate"
     ]
   },

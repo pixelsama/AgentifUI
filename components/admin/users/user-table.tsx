@@ -348,7 +348,7 @@ export const UserTable: React.FC<UserTableProps> = ({
               </th>
               <th
                 className={cn(
-                  'w-28 px-4 py-4 text-left font-serif text-sm font-semibold',
+                  'w-36 px-4 py-4 text-left font-serif text-sm font-semibold',
                   isDark ? 'text-stone-300' : 'text-stone-700'
                 )}
               >
@@ -356,7 +356,7 @@ export const UserTable: React.FC<UserTableProps> = ({
               </th>
               <th
                 className={cn(
-                  'w-24 px-4 py-4 text-left font-serif text-sm font-semibold',
+                  'w-28 px-4 py-4 text-left font-serif text-sm font-semibold',
                   isDark ? 'text-stone-300' : 'text-stone-700'
                 )}
               >
@@ -550,28 +550,30 @@ export const UserTable: React.FC<UserTableProps> = ({
                     </div>
                   </td>
 
-                  <td className="px-4 py-4">
-                    <span
+                  <td className="min-w-0 px-4 py-4">
+                    <div
                       className={cn(
-                        'inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 font-serif text-xs font-medium whitespace-nowrap',
+                        'inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2.5 py-1 font-serif text-xs font-medium',
                         getBadgeClasses(roleInfo.variant)
                       )}
+                      title={roleInfo.label}
                     >
                       {roleInfo.icon}
                       <span className="truncate">{roleInfo.label}</span>
-                    </span>
+                    </div>
                   </td>
 
-                  <td className="px-4 py-4">
-                    <span
+                  <td className="min-w-0 px-4 py-4">
+                    <div
                       className={cn(
-                        'inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 font-serif text-xs font-medium whitespace-nowrap',
+                        'inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2.5 py-1 font-serif text-xs font-medium',
                         getBadgeClasses(statusInfo.variant)
                       )}
+                      title={statusInfo.label}
                     >
                       {statusInfo.icon}
                       <span className="truncate">{statusInfo.label}</span>
-                    </span>
+                    </div>
                   </td>
 
                   <td className="px-4 py-4">

@@ -356,7 +356,7 @@ export default function UsersManagementPage() {
           <div>
             <h1
               className={cn(
-                'mb-3 bg-gradient-to-r bg-clip-text font-serif text-4xl font-bold text-transparent',
+                'mb-3 bg-gradient-to-r bg-clip-text font-serif text-4xl leading-relaxed font-bold text-transparent',
                 isDark
                   ? 'from-stone-100 to-stone-300'
                   : 'from-stone-800 to-stone-600'
