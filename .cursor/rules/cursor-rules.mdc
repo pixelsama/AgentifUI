@@ -2,54 +2,124 @@
 alwaysApply: true
 ---
 
-# Cursor Rules Guide
+# Cursor Rules Master Index
 
-This document provides an overview of all available development rules and when to use them.
+**SINGLE SOURCE OF TRUTH:** This document is the authoritative index of all development rules. AI agents MUST consult this file first to understand rule hierarchy and dependencies.
+
+## 🎯 AI MODEL REQUIREMENTS
+
+### MANDATORY CONSULTATION
+- AI agents MUST read this master index before any development task
+- AI agents MUST follow the specified rule dependencies
+- AI agents MUST NOT proceed with tasks without consulting relevant rules
+
+### ENFORCEMENT LEVELS
+- **CRITICAL**: Development-blocking rules that MUST be followed
+- **STANDARD**: Required rules with enforcement validation
+- **ADVISORY**: Best practices with recommended compliance
 
 ## 📋 Available Rules
 
-### Core Development Rules
+### Core Development Rules (CRITICAL)
 
-- **comment-rule**: Must read when writing code comments or documenting functions
-- **development-workflow-rule**: Must read before starting any development task or code changes
-- **git-commit-rule**: Must read before making any git commits or writing commit messages
+- **development-workflow-rule**: MUST read before starting any development task or code changes
+  - *Dependencies*: comment-rule, git-commit-rule
+  - *Enforcement*: TypeScript check, build validation required
 
-### Specialized Domain Rules
+- **comment-rule**: MUST read when writing code comments or documenting functions
+  - *Dependencies*: None
+  - *Enforcement*: English-only, JSDoc format required
 
-- **database-development-rule**: Must read before making any database schema changes or migrations
-- **i18n-development**: Must read when adding translation keys or working with i18n
-- **debug**: Must read when debugging issues or investigating bugs
+- **git-commit-rule**: MUST read before making any git commits or writing commit messages
+  - *Dependencies*: None
+  - *Enforcement*: Conventional commit format required
 
-### Technical Integration Rules
+### Specialized Domain Rules (STANDARD)
 
-- **cursor-rules**: Guidelines for writing and optimizing cursor rules themselves
+- **database-development-rule**: MUST read before making any database schema changes or migrations
+  - *Dependencies*: development-workflow-rule, git-commit-rule
+  - *Enforcement*: Migration validation, type sync required
 
-## 🎯 When to Use Each Rule
+- **i18n-development**: MUST read when adding translation keys or working with i18n
+  - *Dependencies*: development-workflow-rule
+  - *Enforcement*: Structure validation, key consistency required
 
-### Before Starting Development
-1. **development-workflow-rule** - Read this first for any coding task
-2. **comment-rule** - When you need to document your code
-3. **git-commit-rule** - Before making any commits
+### Technical Integration Rules (STANDARD)
 
-### Domain-Specific Tasks
+- **dify-integration-rule**: MUST read when developing Dify API integrations
+  - *Dependencies*: api-routes, development-workflow-rule
+  - *Enforcement*: 3-layer architecture compliance required
+
+- **api-routes**: MUST read when creating or modifying API routes
+  - *Dependencies*: development-workflow-rule
+  - *Enforcement*: Route structure, error handling required
+
+- **dify-api-endpoints**: MUST read when working with specific Dify API endpoints
+  - *Dependencies*: dify-integration-rule
+  - *Enforcement*: Type safety, service pattern required
+
+## 🔄 Rule Dependencies
+
+```
+development-workflow-rule (ROOT)
+├── comment-rule
+├── git-commit-rule
+├── database-development-rule
+├── i18n-development
+└── dify-integration-rule
+    ├── api-routes
+    └── dify-api-endpoints
+```
+
+## 🎯 Task-Based Rule Application
+
+### Before Starting Development (MANDATORY SEQUENCE)
+1. **development-workflow-rule** - Read this FIRST for any coding task
+2. **comment-rule** - When documenting code
+3. **git-commit-rule** - Before making commits
+
+### Domain-Specific Tasks (MANDATORY)
 - **Database changes** → **database-development-rule**
 - **Translation work** → **i18n-development**
-- **Bug investigation** → **debug**
+- **Dify API work** → **dify-integration-rule** + **dify-api-endpoints**
+- **API route creation** → **api-routes**
 
-### Rule Management
-- **Writing new rules** → **cursor-rules**
+### Cross-Domain Tasks (MULTIPLE RULES)
+- **New feature development** → development-workflow-rule + comment-rule + git-commit-rule
+- **Database + API changes** → database-development-rule + api-routes + development-workflow-rule
+- **I18n + Frontend** → i18n-development + comment-rule + development-workflow-rule
 
-## 🔧 How to Use Rules
+## 🔧 AI Agent Usage Protocol
 
-1. **Automatic**: Some rules apply automatically based on file patterns
-2. **Manual**: Use `@rule-name` to reference specific rules when needed
-3. **Fetch**: Use the fetch_rules tool to get detailed rule content
+### MANDATORY STEPS
+1. **Consult Master Index**: Always read cursor-rules.mdc first
+2. **Identify Dependencies**: Check rule dependency tree
+3. **Apply in Order**: Follow dependency hierarchy
+4. **Validate Compliance**: Ensure all requirements met
 
-## 📝 Best Practices
+### VALIDATION COMMANDS
+```bash
+# Required validation before commits
+pnpm run type-check
+pnpm run i18n:check
+pnpm run build
+```
 
-- Read the relevant rule before starting work in that domain
-- Follow the guidelines strictly for consistency
-- Update rules when patterns change
-- Keep rules focused and actionable
+## 📝 Enforcement Standards
 
-*This guide helps ensure consistent development practices across the AgentifUI project.*
+### MUST Requirements
+- All rules marked as CRITICAL or STANDARD MUST be followed
+- Dependencies MUST be resolved before proceeding
+- Validation commands MUST pass before commits
+
+### MUST NOT Violations
+- MUST NOT skip rule consultation
+- MUST NOT proceed without dependency resolution
+- MUST NOT commit without validation
+
+### SHOULD Recommendations
+- SHOULD document any rule deviations with justification
+- SHOULD update rules when patterns evolve
+- SHOULD maintain rule clarity and actionability
+
+*This master index ensures consistent, AI-compliant development practices across the AgentifUI project.*

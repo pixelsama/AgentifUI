@@ -2,36 +2,36 @@
 alwaysApply: false
 ---
 
-# Dify API 集成开发规范
+# Dify API Integration Development Standards
 
-## 核心原则：关注点分离
+## Core Principle: Separation of Concerns
 
-Dify API集成分为三层架构：
+Dify API integration uses a 3-layer architecture:
 
-### 1. 代理层 (Backend Proxy)
-- **位置**: `app/api/dify/[appId]/[...slug]/route.ts`
-- **职责**: 认证、请求转发、响应代理
-- **原则**: 不关心业务逻辑，只负责安全转发
+### 1. Proxy Layer (Backend Proxy)
+- **Location**: `app/api/dify/[appId]/[...slug]/route.ts`
+- **Responsibility**: Authentication, request forwarding, response proxying
+- **Principle**: MUST NOT handle business logic, only secure forwarding
 
-### 2. 服务层 (Service Layer)
-- **位置**: `lib/services/dify/*.ts` (按功能域划分)
-- **职责**: 业务逻辑、API调用、数据处理
-- **原则**: 不关心认证细节，只调用代理层
+### 2. Service Layer (Service Layer)
+- **Location**: `lib/services/dify/*.ts` (organized by functional domain)
+- **Responsibility**: Business logic, API calls, data processing
+- **Principle**: MUST NOT handle authentication details, only call proxy layer
 
-### 3. 类型层 (Type Definitions)
-- **位置**: `lib/services/dify/types.ts`
-- **职责**: 统一定义所有TypeScript数据结构
-- **原则**: 作为服务层的数据契约
+### 3. Type Layer (Type Definitions)
+- **Location**: `lib/services/dify/types.ts`
+- **Responsibility**: Unified definition of all TypeScript data structures
+- **Principle**: MUST serve as data contract for service layer
 
-## 新增Dify API的开发流程
+## Development Flow for New Dify API
 
-### 步骤1: 定义类型
-在 `types.ts` 中添加请求和响应的TypeScript接口
+### Step 1: Define Types
+Add request and response TypeScript interfaces in `types.ts`
 
-### 步骤2: 选择/创建服务文件
-根据功能域选择合适的服务文件，或创建新的服务文件
+### Step 2: Choose/Create Service File
+Select appropriate service file based on functional domain, or create new service file
 
-### 步骤3: 实现服务函数
+### Step 3: Implement Service Function
 ```typescript
 export async function newDifyFunction(
   appId: string,
@@ -47,106 +47,32 @@ export async function newDifyFunction(
   });
   
   if (!response.ok) {
-    throw new Error(`API调用失败: ${response.statusText}`);
+    throw new Error(`API call failed: ${response.statusText}`);
   }
   
   return response.json();
 }
 ```
 
-### 步骤4: 前端使用
+### Step 4: Frontend Usage
 ```typescript
 import { newDifyFunction } from '@lib/services/dify/service-name';
 
-// 在组件或Hook中使用
+// Use in component or Hook
 const result = await newDifyFunction(appId, params);
 ```
 
-## 核心优势
+## Core Advantages
 
-- **清晰性**: 职责分离，代码易理解
-- **模块化**: 按功能域划分，积木式组合
-- **低耦合**: 各层独立，变更影响最小
-- **易维护**: 问题定位准确，配置修改集中
-- **可扩展**: 新功能开发流程标准化
+- **Clarity**: Responsibility separation, code easy to understand
+- **Modularity**: Organized by functional domain, building-block composition
+- **Low Coupling**: Independent layers, minimal impact from changes
+- **Easy Maintenance**: Accurate problem location, centralized configuration modification
+- **Scalability**: Standardized development process for new features
 
-## 开发要求
+## Development Requirements
 
-在开发Dify相关功能时，请严格遵循此标准。这确保了：
+When developing Dify-related features, MUST strictly follow this standard. This ensures:
 
-- **维护性**: 更容易定位和修复问题，修改配置（如API Key）只需要在一个地方（代理层）修改
-- **扩展性**: 添加新功能只需要按照流程创建新的类型和服务函数，对现有代码影响最小
-# Dify API 集成开发规范
-
-## 核心原则：关注点分离
-
-Dify API集成分为三层架构：
-
-### 1. 代理层 (Backend Proxy)
-- **位置**: `app/api/dify/[appId]/[...slug]/route.ts`
-- **职责**: 认证、请求转发、响应代理
-- **原则**: 不关心业务逻辑，只负责安全转发
-
-### 2. 服务层 (Service Layer)
-- **位置**: `lib/services/dify/*.ts` (按功能域划分)
-- **职责**: 业务逻辑、API调用、数据处理
-- **原则**: 不关心认证细节，只调用代理层
-
-### 3. 类型层 (Type Definitions)
-- **位置**: `lib/services/dify/types.ts`
-- **职责**: 统一定义所有TypeScript数据结构
-- **原则**: 作为服务层的数据契约
-
-## 新增Dify API的开发流程
-
-### 步骤1: 定义类型
-在 `types.ts` 中添加请求和响应的TypeScript接口
-
-### 步骤2: 选择/创建服务文件
-根据功能域选择合适的服务文件，或创建新的服务文件
-
-### 步骤3: 实现服务函数
-```typescript
-export async function newDifyFunction(
-  appId: string,
-  payload: RequestType
-): Promise<ResponseType> {
-  const slug = 'api/path';
-  const apiUrl = `/api/dify/${appId}/${slug}`;
-  
-  const response = await fetch(apiUrl, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-    headers: { 'Content-Type': 'application/json' }
-  });
-  
-  if (!response.ok) {
-    throw new Error(`API调用失败: ${response.statusText}`);
-  }
-  
-  return response.json();
-}
-```
-
-### 步骤4: 前端使用
-```typescript
-import { newDifyFunction } from '@lib/services/dify/service-name';
-
-// 在组件或Hook中使用
-const result = await newDifyFunction(appId, params);
-```
-
-## 核心优势
-
-- **清晰性**: 职责分离，代码易理解
-- **模块化**: 按功能域划分，积木式组合
-- **低耦合**: 各层独立，变更影响最小
-- **易维护**: 问题定位准确，配置修改集中
-- **可扩展**: 新功能开发流程标准化
-
-## 开发要求
-
-在开发Dify相关功能时，请严格遵循此标准。这确保了：
-
-- **维护性**: 更容易定位和修复问题，修改配置（如API Key）只需要在一个地方（代理层）修改
-- **扩展性**: 添加新功能只需要按照流程创建新的类型和服务函数，对现有代码影响最小
+- **Maintainability**: Easier to locate and fix issues, configuration changes (like API Key) only need modification in one place (proxy layer)
+- **Scalability**: Adding new features only requires creating new types and service functions according to the process, minimal impact on existing code

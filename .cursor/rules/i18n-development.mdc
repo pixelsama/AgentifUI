@@ -3,218 +3,107 @@ description: Must read when adding translation keys or working with i18n
 alwaysApply: false
 ---
 
-# AgentifUI 国际化开发规范
+# AgentifUI Internationalization Development Standards
 
-## 核心架构
+## Core Architecture
 
-AgentifUI 使用 next-intl 进行国际化，采用统一的JSON配置架构：
+AgentifUI uses next-intl for internationalization with unified JSON configuration architecture:
 
-- **默认语言**: 中文简体（zh-CN），作为源语言
-- **支持语言**: 10种语言（zh-CN, en-US, es-ES, zh-TW, ja-JP, de-DE, fr-FR, ru-RU, it-IT, pt-PT）
-- **框架**: next-intl 配合 Next.js 15 App Router
-- **验证工具**: pnpm scripts封装的Python脚本进行结构一致性验证
+- **Default Language**: Simplified Chinese (zh-CN) as source language
+- **Supported Languages**: 10 languages (zh-CN, en-US, es-ES, zh-TW, ja-JP, de-DE, fr-FR, ru-RU, it-IT, pt-PT)
+- **Framework**: next-intl with Next.js 15 App Router
+- **Validation Tools**: Python scripts wrapped in pnpm scripts for structural consistency validation
 
-## 目录结构
+## Directory Structure
 
 ```
 messages/
-├── zh-CN.json        # 中文简体（主要语言）
-├── en-US.json        # 英文
-├── es-ES.json        # 西班牙文  
-├── zh-TW.json        # 繁体中文
-├── ja-JP.json        # 日文
-├── de-DE.json        # 德文
-├── fr-FR.json        # 法文
-├── ru-RU.json        # 俄文
-├── it-IT.json        # 意大利文
-└── pt-PT.json        # 葡萄牙文
+├── zh-CN.json        # Simplified Chinese (primary language)
+├── en-US.json        # English
+├── es-ES.json        # Spanish
+├── zh-TW.json        # Traditional Chinese
+├── ja-JP.json        # Japanese
+├── de-DE.json        # German
+├── fr-FR.json        # French
+├── ru-RU.json        # Russian
+├── it-IT.json        # Italian
+└── pt-PT.json        # Portuguese
 
 i18n/
-└── request.ts        # next-intl配置
+└── request.ts        # next-intl configuration
 ```
 
-## 验证工具
+## Validation Tools
 
-项目提供了i18n验证工具链：
+The project provides i18n validation tool chain:
 
 ```bash
-# 快速检查结构一致性
+# Quick structural consistency check
 pnpm run i18n:check
 
-# 详细验证（包含更多检查）
+# Detailed validation (includes more checks)
 pnpm run i18n:validate
 
-# 检测缺失的键（显示行号位置）
+# Detect missing keys (shows line number positions)
 pnpm run i18n:detect
 ```
 
-## 开发工作流程
+## Development Workflow
 
-### 1. 添加新翻译键（严格遵循）
+### 1. Adding New Translation Keys (MANDATORY PROCESS)
 
-**第一步**: 在 `messages/zh-CN.json` 中添加翻译键
-```json
-{
-  "pages": {
-    "admin": {
-      "newFeature": {
-        "title": "新功能标题",
-        "description": "功能描述",
-        "actions": {
-          "save": "保存",
-          "cancel": "取消"
-        }
-      }
-    }
-  }
-}
+**Step 1**: Add key to `messages/zh-CN.json` first
+**Step 2**: Add same structure to all 9 other language files
+**Step 3**: Run validation immediately
+
+```bash
+pnpm run i18n:check
 ```
 
-**第二步**: 在其他9个语言文件中手动添加相同结构的键
-```json
-// en-US.json
-{
-  "pages": {
-    "admin": {
-      "newFeature": {
-        "title": "New Feature Title",
-        "description": "Feature description",
-        "actions": {
-          "save": "Save",
-          "cancel": "Cancel"
-        }
-      }
-    }
-  }
-}
-```
-
-**第三步**: 立即验证一致性
-
-### 2. 在组件中使用
+### 2. Component Usage
 
 ```tsx
 import { useTranslations } from 'next-intl';
 
-const AdminComponent = () => {
-  const t = useTranslations('pages.admin.newFeature');
-
-  return (
-    <div>
-      <h1>{t('title')}</h1>
-      <p>{t('description')}</p>
-      <button>{t('actions.save')}</button>
-      <button>{t('actions.cancel')}</button>
-    </div>
-  );
+const Component = () => {
+  const t = useTranslations('pages.admin.feature');
+  return <h1>{t('title')}</h1>;
 };
 ```
 
-### 3. 验证一致性
+## Naming Structure
 
-```bash
-# 验证所有语言文件结构一致性
-pnpm run i18n:check
-
-# TypeScript类型检查
-pnpm run type-check
-```
-
-## 命名规范
-
-### 层次结构组织
-
+### Hierarchical Organization
 ```json
 {
-  "common": {
-    "ui": {          // 通用UI元素
-      "buttons": {...},
-      "forms": {...},
-      "modals": {...}
-    }
-  },
-  "pages": {         // 页面特定内容
-    "admin": {
-      "apiConfig": {...},
-      "users": {...}
-    },
-    "chat": {...},
-    "settings": {...}
-  },
-  "components": {    // 可复用组件
-    "sidebar": {...},
-    "navbar": {...}
-  }
+  "common": { "ui": {...} },        // Common UI elements
+  "pages": { "admin": {...} },      // Page-specific content
+  "components": { "sidebar": {...} } // Reusable components
 }
 ```
 
-### 参数化翻译
-
+### Parameterized Translations
 ```json
-{
-  "messages": {
-    "welcome": "欢迎 {name} 使用 AgentifUI",
-    "itemCount": "共 {count} 个项目"
-  }
-}
+{ "welcome": "Welcome {name} to AgentifUI" }
 ```
 
-```tsx
-// 使用参数化翻译
-const t = useTranslations('messages');
-<p>{t('welcome', { name: 'John' })}</p>
-<span>{t('itemCount', { count: 42 })}</span>
-```
-
-## 最佳实践
-
-### 功能域分离
-
-- **common.ui**: 通用UI元素（按钮、表单、模态框）
-- **pages.admin**: 管理后台特定功能
-- **pages.chat**: 聊天相关功能
-- **pages.settings**: 设置页面
-- **components**: 可复用组件文案
-
-### 开发流程规范
+## Validation Commands
 
 ```bash
-# 1. 修改翻译文件
-# 2. 立即验证
+# Quick check
 pnpm run i18n:check
 
-# 3. TypeScript检查
-pnpm run type-check
-
-# 4. 提交代码
-git add . && git commit -m "feat(i18n): add new feature translations"
-```
-
-## 故障排除
-
-### 验证命令
-
-```bash
-# 快速检查
-pnpm run i18n:check
-
-# 详细验证
+# Detailed validation  
 pnpm run i18n:validate
 
-# 检测缺失键
+# Detect missing keys
 pnpm run i18n:detect
-
-# 查找硬编码文本
-grep -r "[\\u4e00-\\u9fa5]" components/ --include="*.tsx" --exclude-dir=node_modules
 ```
 
-## 核心规则
+## Core Rules
 
-1. **🚫 禁止硬编码**: 任何用户可见文本都不能硬编码
-2. **✅ 结构一致**: 所有语言文件必须保持相同的键结构
-3. **🔍 及时验证**: 每次修改后立即运行验证脚本
-4. **📝 清晰命名**: 使用描述性的键名和层次结构
-5. **🎯 功能分组**: 按功能域组织翻译键
-
-4. **📝 清晰命名**: 使用描述性的键名和层次结构
-5. **�� 功能分组**: 按功能域组织翻译键
+1. **🚫 NO HARDCODING**: MUST NOT hardcode any user-visible text
+2. **✅ STRUCTURE CONSISTENCY**: MUST maintain identical key structure across all language files
+3. **🔍 IMMEDIATE VALIDATION**: MUST run validation scripts after each modification
+4. **📝 Clear Naming**: MUST use descriptive key names and hierarchical structure
+5. **🎯 Functional Grouping**: MUST organize translation keys by functional domains

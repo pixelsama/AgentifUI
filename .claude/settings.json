@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(pwd:*)",
+      "Bash(cd:*)",
+      "Bash(git:*)",
+      "Bash(pnpm:*)",
+      "Bash(pnpm type-check:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm format:*)",
+      "Bash(pnpm format:check:*)",
+      "Bash(pnpm i18n:check:*)",
+      "Bash(pnpm i18n:validate:*)",
+      "Bash(pnpm i18n:detect:*)",
+      "Bash(pnpm run type-check:*)",
+      "Bash(pnpm run i18n:check:*)",
+      "Bash(pnpm run build:*)",
+      "Bash(npm:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(date:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(awk:*)",
+      "Bash(sed:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(supabase:*)"
+    ]
+  },
+  "enabledMcpjsonServers": ["puppeteer", "context7", "sequential-thinking"],
+  "includeCoAuthoredBy": false,
+  "enableAllProjectMcpServers": true
+}

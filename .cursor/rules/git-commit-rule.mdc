@@ -3,93 +3,9 @@ description: Must read before making any git commits or writing commit messages
 alwaysApply: false
 ---
 
-# Git 提交规范
+# Git Commit Standards
 
-## 基本格式
-
-```
-<type>(<scope>): <subject>
-
-[body]
-
-[footer]
-```
-
-## 类型 (Type)
-
-- **feat**: 新功能
-- **fix**: 修复bug
-- **docs**: 文档更新
-- **style**: 代码格式（不影响功能）
-- **refactor**: 重构代码
-- **perf**: 性能优化
-- **test**: 测试相关
-- **chore**: 构建工具、依赖等
-
-## 作用域 (Scope)
-
-- **api**: 后端API相关
-- **ui**: 通用UI组件
-- **chat**: 聊天功能
-- **sidebar**: 侧边栏
-- **auth**: 认证授权
-- **admin**: 管理面板
-- **workflow**: 工作流
-- **mobile**: 移动端适配
-- **db**: 数据库相关
-- **config**: 配置文件
-- **deps**: 依赖更新
-- **core**: 核心功能
-- **all**: 多个模块
-
-## 主题 (Subject)
-
-- 使用英文描述
-- 以动词开头
-- 不超过50个字符
-- 不以句号结尾
-- 使用祈使语气（如 "add..." 而不是 "added..."）
-
-## 示例
-
-### 简单提交
-```bash
-git commit -m "feat(chat): add message streaming functionality"
-git commit -m "fix(ui): fix button style issue"
-git commit -m "docs: update API documentation"
-```
-
-### 复杂提交
-```bash
-git commit -m "feat(auth): refactor user authentication system" \
-           -m "" \
-           -m "Upgrade to new authentication architecture providing better security." \
-           -m "" \
-           -m "BREAKING CHANGE: Old authentication tokens will no longer be valid."
-```
-
-### 高风险提交
-对于可能需要回滚的核心功能修改，添加风险标记：
-```bash
-git commit -m "fix(core): enhance state management - RISKY_REVERT_CANDIDATE"
-```
-
-## 最佳实践
-
-1. **明确描述**: 提交信息要能清楚说明变更内容
-2. **原子提交**: 每次提交只包含一个逻辑变更
-3. **及时提交**: 完成一个功能点就提交，避免大批量提交
-4. **英文描述**: 统一使用英文编写提交信息
-
-
-
-- Focus on what changed and why
-- Use proper grammar and spelling
-
-
-# Git 提交规范
-
-## 基本格式
+## Basic Format
 
 ```
 <type>(<scope>): <subject>
@@ -99,51 +15,51 @@ git commit -m "fix(core): enhance state management - RISKY_REVERT_CANDIDATE"
 [footer]
 ```
 
-## 类型 (Type)
+## Type (MANDATORY)
 
-- **feat**: 新功能
-- **fix**: 修复bug
-- **docs**: 文档更新
-- **style**: 代码格式（不影响功能）
-- **refactor**: 重构代码
-- **perf**: 性能优化
-- **test**: 测试相关
-- **chore**: 构建工具、依赖等
+- **feat**: New feature
+- **fix**: Bug fix
+- **docs**: Documentation update
+- **style**: Code formatting (no functional impact)
+- **refactor**: Code refactoring
+- **perf**: Performance optimization
+- **test**: Test-related changes
+- **chore**: Build tools, dependencies, etc.
 
-## 作用域 (Scope)
+## Scope (MANDATORY)
 
-- **api**: 后端API相关
-- **ui**: 通用UI组件
-- **chat**: 聊天功能
-- **sidebar**: 侧边栏
-- **auth**: 认证授权
-- **admin**: 管理面板
-- **workflow**: 工作流
-- **mobile**: 移动端适配
-- **db**: 数据库相关
-- **config**: 配置文件
-- **deps**: 依赖更新
-- **core**: 核心功能
-- **all**: 多个模块
+- **api**: Backend API related
+- **ui**: Common UI components
+- **chat**: Chat functionality
+- **sidebar**: Sidebar
+- **auth**: Authentication/authorization
+- **admin**: Admin panel
+- **workflow**: Workflow
+- **mobile**: Mobile adaptation
+- **db**: Database related
+- **config**: Configuration files
+- **deps**: Dependency updates
+- **core**: Core functionality
+- **all**: Multiple modules
 
-## 主题 (Subject)
+## Subject (MANDATORY)
 
-- 使用英文描述
-- 以动词开头
-- 不超过50个字符
-- 不以句号结尾
-- 使用祈使语气（如 "add..." 而不是 "added..."）
+- MUST use English description
+- MUST start with a verb
+- MUST NOT exceed 50 characters
+- MUST NOT end with a period
+- MUST use imperative mood (e.g., "add..." not "added...")
 
-## 示例
+## Examples
 
-### 简单提交
+### Simple Commits
 ```bash
 git commit -m "feat(chat): add message streaming functionality"
 git commit -m "fix(ui): fix button style issue"
 git commit -m "docs: update API documentation"
 ```
 
-### 复杂提交
+### Complex Commits
 ```bash
 git commit -m "feat(auth): refactor user authentication system" \
            -m "" \
@@ -152,22 +68,22 @@ git commit -m "feat(auth): refactor user authentication system" \
            -m "BREAKING CHANGE: Old authentication tokens will no longer be valid."
 ```
 
-### 高风险提交
-对于可能需要回滚的核心功能修改，添加风险标记：
+### High-Risk Commits
+For core functionality changes that may need rollback, add risk markers:
 ```bash
 git commit -m "fix(core): enhance state management - RISKY_REVERT_CANDIDATE"
 ```
 
-## 最佳实践
+## Best Practices
 
-1. **明确描述**: 提交信息要能清楚说明变更内容
-2. **原子提交**: 每次提交只包含一个逻辑变更
-3. **及时提交**: 完成一个功能点就提交，避免大批量提交
-4. **英文描述**: 统一使用英文编写提交信息
+1. **Clear Description**: MUST clearly explain what changed
+2. **Atomic Commits**: MUST contain only one logical change per commit
+3. **Timely Commits**: MUST commit after completing each feature, avoid bulk commits
+4. **English Description**: MUST use English for all commit messages
 
 
 
-- Focus on what changed and why
-- Use proper grammar and spelling
+- MUST focus on what changed and why
+- MUST use proper grammar and spelling
 
 

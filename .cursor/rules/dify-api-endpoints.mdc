@@ -2,125 +2,65 @@
 alwaysApply: false
 ---
 
-# Dify API 集成规范
+# Dify API Integration Standards
 
-## 核心架构
+## Core Architecture
 
-三层架构处理Dify API集成：
+3-layer architecture handles Dify API integration:
 
-1. **代理层**: `app/api/dify/[appId]/[...slug]/route.ts` - 处理认证和请求转发
-2. **服务层**: `lib/services/dify/` - 业务逻辑和API调用
-3. **类型层**: `lib/services/dify/types.ts` - TypeScript类型定义
+1. **Proxy Layer**: `app/api/dify/[appId]/[...slug]/route.ts` - Authentication and request forwarding
+2. **Service Layer**: `lib/services/dify/` - Business logic and API calls
+3. **Type Layer**: `lib/services/dify/types.ts` - TypeScript type definitions
 
-## 主要服务模块
+## Main Service Modules
 
-| 服务 | 文件 | 功能 |
-|------|------|------|
-| 聊天 | `chat-service.ts` | 聊天消息流式处理 |
-| 工作流 | `workflow-service.ts` | 工作流执行和管理 |
-| 应用 | `app-service.ts` | 应用参数和信息获取 |
-| 消息 | `message-service.ts` | 消息管理和反馈 |
-| 对话 | `conversation-service.ts` | 对话列表和管理 |
-| 文本生成 | `completion-service.ts` | 文本生成和流式输出 |
+| Service | File | Function |
+|---------|------|----------|
+| Chat | `chat-service.ts` | Chat message streaming processing |
+| Workflow | `workflow-service.ts` | Workflow execution and management |
+| App | `app-service.ts` | Application parameters and info retrieval |
+| Message | `message-service.ts` | Message management and feedback |
+| Conversation | `conversation-service.ts` | Conversation list and management |
+| Completion | `completion-service.ts` | Text generation and streaming output |
 
-## 使用模式
+## Usage Patterns
 
-### 导入服务
+### Import Services
 ```typescript
-// 统一入口导入
+// Unified entry import
 import { streamDifyChat, getDifyAppParameters } from '@lib/services/dify';
 
-// 或从特定服务文件导入
+// Or import from specific service file
 import { streamDifyChat } from '@lib/services/dify/chat-service';
 ```
 
-### 错误处理
+### Error Handling
 ```typescript
 try {
   const result = await someService(appId, params);
 } catch (error) {
   if (error.status === 401) {
-    // 处理认证错误
+    // Handle authentication error
   } else if (error.status === 429) {
-    // 处理限流错误
+    // Handle rate limiting error
   }
 }
 ```
 
-### 类型安全
-所有API相关类型定义在 `lib/services/dify/types.ts`：
-- 请求类型: `Dify*RequestPayload`
-- 响应类型: `Dify*Response`
-- SSE事件类型: `Dify*SseEvent`
+### Type Safety
+All API-related types defined in `lib/services/dify/types.ts`:
+- Request types: `Dify*RequestPayload`
+- Response types: `Dify*Response`
+- SSE event types: `Dify*SseEvent`
 
-## 开发规范
+## Development Standards
 
-1. **新增端点**: 遵循现有服务文件的模式
-2. **类型定义**: 在types.ts中定义所有相关类型
-3. **错误处理**: 使用统一的错误处理机制
-4. **文档更新**: 更新相关服务函数的JSDoc注释
+1. **New Endpoints**: MUST follow patterns of existing service files
+2. **Type Definitions**: MUST define all related types in types.ts
+3. **Error Handling**: MUST use unified error handling mechanism
+4. **Documentation**: MUST update JSDoc comments for related service functions
 
-- **Total Endpoints**: 25
-- **Service Files**: 7
-- **Supported App Types**: 5 (chatbot, agent, chatflow, workflow, text-generation)
-- **Coverage**: 100% Dify API functionality
-# Dify API 集成规范
-
-## 核心架构
-
-三层架构处理Dify API集成：
-
-1. **代理层**: `app/api/dify/[appId]/[...slug]/route.ts` - 处理认证和请求转发
-2. **服务层**: `lib/services/dify/` - 业务逻辑和API调用
-3. **类型层**: `lib/services/dify/types.ts` - TypeScript类型定义
-
-## 主要服务模块
-
-| 服务 | 文件 | 功能 |
-|------|------|------|
-| 聊天 | `chat-service.ts` | 聊天消息流式处理 |
-| 工作流 | `workflow-service.ts` | 工作流执行和管理 |
-| 应用 | `app-service.ts` | 应用参数和信息获取 |
-| 消息 | `message-service.ts` | 消息管理和反馈 |
-| 对话 | `conversation-service.ts` | 对话列表和管理 |
-| 文本生成 | `completion-service.ts` | 文本生成和流式输出 |
-
-## 使用模式
-
-### 导入服务
-```typescript
-// 统一入口导入
-import { streamDifyChat, getDifyAppParameters } from '@lib/services/dify';
-
-// 或从特定服务文件导入
-import { streamDifyChat } from '@lib/services/dify/chat-service';
-```
-
-### 错误处理
-```typescript
-try {
-  const result = await someService(appId, params);
-} catch (error) {
-  if (error.status === 401) {
-    // 处理认证错误
-  } else if (error.status === 429) {
-    // 处理限流错误
-  }
-}
-```
-
-### 类型安全
-所有API相关类型定义在 `lib/services/dify/types.ts`：
-- 请求类型: `Dify*RequestPayload`
-- 响应类型: `Dify*Response`
-- SSE事件类型: `Dify*SseEvent`
-
-## 开发规范
-
-1. **新增端点**: 遵循现有服务文件的模式
-2. **类型定义**: 在types.ts中定义所有相关类型
-3. **错误处理**: 使用统一的错误处理机制
-4. **文档更新**: 更新相关服务函数的JSDoc注释
+## Coverage Statistics
 
 - **Total Endpoints**: 25
 - **Service Files**: 7

@@ -2,34 +2,34 @@
 alwaysApply: false
 ---
 
-# API Routes 规范
+# API Routes Standards
 
-## 路由结构
+## Route Structure
 
 ```
 app/api/
-├── auth/               # 认证相关API
-├── admin/              # 管理员API
-└── dify/               # Dify API代理
+├── auth/               # Authentication related API
+├── admin/              # Admin API
+└── dify/               # Dify API proxy
     └── [appId]/[...slug]/
 ```
 
-## 核心规范
+## Core Standards
 
-### 1. 文件命名
-- 使用 `route.ts` 作为API处理文件
-- 动态路由使用 `[param]`，捕获所有路由使用 `[...slug]`
+### 1. File Naming
+- MUST use `route.ts` as API handler file
+- MUST use `[param]` for dynamic routes, `[...slug]` for catch-all routes
 
-### 2. 处理函数
+### 2. Handler Functions
 ```typescript
-// 标准HTTP方法导出
+// Standard HTTP method exports
 export async function GET(request: Request) {}
 export async function POST(request: Request) {}
 ```
 
-### 3. 响应格式
+### 3. Response Format
 ```typescript
-// 统一响应结构
+// Unified response structure
 type ApiResponse<T> = {
   success: boolean;
   data?: T;
@@ -40,73 +40,18 @@ type ApiResponse<T> = {
 };
 ```
 
-### 4. 错误处理
-- 使用标准HTTP状态码
-- 提供清晰的错误信息
-- 实现统一的错误响应格式
+### 4. Error Handling
+- MUST use standard HTTP status codes
+- MUST provide clear error messages
+- MUST implement unified error response format
 
-## 最佳实践
+## Best Practices
 
-1. **请求验证**: 严格验证所有入站请求
-2. **类型安全**: 使用TypeScript进行类型检查
-3. **错误处理**: 实现统一的错误处理机制
-4. **中间件**: 在 `middleware.ts` 中配置路由中间件
+1. **Request Validation**: MUST strictly validate all inbound requests
+2. **Type Safety**: MUST use TypeScript for type checking
+3. **Error Handling**: MUST implement unified error handling mechanism
+4. **Middleware**: MUST configure route middleware in `middleware.ts`
+5. **Streaming**: MUST handle streaming responses when necessary
+6. **Timeout**: MUST implement appropriate error handling and timeout handling
 
-3. Handle streaming responses when necessary
-4. Implement appropriate error handling and timeout handling
-
-For example, see [app/api/dify/[appId]/[...slug]/route.ts](mdc:app/api/dify/[appId]/[...slug]/route.ts) for complete implementation.
-# API Routes 规范
-
-## 路由结构
-
-```
-app/api/
-├── auth/               # 认证相关API
-├── admin/              # 管理员API
-└── dify/               # Dify API代理
-    └── [appId]/[...slug]/
-```
-
-## 核心规范
-
-### 1. 文件命名
-- 使用 `route.ts` 作为API处理文件
-- 动态路由使用 `[param]`，捕获所有路由使用 `[...slug]`
-
-### 2. 处理函数
-```typescript
-// 标准HTTP方法导出
-export async function GET(request: Request) {}
-export async function POST(request: Request) {}
-```
-
-### 3. 响应格式
-```typescript
-// 统一响应结构
-type ApiResponse<T> = {
-  success: boolean;
-  data?: T;
-  error?: {
-    code: string;
-    message: string;
-  };
-};
-```
-
-### 4. 错误处理
-- 使用标准HTTP状态码
-- 提供清晰的错误信息
-- 实现统一的错误响应格式
-
-## 最佳实践
-
-1. **请求验证**: 严格验证所有入站请求
-2. **类型安全**: 使用TypeScript进行类型检查
-3. **错误处理**: 实现统一的错误处理机制
-4. **中间件**: 在 `middleware.ts` 中配置路由中间件
-
-3. Handle streaming responses when necessary
-4. Implement appropriate error handling and timeout handling
-
-For example, see [app/api/dify/[appId]/[...slug]/route.ts](mdc:app/api/dify/[appId]/[...slug]/route.ts) for complete implementation.
+For reference, see `app/api/dify/[appId]/[...slug]/route.ts` for complete implementation.

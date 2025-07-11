@@ -179,3 +179,39 @@ Example JSDoc:
 - **File Structure**: Follows Next.js 15 App Router conventions
 - **Error Handling**: Comprehensive error boundaries and user feedback systems
 - **Development Rules**: Follow `.cursor/rules/cursor-rules.mdc` for rule management
+
+## AI Agent Rule Integration
+
+**CRITICAL**: AI agents MUST read `.cursor/rules/cursor-rules.mdc` first - the master rule index with dependencies and enforcement levels.
+
+### Mandatory Rule Compliance
+
+#### Core Development Rules (ALWAYS APPLY)
+
+- **Development Workflow**: MUST analyze→evaluate→implement→validate→document
+- **Comment Standards**: MUST use English, JSDoc format, explain "why" not "what"
+- **Git Commits**: MUST follow `<type>(<scope>): <subject>` format, English, imperative mood
+
+#### Domain-Specific Rules (APPLY WHEN RELEVANT)
+
+- **Database Changes**: MUST follow 6-phase flow, sync TypeScript types
+- **I18n Work**: MUST NOT hardcode text, maintain key structure consistency
+- **Dify API**: MUST follow 3-layer architecture (proxy→service→type)
+
+### Mandatory Validation Commands
+
+```bash
+# Before any commit
+pnpm run type-check    # TypeScript validation
+pnpm run i18n:check    # Translation validation
+pnpm run build         # Build validation (ask user first)
+```
+
+### Rule Enforcement Protocol
+
+1. Read cursor-rules.mdc master index
+2. Apply rules in dependency order
+3. Run validation commands
+4. Update documentation when needed
+
+**Memory Anchor**: These rule summaries provide persistent reference for AI agents, extracted from detailed rule files for quick compliance checking.
