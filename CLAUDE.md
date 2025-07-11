@@ -171,16 +171,6 @@ Example JSDoc:
   refactor(admin): optimize content management UI
   ```
 
-### Prohibited Footer Content
-
-**DO NOT add these lines to any commit:**
-
-```
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
 ## Important Notes
 
 - **Database**: Uses Supabase with comprehensive RLS policies
