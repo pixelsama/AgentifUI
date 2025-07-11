@@ -5,6 +5,7 @@
 import { SSOUserService } from '@lib/services/admin/user/sso-user-service';
 import { CASConfigService } from '@lib/services/sso/generic-cas-service';
 import { createAdminClient } from '@lib/supabase/server';
+import { validateRedirectUrl } from '@lib/utils/redirect-validation';
 
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -20,8 +21,15 @@ export async function GET(
   const returnUrl = requestUrl.searchParams.get('returnUrl') || '/chat';
   const { providerId } = await params;
 
+  // 🔒 Security: Validate redirect URL to prevent open redirect attacks
+  const validatedReturnUrl = validateRedirectUrl(
+    returnUrl,
+    request.url,
+    '/chat'
+  );
+
   console.log(
-    `SSO callback received for provider ${providerId} - ticket: ${ticket ? 'present' : 'missing'}, returnUrl: ${returnUrl}`
+    `SSO callback received for provider ${providerId} - ticket: ${ticket ? 'present' : 'missing'}, returnUrl: ${returnUrl} (validated: ${validatedReturnUrl})`
   );
 
   // 获取配置的应用URL，用于构建重定向URL
@@ -154,7 +162,7 @@ export async function GET(
     processingUrl.searchParams.set('sso_login', 'success');
     processingUrl.searchParams.set('user_id', user.id);
     processingUrl.searchParams.set('user_email', userEmail);
-    processingUrl.searchParams.set('redirect_to', returnUrl);
+    processingUrl.searchParams.set('redirect_to', validatedReturnUrl);
     processingUrl.searchParams.set('welcome', fullName);
 
     console.log(
@@ -172,11 +180,39 @@ export async function GET(
     );
     console.log('Cookie value length:', cookieValue.length);
 
+    // 🔒 Security: Split sensitive and non-sensitive data
+    // Store sensitive data in httpOnly cookie, accessible data in regular cookie
+    const sensitiveData = {
+      userId: ssoUserData.userId,
+      employeeNumber: ssoUserData.employeeNumber,
+      authSource: ssoUserData.authSource,
+      loginTime: ssoUserData.loginTime,
+      expiresAt: ssoUserData.expiresAt,
+    };
+
+    const publicData = {
+      username: ssoUserData.username,
+      fullName: ssoUserData.fullName,
+      provider: ssoUserData.provider,
+    };
+
+    // Store sensitive data in httpOnly cookie (secure from XSS)
+    response.cookies.set({
+      name: 'sso_user_data_secure',
+      value: JSON.stringify(sensitiveData),
+      maxAge: 10 * 60, // 10 minutes
+      httpOnly: true, // 🔒 Security: Prevent XSS attacks by blocking JavaScript access
+      secure: appUrl.startsWith('https'),
+      sameSite: 'lax',
+      path: '/',
+    });
+
+    // Store non-sensitive data in accessible cookie (for frontend use)
     response.cookies.set({
       name: 'sso_user_data',
-      value: cookieValue,
-      maxAge: 10 * 60, // 10分钟过期
-      httpOnly: false, // 前端需要读取
+      value: JSON.stringify(publicData),
+      maxAge: 10 * 60, // 10 minutes
+      httpOnly: false, // Frontend needs access to display name and basic info
       secure: appUrl.startsWith('https'),
       sameSite: 'lax',
       path: '/',

@@ -93,7 +93,6 @@ export default function SSOProcessingPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            userId,
             userEmail,
             ssoUserData,
           }),
@@ -125,6 +124,8 @@ export default function SSOProcessingPage() {
           // --- 清理会话cookie ---
           document.cookie =
             'sso_user_data=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          // Note: sso_user_data_secure is httpOnly and cannot be cleared by JavaScript
+          // It will be automatically cleared by the server or expire after 10 minutes
 
           setStatus('success');
           setMessage(t('success'));

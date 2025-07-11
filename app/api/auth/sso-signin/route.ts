@@ -3,6 +3,7 @@
 // 添加请求去重逻辑和改善的错误处理
 import { createAdminClient } from '@lib/supabase/server';
 
+import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 // 简单的内存缓存，用于防止短时间内的重复请求
@@ -15,9 +16,46 @@ export async function POST(request: NextRequest) {
 
   try {
     requestData = await request.json();
-    const { userId, userEmail, ssoUserData } = requestData;
+    const { userEmail, ssoUserData } = requestData;
 
-    if (!userId || !userEmail || !ssoUserData) {
+    // 🔒 Security: Read sensitive data from httpOnly cookie
+    const cookieStore = await cookies();
+    const secureCookie = cookieStore.get('sso_user_data_secure');
+
+    if (!secureCookie) {
+      return NextResponse.json(
+        { message: 'SSO安全数据不存在或已过期' },
+        { status: 401 }
+      );
+    }
+
+    let sensitiveData;
+    try {
+      sensitiveData = JSON.parse(secureCookie.value);
+    } catch (error) {
+      return NextResponse.json(
+        { message: 'SSO安全数据格式错误' },
+        { status: 401 }
+      );
+    }
+
+    // Check if SSO data has expired
+    if (sensitiveData.expiresAt < Date.now()) {
+      return NextResponse.json(
+        { message: 'SSO登录数据已过期，请重新登录' },
+        { status: 401 }
+      );
+    }
+
+    // Reconstruct complete SSO user data from secure cookie and request
+    const completeSsoUserData = {
+      ...sensitiveData,
+      ...ssoUserData,
+    };
+
+    const userId = sensitiveData.userId;
+
+    if (!userId || !userEmail || !completeSsoUserData) {
       return NextResponse.json(
         { message: 'SSO登录数据不完整' },
         { status: 400 }
@@ -25,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 创建请求唯一标识，防止重复处理同一用户的并发请求
-    const requestKey = `sso-signin-${userId}-${ssoUserData.loginTime}`;
+    const requestKey = `sso-signin-${userId}-${sensitiveData.loginTime}`;
 
     // 检查是否有相同的请求正在处理中
     if (processingRequests.has(requestKey)) {
@@ -53,7 +91,7 @@ export async function POST(request: NextRequest) {
     const processRequest = async (): Promise<NextResponse> => {
       try {
         // 验证SSO数据是否过期
-        if (Date.now() > ssoUserData.expiresAt) {
+        if (Date.now() > completeSsoUserData.expiresAt) {
           return NextResponse.json(
             { message: 'SSO会话已过期' },
             { status: 401 }
@@ -176,9 +214,20 @@ export async function POST(request: NextRequest) {
     console.error('SSO signin failed:', error);
 
     // 在发生错误时清理可能的缓存条目
-    if (requestData?.userId && requestData?.ssoUserData?.loginTime) {
-      const requestKey = `sso-signin-${requestData.userId}-${requestData.ssoUserData.loginTime}`;
-      processingRequests.delete(requestKey);
+    // Note: Error handling may not have access to sensitiveData, so we try to construct the key from cookie
+    try {
+      const cookieStore = await cookies();
+      const secureCookie = cookieStore.get('sso_user_data_secure');
+      if (secureCookie) {
+        const sensitiveData = JSON.parse(secureCookie.value);
+        const requestKey = `sso-signin-${sensitiveData.userId}-${sensitiveData.loginTime}`;
+        processingRequests.delete(requestKey);
+      }
+    } catch (cleanupError) {
+      console.warn(
+        'Failed to cleanup processing cache on error:',
+        cleanupError
+      );
     }
 
     return NextResponse.json(

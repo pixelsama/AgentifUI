@@ -42,20 +42,6 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  // Check if it is an SSO login success callback, if so, temporarily skip authentication check
-  // Allow the frontend to handle the SSO session establishment
-  const ssoLoginSuccess = url.searchParams.get('sso_login') === 'success';
-  const hasSsoUserCookie = request.cookies.get('sso_user_data');
-
-  // If it is an SSO login success callback or there is an SSO user data cookie, temporarily skip authentication check
-  // Allow the frontend component to establish a Supabase session
-  if (ssoLoginSuccess || hasSsoUserCookie) {
-    console.log(
-      `[Middleware] SSO session detected, allowing request to ${pathname}`
-    );
-    return response;
-  }
-
   // Highest priority: If the user directly accesses /chat, redirect to /chat/new
   // This ensures that always starts from a clear new conversation state.
   if (pathname === '/chat') {
@@ -64,6 +50,21 @@ export async function middleware(request: NextRequest) {
       `[Middleware] Exact /chat match. Redirecting to ${newChatUrl.toString()}`
     );
     return NextResponse.redirect(newChatUrl);
+  }
+
+  // Check if it is an SSO login success callback, if so, temporarily skip authentication check
+  // Allow the frontend to handle the SSO session establishment
+  const ssoLoginSuccess = url.searchParams.get('sso_login') === 'success';
+  const hasSsoUserCookie = request.cookies.get('sso_user_data');
+  const hasSsoSecureCookie = request.cookies.get('sso_user_data_secure');
+
+  // If it is an SSO login success callback or there is an SSO user data cookie, temporarily skip authentication check
+  // Allow the frontend component to establish a Supabase session
+  if (ssoLoginSuccess || hasSsoUserCookie || hasSsoSecureCookie) {
+    console.log(
+      `[Middleware] SSO session detected, allowing request to ${pathname}`
+    );
+    return response;
   }
 
   // Create Supabase client

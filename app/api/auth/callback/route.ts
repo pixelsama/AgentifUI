@@ -1,3 +1,5 @@
+import { validateRedirectUrl } from '@lib/utils/redirect-validation';
+
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -69,9 +71,14 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 获取重定向目标，如果没有指定，则重定向到聊天页面
+  // 🔒 Security: Validate redirect URL to prevent open redirect attacks
   const redirectTo = requestUrl.searchParams.get('redirectTo') || '/chat/new';
+  const validatedRedirectUrl = validateRedirectUrl(
+    redirectTo,
+    request.url,
+    '/chat/new'
+  );
 
-  // 重定向到指定页面
-  return NextResponse.redirect(new URL(redirectTo, request.url));
+  // 重定向到验证后的安全页面
+  return NextResponse.redirect(new URL(validatedRedirectUrl, request.url));
 }

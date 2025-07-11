@@ -1,4 +1,5 @@
 import { getDifyAppConfig } from '@lib/config/dify-config';
+import { createClient } from '@lib/supabase/server';
 import { isTextGenerationApp, isWorkflowApp } from '@lib/types/dify-app-types';
 
 import { type NextRequest, NextResponse } from 'next/server';
@@ -67,6 +68,22 @@ async function proxyToDify(
   // Modification point 1: receive context object containing params
   context: { params: Promise<DifyApiParams> } // Unified use of Promise type
 ) {
+  // 🔒 Security: Authenticate user before processing request
+  const supabase = await createClient();
+
+  // Use getUser() to verify authentication with Supabase Auth server
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    console.log(
+      `[Dify API] Unauthorized access attempt to appId: ${(await context.params).appId}`
+    );
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   // Modification point 2: use await to get the value of params
   const params = await context.params;
   const appId = params.appId;
