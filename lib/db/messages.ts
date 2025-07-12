@@ -28,19 +28,18 @@ export async function saveMessage(message: {
   status?: MessageStatus;
   external_id?: string | null;
   token_count?: number | null;
+  sequence_index?: number;
 }): Promise<Result<Message>> {
   console.log(
     `[saveMessage] 开始保存消息，对话ID=${message.conversation_id}，角色=${message.role}`
   );
-
+  // 直接传递sequence_index
   const result = await messageService.saveMessage(message);
-
   if (result.success) {
     console.log(`[saveMessage] 保存消息成功，消息ID=${result.data.id}`);
   } else {
     console.error(`[saveMessage] 保存消息失败:`, result.error);
   }
-
   return result;
 }
 
@@ -59,16 +58,15 @@ export async function saveMessages(
     status?: MessageStatus;
     external_id?: string | null;
     token_count?: number | null;
+    sequence_index?: number;
   }[]
 ): Promise<Result<string[]>> {
   if (!messages.length) {
     return success([]);
   }
-
   console.log(`[saveMessages] 开始批量保存${messages.length}条消息`);
-
+  // 直接传递sequence_index
   const result = await messageService.saveMessages(messages);
-
   if (result.success) {
     console.log(
       `[saveMessages] 批量保存消息成功，保存了${result.data.length}条消息`
@@ -76,7 +74,6 @@ export async function saveMessages(
   } else {
     console.error(`[saveMessages] 批量保存消息失败:`, result.error);
   }
-
   return result;
 }
 
@@ -144,7 +141,7 @@ export function chatMessageToDbMessage(
   conversationId: string,
   userId?: string | null
 ): Omit<Message, 'id' | 'created_at' | 'is_synced'> {
-  // 使用messageService中的转换函数，确保一致性
+  // 直接传递sequence_index
   return messageService.chatMessageToDbMessage(
     chatMessage,
     conversationId,
@@ -167,14 +164,15 @@ export async function createPlaceholderAssistantMessage(
   console.log(
     `[createPlaceholderAssistantMessage] 创建占位助手消息，对话ID=${conversationId}`
   );
-
+  // 直接传递sequence_index: 1
   return saveMessage({
     conversation_id: conversationId,
     user_id: null,
     role: 'assistant',
     content: errorMessage || '助手消息生成失败',
-    metadata: { error: true, errorMessage, sequence_index: 1 },
+    metadata: { error: true, errorMessage },
     status,
+    sequence_index: 1,
   });
 }
 

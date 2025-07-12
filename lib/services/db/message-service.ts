@@ -88,6 +88,7 @@ export class MessageService {
           .select('*')
           .eq('conversation_id', conversationId)
           .order('created_at', { ascending: false })
+          .order('sequence_index', { ascending: false })
           .order('id', { ascending: false }); // 保证排序稳定性
 
         // 应用游标条件
@@ -159,25 +160,19 @@ export class MessageService {
     options: { cache?: boolean } = {}
   ): Promise<Result<Message[]>> {
     const { cache = true } = options;
-
-    return dataService.findMany<Message>(
-      'messages',
-      { conversation_id: conversationId },
-      { column: 'created_at', ascending: false },
-      { offset: 0, limit },
-      {
-        cache,
-        cacheTTL: 2 * 60 * 1000, // 2分钟缓存
-        subscribe: true,
-        subscriptionKey: SubscriptionKeys.conversationMessages(conversationId),
-        onUpdate: () => {
-          // 清除相关缓存
-          cacheService.deletePattern(
-            `conversation:messages:${conversationId}:*`
-          );
-        },
-      }
-    );
+    // 直接用supabase查询，带上排序要求
+    const { data, error } = await dataService['supabase']
+      .from('messages')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true })
+      .order('sequence_index', { ascending: true })
+      .order('id', { ascending: true })
+      .limit(limit);
+    if (error) {
+      return failure(error);
+    }
+    return success(data || []);
   }
 
   /**
@@ -193,12 +188,20 @@ export class MessageService {
     status?: MessageStatus;
     external_id?: string | null;
     token_count?: number | null;
+    sequence_index?: number;
   }): Promise<Result<Message>> {
+    const sequence_index =
+      message.sequence_index !== undefined
+        ? message.sequence_index
+        : message.role === 'user'
+          ? 0
+          : 1;
     const messageData = {
       ...message,
       metadata: message.metadata || {},
       status: message.status || 'sent',
       is_synced: true,
+      sequence_index,
     };
 
     // 🎯 优化：对于助手消息，在保存的同时更新对话预览
@@ -275,6 +278,7 @@ export class MessageService {
       status?: MessageStatus;
       external_id?: string | null;
       token_count?: number | null;
+      sequence_index?: number;
     }>
   ): Promise<Result<string[]>> {
     if (!messages.length) {
@@ -287,6 +291,12 @@ export class MessageService {
         metadata: msg.metadata || {},
         status: msg.status || 'sent',
         is_synced: true,
+        sequence_index:
+          msg.sequence_index !== undefined
+            ? msg.sequence_index
+            : msg.role === 'user'
+              ? 0
+              : 1,
       }));
 
       const { data, error } = await dataService['supabase']
@@ -352,8 +362,13 @@ export class MessageService {
       baseMetadata.attachments = chatMessage.attachments;
     }
 
-    // 添加序列索引，确保用户消息在助手消息前面
-    baseMetadata.sequence_index = chatMessage.isUser ? 0 : 1;
+    // sequence_index 直接作为字段，不再放metadata
+    const sequence_index =
+      chatMessage.sequence_index !== undefined
+        ? chatMessage.sequence_index
+        : chatMessage.isUser
+          ? 0
+          : 1;
 
     return {
       conversation_id: conversationId,
@@ -364,6 +379,7 @@ export class MessageService {
       status: chatMessage.error ? 'error' : 'sent',
       external_id: chatMessage.dify_message_id || null,
       token_count: chatMessage.token_count || null,
+      sequence_index,
     };
   }
 
@@ -386,6 +402,7 @@ export class MessageService {
       wasManuallyStopped: dbMessage.metadata?.stopped_manually === true,
       token_count: dbMessage.token_count || undefined,
       attachments: attachments.length > 0 ? attachments : undefined,
+      sequence_index: dbMessage.sequence_index,
     };
   }
 

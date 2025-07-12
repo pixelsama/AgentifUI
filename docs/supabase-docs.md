@@ -2,8 +2,8 @@
 
 本文档记录了AgentifUI项目中的数据库结构、功能和使用方法。本文档与当前数据库状态完全同步。
 
-**文档更新日期**: 2025-07-09  
-**数据库版本**: 包含至 20250709101517_fix_sso_login_secure_complete.sql 的所有迁移
+**文档更新日期**: 2025-07-12  
+**数据库版本**: 包含至 20250712133249_add_sequence_index_column.sql 的所有迁移
 
 ## 当前系统状态
 
@@ -90,7 +90,13 @@
    - `last_message_preview` 字段：用于在侧边栏等位置展示对话的最后一条消息摘要。20250522193000 迁移后，该字段格式已调整为 JSONB，包含 `content`（消息内容预览）、`role`（消息角色）、`created_at`（消息时间）等。例如：`{"content":"你好，有什么可以帮您？","role":"assistant","created_at":"2024-05-22T19:30:00Z"}`。这样便于前端直接渲染不同角色和时间的消息预览。
 
 2. `messages` 表：
-   - 主要字段：`id`, `conversation_id`, `user_id`, `role`, `content`, `metadata`, `created_at`, `status`
+   - 主要字段：`id`, `conversation_id`, `user_id`, `role`, `content`, `metadata`, `created_at`, `status`, `sequence_index`
+   - `sequence_index` 字段：INT 类型，默认 0。用于消息的顺序排序，0=用户消息，1=助手消息，2=系统消息等。
+   - **索引优化**：
+     - `idx_messages_conversation_time_sequence`：(`conversation_id`, `created_at` ASC, `sequence_index` ASC)
+     - `idx_messages_conversation_stable_sort`：(`conversation_id`, `created_at` ASC, `sequence_index` ASC, `id` ASC)
+   - **排序要求**：
+     - 查询消息时，务必使用 `ORDER BY created_at ASC, sequence_index ASC, id ASC`，确保顺序稳定与高性能。
    - Dify 集成字段：`external_id`, `token_count`, `is_synced`
    - `role` 字段可能的值为 `'user'`, `'assistant'` 或 `'system'`
    - `status` 字段可能的值为 `'sent'`, `'delivered'` 或 `'error'`
@@ -891,6 +897,10 @@ if (!isAdmin) return <AccessDenied />;
   - **运维友好设计**: 详细的NOTICE消息便于监控和问题排查
 
   **验证结果**: 所有API相关表RLS状态均为true，安全策略正确启用
+
+### 2025-07-12 消息表优化 - 新增sequence_index字段和索引
+
+- `/supabase/migrations/20250712133249_add_sequence_index_column.sql`: 为messages表新增sequence_index字段及相关复合索引，风险低，支持高性能排序和稳定分页。
 
 ## 迁移文件说明
 

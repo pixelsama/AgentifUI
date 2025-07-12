@@ -35,6 +35,8 @@ export interface ChatMessage {
   error?: string | null;
   /** 消息附带的文件附件 */
   attachments?: MessageAttachment[];
+  /** 消息顺序索引，0=用户消息，1=助手消息，2=系统消息等 */
+  sequence_index?: number;
 
   /** 数据库中的消息ID，保存成功后才有值 */
   db_id?: string;

@@ -352,6 +352,7 @@ export function useChatInterface(
         isUser: true,
         attachments: messageAttachments,
         persistenceStatus: 'pending', // 设置持久化状态为等待保存
+        sequence_index: 0,
       });
 
       if (isWelcomeScreen) {
@@ -802,8 +803,7 @@ export function useChatInterface(
                   stopped_manually: existingMessage?.metadata?.stopped_manually,
                   stopped_at: existingMessage?.metadata?.stopped_at,
                   attachments: existingMessage?.metadata?.attachments,
-                  sequence_index:
-                    existingMessage?.metadata?.sequence_index || 1,
+                  sequence_index: existingMessage?.sequence_index || 1,
                 },
               };
 

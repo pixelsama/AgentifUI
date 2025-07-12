@@ -125,6 +125,11 @@ export interface Message {
   external_id: string | null;
   token_count: number | null;
   is_synced: boolean;
+  /**
+   * 消息顺序索引，0=用户消息，1=助手消息，2=系统消息等
+   * 用于数据库层排序，ORDER BY created_at, sequence_index, id
+   */
+  sequence_index: number;
 }
 
 // API密钥管理

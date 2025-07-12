@@ -2,8 +2,8 @@
 
 本文档详细描述了 AgentifUI 平台的数据库设计，包括表结构、关系、安全机制和特性。本文档与当前数据库状态完全同步，包含所有已应用的迁移文件。
 
-**文档更新日期**: 2025-07-09
-**数据库版本**: 包含至 20250709101517_fix_sso_login_secure_complete.sql 的所有迁移
+**文档更新日期**: 2025-07-12
+**数据库版本**: 包含至 20250712133249_add_sequence_index_column.sql 的所有迁移
 
 ## 目录
 
@@ -159,6 +159,16 @@
 | metadata        | JSONB                    | 元数据   | DEFAULT '{}'                     |
 | created_at      | TIMESTAMP WITH TIME ZONE | 创建时间 | DEFAULT CURRENT_TIMESTAMP        |
 | status          | message_status           | 消息状态 | DEFAULT 'sent'                   |
+| sequence_index  | INT                      | 顺序索引 | DEFAULT 0，支持高性能排序        |
+
+**索引说明：**
+
+- `idx_messages_conversation_time_sequence`：(`conversation_id`, `created_at` ASC, `sequence_index` ASC)
+- `idx_messages_conversation_stable_sort`：(`conversation_id`, `created_at` ASC, `sequence_index` ASC, `id` ASC)
+
+**排序要求：**
+
+- 查询消息时，务必使用 `ORDER BY created_at ASC, sequence_index ASC, id ASC`，确保顺序稳定与高性能。
 
 ### API密钥管理
 
@@ -623,7 +633,8 @@ SSO认证系统支持多种认证方式：
 | metadata      |       |                |       +---------------+
 | created_at    |       |                |       |               |
 | status        |       |                |       | service_instances|
-+---------------+       |                |       +---------------+
+| sequence_index|       |                |       +---------------+
++---------------+       |                |
                        |                |       | id            |
 +---------------+       |                |       | provider_id   |
 | user_preferences|       |                |       | display_name  |
@@ -675,10 +686,3 @@ SSO认证系统支持多种认证方式：
 ```
 
 这个数据库设计为 AgentifUI 平台提供了简化但功能完整的基础，支持用户管理、群组协作、AI对话、SSO认证和API集成等核心功能。设计注重简洁性、安全性和可扩展性，便于未来功能扩展和维护。
-
-**最新更新 (2025-07-09)：**
-
-- 增加了SSO安全访问函数，解决登录页面权限问题
-- 完善了敏感信息过滤机制
-- 提供了完整的权限控制和安全保护
-- 清理了过时的初始数据配置

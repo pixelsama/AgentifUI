@@ -46,9 +46,8 @@ type LoadingStatus = {
 function dbMessageToChatMessage(dbMessage: Message): ChatMessage {
   // Extract attachment information from metadata
   const attachments = dbMessage.metadata?.attachments || [];
-
   return {
-    id: `db-${dbMessage.id}`, // Add prefix to ensure ID uniqueness
+    id: `db-${dbMessage.id}`,
     text: dbMessage.content,
     isUser: dbMessage.role === 'user',
     role: dbMessage.role,
@@ -59,6 +58,7 @@ function dbMessageToChatMessage(dbMessage: Message): ChatMessage {
     wasManuallyStopped: dbMessage.metadata?.stopped_manually === true,
     token_count: dbMessage.token_count || undefined,
     attachments: attachments.length > 0 ? attachments : undefined,
+    sequence_index: dbMessage.sequence_index,
   };
 }
 
@@ -154,33 +154,16 @@ export function useConversationMessages() {
   }, [pathname]);
 
   /**
-   * 按创建时间对消息进行排序，确保消息顺序正确
+   * 移除前端排序逻辑，直接依赖数据库顺序
    */
   const sortMessagesByTime = useCallback((messages: Message[]): Message[] => {
-    // First sort by creation time
-    // If creation time is the same, sort by sequence_index as secondary order
-    // If both are the same, sort by ID to ensure stability
     return [...messages].sort((a, b) => {
       // Get the creation time of the chat window
       const timeA = new Date(a.created_at).getTime();
       const timeB = new Date(b.created_at).getTime();
 
-      // Calculate the absolute difference between the times
-      const timeDiff = Math.abs(timeA - timeB);
-
       // If the time difference is within one second, it is considered to be the same message in the same conversation
       // At this time, use sequence_index to sort first
-      if (timeDiff < 1000) {
-        // Get the sequence index
-        const seqA = a.metadata?.sequence_index ?? (a.role === 'user' ? 0 : 1);
-        const seqB = b.metadata?.sequence_index ?? (b.role === 'user' ? 0 : 1);
-
-        if (seqA !== seqB) {
-          return seqA - seqB; // User message (0) before assistant message (1)
-        }
-      }
-
-      // If the time difference exceeds the threshold or sequence_index is the same, sort by time
       if (timeA !== timeB) {
         return timeA - timeB;
       }
