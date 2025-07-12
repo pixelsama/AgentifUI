@@ -4,7 +4,7 @@ import { useLogout } from '@lib/hooks/use-logout';
 import { useProfile } from '@lib/hooks/use-profile';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
-import { Clock, LogOut, Moon, Sliders, Sun, UserCircle } from 'lucide-react';
+import { Clock, Info, LogOut, Sliders, UserCircle, Wrench } from 'lucide-react';
 
 import React from 'react';
 
@@ -143,17 +143,18 @@ export function UserBottomSheet({
               'mb-2'
             )}
           >
-            {renderMenuItem(
-              <Clock className="h-5 w-5" />,
-              tMenu('history'),
-              () => {
-                router.push('/chat/history');
-                onClose();
-              }
-            )}
+            {profile?.role === 'admin' &&
+              renderMenuItem(
+                <Wrench className="h-5 w-5" />, // 管理后台
+                tMenu('adminPanel'),
+                () => {
+                  router.push('/admin');
+                  onClose();
+                }
+              )}
 
             {renderMenuItem(
-              <Sliders className="h-5 w-5" />,
+              <Sliders className="h-5 w-5" />, // 设置
               tMenu('settings'),
               () => {
                 router.push('/settings');
@@ -162,13 +163,12 @@ export function UserBottomSheet({
             )}
 
             {renderMenuItem(
-              isDark ? (
-                <Sun className="h-5 w-5 text-yellow-400" />
-              ) : (
-                <Moon className="h-5 w-5" />
-              ),
-              isDark ? tMenu('lightMode') : tMenu('darkMode'),
-              toggleTheme
+              <Info className="h-5 w-5" />, // 关于
+              tMenu('about'),
+              () => {
+                router.push('/about');
+                onClose();
+              }
             )}
           </div>
 
@@ -182,7 +182,7 @@ export function UserBottomSheet({
             )}
           >
             {renderMenuItem(
-              <LogOut className="h-5 w-5" />,
+              <LogOut className="h-5 w-5" />, // 退出登录
               tMenu('logout'),
               handleLogout,
               true

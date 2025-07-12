@@ -2038,13 +2038,12 @@
       "account": "Konto"
     },
     "menu": {
-      "history": "Chat-Verlauf",
       "settings": "Einstellungen",
-      "lightMode": "Heller Modus",
-      "darkMode": "Dunkler Modus",
       "logout": "Abmelden",
       "login": "Anmelden",
-      "register": "Konto erstellen"
+      "register": "Konto erstellen",
+      "adminPanel": "Admin-Panel",
+      "about": "Über"
     }
   },
   "loading": {

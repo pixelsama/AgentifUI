@@ -2038,13 +2038,12 @@
       "account": "账户"
     },
     "menu": {
-      "history": "历史对话",
       "settings": "设置",
-      "lightMode": "亮色模式",
-      "darkMode": "暗色模式",
       "logout": "退出登录",
       "login": "登录",
-      "register": "注册新账户"
+      "register": "注册新账户",
+      "adminPanel": "管理后台",
+      "about": "关于"
     }
   },
   "loading": {

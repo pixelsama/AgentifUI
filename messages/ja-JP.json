@@ -2038,13 +2038,12 @@
       "account": "アカウント"
     },
     "menu": {
-      "history": "チャット履歴",
       "settings": "設定",
-      "lightMode": "ライトモード",
-      "darkMode": "ダークモード",
       "logout": "ログアウト",
       "login": "ログイン",
-      "register": "アカウント作成"
+      "register": "アカウント作成",
+      "adminPanel": "管理パネル",
+      "about": "について"
     }
   },
   "loading": {

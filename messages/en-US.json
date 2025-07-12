@@ -2038,13 +2038,12 @@
       "account": "Account"
     },
     "menu": {
-      "history": "Chat History",
       "settings": "Settings",
-      "lightMode": "Light Mode",
-      "darkMode": "Dark Mode",
       "logout": "Logout",
       "login": "Login",
-      "register": "Create Account"
+      "register": "Register",
+      "adminPanel": "Admin Panel",
+      "about": "About"
     }
   },
   "loading": {

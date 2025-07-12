@@ -2038,13 +2038,12 @@
       "account": "Compte"
     },
     "menu": {
-      "history": "Historique des chats",
       "settings": "Paramètres",
-      "lightMode": "Mode clair",
-      "darkMode": "Mode sombre",
       "logout": "Déconnexion",
       "login": "Connexion",
-      "register": "Créer un compte"
+      "register": "Inscription",
+      "adminPanel": "Panneau d'administration",
+      "about": "À propos"
     }
   },
   "loading": {

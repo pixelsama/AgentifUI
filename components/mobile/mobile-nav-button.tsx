@@ -1,9 +1,10 @@
 'use client';
 
+import { WidePanelLeft } from '@components/ui';
 import { useTheme } from '@lib/hooks/use-theme';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { cn } from '@lib/utils';
-import { Menu } from 'lucide-react';
+import { ArrowRightToLine } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
 
@@ -23,27 +24,51 @@ export function MobileNavButton() {
       aria-label={t('openMenu')}
       onClick={showMobileNav}
       className={cn(
-        'fixed top-4 left-4 z-50 md:hidden', // 仅在移动设备上显示，固定在左上角
-        'flex items-center justify-center',
-        'h-10 w-10 rounded-full',
-        'select-none', // 防止文字选中
-
-        // 去掉transition效果
-
-        // 亮色模式样式
-        !isDark && [
-          'bg-stone-100 text-stone-900 hover:bg-stone-300',
-          'shadow-primary/5 shadow-lg',
-        ],
-
-        // 暗色模式样式
-        isDark && [
-          'bg-stone-700 text-gray-100 hover:bg-stone-600',
-          'shadow-[0_0_10px_rgba(0,0,0,0.4)]',
-        ]
+        'fixed top-0 left-0 z-50 md:hidden',
+        '-translate-x-1 -translate-y-1',
+        'group relative flex items-center justify-center',
+        'h-10 w-10 rounded-lg',
+        'transition-all duration-150 ease-in-out',
+        'outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+        'select-none',
+        'border border-transparent',
+        'cursor-e-resize',
+        isDark
+          ? 'text-gray-200 focus-visible:ring-stone-500 focus-visible:ring-offset-gray-900'
+          : 'focus-visible:ring-primary focus-visible:ring-offset-background text-gray-200'
       )}
     >
-      <Menu className="h-6 w-6" />
+      {/* 悬停背景 */}
+      <div
+        className={cn(
+          'absolute inset-0 rounded-lg transition-all duration-150 ease-in-out',
+          isDark ? 'group-hover:bg-stone-600/60' : 'group-hover:bg-stone-300/80'
+        )}
+      />
+      {/* icon本体 */}
+      <span
+        className={cn(
+          'relative z-10 flex h-5 w-5 flex-shrink-0 items-center justify-center',
+          isDark
+            ? 'text-gray-400 group-hover:text-white'
+            : 'text-gray-500 group-hover:text-stone-800'
+        )}
+      >
+        {/* 默认窗口图标 - 悬停时渐隐放大 */}
+        <WidePanelLeft
+          className={cn(
+            'absolute h-5 w-5 transition-all duration-150 ease-out',
+            'group-hover:scale-125 group-hover:opacity-0'
+          )}
+        />
+        {/* 悬停时显示的右箭头 */}
+        <ArrowRightToLine
+          className={cn(
+            'absolute h-4 w-4 transition-all duration-150 ease-out',
+            'scale-110 opacity-0 group-hover:opacity-100'
+          )}
+        />
+      </span>
     </button>
   );
 }

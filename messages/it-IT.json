@@ -2038,13 +2038,12 @@
       "account": "Account"
     },
     "menu": {
-      "history": "Cronologia Chat",
       "settings": "Impostazioni",
-      "lightMode": "Modalità Chiara",
-      "darkMode": "Modalità Scura",
       "logout": "Logout",
       "login": "Login",
-      "register": "Crea Account"
+      "register": "Crea Account",
+      "adminPanel": "Pannello di Amministrazione",
+      "about": "Informazioni"
     }
   },
   "loading": {

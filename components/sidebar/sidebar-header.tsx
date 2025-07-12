@@ -1,5 +1,6 @@
 'use client';
 
+import { WidePanelLeft } from '@components/ui';
 import { KeyCombination } from '@components/ui/adaptive-key-badge';
 import { TooltipWrapper } from '@components/ui/tooltip-wrapper';
 import { useChatInterface } from '@lib/hooks/use-chat-interface';
@@ -16,15 +17,9 @@ import { cn } from '@lib/utils';
 import {
   ArrowLeftToLine,
   ArrowRightToLine,
-  CirclePlus,
   Clock,
   Edit,
-  Edit3,
-  Feather,
   LayoutGrid,
-  MessageCirclePlus,
-  Pen,
-  SquarePen,
 } from 'lucide-react';
 
 import React from 'react';
@@ -68,25 +63,6 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
   const { setIsWelcomeScreen } = useChatInputStore();
   const { setIsTransitioningToWelcome } = useChatTransitionStore();
   const { clearConversationState } = useChatInterface();
-
-  // 🎯 自定义拉宽版PanelLeft图标 - 让右侧区域更宽
-  const WidePanelLeft = ({ className }: { className?: string }) => (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 28 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      {/* 拉宽的PanelLeft路径 - 右侧区域更宽 */}
-      <rect width="22" height="18" x="3" y="3" rx="2" ry="2" />
-      <line x1="9" x2="9" y1="5" y2="19" />
-    </svg>
-  );
 
   // 🎯 新增：新对话处理函数
   const handleNewChat = () => {

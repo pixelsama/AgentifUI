@@ -20,3 +20,4 @@ export { TypeWriter } from './typewriter';
 export { SuggestedQuestionButton } from './suggested-question-button';
 export { AdaptiveKeyBadge, KeyCombination } from './adaptive-key-badge';
 export { UserAvatar } from './user-avatar';
+export { WidePanelLeft } from './wide-panel-left';
