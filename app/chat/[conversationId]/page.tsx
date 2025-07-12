@@ -127,12 +127,9 @@ export default function ChatPage() {
     setMessagesContainer(element);
   };
 
-  // Only call useProfile on /chat/new route, other routes do not need to call
-  // Use cache mechanism to avoid loading state and flickering
   const isNewChat = conversationIdFromUrl === 'new';
-  const { profile, isLoading: isProfileLoading } = isNewChat
-    ? useProfile()
-    : { profile: null, isLoading: false };
+  const { profile: loadedProfile, isLoading: isProfileLoading } = useProfile();
+  const profile = isNewChat ? loadedProfile : null;
 
   return (
     <div

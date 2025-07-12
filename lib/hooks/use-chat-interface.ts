@@ -1252,7 +1252,6 @@ export function useChatInterface(
       setIsWaitingForResponse,
       isWelcomeScreen,
       setIsWelcomeScreen,
-      appendMessageChunk,
       finalizeStreamingMessage,
       markAsManuallyStopped,
       setMessageError,
@@ -1267,6 +1266,9 @@ export function useChatInterface(
       saveMessage,
       saveStoppedAssistantMessage,
       updateMessage,
+      dbConversationUUID,
+      onNodeEvent,
+      saveErrorPlaceholder,
     ]
   );
 
@@ -1541,7 +1543,6 @@ export function useChatInterface(
     currentAppInstance,
     markAsManuallyStopped,
     setCurrentTaskId,
-    appendMessageChunk,
     setIsWaitingForResponse,
     updatePendingStatus,
     flushChunkBuffer,
@@ -1549,6 +1550,7 @@ export function useChatInterface(
     difyConversationId,
     updateMessage,
     saveMessage,
+    finalizeStreamingMessage,
   ]);
 
   // 🎯 新增：流式状态检测和自动修复机制

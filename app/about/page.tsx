@@ -21,10 +21,9 @@ export default function AboutPage() {
     sections: ['pages.about'],
   });
   const [mounted, setMounted] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
 
   // Enhanced translation function that tries dynamic first, then static fallback
-  const t = (key: string, params?: any) => {
+  const t = (key: string, params?: Record<string, string | number>) => {
     const dynamicValue = dynamicT(key, 'pages.about', params);
     return dynamicValue || staticT(key, params);
   };
@@ -104,20 +103,6 @@ export default function AboutPage() {
       router.push('/login');
     }
   };
-
-  useEffect(() => {
-    const checkUser = async () => {
-      // 🔒 安全修复：使用 getUser() 进行服务器端验证
-      // 避免依赖可能被篡改的本地 session 数据
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setCurrentUser(user);
-    };
-
-    checkUser();
-  }, []);
 
   // Show loading state while mounting or dynamic translations load
   if (!mounted || isLoading) {
