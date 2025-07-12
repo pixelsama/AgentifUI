@@ -99,9 +99,19 @@ export function LanguageSwitcher({
           )}
         >
           {/* 语言预览区域 */}
-          <div className="mb-4 flex h-24 items-center justify-center rounded-md bg-gradient-to-r from-blue-100 to-green-100 dark:from-blue-900/30 dark:to-green-900/30">
+          <div
+            className={cn(
+              'mb-4 flex h-24 items-center justify-center rounded-md bg-gradient-to-r from-blue-100 to-green-100',
+              isDark && 'from-blue-900/30 to-green-900/30'
+            )}
+          >
             <div className="flex items-center gap-3">
-              <span className="font-serif text-lg font-medium text-gray-900 dark:text-gray-100">
+              <span
+                className={cn(
+                  'font-serif text-lg font-medium text-gray-900',
+                  isDark && 'text-gray-100'
+                )}
+              >
                 {currentLanguageInfo.nativeName}
               </span>
             </div>
@@ -143,16 +153,21 @@ export function LanguageSwitcher({
                   }
                   className={cn(
                     'flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left',
-                    'hover:bg-stone-100/50 dark:hover:bg-stone-700/50',
+                    isDark ? 'hover:bg-stone-700/50' : 'hover:bg-stone-100/50',
                     'font-serif transition-colors duration-150',
                     'first:rounded-t-lg last:rounded-b-lg',
                     currentLocale === locale &&
-                      'bg-stone-100/70 dark:bg-stone-700/70'
+                      (isDark ? 'bg-stone-700/70' : 'bg-stone-100/70')
                   )}
                 >
                   <div className="flex-1">
                     <div className="text-sm font-medium">{info.nativeName}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div
+                      className={cn(
+                        'text-xs text-gray-500',
+                        isDark && 'text-gray-400'
+                      )}
+                    >
                       {info.name}
                     </div>
                   </div>
@@ -219,11 +234,11 @@ export function LanguageSwitcher({
                   }
                   className={cn(
                     'flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left',
-                    'hover:bg-stone-100/50 dark:hover:bg-stone-700/50',
+                    isDark ? 'hover:bg-stone-700/50' : 'hover:bg-stone-100/50',
                     'font-serif transition-colors duration-150',
                     'first:rounded-t-lg last:rounded-b-lg',
                     currentLocale === locale &&
-                      'bg-stone-100/70 dark:bg-stone-700/70'
+                      (isDark ? 'bg-stone-700/70' : 'bg-stone-100/70')
                   )}
                 >
                   <span className="text-sm font-medium">{info.nativeName}</span>
@@ -280,11 +295,11 @@ export function LanguageSwitcher({
                 onClick={() => handleLanguageChange(locale as SupportedLocale)}
                 className={cn(
                   'flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left',
-                  'hover:bg-stone-100/50 dark:hover:bg-stone-700/50',
+                  isDark ? 'hover:bg-stone-700/50' : 'hover:bg-stone-100/50',
                   'font-serif transition-colors duration-150',
                   'first:rounded-t-lg last:rounded-b-lg',
                   currentLocale === locale &&
-                    'bg-stone-100/70 dark:bg-stone-700/70'
+                    (isDark ? 'bg-stone-700/70' : 'bg-stone-100/70')
                 )}
               >
                 <span className="text-sm font-medium">{info.nativeName}</span>

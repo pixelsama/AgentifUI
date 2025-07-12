@@ -452,7 +452,12 @@ export function SsoProviderForm({
             </div>
 
             {/* Raw JSON Toggle */}
-            <div className="mt-6 border-t border-stone-200/50 pt-6 dark:border-stone-700/50">
+            <div
+              className={cn(
+                'mt-6 border-t pt-6',
+                isDark ? 'border-stone-700/50' : 'border-stone-200/50'
+              )}
+            >
               <button
                 onClick={() => setShowRawJson(!showRawJson)}
                 className={cn(

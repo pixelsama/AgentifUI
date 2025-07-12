@@ -21,18 +21,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
-// 直接从localStorage获取主题设置
-const getThemeFromCache = () => {
-  if (typeof window === 'undefined') return false;
-
-  try {
-    const theme = localStorage.getItem('theme');
-    return theme === 'dark';
-  } catch {
-    return false;
-  }
-};
-
 /**
  * 桌面端用户头像菜单组件
  * 特点：
@@ -51,31 +39,12 @@ export function DesktopUserAvatar() {
   // 使用useProfile hook获取用户信息，自动处理缓存和认证状态同步
   const { profile } = useProfile();
 
-  const [currentTheme, setCurrentTheme] = useState(() => getThemeFromCache());
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-
-  // 只监听主题变化，用户信息由useProfile hook管理
-  useEffect(() => {
-    const handleThemeChange = () => {
-      setCurrentTheme(getThemeFromCache());
-    };
-
-    // 监听storage事件
-    window.addEventListener('storage', handleThemeChange);
-
-    // 定期检查主题更新
-    const interval = setInterval(handleThemeChange, 5000);
-
-    return () => {
-      window.removeEventListener('storage', handleThemeChange);
-      clearInterval(interval);
-    };
-  }, []);
 
   // 点击外部关闭下拉菜单
   useEffect(() => {
@@ -168,9 +137,6 @@ export function DesktopUserAvatar() {
         : tRoles('user'); // 显示用户角色而不是固定的"群组系统"
   const avatarUrl = profile?.avatar_url;
 
-  // 使用当前主题状态而不是hook，避免闪烁
-  const effectiveTheme = currentTheme;
-
   return (
     <>
       {/* 退出登录确认对话框 */}
@@ -214,9 +180,9 @@ export function DesktopUserAvatar() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: effectiveTheme ? '#57534e' : '#f5f5f4',
-                color: effectiveTheme ? '#e7e5e4' : '#57534e',
-                border: `2px solid ${effectiveTheme ? '#44403c' : '#d6d3d1'}`,
+                backgroundColor: isDark ? '#57534e' : '#f5f5f4',
+                color: isDark ? '#e7e5e4' : '#57534e',
+                border: `2px solid ${isDark ? '#44403c' : '#d6d3d1'}`,
                 transition: 'all 0.2s',
               }}
             >
@@ -229,38 +195,39 @@ export function DesktopUserAvatar() {
         {isDropdownOpen && (
           <div
             ref={dropdownRef}
-            className="animate-slide-in-down absolute top-12 -right-2 z-50 w-64 rounded-xl p-2 shadow-xl"
-            style={{
-              backgroundColor: colors.mainBackground.rgb,
-              border: `1px solid ${effectiveTheme ? '#44403c' : '#e7e5e4'}`,
-            }}
+            className={cn(
+              'animate-slide-in-down absolute top-12 -right-2 z-50 w-64 rounded-xl border p-2 shadow-xl',
+              isDark
+                ? 'border-[#44403c] bg-[#18130f]'
+                : 'border-[#e7e5e4] bg-[#f5f5f4]'
+            )}
           >
             {isLoggedIn ? (
               <>
                 {/* 用户信息头部 - 无头像版本 */}
                 <div
-                  className="mb-2 rounded-lg p-3"
-                  style={{
-                    backgroundColor: effectiveTheme
-                      ? 'rgba(120, 113, 108, 0.3)'
-                      : 'rgba(231, 229, 228, 0.8)',
-                  }}
+                  className={cn(
+                    'mb-2 rounded-lg p-3',
+                    isDark
+                      ? 'bg-[rgba(120,113,108,0.3)]'
+                      : 'bg-[rgba(231,229,228,0.8)]'
+                  )}
                 >
                   <div className="flex items-center">
                     <div className="min-w-0 flex-1">
                       <p
-                        className="truncate font-serif text-sm font-semibold"
-                        style={{
-                          color: effectiveTheme ? '#f5f5f4' : '#1c1917',
-                        }}
+                        className={cn(
+                          'truncate font-serif text-sm font-semibold',
+                          isDark ? 'text-[#f5f5f4]' : 'text-[#1c1917]'
+                        )}
                       >
                         {userName}
                       </p>
                       <p
-                        className="truncate font-serif text-xs"
-                        style={{
-                          color: effectiveTheme ? '#a8a29e' : '#78716c',
-                        }}
+                        className={cn(
+                          'truncate font-serif text-xs',
+                          isDark ? 'text-[#a8a29e]' : 'text-[#78716c]'
+                        )}
                       >
                         {userRole}
                       </p>
@@ -270,10 +237,10 @@ export function DesktopUserAvatar() {
 
                 {/* 分割线 */}
                 <div
-                  className="mb-2 h-px"
-                  style={{
-                    backgroundColor: effectiveTheme ? '#44403c' : '#e7e5e4',
-                  }}
+                  className={cn(
+                    'mb-2 h-px w-full',
+                    isDark ? 'bg-[#44403c]' : 'bg-[#e7e5e4]'
+                  )}
                 />
 
                 {/* 菜单项 */}
@@ -286,29 +253,30 @@ export function DesktopUserAvatar() {
                       <button
                         key={index}
                         onClick={() => handleMenuItemClick(item.action)}
-                        className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors duration-150 focus:outline-none"
-                        style={{
-                          backgroundColor: isHovered
-                            ? effectiveTheme
-                              ? 'rgba(68, 64, 60, 0.5)'
-                              : 'rgba(231, 229, 228, 1)'
-                            : 'transparent',
-                          color: effectiveTheme ? '#d6d3d1' : '#44403c',
-                        }}
+                        className={cn(
+                          'flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors duration-150 focus:outline-none',
+                          isDark
+                            ? isHovered
+                              ? 'bg-[#44403c]/50 text-[#d6d3d1]'
+                              : 'bg-transparent text-[#d6d3d1]'
+                            : isHovered
+                              ? 'bg-[#e7e5e4] text-[#44403c]'
+                              : 'bg-transparent text-[#44403c]'
+                        )}
                         onMouseEnter={() => setHoveredItem(itemKey)}
                         onMouseLeave={() => setHoveredItem(null)}
                       >
                         <item.icon
-                          className="h-4 w-4"
-                          style={{
-                            color: effectiveTheme ? '#a8a29e' : '#57534e',
-                          }}
+                          className={cn(
+                            'h-4 w-4',
+                            isDark ? 'text-[#a8a29e]' : 'text-[#57534e]'
+                          )}
                         />
                         <span
-                          className="flex-1 font-serif text-sm"
-                          style={{
-                            color: effectiveTheme ? '#d6d3d1' : '#44403c',
-                          }}
+                          className={cn(
+                            'flex-1 font-serif text-sm',
+                            isDark ? 'text-[#d6d3d1]' : 'text-[#44403c]'
+                          )}
                         >
                           {item.label}
                         </span>
@@ -319,25 +287,24 @@ export function DesktopUserAvatar() {
 
                 {/* 分割线 */}
                 <div
-                  className="my-2 h-px"
-                  style={{
-                    backgroundColor: effectiveTheme ? '#44403c' : '#e7e5e4',
-                  }}
+                  className={cn(
+                    'my-2 h-px w-full',
+                    isDark ? 'bg-[#44403c]' : 'bg-[#e7e5e4]'
+                  )}
                 />
 
                 {/* 退出登录 */}
                 <button
                   onClick={handleLogout}
-                  className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors duration-150 focus:outline-none"
-                  style={{
-                    color: '#dc2626',
-                    backgroundColor:
-                      hoveredItem === 'logout'
-                        ? effectiveTheme
-                          ? 'rgba(153, 27, 27, 0.2)'
-                          : 'rgba(254, 226, 226, 1)'
-                        : 'transparent',
-                  }}
+                  className={cn(
+                    'flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left font-serif text-sm transition-colors duration-150 focus:outline-none',
+                    'text-[#dc2626]',
+                    hoveredItem === 'logout'
+                      ? isDark
+                        ? 'bg-[rgba(153,27,27,0.2)]'
+                        : 'bg-[rgba(254,226,226,1)]'
+                      : 'bg-transparent'
+                  )}
                   onMouseEnter={() => setHoveredItem('logout')}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
@@ -349,18 +316,17 @@ export function DesktopUserAvatar() {
               <div className="p-4">
                 {/* 未登录状态 */}
                 <div
-                  className="mb-6 rounded-xl px-4 py-6 text-center"
-                  style={{
-                    backgroundColor: effectiveTheme
-                      ? 'rgba(120, 113, 108, 0.3)'
-                      : 'rgba(231, 229, 228, 0.8)',
-                    color: effectiveTheme ? '#d6d3d1' : '#57534e',
-                  }}
+                  className={cn(
+                    'mb-6 rounded-xl px-4 py-6 text-center',
+                    isDark
+                      ? 'bg-[rgba(120,113,108,0.3)] text-[#d6d3d1]'
+                      : 'bg-[rgba(231,229,228,0.8)] text-[#57534e]'
+                  )}
                 >
                   <UserCircle
                     className="mx-auto mb-3 h-16 w-16"
                     style={{
-                      color: effectiveTheme ? '#a8a29e' : '#78716c',
+                      color: isDark ? '#a8a29e' : '#78716c',
                     }}
                   />
                   <p className="font-serif font-medium">{t('loginPrompt')}</p>
@@ -374,11 +340,10 @@ export function DesktopUserAvatar() {
                     onClick={() =>
                       handleMenuItemClick(() => router.push('/login'))
                     }
-                    className="w-full transform rounded-xl px-4 py-3 text-center font-serif font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
-                    style={{
-                      backgroundColor:
-                        hoveredItem === 'login' ? '#44403c' : '#57534e',
-                    }}
+                    className={cn(
+                      'w-full transform rounded-xl px-4 py-3 text-center font-serif font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl',
+                      hoveredItem === 'login' ? 'bg-[#44403c]' : 'bg-[#57534e]'
+                    )}
                     onMouseEnter={() => setHoveredItem('login')}
                     onMouseLeave={() => setHoveredItem(null)}
                   >
@@ -389,19 +354,16 @@ export function DesktopUserAvatar() {
                     onClick={() =>
                       handleMenuItemClick(() => router.push('/register'))
                     }
-                    className="w-full transform rounded-xl px-4 py-3 text-center font-serif font-medium shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
-                    style={{
-                      backgroundColor:
-                        hoveredItem === 'register'
-                          ? effectiveTheme
-                            ? '#57534e'
-                            : '#d6d3d1'
-                          : effectiveTheme
-                            ? '#44403c'
-                            : '#f5f5f4',
-                      color: effectiveTheme ? '#e7e5e4' : '#44403c',
-                      border: `1px solid ${effectiveTheme ? '#57534e' : '#d6d3d1'}`,
-                    }}
+                    className={cn(
+                      'w-full transform rounded-xl border px-4 py-3 text-center font-serif font-medium shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md',
+                      hoveredItem === 'register'
+                        ? isDark
+                          ? 'border-[#57534e] bg-[#57534e] text-[#e7e5e4]'
+                          : 'border-[#d6d3d1] bg-[#d6d3d1] text-[#44403c]'
+                        : isDark
+                          ? 'border-[#57534e] bg-[#44403c] text-[#e7e5e4]'
+                          : 'border-[#d6d3d1] bg-[#f5f5f4] text-[#44403c]'
+                    )}
                     onMouseEnter={() => setHoveredItem('register')}
                     onMouseLeave={() => setHoveredItem(null)}
                   >

@@ -422,7 +422,9 @@ export default function ContentManagementPage() {
                             ? isDark
                               ? 'bg-stone-100 text-stone-900 hover:bg-white'
                               : 'bg-stone-900 text-white hover:bg-stone-800'
-                            : 'cursor-not-allowed bg-stone-300 text-stone-500 dark:bg-stone-700 dark:text-stone-400'
+                            : isDark
+                              ? 'cursor-not-allowed bg-stone-700 text-stone-400'
+                              : 'cursor-not-allowed bg-stone-300 text-stone-500'
                         )}
                       >
                         {isSaving
@@ -500,7 +502,9 @@ export default function ContentManagementPage() {
                     className={cn(
                       'rounded-lg px-6 py-2 text-sm font-medium shadow-sm transition-colors',
                       !hasChanges || isSaving
-                        ? 'cursor-not-allowed bg-stone-300 text-stone-500 dark:bg-stone-700 dark:text-stone-400'
+                        ? isDark
+                          ? 'cursor-not-allowed bg-stone-700 text-stone-400'
+                          : 'cursor-not-allowed bg-stone-300 text-stone-500'
                         : isDark
                           ? 'bg-stone-100 text-stone-900 hover:bg-white'
                           : 'bg-stone-900 text-white hover:bg-stone-800'
