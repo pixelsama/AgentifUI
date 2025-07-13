@@ -4,13 +4,19 @@ import createNextIntlPlugin from 'next-intl/plugin';
 /**
  * Next.js Configuration
  * @description Configure Next.js with traditional webpack to avoid Turbopack font loading issues
- * Integrate next-intl plugin
+ * Integrate next-intl plugin for internationalization support
+ * Additional configuration for cross-origin requests and production optimizations
  */
 
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   /* config options here */
+
+  // Allow cross-origin requests from specific domains during development
+  allowedDevOrigins: process.env.DEV_ALLOWED_ORIGINS
+    ? process.env.DEV_ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+    : [],
 
   // Automatically remove console.log in production
   compiler: {
