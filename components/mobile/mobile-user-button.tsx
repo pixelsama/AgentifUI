@@ -63,6 +63,7 @@ export function MobileUserButton() {
       />
 
       <button
+        data-nav-button="true"
         onClick={handleOpenBottomSheet}
         className={cn(
           'relative flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium',

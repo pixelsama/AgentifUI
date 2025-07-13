@@ -62,6 +62,7 @@ export function SidebarListButton({
   return (
     <div
       role="button"
+      data-nav-button="true"
       tabIndex={isDisabled ? -1 : 0}
       aria-disabled={isDisabled}
       className={cn(

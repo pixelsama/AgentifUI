@@ -12,19 +12,25 @@ import { SidebarFooter } from './sidebar-footer';
 import { SidebarHeader } from './sidebar-header';
 
 export function SidebarContainer() {
-  const { isExpanded, toggleSidebar, isMounted, getSidebarWidth, isAnimating } =
-    useSidebarStore();
+  const {
+    isExpanded,
+    toggleSidebar,
+    isMounted,
+    getSidebarWidth,
+    isAnimating,
+    hideMobileNav,
+  } = useSidebarStore();
   const { colors, isDark } = useThemeColors();
   const isMobile = useMobile();
 
-  // 悬停状态管理 - 仅用于背景效果，不触发展开
+  // Hover state management - for background effects only, does not trigger expansion
   const [isHovering, setIsHovering] = useState(false);
 
-  // 在移动端上禁用悬停事件，并确保cursor状态正确重置
+  // Disable hover events on mobile and ensure cursor state is reset correctly
   const handleMouseEnter = () => {
     if (!isMobile) {
       setIsHovering(true);
-      // 确保移除任何可能残留的focus状态
+      // Ensure any residual focus state is removed
       const activeElement = document.activeElement as HTMLElement;
       activeElement?.blur?.();
     }
@@ -33,19 +39,26 @@ export function SidebarContainer() {
   const handleMouseLeave = () => {
     if (!isMobile) {
       setIsHovering(false);
-      // 确保移除任何可能残留的focus状态
+      // Ensure any residual focus state is removed
       const activeElement = document.activeElement as HTMLElement;
       activeElement?.blur?.();
     }
   };
 
-  // 点击sidebar区域展开/收起
-  // 需要排除按钮区域的点击事件
-  const handleSidebarClick = (e: React.MouseEvent) => {
-    // 检查点击的是否是按钮或其子元素
+  // Combined click handler for the entire sidebar
+  const handleContainerClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
 
-    // 如果点击的是按钮、输入框或其他交互元素，不触发sidebar切换
+    // Mobile-specific logic: close sidebar on nav button click
+    if (isMobile) {
+      if (target.closest('[data-nav-button="true"]')) {
+        hideMobileNav();
+      }
+      // On mobile, we don't want the desktop expand/collapse logic, so we stop here.
+      return;
+    }
+
+    // Desktop-specific logic: expand sidebar on clicking non-interactive areas
     if (
       target.closest('button') ||
       target.closest('[role="button"]') ||
@@ -57,30 +70,24 @@ export function SidebarContainer() {
       return;
     }
 
-    // 移动端不处理点击展开，使用专门的汉堡菜单
-    if (isMobile) {
-      return;
-    }
-
-    // 只有在收起状态时才允许点击展开
     if (!isExpanded) {
       toggleSidebar();
     }
   };
 
-  // 根据主题获取侧边栏样式
+  // Get sidebar styles based on the theme
   const getSidebarStyles = () => {
     if (isDark) {
       return {
         border: 'border-r-stone-700/50',
         text: 'text-stone-300',
-        hoverBg: 'hover:bg-stone-700', // 悬停时使用展开状态的背景色
+        hoverBg: 'hover:bg-stone-700', // Use expanded state background color on hover
       };
     } else {
       return {
         border: 'border-r-stone-300/60',
         text: 'text-stone-700',
-        hoverBg: 'hover:bg-stone-200', // 悬停时使用展开状态的背景色
+        hoverBg: 'hover:bg-stone-200', // Use expanded state background color on hover
       };
     }
   };
@@ -91,27 +98,25 @@ export function SidebarContainer() {
     <aside
       className={cn(
         'fixed top-0 left-0 flex h-full flex-col border-r',
-        // 过渡效果 - 移动端使用transform过渡，桌面端使用width过渡，加快速度
+        // Transition effect - use transform for mobile, width for desktop, faster speed
         isMobile
           ? 'transition-transform duration-150 ease-in-out'
           : 'transition-[width,background-color] duration-150 ease-in-out',
 
-        // 宽度设置 - 始终保持固定宽度
+        // Width setting - always maintain a fixed width
         isExpanded ? 'w-64' : 'w-16',
 
-        // 移动端的显示/隐藏逻辑
+        // Mobile show/hide logic
         isMobile && !isExpanded && '-translate-x-full',
         isMobile && isExpanded && 'translate-x-0',
 
-        // 桌面端始终显示
+        // Desktop is always visible
         !isMobile && 'translate-x-0',
 
-        // 移动端初始渲染优化（移除 isMounted 依赖，避免路由切换闪烁）
-
-        // 简化Z-index设置
+        // Simplified Z-index setting
         isMobile ? 'z-50' : 'z-30',
 
-        // 主题样式 - 展开时使用侧栏背景色，收起时使用主页背景色
+        // Theme styles - use sidebar background when expanded, main background when collapsed
         isExpanded
           ? colors.sidebarBackground.tailwind
           : colors.mainBackground.tailwind,
@@ -119,12 +124,12 @@ export function SidebarContainer() {
         styles.border,
         styles.text,
 
-        // 悬停背景效果 - 仅在收起状态且非移动端时显示，使用展开状态的背景色
+        // Hover background effect - only on collapsed state and non-mobile, uses expanded state color
         !isExpanded && !isMobile && styles.hoverBg,
 
-        // 点击区域提示 - 仅在收起状态时显示cursor-e-resize，表示可以向右展开
-        // 防止文字选中 - 点击时不选中文字
-        // 动画期间保持cursor状态，避免闪烁
+        // Click area hint - show cursor-e-resize only in collapsed state to indicate it can be expanded
+        // Prevent text selection on click
+        // Maintain cursor state during animation to avoid flickering
         'select-none',
         (!isExpanded && !isMobile) || (isAnimating && !isMobile)
           ? 'cursor-e-resize'
@@ -132,7 +137,7 @@ export function SidebarContainer() {
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={handleSidebarClick}
+      onClick={handleContainerClick}
     >
       <div className="flex h-full flex-col">
         <SidebarHeader isHovering={isHovering} />
