@@ -78,7 +78,7 @@ export async function streamDifyChat(
       let errorBody = 'Unknown error';
       try {
         errorBody = await response.text();
-      } catch (e) {
+      } catch {
         // 忽略读取错误体时的错误
       }
       throw new Error(
@@ -467,7 +467,7 @@ export async function stopDifyStreamingTask(
       let errorBody = 'Unknown error';
       try {
         errorBody = await response.text();
-      } catch (e) {
+      } catch {
         // 忽略读取错误
       }
       throw new Error(

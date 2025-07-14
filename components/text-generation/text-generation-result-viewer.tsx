@@ -289,7 +289,7 @@ export function TextGenerationResultViewer({
                 placement="bottom"
                 size="sm"
                 showArrow={false}
-                desktopOnly={true}
+                _desktopOnly={true}
               >
                 <button
                   onClick={handleCopy}
@@ -318,7 +318,7 @@ export function TextGenerationResultViewer({
                 placement="bottom"
                 size="sm"
                 showArrow={false}
-                desktopOnly={true}
+                _desktopOnly={true}
               >
                 <button
                   onClick={handleDownload}

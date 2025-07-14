@@ -9,13 +9,8 @@ import { Message, MessageStatus } from '@lib/types/database';
 import { Result, failure, success } from '@lib/types/result';
 
 import { extractMainContentForPreview } from '../../utils/index';
-import { CacheKeys, cacheService } from './cache-service';
+import { cacheService } from './cache-service';
 import { dataService } from './data-service';
-import {
-  SubscriptionConfigs,
-  SubscriptionKeys,
-  realtimeService,
-} from './realtime-service';
 
 export interface MessagePage {
   messages: Message[];
@@ -77,7 +72,7 @@ export class MessageService {
         if (cursor) {
           try {
             cursorData = JSON.parse(atob(cursor));
-          } catch (error) {
+          } catch {
             throw new Error('无效的分页游标');
           }
         }

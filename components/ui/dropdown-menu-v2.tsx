@@ -116,7 +116,6 @@ export function DropdownMenuV2({
   placement = 'bottom',
   minWidth = 160,
   popoverContainerClassName,
-  alignToTriggerBottom = false,
   preventScroll = true, // 默认阻止滚动
   isOpen: externalIsOpen,
   onOpenChange,

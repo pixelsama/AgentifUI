@@ -409,7 +409,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
     addPendingWithLimit: (
       tempId: string,
       initialTitle = 'Creating...',
-      maxConversations = 20,
+      _maxConversations = 20,
       onNeedEviction
     ) => {
       set(state => {

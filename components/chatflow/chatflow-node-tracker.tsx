@@ -5,7 +5,7 @@ import { useChatflowExecutionStore } from '@lib/stores/chatflow-execution-store'
 import { cn } from '@lib/utils';
 import { Loader2, Workflow } from 'lucide-react';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { useTranslations } from 'next-intl';
 
@@ -36,9 +36,6 @@ export function ChatflowNodeTracker({
   // 从 store 获取节点状态
   const nodes = useChatflowExecutionStore(state => state.nodes);
   const isExecuting = useChatflowExecutionStore(state => state.isExecuting);
-  const executionProgress = useChatflowExecutionStore(
-    state => state.executionProgress
-  );
   const error = useChatflowExecutionStore(state => state.error);
   const iterationExpandedStates = useChatflowExecutionStore(
     state => state.iterationExpandedStates

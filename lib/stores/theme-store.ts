@@ -22,7 +22,7 @@ interface ThemeState {
 
 // 不再需要 persist 中间件、getSystemTheme 或任何初始状态逻辑。
 // next-themes 会处理持久化和状态初始化。
-export const useThemeStore = create<ThemeState>()((set, get) => ({
+export const useThemeStore = create<ThemeState>()(() => ({
   _theme_placeholder: undefined, // 占位符状态，不实际使用
 
   // 下方的 action 实现是"空壳"，因为它们无法在 store 创建函数内部直接调用 useTheme Hook。

@@ -497,7 +497,7 @@ export function TimezoneSelector({
                           : 'bg-gradient-to-b from-transparent to-stone-50/30'
                       )}
                     >
-                      {timezones.map((timezone, index) => {
+                      {timezones.map(timezone => {
                         const isSelected = value === timezone.value;
                         const cityName = t(
                           `timezoneCities.${timezone.cityKey}`

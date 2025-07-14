@@ -48,7 +48,6 @@ export function History() {
   const {
     conversations,
     isLoading,
-    error,
     total,
     refresh,
     deleteConversation,
@@ -349,7 +348,6 @@ export function History() {
             isSelectionMode={isSelectionMode}
             selectedCount={selectedConversations.size}
             totalCount={filteredConversations.length}
-            onToggleSelectionMode={handleToggleSelectionMode}
             onSelectAll={handleSelectAll}
             onDeselectAll={handleDeselectAll}
             onBatchDelete={handleBatchDelete}

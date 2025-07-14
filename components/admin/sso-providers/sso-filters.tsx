@@ -14,7 +14,7 @@ export function SsoFilters() {
   const t = useTranslations('pages.admin.ssoProviders.filters');
   const [searchInput, setSearchInput] = useState('');
 
-  const { filters, updateFilters, loading } = useSsoProvidersStore();
+  const { filters, updateFilters } = useSsoProvidersStore();
 
   // Handle search input change with debouncing
   const handleSearchChange = useCallback(

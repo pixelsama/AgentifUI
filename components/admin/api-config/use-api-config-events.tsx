@@ -48,8 +48,7 @@ export const useApiConfigEvents = ({
       }
     };
 
-    const handleDefaultInstanceChanged = (event: CustomEvent) => {
-      const { instanceId } = event.detail;
+    const handleDefaultInstanceChanged = () => {
       // --- 始终显示成功提示，不管是否是当前选中的实例 ---
       toast.success(t('defaultInstanceSetSuccess'));
 

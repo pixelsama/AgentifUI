@@ -23,7 +23,6 @@ interface UserMessageActionsProps {
  * 组合了复制和编辑按钮，用于用户消息下方的操作区域
  */
 export const UserMessageActions: React.FC<UserMessageActionsProps> = ({
-  messageId,
   content,
   onEdit,
   className,

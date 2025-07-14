@@ -23,7 +23,6 @@ export const UserMessage: React.FC<UserMessageProps> = ({
   attachments = [],
   id,
   className,
-  onCopy = () => console.log('Copy message', id),
   onEdit = () => console.log('Edit message', id),
 }) => {
   const { isDark } = useTheme();

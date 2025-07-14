@@ -18,7 +18,7 @@ export function Home() {
   const router = useRouter();
   const { isDark } = useTheme();
   const supabase = createClient();
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [setCurrentUser] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
   const staticT = useTranslations('pages.home');
   const { t: dynamicT, isLoading } = useDynamicTranslations({

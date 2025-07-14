@@ -4,7 +4,7 @@ import { useTheme } from '@lib/hooks';
 import { cn } from '@lib/utils';
 import { IconType } from 'react-icons';
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { TooltipWrapper } from './tooltip-wrapper';
 
@@ -94,7 +94,7 @@ export const MessageActionButton: React.FC<MessageActionButtonProps> = ({
       placement={tooltipPosition}
       size={tooltipSize}
       showArrow={showTooltipArrow}
-      desktopOnly={true}
+      _desktopOnly={true}
     >
       {button}
     </TooltipWrapper>

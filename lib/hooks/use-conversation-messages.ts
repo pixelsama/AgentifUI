@@ -393,9 +393,6 @@ export function useConversationMessages() {
       scrollPosition = scrollContainer.scrollTop;
     }
 
-    // Get the scroll control function
-    const scrollToBottom = useChatScrollStore.getState().scrollToBottom;
-
     // Cancel any ongoing requests
     cancelCurrentRequest();
 

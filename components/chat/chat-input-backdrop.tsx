@@ -11,7 +11,7 @@ interface ChatInputBackdropProps {
 }
 
 export function ChatInputBackdrop({ className }: ChatInputBackdropProps) {
-  const { colors, isDark } = useThemeColors();
+  const { colors } = useThemeColors();
   const { widthClass } = useChatWidth();
 
   return (

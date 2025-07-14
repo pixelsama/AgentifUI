@@ -11,7 +11,6 @@ interface MoreButtonV2Props
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   iconClassName?: string;
   isMenuOpen?: boolean; // 下拉菜单是否打开
-  isItemSelected?: boolean; // 当前item是否被选中
   forceVisible?: boolean; // 强制显示（移动端或其他情况）
   disableHover?: boolean; // 是否禁用悬停效果（当有其他菜单打开时）
 }
@@ -25,7 +24,6 @@ export const MoreButtonV2 = React.forwardRef<
       className,
       iconClassName,
       isMenuOpen = false,
-      isItemSelected = false,
       forceVisible = false,
       disableHover = false,
       ...props

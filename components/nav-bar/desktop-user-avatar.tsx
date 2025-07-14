@@ -1,20 +1,10 @@
 'use client';
 
 import { LogoutConfirmDialog, UserAvatar } from '@components/ui';
-import { useLogout } from '@lib/hooks/use-logout';
 import { useProfile } from '@lib/hooks/use-profile';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { cn } from '@lib/utils';
-import {
-  Clock,
-  Info,
-  LogOut,
-  Settings,
-  Shield,
-  Sliders,
-  UserCircle,
-  Wrench,
-} from 'lucide-react';
+import { Clock, Info, LogOut, Sliders, UserCircle, Wrench } from 'lucide-react';
 
 import React, { useEffect, useRef, useState } from 'react';
 
@@ -30,8 +20,7 @@ import { useRouter } from 'next/navigation';
  * - 优化的渲染性能，减少重新渲染
  */
 export function DesktopUserAvatar() {
-  const { colors, isDark } = useThemeColors();
-  const { logout } = useLogout();
+  const { isDark } = useThemeColors();
   const router = useRouter();
   const t = useTranslations('navbar.user');
   const tRoles = useTranslations('pages.settings.profileSettings.roles');

@@ -2,7 +2,6 @@
 
 import { useTheme } from '@lib/hooks/use-theme';
 import { usePermissionManagementStore } from '@lib/stores/permission-management-store';
-import type { AppVisibility } from '@lib/types/database';
 import { cn } from '@lib/utils';
 import { Blocks, Globe, Lock, Users } from 'lucide-react';
 

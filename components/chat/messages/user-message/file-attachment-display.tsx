@@ -1,6 +1,5 @@
 'use client';
 
-import { useTheme } from '@lib/hooks';
 import { useMobile } from '@lib/hooks/use-mobile';
 import type { MessageAttachment } from '@lib/stores/chat-store';
 import { useSidebarStore } from '@lib/stores/sidebar-store';

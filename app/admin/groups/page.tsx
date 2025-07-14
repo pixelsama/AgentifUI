@@ -5,15 +5,12 @@ import { GroupsHeader } from '@components/admin/groups/groups-header';
 import { GroupsList } from '@components/admin/groups/groups-list';
 import { GroupsSearch } from '@components/admin/groups/groups-search';
 import { GroupsStatsCards } from '@components/admin/groups/groups-stats-cards';
-import { useTheme } from '@lib/hooks/use-theme';
 import { useGroupManagementStore } from '@lib/stores/group-management-store';
-import { cn } from '@lib/utils';
 import { toast } from 'sonner';
 
 import React, { useEffect, useState } from 'react';
 
 export default function GroupsPage() {
-  const { isDark } = useTheme();
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const {
@@ -28,13 +25,13 @@ export default function GroupsPage() {
     clearError,
   } = useGroupManagementStore();
 
-  // 页面初始化时加载数据
+  // load data when page initializes
   useEffect(() => {
     loadGroups();
     loadStats();
   }, [loadGroups, loadStats]);
 
-  // 处理错误提示
+  // handle error prompt
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -42,7 +39,7 @@ export default function GroupsPage() {
     }
   }, [error, clearError]);
 
-  // 过滤群组
+  // filter groups
   const filteredGroups = groups.filter(
     group =>
       group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -53,19 +50,19 @@ export default function GroupsPage() {
   return (
     <div className="min-h-full">
       <div className="mx-auto max-w-7xl p-6">
-        {/* 页面标题和操作栏 */}
+        {/* page title and action bar */}
         <GroupsHeader onCreateGroup={() => setShowCreateModal(true)} />
 
-        {/* 统计卡片 */}
+        {/* stats cards */}
         <GroupsStatsCards stats={stats} isLoading={loading.stats} />
 
-        {/* 搜索筛选 */}
+        {/* search filter */}
         <GroupsSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
-        {/* 群组列表 */}
+        {/* groups list */}
         <GroupsList groups={filteredGroups} isLoading={loading.groups} />
 
-        {/* 创建群组模态框 */}
+        {/* create group modal */}
         {showCreateModal && (
           <CreateGroupModal
             isOpen={showCreateModal}

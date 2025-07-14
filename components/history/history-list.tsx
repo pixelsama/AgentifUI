@@ -22,7 +22,7 @@ import {
 
 import * as React from 'react';
 
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
 /**
  * History list component properties
@@ -66,7 +66,6 @@ interface HistoryListProps {
  */
 export function HistoryList({
   conversations,
-  isLoading,
   onConversationClick,
   searchQuery,
   total,
@@ -79,7 +78,6 @@ export function HistoryList({
 }: HistoryListProps): React.ReactElement {
   const { isDark } = useTheme();
   const t = useTranslations('history');
-  const format = useFormatter();
   const { formatDate } = useDateFormatter();
 
   // Dialog state management
@@ -115,7 +113,7 @@ export function HistoryList({
       } else {
         alert(t('operations.renameFailed'));
       }
-    } catch (error) {
+    } catch {
       alert(t('operations.error'));
     } finally {
       setIsOperating(false);
@@ -147,7 +145,7 @@ export function HistoryList({
       } else {
         alert(t('operations.deleteFailed'));
       }
-    } catch (error) {
+    } catch {
       alert(t('operations.error'));
     } finally {
       setIsOperating(false);
@@ -157,9 +155,6 @@ export function HistoryList({
   // Handle conversation item click with title setting logic
   const handleConversationItemClick = (conversation: Conversation) => {
     const conversationId = conversation.external_id || conversation.id || '';
-    const title = conversation.title || t('newChat');
-    const baseTitle = 'AgentifUI';
-    const fullTitle = `${title} | ${baseTitle}`;
 
     // Call parent component's click handler
     onConversationClick(conversationId);

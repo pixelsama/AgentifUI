@@ -43,9 +43,9 @@ const GLOBAL_CONFIG_CACHE_KEYS = [
 
 // 登出时需要清理的缓存
 // 将敏感缓存和用户特定缓存合并
-const LOGOUT_CLEANUP_KEYS = [
-  ...new Set([...SENSITIVE_CACHE_KEYS, ...USER_SPECIFIC_CACHE_KEYS]),
-];
+// const LOGOUT_CLEANUP_KEYS = [
+//   ...new Set([...SENSITIVE_CACHE_KEYS, ...USER_SPECIFIC_CACHE_KEYS]),
+// ];
 
 /**
  * 清理敏感缓存

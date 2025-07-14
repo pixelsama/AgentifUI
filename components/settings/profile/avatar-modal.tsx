@@ -46,7 +46,6 @@ export function AvatarModal({
 }: AvatarModalProps) {
   const { colors, isDark } = useSettingsColors();
   const { profile } = useProfile();
-  const tProfile = useTranslations('pages.settings.profileSettings');
   const t = useTranslations('pages.settings.avatarModal');
   const avatarUpload = useAvatarUpload();
 

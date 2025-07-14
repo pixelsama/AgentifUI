@@ -4,7 +4,6 @@
 import type {
   CreateDifyAnnotationRequest,
   CreateDifyAnnotationResponse,
-  DeleteDifyAnnotationResponse,
   DifyAnnotationListResponse,
   DifyAnnotationReplyAction,
   DifyApiError,

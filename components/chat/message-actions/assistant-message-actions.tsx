@@ -35,7 +35,6 @@ interface AssistantMessageActionsProps {
 export const AssistantMessageActions: React.FC<
   AssistantMessageActionsProps
 > = ({
-  messageId,
   content,
   onRegenerate,
   onFeedback,

@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@components/ui/button';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { ArrowLeft, Mail } from 'lucide-react';
@@ -9,12 +8,10 @@ import { useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 import { createClient } from '../../lib/supabase/client';
 
 export function ForgotPasswordForm() {
-  const router = useRouter();
   const { isDark } = useTheme();
   const t = useTranslations('pages.auth.forgotPassword');
 

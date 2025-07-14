@@ -396,8 +396,6 @@ export function useWelcomeLayout(): WelcomeLayoutPositions {
     // 3. 计算推荐问题的理想位置
     const idealSuggestedQuestionsTopY =
       inputBottomY + config.minSpacing.suggestedQuestionsToInput;
-    const idealSuggestedQuestionsBottomY =
-      idealSuggestedQuestionsTopY + config.estimatedHeights.suggestedQuestions;
 
     // 4. 检查是否需要紧凑布局
     const totalRequiredHeight =

@@ -1,10 +1,9 @@
 'use client';
 
-import { useLogout } from '@lib/hooks/use-logout';
 import { useProfile } from '@lib/hooks/use-profile';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
-import { Clock, Info, LogOut, Sliders, UserCircle, Wrench } from 'lucide-react';
+import { Info, LogOut, Sliders, UserCircle, Wrench } from 'lucide-react';
 
 import React from 'react';
 
@@ -32,8 +31,7 @@ export function UserBottomSheet({
   isLoggedIn,
   onLogoutClick,
 }: UserBottomSheetProps) {
-  const { isDark, toggleTheme } = useTheme();
-  const { logout } = useLogout();
+  const { isDark } = useTheme();
   const router = useRouter();
   const t = useTranslations('mobile.user');
   const tBottomSheet = useTranslations('mobile.bottomSheet');

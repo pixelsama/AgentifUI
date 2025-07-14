@@ -13,14 +13,8 @@ import {
   wrapAsync,
 } from '@lib/types/result';
 
-import type { PostgrestError } from '@supabase/supabase-js';
-
-import { CacheKeys, cacheService } from './cache-service';
-import {
-  SubscriptionConfigs,
-  SubscriptionKeys,
-  realtimeService,
-} from './realtime-service';
+import { cacheService } from './cache-service';
+import { realtimeService } from './realtime-service';
 
 interface QueryOptions {
   cache?: boolean;

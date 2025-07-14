@@ -3,7 +3,7 @@
 import { Button } from '@components/ui/button';
 import { useTheme } from '@lib/hooks/use-theme';
 import { createClient } from '@lib/supabase/client';
-import type { PublicSsoProvider, SsoProvider } from '@lib/types/database';
+import type { PublicSsoProvider } from '@lib/types/database';
 import { cn } from '@lib/utils';
 import { clearCacheOnLogin } from '@lib/utils/cache-cleanup';
 

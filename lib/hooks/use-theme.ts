@@ -33,7 +33,7 @@ export function useTheme() {
     theme, // 当前设置的主题 ('light', 'dark', 或 'system')
     setTheme, // 用于设置主题的函数 ('light', 'dark', 'system')
     resolvedTheme, // 实际解析并应用的主题 ('light' 或 'dark')，会解析 'system'
-    systemTheme, // 用户的系统偏好 ('light' 或 'dark')
+    // systemTheme, // 用户的系统偏好 ('light' 或 'dark')
   } = useNextTheme();
 
   // 使用初始主题状态，避免闪烁

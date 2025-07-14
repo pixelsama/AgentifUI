@@ -134,7 +134,7 @@ export function generateConfigSuggestions(
     return suggestions;
   }
 
-  const { dify_apptype, app_type, tags, icon_url } = config.app_metadata;
+  const { dify_apptype, app_type, tags } = config.app_metadata;
 
   // --- 根据Dify应用类型给出建议 ---
   if (dify_apptype === 'workflow' && app_type === 'model') {

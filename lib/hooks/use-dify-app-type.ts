@@ -2,7 +2,6 @@ import { useCurrentAppStore } from '@lib/stores/current-app-store';
 import {
   DIFY_APP_TYPES,
   type DifyAppType,
-  type DifyAppTypeInfo,
   isChatBasedApp,
   isTextGenerationApp,
   isWorkflowApp,

@@ -30,7 +30,6 @@ export function LogoutConfirmDialog({
   const isMobile = useMobile();
   const { logout } = useLogout();
   const t = useTranslations('common.ui.logoutDialog');
-  const tCommon = useTranslations('common.ui');
   const dialogRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);

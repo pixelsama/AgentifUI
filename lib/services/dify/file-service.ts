@@ -53,8 +53,8 @@ export async function uploadDifyFile(
               `[Dify File Service] File "${file.name}" uploaded successfully. ID: ${result.id}`
             );
             resolve(result);
-          } catch (e) {
-            reject(new Error('解析 Dify 文件上传响应失败'));
+          } catch {
+            reject(new Error('Failed to parse Dify file upload response'));
           }
         } else {
           let errorBody = xhr.responseText || 'Unknown error';
@@ -63,7 +63,7 @@ export async function uploadDifyFile(
             const errorJson = JSON.parse(xhr.responseText);
             errorBody = JSON.stringify(errorJson);
             errorCode = errorJson.code || errorCode;
-          } catch (e) {}
+          } catch {}
           const error = new Error(
             `Failed to upload file "${file.name}". Status: ${xhr.status}. Code: ${errorCode}. Body: ${errorBody}`
           );
@@ -74,7 +74,7 @@ export async function uploadDifyFile(
     };
 
     xhr.onerror = () => {
-      reject(new Error(`文件上传网络错误: ${xhr.status}`));
+      reject(new Error(`File upload network error: ${xhr.status}`));
     };
 
     xhr.send(formData);

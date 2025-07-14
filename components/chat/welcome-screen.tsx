@@ -1,7 +1,6 @@
 'use client';
 
 import { TypeWriter } from '@components/ui/typewriter';
-import { useTheme } from '@lib/hooks';
 import { useCurrentApp } from '@lib/hooks/use-current-app';
 import { useDateFormatter } from '@lib/hooks/use-date-formatter';
 import { useWelcomeLayout } from '@lib/hooks/use-welcome-layout';
@@ -16,8 +15,6 @@ interface WelcomeScreenProps {
 }
 
 export const WelcomeScreen = ({ className, username }: WelcomeScreenProps) => {
-  const { isDark } = useTheme();
-
   // 🎯 使用统一的时间格式化Hook，替代重复的问候语逻辑
   const { getTimeBasedGreeting } = useDateFormatter();
   const [finalText, setFinalText] = useState('');

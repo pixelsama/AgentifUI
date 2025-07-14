@@ -143,7 +143,7 @@ export const ExportButton: React.FC<ExportButtonProps> = React.memo(
         placement={tooltipPlacement}
         size={tooltipSize}
         showArrow={showTooltipArrow}
-        desktopOnly={true}
+        _desktopOnly={true}
       >
         <button
           onClick={handleExport}

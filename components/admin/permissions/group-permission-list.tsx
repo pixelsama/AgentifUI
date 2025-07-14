@@ -6,7 +6,7 @@ import {
   usePermissionManagementStore,
 } from '@lib/stores/permission-management-store';
 import { cn } from '@lib/utils';
-import { Building2, Check, X } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useTranslations } from 'next-intl';

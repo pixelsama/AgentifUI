@@ -1,12 +1,12 @@
 'use client';
 
 import { TypingDots } from '@components/ui/typing-dots';
-import { useChatBottomSpacing, useChatWidth, useTheme } from '@lib/hooks';
+import { useChatBottomSpacing, useChatWidth } from '@lib/hooks';
 import { useChatScrollStore } from '@lib/stores/chat-scroll-store';
 import { ChatMessage } from '@lib/stores/chat-store';
 import { cn } from '@lib/utils';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { MessageSkeleton } from './message-skeleton';
 import { AssistantMessage, UserMessage } from './messages';
@@ -52,7 +52,6 @@ export const ChatLoader = ({
   isLoadingInitial = false,
   className,
 }: ChatLoaderProps) => {
-  const { isDark } = useTheme();
   const { widthClass, paddingClass } = useChatWidth();
   const { paddingBottomStyle } = useChatBottomSpacing();
 

@@ -2,9 +2,7 @@
 
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
-import { ArrowUpIcon, MoreHorizontal, Paperclip } from 'lucide-react';
-
-import { useTranslations } from 'next-intl';
+import { ArrowUpIcon, Paperclip } from 'lucide-react';
 
 // 主题卡片组件 - 高颜值版本
 // 模拟真实的聊天界面预览，包含输入框、消息气泡、按钮等元素
@@ -23,7 +21,6 @@ export function ThemeCard({
   onClick,
 }: ThemeCardProps) {
   const { isDark } = useTheme();
-  const t = useTranslations('pages.settings.appearanceSettings.preview');
   const isActive = currentTheme === theme;
 
   // 根据主题类型获取预览样式配置

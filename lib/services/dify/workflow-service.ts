@@ -11,8 +11,6 @@ import {
   DifyWorkflowRequestPayload,
   DifyWorkflowRunDetailResponse,
   DifyWorkflowSseEvent,
-  DifyWorkflowSseNodeFinishedEvent,
-  DifyWorkflowSseNodeStartedEvent,
   DifyWorkflowStreamResponse,
   GetDifyWorkflowLogsParams,
   GetDifyWorkflowLogsResponse,
@@ -91,7 +89,7 @@ export async function executeDifyWorkflow(
       let errorBody = 'Unknown error';
       try {
         errorBody = await response.text();
-      } catch (e) {
+      } catch {
         // 忽略读取错误体时的错误
       }
       throw handleWorkflowApiError(response.status, errorBody);
@@ -155,7 +153,7 @@ export async function streamDifyWorkflow(
       let errorBody = 'Unknown error';
       try {
         errorBody = await response.text();
-      } catch (e) {
+      } catch {
         // 忽略读取错误体时的错误
       }
       throw handleWorkflowApiError(response.status, errorBody);
@@ -472,9 +470,7 @@ export async function stopDifyWorkflow(
       let errorBody = 'Unknown error';
       try {
         errorBody = await response.text();
-      } catch (e) {
-        // 忽略读取错误
-      }
+      } catch {}
       throw handleWorkflowApiError(response.status, errorBody);
     }
 

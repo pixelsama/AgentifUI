@@ -9,12 +9,10 @@ import { useUserManagementStore } from '@lib/stores/user-management-store';
 import { cn } from '@lib/utils';
 import {
   CheckSquare,
-  Clock,
   Crown,
   Plus,
   RefreshCw,
   Shield,
-  Trash2,
   UserCheck,
   UserIcon,
   UserX,
@@ -22,21 +20,20 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { useTranslations } from 'next-intl';
 
 export default function UsersManagementPage() {
   const { isDark } = useTheme();
-  const { profile: currentUserProfile } = useProfile(); // 获取当前用户信息
+  const { profile: currentUserProfile } = useProfile();
   const t = useTranslations('pages.admin.users');
 
-  // 从用户管理store获取状态和操作
+  // get status and operations from user management store
   const {
     users,
     stats,
     filters,
-    filterOptions,
     pagination,
     loading,
     error,
@@ -58,23 +55,23 @@ export default function UsersManagementPage() {
     clearError,
   } = useUserManagementStore();
 
-  // 检查是否可以更改用户角色（防止管理员降级其他管理员）
+  // check if can change user role (prevent admin from downgrading other admins)
   const canChangeUserRole = (
     targetUser: any,
     newRole: 'admin' | 'manager' | 'user'
   ) => {
-    // 如果当前用户不是管理员，不允许任何角色更改
+    // if current user is not admin, do not allow any role change
     if (currentUserProfile?.role !== 'admin') {
       return false;
     }
 
-    // 防止管理员修改自己的角色
+    // prevent admin from modifying their own role
     if (targetUser.id === currentUserProfile?.id) {
       toast.error(t('messages.cannotChangeOwnRole'));
       return false;
     }
 
-    // 防止非超级管理员降级其他管理员
+    // prevent non-super admin from downgrading other admins
     if (targetUser.role === 'admin' && newRole !== 'admin') {
       toast.error(t('messages.cannotDowngradeOtherAdmin'));
       return false;
@@ -83,20 +80,20 @@ export default function UsersManagementPage() {
     return true;
   };
 
-  // 检查是否可以删除用户（防止删除管理员账号）
+  // check if can delete user (prevent deleting admin account)
   const canDeleteUser = (targetUser: any) => {
-    // 如果当前用户不是管理员，不允许删除
+    // if current user is not admin, do not allow delete
     if (currentUserProfile?.role !== 'admin') {
       return false;
     }
 
-    // 防止删除自己
+    // prevent deleting self
     if (targetUser.id === currentUserProfile?.id) {
       toast.error(t('messages.cannotDeleteSelf'));
       return false;
     }
 
-    // 防止删除其他管理员
+    // prevent deleting other admins
     if (targetUser.role === 'admin') {
       toast.error(t('messages.cannotDeleteOtherAdmin'));
       return false;
@@ -105,7 +102,7 @@ export default function UsersManagementPage() {
     return true;
   };
 
-  // 检查批量操作是否包含受保护的用户
+  // check if batch operation contains protected users
   const canBatchChangeRole = (newRole: 'admin' | 'manager' | 'user') => {
     if (currentUserProfile?.role !== 'admin') {
       return false;
@@ -115,7 +112,7 @@ export default function UsersManagementPage() {
       selectedUserIds.includes(user.id)
     );
 
-    // 检查是否包含当前用户
+    // check if contains current user
     const includesSelf = selectedUsers.some(
       user => user.id === currentUserProfile?.id
     );
@@ -124,7 +121,7 @@ export default function UsersManagementPage() {
       return false;
     }
 
-    // 检查是否试图降级其他管理员
+    // check if trying to downgrade other admins
     const hasAdminBeingDowngraded = selectedUsers.some(
       user => user.role === 'admin' && newRole !== 'admin'
     );
@@ -136,14 +133,14 @@ export default function UsersManagementPage() {
     return true;
   };
 
-  // 页面初始化时加载数据
+  // load data when page initializes
   useEffect(() => {
     loadUsers();
     loadStats();
     loadFilterOptions();
   }, [loadUsers, loadStats, loadFilterOptions]);
 
-  // 处理错误提示
+  // handle error prompt
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -151,7 +148,7 @@ export default function UsersManagementPage() {
     }
   }, [error, clearError]);
 
-  // 处理筛选重置
+  // handle filter reset
   const handleResetFilters = () => {
     updateFilters({
       role: undefined,
@@ -161,12 +158,12 @@ export default function UsersManagementPage() {
     });
   };
 
-  // 处理用户选择
+  // handle user selection
   const handleSelectUser = (userId: string) => {
     toggleUserSelection(userId);
   };
 
-  // 处理全选/取消全选
+  // handle select all/cancel all
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
       selectUsers(users.map(user => user.id));
@@ -175,7 +172,7 @@ export default function UsersManagementPage() {
     }
   };
 
-  // 处理用户角色更改（带安全检查）
+  // handle user role change (with safety check)
   const handleChangeRole = async (
     user: any,
     role: 'admin' | 'manager' | 'user'
@@ -196,7 +193,7 @@ export default function UsersManagementPage() {
     }
   };
 
-  // 处理用户状态更改
+  // handle user status change
   const handleChangeStatus = async (
     user: any,
     status: 'active' | 'suspended' | 'pending'
@@ -213,7 +210,7 @@ export default function UsersManagementPage() {
     }
   };
 
-  // 处理用户删除（带安全检查）
+  // handle user delete (with safety check)
   const handleDeleteUser = async (user: any) => {
     if (!canDeleteUser(user)) {
       return;
@@ -233,7 +230,7 @@ export default function UsersManagementPage() {
     }
   };
 
-  // 处理批量角色更改（带安全检查）
+  // handle batch role change (with safety check)
   const handleBatchChangeRole = async (role: 'admin' | 'manager' | 'user') => {
     if (!canBatchChangeRole(role)) {
       return;
@@ -247,7 +244,7 @@ export default function UsersManagementPage() {
     }
   };
 
-  // 处理批量状态更改
+  // handle batch status change
   const handleBatchChangeStatus = async (
     status: 'active' | 'suspended' | 'pending'
   ) => {
@@ -261,21 +258,21 @@ export default function UsersManagementPage() {
     }
   };
 
-  // 处理查看用户（暂时用toast代替）
+  // handle view user (use toast temporarily)
   const handleViewUser = (user: any) => {
     toast.success(
       t('actions.viewUser', { name: user.full_name || user.email })
     );
   };
 
-  // 处理编辑用户（暂时用toast代替）
+  // handle edit user (use toast temporarily)
   const handleEditUser = (user: any) => {
     toast.success(
       t('actions.editUser', { name: user.full_name || user.email })
     );
   };
 
-  // 分页控制
+  // pagination control
   const PaginationControls = () => {
     if (pagination.totalPages <= 1) return null;
 

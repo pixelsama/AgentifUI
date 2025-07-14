@@ -34,7 +34,7 @@ export function DynamicTitle() {
 
   // --- 本地状态管理 ---
   const [currentTitle, setCurrentTitle] = useState<string>('AgentifUI');
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [_isUpdating, setIsUpdating] = useState(false);
 
   // --- 状态缓存 ---
   const stableStateRef = useRef<{

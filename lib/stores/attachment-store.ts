@@ -55,7 +55,7 @@ interface AttachmentStoreState {
  * Attachment store
  * @description Zustand store for managing file attachments and upload states
  */
-export const useAttachmentStore = create<AttachmentStoreState>((set, get) => ({
+export const useAttachmentStore = create<AttachmentStoreState>(set => ({
   files: [],
 
   // Add one or more files to store
@@ -88,7 +88,6 @@ export const useAttachmentStore = create<AttachmentStoreState>((set, get) => ({
   // Remove file by ID and release possible preview URLs
   removeFile: id => {
     set(state => {
-      const fileToRemove = state.files.find(f => f.id === id);
       return {
         files: state.files.filter(f => f.id !== id),
       };

@@ -12,7 +12,7 @@ import { useTextGenerationExecution } from '@lib/hooks/use-text-generation-execu
 import { useTheme } from '@lib/hooks/use-theme';
 import { useWorkflowHistoryStore } from '@lib/stores/workflow-history-store';
 import { cn } from '@lib/utils';
-import { AlertCircle, FileText, RefreshCw, X } from 'lucide-react';
+import { AlertCircle, RefreshCw, X } from 'lucide-react';
 
 import React, { useCallback, useRef, useState } from 'react';
 
@@ -43,19 +43,14 @@ export function TextGenerationLayout({
   const {
     isExecuting,
     isStreaming,
-    progress,
     error,
     canRetry,
     currentExecution,
-    executionHistory,
-    formData,
-    formLocked,
     generatedText,
     executeTextGeneration,
     stopTextGeneration,
     retryTextGeneration,
     resetTextGeneration,
-    loadTextGenerationHistory,
   } = useTextGenerationExecution(instanceId);
 
   // --- 保留原有状态管理 ---

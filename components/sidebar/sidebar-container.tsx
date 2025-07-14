@@ -5,21 +5,15 @@ import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { cn } from '@lib/utils';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { SidebarContent } from './sidebar-content';
 import { SidebarFooter } from './sidebar-footer';
 import { SidebarHeader } from './sidebar-header';
 
 export function SidebarContainer() {
-  const {
-    isExpanded,
-    toggleSidebar,
-    isMounted,
-    getSidebarWidth,
-    isAnimating,
-    hideMobileNav,
-  } = useSidebarStore();
+  const { isExpanded, toggleSidebar, isAnimating, hideMobileNav } =
+    useSidebarStore();
   const { colors, isDark } = useThemeColors();
   const isMobile = useMobile();
 

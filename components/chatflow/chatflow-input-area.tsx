@@ -44,7 +44,7 @@ export function ChatflowInputArea({
   className,
   onFormConfigChange,
 }: ChatflowInputAreaProps) {
-  const { colors, isDark } = useThemeColors();
+  const { isDark } = useThemeColors();
   const { widthClass, paddingClass } = useChatWidth();
   const { currentAppInstance } = useCurrentApp();
   const t = useTranslations('pages.chatflow');

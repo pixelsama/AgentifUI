@@ -103,7 +103,7 @@ export const ThinkBlockContent: React.FC<ThinkBlockContentProps> = ({
   // --- Markdown 渲染器的组件配置 ---
   const markdownComponents: Components = {
     code({ className, children, ...props }: any) {
-      const match = /language-(\w+)/.exec(className || '');
+      // const match = /language-(\w+)/.exec(className || '');
       // 如果不是带有语言标识的代码块 (inline code)
       return !className?.includes('language-') ? (
         <code

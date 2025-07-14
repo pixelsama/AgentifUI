@@ -43,7 +43,6 @@ export function AvatarCropper({
   });
 
   // 简化滑块样式 - 连接式设计
-  const progressPercentage = ((cropState.zoom - 1) / 2) * 100;
   const sliderStyles = `
     .custom-slider {
       -webkit-appearance: none;

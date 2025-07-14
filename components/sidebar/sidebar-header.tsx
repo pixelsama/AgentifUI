@@ -4,10 +4,7 @@ import { WidePanelLeft } from '@components/ui';
 import { KeyCombination } from '@components/ui/adaptive-key-badge';
 import { TooltipWrapper } from '@components/ui/tooltip-wrapper';
 import { useChatInterface } from '@lib/hooks/use-chat-interface';
-import {
-  COMMON_SHORTCUTS,
-  useFormattedShortcut,
-} from '@lib/hooks/use-platform-keys';
+import { useFormattedShortcut } from '@lib/hooks/use-platform-keys';
 import { useTheme } from '@lib/hooks/use-theme';
 import { useChatInputStore } from '@lib/stores/chat-input-store';
 import { useChatStore } from '@lib/stores/chat-store';
@@ -320,7 +317,6 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
             />
           }
           active={isNewChatActive}
-          disableLockBehavior={true}
           onClick={handleNewChat}
           aria-label={t('newChat')}
           variant="transparent"
@@ -369,7 +365,6 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               />
             }
             active={isNewChatActive}
-            disableLockBehavior={true}
             onClick={handleNewChat}
             aria-label={t('newChat')}
             variant="transparent"
@@ -396,7 +391,6 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
             />
           }
           active={isHistoryActive}
-          disableLockBehavior={true}
           onClick={() => {
             router.push('/chat/history');
           }}
@@ -447,7 +441,6 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               />
             }
             active={isHistoryActive}
-            disableLockBehavior={true}
             onClick={() => {
               router.push('/chat/history');
             }}
@@ -476,7 +469,6 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
             />
           }
           active={isAppsActive}
-          disableLockBehavior={true}
           onClick={() => {
             router.push('/apps');
           }}
@@ -527,7 +519,6 @@ export function SidebarHeader({ isHovering = false }: SidebarHeaderProps) {
               />
             }
             active={isAppsActive}
-            disableLockBehavior={true}
             onClick={() => {
               router.push('/apps');
             }}

@@ -1,4 +1,3 @@
-import { useMobile } from '@lib/hooks/use-mobile';
 import { cn } from '@lib/utils';
 
 import React, { useState } from 'react';
@@ -39,7 +38,6 @@ export function ReferenceSources({
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const isMobile = useMobile();
 
   // 如果没有引用资源，不渲染组件
   if (!retrieverResources || retrieverResources.length === 0) {

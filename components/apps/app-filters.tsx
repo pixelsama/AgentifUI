@@ -27,7 +27,7 @@ export function AppFilters({
   viewMode,
   onViewModeChange,
 }: AppFiltersProps) {
-  const { colors, isDark } = useThemeColors();
+  const { isDark } = useThemeColors();
   const t = useTranslations('pages.apps.market');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);

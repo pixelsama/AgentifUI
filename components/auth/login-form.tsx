@@ -6,11 +6,11 @@ import { cn } from '@lib/utils';
 import { clearCacheOnLogin } from '@lib/utils/cache-cleanup';
 import { Eye, EyeOff } from 'lucide-react';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 import { createClient } from '../../lib/supabase/client';
 import { SocialAuthButtons } from './social-auth-buttons';
@@ -18,7 +18,6 @@ import { SSOCard } from './sso-button';
 
 export function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { isDark } = useTheme();
   const t = useTranslations('pages.auth.login');
 

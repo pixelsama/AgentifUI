@@ -107,9 +107,9 @@ export const useGroupManagementStore = create<GroupManagementState>(
             loading: { ...state.loading, groups: false },
           }));
         }
-      } catch (error) {
+      } catch {
         set(state => ({
-          error: '加载群组列表失败',
+          error: 'Failed to load groups',
           loading: { ...state.loading, groups: false },
         }));
       }
@@ -139,9 +139,9 @@ export const useGroupManagementStore = create<GroupManagementState>(
             loading: { ...state.loading, members: false },
           }));
         }
-      } catch (error) {
+      } catch {
         set(state => ({
-          error: '加载群组成员失败',
+          error: 'Failed to load group members',
           loading: { ...state.loading, members: false },
         }));
       }
@@ -183,9 +183,9 @@ export const useGroupManagementStore = create<GroupManagementState>(
             loading: { ...state.loading, stats: false },
           }));
         }
-      } catch (error) {
+      } catch {
         set(state => ({
-          error: '加载统计数据失败',
+          error: 'Failed to load stats',
           loading: { ...state.loading, stats: false },
         }));
       }
@@ -222,9 +222,9 @@ export const useGroupManagementStore = create<GroupManagementState>(
           }));
           return false;
         }
-      } catch (error) {
+      } catch {
         set(state => ({
-          error: '创建群组失败',
+          error: 'Failed to create group',
           loading: { ...state.loading, creating: false },
         }));
         return false;
@@ -261,9 +261,9 @@ export const useGroupManagementStore = create<GroupManagementState>(
           }));
           return false;
         }
-      } catch (error) {
+      } catch {
         set(state => ({
-          error: '更新群组失败',
+          error: 'Failed to update group',
           loading: { ...state.loading, updating: false },
         }));
         return false;
@@ -313,9 +313,9 @@ export const useGroupManagementStore = create<GroupManagementState>(
           }));
           return false;
         }
-      } catch (error) {
+      } catch {
         set(state => ({
-          error: '删除群组失败',
+          error: 'Failed to delete group',
           loading: { ...state.loading, deleting: false },
         }));
         return false;
@@ -347,8 +347,8 @@ export const useGroupManagementStore = create<GroupManagementState>(
           set({ error: result.error.message });
           return false;
         }
-      } catch (error) {
-        set({ error: '添加成员失败' });
+      } catch {
+        set({ error: 'Failed to add member' });
         return false;
       }
     },
@@ -381,8 +381,8 @@ export const useGroupManagementStore = create<GroupManagementState>(
           set({ error: result.error.message });
           return false;
         }
-      } catch (error) {
-        set({ error: '移除成员失败' });
+      } catch {
+        set({ error: 'Failed to remove member' });
         return false;
       }
     },

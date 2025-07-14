@@ -2,7 +2,7 @@
 
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
-import { Check, CheckSquare, Square, Trash2, X } from 'lucide-react';
+import { CheckSquare, Square, Trash2, X } from 'lucide-react';
 
 import * as React from 'react';
 
@@ -14,7 +14,6 @@ interface HistorySelectionBarProps {
   isSelectionMode: boolean;
   selectedCount: number;
   totalCount: number;
-  onToggleSelectionMode: () => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;
   onBatchDelete: () => void;
@@ -26,7 +25,6 @@ export function HistorySelectionBar({
   isSelectionMode,
   selectedCount,
   totalCount,
-  onToggleSelectionMode,
   onSelectAll,
   onDeselectAll,
   onBatchDelete,

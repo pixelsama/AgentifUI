@@ -2,24 +2,11 @@
 
 import { DropdownMenuV2 } from '@components/ui/dropdown-menu-v2';
 import { MoreButtonV2 } from '@components/ui/more-button-v2';
-import { useCurrentApp } from '@lib/hooks/use-current-app';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
-import { useChatStore } from '@lib/stores/chat-store';
 import { useFavoriteAppsStore } from '@lib/stores/favorite-apps-store';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { cn } from '@lib/utils';
-import {
-  Bot,
-  ChevronDown,
-  ChevronRight,
-  Edit,
-  Heart,
-  HeartOff,
-  Pen,
-  Plus,
-  Trash,
-  Zap,
-} from 'lucide-react';
+import { ChevronRight, Edit, HeartOff } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 import React from 'react';
@@ -53,8 +40,6 @@ export function SidebarFavoriteApps({
   contentVisible,
 }: SidebarFavoriteAppsProps) {
   const router = useRouter();
-  const { switchToSpecificApp } = useCurrentApp();
-  const { clearMessages } = useChatStore();
   const { isExpanded, selectItem, selectedType, selectedId } =
     useSidebarStore();
   const { colors } = useThemeColors();
@@ -240,7 +225,6 @@ export function SidebarFavoriteApps({
             aria-label={t('moreOptions')}
             disabled={false}
             isMenuOpen={isMenuOpen}
-            isItemSelected={false}
             disableHover={!!openDropdownId && !isMenuOpen}
           />
         }

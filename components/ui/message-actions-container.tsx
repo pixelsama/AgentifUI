@@ -15,7 +15,6 @@ interface MessageActionsContainerProps {
 export const MessageActionsContainer: React.FC<
   MessageActionsContainerProps
 > = ({ children, className, align = 'left', isAssistantMessage = false }) => {
-  const { isDark } = useTheme();
   const isMobile = useMobile();
 
   return (

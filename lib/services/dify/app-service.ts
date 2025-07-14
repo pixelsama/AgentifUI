@@ -1,4 +1,3 @@
-import { getProviderByName } from '@lib/db';
 import type { ServiceInstanceConfig } from '@lib/types/database';
 
 import type {

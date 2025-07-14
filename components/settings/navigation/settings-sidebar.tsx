@@ -2,15 +2,7 @@
 
 import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { cn } from '@lib/utils';
-import {
-  Globe,
-  KeyRound,
-  Palette,
-  Shield,
-  Sliders,
-  User,
-  UserCog,
-} from 'lucide-react';
+import { Globe, Palette, Sliders, User, UserCog } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';

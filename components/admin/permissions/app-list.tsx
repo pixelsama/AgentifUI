@@ -29,19 +29,6 @@ export function AppList() {
     }
   };
 
-  const getVisibilityColor = (visibility: AppVisibility) => {
-    switch (visibility) {
-      case 'public':
-        return isDark ? 'text-green-400' : 'text-green-600';
-      case 'group_only':
-        return isDark ? 'text-blue-400' : 'text-blue-600';
-      case 'private':
-        return isDark ? 'text-purple-400' : 'text-purple-600';
-      default:
-        return isDark ? 'text-stone-400' : 'text-stone-600';
-    }
-  };
-
   const getVisibilityLabel = (visibility: AppVisibility) => {
     switch (visibility) {
       case 'public':

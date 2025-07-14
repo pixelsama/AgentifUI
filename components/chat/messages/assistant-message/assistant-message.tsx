@@ -73,7 +73,7 @@ const extractThinkContent = (
   // Priority check <think> tags first, then <details> tags if not found
   // New: Allow a small amount of whitespace or very short content before tags
   // Preprocessing: Remove leading whitespace but preserve original content for subsequent processing
-  const trimmedContent = rawContent.trim();
+  // const trimmedContent = rawContent.trim();
 
   // Check <think> tags
   const thinkStartTag = '<think>';
@@ -268,7 +268,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(
     const preprocessMainContent = (content: string): string => {
       // Key fix: Ensure details tags have enough blank lines after them to separate markdown content
       // This prevents rehypeRaw plugin from affecting subsequent markdown parsing
-      let processedContent = content
+      const processedContent = content
         // Ensure details closing tag has two newlines after it
         .replace(/(<\/details>)(\s*)([^\s])/g, '$1\n\n$3')
         // Ensure details opening tag has newline before it (if there's content before)
@@ -506,7 +506,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(
           </h4>
         );
       },
-      a({ children, href, node, ...props }: any) {
+      a({ children, href, ...props }: any) {
         // Ensure href is string type
         const linkUrl = typeof href === 'string' ? href : '';
 
@@ -525,7 +525,6 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = React.memo(
               (child.type === 'img' || (child.props as any)?.src)
           ) as React.ReactElement;
 
-          const imageSrc = (imageChild?.props as any)?.src || linkUrl;
           const imageAlt = (imageChild?.props as any)?.alt || '';
 
           return (

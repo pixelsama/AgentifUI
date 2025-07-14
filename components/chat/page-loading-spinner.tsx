@@ -13,7 +13,7 @@ interface PageLoadingSpinnerProps {
 }
 
 export function PageLoadingSpinner({ isLoading }: PageLoadingSpinnerProps) {
-  const { colors, isDark } = useThemeColors();
+  const { colors } = useThemeColors();
   const [visible, setVisible] = useState(false);
 
   // 添加延迟显示，避免闪烁

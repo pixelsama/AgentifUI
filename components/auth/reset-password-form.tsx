@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@components/ui/button';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { AlertCircle, ArrowLeft, CheckCircle, Eye, EyeOff } from 'lucide-react';

@@ -4,12 +4,10 @@ import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import {
   CheckCircle,
-  Clock,
   Copy,
   Download,
   FileText,
   Loader2,
-  Play,
   RefreshCw,
   RotateCcw,
   Square,

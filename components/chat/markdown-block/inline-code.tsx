@@ -37,3 +37,5 @@ export const InlineCode: React.FC<InlineCodeProps> = React.memo(
     );
   }
 );
+
+InlineCode.displayName = 'InlineCode';

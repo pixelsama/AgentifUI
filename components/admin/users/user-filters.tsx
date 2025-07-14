@@ -4,13 +4,10 @@ import type { UserFilters } from '@lib/db/users';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import {
-  Briefcase,
-  Building2,
   ChevronDown,
   ChevronUp,
   Clock,
   Crown,
-  Filter,
   RotateCcw,
   Search,
   Settings,
@@ -24,11 +21,6 @@ import {
 import React, { useState } from 'react';
 
 import { useTranslations } from 'next-intl';
-
-interface FilterOption {
-  value: string;
-  label: string;
-}
 
 interface UserFiltersProps {
   filters: UserFilters;

@@ -73,7 +73,7 @@ export const CopyButton: React.FC<CopyButtonProps> = React.memo(
         placement={tooltipPlacement}
         size={tooltipSize}
         showArrow={showTooltipArrow}
-        desktopOnly={true}
+        _desktopOnly={true}
       >
         <button
           onClick={handleCopy}

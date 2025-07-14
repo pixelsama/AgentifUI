@@ -5,7 +5,6 @@ import type {
   GroupMember,
   SearchableUser,
 } from '@lib/db/group-permissions';
-import { searchUsersForGroup } from '@lib/db/group-permissions';
 import {
   DateFormatPresets,
   useDateFormatter,
@@ -43,7 +42,7 @@ export function GroupMembersModal({
   onClose,
 }: GroupMembersModalProps) {
   const { isDark } = useTheme();
-  const { groupMembers, loading, loadGroupMembers, addMember, removeMember } =
+  const { groupMembers, loading, loadGroupMembers, removeMember } =
     useGroupManagementStore();
   const { formatDate } = useDateFormatter();
   const t = useTranslations('pages.admin.groups.membersModal');

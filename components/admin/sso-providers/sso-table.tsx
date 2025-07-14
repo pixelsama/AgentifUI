@@ -11,15 +11,9 @@ import {
   ChevronRight,
   Clock,
   Edit2,
-  ExternalLink,
-  MoreHorizontal,
   Shield,
-  ShieldCheck,
-  ShieldOff,
   Trash2,
-  Users,
   XCircle,
-  Zap,
 } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
@@ -60,15 +54,8 @@ export function SsoTable({
   const { isDark } = useTheme();
   const t = useTranslations('pages.admin.ssoProviders.table');
 
-  const {
-    providers,
-    loading,
-    pagination,
-    filters,
-    updateFilters,
-    setPage,
-    toggleProviderStatus,
-  } = useSsoProvidersStore();
+  const { providers, loading, pagination, setPage, toggleProviderStatus } =
+    useSsoProvidersStore();
 
   // Use provided isLoading prop or store loading state
   const shouldShowLoading = isLoading || loading.providers;

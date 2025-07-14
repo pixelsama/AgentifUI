@@ -7,7 +7,7 @@ import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { cn } from '@lib/utils';
 
 export function MessageSkeleton() {
-  const { colors, isDark } = useThemeColors();
+  const { isDark } = useThemeColors();
 
   return (
     <div

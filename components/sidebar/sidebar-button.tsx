@@ -13,7 +13,6 @@ interface SidebarButtonProps extends React.HTMLAttributes<HTMLDivElement> {
   moreActionsTrigger?: React.ReactNode;
   isDisabled?: boolean;
   children?: React.ReactNode;
-  disableLockBehavior?: boolean;
   variant?: 'default' | 'transparent'; // 新增：控制悬停效果样式
 }
 
@@ -26,7 +25,6 @@ export function SidebarButton({
   moreActionsTrigger,
   isDisabled = false,
   children,
-  disableLockBehavior = false,
   variant = 'default',
   ...props
 }: SidebarButtonProps) {

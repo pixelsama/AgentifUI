@@ -505,7 +505,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                     <div className="flex h-16 flex-col justify-center space-y-1">
                       {user.groups && user.groups.length > 0 ? (
                         <>
-                          {user.groups.slice(0, 2).map((group, index) => (
+                          {user.groups.slice(0, 2).map(group => (
                             <p
                               key={group.id}
                               className={cn(

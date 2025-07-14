@@ -10,7 +10,7 @@ import {
   XIcon,
 } from 'lucide-react';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
 const iconMap = {
   success: CheckCircleIcon,

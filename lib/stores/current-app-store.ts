@@ -1,12 +1,7 @@
 // lib/stores/current-app-store.ts
 import { clearDifyConfigCache } from '@lib/config/dify-config';
-import {
-  getDefaultProvider,
-  getDefaultServiceInstance,
-  getProviderByName,
-} from '@lib/db';
+import { getDefaultProvider, getDefaultServiceInstance } from '@lib/db';
 import type { Provider, ServiceInstance } from '@lib/types/database';
-import { Result } from '@lib/types/result';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 

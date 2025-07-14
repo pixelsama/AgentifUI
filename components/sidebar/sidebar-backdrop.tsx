@@ -4,7 +4,7 @@ import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { cn } from '@lib/utils';
 
 export function SidebarBackdrop() {
-  const { isExpanded, isMobileNavVisible, hideMobileNav } = useSidebarStore();
+  const { isExpanded, hideMobileNav } = useSidebarStore();
 
   return (
     <div

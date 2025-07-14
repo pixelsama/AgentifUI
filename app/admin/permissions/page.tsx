@@ -13,7 +13,7 @@ export default function PermissionsPage() {
   const { loadApps, loadGroups, loading, error } =
     usePermissionManagementStore();
 
-  // 初始化数据
+  // initialize data
   useEffect(() => {
     loadApps();
     loadGroups();
@@ -21,10 +21,10 @@ export default function PermissionsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* 页面头部 */}
+      {/* page header */}
       <PermissionHeader />
 
-      {/* 错误提示 */}
+      {/* error prompt */}
       {error && (
         <div
           className={cn(
@@ -38,7 +38,7 @@ export default function PermissionsPage() {
         </div>
       )}
 
-      {/* 主要内容 */}
+      {/* main content */}
       <PermissionLayout />
     </div>
   );

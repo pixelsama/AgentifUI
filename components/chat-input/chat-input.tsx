@@ -1,11 +1,9 @@
 'use client';
 
-import { TooltipWrapper } from '@components/ui/tooltip-wrapper';
 import { useChatWidth, useInputHeightReset } from '@lib/hooks';
 import { useChatInputRouteSync } from '@lib/hooks/use-chat-input-route-sync';
 import { useCurrentApp } from '@lib/hooks/use-current-app';
 import { uploadDifyFile } from '@lib/services/dify/file-service';
-import { DifyFileUploadResponse } from '@lib/services/dify/types';
 import { useAppListStore } from '@lib/stores/app-list-store';
 import { useAttachmentStore } from '@lib/stores/attachment-store';
 import { AttachmentFile } from '@lib/stores/attachment-store';
@@ -16,7 +14,7 @@ import { useChatScrollStore } from '@lib/stores/chat-scroll-store';
 import { useNotificationStore } from '@lib/stores/ui/notification-store';
 import { useSupabaseAuth } from '@lib/supabase/hooks';
 import { cn } from '@lib/utils';
-import { ArrowUpIcon, Loader2, PlusIcon, Square } from 'lucide-react';
+import { ArrowUpIcon, Loader2, Square } from 'lucide-react';
 import { create } from 'zustand';
 
 import { useCallback, useEffect, useRef, useState } from 'react';

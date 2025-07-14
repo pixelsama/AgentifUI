@@ -4,7 +4,7 @@ import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { useFavoriteAppsStore } from '@lib/stores/favorite-apps-store';
 import { getDifyAppTypeInfo } from '@lib/types/dify-app-types';
 import { cn } from '@lib/utils';
-import { ArrowRight, Blocks, Cpu, Heart, Star } from 'lucide-react';
+import { ArrowRight, Blocks, Cpu, Heart } from 'lucide-react';
 
 import React from 'react';
 

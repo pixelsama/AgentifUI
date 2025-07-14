@@ -22,18 +22,18 @@ export default function AboutPage() {
   });
   const [mounted, setMounted] = useState(false);
 
-  // Enhanced translation function that tries dynamic first, then static fallback
+  // enhanced translation function that tries dynamic first, then static fallback
   const t = (key: string, params?: Record<string, string | number>) => {
     const dynamicValue = dynamicT(key, 'pages.about', params);
     return dynamicValue || staticT(key, params);
   };
 
-  // 确保客户端渲染一致性
+  // ensure client-side rendering consistency
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // 根据主题获取颜色
+  // get colors based on theme
   const getColors = () => {
     if (isDark) {
       return {
@@ -81,25 +81,25 @@ export default function AboutPage() {
         buttonClass: '',
       };
 
-  // 处理"开始探索"按钮点击
+  // handle "start exploring" button click
   const handleExploreClick = async () => {
     try {
-      // 检查用户是否已登录
+      // check if user is logged in
       const supabase = createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
       if (user) {
-        // 用户已登录，直接跳转到聊天页面
+        // user is logged in, redirect to chat page
         router.push('/chat');
       } else {
-        // 用户未登录，跳转到登录页面
+        // user is not logged in, redirect to login page
         router.push('/login');
       }
     } catch (error) {
-      console.error('检查登录状态失败:', error);
-      // 出错时默认跳转到登录页面
+      console.error('check login status failed:', error);
+      // if error, redirect to login page
       router.push('/login');
     }
   };
@@ -118,7 +118,7 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen w-full overflow-x-hidden px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
-        {/* 标题部分 */}
+        {/* title */}
         <motion.section
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -151,7 +151,7 @@ export default function AboutPage() {
           </motion.p>
         </motion.section>
 
-        {/* 使命部分 */}
+        {/* mission */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -177,7 +177,7 @@ export default function AboutPage() {
           </p>
         </motion.section>
 
-        {/* 价值观部分 */}
+        {/* values */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -230,7 +230,7 @@ export default function AboutPage() {
           </div>
         </motion.section>
 
-        {/* 加入我们部分 */}
+        {/* join us */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -250,7 +250,7 @@ export default function AboutPage() {
           </Button>
         </motion.section>
 
-        {/* 底部信息 */}
+        {/* bottom info */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

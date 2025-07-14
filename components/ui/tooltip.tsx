@@ -57,7 +57,7 @@ const tooltipState = {
 
 // Tooltip容器组件
 export function TooltipContainer() {
-  const [isMounted, setIsMounted] = useState(false);
+  const [_isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);

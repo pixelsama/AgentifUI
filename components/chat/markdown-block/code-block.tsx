@@ -151,3 +151,5 @@ export const CodeBlock: React.FC<CodeBlockProps> = React.memo(
     );
   }
 );
+
+CodeBlock.displayName = 'CodeBlock';

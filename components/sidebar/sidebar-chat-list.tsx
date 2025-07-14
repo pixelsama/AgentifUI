@@ -2,9 +2,6 @@
 
 import { ConfirmDialog, InputDialog } from '@components/ui';
 import { DropdownMenuV2 } from '@components/ui/dropdown-menu-v2';
-// formatDistanceToNow and zhCN are not needed if we only show title
-// import { formatDistanceToNow } from "date-fns"
-// import { zhCN } from "date-fns/locale"
 import { MoreButtonV2 } from '@components/ui/more-button-v2';
 import { TypeWriter } from '@components/ui/typewriter';
 import {
@@ -12,26 +9,14 @@ import {
   conversationEvents,
   useCombinedConversations,
 } from '@lib/hooks/use-combined-conversations';
-import { useMobile } from '@lib/hooks/use-mobile';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { usePendingConversationStore } from '@lib/stores/pending-conversation-store';
-import { useSidebarStore } from '@lib/stores/sidebar-store';
-// import { ChatSkeleton } from "./chat-skeleton"
 import { cn } from '@lib/utils';
-import {
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Edit,
-  MessageSquare,
-  Pen,
-  Trash,
-} from 'lucide-react';
+import { Pen, Trash } from 'lucide-react';
 
 import * as React from 'react';
 
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 
 // 使用新的 SidebarListButton 组件
 import { SidebarListButton } from './sidebar-list-button';
@@ -49,22 +34,14 @@ export function SidebarChatList({
   selectedId,
   onSelectChat,
 }: SidebarChatListProps) {
-  const { isExpanded } = useSidebarStore();
-  const isMobile = useMobile();
-  const router = useRouter();
   const { colors } = useThemeColors();
   const t = useTranslations('sidebar');
   const {
     conversations,
     isLoading: isLoadingConversations,
-    error,
     refresh,
   } = useCombinedConversations();
 
-  // 🎯 新增：打字机效果相关Actions
-  const updateTypewriterDisplay = usePendingConversationStore(
-    state => state.updateTypewriterDisplay
-  );
   const completeTitleTypewriter = usePendingConversationStore(
     state => state.completeTitleTypewriter
   );
@@ -133,11 +110,6 @@ export function SidebarChatList({
   // 使用 useSidebarConversations 获取的对话列表已经限制为20个
   const visibleUnpinnedChats = unpinnedChats;
 
-  // 判断是否有更多历史对话（超过20个）
-  // 使用 useCombinedConversations 返回的 total 属性
-  const hasMoreChats =
-    displayConversations.length === 20 || unpinnedChats.length === 20;
-
   const handleRename = React.useCallback(
     async (chatId: string) => {
       const conversation = conversations.find(c => c.id === chatId);
@@ -168,7 +140,6 @@ export function SidebarChatList({
         if (result.success) {
           // 重命名成功后直接更新页面标题，无需刷新页面
           if (selectedId === selectedConversation.id) {
-            const baseTitle = 'AgentifUI';
             // 标题管理由DynamicTitle组件统一处理，无需手动设置
           }
 
@@ -381,7 +352,6 @@ export function SidebarChatList({
             aria-label={t('moreOptions')}
             disabled={itemIsLoading || !canPerformActions || isTempChat}
             isMenuOpen={isMenuOpen}
-            isItemSelected={isItemSelected}
             disableHover={!!openDropdownId && !isMenuOpen}
             className={cn(
               'transition-opacity',

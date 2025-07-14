@@ -264,7 +264,7 @@ export function TextGenerationTracker({
                     placement="bottom"
                     size="sm"
                     showArrow={false}
-                    desktopOnly={true}
+                    _desktopOnly={true}
                   >
                     <button
                       onClick={handleCopyText}
@@ -299,7 +299,7 @@ export function TextGenerationTracker({
                     placement="bottom"
                     size="sm"
                     showArrow={false}
-                    desktopOnly={true}
+                    _desktopOnly={true}
                   >
                     <button
                       onClick={handleDownloadText}

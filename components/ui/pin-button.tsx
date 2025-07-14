@@ -46,7 +46,7 @@ export function PinButton({
       placement="top"
       size={tooltipSize}
       showArrow={showTooltipArrow}
-      desktopOnly={true}
+      _desktopOnly={true}
     >
       <button
         className={cn(

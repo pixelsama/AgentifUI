@@ -254,7 +254,7 @@ export function SsoProviderForm({
       if (success) {
         onClose();
       }
-    } catch (error) {
+    } catch {
       toast.error(t('messages.unexpectedError'));
     }
   };

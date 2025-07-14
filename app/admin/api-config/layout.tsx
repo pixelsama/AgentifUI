@@ -2,17 +2,13 @@
 
 import { InstanceFilterSelector } from '@components/admin/api-config/instance-filter-selector';
 import { useTheme } from '@lib/hooks/use-theme';
-import {
-  ServiceInstance,
-  useApiConfigStore,
-} from '@lib/stores/api-config-store';
+import { useApiConfigStore } from '@lib/stores/api-config-store';
 import { cn } from '@lib/utils';
 import {
   Bot,
   Database,
   FileText,
   Globe,
-  Key,
   Loader2,
   MessageSquare,
   Plus,
@@ -21,7 +17,6 @@ import {
   StarOff,
   Trash2,
   Workflow,
-  Zap,
 } from 'lucide-react';
 
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
@@ -33,7 +28,7 @@ interface ApiConfigLayoutProps {
   children: ReactNode;
 }
 
-// 根据Dify应用类型获取对应图标
+// get app type icon based on Dify app type
 const getAppTypeIcon = (difyAppType?: string) => {
   switch (difyAppType) {
     case 'chatbot':
@@ -51,7 +46,7 @@ const getAppTypeIcon = (difyAppType?: string) => {
   }
 };
 
-// 根据Dify应用类型获取类型标签和颜色
+// get app type info based on Dify app type
 const getAppTypeInfo = (tDifyTypes: any, difyAppType?: string) => {
   switch (difyAppType) {
     case 'chatbot':
@@ -80,7 +75,6 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
 
   const {
     serviceInstances: instances,
-    apiKeys,
     providers,
     isLoading: instancesLoading,
     loadConfigData: loadInstances,
@@ -95,14 +89,14 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     null
   );
 
-  // 从URL查询参数获取筛选状态
+  // get filter state from URL query params
   const [filterProviderId, setFilterProviderId] = useState<string | null>(
     () => {
       return searchParams.get('provider') || null;
     }
   );
 
-  // 初始化数据加载
+  // initialize data loading
   useEffect(() => {
     if (!hasInitiallyLoaded) {
       loadInstances().finally(() => {
@@ -111,14 +105,14 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     }
   }, [hasInitiallyLoaded, loadInstances]);
 
-  // 处理筛选变化并同步URL
+  // handle filter change and sync URL
   const handleFilterChange = (providerId: string | null) => {
-    // 如果值没有变化，直接返回
+    // if value is not changed, return
     if (providerId === filterProviderId) return;
 
     setFilterProviderId(providerId);
 
-    // 立即更新URL查询参数，不使用startTransition避免延迟
+    // immediately update URL query params, avoid delay
     const params = new URLSearchParams(searchParams.toString());
     if (providerId) {
       params.set('provider', providerId);
@@ -129,7 +123,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     const newUrl = `${pathname}?${params.toString()}`;
     router.replace(newUrl, { scroll: false });
 
-    // 通知page组件筛选状态变化，用于新建应用时自动设置提供商
+    // notify page component of filter state change, for auto-setting provider when creating app
     window.dispatchEvent(
       new CustomEvent('filterChanged', {
         detail: { providerId },
@@ -137,38 +131,38 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     );
   };
 
-  // 监听URL变化同步筛选状态（优化避免循环）
+  // listen to URL change and sync filter state (optimized to avoid loop)
   useEffect(() => {
     const urlProviderId = searchParams.get('provider');
-    // 只在真正不同时才更新，避免循环
+    // only update when truly different, avoid loop
     if (urlProviderId !== filterProviderId) {
       setFilterProviderId(urlProviderId);
-      // 同步通知page组件
+      // sync notification to page component
       window.dispatchEvent(
         new CustomEvent('filterChanged', {
           detail: { providerId: urlProviderId },
         })
       );
     }
-  }, [searchParams]); // 移除filterProviderId依赖，避免循环
+  }, [searchParams]); // remove filterProviderId dependency, avoid loop
 
-  // 🎯 根据筛选条件过滤应用实例
+  // 🎯 filter instances based on filter conditions
   const filteredInstances = useMemo(() => {
     if (!filterProviderId) {
-      return instances; // 显示全部
+      return instances; // show all
     }
     return instances.filter(
       instance => instance.provider_id === filterProviderId
     );
   }, [instances, filterProviderId]);
 
-  // 监听page组件的状态变化，完全同步page的表单状态
+  // listen to page component's state change, fully sync page's form state
   useEffect(() => {
     const handleAddFormToggled = (event: CustomEvent) => {
       const { showAddForm: newShowAddForm, selectedInstance } = event.detail;
       setShowAddForm(newShowAddForm);
-      // 当显示添加表单时，清除所有选中状态
-      // 当显示编辑表单时，设置对应的选中状态
+      // when showing add form, clear all selected state
+      // when showing edit form, set corresponding selected state
       if (newShowAddForm) {
         setSelectedInstanceId(null);
       } else if (selectedInstance) {
@@ -185,18 +179,18 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
 
     const handleDirectSetDefault = (event: CustomEvent) => {
       const { instanceId } = event.detail;
-      // --- 统一逻辑：直接调用相同的函数 ---
+      // unified logic: directly call the same function
       handleSetDefaultInstance(instanceId);
     };
 
     const handleReloadInstances = () => {
-      // 重新加载服务实例数据
+      // reload service instance data
       loadInstances();
     };
 
     const handleReloadProviders = () => {
-      // 重新加载providers数据
-      loadInstances(); // 这会同时加载providers和instances
+      // reload providers data
+      loadInstances(); // this will also load providers and instances
     };
 
     window.addEventListener(
@@ -241,7 +235,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
       return;
     }
 
-    // --- 检查是否为默认应用 ---
+    // check if it is a default app
     if (instanceToDelete.is_default) {
       alert(t('defaultAppCannotDelete'));
       return;
@@ -255,14 +249,14 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     try {
       await deleteInstance(instanceToDelete.id);
 
-      // 通知page组件实例被删除
+      // notify page component that instance is deleted
       window.dispatchEvent(
         new CustomEvent('instanceDeleted', {
           detail: { instanceId },
         })
       );
     } catch (error) {
-      console.error('删除失败:', error);
+      console.error('delete failed:', error);
       alert(t('deleteInstanceFailed'));
     } finally {
       setIsProcessing(false);
@@ -270,7 +264,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
   };
 
   const handleSetDefaultInstance = async (instanceId: string) => {
-    // --- 添加调试信息 ---
+    // add debug info
     console.log(tDebug('setDefaultApp'), instanceId);
     console.log(
       tDebug('currentInstances'),
@@ -281,7 +275,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
       }))
     );
 
-    // --- 修复：使用数据库ID查找实例 ---
+    // fix: use database ID to find instance
     const instanceToSet = instances.find(inst => inst.id === instanceId);
     if (!instanceToSet) {
       console.error(tDebug('instanceNotFound'), instanceId);
@@ -292,7 +286,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     console.log(tDebug('foundInstance'), instanceToSet);
 
     if (instanceToSet.is_default) {
-      return; // 已经是默认应用，无需操作
+      return; // already a default app, no need to operate
     }
 
     if (
@@ -309,7 +303,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
     try {
       await setDefaultInstance(instanceToSet.id);
 
-      // 通知page组件默认应用已更改
+      // notify page component that default app is changed
       window.dispatchEvent(
         new CustomEvent('defaultInstanceChanged', {
           detail: { instanceId },
@@ -332,7 +326,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
           'top-12 bottom-0'
         )}
       >
-        {/* 头部：不需要额外的顶部间距，因为已经从正确位置开始 */}
+        {/* header: no extra top spacing, because it starts from the correct position */}
         <div
           className={cn(
             'flex-shrink-0 border-b p-2',
@@ -377,7 +371,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
           </div>
         </div>
 
-        {/* 列表：独立滚动区域 */}
+        {/* list: independent scroll area */}
         <div
           className={cn(
             'min-h-0 flex-1 overflow-y-auto',
@@ -428,7 +422,6 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
               {filteredInstances.map(instance => {
                 const difyAppType = instance.config?.app_metadata?.dify_apptype;
                 const AppIcon = getAppTypeIcon(difyAppType);
-                const typeInfo = getAppTypeInfo(tDifyTypes, difyAppType);
                 const provider = providers.find(
                   p => p.id === instance.provider_id
                 );
@@ -441,7 +434,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
                       'transition-all duration-200 ease-in-out',
                       'focus:ring-2 focus:ring-offset-2 focus:outline-none',
                       'border backdrop-blur-sm',
-                      // 固定高度保持一致性
+                      // fixed height to keep consistency
                       'flex h-20 flex-col justify-between',
                       selectedInstanceId === instance.instance_id
                         ? isDark
@@ -460,10 +453,10 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
                     }}
                     tabIndex={0}
                   >
-                    {/* 主要内容区域 */}
+                    {/* main content area */}
                     <div className="flex h-full items-start justify-between">
                       <div className="flex h-full min-w-0 flex-1 flex-col justify-between">
-                        {/* 顶部：应用名称和图标 */}
+                        {/* top: app name and icon */}
                         <div className="flex items-center gap-2">
                           <AppIcon
                             className={cn(
@@ -480,7 +473,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
                             {instance.display_name}
                           </h3>
 
-                          {/* 默认应用标签 */}
+                          {/* default app label */}
                           {instance.is_default && (
                             <span
                               className={cn(
@@ -496,9 +489,9 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
                           )}
                         </div>
 
-                        {/* 底部：类型和提供商信息（低调显示） */}
+                        {/* bottom: type and provider info (low profile display) */}
                         <div className="flex items-center gap-2 text-xs">
-                          {/* 应用类型原始值 */}
+                          {/* app type original value */}
                           {difyAppType && (
                             <span
                               className={cn(
@@ -510,12 +503,12 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
                             </span>
                           )}
 
-                          {/* 分隔符 */}
+                          {/* separator */}
                           {difyAppType && provider && (
                             <span className={cn('text-stone-500')}>·</span>
                           )}
 
-                          {/* 提供商信息 */}
+                          {/* provider info */}
                           {provider && (
                             <span
                               className={cn(
@@ -529,9 +522,9 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
                         </div>
                       </div>
 
-                      {/* 右侧操作按钮 */}
+                      {/* right operation buttons */}
                       <div className="ml-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                        {/* 设置默认应用按钮 */}
+                        {/* set default app button */}
                         {!instance.is_default && (
                           <button
                             onClick={e => {
@@ -553,7 +546,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
                           </button>
                         )}
 
-                        {/* 删除按钮 */}
+                        {/* delete button */}
                         <button
                           onClick={e => {
                             e.stopPropagation();

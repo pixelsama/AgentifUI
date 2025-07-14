@@ -16,18 +16,9 @@ import { useChatStore } from '@lib/stores/chat-store';
 import { useFavoriteAppsStore } from '@lib/stores/favorite-apps-store';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { cn } from '@lib/utils';
-import {
-  Blocks,
-  ChevronDown,
-  ChevronUp,
-  Edit,
-  Heart,
-  Pen,
-  Star,
-  Trash,
-} from 'lucide-react';
+import { ChevronDown, ChevronUp, Heart, Pen, Trash } from 'lucide-react';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 import { useParams, usePathname, useRouter } from 'next/navigation';
@@ -43,7 +34,7 @@ export function ConversationTitleButton({
   const pathname = usePathname();
   const params = useParams();
   const { currentConversationId } = useChatStore();
-  const { isExpanded, selectItem } = useSidebarStore();
+  const { selectItem } = useSidebarStore();
   const { conversations, refresh } = useCombinedConversations();
   const t = useTranslations('navbar.conversation');
   // 🎯 新增：获取完整对话列表，用于查找历史对话标题
@@ -54,7 +45,7 @@ export function ConversationTitleButton({
 
   // 应用相关状态
   const { apps } = useAppListStore();
-  const { favoriteApps, addFavoriteApp, removeFavoriteApp, isFavorite } =
+  const { addFavoriteApp, removeFavoriteApp, isFavorite } =
     useFavoriteAppsStore();
 
   // 获取对话关联的应用ID，用于显示应用名称标签
@@ -212,10 +203,6 @@ export function ConversationTitleButton({
       const result = await renameConversation(supabasePK, newTitle.trim());
 
       if (result.success) {
-        // 重命名成功后更新页面标题
-        const baseTitle = 'AgentifUI';
-        // 标题管理由DynamicTitle组件统一处理，无需手动设置
-
         // 标题更新后会通过refresh()和conversationEvents.emit()自动同步
 
         // 刷新对话列表

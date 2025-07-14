@@ -14,7 +14,6 @@ interface UserMessageActionsProps {
 }
 
 export const UserMessageActions: React.FC<UserMessageActionsProps> = ({
-  messageId,
   onCopy,
   onEdit,
   className,

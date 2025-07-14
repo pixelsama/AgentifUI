@@ -11,7 +11,7 @@ interface TooltipWrapperProps extends Omit<TooltipProps, 'children'> {
    * 是否只在非移动设备上显示提示
    * 如果为true，移动设备上将不显示tooltip（默认由Tooltip组件已处理）
    */
-  desktopOnly?: boolean;
+  _desktopOnly?: boolean;
 }
 
 /**
@@ -22,7 +22,6 @@ interface TooltipWrapperProps extends Omit<TooltipProps, 'children'> {
  */
 export function TooltipWrapper({
   children,
-  desktopOnly = false,
   ...tooltipProps
 }: TooltipWrapperProps) {
   return (

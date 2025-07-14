@@ -4,23 +4,16 @@ import {
   createProvider,
   createServiceInstance,
   deleteApiKey,
-  deleteProvider,
   deleteServiceInstance,
   getActiveProviders,
   getApiKeyByServiceInstance,
-  getDecryptedApiKey,
-  getDefaultServiceInstance,
-  getProviderById,
-  getProviderByName,
   getServiceInstanceById,
-  getServiceInstanceByInstanceId,
   getServiceInstancesByProvider,
   setDefaultServiceInstance,
   updateApiKey,
   updateProvider,
   updateServiceInstance,
 } from '@lib/db';
-import { createClient } from '@lib/supabase/client';
 // 导入类型定义
 import { ApiKey, Provider, ServiceInstance } from '@lib/types/database';
 import { Result } from '@lib/types/result';

@@ -26,7 +26,6 @@ export default function SsoProvidersPage() {
   const { isDark } = useTheme();
   const t = useTranslations('pages.admin.ssoProviders');
   const {
-    providers,
     loading,
     error,
     showCreateForm,
@@ -45,15 +44,11 @@ export default function SsoProvidersPage() {
     clearError,
   } = useSsoProvidersStore();
 
-  // Provider details modal removed
-
   // Load data on mount
   useEffect(() => {
     loadProviders();
     loadStats();
   }, [loadProviders, loadStats]);
-
-  // View details function removed
 
   // Handle provider edit
   const handleEditProvider = (provider: SsoProvider) => {
@@ -79,8 +74,6 @@ export default function SsoProvidersPage() {
   const handleDismissError = () => {
     clearError();
   };
-
-  // Protocol icon function removed
 
   return (
     <div
@@ -290,8 +283,6 @@ export default function SsoProvidersPage() {
             </div>
           </div>
         )}
-
-        {/* Provider Details Modal removed */}
       </div>
     </div>
   );

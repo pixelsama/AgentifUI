@@ -65,3 +65,5 @@ export const CodeBlockHeader: React.FC<CodeBlockHeaderProps> = React.memo(
     );
   }
 );
+
+CodeBlockHeader.displayName = 'CodeBlockHeader';

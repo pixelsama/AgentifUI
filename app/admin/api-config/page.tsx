@@ -17,7 +17,6 @@ import { ProviderManagementModal } from '@components/admin/api-config/provider-m
 import { TagsSelector } from '@components/admin/api-config/tags-selector';
 import { useApiConfigEvents } from '@components/admin/api-config/use-api-config-events';
 import { useTheme } from '@lib/hooks/use-theme';
-// import { getDifyAppParameters } from '@lib/services/dify/app-service'; // 移除直接导入，改为动态导入保持一致性
 import type { DifyAppParametersResponse } from '@lib/services/dify/types';
 import { validateDifyFormData } from '@lib/services/dify/validation';
 import {
@@ -29,22 +28,11 @@ import type { DifyParametersSimplifiedConfig } from '@lib/types/dify-parameters'
 import { cn } from '@lib/utils';
 import {
   AlertCircle,
-  CheckCircle,
-  Database,
-  Edit,
-  FileText,
   Lightbulb,
   Loader2,
-  Plus,
   RefreshCw,
-  Save,
-  Settings,
   Sliders,
   Star,
-  Trash2,
-  X,
-  XCircle,
-  Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -77,10 +65,10 @@ const InstanceForm = ({
   const tButtons = useTranslations('buttons');
   const tConfirm = useTranslations('confirmDialog');
 
-  // 新建模式下的提供商选择状态
+  // provider selection state for new mode
   const [selectedProviderId, setSelectedProviderId] = useState<string>('');
 
-  // 监听提供商选择变化，自动更新API URL
+  // listen to provider selection change, automatically update API URL
   useEffect(() => {
     if (!isEditing && selectedProviderId) {
       const selectedProvider = providers.find(p => p.id === selectedProviderId);
@@ -96,13 +84,13 @@ const InstanceForm = ({
     }
   }, [selectedProviderId, providers, isEditing]);
 
-  // --- 获取当前实例的最新状态 ---
+  // get current instance's latest state
   const currentInstance = instance
     ? serviceInstances.find(inst => inst.id === instance.id)
     : null;
   const isCurrentDefault = currentInstance?.is_default || false;
 
-  // --- 检查当前实例是否已配置API密钥 ---
+  // check if current instance is configured with API key
   const hasApiKey = instance
     ? apiKeys.some(key => key.service_instance_id === instance.id)
     : false;
@@ -133,8 +121,8 @@ const InstanceForm = ({
     },
   });
 
-  // 🎯 新增：基准数据状态，用于正确判断是否有未保存的更改
-  // 当同步参数或重置表单时，需要更新这个基准数据
+  // baseline data state, used to correctly determine if there are unsaved changes
+  // when syncing parameters or resetting form, this baseline data needs to be updated
   const [baselineData, setBaselineData] = useState({
     instance_id: instance?.instance_id || '',
     display_name: instance?.display_name || '',
@@ -165,10 +153,10 @@ const InstanceForm = ({
   const [setAsDefault, setSetAsDefault] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // 🎯 新增：实时验证instance_id格式
+  // real-time validation of instance_id format
   const [instanceIdError, setInstanceIdError] = useState<string>('');
 
-  // 🎯 实时验证instance_id格式的函数
+  // real-time validation of instance_id format
   const validateInstanceId = (value: string) => {
     if (!value.trim()) {
       setInstanceIdError('');
@@ -177,32 +165,32 @@ const InstanceForm = ({
 
     const instanceId = value.trim();
 
-    // 检查是否包含空格
+    // check if it contains spaces
     if (instanceId.includes(' ')) {
       setInstanceIdError(t('validation.instanceId.noSpaces'));
       return;
     }
 
-    // 检查是否包含其他需要URL编码的特殊字符
+    // check if it contains other special characters that need URL encoding
     const urlUnsafeChars = /[^a-zA-Z0-9\-_\.]/;
     if (urlUnsafeChars.test(instanceId)) {
       setInstanceIdError(t('validation.instanceId.invalidChars'));
       return;
     }
 
-    // 检查长度限制
+    // check length limit
     if (instanceId.length > 50) {
       setInstanceIdError(t('validation.instanceId.tooLong'));
       return;
     }
 
-    // 检查是否以字母或数字开头
+    // check if it starts with a letter or number
     if (!/^[a-zA-Z0-9]/.test(instanceId)) {
       setInstanceIdError(t('validation.instanceId.mustStartWithAlphanumeric'));
       return;
     }
 
-    // 所有验证通过
+    // all validation passed
     setInstanceIdError('');
   };
 
@@ -234,7 +222,7 @@ const InstanceForm = ({
     };
 
     if (instance) {
-      // 编辑模式：如果API URL为空，使用提供商的base_url
+      // edit mode: if API URL is empty, use provider's base_url
       if (!newData.config.api_url && instance.provider_id) {
         const currentProvider = providers.find(
           p => p.id === instance.provider_id
@@ -246,16 +234,16 @@ const InstanceForm = ({
 
       setFormData(newData);
       setBaselineData(newData);
-      // 🎯 初始化时也验证instance_id格式
+      // validate instance_id format when initializing
       validateInstanceId(newData.instance_id);
     } else {
-      // 新建模式：初始化默认提供商选择
-      // 优先使用筛选的提供商，其次是Dify，最后是第一个活跃的提供商
+      // new mode: initialize default provider selection
+      // use filtered provider first, then Dify, then the first active provider
       const getInitialProviderId = () => {
         const activeProviders = providers.filter(p => p.is_active);
         if (activeProviders.length === 0) return '';
 
-        // 如果有筛选的提供商且该提供商是活跃的，优先使用
+        // if there is a filtered provider and it is active, use it first
         if (defaultProviderId) {
           const filteredProvider = activeProviders.find(
             p => p.id === defaultProviderId
@@ -291,7 +279,7 @@ const InstanceForm = ({
       };
       setFormData(emptyData);
       setBaselineData(emptyData);
-      // 🎯 新建时清空错误状态
+      // clear error state when creating
       setInstanceIdError('');
     }
   }, [instance, providers]);
@@ -299,7 +287,7 @@ const InstanceForm = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 🎯 检查实时验证错误
+    // check real-time validation error
     if (instanceIdError) {
       toast.error(t('validation.instanceId.formatError'), {
         description: instanceIdError,
@@ -307,7 +295,7 @@ const InstanceForm = ({
       return;
     }
 
-    // 🎯 新增：表单验证，确保Dify应用类型必填
+    // form validation, ensure Dify app type is required
     const validationErrors = validateDifyFormData(formData);
     if (validationErrors.length > 0) {
       toast.error(t('validation.formValidationFailed'), {
@@ -316,23 +304,23 @@ const InstanceForm = ({
       return;
     }
 
-    // --- 自动设置 is_marketplace_app 字段与 app_type 保持一致 ---
+    // automatically set is_marketplace_app field to be consistent with app_type
     const dataToSave = {
       ...formData,
-      // 🎯 确保instance_id去除首尾空格
+      // ensure instance_id removes leading and trailing spaces
       instance_id: formData.instance_id.trim(),
       config: {
         ...formData.config,
         app_metadata: {
           ...formData.config.app_metadata,
-          // 🎯 确保dify_apptype字段被保存
+          // ensure dify_apptype field is saved
           dify_apptype: formData.config.app_metadata.dify_apptype,
           is_marketplace_app:
             formData.config.app_metadata.app_type === 'marketplace',
         },
       },
       setAsDefault,
-      // 新建模式下传递选择的提供商ID
+      // pass selected provider ID when creating
       selectedProviderId: isEditing ? undefined : selectedProviderId,
     };
 
@@ -348,7 +336,7 @@ const InstanceForm = ({
       },
     }));
 
-    // 🎯 修复：Dify参数保存后也更新基准数据
+    // update baseline data after Dify parameters are saved
     setBaselineData(prev => ({
       ...prev,
       config: {
@@ -360,11 +348,11 @@ const InstanceForm = ({
     setShowDifyPanel(false);
   };
 
-  // 🎯 修复：智能同步参数逻辑
-  // 编辑模式：优先使用数据库配置，失败时fallback到表单配置
-  // 添加模式：直接使用表单配置
+  // smart sync parameters logic
+  // edit mode: use database config first, fallback to form config if failed
+  // add mode: use form config directly
   const handleSyncFromDify = async () => {
-    // 🎯 新建模式下需要API URL和API Key，编辑模式下需要instance_id
+    // new mode needs API URL and API Key, edit mode needs instance_id
     if (!isEditing && (!formData.config.api_url || !formData.apiKey)) {
       toast.warning(t('validation.fillApiCredentials'));
       return;
@@ -377,45 +365,48 @@ const InstanceForm = ({
 
     setIsSyncing(true);
     try {
-      // 🎯 新增：同步基本配置信息（name、description、tags）
+      // sync basic config info (name, description, tags)
       let appInfo: any = null;
       let difyParams: DifyAppParametersResponse | null = null;
       let actualInstanceId = formData.instance_id;
       let isAutoGenerated = false;
 
       if (isEditing) {
-        // 编辑模式：优先使用数据库配置
+        // edit mode: use database config first
         try {
-          console.log('[同步配置] 编辑模式：尝试使用数据库配置');
+          console.log('[sync config] edit mode: try to use database config');
 
-          // 同时获取基本信息和参数
+          // get basic info and parameters
           const { getDifyAppInfo, getDifyAppParameters } = await import(
             '@lib/services/dify'
           );
           appInfo = await getDifyAppInfo(formData.instance_id);
           difyParams = await getDifyAppParameters(formData.instance_id);
         } catch (dbError) {
-          console.log('[同步配置] 数据库配置失败，尝试使用表单配置:', dbError);
+          console.log(
+            '[sync config] database config failed, try to use form config:',
+            dbError
+          );
 
-          // 🎯 改进：编辑模式下支持使用表单配置进行同步
-          // 这样用户可以修改API Key后立即测试，无需先保存
+          // support using form config for sync in edit mode
+          // so user can test immediately after modifying API Key
           if (!formData.config.api_url) {
             throw new Error(
-              'API URL为空，无法同步配置。请填写API URL或检查数据库配置。'
+              'API URL is empty, cannot sync config. Please fill in API URL or check database config.'
             );
           }
 
           if (!formData.apiKey) {
             throw new Error(
-              'API Key为空，无法同步配置。请在API密钥字段中输入新的密钥进行测试。'
+              'API Key is empty, cannot sync config. Please enter a new key in the API Key field for testing.'
             );
           }
 
-          // 使用表单配置作为fallback
+          // use form config as fallback
           const { getDifyAppInfoWithConfig, getDifyAppParametersWithConfig } =
             await import('@lib/services/dify');
 
-          // 同时获取基本信息和参数
+          // get basic info and parameters
           appInfo = await getDifyAppInfoWithConfig(formData.instance_id, {
             apiUrl: formData.config.api_url,
             apiKey: formData.apiKey,
@@ -429,31 +420,31 @@ const InstanceForm = ({
           );
         }
       } else {
-        // 添加模式：直接使用表单配置
-        console.log('[同步配置] 添加模式：使用表单配置');
+        // add mode: use form config directly
+        console.log('[sync config] add mode: use form config');
 
-        // 检查表单配置是否完整
+        // check if form config is complete
         if (!formData.config.api_url || !formData.apiKey) {
-          toast.warning('请先填写API URL和API Key');
+          toast.warning('Please fill in API URL and API Key');
           return;
         }
 
-        // 🎯 改进：如果应用ID为空，自动生成临时UUID进行测试
-        // 这样用户可以先测试API配置，无需预先想应用ID
+        // if application ID is empty, generate a temporary UUID for testing
+        // so user can test API config immediately, without pre-thinking application ID
         if (!actualInstanceId) {
           actualInstanceId = uuidv4();
           isAutoGenerated = true;
           console.log(
-            '[同步配置] 应用ID为空，自动生成临时ID:',
+            '[sync config] application ID is empty, generate temporary ID:',
             actualInstanceId
           );
         }
 
-        // 直接使用表单配置
+        // use form config directly
         const { getDifyAppInfoWithConfig, getDifyAppParametersWithConfig } =
           await import('@lib/services/dify');
 
-        // 同时获取基本信息和参数
+        // get basic info and parameters
         appInfo = await getDifyAppInfoWithConfig(actualInstanceId, {
           apiUrl: formData.config.api_url,
           apiKey: formData.apiKey,
@@ -464,13 +455,13 @@ const InstanceForm = ({
         });
       }
 
-      // 🎯 处理基本信息同步 - 去掉确认对话框，直接同步
+      // sync basic info
       const updatedFormData = { ...formData };
 
       if (appInfo) {
-        // 🎯 改进：总是同步基本信息，但给用户选择权
-        // 不再限制只有空字段才同步，提高同步功能的实用性
-        // 同步display_name（如果有变化则询问用户）
+        // always sync basic info, but give user the choice
+        // no longer limit only empty fields to sync, improve the practicality of sync function
+        // sync display_name (if changed, ask user for confirmation)
         if (appInfo.name && appInfo.name !== formData.display_name) {
           if (
             !formData.display_name ||
@@ -480,7 +471,7 @@ const InstanceForm = ({
           }
         }
 
-        // 同步description（如果有变化则询问用户）
+        // sync description (if changed, ask user for confirmation)
         if (
           appInfo.description &&
           appInfo.description !== formData.description
@@ -497,7 +488,7 @@ const InstanceForm = ({
           }
         }
 
-        // 🎯 同步tags（append模式，不替换现有tags）
+        // sync tags (append mode, do not replace existing tags)
         if (appInfo.tags && appInfo.tags.length > 0) {
           const currentTags = formData.config.app_metadata.tags || [];
           const newTags = appInfo.tags.filter(
@@ -513,7 +504,7 @@ const InstanceForm = ({
         }
       }
 
-      // 🎯 处理参数同步（保持原有逻辑）
+      // sync parameters
       if (difyParams) {
         const simplifiedParams: DifyParametersSimplifiedConfig = {
           opening_statement: difyParams.opening_statement || '',
@@ -539,20 +530,20 @@ const InstanceForm = ({
         updatedFormData.config.dify_parameters = simplifiedParams;
       }
 
-      // 🎯 新增：如果是自动生成的ID，同步成功后自动填充到表单
+      // if the ID is auto-generated, fill it into the form after sync
       if (!isEditing && isAutoGenerated && actualInstanceId) {
         updatedFormData.instance_id = actualInstanceId;
-        // 验证自动生成的ID
+        // validate auto-generated ID
         validateInstanceId(actualInstanceId);
       }
 
-      // 更新表单数据
+      // update form data
       setFormData(updatedFormData);
 
-      // 🎯 同步成功后更新基准数据
+      // update baseline data after sync
       setBaselineData(updatedFormData);
 
-      // 🎯 添加数据验证，确保真正获取到数据才显示成功
+      // add data validation, ensure really getting data before showing success
       const syncedItems = [];
       if (appInfo) {
         syncedItems.push(t('sync.basicInfo'));
@@ -565,9 +556,8 @@ const InstanceForm = ({
         throw new Error(t('sync.noDataReceived'));
       }
 
-      // 🎯 改进：根据是否自动生成ID提供不同的成功提示
       let successMessage = t('sync.successMessage', {
-        items: syncedItems.join('和'),
+        items: syncedItems.join(', '),
       });
       if (!isEditing && isAutoGenerated) {
         successMessage += t('sync.autoGeneratedId', {
@@ -577,7 +567,7 @@ const InstanceForm = ({
 
       toast.success(successMessage);
     } catch (error) {
-      console.error('[同步配置] 同步失败:', error);
+      console.error('[sync config] sync failed:', error);
       const errorMessage =
         error instanceof Error ? error.message : t('sync.syncFailed');
       toast.error(t('sync.syncFailedTitle'), { description: errorMessage });
@@ -629,15 +619,15 @@ const InstanceForm = ({
           </div>
 
           <div className="flex items-center gap-3">
-            {/* 设为默认应用按钮 */}
+            {/* set as default app button */}
             {isEditing ? (
-              /* 编辑模式：显示当前状态并允许修改 */
+              /* edit mode: display current state and allow modification */
               instance && (
                 <button
                   type="button"
                   onClick={() => {
                     if (isCurrentDefault) {
-                      return; // 已经是默认应用，无需操作
+                      return; // already a default app, no need to operate
                     }
 
                     if (
@@ -647,7 +637,7 @@ const InstanceForm = ({
                         })
                       )
                     ) {
-                      // 直接调用store的方法
+                      // directly call the store method
                       if (instance.id) {
                         useApiConfigStore
                           .getState()
@@ -694,7 +684,7 @@ const InstanceForm = ({
                 </button>
               )
             ) : (
-              /* 添加模式：允许选择是否设为默认 */
+              /* add mode: allow selecting whether to set as default */
               <button
                 type="button"
                 onClick={() => setSetAsDefault(!setAsDefault)}
@@ -721,7 +711,7 @@ const InstanceForm = ({
               </button>
             )}
 
-            {/* Dify参数配置按钮组 */}
+            {/* Dify parameters configuration button group */}
             <div
               className={cn(
                 'flex gap-2 rounded-lg p-2',
@@ -817,7 +807,7 @@ const InstanceForm = ({
             </div>
 
             {isEditing ? (
-              // 编辑模式：只显示，不可修改
+              /* edit mode: only display, cannot modify */
               <div
                 className={cn(
                   'rounded-md px-3 py-1.5 font-serif text-sm',
@@ -836,7 +826,7 @@ const InstanceForm = ({
                 })()}
               </div>
             ) : (
-              // 新建模式：可选择
+              /* add mode: allow selecting */
               <div className="w-48">
                 <CustomProviderSelector
                   providers={providers}
@@ -873,7 +863,7 @@ const InstanceForm = ({
                   }}
                   className={cn(
                     'w-full rounded-lg border px-3 py-2 font-serif',
-                    !isEditing && 'pr-20', // 新建模式下为按钮留空间
+                    !isEditing && 'pr-20', // add mode: leave space for button
                     isDark
                       ? 'border-stone-600 bg-stone-700 text-stone-100 placeholder-stone-400'
                       : 'border-stone-300 bg-white text-stone-900 placeholder-stone-500',
@@ -978,7 +968,7 @@ const InstanceForm = ({
             </div>
           </div>
 
-          {/* --- API配置字段 --- */}
+          {/* API config fields */}
           <ApiConfigFields
             formData={formData}
             setFormData={setFormData}
@@ -1212,7 +1202,7 @@ const InstanceForm = ({
             }}
           />
 
-          {/* 应用标签配置 - 紧凑设计 */}
+          {/* application tags configuration - compact design */}
           <TagsSelector
             tags={formData.config.app_metadata.tags}
             onTagsChange={newTags => {
@@ -1233,7 +1223,7 @@ const InstanceForm = ({
         </form>
       </div>
 
-      {/* Dify参数配置面板 */}
+      {/* Dify parameters configuration panel */}
       <DifyParametersPanel
         isOpen={showDifyPanel}
         onClose={() => setShowDifyPanel(false)}
@@ -1248,8 +1238,6 @@ const InstanceForm = ({
 };
 
 export default function ApiConfigPage() {
-  const { isDark } = useTheme();
-
   const {
     serviceInstances: instances,
     providers,
@@ -1257,7 +1245,7 @@ export default function ApiConfigPage() {
     updateAppInstance: updateInstance,
   } = useApiConfigStore();
 
-  // 翻译函数
+  // translation function
   const tInstanceSaveHandlers = useTranslations(
     'pages.admin.apiConfig.instanceSaveHandlers'
   );
@@ -1272,7 +1260,7 @@ export default function ApiConfigPage() {
     string | null
   >(null);
 
-  // --- 使用自定义 Hook 管理事件监听器 ---
+  // use custom Hook to manage event listeners
   useApiConfigEvents({
     showAddForm,
     selectedInstance,
@@ -1294,11 +1282,11 @@ export default function ApiConfigPage() {
     );
   };
 
-  // Provider管理相关处理函数
+  // Provider management related processing functions
   const handleProviderChange = () => {
-    // 重新加载providers数据
+    // reload providers data
     window.dispatchEvent(new CustomEvent('reloadProviders'));
-    toast.success('提供商配置已更新');
+    toast.success('Provider configuration updated');
   };
 
   useEffect(() => {
@@ -1314,7 +1302,7 @@ export default function ApiConfigPage() {
 
   return (
     <div className="flex h-full flex-col">
-      {/* --- 管理提供商按钮 --- */}
+      {/* provider management button */}
       <ProviderManagementButton onClick={() => setShowProviderModal(true)} />
 
       {showAddForm ? (
@@ -1365,7 +1353,7 @@ export default function ApiConfigPage() {
         <EmptyState />
       )}
 
-      {/* --- Provider管理模态框 --- */}
+      {/* provider management modal */}
       <ProviderManagementModal
         open={showProviderModal}
         onOpenChange={setShowProviderModal}

@@ -22,7 +22,6 @@ import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-// 临时类型定义，因为about-config.ts已被删除
 interface ValueCard {
   id: string;
   title: string;
@@ -38,7 +37,6 @@ interface AboutPageConfig {
   copyrightText: string;
 }
 
-// 主页预览配置类型
 interface FeatureCard {
   title: string;
   description: string;
@@ -110,7 +108,7 @@ export default function ContentManagementPage() {
           setOriginalHomeTranslations(translations);
         }
 
-        // 仅在需要时加载语言列表
+        // load language list only when needed
         if (supportedLocales.length === 0) {
           const locales = await TranslationService.getSupportedLanguages();
           setSupportedLocales(locales);
@@ -166,7 +164,7 @@ export default function ContentManagementPage() {
         setOriginalHomeTranslations({ ...homeTranslations });
       }
 
-      // Clear dynamic translation cache to force refresh on frontend
+      // clear dynamic translation cache to force refresh on frontend
       clearTranslationCache();
 
       toast.success(t('messages.saveSuccess'));

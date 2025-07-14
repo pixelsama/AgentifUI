@@ -15,10 +15,7 @@ import {
   getUserList,
   getUserStats,
   updateUserProfile,
-  updateUserRole,
-  updateUserStatus,
 } from '@lib/db/users';
-import { Result } from '@lib/types/result';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 

@@ -348,7 +348,7 @@ export const useChatflowExecutionStore = create<ChatflowExecutionState>(
     completeParallelBranch: (
       nodeId: string,
       branchId: string,
-      status: 'completed' | 'failed'
+      _status: 'completed' | 'failed'
     ) => {
       set(state => ({
         nodes: state.nodes.map(node =>

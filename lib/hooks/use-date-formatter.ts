@@ -209,8 +209,10 @@ export function useDateFormatter(defaultTimezone?: string) {
     return (): string => {
       try {
         return Intl.DateTimeFormat().resolvedOptions().timeZone;
-      } catch (error) {
-        console.warn('[useDateFormatter] 无法获取系统时区，使用默认值');
+      } catch {
+        console.warn(
+          '[useDateFormatter] cannot get system timezone, use default'
+        );
         return 'Asia/Shanghai';
       }
     };

@@ -1,5 +1,4 @@
-import { getAppParametersFromDb, updateAppParametersInDb } from '@lib/db';
-import { getDifyAppParameters } from '@lib/services/dify/app-service';
+import { getAppParametersFromDb } from '@lib/db';
 import type { DifyAppParametersResponse } from '@lib/services/dify/types';
 import type { Result } from '@lib/types/result';
 import { failure, success } from '@lib/types/result';

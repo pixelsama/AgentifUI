@@ -36,7 +36,7 @@ export default function PhoneAuth() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithOtp({
         phone: `+86${phone}`, // add Chinese area code
       });
 
@@ -67,7 +67,7 @@ export default function PhoneAuth() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
+      const { error } = await supabase.auth.verifyOtp({
         phone: `+86${phone}`,
         token: otp,
         type: 'sms',

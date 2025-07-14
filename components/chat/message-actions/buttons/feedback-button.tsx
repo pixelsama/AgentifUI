@@ -1,7 +1,7 @@
 'use client';
 
 import { MessageActionButton } from '@components/ui/message-action-button';
-import { FiCheck, FiThumbsDown, FiThumbsUp } from 'react-icons/fi';
+import { FiThumbsDown, FiThumbsUp } from 'react-icons/fi';
 
 import React from 'react';
 

@@ -5,7 +5,7 @@ import { TooltipWrapper } from '@components/ui/tooltip-wrapper';
 import { useMobile } from '@lib/hooks/use-mobile';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { cn } from '@lib/utils';
-import { Settings, Sliders } from 'lucide-react';
+import { Sliders } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';

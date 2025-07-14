@@ -77,7 +77,6 @@ export const useChatInputStore = create<ChatInputState>((set, get) => ({
   // 🎯 兼容接口：clearMessage
   // 清空当前路由的消息内容
   clearMessage: () => {
-    const state = get();
     set(state => ({
       messagesByRoute: {
         ...state.messagesByRoute,
