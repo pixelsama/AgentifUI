@@ -1,19 +1,19 @@
 /**
- * 通用CAS统一认证服务
- * 支持标准CAS 2.0/3.0协议的客户端，配置化实现
+ * generic CAS unified authentication service
+ * support standard CAS 2.0/3.0 protocol clients, configuration-based implementation
  */
 import { createClient } from '@lib/supabase/server';
 import type { SsoProvider } from '@lib/types/database';
 import { XMLParser } from 'fast-xml-parser';
 
-// 通用CAS配置接口
+// generic CAS config interface
 export interface CASConfig {
-  id: string; // SSO提供商ID
-  name: string; // 提供商名称
-  baseUrl: string; // CAS服务器基础URL
-  serviceUrl: string; // 应用回调服务URL
-  version: '2.0' | '3.0'; // CAS协议版本
-  timeout: number; // 请求超时时间
+  id: string; // SSO provider ID
+  name: string; // provider name
+  baseUrl: string; // CAS server base URL
+  serviceUrl: string; // app callback service URL
+  version: '2.0' | '3.0'; // CAS protocol version
+  timeout: number; // request timeout
   endpoints: {
     login: string;
     logout: string;
@@ -21,15 +21,15 @@ export interface CASConfig {
     validate_v3?: string;
   };
   attributesMapping: {
-    employee_id: string; // 学工号字段映射
-    username: string; // 用户名字段映射
-    full_name: string; // 全名字段映射
-    email: string; // 邮箱字段映射
+    employee_id: string; // employee number field mapping
+    username: string; // username field mapping
+    full_name: string; // full name field mapping
+    email: string; // email field mapping
   };
-  emailDomain: string; // 邮箱域名
+  emailDomain: string; // email domain
 }
 
-// CAS返回的用户信息接口
+// CAS user info interface
 export interface CASUserInfo {
   employeeNumber: string; // 学工号（主要标识）
   username: string; // 用户名
@@ -42,7 +42,7 @@ export interface CASUserInfo {
   rawResponse?: string; // 原始XML响应（调试用）
 }
 
-// CAS验证错误类型
+// CAS validation error type
 export interface CASValidationError {
   code: string;
   message: string;
@@ -50,7 +50,7 @@ export interface CASValidationError {
 }
 
 /**
- * 通用CAS服务实现类
+ * generic CAS service implementation class
  */
 export class GenericCASService {
   private config: CASConfig;
@@ -59,24 +59,24 @@ export class GenericCASService {
   constructor(config: CASConfig) {
     this.config = config;
 
-    // 初始化XML解析器，配置适合CAS响应的选项
+    // initialize XML parser, configure for CAS response
     this.xmlParser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: '@_',
       textNodeName: '#text',
-      parseAttributeValue: false, // 禁用属性值自动类型转换
+      parseAttributeValue: false, // disable attribute value auto type conversion
       trimValues: true,
     });
   }
 
   /**
-   * 生成CAS登录URL
-   * @param returnUrl 登录成功后重定向的URL（可选）
-   * @returns CAS登录页面URL
+   * generate CAS login URL
+   * @param returnUrl redirect URL after login (optional)
+   * @returns CAS login page URL
    */
   generateLoginURL(returnUrl?: string): string {
     try {
-      // 构建service参数，如果有returnUrl则附加到回调URL上
+      // build service params, if returnUrl, append to callback URL
       const serviceUrl = returnUrl
         ? `${this.config.serviceUrl}?returnUrl=${encodeURIComponent(returnUrl)}`
         : this.config.serviceUrl;
@@ -103,9 +103,9 @@ export class GenericCASService {
   }
 
   /**
-   * 生成CAS注销URL
-   * @param returnUrl 注销后重定向的URL（可选）
-   * @returns CAS注销页面URL
+   * generate CAS logout URL
+   * @param returnUrl redirect URL after logout (optional)
+   * @returns CAS logout page URL
    */
   generateLogoutURL(returnUrl?: string): string {
     try {
@@ -133,10 +133,10 @@ export class GenericCASService {
   }
 
   /**
-   * 验证CAS ticket并获取用户信息
-   * @param ticket CAS返回的票据
-   * @param service 服务URL（必须与登录时的service参数一致）
-   * @returns 用户信息或验证失败结果
+   * validate CAS ticket and get user info
+   * @param ticket CAS returned ticket
+   * @param service service URL (must match service param at login time)
+   * @returns user info or validation failure result
    */
   async validateTicket(ticket: string, service: string): Promise<CASUserInfo> {
     if (!ticket || !service) {
@@ -149,13 +149,13 @@ export class GenericCASService {
     }
 
     try {
-      // 构建验证请求参数
+      // build validation request params
       const params = new URLSearchParams({
         service: service,
         ticket: ticket,
       });
 
-      // 根据配置选择验证端点
+      // select validation endpoint based on config
       const validateEndpoint =
         this.config.version === '3.0'
           ? this.config.endpoints.validate_v3 || this.config.endpoints.validate
@@ -167,14 +167,14 @@ export class GenericCASService {
         `Validating ticket for ${this.config.name} at: ${validateUrl.replace(/ticket=[^&]+/, 'ticket=***')}`
       );
 
-      // 发送验证请求
+      // send validation request
       const response = await fetch(validateUrl, {
         method: 'GET',
         headers: {
           Accept: 'application/xml, text/xml',
           'User-Agent': 'AgentifUI-CAS-SSO-Client/1.0',
         },
-        // 设置超时时间避免长时间等待
+        // set timeout to avoid long wait
         signal: AbortSignal.timeout(this.config.timeout),
       });
 
@@ -185,10 +185,14 @@ export class GenericCASService {
       const xmlText = await response.text();
       console.log(`Received CAS validation response from ${this.config.name}`);
 
-      // 在CAS服务层也打印原始XML响应，方便调试
-      console.log(`=== ${this.config.name} CAS服务层收到的原始XML ===`);
+      // print raw XML response in CAS service layer for debugging
+      console.log(
+        `=== ${this.config.name} CAS service layer received raw XML ===`
+      );
       console.log(xmlText);
-      console.log(`=== ${this.config.name} CAS服务层XML响应结束 ===`);
+      console.log(
+        `=== ${this.config.name} CAS service layer XML response end ===`
+      );
 
       return this.parseValidationResponse(xmlText);
     } catch (error) {
@@ -208,27 +212,27 @@ export class GenericCASService {
   }
 
   /**
-   * 解析CAS验证响应XML
+   * parse CAS validation response XML
    * @private
-   * @param xmlText CAS返回的XML响应
-   * @returns 解析后的用户信息
+   * @param xmlText CAS returned XML response
+   * @returns parsed user info
    */
   private parseValidationResponse(xmlText: string): CASUserInfo {
     try {
       console.log(`Parsing CAS response XML for ${this.config.name}...`);
 
-      // 打印XML解析前的原始内容长度和前100个字符预览
-      console.log(`XML长度: ${xmlText.length} 字符`);
+      // print raw XML content length and first 100 chars preview before parsing
+      console.log(`XML length: ${xmlText.length} chars`);
       console.log(
-        `XML预览: ${xmlText.substring(0, 200)}${xmlText.length > 200 ? '...' : ''}`
+        `XML preview: ${xmlText.substring(0, 200)}${xmlText.length > 200 ? '...' : ''}`
       );
 
       const parsed = this.xmlParser.parse(xmlText);
 
-      // 打印解析后的完整JSON结构
-      console.log(`=== ${this.config.name} XML解析后的完整结构 ===`);
+      // print parsed full JSON structure
+      console.log(`=== ${this.config.name} parsed full JSON structure ===`);
       console.log(JSON.stringify(parsed, null, 2));
-      console.log('=== 解析结构结束 ===');
+      console.log('=== parsed structure end ===');
 
       const serviceResponse = parsed['cas:serviceResponse'];
 
@@ -236,13 +240,13 @@ export class GenericCASService {
         throw new Error('Invalid CAS response: missing cas:serviceResponse');
       }
 
-      // 检查认证成功的情况
+      // check authentication success
       if (serviceResponse['cas:authenticationSuccess']) {
         const success = serviceResponse['cas:authenticationSuccess'];
         const user = success['cas:user'];
         const attributes = success['cas:attributes'] || {};
 
-        // 根据配置的属性映射提取用户信息
+        // extract user info based on config attributes mapping
         const employeeNumber = String(
           this.extractAttribute(
             attributes,
@@ -277,7 +281,7 @@ export class GenericCASService {
           attributes: {
             name: fullName,
             username: username,
-            // 保存所有属性以备后续使用，移除 cas: 前缀
+            // save all attributes for later use, remove cas: prefix
             ...Object.keys(attributes).reduce(
               (acc, key) => {
                 if (key.startsWith('cas:')) {
@@ -292,7 +296,7 @@ export class GenericCASService {
           rawResponse: xmlText,
         };
       }
-      // 检查认证失败的情况
+      // check authentication failure
       else if (serviceResponse['cas:authenticationFailure']) {
         const failure = serviceResponse['cas:authenticationFailure'];
         const errorCode = failure['@_code'] || 'UNKNOWN_ERROR';
@@ -338,14 +342,14 @@ export class GenericCASService {
   }
 
   /**
-   * 从CAS属性中提取指定字段值
+   * extract specified field value from CAS attributes
    * @private
-   * @param attributes CAS属性对象
-   * @param fieldName 字段名（支持cas:前缀）
-   * @returns 字段值
+   * @param attributes CAS attributes object
+   * @param fieldName field name (supports cas: prefix)
+   * @returns field value
    */
   private extractAttribute(attributes: any, fieldName: string): any {
-    // 优先查找带cas:前缀的字段
+    // prioritize fields with cas: prefix
     const casFieldName = fieldName.startsWith('cas:')
       ? fieldName
       : `cas:${fieldName}`;
@@ -353,7 +357,7 @@ export class GenericCASService {
       return attributes[casFieldName];
     }
 
-    // 回退到不带前缀的字段
+    // fallback to fields without prefix
     const plainFieldName = fieldName.replace('cas:', '');
     if (attributes[plainFieldName] !== undefined) {
       return attributes[plainFieldName];
@@ -363,8 +367,8 @@ export class GenericCASService {
   }
 
   /**
-   * 获取当前配置信息
-   * @returns 配置对象（敏感信息已屏蔽）
+   * get current config info
+   * @returns config object (sensitive info masked)
    */
   getConfig(): Partial<CASConfig> {
     return {
@@ -372,26 +376,26 @@ export class GenericCASService {
       name: this.config.name,
       baseUrl: this.config.baseUrl,
       version: this.config.version,
-      // serviceUrl 可能包含敏感信息，仅返回域名部分
+      // serviceUrl may contain sensitive info, return only domain part
       serviceUrl: new URL(this.config.serviceUrl).origin + '/***',
     };
   }
 }
 
 /**
- * CAS配置服务 - 从数据库读取SSO提供商配置
+ * CAS config service - read SSO provider config from database
  */
 export class CASConfigService {
   /**
-   * 根据提供商ID获取CAS配置
-   * 使用安全的SECURITY DEFINER函数获取配置
-   * @param providerId SSO提供商ID
-   * @returns CAS配置对象
+   * get CAS config by provider ID
+   * use SECURITY DEFINER function to get config
+   * @param providerId SSO provider ID
+   * @returns CAS config object
    */
   static async getCASConfig(providerId: string): Promise<CASConfig> {
     const supabase = await createClient();
 
-    // 使用安全的SECURITY DEFINER函数获取完整配置
+    // use SECURITY DEFINER function to get full config
     const { data: providers, error } = await supabase.rpc(
       'get_sso_provider_config',
       { provider_id_param: providerId }
@@ -409,7 +413,7 @@ export class CASConfigService {
     const settings = provider.settings as any;
     const protocolConfig = settings.protocol_config || {};
 
-    // 获取当前应用URL用于构建回调地址
+    // get current app URL for building callback URL
     const appUrl = process.env.NEXT_PUBLIC_APP_URL;
     if (!appUrl) {
       throw new Error(
@@ -444,9 +448,9 @@ export class CASConfigService {
   }
 
   /**
-   * 根据名称查找CAS提供商
-   * @param name 提供商名称
-   * @returns SSO提供商信息
+   * find CAS provider by name
+   * @param name provider name
+   * @returns SSO provider info
    */
   static async findCASProviderByName(
     name: string
@@ -472,8 +476,8 @@ export class CASConfigService {
   }
 
   /**
-   * 获取所有启用的CAS提供商
-   * @returns CAS提供商列表
+   * get all enabled CAS providers
+   * @returns CAS provider list
    */
   static async getEnabledCASProviders(): Promise<SsoProvider[]> {
     const supabase = await createClient();
@@ -493,9 +497,9 @@ export class CASConfigService {
   }
 
   /**
-   * 创建通用CAS服务实例
-   * @param providerId SSO提供商ID
-   * @returns GenericCASService实例
+   * create generic CAS service instance
+   * @param providerId SSO provider ID
+   * @returns GenericCASService instance
    */
   static async createCASService(
     providerId: string
@@ -505,10 +509,10 @@ export class CASConfigService {
   }
 
   /**
-   * 从基础URL提取邮箱域名
+   * extract email domain from base URL
    * @private
-   * @param baseUrl CAS服务器基础URL
-   * @returns 邮箱域名
+   * @param baseUrl CAS server base URL
+   * @returns email domain
    */
   private static extractEmailDomain(baseUrl: string): string {
     try {

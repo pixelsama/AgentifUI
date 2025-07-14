@@ -1,6 +1,6 @@
 /**
- * 通用SSO注销处理
- * 处理任何CAS提供商的注销请求
+ * generic SSO logout handler
+ * handle logout requests for any CAS provider
  */
 import { CASConfigService } from '@lib/services/sso/generic-cas-service';
 import { createAdminClient } from '@lib/supabase/server';
@@ -28,11 +28,11 @@ export async function GET(
   }
 
   try {
-    // 创建通用CAS服务实例
+    // create generic CAS service instance
     const casService = await CASConfigService.createCASService(providerId);
     const casConfig = casService.getConfig();
 
-    // 生成CAS注销URL
+    // generate CAS logout URL
     const logoutUrl = casService.generateLogoutURL(
       new URL(returnUrl, appUrl).toString()
     );
@@ -45,7 +45,7 @@ export async function GET(
   } catch (error) {
     console.error(`SSO logout failed for provider ${providerId}:`, error);
 
-    // 即使CAS注销失败，也要清理本地会话
+    // even if CAS logout fails, clean up local session
     return NextResponse.redirect(new URL(returnUrl, appUrl));
   }
 }
@@ -77,7 +77,7 @@ export async function POST(
       }
     );
 
-    // 登出Supabase会话
+    // sign out Supabase session
     const { error } = await supabase.auth.signOut();
 
     if (error) {
@@ -88,7 +88,7 @@ export async function POST(
       );
     }
 
-    // 创建通用CAS服务实例
+    // create generic CAS service instance
     const casService = await CASConfigService.createCASService(providerId);
     const casConfig = casService.getConfig();
 
@@ -97,7 +97,7 @@ export async function POST(
       throw new Error('NEXT_PUBLIC_APP_URL is not configured');
     }
 
-    // 生成CAS注销URL
+    // generate CAS logout URL
     const logoutUrl = casService.generateLogoutURL(
       new URL('/login', appUrl).toString()
     );

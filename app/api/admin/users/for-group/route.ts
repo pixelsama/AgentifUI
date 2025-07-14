@@ -5,23 +5,26 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Admin Users for Group API Route
  *
- * 处理群组成员管理中的用户分页列表请求
- * 支持搜索、分页和排除已存在成员
+ * Handle user pagination list request in group member management
+ * Support search, pagination, and exclude existing members
  */
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
 
-    // --- 检查用户权限 ---
+    // get current user
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: '未授权访问' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized access' },
+        { status: 401 }
+      );
     }
 
-    // --- 检查是否为管理员 ---
+    // check if user is admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -29,35 +32,38 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (profile?.role !== 'admin') {
-      return NextResponse.json({ error: '权限不足' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Insufficient permissions' },
+        { status: 403 }
+      );
     }
 
-    // --- 解析请求参数 ---
+    // parse request parameters
     const body = await request.json();
     const { page = 1, pageSize = 10, search, excludeUserIds = [] } = body;
 
-    // --- 构建查询 ---
+    // build query
     let query = supabase
       .from('profiles')
       .select('id, username, full_name, email, avatar_url, role, status', {
         count: 'exact',
       })
-      .eq('status', 'active') // 只获取活跃用户
+      .eq('status', 'active') // only get active users
       .order('created_at', { ascending: false });
 
-    // 排除指定的用户ID（如已在群组中的用户）
+    // exclude specified user IDs (e.g. users already in the group)
     if (excludeUserIds.length > 0) {
       query = query.not('id', 'in', `(${excludeUserIds.join(',')})`);
     }
 
-    // 搜索条件：用户名、全名或邮箱包含搜索词
+    // search condition: username, full name or email contains search term
     if (search && search.trim()) {
       query = query.or(
         `username.ilike.%${search.trim()}%,full_name.ilike.%${search.trim()}%,email.ilike.%${search.trim()}%`
       );
     }
 
-    // 应用分页
+    // apply pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     query = query.range(from, to);
@@ -65,15 +71,18 @@ export async function POST(request: NextRequest) {
     const { data: users, error, count } = await query;
 
     if (error) {
-      console.error('获取用户列表失败:', error);
-      return NextResponse.json({ error: '获取用户列表失败' }, { status: 500 });
+      console.error('Failed to get user list:', error);
+      return NextResponse.json(
+        { error: 'Failed to get user list' },
+        { status: 500 }
+      );
     }
 
-    // --- 计算分页信息 ---
+    // calculate pagination information
     const total = count || 0;
     const totalPages = Math.ceil(total / pageSize);
 
-    // --- 格式化用户数据 ---
+    // format user data
     const formattedUsers = (users || []).map(user => ({
       id: user.id,
       username: user.username,
@@ -93,7 +102,10 @@ export async function POST(request: NextRequest) {
       success: true,
     });
   } catch (error) {
-    console.error('用户列表API错误:', error);
-    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
+    console.error('User list API error:', error);
+    return NextResponse.json(
+      { error: 'Server internal error' },
+      { status: 500 }
+    );
   }
 }

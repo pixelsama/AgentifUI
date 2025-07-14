@@ -86,7 +86,7 @@ export function useDynamicTranslations(config: UseDynamicTranslationsConfig) {
 
         // Fetch fresh data from API
         const response = await fetch(
-          `/api/translations/dynamic/${locale}?sections=${sections.join(',')}`
+          `/api/translations/${locale}?sections=${sections.join(',')}`
         );
 
         if (response.ok) {

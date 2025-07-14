@@ -1,6 +1,5 @@
 'use client';
 
-// NavBar 已移至根布局，无需导入
 import { TextGenerationLayout } from '@components/text-generation/text-generation-layout';
 import { useCurrentApp } from '@lib/hooks/use-current-app';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
@@ -21,15 +20,15 @@ interface TextGenerationPageProps {
 }
 
 /**
- * 文本生成应用页面
+ * text generation app page
  *
- * 功能特点：
- * - 基于流式API的实时文本生成
- * - 动态输入表单（基于 user_input_form 配置）
- * - 完整的执行历史记录管理
- * - 响应式设计，支持移动端
- * - 统一 stone 色系主题
- * - 复用workflow的完整架构
+ * features:
+ * - real-time text generation based on streaming API
+ * - dynamic input form (based on user_input_form configuration)
+ * - complete execution history management
+ * - responsive design, support mobile
+ * - unified stone color theme
+ * - reuse workflow's complete architecture
  */
 export default function TextGenerationPage({
   params,
@@ -39,7 +38,7 @@ export default function TextGenerationPage({
   const { colors, isDark } = useThemeColors();
   const t = useTranslations('pages.apps');
 
-  // --- 应用相关状态 ---
+  // --- app related state ---
   const { apps, fetchApps } = useAppListStore();
   const {
     currentAppId,
@@ -49,14 +48,14 @@ export default function TextGenerationPage({
   } = useCurrentApp();
   const { selectItem } = useSidebarStore();
 
-  // --- 应用初始化状态 ---
+  // --- app initialization state ---
   const [isInitializing, setIsInitializing] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
 
-  // --- 获取当前应用实例数据 ---
+  // --- get current app instance data ---
   const currentApp = apps.find(app => app.instance_id === instanceId);
 
-  // --- 页面初始化：切换到目标应用并同步sidebar选中状态 ---
+  // --- page initialization: switch to target app and synchronize sidebar selected state ---
   useEffect(() => {
     const initializeApp = async () => {
       if (!instanceId) return;
@@ -64,7 +63,10 @@ export default function TextGenerationPage({
       try {
         setInitError(null);
 
-        console.log('[文本生成页面] 开始初始化应用:', instanceId);
+        console.log(
+          '[text generation page] start initializing app:',
+          instanceId
+        );
 
         const needsAppListFetch = apps.length === 0;
         const currentAppMatches = currentAppId === instanceId;
@@ -72,54 +74,64 @@ export default function TextGenerationPage({
         // 如果应用列表为空，需要获取
         if (needsAppListFetch) {
           setIsInitializing(true);
-          console.log('[文本生成页面] 应用列表为空，开始获取');
+          console.log(
+            '[text generation page] app list is empty, start fetching'
+          );
           await fetchApps();
         }
 
         // 重新获取最新的应用列表
         const latestApps = useAppListStore.getState().apps;
-        console.log('[文本生成页面] 当前应用列表长度:', latestApps.length);
+        console.log(
+          '[text generation page] current app list length:',
+          latestApps.length
+        );
 
         // 检查应用是否存在
         const targetApp = latestApps.find(
           app => app.instance_id === instanceId
         );
         if (!targetApp) {
-          console.error('[文本生成页面] 应用不存在:', instanceId);
+          console.error('[text generation page] app not found:', instanceId);
           setInitError(t('errors.appNotFound'));
           return;
         }
 
-        console.log('[文本生成页面] 找到目标应用:', targetApp.display_name);
+        console.log(
+          '[text generation page] found target app:',
+          targetApp.display_name
+        );
 
-        // 立即设置sidebar选中状态
+        // immediately set sidebar selected state
         selectItem('app', instanceId);
 
-        // 只有在当前应用确实不匹配时才进行切换
+        // only switch when current app does not match
         if (!currentAppMatches) {
           console.log(
-            '[文本生成页面] 需要切换应用，从',
+            '[text generation page] need to switch app, from',
             currentAppId,
-            '到',
+            'to',
             instanceId
           );
 
           try {
             await switchToSpecificApp(instanceId);
-            console.log('[文本生成页面] 应用切换成功');
+            console.log('[text generation page] app switched successfully');
           } catch (switchError) {
             console.warn(
-              '[文本生成页面] 应用切换失败，但继续加载页面:',
+              '[text generation page] app switching failed, but continue loading page:',
               switchError
             );
           }
         } else {
-          console.log('[文本生成页面] 当前应用已匹配，无需切换');
+          console.log(
+            '[text generation page] current app matched, no need to switch'
+          );
         }
 
-        console.log('[文本生成页面] 应用初始化完成');
+        console.log('[text generation page] app initialization completed');
       } catch (error) {
-        console.error('[文本生成页面] 初始化失败:', error);
+        console.error('[text generation page] initialization failed:', error);
         setInitError(
           error instanceof Error
             ? error.message
@@ -142,7 +154,7 @@ export default function TextGenerationPage({
     selectItem,
   ]);
 
-  // --- 页面卸载时清除选中状态 ---
+  // --- when page is unloaded, clear the selected state ---
   useEffect(() => {
     return () => {
       const currentPath = window.location.pathname;
@@ -152,7 +164,7 @@ export default function TextGenerationPage({
     };
   }, [selectItem]);
 
-  // --- 错误状态 ---
+  // --- error state ---
   if (initError) {
     return (
       <div
@@ -201,7 +213,7 @@ export default function TextGenerationPage({
     );
   }
 
-  // --- 加载状态 ---
+  // --- loading state ---
   if (isInitializing || isValidating || !currentApp) {
     return (
       <div
@@ -243,9 +255,6 @@ export default function TextGenerationPage({
         colors.mainText.tailwind
       )}
     >
-      {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
-
-      {/* --- 主内容区域，为 NavBar 留出空间 --- */}
       <div className="min-h-0 flex-1 pt-12">
         <TextGenerationLayout instanceId={instanceId} />
       </div>

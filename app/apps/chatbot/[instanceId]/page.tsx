@@ -8,12 +8,10 @@ import {
 } from '@components/chat';
 import { ChatInput } from '@components/chat-input';
 import { DynamicSuggestedQuestions } from '@components/chat/dynamic-suggested-questions';
-// NavBar 已移至根布局，无需导入
 import {
   useChatInterface,
   useChatScroll,
   useChatWidth,
-  useMobile,
   useWelcomeScreen,
 } from '@lib/hooks';
 import { useCurrentApp } from '@lib/hooks/use-current-app';
@@ -25,7 +23,7 @@ import { useChatLayoutStore } from '@lib/stores/chat-layout-store';
 import { useChatStore } from '@lib/stores/chat-store';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { cn } from '@lib/utils';
-import { Blocks, Loader2, MessageSquare } from 'lucide-react';
+import { Blocks, Loader2 } from 'lucide-react';
 
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 
@@ -34,7 +32,6 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 
 export default function AppDetailPage() {
   const { colors, isDark } = useThemeColors();
-  const isMobile = useMobile();
   const { widthClass, paddingClass } = useChatWidth();
   const router = useRouter();
   const params = useParams();
@@ -42,10 +39,10 @@ export default function AppDetailPage() {
   const instanceId = params.instanceId as string;
   const t = useTranslations('pages.apps');
 
-  // 获取用户资料，用于欢迎界面显示
+  // get user profile, used for welcome interface display
   const { profile } = useProfile();
 
-  // 使用聊天接口逻辑，获取messages状态和相关方法
+  // use chat interface logic, get messages status and related methods
   const {
     messages,
     handleSubmit: originalHandleSubmit,
@@ -55,42 +52,42 @@ export default function AppDetailPage() {
     sendDirectMessage,
   } = useChatInterface();
 
-  // 使用统一的欢迎界面逻辑，现在支持应用详情页面
+  // use unified welcome interface logic, now support app detail page
   const { isWelcomeScreen, setIsWelcomeScreen } = useWelcomeScreen();
 
-  // 获取聊天布局状态，用于输入框高度管理
+  // get chat layout status, used for input box height management
   const { inputHeight } = useChatLayoutStore();
   const chatInputHeightVar = `${inputHeight || 80}px`;
 
-  // 本地状态管理
+  // local state management
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 添加滚动管理，确保消息列表能正确滚动
+  // add scroll management, ensure message list can scroll correctly
   const scrollRef = useChatScroll(messages);
 
-  // Sidebar选中状态管理
+  // sidebar selected status management
   const { selectItem } = useSidebarStore();
 
-  // 聊天状态管理
+  // chat status management
   const { clearMessages, setCurrentConversationId } = useChatStore();
 
-  // 应用初始化状态
+  // app initialization status
   const [isInitializing, setIsInitializing] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
 
-  // 🎯 新增：确保loader最少显示0.7秒，让布局有足够时间稳定
+  // ensure loader shows for at least 0.7 seconds, giving the layout enough time to stabilize
   const [hasMinimumLoadTime, setHasMinimumLoadTime] = useState(false);
 
-  // 🎯 最小加载时间控制：确保loader至少显示0.7秒
+  // ensure loader shows for at least 0.7 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasMinimumLoadTime(true);
-    }, 700); // 0.7秒
+    }, 700); // 0.7 seconds
 
     return () => clearTimeout(timer);
   }, []);
 
-  // 应用相关状态
+  // app related status
   const { apps, fetchApps } = useAppListStore();
   const {
     currentAppId,
@@ -100,42 +97,41 @@ export default function AppDetailPage() {
     error: appError,
   } = useCurrentApp();
 
-  // 获取当前应用实例数据
+  // get current app instance data
   const currentApp = apps.find(app => app.instance_id === instanceId);
 
-  // 主题同步：确保输入框样式跟随主题变化
+  // theme sync: ensure input box style follows theme change
   const setDarkMode = useChatInputStore(state => state.setDarkMode);
   useEffect(() => {
     setDarkMode(isDark);
   }, [isDark, setDarkMode]);
 
-  // 🎯 关键修复：使用useLayoutEffect确保在路由切换时立即清理状态
-  // 这比useEffect更早执行，能在渲染前清理状态，避免显示错误内容
   const { clearConversationState } = useChatInterface();
 
   useLayoutEffect(() => {
-    // 🎯 修复：正确判断当前是否在chatbot页面
     if (pathname === `/apps/chatbot/${instanceId}`) {
-      console.log('[AppDetail] 路由切换到应用详情页面，立即清理聊天状态');
+      console.log(
+        '[AppDetail] route changed to app detail page, clear chat state immediately'
+      );
 
-      // 立即清除所有消息
+      // immediately clear all messages
       useChatStore.getState().clearMessages();
       clearMessages();
 
-      // 设置当前对话 ID 为 null
+      // set current conversation id to null
       setCurrentConversationId(null);
 
-      // 🎯 新增：清理use-chat-interface中的对话状态
-      // 这确保difyConversationId、dbConversationUUID、conversationAppId都被正确清理
+      // clear conversation state in use-chat-interface
+      // ensure difyConversationId, dbConversationUUID, conversationAppId are correctly cleared
       clearConversationState();
 
-      // 强制设置欢迎屏幕状态为 true
+      // force set welcome screen state to true
       setIsWelcomeScreen(true);
 
-      // 重置提交状态
+      // reset submit state
       setIsSubmitting(false);
 
-      console.log('[AppDetail] 聊天状态清理完成');
+      console.log('[AppDetail] chat state cleared');
     }
   }, [
     pathname,
@@ -146,8 +142,8 @@ export default function AppDetailPage() {
     clearConversationState,
   ]);
 
-  // 页面初始化：切换到目标应用并同步sidebar选中状态
-  // 🎯 优化：简化初始化逻辑，避免验证反弹，改善用户体验
+  // page initialization: switch to target app and sync sidebar selected status
+  // simplify initialization logic, avoid validation bounce, improve user experience
   useEffect(() => {
     const initializeApp = async () => {
       if (!instanceId) return;
@@ -155,76 +151,66 @@ export default function AppDetailPage() {
       try {
         setInitError(null);
 
-        console.log('[AppDetail] 开始初始化应用:', instanceId);
+        console.log('[AppDetail] start initializing app:', instanceId);
 
-        // 🎯 优化：简化加载状态判断
-        // 只有在真正需要等待时才显示加载状态
+        // simplify loading state check
+        // only show loading state when really needed
         const needsAppListFetch = apps.length === 0;
         const currentAppMatches = currentAppId === instanceId;
 
-        // 如果应用列表为空，需要获取
+        // if app list is empty, need to fetch
         if (needsAppListFetch) {
           setIsInitializing(true);
-          console.log('[AppDetail] 应用列表为空，开始获取');
+          console.log('[AppDetail] app list is empty, start fetching');
           await fetchApps();
         }
 
-        // 重新获取最新的应用列表
+        // get latest app list
         const latestApps = useAppListStore.getState().apps;
-        console.log('[AppDetail] 当前应用列表长度:', latestApps.length);
+        console.log('[AppDetail] current app list length:', latestApps.length);
 
-        // 检查应用是否存在
+        // check if target app exists
         const targetApp = latestApps.find(
           app => app.instance_id === instanceId
         );
         if (!targetApp) {
-          console.error('[AppDetail] 应用不存在:', instanceId);
+          console.error('[AppDetail] app not found:', instanceId);
           setInitError(t('errors.appNotFound'));
           return;
         }
 
-        console.log('[AppDetail] 找到目标应用:', targetApp.display_name);
+        console.log('[AppDetail] found target app:', targetApp.display_name);
 
-        // 立即设置sidebar选中状态
+        // immediately set sidebar selected status
         selectItem('app', instanceId);
 
-        // 🎯 关键优化：简化应用切换逻辑
-        // 只有在当前应用确实不匹配时才进行切换
-        // 避免不必要的验证调用
+        // simplify app switch logic
+        // only switch when current app does not match
+        // avoid unnecessary validation calls
         if (!currentAppMatches) {
-          console.log(
-            '[AppDetail] 需要切换应用，从',
-            currentAppId,
-            '到',
-            instanceId
-          );
-
-          // 🎯 使用更简单的切换逻辑，避免复杂的验证
           try {
             await switchToSpecificApp(instanceId);
-            console.log('[AppDetail] 应用切换成功');
+            console.log('[AppDetail] app switched successfully');
           } catch (switchError) {
             console.warn(
-              '[AppDetail] 应用切换失败，但继续加载页面:',
+              '[AppDetail] app switch failed, but continue loading page:',
               switchError
             );
-            // 🎯 即使切换失败也不阻塞页面加载
-            // 页面可以正常显示，用户可以正常使用
           }
         } else {
-          console.log('[AppDetail] 当前应用已匹配，无需切换');
+          console.log('[AppDetail] current app matched, no need to switch');
         }
 
-        console.log('[AppDetail] 应用初始化完成');
+        console.log('[AppDetail] app initialization completed');
       } catch (error) {
-        console.error('[AppDetail] 初始化失败:', error);
+        console.error('[AppDetail] initialization failed:', error);
         setInitError(
           error instanceof Error
             ? error.message
             : t('errors.initializationFailed')
         );
       } finally {
-        // 🎯 确保在所有情况下都清除初始化状态
+        // ensure initialization state is cleared in all cases
         setIsInitializing(false);
       }
     };
@@ -241,10 +227,10 @@ export default function AppDetailPage() {
     selectItem,
   ]);
 
-  // 页面卸载时清除选中状态（当离开应用详情页面时）
+  // clear sidebar selected status when page unmounts
   useEffect(() => {
     return () => {
-      // 检查是否离开了应用详情页面
+      // check if current path is not app detail page
       const currentPath = window.location.pathname;
       if (!currentPath.startsWith('/apps/')) {
         selectItem(null, null);
@@ -252,27 +238,28 @@ export default function AppDetailPage() {
     };
   }, [selectItem]);
 
-  // 包装handleSubmit，实现UI切换逻辑
+  // wrap handleSubmit, implement UI switch logic
   const handleSubmit = useCallback(
     async (message: string, files?: any[]) => {
       try {
-        // 🎯 简化UI切换逻辑：立即响应用户操作
-        // 立即设置提交状态为 true
+        // immediately set submit state to true
         setIsSubmitting(true);
 
-        // 立即关闭欢迎界面
+        // immediately close welcome screen
         setIsWelcomeScreen(false);
 
-        console.log('[AppDetail] UI状态已更新，开始发送消息');
+        console.log('[AppDetail] UI state updated, start sending message');
 
-        // 调用原始的handleSubmit，它会创建对话并发送消息
+        // call original handleSubmit, it will create conversation and send message
         await originalHandleSubmit(message, files);
 
-        console.log('[AppDetail] 消息发送成功，等待路由跳转');
+        console.log(
+          '[AppDetail] message sent successfully, waiting for route change'
+        );
       } catch (error) {
-        console.error('[AppDetail] 发送消息失败:', error);
+        console.error('[AppDetail] send message failed:', error);
 
-        // 发送失败时恢复UI状态
+        // restore UI state when send message failed
         setIsSubmitting(false);
         setIsWelcomeScreen(true);
       }
@@ -280,7 +267,7 @@ export default function AppDetailPage() {
     [originalHandleSubmit, setIsWelcomeScreen]
   );
 
-  // 错误状态
+  // error state
   if (initError) {
     return (
       <div
@@ -329,7 +316,7 @@ export default function AppDetailPage() {
     );
   }
 
-  // 加载状态 - 🎯 确保最少显示0.7秒
+  // loading state - ensure at least 0.7 seconds
   if (
     !hasMinimumLoadTime ||
     isInitializing ||
@@ -376,8 +363,6 @@ export default function AppDetailPage() {
         colors.mainText.tailwind
       )}
     >
-      {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
-
       {/* Main content area with simplified layout */}
       <div
         className={cn(
@@ -388,7 +373,7 @@ export default function AppDetailPage() {
           { '--chat-input-height': chatInputHeightVar } as React.CSSProperties
         }
       >
-        {/* 主要内容 */}
+        {/* main content */}
         <div className="min-h-0 flex-1">
           {/* Simplified display logic using useWelcomeScreen */}
           {isWelcomeScreen && messages.length === 0 ? (
@@ -420,10 +405,10 @@ export default function AppDetailPage() {
           )}
         </div>
 
-        {/* 滚动到底部按钮 */}
+        {/* scroll to bottom button */}
         <ScrollToBottomButton />
 
-        {/* 输入框背景 */}
+        {/* input box background */}
         <ChatInputBackdrop />
 
         {/* Chat input with simplified configuration */}

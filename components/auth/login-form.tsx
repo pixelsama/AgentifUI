@@ -22,7 +22,7 @@ export function LoginForm() {
   const { isDark } = useTheme();
   const t = useTranslations('pages.auth.login');
 
-  // 检查是否启用SSO模式
+  // check if SSO mode is enabled
   const ssoOnlyMode = process.env.NEXT_PUBLIC_SSO_ONLY_MODE === 'true';
 
   const [formData, setFormData] = useState({
@@ -47,12 +47,12 @@ export function LoginForm() {
     setError('');
 
     try {
-      console.log('[登录] 开始邮箱密码登录流程');
+      console.log('[login] start email password login process');
 
-      // 登录前先清理前一个用户的缓存，防止数据污染
+      // clear cache of previous user before login to prevent data pollution
       clearCacheOnLogin();
 
-      // 使用 Supabase Auth 进行登录
+      // use Supabase Auth to login
       const supabase = createClient();
       const { error } = await supabase.auth.signInWithPassword({
         email: formData.email,
@@ -63,13 +63,13 @@ export function LoginForm() {
         throw error;
       }
 
-      console.log('[登录] 邮箱密码登录成功');
+      console.log('[login] email password login success');
 
-      // 登录成功，跳转到聊天页面
+      // login success, redirect to chat page
       router.push('/chat');
-      router.refresh(); // 刷新页面以更新用户状态
+      router.refresh(); // refresh page to update user state
     } catch (err: any) {
-      console.error('[登录] 邮箱密码登录失败:', err);
+      console.error('[login] email password login failed:', err);
       setError(err.message || t('errors.loginFailed'));
     } finally {
       setIsLoading(false);

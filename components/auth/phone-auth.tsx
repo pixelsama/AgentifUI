@@ -19,14 +19,14 @@ export default function PhoneAuth() {
   const supabase = createClient();
   const t = useTranslations('pages.auth.phoneLogin');
 
-  // --- 发送验证码 ---
+  // send OTP
   const sendOTP = async () => {
     if (!phone.trim()) {
       toast.error(t('errors.phoneRequired'));
       return;
     }
 
-    // 验证手机号格式（中国手机号）
+    // validate phone number format (Chinese phone number)
     const phoneRegex = /^1[3-9]\d{9}$/;
     if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
       toast.error(t('errors.phoneInvalid'));
@@ -37,7 +37,7 @@ export default function PhoneAuth() {
 
     try {
       const { data, error } = await supabase.auth.signInWithOtp({
-        phone: `+86${phone}`, // 添加中国区号
+        phone: `+86${phone}`, // add Chinese area code
       });
 
       if (error) throw error;
@@ -45,14 +45,14 @@ export default function PhoneAuth() {
       toast.success(t('success.otpSent'));
       setStep('otp');
     } catch (error: any) {
-      console.error('发送验证码失败:', error);
+      console.error('send OTP failed:', error);
       toast.error(error.message || t('errors.sendFailed'));
     } finally {
       setLoading(false);
     }
   };
 
-  // --- 验证OTP ---
+  // verify OTP
   const verifyOTP = async () => {
     if (!otp.trim()) {
       toast.error(t('errors.otpRequired'));
@@ -77,17 +77,17 @@ export default function PhoneAuth() {
 
       toast.success(t('success.verifySuccess'));
 
-      // 登录成功后重定向
+      // redirect after login success
       window.location.href = '/chat';
     } catch (error: any) {
-      console.error('验证失败:', error);
+      console.error('verify failed:', error);
       toast.error(error.message || t('errors.verifyFailed'));
     } finally {
       setLoading(false);
     }
   };
 
-  // --- 重新发送验证码 ---
+  // resend OTP
   const resendOTP = async () => {
     setStep('phone');
     setOtp('');
@@ -121,7 +121,7 @@ export default function PhoneAuth() {
       <div className="space-y-6">
         {step === 'phone' ? (
           <>
-            {/* --- 手机号输入 --- */}
+            {/* phone number input */}
             <div>
               <label
                 htmlFor="phone"
@@ -162,7 +162,7 @@ export default function PhoneAuth() {
               </div>
             </div>
 
-            {/* --- 发送验证码按钮 --- */}
+            {/* send OTP button */}
             <button
               onClick={sendOTP}
               disabled={loading || !phone.trim()}
@@ -186,7 +186,7 @@ export default function PhoneAuth() {
           </>
         ) : (
           <>
-            {/* --- OTP输入 --- */}
+            {/* OTP input */}
             <div>
               <label
                 htmlFor="otp"
@@ -224,7 +224,7 @@ export default function PhoneAuth() {
               </p>
             </div>
 
-            {/* --- 验证按钮 --- */}
+            {/* verify button */}
             <button
               onClick={verifyOTP}
               disabled={loading || otp.length !== 6}
@@ -243,7 +243,7 @@ export default function PhoneAuth() {
               )}
             </button>
 
-            {/* --- 重新发送 --- */}
+            {/* resend OTP button */}
             <button
               onClick={resendOTP}
               disabled={loading}
@@ -257,7 +257,7 @@ export default function PhoneAuth() {
               {t('resendButton')}
             </button>
 
-            {/* --- 返回修改手机号 --- */}
+            {/* change phone button */}
             <button
               onClick={() => setStep('phone')}
               disabled={loading}

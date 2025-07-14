@@ -1,11 +1,7 @@
 'use client';
 
 import { AppFilters, AppHeader, AppList, AppLoading } from '@components/apps';
-// 🎯 多提供商支持：应用市场现在支持来自不同提供商的应用
-// 过滤逻辑基于 app_type === 'marketplace'，不再限制特定提供商
-// 这样可以显示来自不同提供商的应用市场应用
 import type { AppInstance } from '@components/apps/types';
-// NavBar 已移至根布局，无需导入
 import { useMobile } from '@lib/hooks';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { useAppListStore } from '@lib/stores/app-list-store';
@@ -26,7 +22,6 @@ export default function AppsPage() {
   const { addFavoriteApp, favoriteApps } = useFavoriteAppsStore();
   const { selectItem } = useSidebarStore();
   const t = useTranslations('pages.apps.market');
-  // 🎯 使用真实的应用列表数据，替代硬编码
   const { apps: rawApps, fetchApps, isLoading } = useAppListStore();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,18 +30,14 @@ export default function AppsPage() {
   );
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // 🎯 效仿模型选择器：简洁的应用获取逻辑
-  // 只需要一行代码，无需复杂的用户状态判断
   useEffect(() => {
     fetchApps();
   }, [fetchApps]);
 
-  // 🎯 在组件挂载时清除sidebar选中状态
   useEffect(() => {
     selectItem(null, null);
   }, [selectItem]);
 
-  // 🎯 处理URL查询参数，支持直接跳转到特定筛选
   useEffect(() => {
     const categoryParam = searchParams.get('category');
     const searchParam = searchParams.get('search');
@@ -60,7 +51,6 @@ export default function AppsPage() {
     }
   }, [searchParams]);
 
-  // 🎯 更新URL查询参数的函数
   const updateURLParams = (category?: string, search?: string) => {
     const params = new URLSearchParams();
 
@@ -78,26 +68,20 @@ export default function AppsPage() {
     router.replace(newURL, { scroll: false });
   };
 
-  // 🎯 分类选择处理函数
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     updateURLParams(category, searchTerm);
   };
 
-  // 🎯 搜索处理函数
   const handleSearchChange = (search: string) => {
     setSearchTerm(search);
     updateURLParams(selectedCategory, search);
   };
 
-  // 🎯 将原始应用数据转换为应用市场格式
-  // 🎯 多提供商支持：过滤出应用市场类型的应用，支持所有提供商
-  // 过滤逻辑不再限制特定提供商，只要是 marketplace 类型就显示
   const apps: AppInstance[] = rawApps
     .filter(app => {
       const metadata = app.config?.app_metadata;
 
-      // 🎯 支持多提供商：只要 app_type === 'marketplace' 就显示
       if (metadata) {
         return (
           metadata.app_type === 'marketplace' ||
@@ -105,7 +89,6 @@ export default function AppsPage() {
         );
       }
 
-      // 如果没有元数据配置，则不显示
       return false;
     })
     .map(app => {
@@ -114,7 +97,6 @@ export default function AppsPage() {
 
       const difyAppType = metadata?.dify_apptype;
 
-      // 🎯 简化描述生成逻辑
       let description =
         metadata?.brief_description ||
         app.description ||
@@ -138,7 +120,6 @@ export default function AppsPage() {
       };
     });
 
-  // 🎯 动态分类逻辑：从应用 tags 中提取分类 + 常用应用分类
   const hasCommonApps = apps.some(app => {
     const isFavorite = favoriteApps.some(
       fav => fav.instanceId === app.instanceId
@@ -146,12 +127,10 @@ export default function AppsPage() {
     return app.isPopular || isFavorite;
   });
 
-  // 🎯 新增：动态提取所有应用的 tags 作为分类
-  // 从应用市场的所有应用中提取唯一的 tags，并按使用频率排序
   const extractTagCategories = (apps: AppInstance[]): string[] => {
     const tagCounts = new Map<string, number>();
 
-    // 统计每个 tag 的使用频率
+    // count the usage frequency of each tag
     apps.forEach(app => {
       if (app.tags && app.tags.length > 0) {
         app.tags.forEach(tag => {
@@ -166,28 +145,25 @@ export default function AppsPage() {
       }
     });
 
-    // 按使用频率降序排序，如果频率相同则按字母顺序排序
+    // sort by usage frequency in descending order, if frequency is the same, sort by alphabetical order
     return Array.from(tagCounts.entries())
       .sort(([tagA, countA], [tagB, countB]) => {
         if (countA !== countB) {
-          return countB - countA; // 按频率降序
+          return countB - countA; // sort by usage frequency in descending order
         }
-        return tagA.localeCompare(tagB); // 按字母顺序
+        return tagA.localeCompare(tagB); // sort by alphabetical order
       })
       .map(([tag]) => tag);
   };
 
-  // 提取 tag 分类
   const tagCategories = extractTagCategories(apps);
 
-  // 构建完整的分类列表
   const categories = [
-    t('categoryKeys.all'), // "全部" 分类
-    ...(hasCommonApps ? [t('categoryKeys.commonApps')] : []), // "常用应用" 分类（如果有的话）
-    ...tagCategories, // 动态 tag 分类
+    t('categoryKeys.all'), // "all" category
+    ...(hasCommonApps ? [t('categoryKeys.commonApps')] : []), // "common apps" category (if any)
+    ...tagCategories, // dynamic tag category
   ];
 
-  // 🎯 应用过滤逻辑（保持原有逻辑）
   const filteredApps = apps.filter(app => {
     const matchesSearch =
       app.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -201,7 +177,6 @@ export default function AppsPage() {
     if (selectedCategory === t('categoryKeys.all')) {
       matchesCategory = true;
     } else if (selectedCategory === t('categoryKeys.commonApps')) {
-      // 🎯 常用应用过滤逻辑：基于isPopular标记或收藏状态
       const isFavorite = favoriteApps.some(
         fav => fav.instanceId === app.instanceId
       );
@@ -214,7 +189,6 @@ export default function AppsPage() {
     return matchesSearch && matchesCategory;
   });
 
-  // 🎯 应用排序逻辑（保持原有逻辑）
   const sortedApps = [...filteredApps].sort((a, b) => {
     const aIsFavorite = favoriteApps.some(
       fav => fav.instanceId === a.instanceId
@@ -226,12 +200,9 @@ export default function AppsPage() {
     if (aIsFavorite && !bIsFavorite) return -1;
     if (!aIsFavorite && bIsFavorite) return 1;
 
-    // 移除硬编码的标签优先级逻辑
-
     return a.displayName.localeCompare(b.displayName);
   });
 
-  // 🎯 打开应用详情
   const handleOpenApp = async (app: AppInstance) => {
     try {
       const difyAppType = app.config?.app_metadata?.dify_apptype;
@@ -271,16 +242,12 @@ export default function AppsPage() {
     }
   };
 
-  // 🔧 修复时序问题：只要在加载中就显示加载状态
-  // 避免在初始加载时短暂显示"应用不存在"
   if (isLoading) {
     return <AppLoading />;
   }
 
   return (
     <>
-      {/* 🎯 NavBar 已移至根布局，无需重复渲染 */}
-
       <div
         className={cn(
           colors.mainBackground.tailwind,

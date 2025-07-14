@@ -10,10 +10,10 @@ import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 /**
- * SSO处理页面
+ * SSO processing page
  *
- * 用于显示SSO登录处理状态，替代跳转到login页面
- * 包含加载指示器和状态信息
+ * used to display SSO login processing status, replacing the jump to login page
+ * contains loading indicator and status information
  */
 
 export default function SSOProcessingPage() {
@@ -33,7 +33,7 @@ export default function SSOProcessingPage() {
 
   useEffect(() => {
     const handleSSOProcessing = async () => {
-      // --- 防止重复处理 ---
+      // prevent duplicate processing
       if (hasProcessedRef.current || isProcessingRef.current) {
         return;
       }
@@ -42,7 +42,7 @@ export default function SSOProcessingPage() {
       isProcessingRef.current = true;
 
       try {
-        // --- 获取URL参数 ---
+        // get URL parameters
         const ssoLogin = searchParams.get('sso_login');
         const welcome = searchParams.get('welcome');
         const redirectTo = searchParams.get('redirect_to') || '/chat';
@@ -55,7 +55,7 @@ export default function SSOProcessingPage() {
 
         setMessage(t('welcome', { name: welcome || 'User' }));
 
-        // --- 读取SSO用户数据cookie ---
+        // read SSO user data cookie
         const ssoUserCookie = document.cookie
           .split('; ')
           .find(row => row.startsWith('sso_user_data='));
@@ -64,14 +64,14 @@ export default function SSOProcessingPage() {
           throw new Error(t('errors.userDataNotFound'));
         }
 
-        // 提取cookie值（去掉cookie名称部分）
+        // extract cookie value (remove cookie name part)
         let cookieValue = ssoUserCookie.split('=')[1];
 
-        // 调试：输出cookie原始值
+        // debug: output cookie original value
         console.log('Raw cookie value:', cookieValue);
         console.log('Cookie value starts with %:', cookieValue.startsWith('%'));
 
-        // 尝试URL解码（如果需要的话）
+        // try URL decoding (if needed)
         if (cookieValue.startsWith('%')) {
           cookieValue = decodeURIComponent(cookieValue);
           console.log('After decodeURIComponent:', cookieValue);
@@ -79,14 +79,14 @@ export default function SSOProcessingPage() {
 
         const ssoUserData = JSON.parse(cookieValue);
 
-        // --- 检查数据是否过期 ---
+        // check if data has expired
         if (Date.now() > ssoUserData.expiresAt) {
           throw new Error(t('errors.sessionExpired'));
         }
 
         setMessage(t('verifying'));
 
-        // --- 调用SSO登录API ---
+        // call SSO login API
         const response = await fetch('/api/auth/sso-signin', {
           method: 'POST',
           headers: {
@@ -108,7 +108,7 @@ export default function SSOProcessingPage() {
         if (session) {
           setMessage(t('sessionCheck'));
 
-          // --- 验证会话是否真正建立 ---
+          // verify if session is really established
           const supabase = createClient();
           const {
             data: { user },
@@ -119,9 +119,9 @@ export default function SSOProcessingPage() {
             throw new Error(t('errors.sessionValidationFailed'));
           }
 
-          console.log('会话验证成功，用户ID:', user.id);
+          console.log('Session verification successful, user ID:', user.id);
 
-          // --- 清理会话cookie ---
+          // clean up session cookie
           document.cookie =
             'sso_user_data=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
           // Note: sso_user_data_secure is httpOnly and cannot be cleared by JavaScript
@@ -130,25 +130,25 @@ export default function SSOProcessingPage() {
           setStatus('success');
           setMessage(t('success'));
 
-          // --- 跳转到目标页面 ---
+          // jump to target page
           setTimeout(() => {
-            console.log(`准备跳转到: ${redirectTo}`);
+            console.log(`Preparing to jump to: ${redirectTo}`);
             router.replace(redirectTo);
           }, 1000);
         } else {
           throw new Error(t('errors.noValidSessionData'));
         }
       } catch (err: any) {
-        console.error('SSO处理失败:', err);
+        console.error('SSO processing failed:', err);
         setStatus('error');
         setError(err.message || t('errors.processingFailed'));
         setMessage(t('failed'));
 
-        // --- 清理可能存在的会话cookie ---
+        // clean up possible session cookie
         document.cookie =
           'sso_user_data=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 
-        // --- 3秒后跳转到登录页面 ---
+        // jump to login page after 3 seconds
         setTimeout(() => {
           router.replace('/login');
         }, 3000);
@@ -175,14 +175,14 @@ export default function SSOProcessingPage() {
             : 'border-stone-200 bg-stone-50'
         )}
       >
-        {/* --- 标题 --- */}
+        {/* --- title --- */}
         <div className="space-y-2">
           <h1 className="bg-gradient-to-r from-stone-700 to-stone-500 bg-clip-text py-1 text-2xl leading-normal font-bold text-transparent">
             {t('title')}
           </h1>
         </div>
 
-        {/* --- 状态指示器 --- */}
+        {/* --- status indicator --- */}
         <div className="space-y-4">
           {status === 'processing' && (
             <div className="flex items-center justify-center space-x-3">
@@ -227,7 +227,7 @@ export default function SSOProcessingPage() {
           )}
         </div>
 
-        {/* --- 状态消息 --- */}
+        {/* --- status message --- */}
         <div className="space-y-2">
           <p
             className={cn(

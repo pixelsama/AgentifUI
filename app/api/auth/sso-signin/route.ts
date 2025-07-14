@@ -1,13 +1,13 @@
-// SSO登录API
-// 为已验证的SSO用户建立Supabase会话
-// 添加请求去重逻辑和改善的错误处理
+// SSO login API
+// establish Supabase session for verified SSO users
+// add request deduplication logic and improved error handling
 import { createAdminClient } from '@lib/supabase/server';
 
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-// 简单的内存缓存，用于防止短时间内的重复请求
-// 在生产环境中，建议使用Redis等持久化缓存
+// simple memory cache to prevent duplicate requests within a short time
+// in production, it is recommended to use Redis or other persistent cache
 const processingRequests = new Map<string, Promise<NextResponse>>();
 
 export async function POST(request: NextRequest) {
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     if (!secureCookie) {
       return NextResponse.json(
-        { message: 'SSO安全数据不存在或已过期' },
+        { message: 'SSO secure data does not exist or has expired' },
         { status: 401 }
       );
     }
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       sensitiveData = JSON.parse(secureCookie.value);
     } catch (error) {
       return NextResponse.json(
-        { message: 'SSO安全数据格式错误' },
+        { message: 'SSO secure data format error' },
         { status: 401 }
       );
     }
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Check if SSO data has expired
     if (sensitiveData.expiresAt < Date.now()) {
       return NextResponse.json(
-        { message: 'SSO登录数据已过期，请重新登录' },
+        { message: 'SSO login data has expired, please login again' },
         { status: 401 }
       );
     }
@@ -57,22 +57,22 @@ export async function POST(request: NextRequest) {
 
     if (!userId || !userEmail || !completeSsoUserData) {
       return NextResponse.json(
-        { message: 'SSO登录数据不完整' },
+        { message: 'SSO login data is incomplete' },
         { status: 400 }
       );
     }
 
-    // 创建请求唯一标识，防止重复处理同一用户的并发请求
+    // create request unique identifier to prevent duplicate processing of concurrent requests for the same user
     const requestKey = `sso-signin-${userId}-${sensitiveData.loginTime}`;
 
-    // 检查是否有相同的请求正在处理中
+    // check if there is a request being processed for the same user
     if (processingRequests.has(requestKey)) {
       console.log(
         `Duplicate SSO signin request detected for user: ${userId}, waiting for existing request...`
       );
 
       try {
-        // 等待现有请求完成
+        // wait for existing request to complete
         const existingResponse = await processingRequests.get(requestKey);
         console.log(
           `Returning result from existing request for user: ${userId}`
@@ -82,41 +82,44 @@ export async function POST(request: NextRequest) {
         console.log(
           `Existing request failed for user: ${userId}, proceeding with new request`
         );
-        // 如果现有请求失败，清理缓存并继续处理新请求
+        // if existing request fails, clean up cache and continue processing new request
         processingRequests.delete(requestKey);
       }
     }
 
-    // 创建处理函数并添加到缓存中
+    // create processing function and add to cache
     const processRequest = async (): Promise<NextResponse> => {
       try {
-        // 验证SSO数据是否过期
+        // verify if SSO data has expired
         if (Date.now() > completeSsoUserData.expiresAt) {
           return NextResponse.json(
-            { message: 'SSO会话已过期' },
+            { message: 'SSO session has expired' },
             { status: 401 }
           );
         }
 
-        // 使用Admin客户端为SSO用户生成会话
+        // use Admin client to generate session for SSO user
         const adminSupabase = await createAdminClient();
 
-        // 验证用户是否存在于Supabase并获取实际邮箱
+        // verify if user exists in Supabase and get actual email
         const { data: user, error: userError } =
           await adminSupabase.auth.admin.getUserById(userId);
 
         if (userError || !user) {
           console.error('SSO user not found in Supabase:', userError);
-          return NextResponse.json({ message: '用户不存在' }, { status: 404 });
+          return NextResponse.json(
+            { message: 'User not found' },
+            { status: 404 }
+          );
         }
 
-        // 使用数据库中实际存储的邮箱地址，而不是URL参数传递的邮箱
-        // 这解决了邮箱不匹配导致的认证失败问题
+        // use the actual email address stored in the database, not the email passed as a URL parameter
+        // this solves the authentication failure problem caused by email mismatch
         const actualUserEmail = user.user.email || userEmail;
         if (!actualUserEmail) {
           console.error('No email found for user:', userId);
           return NextResponse.json(
-            { message: '用户邮箱信息缺失' },
+            { message: 'User email information is missing' },
             { status: 400 }
           );
         }
@@ -124,15 +127,15 @@ export async function POST(request: NextRequest) {
           `Creating session for SSO user: ${userId}, URL email: ${userEmail}, actual email: ${actualUserEmail}`
         );
 
-        // 使用优化的临时密码方法创建会话
-        // 这是最可靠和简单的方法
+        // use optimized temporary password method to create session
+        // this is the most reliable and simple method
         try {
           console.log('Creating session using temporary password method...');
 
-          // 生成更强的临时密码
+          // generate stronger temporary password
           const tempPassword = `SSO_${Date.now()}_${Math.random().toString(36).substring(2, 15)}_${Math.random().toString(36).substring(2, 15)}`;
 
-          // 更新用户密码（临时）
+          // update user password (temporary)
           const { error: updateError } =
             await adminSupabase.auth.admin.updateUserById(userId, {
               password: tempPassword,
@@ -141,15 +144,15 @@ export async function POST(request: NextRequest) {
           if (updateError) {
             console.error('Failed to set temporary password:', updateError);
             return NextResponse.json(
-              { message: '临时密码设置失败' },
+              { message: 'Failed to set temporary password' },
               { status: 500 }
             );
           }
 
-          // 等待一小段时间确保密码更新生效
+          // wait for a short time to ensure password update takes effect
           await new Promise(resolve => setTimeout(resolve, 100));
 
-          // 使用临时密码和实际邮箱进行登录获取会话
+          // sign in with temporary password and actual email to get session
           const { data: signInData, error: signInError } =
             await adminSupabase.auth.signInWithPassword({
               email: actualUserEmail,
@@ -162,12 +165,12 @@ export async function POST(request: NextRequest) {
               signInError
             );
             return NextResponse.json(
-              { message: '会话创建失败' },
+              { message: 'Session creation failed' },
               { status: 500 }
             );
           }
 
-          // 立即清理临时密码
+          // immediately clean up temporary password
           try {
             await adminSupabase.auth.admin.updateUserById(userId, {
               password: undefined,
@@ -178,34 +181,34 @@ export async function POST(request: NextRequest) {
 
           const processingTime = Date.now() - startTime;
           console.log(
-            `[SSO认证] SSO signin successful for user: ${userId} (processing time: ${processingTime}ms)`
+            `[SSO authentication] SSO signin successful for user: ${userId} (processing time: ${processingTime}ms)`
           );
 
-          // SSO登录成功，返回结果
-          // 注意：前端缓存清理已在SSO按钮组件中处理
+          // SSO login successful, return result
+          // note: frontend cache cleanup is handled in SSO button component
           return NextResponse.json({
             success: true,
             session: signInData.session,
-            message: 'SSO登录成功',
+            message: 'SSO login successful',
           });
         } catch (authError) {
           console.error('Authentication error:', authError);
           return NextResponse.json(
             {
-              message: `认证失败: ${authError instanceof Error ? authError.message : '未知错误'}`,
+              message: `Authentication failed: ${authError instanceof Error ? authError.message : 'Unknown error'}`,
             },
             { status: 500 }
           );
         }
       } finally {
-        // 处理完成后清理缓存（延迟清理防止竞争条件）
+        // clean up cache after processing (delayed cleanup to prevent race conditions)
         setTimeout(() => {
           processingRequests.delete(requestKey);
         }, 1000);
       }
     };
 
-    // 将处理函数添加到缓存并执行
+    // add processing function to cache and execute
     const requestPromise = processRequest();
     processingRequests.set(requestKey, requestPromise);
 
@@ -213,7 +216,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('SSO signin failed:', error);
 
-    // 在发生错误时清理可能的缓存条目
+    // clean up possible cache entries when error occurs
     // Note: Error handling may not have access to sensitiveData, so we try to construct the key from cookie
     try {
       const cookieStore = await cookies();
@@ -232,7 +235,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        message: `登录失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        message: `Login failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       },
       { status: 500 }
     );

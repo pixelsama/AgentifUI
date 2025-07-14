@@ -1,6 +1,6 @@
 /**
- * 通用SSO回调处理
- * 处理任何CAS提供商的回调，验证ticket，创建或查找用户，建立会话
+ * generic SSO callback handler
+ * handle any CAS provider callback, validate ticket, create or find user, establish session
  */
 import { SSOUserService } from '@lib/services/admin/user/sso-user-service';
 import { CASConfigService } from '@lib/services/sso/generic-cas-service';
@@ -21,7 +21,7 @@ export async function GET(
   const returnUrl = requestUrl.searchParams.get('returnUrl') || '/chat';
   const { providerId } = await params;
 
-  // 🔒 Security: Validate redirect URL to prevent open redirect attacks
+  // validate redirect URL to prevent open redirect attacks
   const validatedReturnUrl = validateRedirectUrl(
     returnUrl,
     request.url,
@@ -32,7 +32,7 @@ export async function GET(
     `SSO callback received for provider ${providerId} - ticket: ${ticket ? 'present' : 'missing'}, returnUrl: ${returnUrl} (validated: ${validatedReturnUrl})`
   );
 
-  // 获取配置的应用URL，用于构建重定向URL
+  // get config app URL, for building redirect URL
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   if (!appUrl) {
@@ -52,16 +52,16 @@ export async function GET(
   }
 
   try {
-    // 创建通用CAS服务实例
+    // create generic CAS service instance
     const casService = await CASConfigService.createCASService(providerId);
     const casConfig = casService.getConfig();
 
-    // Validate ticket - ensure service URL matches exactly with login time
-    // Fix: Use the same logic as login time to build service URL
+    // validate ticket - ensure service URL matches exactly with login time
+    // fix: use the same logic as login time to build service URL
     let serviceUrl = `${appUrl}/api/sso/${providerId}/callback`;
     if (returnUrl) {
-      // If returnUrl parameter exists, add it to service URL
-      // This maintains consistency with login time service URL
+      // if returnUrl parameter exists, add it to service URL
+      // this maintains consistency with login time service URL
       serviceUrl = `${serviceUrl}?returnUrl=${encodeURIComponent(returnUrl)}`;
     }
     console.log(`Using service URL for ticket validation: ${serviceUrl}`);
@@ -89,7 +89,7 @@ export async function GET(
       );
     }
 
-    // 提取用户信息
+    // extract user info
     const employeeNumberStr = validationResult.employeeNumber;
     const username = validationResult.username;
     const fullName = validationResult.attributes?.name || username;
@@ -110,10 +110,10 @@ export async function GET(
       `Processing SSO user for ${casConfig.name}: ${username} (${employeeNumberStr}), name: ${fullName}`
     );
 
-    // 获取CAS配置中的完整信息（提前获取）
+    // get full CAS config (pre-fetch)
     const casFullConfig = await CASConfigService.getCASConfig(providerId);
 
-    // 查找或创建用户
+    // find or create user
     let user = await SSOUserService.findUserByEmployeeNumber(employeeNumberStr);
 
     if (!user) {
@@ -142,18 +142,18 @@ export async function GET(
         `Found existing user: ${user.id} for employee ${employeeNumberStr}`
       );
 
-      // 更新最后登录时间
+      // update last login time
       await SSOUserService.updateLastLogin(user.id);
     }
 
-    // 使用配置中的邮箱域名
+    // use email domain from config
     const userEmail = `${user.employee_number || employeeNumberStr}@${casFullConfig.emailDomain}`;
 
     console.log(
       `Preparing to create Supabase session for user: ${user.id}, email: ${userEmail}`
     );
 
-    // 构建SSO用户数据用于会话创建
+    // build SSO user data for session creation
     const ssoUserData = {
       userId: user.id,
       employeeNumber: employeeNumberStr,
@@ -161,11 +161,11 @@ export async function GET(
       fullName: fullName,
       provider: casFullConfig.name,
       loginTime: Date.now(),
-      expiresAt: Date.now() + 10 * 60 * 1000, // 10分钟有效期
+      expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
       authSource: `${casFullConfig.name.toLowerCase().replace(/\s+/g, '_')}_sso`,
     };
 
-    // 重定向到SSO处理页面，由前端发起POST请求到signin API
+    // redirect to SSO processing page, frontend will POST to signin API
     const processingUrl = new URL('/sso/processing', appUrl);
     processingUrl.searchParams.set('sso_login', 'success');
     processingUrl.searchParams.set('user_id', user.id);
@@ -177,19 +177,19 @@ export async function GET(
       `Redirecting to SSO processing page for session creation: ${processingUrl.toString()}`
     );
 
-    // 创建响应对象并设置SSO用户数据cookie供前端使用
+    // create response object and set SSO user data cookie for frontend use
     const response = NextResponse.redirect(processingUrl.toString());
     const cookieValue = JSON.stringify(ssoUserData);
 
-    // 调试：输出设置的cookie值
+    // debug: output the cookie value
     console.log(
       'Setting cookie value (first 100 chars):',
       cookieValue.substring(0, 100)
     );
     console.log('Cookie value length:', cookieValue.length);
 
-    // 🔒 Security: Split sensitive and non-sensitive data
-    // Store sensitive data in httpOnly cookie, accessible data in regular cookie
+    // split sensitive and non-sensitive data
+    // store sensitive data in httpOnly cookie, accessible data in regular cookie
     const sensitiveData = {
       userId: ssoUserData.userId,
       employeeNumber: ssoUserData.employeeNumber,
@@ -204,23 +204,23 @@ export async function GET(
       provider: ssoUserData.provider,
     };
 
-    // Store sensitive data in httpOnly cookie (secure from XSS)
+    // store sensitive data in httpOnly cookie (secure from XSS)
     response.cookies.set({
       name: 'sso_user_data_secure',
       value: JSON.stringify(sensitiveData),
       maxAge: 10 * 60, // 10 minutes
-      httpOnly: true, // 🔒 Security: Prevent XSS attacks by blocking JavaScript access
+      httpOnly: true, // prevent XSS attacks by blocking JavaScript access
       secure: appUrl.startsWith('https'),
       sameSite: 'lax',
       path: '/',
     });
 
-    // Store non-sensitive data in accessible cookie (for frontend use)
+    // store non-sensitive data in accessible cookie (for frontend use)
     response.cookies.set({
       name: 'sso_user_data',
       value: JSON.stringify(publicData),
       maxAge: 10 * 60, // 10 minutes
-      httpOnly: false, // Frontend needs access to display name and basic info
+      httpOnly: false, // frontend needs access to display name and basic info
       secure: appUrl.startsWith('https'),
       sameSite: 'lax',
       path: '/',

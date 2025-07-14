@@ -3,25 +3,25 @@ import { getActiveProviders, getServiceInstancesByProvider } from '@lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * 获取管理后台状态信息
+ * Get admin backend status information
  */
 export async function GET(request: NextRequest) {
   try {
-    // 检查是否有活跃的服务提供商
+    // check if there are active service providers
     const providersResult = await getActiveProviders();
 
     if (!providersResult.success) {
       return NextResponse.json({
         hasActiveProviders: false,
         hasActiveInstances: false,
-        error: '无法获取提供商信息',
+        error: 'Cannot get provider information',
       });
     }
 
     const providers = providersResult.data;
     let hasActiveInstances = false;
 
-    // 检查是否有配置的服务实例
+    // check if there are configured service instances
     if (providers.length > 0) {
       for (const provider of providers) {
         const instancesResult = await getServiceInstancesByProvider(
@@ -41,10 +41,10 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('获取管理状态失败:', error);
+    console.error('Failed to get admin status:', error);
     return NextResponse.json(
       {
-        error: '获取状态信息失败',
+        error: 'Failed to get status information',
         hasActiveProviders: false,
         hasActiveInstances: false,
       },

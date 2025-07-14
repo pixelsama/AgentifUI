@@ -15,9 +15,9 @@ export default function AppsLayout({ children }: AppsLayoutProps) {
   const isMobile = useMobile();
   const { isDark } = useTheme();
 
-  // 🎯 移除重复的 setMounted 调用，现在由全局 ClientLayout 统一管理
-  // 计算主内容区域的左边距
-  // 根据sidebar展开状态设置边距，推动主内容
+  // remove duplicate setMounted calls, now managed by global ClientLayout
+  // calculate the left margin of the main content area
+  // set the margin based on the sidebar expansion state, push the main content
   const getMainMarginLeft = () => {
     if (isMobile) return 'ml-0';
     return isExpanded ? 'ml-64' : 'ml-16';
@@ -30,21 +30,17 @@ export default function AppsLayout({ children }: AppsLayoutProps) {
         isDark ? 'bg-stone-800' : 'bg-stone-100'
       )}
     >
-      {/* 🎯 Sidebar 已移至根布局，无需重复渲染 */}
-
-      {/* 
-        移动端导航按钮 - 仅在客户端挂载后显示 
-      */}
+      {/* mobile navigation button - only display after client mount */}
       <div className="fixed top-4 left-4 z-50 md:hidden">
         {isMounted && <MobileNavButton />}
       </div>
 
-      {/* 主内容区域 - 应用市场页面 */}
+      {/* main content area - app market page */}
       <main
         className={cn(
-          'h-screen w-full overflow-auto', // 使用 w-full 而不是 flex-1
+          'h-screen w-full overflow-auto', // use w-full instead of flex-1
           getMainMarginLeft(),
-          // 过渡效果
+          // transition effect
           'transition-[margin-left] duration-150 ease-in-out'
         )}
       >

@@ -46,7 +46,7 @@
 
 ### 核心组件
 
-#### 1. 动态翻译 API (`app/api/translations/dynamic/[locale]/route.ts`)
+#### 1. 动态翻译 API (`app/api/translations/[locale]/route.ts`)
 
 ```typescript
 export async function GET(
@@ -143,7 +143,7 @@ sequenceDiagram
     API->>FS: 写入 messages/*.json
     API->>Cache: clearTranslationCache()
     Cache->>User: 触发重新获取
-    User->>API: GET /api/translations/dynamic/[locale]
+    User->>API: GET /api/translations/[locale]
     API->>FS: 读取文件（检查 mtime）
     API-->>User: 返回更新的翻译
 ```

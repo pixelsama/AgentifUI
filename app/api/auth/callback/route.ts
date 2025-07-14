@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get('code');
 
   if (code) {
-    // 使用类型断言解决 cookies() 的类型问题
+    // use type assertion to solve cookies() type problem
     const cookieStore = cookies() as any;
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,19 +32,19 @@ export async function GET(request: NextRequest) {
     );
 
     try {
-      // 使用授权码交换会话，获取用户信息
+      // use authorization code to exchange session, get user info
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
         console.error('OAuth callback error:', error);
-        // 重定向到登录页面并显示错误
+        // redirect to login page and show error
         return NextResponse.redirect(
           new URL('/login?error=oauth_failed', request.url)
         );
       }
 
-      // 检查用户是否已有profile，如果没有则创建
-      // OAuth用户的profile会由数据库触发器自动创建，但我们需要更新认证来源
+      // check if user has profile, if not, create it
+      // OAuth user's profile will be automatically created by database trigger, but we need to update the authentication source
       if (data.user) {
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
           .single();
 
         if (profile && !profile.auth_source) {
-          // 更新认证来源为oauth
+          // update authentication source to oauth
           await supabase
             .from('profiles')
             .update({
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
         }
       }
     } catch (err) {
-      console.error('OAuth处理失败:', err);
+      console.error('OAuth processing failed:', err);
       return NextResponse.redirect(
         new URL('/login?error=oauth_failed', request.url)
       );
@@ -79,6 +79,6 @@ export async function GET(request: NextRequest) {
     '/chat/new'
   );
 
-  // 重定向到验证后的安全页面
+  // redirect to validated secure page
   return NextResponse.redirect(new URL(validatedRedirectUrl, request.url));
 }

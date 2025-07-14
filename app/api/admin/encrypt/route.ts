@@ -5,7 +5,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { createServerClient } from '@supabase/ssr';
 
-// 正确创建 Supabase 客户端的函数
 function createClient() {
   const cookieStore = cookies();
 
@@ -31,20 +30,18 @@ function createClient() {
 
 export async function POST(request: NextRequest) {
   try {
-    // 获取当前用户会话
     const supabase = createClient();
 
-    // 使用 getUser 获取经过身份验证的用户数据
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 检查用户是否为管理员
+    // check if user is admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -52,34 +49,37 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!profile || profile.role !== 'admin') {
-      return NextResponse.json({ error: '禁止访问' }, { status: 403 });
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // 获取请求数据
+    // get request data
     const { apiKey } = await request.json();
 
     if (!apiKey) {
-      return NextResponse.json({ error: '缺少 API 密钥' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing API key' }, { status: 400 });
     }
 
-    // 获取加密密钥
+    // get encryption key
     const masterKey = process.env.API_ENCRYPTION_KEY;
 
     if (!masterKey) {
-      console.error('API_ENCRYPTION_KEY 环境变量未设置');
+      console.error('API_ENCRYPTION_KEY environment variable not set');
       return NextResponse.json(
-        { error: '服务器配置错误：加密密钥未设置' },
+        { error: 'Server configuration error: encryption key not set' },
         { status: 500 }
       );
     }
 
-    // 加密 API 密钥
+    // encrypt API key
     const encryptedKey = encryptApiKey(apiKey, masterKey);
 
-    // 返回加密后的密钥
+    // return encrypted key
     return NextResponse.json({ encryptedKey });
   } catch (error) {
-    console.error('加密 API 密钥时出错:', error);
-    return NextResponse.json({ error: '加密 API 密钥时出错' }, { status: 500 });
+    console.error('Error encrypting API key:', error);
+    return NextResponse.json(
+      { error: 'Error encrypting API key' },
+      { status: 500 }
+    );
   }
 }

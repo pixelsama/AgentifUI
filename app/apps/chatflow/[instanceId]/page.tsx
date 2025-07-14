@@ -4,19 +4,12 @@ import {
   ChatInputBackdrop,
   ChatLoader,
   ScrollToBottomButton,
-  WelcomeScreen,
 } from '@components/chat';
 import { ChatInput } from '@components/chat-input';
 import { ChatflowFloatingController } from '@components/chatflow/chatflow-floating-controller';
 import { ChatflowInputArea } from '@components/chatflow/chatflow-input-area';
 import { ChatflowNodeTracker } from '@components/chatflow/chatflow-node-tracker';
-import {
-  useChatInterface,
-  useChatScroll,
-  useChatWidth,
-  useMobile,
-  useWelcomeScreen,
-} from '@lib/hooks';
+import { useChatInterface, useChatScroll, useWelcomeScreen } from '@lib/hooks';
 import { useChatflowInterface } from '@lib/hooks/use-chatflow-interface';
 import { useChatflowState } from '@lib/hooks/use-chatflow-state';
 import { useCurrentApp } from '@lib/hooks/use-current-app';
@@ -38,21 +31,19 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 
 export default function AppDetailPage() {
   const { colors, isDark } = useThemeColors();
-  const isMobile = useMobile();
-  const { widthClass, paddingClass } = useChatWidth();
   const router = useRouter();
   const params = useParams();
   const pathname = usePathname();
   const instanceId = params.instanceId as string;
   const t = useTranslations('pages.apps');
 
-  // Get user profile, used for welcome interface display
+  // get user profile, used for welcome interface display
   const { profile } = useProfile();
 
-  // 🎯 Get chatflow execution state cleanup method
+  // get chatflow execution state cleanup method
   const { resetExecution } = useChatflowExecutionStore();
 
-  // 🎯 Use unified chatflow state management, support intelligent popup control
+  // use unified chatflow state management, support intelligent popup control
   const {
     messages,
     handleSubmit: originalHandleSubmit,
@@ -63,41 +54,41 @@ export default function AppDetailPage() {
     showNodeTracker,
     setShowNodeTracker,
     showFloatingController,
-  } = useChatflowState(true); // Chatflow page is always a chatflow application
+  } = useChatflowState(true); // chatflow page is always a chatflow application
 
-  // Get chatflow-specific submission function
+  // get chatflow-specific submission function
   const { handleChatflowSubmit, isWaitingForResponse } = useChatflowInterface();
 
-  // Use unified welcome interface logic, now support app detail page
+  // use unified welcome interface logic, now support app detail page
   const { isWelcomeScreen, setIsWelcomeScreen } = useWelcomeScreen();
 
-  // Get chat layout state, used for input box height management
+  // get chat layout state, used for input box height management
   const { inputHeight } = useChatLayoutStore();
   const chatInputHeightVar = `${inputHeight || 80}px`;
 
-  // Local state management
+  // local state management
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 🎯 Remove duplicate automatic display logic, now managed by useChatflowState
+  // remove duplicate automatic display logic, now managed by useChatflowState
   // Support intelligent behavior where users can manually close and no longer automatically open
-  // Add scroll management, ensure message list can scroll correctly
+  // add scroll management, ensure message list can scroll correctly
   const scrollRef = useChatScroll(messages);
 
-  // Sidebar selected state management
+  // sidebar selected state management
   const { selectItem } = useSidebarStore();
 
-  // Chat state management
+  // chat state management
   const { clearMessages, setCurrentConversationId } = useChatStore();
 
-  // Application initialization state
+  // app initialization state
   const [isInitializing, setIsInitializing] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
   const [hasFormConfig, setHasFormConfig] = useState(false);
 
-  // 🎯 New: Ensure loader displays for at least 0.7 seconds, allowing layout to stabilize
+  // ensure loader displays for at least 0.7 seconds, allowing layout to stabilize
   const [hasMinimumLoadTime, setHasMinimumLoadTime] = useState(false);
 
-  // 🎯 Minimum loading time control: Ensure loader displays for at least 0.7 seconds
+  // ensure loader displays for at least 0.7 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasMinimumLoadTime(true);
@@ -106,7 +97,7 @@ export default function AppDetailPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Application-related state
+  // app-related state
   const { apps, fetchApps } = useAppListStore();
   const {
     currentAppId,
@@ -116,7 +107,7 @@ export default function AppDetailPage() {
     error: appError,
   } = useCurrentApp();
 
-  // Get current application instance data
+  // get current app instance data
   const currentApp = apps.find(app => app.instance_id === instanceId);
 
   // Theme synchronization: ensure input box style follows theme changes
@@ -125,14 +116,16 @@ export default function AppDetailPage() {
     setDarkMode(isDark);
   }, [isDark, setDarkMode]);
 
-  // 🎯 Critical fix: useLayoutEffect ensures immediate cleanup of state when switching routes
-  // This executes earlier than useEffect, allowing state to be cleared before rendering, avoiding display of incorrect content
+  // useLayoutEffect ensures immediate cleanup of state when switching routes
+  // this executes earlier than useEffect, allowing state to be cleared before rendering, avoiding display of incorrect content
   const { clearConversationState } = useChatInterface();
 
   useLayoutEffect(() => {
-    // 🎯 Fix: correctly determine if the current page is a chatflow page
+    // correctly determine if the current page is a chatflow page
     if (pathname === `/apps/chatflow/${instanceId}`) {
-      console.log('[AppDetail] 路由切换到应用详情页面，立即清理聊天状态');
+      console.log(
+        '[AppDetail] route changed to app detail page, clear chat state immediately'
+      );
 
       // Immediately clear all messages
       useChatStore.getState().clearMessages();
@@ -141,17 +134,17 @@ export default function AppDetailPage() {
       // Set current conversation ID to null
       setCurrentConversationId(null);
 
-      // 🎯 New: clean up conversation state in use-chat-interface
-      // This ensures that difyConversationId, dbConversationUUID, and conversationAppId are correctly cleared
+      // clean up conversation state in use-chat-interface
+      // ensure difyConversationId, dbConversationUUID, conversationAppId are correctly cleared
       clearConversationState();
 
-      // Force welcome screen state to true
+      // force welcome screen state to true
       setIsWelcomeScreen(true);
 
-      // Reset submission state
+      // reset submission state
       setIsSubmitting(false);
 
-      // 🎯 New: clean up chatflow execution state, ensuring previous node data is not displayed
+      // clean up chatflow execution state, ensuring previous node data is not displayed
       resetExecution();
 
       console.log('[AppDetail] Chat state cleanup completed');
@@ -166,8 +159,8 @@ export default function AppDetailPage() {
     clearConversationState,
   ]);
 
-  // Page initialization: switch to target app and synchronize sidebar selected state
-  // 🎯 Optimization: simplify initialization logic, avoid validation bounce, improve user experience
+  // page initialization: switch to target app and synchronize sidebar selected state
+  // simplify initialization logic, avoid validation bounce, improve user experience
   useEffect(() => {
     const initializeApp = async () => {
       if (!instanceId) return;
@@ -180,12 +173,12 @@ export default function AppDetailPage() {
           instanceId
         );
 
-        // 🎯 Optimization: simplify loading state check
-        // Only display loading state when truly needed
+        // simplify loading state check
+        // only display loading state when truly needed
         const needsAppListFetch = apps.length === 0;
         const currentAppMatches = currentAppId === instanceId;
 
-        // If the application list is empty, need to fetch
+        // if app list is empty, need to fetch
         if (needsAppListFetch) {
           setIsInitializing(true);
           console.log(
@@ -194,53 +187,50 @@ export default function AppDetailPage() {
           await fetchApps();
         }
 
-        // Re-fetch the latest application list
+        // get latest app list
         const latestApps = useAppListStore.getState().apps;
         console.log(
           '[AppDetail] Current application list length:',
           latestApps.length
         );
 
-        // Check if the application exists
+        // check if target app exists
         const targetApp = latestApps.find(
           app => app.instance_id === instanceId
         );
         if (!targetApp) {
-          console.error('[AppDetail] Application does not exist:', instanceId);
+          console.error('[AppDetail] app not found:', instanceId);
           setInitError(t('errors.appNotFound'));
           return;
         }
 
-        console.log(
-          '[AppDetail] Found target application:',
-          targetApp.display_name
-        );
+        console.log('[AppDetail] found target app:', targetApp.display_name);
 
-        // Immediately set sidebar selected state
+        // immediately set sidebar selected state
         selectItem('app', instanceId);
 
-        // 🎯 Critical optimization: simplify application switching logic
-        // Only switch when the current application does not match
-        // Avoid unnecessary validation calls
+        // simplify app switch logic
+        // only switch when current app does not match
+        // avoid unnecessary validation calls
         if (!currentAppMatches) {
           console.log(
-            '[AppDetail] Need to switch application, from',
+            '[AppDetail] need to switch app, from',
             currentAppId,
             'to',
             instanceId
           );
 
-          // 🎯 Use simpler switching logic, avoid complex validation
+          // use simpler switching logic, avoid complex validation
           try {
             await switchToSpecificApp(instanceId);
-            console.log('[AppDetail] Application switched successfully');
+            console.log('[AppDetail] app switched successfully');
           } catch (switchError) {
             console.warn(
-              '[AppDetail] Application switching failed, but continue to load page:',
+              '[AppDetail] app switching failed, but continue loading page:',
               switchError
             );
-            // 🎯 Even if switching fails, do not block page loading
-            // The page can still be displayed normally, and the user can still use it
+            // even if switching fails, do not block page loading
+            // the page can still be displayed normally, and the user can still use it
           }
         } else {
           console.log(
@@ -257,7 +247,7 @@ export default function AppDetailPage() {
             : t('errors.initializationFailed')
         );
       } finally {
-        // 🎯 Ensure that the initialization state is cleared in all cases
+        // ensure initialization state is cleared in all cases
         setIsInitializing(false);
       }
     };
@@ -274,10 +264,10 @@ export default function AppDetailPage() {
     selectItem,
   ]);
 
-  // When the page is unloaded, clear the selected state (when leaving the application detail page)
+  // when page is unloaded, clear the selected state (when leaving the app detail page)
   useEffect(() => {
     return () => {
-      // Check if the application detail page has been left
+      // check if app detail page has been left
       const currentPath = window.location.pathname;
       if (!currentPath.startsWith('/apps/')) {
         selectItem(null, null);
@@ -285,20 +275,19 @@ export default function AppDetailPage() {
     };
   }, [selectItem]);
 
-  // Wrap handleSubmit, implement UI switching logic
+  // wrap handleSubmit, implement UI switching logic
   const handleSubmit = useCallback(
     async (message: string, files?: any[]) => {
       try {
-        // 🎯 Simplify UI switching logic: immediately respond to user operations
-        // Immediately set the submission state to true
+        // immediately set the submission state to true
         setIsSubmitting(true);
 
-        // Immediately close the welcome interface
+        // immediately close the welcome interface
         setIsWelcomeScreen(false);
 
-        console.log('[AppDetail] UI state updated, starting to send message');
+        console.log('[AppDetail] UI state updated, start sending message');
 
-        // Call the original handleSubmit, it will create a conversation and send a message
+        // call the original handleSubmit, it will create a conversation and send a message
         await originalHandleSubmit(message, files);
 
         console.log(
@@ -307,7 +296,7 @@ export default function AppDetailPage() {
       } catch (error) {
         console.error('[AppDetail] Message sending failed:', error);
 
-        // When sending fails, restore the UI state
+        // restore UI state when send message failed
         setIsSubmitting(false);
         setIsWelcomeScreen(true);
       }
@@ -315,7 +304,7 @@ export default function AppDetailPage() {
     [originalHandleSubmit, setIsWelcomeScreen]
   );
 
-  // Error state
+  // error state
   if (initError) {
     return (
       <div
@@ -364,7 +353,7 @@ export default function AppDetailPage() {
     );
   }
 
-  // Loading state - 🎯 Ensure at least 0.7 seconds are displayed
+  // loading state - ensure at least 0.7 seconds are displayed
   if (
     !hasMinimumLoadTime ||
     isInitializing ||
@@ -467,7 +456,7 @@ export default function AppDetailPage() {
           isTrackerVisible={showNodeTracker}
           onToggleTracker={() => setShowNodeTracker(!showNodeTracker)}
           onClose={() => {
-            // The floating ball of the chatflow application cannot be closed, only the tracker can be closed
+            // the floating ball of the chatflow application cannot be closed, only the tracker can be closed
             setShowNodeTracker(false);
           }}
         />

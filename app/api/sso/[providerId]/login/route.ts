@@ -1,6 +1,6 @@
 /**
- * 通用SSO登录入口
- * 处理任何CAS提供商的SSO登录请求，重定向到相应的CAS服务器
+ * generic SSO login entry
+ * handle any CAS provider SSO login request, redirect to corresponding CAS server
  */
 import { CASConfigService } from '@lib/services/sso/generic-cas-service';
 
@@ -13,7 +13,7 @@ export async function GET(
   const { providerId } = await params;
 
   try {
-    // 获取查询参数
+    // get query params
     const searchParams = request.nextUrl.searchParams;
     const returnUrl = searchParams.get('returnUrl') || '/chat';
 
@@ -21,16 +21,16 @@ export async function GET(
       `SSO login initiated for provider: ${providerId}, return URL: ${returnUrl}`
     );
 
-    // 验证returnUrl的安全性，防止开放重定向攻击
+    // validate returnUrl security, prevent open redirect attacks
     const allowedReturnUrls = [
       '/chat',
       '/dashboard',
       '/settings',
       '/apps',
-      '/', // 首页
+      '/', // home page
     ];
 
-    // 检查returnUrl是否为相对路径且在允许列表中
+    // check returnUrl is relative path and in allowed list
     const isValidReturnUrl =
       returnUrl.startsWith('/') &&
       (allowedReturnUrls.includes(returnUrl) || returnUrl.startsWith('/chat/'));
@@ -43,17 +43,17 @@ export async function GET(
       );
     }
 
-    // 创建通用CAS服务实例
+    // create generic CAS service instance
     const casService = await CASConfigService.createCASService(providerId);
 
-    // 生成登录URL并重定向
+    // generate login URL and redirect
     const loginUrl = casService.generateLoginURL(safeReturnUrl);
 
     console.log(
       `Redirecting to CAS login: ${loginUrl.replace(/service=[^&]+/, 'service=***')}`
     );
 
-    // 添加详细调试信息
+    // add detailed debug info
     console.log(`Full login URL (for debugging): ${loginUrl}`);
     console.log(`User Agent: ${request.headers.get('user-agent')}`);
     console.log(`Referer: ${request.headers.get('referer')}`);

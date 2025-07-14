@@ -21,12 +21,12 @@ export default function LoginPage() {
   const t = useTranslations('pages.auth.login');
   const [mounted, setMounted] = useState(false);
 
-  // 确保客户端渲染一致性
+  // ensure client-side rendering consistency
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // 根据主题获取颜色
+  // get colors based on theme
   const getColors = () => {
     if (isDark) {
       return {
@@ -69,7 +69,7 @@ export default function LoginPage() {
         errorIconColor: '',
       };
 
-  // 获取错误消息
+  // get error message
   const getErrorMessage = (error: string) => {
     switch (error) {
       case 'oauth_failed':

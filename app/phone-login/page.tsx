@@ -21,7 +21,7 @@ export default function PhoneLoginPage() {
       )}
     >
       <div className="w-full max-w-md space-y-6">
-        {/* --- 头部标题 --- */}
+        {/* --- header title --- */}
         <div className="space-y-2 text-center">
           <h1
             className={cn(
@@ -41,10 +41,10 @@ export default function PhoneLoginPage() {
           </p>
         </div>
 
-        {/* --- 手机号认证组件 --- */}
+        {/* --- phone number authentication component --- */}
         <PhoneAuth />
 
-        {/* --- 其他登录方式 --- */}
+        {/* --- other login methods --- */}
         <div
           className={cn(
             'rounded-xl border p-6 font-serif shadow-lg transition-all',
@@ -104,7 +104,7 @@ export default function PhoneLoginPage() {
           </div>
         </div>
 
-        {/* --- 底部说明 --- */}
+        {/* --- bottom description --- */}
         <p
           className={cn(
             'text-center font-serif text-xs',

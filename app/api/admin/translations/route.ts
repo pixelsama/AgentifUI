@@ -7,41 +7,41 @@ import path from 'path';
 
 import { NextRequest, NextResponse } from 'next/server';
 
-// 翻译文件路径配置
+// translation file path configuration
 const MESSAGES_DIR = path.join(process.cwd(), 'messages');
-const LOCK_TIMEOUT = 5000; // 5秒锁超时
+const LOCK_TIMEOUT = 5000; // 5 seconds lock timeout
 
-// 文件锁管理
+// file lock management
 const fileLocks = new Map<string, { timestamp: number; processId: string }>();
 
-// 获取文件锁
+// get file lock
 async function acquireLock(filePath: string): Promise<void> {
   const lockKey = path.basename(filePath);
   const now = Date.now();
   const processId = `${process.pid}-${now}`;
 
-  // 检查现有锁
+  // check existing lock
   const existingLock = fileLocks.get(lockKey);
   if (existingLock) {
-    // 检查锁是否过期
+    // check if lock is expired
     if (now - existingLock.timestamp < LOCK_TIMEOUT) {
       throw new Error(`File ${lockKey} is locked by another process`);
     }
-    // 清除过期锁
+    // clear expired lock
     fileLocks.delete(lockKey);
   }
 
-  // 获取新锁
+  // get new lock
   fileLocks.set(lockKey, { timestamp: now, processId });
 }
 
-// 释放文件锁
+// release file lock
 function releaseLock(filePath: string): void {
   const lockKey = path.basename(filePath);
   fileLocks.delete(lockKey);
 }
 
-// 读取翻译文件
+// read translation file
 async function readTranslationFile(locale: string): Promise<any> {
   const filePath = path.join(MESSAGES_DIR, `${locale}.json`);
 
@@ -55,23 +55,23 @@ async function readTranslationFile(locale: string): Promise<any> {
   }
 }
 
-// 写入翻译文件 (带原子性保证)
+// write translation file (with atomicity guarantee)
 async function writeTranslationFile(locale: string, data: any): Promise<void> {
   const filePath = path.join(MESSAGES_DIR, `${locale}.json`);
   const tempPath = `${filePath}.tmp`;
 
   try {
-    // 获取文件锁
+    // get file lock
     await acquireLock(filePath);
 
     // Write to temporary file without adding newline - let prettier handle formatting
     const fileContent = JSON.stringify(data, null, 2);
     await fs.writeFile(tempPath, fileContent, 'utf-8');
 
-    // 原子性重命名
+    // atomic rename
     await fs.rename(tempPath, filePath);
   } catch (error) {
-    // 清理临时文件
+    // clean up temporary file
     try {
       await fs.unlink(tempPath);
     } catch {}
@@ -80,12 +80,12 @@ async function writeTranslationFile(locale: string, data: any): Promise<void> {
       `Failed to write translation file for locale ${locale}: ${error}`
     );
   } finally {
-    // 释放文件锁
+    // release file lock
     releaseLock(filePath);
   }
 }
 
-// 深度合并对象
+// deep merge objects
 function deepMerge(target: any, source: any): any {
   const result = { ...target };
 
@@ -104,12 +104,12 @@ function deepMerge(target: any, source: any): any {
   return result;
 }
 
-// 根据路径获取嵌套对象值
+// get nested object value by path
 function getNestedValue(obj: any, path: string): any {
   return path.split('.').reduce((current, key) => current?.[key], obj);
 }
 
-// 根据路径设置嵌套对象值
+// set nested object value by path
 function setNestedValue(obj: any, path: string, value: any): void {
   const keys = path.split('.');
   const lastKey = keys.pop()!;
@@ -120,14 +120,14 @@ function setNestedValue(obj: any, path: string, value: any): void {
   target[lastKey] = value;
 }
 
-// GET: 读取翻译内容
+// GET: read translation content
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const locale = searchParams.get('locale');
     const section = searchParams.get('section');
 
-    // 验证语言代码
+    // validate language code
     if (locale && !isValidLocale(locale)) {
       return NextResponse.json(
         { error: `Unsupported locale: ${locale}` },
@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 如果指定语言，返回该语言的翻译
+    // if specified language, return the translation
     if (locale) {
       const translations = await readTranslationFile(locale);
 
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ locale, data: translations });
     }
 
-    // 否则返回所有支持的语言列表和元信息
+    // otherwise return all supported languages and metadata
     const supportedLocales = getSupportedLocales();
     const result = {
       supportedLocales,
@@ -171,13 +171,13 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PUT: 更新翻译内容
+// PUT: update translation content
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const { locale, section, updates, mode = 'merge' } = body;
 
-    // 验证必要参数
+    // validate required parameters
     if (!locale || !updates) {
       return NextResponse.json(
         { error: 'Missing required parameters: locale, updates' },
@@ -185,7 +185,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // 验证语言代码
+    // validate language code
     if (!isValidLocale(locale)) {
       return NextResponse.json(
         { error: `Unsupported locale: ${locale}` },
@@ -193,26 +193,26 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // 读取现有翻译文件
+    // read existing translation file
     const currentTranslations = await readTranslationFile(locale);
 
     let updatedTranslations;
 
     if (section) {
-      // 更新特定部分
+      // update specific section
       updatedTranslations = { ...currentTranslations };
 
       if (mode === 'replace') {
         setNestedValue(updatedTranslations, section, updates);
       } else {
-        // 默认合并模式
+        // default merge mode
         const currentSection =
           getNestedValue(currentTranslations, section) || {};
         const mergedSection = deepMerge(currentSection, updates);
         setNestedValue(updatedTranslations, section, mergedSection);
       }
     } else {
-      // 更新整个文件
+      // update entire file
       if (mode === 'replace') {
         updatedTranslations = updates;
       } else {
@@ -220,7 +220,7 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // 写入更新的翻译文件
+    // write updated translation file
     await writeTranslationFile(locale, updatedTranslations);
 
     const result = {
@@ -246,13 +246,13 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// POST: 批量更新多语言翻译
+// POST: batch update multiple language translations
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { section, updates, mode = 'merge' } = body;
 
-    // 验证必要参数
+    // validate required parameters
     if (!section || !updates || typeof updates !== 'object') {
       return NextResponse.json(
         {
@@ -267,11 +267,11 @@ export async function POST(request: NextRequest) {
     const results: any[] = [];
     const errors: any[] = [];
 
-    // 批量更新所有语言
+    // batch update all languages
     for (const locale of supportedLocales) {
       try {
         if (updates[locale]) {
-          // 读取现有翻译
+          // read existing translation
           const currentTranslations = await readTranslationFile(locale);
           const updatedTranslations = { ...currentTranslations };
 
@@ -284,7 +284,7 @@ export async function POST(request: NextRequest) {
             setNestedValue(updatedTranslations, section, mergedSection);
           }
 
-          // 写入更新
+          // write updated translation
           await writeTranslationFile(locale, updatedTranslations);
 
           results.push({
@@ -312,7 +312,7 @@ export async function POST(request: NextRequest) {
     };
 
     return NextResponse.json(response, {
-      status: errors.length > 0 ? 207 : 200, // 207 Multi-Status for partial success
+      status: errors.length > 0 ? 207 : 200, // 207 Multi-Status for partial success (partial success)
     });
   } catch (error) {
     console.error('Failed to batch update translations:', error);

@@ -32,20 +32,20 @@ export function ForgotPasswordForm() {
     try {
       const supabase = createClient();
 
-      // --- 发送重置密码邮件 ---
-      // 使用Supabase Auth内置的resetPasswordForEmail方法
-      // 邮件中的链接将包含重置token并重定向到reset-password页面
+      // send reset password email
+      // use Supabase Auth's resetPasswordForEmail method
+      // the link in the email will contain the reset token and redirect to reset-password page
       const redirectUrl = `${window.location.origin}/reset-password`;
-      console.log('发送重置密码邮件，重定向URL:', redirectUrl);
+      console.log('send reset password email, redirect URL:', redirectUrl);
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
       });
 
-      console.log('重置邮件发送结果:', error ? '失败' : '成功');
+      console.log('reset email send result:', error ? 'failed' : 'success');
 
       if (error) {
-        // --- 处理常见错误情况 ---
+        // handle common error cases
         if (error.message.includes('Invalid email')) {
           throw new Error(t('errors.emailRequired'));
         } else if (error.message.includes('rate limit')) {
@@ -55,7 +55,7 @@ export function ForgotPasswordForm() {
         }
       }
 
-      // --- 发送成功 ---
+      // send success
       setIsEmailSent(true);
     } catch (err: any) {
       setError(err.message || t('errors.sendFailed'));
@@ -66,11 +66,11 @@ export function ForgotPasswordForm() {
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
-    // --- 清除之前的错误信息 ---
+    // clear previous error message
     if (error) setError('');
   };
 
-  // --- 邮件发送成功状态的UI ---
+  // email send success UI
   if (isEmailSent) {
     return (
       <div
@@ -152,7 +152,7 @@ export function ForgotPasswordForm() {
     );
   }
 
-  // --- 主要的忘记密码表单UI ---
+  // main forgot password form UI
   return (
     <div
       className={cn(

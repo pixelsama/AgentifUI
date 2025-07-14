@@ -11,8 +11,8 @@ import { useEffect, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// SSO登录按钮组件
-// 提供统一的SSO登录入口界面
+// SSO login button component
+// provide unified SSO login entry interface
 interface SSOButtonProps {
   returnUrl?: string;
   className?: string;
@@ -20,7 +20,7 @@ interface SSOButtonProps {
   size?: 'default' | 'sm' | 'lg';
   disabled?: boolean;
   children?: React.ReactNode;
-  providerId?: string; // 特定提供商ID
+  providerId?: string; // specific provider ID
 }
 
 export function SSOButton({
@@ -39,27 +39,27 @@ export function SSOButton({
     try {
       setIsLoading(true);
 
-      // SSO登录前先清理前一个用户的缓存，防止数据污染
+      // clear cache of previous user before SSO login to prevent data pollution
       clearCacheOnLogin();
 
-      // 构建SSO登录URL
+      // build SSO login URL
       const params = new URLSearchParams();
       if (returnUrl) {
         params.set('returnUrl', returnUrl);
       }
 
-      // 动态构建SSO登录URL
+      // dynamically build SSO login URL
       const ssoLoginUrl = providerId
         ? `/api/sso/${providerId}/login${params.toString() ? '?' + params.toString() : ''}`
         : `/api/sso/cas/login${params.toString() ? '?' + params.toString() : ''}`;
 
-      // 重定向到SSO登录接口
+      // redirect to SSO login interface
       window.location.href = ssoLoginUrl;
     } catch (error) {
-      console.error('[SSO登录] 启动SSO登录失败:', error);
+      console.error('[SSO login] failed to start SSO login:', error);
       setIsLoading(false);
 
-      // 显示错误提示
+      // show error message
       alert(t('startError'));
     }
   };
@@ -100,7 +100,7 @@ export function SSOButton({
   );
 }
 
-// 带有详细说明的SSO登录卡片 - 动态获取所有启用的SSO提供商
+// SSO login card with detailed description - dynamically fetch all enabled SSO providers
 export function SSOCard({
   returnUrl,
   className,
@@ -122,23 +122,23 @@ export function SSOCard({
 
         const supabase = createClient();
 
-        // 使用安全的公开视图获取所有启用的SSO提供商
-        // 按display_order排序，支持多个提供商
+        // use safe public view to get all enabled SSO providers
+        // sort by display_order, support multiple providers
         const { data: providers, error } = await supabase
           .from('public_sso_providers')
           .select('*');
 
-        console.log('=== SSO安全查询 ===');
-        console.log('启用的SSO提供商:', providers);
-        console.log('查询错误:', error);
+        console.log('=== SSO safe query ===');
+        console.log('Enabled SSO providers:', providers);
+        console.log('Query error:', error);
 
         if (error) {
           throw new Error(error.message);
         }
 
-        // 确保数据按display_order排序（数据库已排序，但防止意外）
+        // ensure data is sorted by display_order (database is sorted, but prevent unexpected)
         const sortedProviders = (providers || []).sort((a, b) => {
-          // display_order为null的排在最后
+          // display_order is null at the end
           if (a.display_order === null && b.display_order === null)
             return a.name.localeCompare(b.name);
           if (a.display_order === null) return 1;
@@ -272,10 +272,10 @@ export function SSOCard({
           </p>
         </div>
 
-        {/* SSO登录按钮列表 - 按display_order排序显示 */}
+        {/* SSO login button list - sorted by display_order */}
         <div className="space-y-3">
           {providers.map(provider => {
-            // 使用新的settings字段，包含过滤后的完整配置
+            // use new settings field, include filtered full config
             const settings = provider.settings as any;
             const uiSettings = settings?.ui || {};
             const displayName =

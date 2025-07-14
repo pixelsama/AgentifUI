@@ -43,7 +43,7 @@ export function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // 表单验证
+    // form validation
     if (!formData.name.trim()) {
       setError(t('errors.nameRequired'));
       return;
@@ -64,7 +64,7 @@ export function RegisterForm() {
       return;
     }
 
-    // 验证用户名格式（如果提供）
+    // validate username format (if provided)
     if (
       formData.username.trim() &&
       !/^[a-zA-Z0-9_-]{2,20}$/.test(formData.username.trim())
@@ -77,20 +77,20 @@ export function RegisterForm() {
     setError('');
 
     try {
-      // 使用 Supabase Auth 进行注册
+      // use Supabase Auth to register
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
-            full_name: formData.name.trim(), // 去除首尾空格
-            username: formData.username.trim() || undefined, // 去除空格，如果为空则不传递
+            full_name: formData.name.trim(), // remove leading and trailing spaces
+            username: formData.username.trim() || undefined, // remove spaces, if empty, do not pass
           },
         },
       });
 
       if (signUpError) {
-        // 处理常见的注册错误
+        // handle common registration errors
         if (signUpError.message.includes('already registered')) {
           throw new Error(t('errors.emailExists'));
         } else if (signUpError.message.includes('Password should be')) {
@@ -102,12 +102,12 @@ export function RegisterForm() {
         }
       }
 
-      // 检查是否需要邮箱验证
+      // check if email verification is required
       if (data.user && !data.user.email_confirmed_at) {
-        // 需要邮箱验证
+        // email verification is required
         router.push('/login?registered=true&verify=true');
       } else {
-        // 直接注册成功（如果禁用了邮箱验证）
+        // direct registration success (if email verification is disabled)
         router.push('/login?registered=true');
       }
     } catch (err: any) {

@@ -5,23 +5,26 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Admin Users API Route
  *
- * 处理管理员用户管理相关的API请求
- * 获取用户列表（简化版，用于群组管理中的用户选择）
+ * Handle admin user management related API requests
+ * Get user list (simplified version, for user selection in group management)
  */
 export async function GET() {
   try {
     const supabase = await createClient();
 
-    // --- 检查用户权限 ---
+    // get current user
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: '未授权访问' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized access' },
+        { status: 401 }
+      );
     }
 
-    // --- 检查是否为管理员 ---
+    // check if user is admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -29,25 +32,31 @@ export async function GET() {
       .single();
 
     if (profile?.role !== 'admin') {
-      return NextResponse.json({ error: '权限不足' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Insufficient permissions' },
+        { status: 403 }
+      );
     }
 
-    // --- 获取用户基本信息（只查询profiles表存在的字段） ---
+    // get user basic information (only query profiles table existing fields)
     const { data: users, error } = await supabase
       .from('profiles')
       .select('id, full_name, username, avatar_url, role, status')
-      .eq('status', 'active') // 只获取活跃用户
+      .eq('status', 'active') // only get active users
       .order('full_name', { ascending: true });
 
     if (error) {
-      console.error('获取用户列表失败:', error);
-      return NextResponse.json({ error: '获取用户列表失败' }, { status: 500 });
+      console.error('Failed to get user list:', error);
+      return NextResponse.json(
+        { error: 'Failed to get user list' },
+        { status: 500 }
+      );
     }
 
-    // --- 格式化用户数据，优先显示真实姓名 ---
+    // format user data, prioritize showing real name
     const formattedUsers = (users || []).map(user => ({
       id: user.id,
-      full_name: user.full_name || user.username || '未知用户',
+      full_name: user.full_name || user.username || 'Unknown user',
       username: user.username,
       avatar_url: user.avatar_url,
       role: user.role,
@@ -59,7 +68,10 @@ export async function GET() {
       success: true,
     });
   } catch (error) {
-    console.error('用户列表API错误:', error);
-    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
+    console.error('User list API error:', error);
+    return NextResponse.json(
+      { error: 'Server internal error' },
+      { status: 500 }
+    );
   }
 }
