@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     let sensitiveData;
     try {
       sensitiveData = JSON.parse(secureCookie.value);
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { message: 'SSO secure data format error' },
         { status: 401 }
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
           `Returning result from existing request for user: ${userId}`
         );
         return existingResponse;
-      } catch (error) {
+      } catch {
         console.log(
           `Existing request failed for user: ${userId}, proceeding with new request`
         );

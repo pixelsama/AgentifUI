@@ -7,6 +7,11 @@ import path from 'path';
 
 import { NextRequest, NextResponse } from 'next/server';
 
+// Define a recursive type for translation data
+type TranslationData = {
+  [key: string]: string | TranslationData;
+};
+
 // translation file path configuration
 const MESSAGES_DIR = path.join(process.cwd(), 'messages');
 const LOCK_TIMEOUT = 5000; // 5 seconds lock timeout
@@ -42,7 +47,7 @@ function releaseLock(filePath: string): void {
 }
 
 // read translation file
-async function readTranslationFile(locale: string): Promise<any> {
+async function readTranslationFile(locale: string): Promise<TranslationData> {
   const filePath = path.join(MESSAGES_DIR, `${locale}.json`);
 
   try {
@@ -56,7 +61,10 @@ async function readTranslationFile(locale: string): Promise<any> {
 }
 
 // write translation file (with atomicity guarantee)
-async function writeTranslationFile(locale: string, data: any): Promise<void> {
+async function writeTranslationFile(
+  locale: string,
+  data: TranslationData
+): Promise<void> {
   const filePath = path.join(MESSAGES_DIR, `${locale}.json`);
   const tempPath = `${filePath}.tmp`;
 
@@ -86,18 +94,30 @@ async function writeTranslationFile(locale: string, data: any): Promise<void> {
 }
 
 // deep merge objects
-function deepMerge(target: any, source: any): any {
-  const result = { ...target };
+function deepMerge(
+  target: TranslationData,
+  source: TranslationData
+): TranslationData {
+  const result: TranslationData = { ...target };
 
   for (const key in source) {
+    const sourceValue = source[key];
+    const targetValue = result[key];
+
     if (
-      source[key] &&
-      typeof source[key] === 'object' &&
-      !Array.isArray(source[key])
+      sourceValue &&
+      typeof sourceValue === 'object' &&
+      !Array.isArray(sourceValue) &&
+      targetValue &&
+      typeof targetValue === 'object' &&
+      !Array.isArray(targetValue)
     ) {
-      result[key] = deepMerge(target[key] || {}, source[key]);
+      result[key] = deepMerge(
+        targetValue as TranslationData,
+        sourceValue as TranslationData
+      );
     } else {
-      result[key] = source[key];
+      result[key] = sourceValue;
     }
   }
 
@@ -105,19 +125,39 @@ function deepMerge(target: any, source: any): any {
 }
 
 // get nested object value by path
-function getNestedValue(obj: any, path: string): any {
-  return path.split('.').reduce((current, key) => current?.[key], obj);
+function getNestedValue(
+  obj: TranslationData,
+  path: string
+): TranslationData | string | undefined {
+  return path.split('.').reduce(
+    (current, key) => {
+      if (current && typeof current === 'object') {
+        return (current as TranslationData)[key];
+      }
+      return undefined;
+    },
+    obj as TranslationData | string | undefined
+  );
 }
 
 // set nested object value by path
-function setNestedValue(obj: any, path: string, value: any): void {
+function setNestedValue(
+  obj: TranslationData,
+  path: string,
+  value: TranslationData | string
+): void {
   const keys = path.split('.');
   const lastKey = keys.pop()!;
-  const target = keys.reduce((current, key) => {
-    if (!current[key]) current[key] = {};
-    return current[key];
-  }, obj);
-  target[lastKey] = value;
+  let current: TranslationData = obj;
+
+  for (const key of keys) {
+    if (!current[key] || typeof current[key] !== 'object') {
+      current[key] = {};
+    }
+    current = current[key] as TranslationData;
+  }
+
+  current[lastKey] = value;
 }
 
 // GET: read translation content
@@ -208,7 +248,10 @@ export async function PUT(request: NextRequest) {
         // default merge mode
         const currentSection =
           getNestedValue(currentTranslations, section) || {};
-        const mergedSection = deepMerge(currentSection, updates);
+        const mergedSection = deepMerge(
+          currentSection as TranslationData,
+          updates as TranslationData
+        );
         setNestedValue(updatedTranslations, section, mergedSection);
       }
     } else {
@@ -216,7 +259,10 @@ export async function PUT(request: NextRequest) {
       if (mode === 'replace') {
         updatedTranslations = updates;
       } else {
-        updatedTranslations = deepMerge(currentTranslations, updates);
+        updatedTranslations = deepMerge(
+          currentTranslations,
+          updates as TranslationData
+        );
       }
     }
 
@@ -264,8 +310,9 @@ export async function POST(request: NextRequest) {
     }
 
     const supportedLocales = getSupportedLocales();
-    const results: any[] = [];
-    const errors: any[] = [];
+    const results: { locale: string; success: boolean; updatedAt: string }[] =
+      [];
+    const errors: { locale: string; error: string }[] = [];
 
     // batch update all languages
     for (const locale of supportedLocales) {
@@ -280,7 +327,10 @@ export async function POST(request: NextRequest) {
           } else {
             const currentSection =
               getNestedValue(currentTranslations, section) || {};
-            const mergedSection = deepMerge(currentSection, updates[locale]);
+            const mergedSection = deepMerge(
+              currentSection as TranslationData,
+              updates[locale] as TranslationData
+            );
             setNestedValue(updatedTranslations, section, mergedSection);
           }
 

@@ -4,15 +4,20 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-import { createServerClient } from '@supabase/ssr';
+import { CookieOptions, createServerClient } from '@supabase/ssr';
 
+/**
+ * GET handler for the OAuth callback.
+ * This endpoint is responsible for exchanging the authorization code for a session.
+ * @param request - The NextRequest object.
+ * @returns A NextResponse object that redirects the user to a secure page.
+ */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
 
   if (code) {
-    // use type assertion to solve cookies() type problem
-    const cookieStore = cookies() as any;
+    const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -21,10 +26,10 @@ export async function GET(request: NextRequest) {
           get(name: string) {
             return cookieStore.get(name)?.value;
           },
-          set(name: string, value: string, options: any) {
+          set(name: string, value: string, options: CookieOptions) {
             cookieStore.set({ name, value, ...options });
           },
-          remove(name: string, options: any) {
+          remove(name: string, options: CookieOptions) {
             cookieStore.set({ name, value: '', ...options });
           },
         },
@@ -46,7 +51,7 @@ export async function GET(request: NextRequest) {
       // check if user has profile, if not, create it
       // OAuth user's profile will be automatically created by database trigger, but we need to update the authentication source
       if (data.user) {
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile } = await supabase
           .from('profiles')
           .select('id, auth_source')
           .eq('id', data.user.id)

@@ -15,7 +15,7 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 interface FileCacheEntry {
   /** Parsed JSON translation data */
-  data: any;
+  data: Record<string, unknown>;
   /** File modification time in milliseconds */
   mtime: number;
 }
@@ -68,7 +68,7 @@ export async function GET(
     }
 
     // Extract only requested sections to minimize payload size
-    const result: any = {};
+    const result: Record<string, unknown> = {};
     sections.forEach(section => {
       const sectionData = getSectionData(fileContent.data, section);
       if (sectionData) {
@@ -96,8 +96,16 @@ export async function GET(
  * @param section - Dot-separated path (e.g., 'pages.about')
  * @returns Extracted data or undefined if path doesn't exist
  */
-function getSectionData(data: any, section: string): any {
-  return section.split('.').reduce((current, key) => current?.[key], data);
+function getSectionData(
+  data: Record<string, unknown>,
+  section: string
+): unknown {
+  return section.split('.').reduce((current, key) => {
+    if (current && typeof current === 'object' && key in current) {
+      return (current as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, data as unknown);
 }
 
 /**
@@ -108,12 +116,18 @@ function getSectionData(data: any, section: string): any {
  * @param path - Dot-separated path where to set the value
  * @param value - Value to set at the specified path
  */
-function setNestedValue(obj: any, path: string, value: any): void {
+function setNestedValue(
+  obj: Record<string, unknown>,
+  path: string,
+  value: unknown
+): void {
   const keys = path.split('.');
   const lastKey = keys.pop()!;
-  const target = keys.reduce((current, key) => {
-    if (!current[key]) current[key] = {};
-    return current[key];
+  const target = keys.reduce((current: Record<string, unknown>, key) => {
+    if (!current[key]) {
+      current[key] = {};
+    }
+    return current[key] as Record<string, unknown>;
   }, obj);
-  target[lastKey] = value;
+  (target as Record<string, unknown>)[lastKey] = value;
 }

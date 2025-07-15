@@ -4,13 +4,9 @@
  */
 import { SSOUserService } from '@lib/services/admin/user/sso-user-service';
 import { CASConfigService } from '@lib/services/sso/generic-cas-service';
-import { createAdminClient } from '@lib/supabase/server';
 import { validateRedirectUrl } from '@lib/utils/redirect-validation';
 
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-
-import { createServerClient } from '@supabase/ssr';
 
 export async function GET(
   request: NextRequest,

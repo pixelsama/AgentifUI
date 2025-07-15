@@ -3,8 +3,13 @@ import { encryptApiKey } from '@lib/utils/encryption';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { createServerClient } from '@supabase/ssr';
+import { CookieOptions, createServerClient } from '@supabase/ssr';
 
+/**
+ * Creates a Supabase client for server-side operations.
+ * This is a helper function to abstract the client creation process.
+ * @returns A Supabase client instance.
+ */
 function createClient() {
   const cookieStore = cookies();
 
@@ -17,10 +22,10 @@ function createClient() {
           const cookie = await (await cookieStore).get(name);
           return cookie?.value;
         },
-        async set(name: string, value: string, options: any) {
+        async set(name: string, value: string, options: CookieOptions) {
           (await cookieStore).set({ name, value, ...options });
         },
-        async remove(name: string, options: any) {
+        async remove(name: string, options: CookieOptions) {
           (await cookieStore).set({ name, value: '', ...options });
         },
       },
@@ -28,10 +33,17 @@ function createClient() {
   );
 }
 
+/**
+ * POST handler for encrypting an API key.
+ * This endpoint is for admin use only.
+ * @param request - The NextRequest object.
+ * @returns A NextResponse object with the encrypted key or an error message.
+ */
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient();
 
+    // authenticate user
     const {
       data: { user },
       error: userError,
@@ -59,7 +71,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing API key' }, { status: 400 });
     }
 
-    // get encryption key
+    // get encryption key from environment variables
     const masterKey = process.env.API_ENCRYPTION_KEY;
 
     if (!masterKey) {
@@ -70,10 +82,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // encrypt API key
+    // encrypt the API key
     const encryptedKey = encryptApiKey(apiKey, masterKey);
 
-    // return encrypted key
+    // return the encrypted key
     return NextResponse.json({ encryptedKey });
   } catch (error) {
     console.error('Error encrypting API key:', error);

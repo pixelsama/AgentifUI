@@ -1,6 +1,11 @@
 import { getDifyAppConfig } from '@lib/config/dify-config';
+import { type DifyAppConfig } from '@lib/config/dify-config';
 import { createClient } from '@lib/supabase/server';
-import { isTextGenerationApp, isWorkflowApp } from '@lib/types/dify-app-types';
+import {
+  type DifyAppType,
+  isTextGenerationApp,
+  isWorkflowApp,
+} from '@lib/types/dify-app-types';
 
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -28,7 +33,7 @@ function adjustApiPathByAppType(
   }
 
   // workflow apps: need workflows prefix, but exclude common APIs
-  if (isWorkflowApp(appType as any)) {
+  if (isWorkflowApp(appType as DifyAppType)) {
     // common APIs like file upload, audio-to-text don't need workflows prefix
     const commonApis = ['files/upload', 'audio-to-text'];
     const isCommonApi = commonApis.some(api => originalPath.startsWith(api));
@@ -39,7 +44,7 @@ function adjustApiPathByAppType(
   }
 
   // text generation apps: use completion-messages endpoint
-  if (isTextGenerationApp(appType as any)) {
+  if (isTextGenerationApp(appType as DifyAppType)) {
     if (originalPath === 'messages' || originalPath === 'chat-messages') {
       return 'completion-messages';
     }
@@ -93,7 +98,7 @@ async function proxyToDify(
   // if the request body contains _temp_config, use temporary configuration instead of database configuration
   // avoid reading the request body repeatedly, clone the request to preserve the original request body
   let tempConfig: { apiUrl: string; apiKey: string } | null = null;
-  let requestBody: any = null;
+  let requestBody: Record<string, unknown> | null = null;
 
   if (req.method === 'POST') {
     try {
@@ -113,10 +118,9 @@ async function proxyToDify(
         );
 
         // Remove temporary configuration fields to avoid passing to Dify API
-        const { _temp_config, ...cleanBody } = body;
-        requestBody = cleanBody;
+        requestBody = body;
       }
-    } catch (error) {
+    } catch {
       // if parsing the request body fails, continue using normal process
       console.log(
         `[App: ${appId}] [${req.method}] Failed to parse request body, using normal configuration process`
@@ -145,7 +149,7 @@ async function proxyToDify(
   // use temporary configuration (form synchronization) first, otherwise get from database
   let difyApiKey: string;
   let difyApiUrl: string;
-  let difyConfig: any = null;
+  let difyConfig: DifyAppConfig | null = null;
 
   if (tempConfig) {
     // use temporary configuration
@@ -279,6 +283,7 @@ async function proxyToDify(
       duplex: 'half',
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await fetch(targetUrl, fetchOptions as any);
     console.log(
       `[App: ${appId}] [${req.method}] Dify response status: ${response.status}`
@@ -465,7 +470,7 @@ async function proxyToDify(
           });
 
           return baseResponse;
-        } catch (parseError) {
+        } catch {
           // not JSON, return text
           console.log(
             `[App: ${appId}] [${req.method}] JSON parse failed, returning plain text with minimal headers.`
@@ -541,7 +546,7 @@ async function proxyToDify(
         return baseResponse;
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     // catch errors in fetch or response processing
     console.error(
       `[App: ${appId}] [${req.method}] Dify proxy fetch/processing error:`,
@@ -550,7 +555,7 @@ async function proxyToDify(
     const baseResponse = NextResponse.json(
       {
         error: `Failed to connect or process response from Dify service for app '${appId}' during ${req.method}.`,
-        details: error.message,
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 502 } // 502 Bad Gateway
     );
@@ -601,7 +606,7 @@ export async function PATCH(
  * Explicit OPTIONS handler
  * @description add explicit OPTIONS request handler to ensure CORS preflight requests respond correctly in various deployment environments
  */
-export async function OPTIONS(req: NextRequest) {
+export async function OPTIONS() {
   console.log('[OPTIONS Request] Responding to preflight request.');
   const baseResponse = new Response(null, {
     status: 204, // no content for preflight

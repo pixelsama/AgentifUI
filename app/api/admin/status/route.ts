@@ -1,11 +1,11 @@
 import { getActiveProviders, getServiceInstancesByProvider } from '@lib/db';
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 /**
  * Get admin backend status information
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // check if there are active service providers
     const providersResult = await getActiveProviders();
