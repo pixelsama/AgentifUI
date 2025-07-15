@@ -10,8 +10,7 @@ import { useEffect } from 'react';
 
 export default function PermissionsPage() {
   const { isDark } = useTheme();
-  const { loadApps, loadGroups, loading, error } =
-    usePermissionManagementStore();
+  const { loadApps, loadGroups, error } = usePermissionManagementStore();
 
   // initialize data
   useEffect(() => {

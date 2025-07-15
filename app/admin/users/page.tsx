@@ -24,6 +24,13 @@ import React, { useEffect } from 'react';
 
 import { useTranslations } from 'next-intl';
 
+interface User {
+  id: string;
+  role: 'admin' | 'manager' | 'user';
+  full_name?: string;
+  email?: string;
+}
+
 export default function UsersManagementPage() {
   const { isDark } = useTheme();
   const { profile: currentUserProfile } = useProfile();
@@ -57,7 +64,7 @@ export default function UsersManagementPage() {
 
   // check if can change user role (prevent admin from downgrading other admins)
   const canChangeUserRole = (
-    targetUser: any,
+    targetUser: User,
     newRole: 'admin' | 'manager' | 'user'
   ) => {
     // if current user is not admin, do not allow any role change
@@ -81,7 +88,7 @@ export default function UsersManagementPage() {
   };
 
   // check if can delete user (prevent deleting admin account)
-  const canDeleteUser = (targetUser: any) => {
+  const canDeleteUser = (targetUser: User) => {
     // if current user is not admin, do not allow delete
     if (currentUserProfile?.role !== 'admin') {
       return false;
@@ -174,7 +181,7 @@ export default function UsersManagementPage() {
 
   // handle user role change (with safety check)
   const handleChangeRole = async (
-    user: any,
+    user: User,
     role: 'admin' | 'manager' | 'user'
   ) => {
     if (!canChangeUserRole(user, role)) {
@@ -186,7 +193,7 @@ export default function UsersManagementPage() {
       const roleText = t(`messages.roles.${role}`);
       toast.success(
         t('messages.roleChangeSuccess', {
-          name: user.full_name || user.email,
+          name: user.full_name || user.email || 'Unknown User',
           role: roleText,
         })
       );
@@ -195,7 +202,7 @@ export default function UsersManagementPage() {
 
   // handle user status change
   const handleChangeStatus = async (
-    user: any,
+    user: User,
     status: 'active' | 'suspended' | 'pending'
   ) => {
     const success = await changeUserStatus(user.id, status);
@@ -203,7 +210,7 @@ export default function UsersManagementPage() {
       const statusText = t(`messages.statuses.${status}`);
       toast.success(
         t('messages.statusChangeSuccess', {
-          name: user.full_name || user.email,
+          name: user.full_name || user.email || 'Unknown User',
           status: statusText,
         })
       );
@@ -211,20 +218,24 @@ export default function UsersManagementPage() {
   };
 
   // handle user delete (with safety check)
-  const handleDeleteUser = async (user: any) => {
+  const handleDeleteUser = async (user: User) => {
     if (!canDeleteUser(user)) {
       return;
     }
 
     if (
       window.confirm(
-        t('messages.deleteConfirm', { name: user.full_name || user.email })
+        t('messages.deleteConfirm', {
+          name: user.full_name || user.email || 'Unknown User',
+        })
       )
     ) {
       const success = await removeUser(user.id);
       if (success) {
         toast.success(
-          t('messages.deleteSuccess', { name: user.full_name || user.email })
+          t('messages.deleteSuccess', {
+            name: user.full_name || user.email || 'Unknown User',
+          })
         );
       }
     }
@@ -259,16 +270,20 @@ export default function UsersManagementPage() {
   };
 
   // handle view user (use toast temporarily)
-  const handleViewUser = (user: any) => {
+  const handleViewUser = (user: User) => {
     toast.success(
-      t('actions.viewUser', { name: user.full_name || user.email })
+      t('actions.viewUser', {
+        name: user.full_name || user.email || 'Unknown User',
+      })
     );
   };
 
   // handle edit user (use toast temporarily)
-  const handleEditUser = (user: any) => {
+  const handleEditUser = (user: User) => {
     toast.success(
-      t('actions.editUser', { name: user.full_name || user.email })
+      t('actions.editUser', {
+        name: user.full_name || user.email || 'Unknown User',
+      })
     );
   };
 

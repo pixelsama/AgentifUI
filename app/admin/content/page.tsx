@@ -72,17 +72,17 @@ export default function ContentManagementPage() {
 
   const [aboutTranslations, setAboutTranslations] = useState<Record<
     SupportedLocale,
-    any
+    AboutPageConfig
   > | null>(null);
   const [originalAboutTranslations, setOriginalAboutTranslations] =
-    useState<Record<SupportedLocale, any> | null>(null);
+    useState<Record<SupportedLocale, AboutPageConfig> | null>(null);
 
   const [homeTranslations, setHomeTranslations] = useState<Record<
     SupportedLocale,
-    any
+    HomePageConfig
   > | null>(null);
   const [originalHomeTranslations, setOriginalHomeTranslations] =
-    useState<Record<SupportedLocale, any> | null>(null);
+    useState<Record<SupportedLocale, HomePageConfig> | null>(null);
 
   const [currentLocale, setCurrentLocale] = useState<SupportedLocale>(
     getCurrentLocaleFromCookie()
@@ -122,7 +122,7 @@ export default function ContentManagementPage() {
     };
 
     loadTranslations();
-  }, [activeTab]);
+  }, [activeTab, supportedLocales.length, t]);
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -185,13 +185,13 @@ export default function ContentManagementPage() {
   };
 
   const handleAboutTranslationsChange = (
-    newTranslations: Record<SupportedLocale, any>
+    newTranslations: Record<SupportedLocale, AboutPageConfig>
   ) => {
     setAboutTranslations(newTranslations);
   };
 
   const handleHomeTranslationsChange = (
-    newTranslations: Record<SupportedLocale, any>
+    newTranslations: Record<SupportedLocale, HomePageConfig>
   ) => {
     setHomeTranslations(newTranslations);
   };
@@ -228,7 +228,7 @@ export default function ContentManagementPage() {
   };
 
   const transformToHomePreviewConfig = (
-    translations: Record<SupportedLocale, any> | null,
+    translations: Record<SupportedLocale, HomePageConfig> | null,
     locale: SupportedLocale
   ): HomePageConfig | null => {
     const t = translations?.[locale];

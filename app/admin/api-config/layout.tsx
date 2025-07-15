@@ -19,7 +19,13 @@ import {
   Workflow,
 } from 'lucide-react';
 
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -46,31 +52,12 @@ const getAppTypeIcon = (difyAppType?: string) => {
   }
 };
 
-// get app type info based on Dify app type
-const getAppTypeInfo = (tDifyTypes: any, difyAppType?: string) => {
-  switch (difyAppType) {
-    case 'chatbot':
-      return { label: tDifyTypes('chatbot.label'), color: 'emerald' };
-    case 'agent':
-      return { label: tDifyTypes('agent.label'), color: 'violet' };
-    case 'chatflow':
-      return { label: tDifyTypes('chatflow.label'), color: 'amber' };
-    case 'workflow':
-      return { label: tDifyTypes('workflow.label'), color: 'rose' };
-    case 'text-generation':
-      return { label: tDifyTypes('text-generation.label'), color: 'cyan' };
-    default:
-      return { label: tDifyTypes('chatbot.label'), color: 'stone' };
-  }
-};
-
 export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
   const { isDark } = useTheme();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations('pages.admin.apiConfig.layout');
-  const tDifyTypes = useTranslations('difyAppTypes');
   const tDebug = useTranslations('debug');
 
   const {
@@ -144,7 +131,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
         })
       );
     }
-  }, [searchParams]); // remove filterProviderId dependency, avoid loop
+  }, [searchParams, filterProviderId]);
 
   // 🎯 filter instances based on filter conditions
   const filteredInstances = useMemo(() => {
@@ -155,6 +142,63 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
       instance => instance.provider_id === filterProviderId
     );
   }, [instances, filterProviderId]);
+
+  const handleSetDefaultInstance = useCallback(
+    async (instanceId: string) => {
+      // add debug info
+      console.log(tDebug('setDefaultApp'), instanceId);
+      console.log(
+        tDebug('currentInstances'),
+        instances.map(inst => ({
+          id: inst.id,
+          instance_id: inst.instance_id,
+          display_name: inst.display_name,
+        }))
+      );
+
+      // fix: use database ID to find instance
+      const instanceToSet = instances.find(inst => inst.id === instanceId);
+      if (!instanceToSet) {
+        console.error(tDebug('instanceNotFound'), instanceId);
+        alert(t('instanceNotFoundForDefault'));
+        return;
+      }
+
+      console.log(tDebug('foundInstance'), instanceToSet);
+
+      if (instanceToSet.is_default) {
+        return; // already a default app, no need to operate
+      }
+
+      if (
+        !confirm(
+          t('setDefaultConfirm', {
+            name: instanceToSet.display_name || 'this app',
+          })
+        )
+      ) {
+        return;
+      }
+
+      setIsProcessing(true);
+      try {
+        await setDefaultInstance(instanceToSet.id);
+
+        // notify page component that default app is changed
+        window.dispatchEvent(
+          new CustomEvent('defaultInstanceChanged', {
+            detail: { instanceId },
+          })
+        );
+      } catch (error) {
+        console.error(tDebug('setDefaultFailed'), error);
+        alert(t('setDefaultFailed'));
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [instances, t, tDebug, setDefaultInstance]
+  );
 
   // listen to page component's state change, fully sync page's form state
   useEffect(() => {
@@ -224,98 +268,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
       window.removeEventListener('reloadInstances', handleReloadInstances);
       window.removeEventListener('reloadProviders', handleReloadProviders);
     };
-  }, []);
-
-  const handleDeleteInstance = async (instanceId: string) => {
-    const instanceToDelete = instances.find(
-      inst => inst.instance_id === instanceId
-    );
-    if (!instanceToDelete) {
-      alert(t('instanceNotFound'));
-      return;
-    }
-
-    // check if it is a default app
-    if (instanceToDelete.is_default) {
-      alert(t('defaultAppCannotDelete'));
-      return;
-    }
-
-    if (!confirm(t('deleteConfirm'))) {
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      await deleteInstance(instanceToDelete.id);
-
-      // notify page component that instance is deleted
-      window.dispatchEvent(
-        new CustomEvent('instanceDeleted', {
-          detail: { instanceId },
-        })
-      );
-    } catch (error) {
-      console.error('delete failed:', error);
-      alert(t('deleteInstanceFailed'));
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleSetDefaultInstance = async (instanceId: string) => {
-    // add debug info
-    console.log(tDebug('setDefaultApp'), instanceId);
-    console.log(
-      tDebug('currentInstances'),
-      instances.map(inst => ({
-        id: inst.id,
-        instance_id: inst.instance_id,
-        display_name: inst.display_name,
-      }))
-    );
-
-    // fix: use database ID to find instance
-    const instanceToSet = instances.find(inst => inst.id === instanceId);
-    if (!instanceToSet) {
-      console.error(tDebug('instanceNotFound'), instanceId);
-      alert(t('instanceNotFoundForDefault'));
-      return;
-    }
-
-    console.log(tDebug('foundInstance'), instanceToSet);
-
-    if (instanceToSet.is_default) {
-      return; // already a default app, no need to operate
-    }
-
-    if (
-      !confirm(
-        t('setDefaultConfirm', {
-          name: instanceToSet.display_name || 'this app',
-        })
-      )
-    ) {
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      await setDefaultInstance(instanceToSet.id);
-
-      // notify page component that default app is changed
-      window.dispatchEvent(
-        new CustomEvent('defaultInstanceChanged', {
-          detail: { instanceId },
-        })
-      );
-    } catch (error) {
-      console.error(tDebug('setDefaultFailed'), error);
-      alert(t('setDefaultFailed'));
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  }, [handleSetDefaultInstance, loadInstances]);
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -550,7 +503,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
                         <button
                           onClick={e => {
                             e.stopPropagation();
-                            handleDeleteInstance(instance.instance_id);
+                            deleteInstance(instance.instance_id);
                           }}
                           disabled={isProcessing || instance.is_default}
                           className={cn(
