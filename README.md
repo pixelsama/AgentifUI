@@ -1,10 +1,10 @@
-<h1 align="center">AgentifUI – Enterprise-Grade Intelligent Chat Platform</h1>
+# <h1 align="center">AgentifUI – Enterprise-Grade Intelligent Chat Platform</h1>
 
 > **Community Edition** – Apache 2.0
-> **Enterprise Edition** – Commercial License (contact license@iflabx.com)  
+> **Enterprise Edition** – Commercial License (contact [license@iflabx.com](mailto:license@iflabx.com))
 > Maintained by the **ifLabX community** and sponsored by **ifLabX Corp**.
 
-AgentifUI is a modern, multi-device intelligent-chat front-end built with the Next .js 15 App Router.  
+AgentifUI is a modern, multi-device intelligent-chat front-end built with the Next.js 15 App Router.
 By combining **Supabase Auth**, **Dify API**, **Zustand** state management and layered data services, it delivers a secure, scalable and easy-to-maintain LLM chat experience—ideal for corporate knowledge bases, AI assistants and other enterprise scenarios.
 
 | Edition        | License     | Scope & Extras                                                     |
@@ -41,20 +41,18 @@ By combining **Supabase Auth**, **Dify API**, **Zustand** state management and l
 
 ---
 
-## 🏗 Architecture Overview
+## 🔗 Architecture Overview
 
 ```
-
 UI Components (React)
 ↓
 Custom Hooks (use-*)
 ↓
 DB Access Layer  (lib/db/*)
 ↓
-Service Layer    (lib/services/\*)
+Service Layer    (lib/services/*)
 ↓
 Supabase Client
-
 ```
 
 ### Core Design Highlights
@@ -134,17 +132,8 @@ docker run -p 8080:8080 ghcr.io/agentifui/community:latest
 
 ## 🤝 Getting Help / Contributing
 
-- **Issues & PRs:** please open them on GitHub; remember to sign the CLA bot check.
-- **Security reports:** email `security@example.com`.
-- **Enterprise/OEM enquiries:** email `sales@example.com`.
+- **Issues & PRs**: Please open them on [GitHub Issues](https://github.com/yourusername/yourrepo/issues). All contributors must pass the CLA bot check.
+- **Security reports**: Please email [bitifirefly@gmail.com](mailto:bitifirefly@gmail.com)
+- **Enterprise/OEM inquiries**: For commercial support or integration, email [license@iflabx.com](mailto:license@iflabx.com)
 
-> AgentifUI is dual-licensed. The Community Edition is true open source under **Apache 2.0**; the Enterprise Edition adds multi-tenant, SAML/LDAP, branding removal and SLA support under a commercial license. See `LICENSE`, `NOTICE` and `TRADEMARK_POLICY.md` for details.
-
-- **Dual-license banner, edition table and quick Docker snippet** were retained from the previous draft.
-- All Chinese sections have been fully translated and slotted into “Key Features,” “Tech Stack,” “Architecture,” etc.
-- File paths, environment steps and doc links mirror the Chinese original.
-- References to **ifLabX community** and **Example Corp** remain for consistency with the legal documents.
-
-```
-
-```
+> AgentifUI is dual-licensed. The Community Edition is open source under **Apache 2.0**; the Enterprise Edition adds multi-tenant, SAML/LDAP, branding removal and SLA support under a commercial license. See `LICENSE`, `NOTICE` and `TRADEMARK_POLICY.md` for details.
