@@ -72,17 +72,17 @@ export default function ContentManagementPage() {
 
   const [aboutTranslations, setAboutTranslations] = useState<Record<
     SupportedLocale,
-    AboutPageConfig
+    AboutTranslationData
   > | null>(null);
   const [originalAboutTranslations, setOriginalAboutTranslations] =
-    useState<Record<SupportedLocale, AboutPageConfig> | null>(null);
+    useState<Record<SupportedLocale, AboutTranslationData> | null>(null);
 
   const [homeTranslations, setHomeTranslations] = useState<Record<
     SupportedLocale,
-    HomePageConfig
+    HomeTranslationData
   > | null>(null);
   const [originalHomeTranslations, setOriginalHomeTranslations] =
-    useState<Record<SupportedLocale, HomePageConfig> | null>(null);
+    useState<Record<SupportedLocale, HomeTranslationData> | null>(null);
 
   const [currentLocale, setCurrentLocale] = useState<SupportedLocale>(
     getCurrentLocaleFromCookie()
@@ -185,13 +185,13 @@ export default function ContentManagementPage() {
   };
 
   const handleAboutTranslationsChange = (
-    newTranslations: Record<SupportedLocale, AboutPageConfig>
+    newTranslations: Record<SupportedLocale, AboutTranslationData>
   ) => {
     setAboutTranslations(newTranslations);
   };
 
   const handleHomeTranslationsChange = (
-    newTranslations: Record<SupportedLocale, HomePageConfig>
+    newTranslations: Record<SupportedLocale, HomeTranslationData>
   ) => {
     setHomeTranslations(newTranslations);
   };
@@ -204,8 +204,21 @@ export default function ContentManagementPage() {
     setShowFullscreenPreview(false);
   };
 
+  interface AboutTranslationData {
+    title?: string;
+    subtitle?: string;
+    mission?: { description?: string };
+    values?: { items?: Array<{ title: string; description: string }> };
+    buttonText?: string;
+    copyright?: {
+      prefix?: string;
+      linkText?: string;
+      suffix?: string;
+    };
+  }
+
   const transformToAboutPreviewConfig = (
-    translations: Record<SupportedLocale, any> | null,
+    translations: Record<SupportedLocale, AboutTranslationData> | null,
     locale: SupportedLocale
   ): AboutPageConfig | null => {
     const t = translations?.[locale];
@@ -215,20 +228,35 @@ export default function ContentManagementPage() {
       title: t.title || '',
       subtitle: t.subtitle || '',
       mission: t.mission?.description || '',
-      valueCards: (t.values?.items || []).map((item: any, index: number) => ({
-        id: `value-${index}`,
-        title: item.title,
-        description: item.description,
-      })),
+      valueCards: (t.values?.items || []).map(
+        (item: { title: string; description: string }, index: number) => ({
+          id: `value-${index}`,
+          title: item.title,
+          description: item.description,
+        })
+      ),
       buttonText: t.buttonText || '',
       copyrightText: t.copyright
-        ? `${t.copyright.prefix?.replace('{year}', new Date().getFullYear()) || ''}${t.copyright.linkText || ''}${t.copyright.suffix || ''}`
+        ? `${(t.copyright.prefix || '').replace('{year}', new Date().getFullYear().toString())}${t.copyright.linkText || ''}${t.copyright.suffix || ''}`
         : '',
     };
   };
 
+  interface HomeTranslationData {
+    title?: string;
+    subtitle?: string;
+    getStarted?: string;
+    learnMore?: string;
+    features?: FeatureCard[];
+    copyright?: {
+      prefix?: string;
+      linkText?: string;
+      suffix?: string;
+    };
+  }
+
   const transformToHomePreviewConfig = (
-    translations: Record<SupportedLocale, HomePageConfig> | null,
+    translations: Record<SupportedLocale, HomeTranslationData> | null,
     locale: SupportedLocale
   ): HomePageConfig | null => {
     const t = translations?.[locale];
@@ -240,7 +268,13 @@ export default function ContentManagementPage() {
       getStarted: t.getStarted || '',
       learnMore: t.learnMore || '',
       features: t.features || [],
-      copyright: t.copyright || { prefix: '', linkText: '', suffix: '' },
+      copyright: t.copyright
+        ? {
+            prefix: t.copyright.prefix || '',
+            linkText: t.copyright.linkText || '',
+            suffix: t.copyright.suffix || '',
+          }
+        : { prefix: '', linkText: '', suffix: '' },
     };
   };
 

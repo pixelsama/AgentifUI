@@ -138,10 +138,18 @@ export default function SSOProcessingPage() {
         } else {
           throw new Error(t('errors.noValidSessionData'));
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('SSO processing failed:', err);
+        let errorMessage = t('errors.processingFailed');
+
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        } else if (typeof err === 'string') {
+          errorMessage = err;
+        }
+
         setStatus('error');
-        setError(err.message || t('errors.processingFailed'));
+        setError(errorMessage);
         setMessage(t('failed'));
 
         // clean up possible session cookie

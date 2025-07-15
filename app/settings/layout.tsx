@@ -7,8 +7,6 @@ import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { cn } from '@lib/utils';
 
-import { useTranslations } from 'next-intl';
-
 interface SettingsLayoutProps {
   children: React.ReactNode;
 }
@@ -16,12 +14,11 @@ interface SettingsLayoutProps {
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
   const { isExpanded, isMounted } = useSidebarStore();
   const isMobile = useMobile();
-  const { colors, isDark } = useSettingsColors();
+  const { colors } = useSettingsColors();
 
-  // 🎯 移除重复的 setMounted 调用，现在由全局 ClientLayout 统一管理
-  // 计算主内容区域的左边距
-  // 仅在桌面端且侧边栏锁定时，根据展开状态设置边距
-  // 悬停展开时不设置边距（覆盖模式）
+  // Remove duplicate setMounted calls, now managed by global ClientLayout
+  // Calculate the left margin of the main content area
+  // Set the margin based on the sidebar expansion state, push the main content
   const getMainMarginLeft = () => {
     if (isMobile) return 'ml-0';
     return isExpanded ? 'ml-64' : 'ml-16';
@@ -35,7 +32,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
         {isMounted && <MobileNavButton />}
       </div>
 
-      {/* 主内容区域 - 分为左侧设置导航和右侧内容 */}
+      {/* Main content area - divided into left settings navigation and right content */}
       <main
         className={cn(
           'h-screen w-full overflow-auto',
@@ -46,7 +43,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
         )}
       >
         <div className="flex h-full flex-col md:flex-row">
-          {/* 设置侧边导航 - 移动端响应式隐藏，移除分割线保持简洁 */}
+          {/* Settings sidebar - mobile responsive hidden, remove divider to keep simple */}
           <div
             className={cn(
               'relative z-40 hidden w-64 shrink-0 md:block',
@@ -56,7 +53,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
             <SettingsSidebar />
           </div>
 
-          {/* 移动端设置导航 - 仅在移动端显示 */}
+          {/* Mobile settings navigation - only show on mobile */}
           <div
             className={cn(
               'block p-4 md:hidden',
@@ -66,9 +63,9 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
             <SettingsMobileNav />
           </div>
 
-          {/* 设置内容区域 */}
+          {/* Settings content area */}
           <div className="flex-1 overflow-auto">
-            {/* 设置页面内容 */}
+            {/* Settings page content */}
             <div className="p-4 md:p-8">{children}</div>
           </div>
         </div>

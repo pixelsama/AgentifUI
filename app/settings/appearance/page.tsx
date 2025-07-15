@@ -5,50 +5,49 @@ import { TimezoneSelector } from '@components/settings/appearance/timezone-selec
 import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { useTheme } from '@lib/hooks/use-theme';
 import { useUserTimezone } from '@lib/hooks/use-user-timezone';
-import { cn } from '@lib/utils';
 import { motion } from 'framer-motion';
 
 import { useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// 外观设置页面
-// 允许用户选择主题（亮色/暗色/系统）
+// Appearance settings page
+// Allow users to select theme (light/dark/system)
 export default function AppearanceSettingsPage() {
   const { theme, setTheme } = useTheme();
   const { timezone, updateTimezone } = useUserTimezone();
   const { colors } = useSettingsColors();
   const t = useTranslations('pages.settings.appearanceSettings');
-  const [isSaving, setIsSaving] = useState(false);
-  const [isTimezoneUpdating, setIsTimezoneUpdating] = useState(false);
+  const [, setIsSaving] = useState(false);
+  const [, setIsTimezoneUpdating] = useState(false);
 
-  // 处理主题变更
-  // 目前只是更新前端状态，未来可以扩展为保存到用户偏好设置
+  // Handle theme change
+  // Currently just updates frontend state, future can be extended to save to user preferences
   const handleThemeChange = (newTheme: string) => {
     setIsSaving(true);
 
-    // 设置主题
+    // Set theme
     setTheme(newTheme);
 
-    // 模拟保存延迟
+    // Simulate save delay
     setTimeout(() => {
       setIsSaving(false);
     }, 300);
   };
 
-  // 处理时区变更
-  // 使用localStorage存储用户时区偏好
+  // Handle timezone change
+  // Use localStorage to store user timezone preference
   const handleTimezoneChange = (newTimezone: string) => {
     setIsTimezoneUpdating(true);
 
-    // 更新时区设置
+    // Update timezone settings
     const success = updateTimezone(newTimezone);
 
     if (success) {
-      console.log(`[AppearanceSettings] 时区已更新为: ${newTimezone}`);
+      console.log(`[AppearanceSettings] Timezone updated to: ${newTimezone}`);
     }
 
-    // 模拟保存延迟
+    // Simulate save delay
     setTimeout(() => {
       setIsTimezoneUpdating(false);
     }, 300);
@@ -65,7 +64,7 @@ export default function AppearanceSettingsPage() {
       <div
         className={`w-full space-y-10 ${colors.cardBackground.tailwind} rounded-lg border ${colors.borderColor.tailwind} p-6`}
       >
-        {/* 主题选择 */}
+        {/* Theme selection */}
         <section>
           <h2 className="mb-4 font-serif text-lg font-medium">{t('theme')}</h2>
           <p
@@ -75,7 +74,7 @@ export default function AppearanceSettingsPage() {
           </p>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {/* 浅色主题 - 放在最前面 */}
+            {/* Light theme - put first */}
             <ThemeCard
               title={t('themes.light')}
               theme="light"
@@ -83,7 +82,7 @@ export default function AppearanceSettingsPage() {
               onClick={() => handleThemeChange('light')}
             />
 
-            {/* 系统主题 */}
+            {/* System theme */}
             <ThemeCard
               title={t('themes.system')}
               theme="system"
@@ -91,7 +90,7 @@ export default function AppearanceSettingsPage() {
               onClick={() => handleThemeChange('system')}
             />
 
-            {/* 深色主题 */}
+            {/* Dark theme */}
             <ThemeCard
               title={t('themes.dark')}
               theme="dark"
@@ -101,7 +100,7 @@ export default function AppearanceSettingsPage() {
           </div>
         </section>
 
-        {/* 时区设置 */}
+        {/* Timezone settings */}
         <section>
           <h2 className="mb-4 font-serif text-lg font-medium">
             {t('timezone')}

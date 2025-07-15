@@ -13,8 +13,6 @@ import { DynamicSuggestedQuestions } from '@components/chat/dynamic-suggested-qu
 import { ChatflowFloatingController } from '@components/chatflow/chatflow-floating-controller';
 import { ChatflowNodeTracker } from '@components/chatflow/chatflow-node-tracker';
 import { FilePreviewCanvas } from '@components/file-preview/file-preview-canvas';
-import { useChatInterface, useChatStateSync } from '@lib/hooks';
-import { useMobile } from '@lib/hooks';
 import { useChatPageState } from '@lib/hooks/use-chat-page-state';
 import { useChatScroll } from '@lib/hooks/use-chat-scroll';
 import { useChatflowDetection } from '@lib/hooks/use-chatflow-detection';
@@ -24,14 +22,12 @@ import { useProfile } from '@lib/hooks/use-profile';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { useChatLayoutStore } from '@lib/stores/chat-layout-store';
 import { useChatStore } from '@lib/stores/chat-store';
-import { useChatTransitionStore } from '@lib/stores/chat-transition-store';
 import { useChatflowExecutionStore } from '@lib/stores/chatflow-execution-store';
-import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { useFilePreviewStore } from '@lib/stores/ui/file-preview-store';
 import { cn } from '@lib/utils';
 
 import React from 'react';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useLayoutEffect } from 'react';
 
 import { useTranslations } from 'next-intl';
 import { useParams, usePathname } from 'next/navigation';
@@ -41,10 +37,6 @@ export default function ChatPage() {
   const conversationIdFromUrl = params.conversationId;
   const pathname = usePathname();
   const t = useTranslations('pages.chat.input');
-
-  // Get sidebar state and mobile state, used to calculate backdrop margin
-  const { isExpanded } = useSidebarStore();
-  const isMobile = useMobile();
 
   // Get chatflow execution state cleanup method
   const { resetExecution } = useChatflowExecutionStore();
@@ -60,7 +52,7 @@ export default function ChatPage() {
 
   const { inputHeight } = useChatLayoutStore();
   const isPreviewOpen = useFilePreviewStore(state => state.isPreviewOpen);
-  const { colors, isDark } = useThemeColors();
+  const { colors } = useThemeColors();
 
   // Use the wrapped hook to detect chatflow apps
   const { isChatflowApp } = useChatflowDetection();
@@ -72,13 +64,12 @@ export default function ChatPage() {
     isProcessing,
     handleStopProcessing,
     sendDirectMessage,
-    nodeTracker,
     showNodeTracker,
     setShowNodeTracker,
     showFloatingController,
   } = useChatflowState(isChatflowApp);
 
-  // 🎯 Critical fix: Clean up chatflow execution state when switching routes
+  // Critical fix: Clean up chatflow execution state when switching routes
   // Ensure that when switching to historical conversations, previous node data is not displayed
   useLayoutEffect(() => {
     if (
@@ -87,12 +78,10 @@ export default function ChatPage() {
       conversationIdFromUrl !== 'new' &&
       !conversationIdFromUrl.includes('temp-')
     ) {
-      console.log('[ChatPage] 路由切换到历史对话，清理chatflow执行状态');
-
       // Clean up chatflow execution state, ensure previous node data is not displayed
       resetExecution();
 
-      console.log('[ChatPage] chatflow执行状态清理完成');
+      console.log('[ChatPage] chatflow execution state cleanup completed');
     }
   }, [pathname, conversationIdFromUrl, resetExecution]);
 
@@ -139,7 +128,6 @@ export default function ChatPage() {
         colors.mainText.tailwind
       )}
     >
-      {/* 🎯 NavBar has been moved to the root layout, no need to render again */}
       <div
         className={cn(
           'relative flex min-h-0 flex-1 flex-col overflow-hidden',
@@ -156,7 +144,7 @@ export default function ChatPage() {
              Only show page-level loading when profile is still in initial loading */}
         <PageLoadingSpinner isLoading={isNewChat && isProfileLoading} />
 
-        {/* 主要内容 */}
+        {/* main content */}
         <div className="min-h-0 flex-1">
           {/* Conditions for showing welcome screen:
                1. New chat page with no messages
@@ -199,7 +187,7 @@ export default function ChatPage() {
                 isLoadingInitial={isLoadingInitial}
               />
 
-              {/* 🎯 New: Chatflow node tracker - only show for chatflow apps
+              {/* New: Chatflow node tracker - only show for chatflow apps
                    Popup controlled by user clicking floating ball, or auto-popup when sending messages */}
               {isChatflowApp && showNodeTracker && (
                 <ChatflowNodeTracker
@@ -216,7 +204,7 @@ export default function ChatPage() {
 
         <ScrollToBottomButton />
 
-        {/* 🎯 New: Chatflow floating controller - only show for chatflow apps */}
+        {/* New: Chatflow floating controller - only show for chatflow apps */}
         {isChatflowApp && (
           <ChatflowFloatingController
             isVisible={showFloatingController}

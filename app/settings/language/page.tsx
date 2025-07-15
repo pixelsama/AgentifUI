@@ -13,26 +13,26 @@ import { useState } from 'react';
 
 import { useLocale, useTranslations } from 'next-intl';
 
-// 语言设置页面
-// 允许用户选择显示语言，使用卡片形式类似于外观设置
+// Language settings page
+// Allow users to select display language, use card style similar to appearance settings
 export default function LanguageSettingsPage() {
   const { colors } = useSettingsColors();
   const t = useTranslations('pages.settings.languageSettings');
   const currentLocale = useLocale() as SupportedLocale;
-  const [isSaving, setIsSaving] = useState(false);
+  const [, setIsSaving] = useState(false);
 
-  // 处理语言变更
-  // 设置Cookie并刷新页面应用新语言
+  // Handle language change
+  // Set cookie and refresh page to apply new language
   const handleLanguageChange = (newLanguage: SupportedLocale) => {
     setIsSaving(true);
 
-    // 设置语言Cookie
+    // Set language cookie
     setLanguageCookie(newLanguage);
 
-    // 模拟保存延迟
+    // Simulate save delay
     setTimeout(() => {
       setIsSaving(false);
-      // 刷新页面以应用新语言
+      // Refresh page to apply new language
       window.location.reload();
     }, 300);
   };
@@ -48,7 +48,7 @@ export default function LanguageSettingsPage() {
       <div
         className={`w-full space-y-10 ${colors.cardBackground.tailwind} rounded-lg border ${colors.borderColor.tailwind} p-6`}
       >
-        {/* 语言选择 */}
+        {/* Language selection */}
         <section>
           <h2 className="mb-4 font-serif text-lg font-medium">
             {t('language')}

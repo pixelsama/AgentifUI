@@ -4,18 +4,17 @@ import { getSettingsNavItems } from '@components/settings/navigation/settings-si
 import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { cn } from '@lib/utils';
 import { motion } from 'framer-motion';
-import { Palette, Settings, User } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-// 设置页面入口
-// 展示所有可用的设置选项，并提供导航链接
+// Settings page entry
+// Display all available settings options and provide navigation links
 export default function SettingsPage() {
   const { colors } = useSettingsColors();
   const t = useTranslations('pages.settings');
 
-  // 设置项描述，为每个设置页面提供说明文本
+  // Settings item description, provide a description text for each settings page
   const settingsDescriptions: Record<string, string> = {
     '/settings': t('descriptions.overview'),
     '/settings/profile': t('descriptions.profileDesc'),
@@ -24,7 +23,7 @@ export default function SettingsPage() {
     '/settings/language': t('descriptions.languageDesc'),
   };
 
-  // 过滤掉当前页面（概览）
+  // Filter out the current page (overview)
   const navItems = getSettingsNavItems(t);
   const filteredItems = navItems.filter(item => item.href !== '/settings');
 

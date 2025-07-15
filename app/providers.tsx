@@ -7,14 +7,12 @@ import { useEffect, useState } from 'react';
 
 import { ThemeProvider } from 'next-themes';
 
-// 引入 App Store
-
 export function Providers({ children }: { children: React.ReactNode }) {
-  // 避免水合不匹配，确保在客户端渲染时才加载 ThemeProvider
+  // Avoid hydration mismatch, ensure ThemeProvider is loaded only when rendering on the client
   const [mounted, setMounted] = useState(false);
-  const [userChecked, setUserChecked] = useState(false);
+  const [, setUserChecked] = useState(false);
 
-  // 使用 hook 方式获取初始化方法，遵循 React 最佳实践
+  // Use hook to get initialization method, following React best practices
   const initializeDefaultAppId = useCurrentAppStore(
     state => state.initializeDefaultAppId
   );
@@ -22,8 +20,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true);
 
-    // 🔒 安全修复：只在用户已登录时才初始化应用存储
-    // 防止未登录用户触发不必要的缓存创建
+    // Security fix: Only initialize app storage when user is logged in
+    // Prevent unnecessary cache creation for unlogged users
     const checkUserAndInitialize = async () => {
       try {
         const supabase = createClient();
@@ -35,14 +33,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
         setUserChecked(true);
 
         if (user && !error) {
-          console.log('[Providers] 用户已登录，初始化应用存储');
-          // 只有在用户已登录时才初始化默认 App ID
+          console.log('[Providers] User logged in, initializing app storage');
+          // Only initialize default App ID when user is logged in
           await initializeDefaultAppId();
         } else {
-          console.log('[Providers] 用户未登录，跳过应用存储初始化');
+          console.log(
+            '[Providers] User not logged in, skipping app storage initialization'
+          );
         }
       } catch (error) {
-        console.warn('[Providers] 检查用户状态失败:', error);
+        console.warn('[Providers] Checking user status failed:', error);
         setUserChecked(true);
       }
     };
@@ -51,17 +51,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, [initializeDefaultAppId]);
 
   if (!mounted) {
-    // 在 ThemeProvider 准备好之前，不渲染 children，或者渲染一个最小的占位符
-    // 返回 null 确保子组件不会在没有主题上下文的情况下尝试渲染
+    // Don't render children before ThemeProvider is ready, or render a minimal placeholder
+    // Return null to ensure children don't attempt to render without theme context
     return null;
   }
 
   return (
     <ThemeProvider
-      attribute="class" // 使用 class 属性来切换主题 (TailwindCSS class 模式)
-      defaultTheme="system" // 默认使用系统主题
-      enableSystem={true} // 启用系统主题检测
-      disableTransitionOnChange // 禁用切换时的过渡效果，避免闪烁
+      attribute="class" // Use class attribute to switch theme (TailwindCSS class mode)
+      defaultTheme="system" // Default to system theme
+      enableSystem={true} // Enable system theme detection
+      disableTransitionOnChange // Disable transition effect to avoid flickering
     >
       {children}
     </ThemeProvider>
