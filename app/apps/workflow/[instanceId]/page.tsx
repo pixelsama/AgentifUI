@@ -11,7 +11,7 @@ import { Blocks, Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 interface WorkflowPageProps {
   params: Promise<{
@@ -34,18 +34,12 @@ interface WorkflowPageProps {
 export default function WorkflowPage({ params }: WorkflowPageProps) {
   const { instanceId } = React.use(params);
   const router = useRouter();
-  const pathname = usePathname();
   const { colors, isDark } = useThemeColors();
   const t = useTranslations('pages.apps');
 
   // --- app related state ---
   const { apps, fetchApps } = useAppListStore();
-  const {
-    currentAppId,
-    isValidating,
-    switchToSpecificApp,
-    error: appError,
-  } = useCurrentApp();
+  const { currentAppId, isValidating, switchToSpecificApp } = useCurrentApp();
   const { selectItem } = useSidebarStore();
 
   // --- app initialization state ---

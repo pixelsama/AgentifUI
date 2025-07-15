@@ -2,7 +2,6 @@
 
 import { AppFilters, AppHeader, AppList, AppLoading } from '@components/apps';
 import type { AppInstance } from '@components/apps/types';
-import { useMobile } from '@lib/hooks';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { useAppListStore } from '@lib/stores/app-list-store';
 import { useFavoriteAppsStore } from '@lib/stores/favorite-apps-store';
@@ -18,8 +17,7 @@ export default function AppsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { colors } = useThemeColors();
-  const isMobile = useMobile();
-  const { addFavoriteApp, favoriteApps } = useFavoriteAppsStore();
+  const { favoriteApps } = useFavoriteAppsStore();
   const { selectItem } = useSidebarStore();
   const t = useTranslations('pages.apps.market');
   const { apps: rawApps, fetchApps, isLoading } = useAppListStore();

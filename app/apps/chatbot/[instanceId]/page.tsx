@@ -17,6 +17,7 @@ import {
 import { useCurrentApp } from '@lib/hooks/use-current-app';
 import { useProfile } from '@lib/hooks/use-profile';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
+import type { ChatUploadFile } from '@lib/services/dify/types';
 import { useAppListStore } from '@lib/stores/app-list-store';
 import { useChatInputStore } from '@lib/stores/chat-input-store';
 import { useChatLayoutStore } from '@lib/stores/chat-layout-store';
@@ -60,7 +61,7 @@ export default function AppDetailPage() {
   const chatInputHeightVar = `${inputHeight || 80}px`;
 
   // local state management
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [, setIsSubmitting] = useState(false);
 
   // add scroll management, ensure message list can scroll correctly
   const scrollRef = useChatScroll(messages);
@@ -94,7 +95,6 @@ export default function AppDetailPage() {
     isValidating,
     isValidatingForMessage,
     switchToSpecificApp,
-    error: appError,
   } = useCurrentApp();
 
   // get current app instance data
@@ -225,6 +225,7 @@ export default function AppDetailPage() {
     fetchApps,
     switchToSpecificApp,
     selectItem,
+    t,
   ]);
 
   // clear sidebar selected status when page unmounts
@@ -240,7 +241,7 @@ export default function AppDetailPage() {
 
   // wrap handleSubmit, implement UI switch logic
   const handleSubmit = useCallback(
-    async (message: string, files?: any[]) => {
+    async (message: string, files?: ChatUploadFile[]) => {
       try {
         // immediately set submit state to true
         setIsSubmitting(true);

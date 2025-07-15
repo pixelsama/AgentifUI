@@ -4,6 +4,7 @@ import { useChatWidth, useInputHeightReset } from '@lib/hooks';
 import { useChatInputRouteSync } from '@lib/hooks/use-chat-input-route-sync';
 import { useCurrentApp } from '@lib/hooks/use-current-app';
 import { uploadDifyFile } from '@lib/services/dify/file-service';
+import type { ChatUploadFile } from '@lib/services/dify/types';
 import { useAppListStore } from '@lib/stores/app-list-store';
 import { useAttachmentStore } from '@lib/stores/attachment-store';
 import { AttachmentFile } from '@lib/stores/attachment-store';
@@ -59,17 +60,7 @@ interface ChatInputProps {
   className?: string;
   placeholder?: string;
   maxHeight?: number;
-  onSubmit?: (
-    message: string,
-    files?: {
-      type: string;
-      transfer_method: string;
-      upload_file_id: string;
-      name: string;
-      size: number;
-      mime_type: string;
-    }[]
-  ) => void;
+  onSubmit?: (message: string, files?: ChatUploadFile[]) => void;
   onStop?: () => void;
   isProcessing?: boolean;
   isWaitingForResponse?: boolean;

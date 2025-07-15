@@ -12,12 +12,12 @@ import {
   useChatInterface,
   useChatScroll,
   useChatWidth,
-  useMobile,
   useWelcomeScreen,
 } from '@lib/hooks';
 import { useCurrentApp } from '@lib/hooks/use-current-app';
 import { useProfile } from '@lib/hooks/use-profile';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
+import type { ChatUploadFile } from '@lib/services/dify/types';
 import { useAppListStore } from '@lib/stores/app-list-store';
 import { useChatInputStore } from '@lib/stores/chat-input-store';
 import { useChatLayoutStore } from '@lib/stores/chat-layout-store';
@@ -33,7 +33,6 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 
 export default function AppDetailPage() {
   const { colors, isDark } = useThemeColors();
-  const isMobile = useMobile();
   const { widthClass, paddingClass } = useChatWidth();
   const router = useRouter();
   const params = useParams();
@@ -62,7 +61,7 @@ export default function AppDetailPage() {
   const chatInputHeightVar = `${inputHeight || 80}px`;
 
   // local state management
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [, setIsSubmitting] = useState(false);
 
   // add scroll management, ensure message list can scroll correctly
   const scrollRef = useChatScroll(messages);
@@ -96,7 +95,6 @@ export default function AppDetailPage() {
     isValidating,
     isValidatingForMessage,
     switchToSpecificApp,
-    error: appError,
   } = useCurrentApp();
 
   // get current app instance data
@@ -253,6 +251,7 @@ export default function AppDetailPage() {
     fetchApps,
     switchToSpecificApp,
     selectItem,
+    t,
   ]);
 
   // when the page is unloaded, clear the selected state (when leaving the app detail page)
@@ -268,7 +267,7 @@ export default function AppDetailPage() {
 
   // wrap handleSubmit, implement UI switching logic
   const handleSubmit = useCallback(
-    async (message: string, files?: any[]) => {
+    async (message: string, files?: ChatUploadFile[]) => {
       try {
         // simplify UI switching logic: immediately respond to user operations
         // immediately set submission state to true

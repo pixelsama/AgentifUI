@@ -13,8 +13,8 @@ import { useChatInterface, useChatScroll, useWelcomeScreen } from '@lib/hooks';
 import { useChatflowInterface } from '@lib/hooks/use-chatflow-interface';
 import { useChatflowState } from '@lib/hooks/use-chatflow-state';
 import { useCurrentApp } from '@lib/hooks/use-current-app';
-import { useProfile } from '@lib/hooks/use-profile';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
+import type { ChatUploadFile } from '@lib/services/dify/types';
 import { useAppListStore } from '@lib/stores/app-list-store';
 import { useChatInputStore } from '@lib/stores/chat-input-store';
 import { useChatLayoutStore } from '@lib/stores/chat-layout-store';
@@ -37,9 +37,6 @@ export default function AppDetailPage() {
   const instanceId = params.instanceId as string;
   const t = useTranslations('pages.apps');
 
-  // get user profile, used for welcome interface display
-  const { profile } = useProfile();
-
   // get chatflow execution state cleanup method
   const { resetExecution } = useChatflowExecutionStore();
 
@@ -49,8 +46,6 @@ export default function AppDetailPage() {
     handleSubmit: originalHandleSubmit,
     isProcessing,
     handleStopProcessing,
-    sendDirectMessage,
-    nodeTracker,
     showNodeTracker,
     setShowNodeTracker,
     showFloatingController,
@@ -67,7 +62,7 @@ export default function AppDetailPage() {
   const chatInputHeightVar = `${inputHeight || 80}px`;
 
   // local state management
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [, setIsSubmitting] = useState(false);
 
   // remove duplicate automatic display logic, now managed by useChatflowState
   // Support intelligent behavior where users can manually close and no longer automatically open
@@ -83,7 +78,8 @@ export default function AppDetailPage() {
   // app initialization state
   const [isInitializing, setIsInitializing] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
-  const [hasFormConfig, setHasFormConfig] = useState(false);
+  // track form configuration state for chatflow
+  const [, setHasFormConfig] = useState(false);
 
   // ensure loader displays for at least 0.7 seconds, allowing layout to stabilize
   const [hasMinimumLoadTime, setHasMinimumLoadTime] = useState(false);
@@ -104,7 +100,6 @@ export default function AppDetailPage() {
     isValidating,
     isValidatingForMessage,
     switchToSpecificApp,
-    error: appError,
   } = useCurrentApp();
 
   // get current app instance data
@@ -262,6 +257,7 @@ export default function AppDetailPage() {
     fetchApps,
     switchToSpecificApp,
     selectItem,
+    t,
   ]);
 
   // when page is unloaded, clear the selected state (when leaving the app detail page)
@@ -277,7 +273,7 @@ export default function AppDetailPage() {
 
   // wrap handleSubmit, implement UI switching logic
   const handleSubmit = useCallback(
-    async (message: string, files?: any[]) => {
+    async (message: string, files?: ChatUploadFile[]) => {
       try {
         // immediately set the submission state to true
         setIsSubmitting(true);

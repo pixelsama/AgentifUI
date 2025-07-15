@@ -1,157 +1,170 @@
 /**
- * Dify API 类型定义
- * @description 定义与 Dify API 交互相关的数据结构
+ * Dify API type definitions
+ * @description Defines data structures for interacting with Dify API
  * @see https://docs.dify.ai/
  */
 
 /**
- * Dify 文件对象结构
- * @description 用于请求体中的文件上传
+ * Dify file object structure
+ * @description Used for file uploads in request body
  */
 export interface DifyFile {
-  /** 文件类型 */
+  /** File type */
   type: 'image' | 'document' | 'audio' | 'video' | 'custom';
-  /** 传输方式 */
+  /** Transfer method */
   transfer_method: 'remote_url' | 'local_file';
-  /** 远程URL，当transfer_method为remote_url时必需 */
+  /** Remote URL, required when transfer_method is remote_url */
   url?: string;
-  /** 本地文件ID，当transfer_method为local_file时必需 */
+  /** Local file ID, required when transfer_method is local_file */
   upload_file_id?: string;
 }
 
 /**
- * Dify 聊天消息请求体
- * @description 发送给 Dify API 的聊天请求数据结构
+ * Chat file upload structure
+ * @description Used for file uploads in chat components
+ */
+export interface ChatUploadFile {
+  type: string;
+  transfer_method: string;
+  upload_file_id: string;
+  name: string;
+  size: number;
+  mime_type: string;
+}
+
+/**
+ * Dify chat message request body
+ * @description Chat request data structure sent to Dify API
  */
 export interface DifyChatRequestPayload {
-  /** 用户输入内容 */
+  /** User input content */
   query: string;
-  /** App 输入变量，默认为空对象 */
+  /** App input variables, defaults to empty object */
   inputs?: Record<string, any>;
-  /** 响应模式 */
+  /** Response mode */
   response_mode: 'streaming' | 'blocking';
-  /** 用户唯一标识符 */
+  /** Unique user identifier */
   user: string;
-  /** 对话ID，null或空字符串表示新对话 */
+  /** Conversation ID, null or empty string indicates new conversation */
   conversation_id?: string | null;
-  /** 文件列表 */
+  /** File list */
   files?: DifyFile[];
-  /** 是否自动生成标题，默认true */
+  /** whether to auto-generate title, defaults to true */
   auto_generate_name?: boolean;
 }
 
 /**
- * SSE事件基础结构
- * @description 所有Dify SSE事件的基础接口
+ * SSE event base structure
+ * @description Base interface for all Dify SSE events
  */
 interface DifySseBaseEvent {
-  /** 任务ID */
+  /** Task ID */
   task_id: string;
-  /** 事件或消息ID */
+  /** Event or message ID */
   id?: string;
-  /** 对话ID */
+  /** Conversation ID */
   conversation_id: string;
-  /** 事件类型 */
+  /** Event type */
   event: string;
 }
 
 /**
- * 消息文本块事件
- * @description event: message - LLM返回的文本块内容
+ * Message text chunk event
+ * @description event: message - LLM returned text chunk content
  */
 export interface DifySseMessageEvent extends DifySseBaseEvent {
   event: 'message';
-  /** 消息ID */
+  /** Message ID */
   id: string;
-  /** LLM返回的文本块内容 */
+  /** LLM returned text chunk content */
   answer: string;
-  /** 创建时间戳 */
+  /** Creation timestamp */
   created_at: number;
 }
 
 /**
- * 消息文件事件
- * @description event: message_file - 文件消息
+ * Message file event
+ * @description event: message_file - File message
  */
 export interface DifySseMessageFileEvent extends DifySseBaseEvent {
   event: 'message_file';
-  /** 文件ID */
+  /** File ID */
   id: string;
-  /** 文件类型 */
+  /** File type */
   type: string;
-  /** 文件归属方 */
+  /** File owner */
   belongs_to: 'user' | 'assistant';
-  /** 文件访问地址 */
+  /** File access URL */
   url: string;
 }
 
 /**
- * 消息结束事件
- * @description event: message_end - 消息传输完成
+ * Message end event
+ * @description event: message_end - Message transmission complete
  */
 export interface DifySseMessageEndEvent extends DifySseBaseEvent {
   event: 'message_end';
-  /** 消息ID */
+  /** Message ID */
   id: string;
-  /** 元数据 */
+  /** Metadata */
   metadata: Record<string, any>;
-  /** 模型用量信息 */
+  /** Model usage information */
   usage: DifyUsage;
-  /** 引用和归属资源 */
+  /** Reference and attribution resources */
   retriever_resources?: DifyRetrieverResource[];
 }
 
 /**
- * TTS音频块事件
- * @description event: tts_message - 文本转语音音频块
+ * TTS audio chunk event
+ * @description event: tts_message - Text-to-speech audio chunk
  */
 export interface DifySseTtsMessageEvent extends DifySseBaseEvent {
   event: 'tts_message';
-  /** 消息ID */
+  /** Message ID */
   id: string;
-  /** Base64编码的音频块 */
+  /** Base64 encoded audio chunk */
   audio: string;
-  /** 创建时间戳 */
+  /** Creation timestamp */
   created_at: number;
 }
 
 /**
- * TTS结束事件
- * @description event: tts_message_end - TTS传输结束
+ * TTS end event
+ * @description event: tts_message_end - TTS transmission end
  */
 export interface DifySseTtsMessageEndEvent extends DifySseBaseEvent {
   event: 'tts_message_end';
-  /** 消息ID */
+  /** Message ID */
   id: string;
-  /** 空音频字符串 */
+  /** Empty audio string */
   audio: string;
-  /** 创建时间戳 */
+  /** Creation timestamp */
   created_at: number;
 }
 
 /**
- * 消息替换事件
- * @description event: message_replace - 内容替换
+ * Message replacement event
+ * @description event: message_replace - Content replacement
  */
 export interface DifySseMessageReplaceEvent extends DifySseBaseEvent {
   event: 'message_replace';
-  /** 消息ID */
+  /** Message ID */
   id: string;
-  /** 替换后的完整内容 */
+  /** Complete content after replacement */
   answer: string;
-  /** 创建时间戳 */
+  /** Creation timestamp */
   created_at: number;
 }
 
 /**
- * 工作流开始事件
- * @description event: workflow_started - 工作流执行开始
+ * Workflow start event
+ * @description event: workflow_started - Workflow execution start
  */
 export interface DifySseWorkflowStartedEvent extends DifySseBaseEvent {
   event: 'workflow_started';
-  /** 工作流运行ID */
+  /** Workflow run ID */
   workflow_run_id: string;
-  /** 工作流数据 */
+  /** Workflow data */
   data: {
     id: string;
     workflow_id: string;
@@ -159,16 +172,15 @@ export interface DifySseWorkflowStartedEvent extends DifySseBaseEvent {
     created_at: number;
   };
 }
-
 /**
- * 节点开始事件
- * @description event: node_started - 工作流节点开始执行
+ * Node Started Event
+ * @description event: node_started - A workflow node has started execution
  */
 export interface DifySseNodeStartedEvent extends DifySseBaseEvent {
   event: 'node_started';
-  /** 工作流运行ID */
+  /** Workflow run ID */
   workflow_run_id: string;
-  /** 节点数据 */
+  /** Node data */
   data: {
     id: string;
     node_id: string;
@@ -182,14 +194,14 @@ export interface DifySseNodeStartedEvent extends DifySseBaseEvent {
 }
 
 /**
- * 节点结束事件
- * @description event: node_finished - 工作流节点执行完成
+ * Node Finished Event
+ * @description event: node_finished - A workflow node has finished execution
  */
 export interface DifySseNodeFinishedEvent extends DifySseBaseEvent {
   event: 'node_finished';
-  /** 工作流运行ID */
+  /** Workflow run ID */
   workflow_run_id: string;
-  /** 节点执行结果数据 */
+  /** Node execution result data */
   data: {
     id: string;
     node_id: string;
@@ -210,14 +222,14 @@ export interface DifySseNodeFinishedEvent extends DifySseBaseEvent {
 }
 
 /**
- * 工作流结束事件
- * @description event: workflow_finished - 工作流执行完成
+ * Workflow Finished Event
+ * @description event: workflow_finished - The workflow execution has completed
  */
 export interface DifySseWorkflowFinishedEvent extends DifySseBaseEvent {
   event: 'workflow_finished';
-  /** 工作流运行ID */
+  /** Workflow run ID */
   workflow_run_id: string;
-  /** 工作流执行结果数据 */
+  /** Workflow execution result data */
   data: {
     id: string;
     workflow_id: string;
@@ -233,133 +245,133 @@ export interface DifySseWorkflowFinishedEvent extends DifySseBaseEvent {
 }
 
 /**
- * 流错误事件
- * @description event: error - SSE流处理错误
+ * Stream Error Event
+ * @description event: error - An error occurred in the SSE stream processing
  */
 export interface DifySseErrorEvent extends DifySseBaseEvent {
   event: 'error';
-  /** 消息ID，可能为空 */
+  /** Message ID, may be empty */
   id?: string;
-  /** HTTP状态码 */
+  /** HTTP status code */
   status: number;
-  /** 错误码 */
+  /** Error code */
   code: string;
-  /** 错误消息 */
+  /** Error message */
   message: string;
 }
 
 /**
- * 保持连接事件
- * @description event: ping - 心跳包，保持SSE连接
+ * Ping Event
+ * @description event: ping - A heartbeat packet to keep the SSE connection alive
  */
 export interface DifySsePingEvent extends DifySseBaseEvent {
   event: 'ping';
 }
 
 /**
- * Agent思考过程事件
- * @description event: agent_thought - Agent的思考过程
+ * Agent Thought Event
+ * @description event: agent_thought - The thinking process of the Agent
  */
 export interface DifySseAgentThoughtEvent extends DifySseBaseEvent {
   event: 'agent_thought';
-  /** Agent思考消息ID */
+  /** Agent thought message ID */
   id: string;
-  /** 关联的消息ID */
+  /** Associated message ID */
   message_id: string;
-  /** 位置序号 */
+  /** Position index */
   position: number;
-  /** 思考过程的文本内容 */
+  /** Text content of the thought process */
   thought: string;
-  /** 观察结果 */
+  /** Observation result */
   observation: string;
-  /** 使用的工具 */
+  /** The tool being used */
   tool: string;
-  /** 工具标签 */
+  /** Tool labels */
   tool_labels: Record<string, any>;
-  /** 工具输入 */
+  /** Tool input */
   tool_input: string;
-  /** 消息文件 */
+  /** Message files */
   message_files: any[];
-  /** 创建时间戳 */
+  /** Creation timestamp */
   created_at: number;
 }
 
 /**
- * Agent消息事件
- * @description event: agent_message - Agent应用的流式回答内容
+ * Agent Message Event
+ * @description event: agent_message - The streaming response content from an Agent application
  */
 export interface DifySseAgentMessageEvent extends DifySseBaseEvent {
   event: 'agent_message';
-  /** Agent消息ID */
+  /** Agent message ID */
   id: string;
-  /** 关联的消息ID */
+  /** Associated message ID */
   message_id: string;
-  /** Agent回答的文本块 */
+  /** Text chunk of the Agent's answer */
   answer: string;
-  /** 创建时间戳 */
+  /** Creation timestamp */
   created_at: number;
 }
 
 /**
- * Dify模型用量信息
- * @description 记录API调用的token使用情况和费用
+ * Dify Model Usage Information
+ * @description Records token usage and costs for API calls
  */
 export interface DifyUsage {
-  /** 提示词token数量 */
+  /** Number of prompt tokens */
   prompt_tokens?: number;
-  /** 提示词单价 */
+  /** Prompt unit price */
   prompt_unit_price?: string;
-  /** 提示词价格单位 */
+  /** Prompt price unit */
   prompt_price_unit?: string;
-  /** 提示词总价 */
+  /** Total prompt price */
   prompt_price?: string;
-  /** 完成词token数量 */
+  /** Number of completion tokens */
   completion_tokens?: number;
-  /** 完成词单价 */
+  /** Completion unit price */
   completion_unit_price?: string;
-  /** 完成词价格单位 */
+  /** Completion price unit */
   completion_price_unit?: string;
-  /** 完成词总价 */
+  /** Total completion price */
   completion_price?: string;
-  /** 总token数量 */
+  /** Total number of tokens */
   total_tokens: number;
-  /** 总费用 */
+  /** Total price */
   total_price?: string;
-  /** 货币 */
+  /** Currency */
   currency?: string;
-  /** 延迟 */
+  /** Latency */
   latency?: number;
 }
 
 /**
- * Dify 引用和归属信息
- * @description 记录引用和归属信息
+ * Dify Retriever Resource Information
+ * @description Records citation and attribution information
  */
 export interface DifyRetrieverResource {
-  /** 段落ID */
+  /** Segment ID */
   segment_id: string;
-  /** 文档ID */
+  /** Document ID */
   document_id: string;
-  /** 文档名称 */
+  /** Document name */
   document_name: string;
-  /** 位置 */
+  /** Position */
   position: number;
-  /** 内容 */
+  /** Content */
   content: string;
-  /** 分数 */
+  /** Score */
   score?: number;
-  // 其他可能的字段
+  // Other possible fields
 }
 
 /**
- * 迭代开始事件
- * @description event: iteration_started - 迭代开始
+ * Iteration Started Event
+ * @description event: iteration_started - An iteration has started
  */
 export interface DifySseIterationStartedEvent extends DifySseBaseEvent {
   event: 'iteration_started';
-  /** 工作流运行ID */
+  /** Workflow run ID */
   workflow_run_id: string;
-  /** 节点数据 */
+  /** Node data */
   data: {
     id: string;
     node_id: string;
@@ -374,14 +386,14 @@ export interface DifySseIterationStartedEvent extends DifySseBaseEvent {
 }
 
 /**
- * 迭代下一轮事件
- * @description event: iteration_next - 迭代下一轮
+ * Iteration Next Event
+ * @description event: iteration_next - The next round of an iteration
  */
 export interface DifySseIterationNextEvent extends DifySseBaseEvent {
   event: 'iteration_next';
-  /** 工作流运行ID */
+  /** Workflow run ID */
   workflow_run_id: string;
-  /** 节点数据 */
+  /** Node data */
   data: {
     id: string;
     node_id: string;
@@ -393,14 +405,14 @@ export interface DifySseIterationNextEvent extends DifySseBaseEvent {
 }
 
 /**
- * 迭代完成事件
- * @description event: iteration_completed - 迭代完成
+ * Iteration Completed Event
+ * @description event: iteration_completed - The iteration has completed
  */
 export interface DifySseIterationCompletedEvent extends DifySseBaseEvent {
   event: 'iteration_completed';
-  /** 工作流运行ID */
+  /** Workflow run ID */
   workflow_run_id: string;
-  /** 节点数据 */
+  /** Node data */
   data: {
     id: string;
     node_id: string;
@@ -413,14 +425,14 @@ export interface DifySseIterationCompletedEvent extends DifySseBaseEvent {
 }
 
 /**
- * 并行分支开始事件
- * @description event: parallel_branch_started - 并行分支开始
+ * Parallel Branch Started Event
+ * @description event: parallel_branch_started - A parallel branch has started
  */
 export interface DifySseParallelBranchStartedEvent extends DifySseBaseEvent {
   event: 'parallel_branch_started';
-  /** 工作流运行ID */
+  /** Workflow run ID */
   workflow_run_id: string;
-  /** 节点数据 */
+  /** Node data */
   data: {
     id: string;
     node_id: string;
@@ -433,14 +445,14 @@ export interface DifySseParallelBranchStartedEvent extends DifySseBaseEvent {
 }
 
 /**
- * 并行分支结束事件
- * @description event: parallel_branch_finished - 并行分支结束
+ * Parallel Branch Finished Event
+ * @description event: parallel_branch_finished - A parallel branch has finished
  */
 export interface DifySseParallelBranchFinishedEvent extends DifySseBaseEvent {
   event: 'parallel_branch_finished';
-  /** 工作流运行ID */
+  /** Workflow run ID */
   workflow_run_id: string;
-  /** 节点数据 */
+  /** Node data */
   data: {
     id: string;
     node_id: string;
@@ -454,39 +466,39 @@ export interface DifySseParallelBranchFinishedEvent extends DifySseBaseEvent {
   };
 }
 
-// 新增：循环(Loop)相关的SSE事件类型
-// Loop与Iteration的区别：
-// - Loop：基于条件判断的重复执行，可能无限循环或基于计数器
-// - Iteration：基于输入数据列表的遍历执行，有明确的结束条件
+// New: SSE event types related to Loop
+// Difference between Loop and Iteration:
+// - Loop: Repetitive execution based on a condition, can be an infinite loop or based on a counter.
+// - Iteration: Traversal-based execution on an input data list, with a clear ending condition.
 /**
- * 循环开始事件
- * @description event: loop_started - 循环开始
+ * Loop Started Event
+ * @description event: loop_started - A loop has started
  */
 export interface DifySseLoopStartedEvent extends DifySseBaseEvent {
   event: 'loop_started';
-  /** 工作流运行ID */
+  /** Workflow run ID */
   workflow_run_id: string;
-  /** 节点数据 */
+  /** Node data */
   data: {
     id: string;
     node_id: string;
     node_type: string;
     title: string;
     inputs: Record<string, any>;
-    metadata?: { loop_length?: number }; // 循环限制信息
+    metadata?: { loop_length?: number }; // Loop limit information
     created_at: number;
   };
 }
 
 /**
- * 循环下一轮事件
- * @description event: loop_next - 循环下一轮
+ * Loop Next Event
+ * @description event: loop_next - The next round of a loop
  */
 export interface DifySseLoopNextEvent extends DifySseBaseEvent {
   event: 'loop_next';
-  /** 工作流运行ID */
+  /** Workflow run ID */
   workflow_run_id: string;
-  /** 节点数据 */
+  /** Node data */
   data: {
     id: string;
     node_id: string;
@@ -499,67 +511,67 @@ export interface DifySseLoopNextEvent extends DifySseBaseEvent {
 }
 
 /**
- * 循环完成事件
- * @description event: loop_completed - 循环完成
+ * Loop Completed Event
+ * @description event: loop_completed - The loop has completed
  */
 export interface DifySseLoopCompletedEvent extends DifySseBaseEvent {
   event: 'loop_completed';
-  /** 工作流运行ID */
+  /** Workflow run ID */
   workflow_run_id: string;
-  /** 节点数据 */
+  /** Node data */
   data: {
     id: string;
     node_id: string;
-    // 🎯 修复：实际数据中没有total_loops字段，需要从其他地方推断
+    // 🎯 Fix: The actual data does not contain the total_loops field, it needs to be inferred from elsewhere.
     outputs?: Record<string, any>;
     elapsed_time?: number;
     created_at: number;
   };
 }
 
-// --- 服务函数返回类型 --- (供 Hook 使用)
+// --- Service Function Return Types --- (For Hook usage)
 
 export interface DifyStreamResponse {
-  // 经过处理的文本块流，只包含 `event: message` 中的 `answer` 字段内容。
-  // 服务层负责解析 SSE 并过滤出文本。
+  // A stream of processed text chunks, containing only the 'answer' field content from 'event: message' events.
+  // The service layer is responsible for parsing the SSE and filtering the text.
   answerStream: AsyncGenerator<string, void, undefined>;
 
-  // 提供方法以在流处理过程中或结束后获取 conversation_id。
-  // 该方法在流开始时返回 null，在流中捕获到 ID 后返回 ID。
+  // Provides a method to get the conversation_id during or after stream processing.
+  // This method returns null at the start of the stream and returns the ID once it's captured from the stream.
   getConversationId: () => string | null;
 
-  // 提供方法以在流处理过程中或结束后获取 task_id。
+  // Provides a method to get the task_id during or after stream processing.
   getTaskId: () => string | null;
 
-  // 可以添加一个 Promise，在 message_end 事件到达时 resolve，
-  // 并携带最终的 usage 和 metadata 等信息，供需要完整响应的场景使用。
+  // An optional Promise that resolves when the message_end event arrives,
+  // carrying the final usage, metadata, etc., for scenarios that require the complete response.
   completionPromise?: Promise<{
     usage?: DifyUsage;
     metadata?: Record<string, any>;
     retrieverResources?: DifyRetrieverResource[];
   }>;
 
-  // 可能还需要传递其他从流中提取的非文本事件，如文件事件等，根据需求添加。
+  // Other non-text events extracted from the stream, such as file events, can be added here as needed.
   // fileEventsStream?: AsyncGenerator<DifySseMessageFileEvent, void, undefined>;
 }
 
-// Dify 停止流式任务 API 类型
+// Dify Stop Streaming Task API Types
 // POST /chat-messages/:task_id/stop
 /**
- * Dify 停止任务请求体
- * @description 用于停止流式任务的请求数据结构
+ * Dify Stop Task Request Payload
+ * @description Data structure for the request to stop a streaming task.
  */
 export interface DifyStopTaskRequestPayload {
-  /** 用户唯一标识符，必须和发送消息时一致 */
+  /** Unique user identifier, must be consistent with the one used when sending the message. */
   user: string;
 }
 
 /**
- * Dify 停止任务响应体
- * @description 用于停止流式任务的响应数据结构
+ * Dify Stop Task Response
+ * @description Data structure for the response of stopping a streaming task.
  */
 export interface DifyStopTaskResponse {
-  result: 'success'; // 固定返回 success
+  result: 'success'; // Always returns 'success'
 }
 
 /**
@@ -582,7 +594,7 @@ export interface DifyFileUploadResponse {
  */
 
 // /messages API - Common error response structure
-// This can be used as type reference for message-service.ts error handling
+// This can be used as a type reference for message-service.ts error handling
 export interface DifyApiError {
   status: number; // HTTP status code
   code: string; // Dify internal error code or HTTP status code string
@@ -601,182 +613,182 @@ export interface DifyMessageFile {
 // /messages API - Message feedback information structure
 export interface DifyMessageFeedback {
   rating: 'like' | 'dislike' | null; // Like 'like' / Dislike 'dislike', or null
-  // May have other feedback-related fields based on actual API, e.g. content
+  // May have other feedback-related fields based on the actual API, e.g. content
 }
 
-// /messages API - 单条消息对象结构 (与 SSE 中的 DifyMessage 不同，这是获取历史消息的特定结构)
+// /messages API - Single message object structure (This is different from DifyMessage in SSE, it's a specific structure for fetching historical messages)
 export interface ConversationMessage {
-  id: string; // 消息的唯一 ID
-  conversation_id: string; // 该消息所属的会话 ID
-  inputs: Record<string, any>; // 用户输入的参数，具体内容取决于应用设计
-  query: string; // 用户发送的原始提问内容
-  answer: string; // AI 助手的回答内容
-  message_files: DifyMessageFile[]; // 消息中包含的文件列表
-  created_at: number; // 消息创建的时间戳 (Unix timestamp)
-  feedback: DifyMessageFeedback | null; // 用户对这条回答的反馈信息
-  retriever_resources: DifyRetrieverResource[]; // 引用和归属分段列表
+  id: string; // Unique ID of the message
+  conversation_id: string; // ID of the conversation this message belongs to
+  inputs: Record<string, any>; // User-provided parameters, content depends on the application design
+  query: string; // The original query content sent by the user
+  answer: string; // The AI assistant's response content
+  message_files: DifyMessageFile[]; // List of files included in the message
+  created_at: number; // Message creation timestamp (Unix timestamp)
+  feedback: DifyMessageFeedback | null; // User feedback on this response
+  retriever_resources: DifyRetrieverResource[]; // List of citation and attribution segments
 }
 
-// /messages API - 获取历史消息的请求查询参数 (Query Parameters) 接口
+// /messages API - Query Parameters interface for fetching historical messages
 export interface GetMessagesParams {
-  conversation_id: string; // 会话 ID (必需)
-  user: string; // 用户标识 (必需)
-  first_id?: string | null; // 当前消息列表最上面 (最早) 那条消息的 ID，用于分页 (可选, 默认为 null)
-  limit?: number; // 一次请求希望返回多少条聊天记录 (可选, 默认为 20)
+  conversation_id: string; // Conversation ID (required)
+  user: string; // User identifier (required)
+  first_id?: string | null; // The ID of the earliest message in the current list, for pagination (optional, defaults to null)
+  limit?: number; // The number of chat records to return in one request (optional, defaults to 20)
 }
 
-// /messages API - 获取历史消息的响应体结构
+// /messages API - Response body structure for fetching historical messages
 export interface GetMessagesResponse {
-  data: ConversationMessage[]; // 本次请求获取到的消息对象列表
-  has_more: boolean; // 是否还有更早的聊天记录可以加载
-  limit: number; // 本次请求实际返回的聊天记录条数
+  data: ConversationMessage[]; // List of message objects fetched in this request
+  has_more: boolean; // Indicates if there are more older chat records to load
+  limit: number; // The actual number of chat records returned in this request
 }
 /**
  * Conversations API Type Definitions
  * @description Type definitions for Dify conversations API endpoints
  */
-// /conversations API - 获取会话列表的参数
+// /conversations API - Parameters for fetching the conversation list
 export interface GetConversationsParams {
-  user: string; // 用户标识，必需
-  last_id?: string | null; // 当前页最后一条记录的ID，用于分页，选填
-  limit?: number; // 一次返回多少条记录，默认20，选填
-  sort_by?: 'created_at' | '-created_at' | 'updated_at' | '-updated_at'; // 排序字段，默认-updated_at
+  user: string; // User identifier, required
+  last_id?: string | null; // The ID of the last record on the current page, for pagination, optional
+  limit?: number; // Number of records to return at once, default 20, optional
+  sort_by?: 'created_at' | '-created_at' | 'updated_at' | '-updated_at'; // Sort field, default -updated_at
 }
 
-// /conversations API - 单个会话对象结构
+// /conversations API - Single conversation object structure
 export interface Conversation {
-  id: string; // 会话ID
-  name: string; // 会话名称，默认由大语言模型生成
-  inputs: Record<string, any>; // 用户输入参数
-  status: string; // 会话状态
-  introduction: string; // 开场白
-  created_at: number; // 创建时间(时间戳)
-  updated_at: number; // 更新时间(时间戳)
+  id: string; // Conversation ID
+  name: string; // Conversation name, generated by the large language model by default
+  inputs: Record<string, any>; // User input parameters
+  status: string; // Conversation status
+  introduction: string; // Opening remark
+  created_at: number; // Creation time (timestamp)
+  updated_at: number; // Update time (timestamp)
 }
 
-// /conversations API - 获取会话列表的响应体结构
+// /conversations API - Response body structure for fetching the conversation list
 export interface GetConversationsResponse {
-  data: Conversation[]; // 会话列表
-  has_more: boolean; // 是否有更多会话
-  limit: number; // 返回条数
+  data: Conversation[]; // List of conversations
+  has_more: boolean; // Indicates if there are more conversations
+  limit: number; // Number of records returned
 }
-// /conversations API - 删除会话的请求体结构
+// /conversations API - Request body structure for deleting a conversation
 export interface DeleteConversationRequestPayload {
-  user: string; // 用户标识，由开发者定义规则，需保证用户标识在应用内唯一
+  user: string; // User identifier, defined by the developer, must be unique within the application
 }
 
-// /conversations API - 删除会话的响应体结构
+// /conversations API - Response body structure for deleting a conversation
 export interface DeleteConversationResponse {
   result: 'success';
 }
 
-// /conversations API - 重命名会话的请求体结构
+// /conversations API - Request body structure for renaming a conversation
 export interface RenameConversationRequestPayload {
-  name?: string; // （选填）名称，若 auto_generate 为 true 时，该参数可不传
-  auto_generate?: boolean; // （选填）自动生成标题，默认 false
-  user: string; // 用户标识，由开发者定义规则，需保证用户标识在应用内唯一
+  name?: string; // (Optional) Name. This parameter can be omitted if auto_generate is true.
+  auto_generate?: boolean; // (Optional) Auto-generate title, default is false
+  user: string; // User identifier, defined by the developer, must be unique within the application
 }
 
-// /conversations API - 重命名会话的响应体结构，返回更新后的会话信息
+// /conversations API - Response body structure for renaming a conversation, returns the updated conversation info
 export interface RenameConversationResponse extends Conversation {
-  // 继承了 Conversation 接口的所有字段
+  // Inherits all fields from the Conversation interface
 }
 
-// /conversations API - 获取对话变量的请求参数
+// /conversations API - Request parameters for getting conversation variables
 export interface GetConversationVariablesParams {
-  user: string; // 用户标识符，由开发人员定义的规则，在应用程序内必须唯一
-  last_id?: string | null; // （选填）当前页最后面一条记录的 ID，默认 null
-  limit?: number; // （选填）一次请求返回多少条记录，默认 20 条，最大 100 条，最小 1 条
+  user: string; // User identifier, defined by the developer, must be unique within the application
+  last_id?: string | null; // (Optional) The ID of the last record on the current page, default null
+  limit?: number; // (Optional) Number of records to return at once, default 20, max 100, min 1
 }
 
-// /conversations API - 对话变量对象结构
+// /conversations API - Conversation variable object structure
 export interface ConversationVariable {
-  id: string; // 变量 ID
-  name: string; // 变量名称
-  value_type: string; // 变量类型（字符串、数字、布尔等）
-  value: string; // 变量值
-  description: string; // 变量描述
-  created_at: number; // 创建时间戳
-  updated_at: number; // 最后更新时间戳
+  id: string; // Variable ID
+  name: string; // Variable name
+  value_type: string; // Variable type (string, number, boolean, etc.)
+  value: string; // Variable value
+  description: string; // Variable description
+  created_at: number; // Creation timestamp
+  updated_at: number; // Last updated timestamp
 }
 
-// /conversations API - 获取对话变量的响应体结构
+// /conversations API - Response body structure for getting conversation variables
 export interface GetConversationVariablesResponse {
-  limit: number; // 每页项目数
-  has_more: boolean; // 是否有更多项目
-  data: ConversationVariable[]; // 变量列表
+  limit: number; // Number of items per page
+  has_more: boolean; // Indicates if there are more items
+  data: ConversationVariable[]; // List of variables
 }
 
 // End of Conversations API types
 
-// 应用参数相关类型定义 (GET /parameters)
+// Application parameters related type definitions (GET /parameters)
 /**
- * Dify 数字输入控件
- * @description 用于表单中的数字输入控件
+ * Dify Number Input Control
+ * @description A number input control for forms
  */
 export interface DifyNumberInputControl {
-  label: string; // 控件展示标签名
-  variable: string; // 控件 ID
-  required: boolean; // 是否必填
-  default: number | string; // 默认值（可以是数字或字符串）
-  min?: number; // 最小值限制
-  max?: number; // 最大值限制
-  step?: number; // 步长，默认为1
-  precision?: number; // 小数位数限制
+  label: string; // Display label for the control
+  variable: string; // Control ID
+  required: boolean; // Whether it is required
+  default: number | string; // Default value (can be number or string)
+  min?: number; // Minimum value constraint
+  max?: number; // Maximum value constraint
+  step?: number; // Step increment, defaults to 1
+  precision?: number; // Decimal places constraint
 }
 
 /**
- * Dify 文本输入控件
- * @description 用于表单中的文本输入控件
+ * Dify Text Input Control
+ * @description A text input control for forms
  */
 export interface DifyTextInputControl {
-  label: string; // 控件展示标签名
-  variable: string; // 控件 ID
-  required: boolean; // 是否必填
-  max_length?: number; // 最大长度限制
-  default: string; // 默认值
+  label: string; // Display label for the control
+  variable: string; // Control ID
+  required: boolean; // Whether it is required
+  max_length?: number; // Maximum length constraint
+  default: string; // Default value
 }
 
 /**
- * 用户输入表单控件 - 段落文本输入
- * @description 用于表单中的段落文本输入控件
+ * User Input Form Control - Paragraph Text Input
+ * @description A paragraph text input control for forms
  */
 export interface DifyParagraphControl {
-  label: string; // 控件展示标签名
-  variable: string; // 控件 ID
-  required: boolean; // 是否必填
-  default: string; // 默认值
+  label: string; // Display label for the control
+  variable: string; // Control ID
+  required: boolean; // Whether it is required
+  default: string; // Default value
 }
 
 /**
- * 用户输入表单控件 - 下拉选择
- * @description 用于表单中的下拉选择控件
+ * User Input Form Control - Select Dropdown
+ * @description A select dropdown control for forms
  */
 export interface DifySelectControl {
-  label: string; // 控件展示标签名
-  variable: string; // 控件 ID
-  required: boolean; // 是否必填
-  default: string; // 默认值
-  options: string[]; // 选项值列表
+  label: string; // Display label for the control
+  variable: string; // Control ID
+  required: boolean; // Whether it is required
+  default: string; // Default value
+  options: string[]; // List of option values
 }
 
 /**
- * 文件输入控件
- * @description 用于表单中的文件输入控件
+ * File Input Control
+ * @description A file input control for forms
  */
 export interface DifyFileInputControl {
-  label: string; // 控件展示标签名
-  variable: string; // 控件 ID
-  required: boolean; // 是否必填
-  default?: File[]; // 默认值（文件数组）
-  number_limits?: number; // 文件数量限制
-  allowed_file_types?: string[]; // 允许的文件类型
-  max_file_size_mb?: number; // 最大文件大小(MB)
+  label: string; // Display label for the control
+  variable: string; // Control ID
+  required: boolean; // Whether it is required
+  default?: File[]; // Default value (array of files)
+  number_limits?: number; // File count limit
+  allowed_file_types?: string[]; // Allowed file types
+  max_file_size_mb?: number; // Maximum file size (MB)
 }
 
 /**
- * 用户输入表单项
- * @description 用于表单中的用户输入项
+ * User Input Form Item
+ * @description A user input item within a form
  */
 export interface DifyUserInputFormItem {
   'text-input'?: DifyTextInputControl;
@@ -784,206 +796,206 @@ export interface DifyUserInputFormItem {
   paragraph?: DifyParagraphControl;
   select?: DifySelectControl;
   file?: DifyFileInputControl;
-  'file-list'?: DifyFileInputControl; // 多文件模式
+  'file-list'?: DifyFileInputControl; // Multi-file mode
 }
 
 /**
- * 图片上传配置
- * @description 用于配置图片上传相关的设置
+ * Image Upload Configuration
+ * @description Settings related to image uploads
  */
 export interface DifyImageUploadConfig {
-  enabled: boolean; // 是否开启
-  number_limits: number; // 图片数量限制，默认 3
-  transfer_methods: ('remote_url' | 'local_file')[]; // 传递方式列表，必选一个
+  enabled: boolean; // Whether it is enabled
+  number_limits: number; // Image count limit, default 3
+  transfer_methods: ('remote_url' | 'local_file')[]; // List of transfer methods, at least one is required
 }
 
 /**
- * 文档上传配置
- * @description 用于配置文档上传相关的设置
+ * Document Upload Configuration
+ * @description Settings related to document uploads
  */
 export interface DifyDocumentUploadConfig {
-  enabled: boolean; // 是否开启
-  number_limits: number; // 文档数量限制
-  transfer_methods: ('remote_url' | 'local_file')[]; // 传递方式列表
+  enabled: boolean; // Whether it is enabled
+  number_limits: number; // Document count limit
+  transfer_methods: ('remote_url' | 'local_file')[]; // List of transfer methods
 }
 
 /**
- * 音频上传配置
- * @description 用于配置音频上传相关的设置
+ * Audio Upload Configuration
+ * @description Settings related to audio uploads
  */
 export interface DifyAudioUploadConfig {
-  enabled: boolean; // 是否开启
-  number_limits: number; // 音频数量限制
-  transfer_methods: ('remote_url' | 'local_file')[]; // 传递方式列表
+  enabled: boolean; // Whether it is enabled
+  number_limits: number; // Audio count limit
+  transfer_methods: ('remote_url' | 'local_file')[]; // List of transfer methods
 }
 
 /**
- * 视频上传配置
- * @description 用于配置视频上传相关的设置
+ * Video Upload Configuration
+ * @description Settings related to video uploads
  */
 export interface DifyVideoUploadConfig {
-  enabled: boolean; // 是否开启
-  number_limits: number; // 视频数量限制
-  transfer_methods: ('remote_url' | 'local_file')[]; // 传递方式列表
+  enabled: boolean; // Whether it is enabled
+  number_limits: number; // Video count limit
+  transfer_methods: ('remote_url' | 'local_file')[]; // List of transfer methods
 }
 
 /**
- * 其他文件类型上传配置
- * @description 用于配置其他文件类型上传相关的设置
+ * Other File Types Upload Configuration
+ * @description Settings for uploading other file types
  */
 export interface DifyOtherUploadConfig {
-  enabled: boolean; // 是否开启
-  number_limits: number; // 文件数量限制
-  transfer_methods: ('remote_url' | 'local_file')[]; // 传递方式列表
-  custom_extensions?: string[]; // 自定义文件扩展名列表
+  enabled: boolean; // Whether it is enabled
+  number_limits: number; // File count limit
+  transfer_methods: ('remote_url' | 'local_file')[]; // List of transfer methods
+  custom_extensions?: string[]; // List of custom file extensions
 }
 
 /**
- * 文件上传配置
- * @description 用于配置文件上传相关的设置
+ * File Upload Configuration
+ * @description Settings related to file uploads
  */
 export interface DifyFileUploadConfig {
-  enabled?: boolean; // 顶层的文件上传总开关
-  allowed_file_types?: string[]; // 允许的文件类型列表
-  allowed_file_extensions?: string[]; // 允许的文件扩展名列表
-  allowed_file_upload_methods?: string[]; // 允许的上传方式
-  max_file_size_mb?: number; // 最大文件大小(MB)
-  number_limits?: number; // 文件数量限制（可能的字段名1）
-  max_files?: number; // 文件数量限制（可能的字段名2）
-  file_count_limit?: number; // 文件数量限制（可能的字段名3）
-  image?: DifyImageUploadConfig; // 图片设置
-  document?: DifyDocumentUploadConfig; // 文档设置
-  audio?: DifyAudioUploadConfig; // 音频设置
-  video?: DifyVideoUploadConfig; // 视频设置
-  other?: DifyOtherUploadConfig; // 其他文件类型设置
+  enabled?: boolean; // Top-level master switch for file uploads
+  allowed_file_types?: string[]; // List of allowed file types
+  allowed_file_extensions?: string[]; // List of allowed file extensions
+  allowed_file_upload_methods?: string[]; // Allowed upload methods
+  max_file_size_mb?: number; // Maximum file size (MB)
+  number_limits?: number; // File count limit (possible field name 1)
+  max_files?: number; // File count limit (possible field name 2)
+  file_count_limit?: number; // File count limit (possible field name 3)
+  image?: DifyImageUploadConfig; // Image settings
+  document?: DifyDocumentUploadConfig; // Document settings
+  audio?: DifyAudioUploadConfig; // Audio settings
+  video?: DifyVideoUploadConfig; // Video settings
+  other?: DifyOtherUploadConfig; // Other file type settings
 }
 
 /**
- * 系统参数配置
- * @description 用于配置系统相关的参数
+ * System Parameters Configuration
+ * @description System-related parameter configurations
  */
 export interface DifySystemParameters {
-  file_size_limit: number; // 文档上传大小限制 (MB)
-  image_file_size_limit: number; // 图片文件上传大小限制 (MB)
-  audio_file_size_limit: number; // 音频文件上传大小限制 (MB)
-  video_file_size_limit: number; // 视频文件上传大小限制 (MB)
+  file_size_limit: number; // Document upload size limit (MB)
+  image_file_size_limit: number; // Image file upload size limit (MB)
+  audio_file_size_limit: number; // Audio file upload size limit (MB)
+  video_file_size_limit: number; // Video file upload size limit (MB)
 }
 
 /**
- * 回答后推荐问题配置
- * @description 用于配置回答后推荐问题相关的设置
+ * Suggested Questions After Answer Configuration
+ * @description Settings for suggested questions after an answer is provided
  */
 export interface DifySuggestedQuestionsAfterAnswer {
-  enabled: boolean; // 是否开启
+  enabled: boolean; // Whether it is enabled
 }
 
 /**
- * 语音转文本配置
- * @description 用于配置语音转文本相关的设置
+ * Speech-to-Text Configuration
+ * @description Settings for speech-to-text functionality
  */
 export interface DifySpeechToText {
-  enabled: boolean; // 是否开启
+  enabled: boolean; // Whether it is enabled
 }
 
 /**
- * 文本转语音配置
- * @description 用于配置文本转语音相关的设置
+ * Text-to-Speech Configuration
+ * @description Settings for text-to-speech functionality
  */
 export interface DifyTextToSpeech {
-  enabled: boolean; // 是否开启
-  voice?: string; // 语音类型
-  language?: string; // 语言
-  autoPlay?: 'enabled' | 'disabled'; // 自动播放：enabled 开启, disabled 关闭
+  enabled: boolean; // Whether it is enabled
+  voice?: string; // Voice type
+  language?: string; // Language
+  autoPlay?: 'enabled' | 'disabled'; // Autoplay: enabled or disabled
 }
 
 /**
- * 引用和归属配置
- * @description 用于配置引用和归属相关的设置
+ * Retriever Resource (Citation and Attribution) Configuration
+ * @description Settings for citation and attribution
  */
 export interface DifyRetrieverResourceConfig {
-  enabled: boolean; // 是否开启
+  enabled: boolean; // Whether it is enabled
 }
 
 /**
- * 标记回复配置
- * @description 用于配置标记回复相关的设置
+ * Annotation Reply Configuration
+ * @description Settings for annotation replies
  */
 export interface DifyAnnotationReply {
-  enabled: boolean; // 是否开启
+  enabled: boolean; // Whether it is enabled
 }
 
 /**
- * 获取应用参数响应
- * @description 用于返回应用相关的参数
+ * Get Application Parameters Response
+ * @description Response containing application-related parameters
  */
 export interface DifyAppParametersResponse {
-  opening_statement: string; // 开场白
-  suggested_questions: string[]; // 开场推荐问题列表
-  suggested_questions_after_answer: DifySuggestedQuestionsAfterAnswer; // 启用回答后给出推荐问题
-  speech_to_text: DifySpeechToText; // 语音转文本
-  text_to_speech: DifyTextToSpeech; // 文本转语音
-  retriever_resource: DifyRetrieverResourceConfig; // 引用和归属
-  annotation_reply: DifyAnnotationReply; // 标记回复
-  user_input_form: DifyUserInputFormItem[]; // 用户输入表单配置
-  file_upload: DifyFileUploadConfig; // 文件上传配置
-  system_parameters: DifySystemParameters; // 系统参数
+  opening_statement: string; // Opening statement
+  suggested_questions: string[]; // List of suggested opening questions
+  suggested_questions_after_answer: DifySuggestedQuestionsAfterAnswer; // Enable suggested questions after answer
+  speech_to_text: DifySpeechToText; // Speech-to-text
+  text_to_speech: DifyTextToSpeech; // Text-to-speech
+  retriever_resource: DifyRetrieverResourceConfig; // Citation and attribution
+  annotation_reply: DifyAnnotationReply; // Annotation reply
+  user_input_form: DifyUserInputFormItem[]; // User input form configuration
+  file_upload: DifyFileUploadConfig; // File upload configuration
+  system_parameters: DifySystemParameters; // System parameters
 }
 
-// Workflow API 相关类型定义
+// Workflow API Related Type Definitions
 // POST /workflows/run
-// 基于完整的 OpenAPI 文档更新
+// Updated based on the complete OpenAPI documentation
 /**
- * Workflow 输入文件对象
- * @description 用于描述工作流输入文件的结构
+ * Workflow Input File Object
+ * @description Describes the structure of a workflow input file
  */
 export interface DifyWorkflowInputFile {
   type: 'document' | 'image' | 'audio' | 'video' | 'custom';
   transfer_method: 'remote_url' | 'local_file';
-  url?: string; // transfer_method 为 remote_url 时必需
-  upload_file_id?: string; // transfer_method 为 local_file 时必需
+  url?: string; // Required when transfer_method is 'remote_url'
+  upload_file_id?: string; // Required when transfer_method is 'local_file'
 }
 
 /**
- * Dify Workflow 请求体
- * @description 用于描述工作流请求的结构
+ * Dify Workflow Request Payload
+ * @description Describes the structure of a workflow request
  */
 export interface DifyWorkflowRequestPayload {
-  inputs: Record<string, any>; // 结构化输入参数，支持字符串、数字、布尔值、对象、文件数组
+  inputs: Record<string, any>; // Structured input parameters, supporting string, number, boolean, object, file array
   response_mode: 'streaming' | 'blocking';
   user: string;
-  // 注意：Workflow 没有 conversation_id 概念
+  // Note: Workflow does not have the concept of a conversation_id
 }
 
 /**
- * Dify Workflow 执行响应 (blocking模式)
- * @description 用于描述工作流执行响应的结构
+ * Dify Workflow Completion Response (blocking mode)
+ * @description Describes the structure of a workflow execution response
  */
 export interface DifyWorkflowCompletionResponse {
-  workflow_run_id: string; // UUID 格式
-  task_id: string; // UUID 格式
+  workflow_run_id: string; // UUID format
+  task_id: string; // UUID format
   data: DifyWorkflowFinishedData;
 }
 
 /**
- * Workflow 执行完成数据
- * @description 用于描述工作流执行完成的数据结构
+ * Workflow Finished Data
+ * @description Describes the data structure when a workflow execution is finished
  */
 export interface DifyWorkflowFinishedData {
-  id: string; // workflow 执行 ID (UUID)
-  workflow_id: string; // 关联 Workflow ID (UUID)
+  id: string; // Workflow execution ID (UUID)
+  workflow_id: string; // Associated Workflow ID (UUID)
   status: 'running' | 'succeeded' | 'failed' | 'stopped';
-  outputs?: Record<string, any> | null; // 结构化输出 (JSON)
+  outputs?: Record<string, any> | null; // Structured output (JSON)
   error?: string | null;
-  elapsed_time?: number | null; // 耗时(秒)
+  elapsed_time?: number | null; // Time elapsed (seconds)
   total_tokens?: number | null;
-  total_steps: number; // 总步数，默认 0
-  created_at: number; // 开始时间 (Unix timestamp)
-  finished_at: number; // 结束时间 (Unix timestamp)
+  total_steps: number; // Total steps, default 0
+  created_at: number; // Start time (Unix timestamp)
+  finished_at: number; // End time (Unix timestamp)
 }
 
 /**
- * Workflow SSE 事件 - workflow_started
- * @description event: workflow_started - 工作流执行开始
+ * Workflow SSE Event - workflow_started
+ * @description event: workflow_started - Workflow execution has started
  */
 export interface DifyWorkflowSseStartedEvent {
   event: 'workflow_started';
@@ -998,8 +1010,8 @@ export interface DifyWorkflowSseStartedEvent {
 }
 
 /**
- * Workflow SSE 事件 - workflow_finished
- * @description event: workflow_finished - 工作流执行完成
+ * Workflow SSE Event - workflow_finished
+ * @description event: workflow_finished - Workflow execution has completed
  */
 export interface DifyWorkflowSseFinishedEvent {
   event: 'workflow_finished';
@@ -1009,8 +1021,8 @@ export interface DifyWorkflowSseFinishedEvent {
 }
 
 /**
- * Workflow SSE 事件 - node_started
- * @description event: node_started - 工作流节点开始执行
+ * Workflow SSE Event - node_started
+ * @description event: node_started - A workflow node has started execution
  */
 export interface DifyWorkflowSseNodeStartedEvent {
   event: 'node_started';
@@ -1029,8 +1041,8 @@ export interface DifyWorkflowSseNodeStartedEvent {
 }
 
 /**
- * Workflow SSE 事件 - node_finished
- * @description event: node_finished - 工作流节点执行完成
+ * Workflow SSE Event - node_finished
+ * @description event: node_finished - A workflow node has finished execution
  */
 export interface DifyWorkflowSseNodeFinishedEvent {
   event: 'node_finished';
@@ -1056,8 +1068,8 @@ export interface DifyWorkflowSseNodeFinishedEvent {
 }
 
 /**
- * Workflow SSE 事件 - error
- * @description event: error - SSE流处理错误
+ * Workflow SSE Event - error
+ * @description event: error - An error occurred in the SSE stream processing
  */
 export interface DifyWorkflowSseErrorEvent {
   event: 'error';
@@ -1069,8 +1081,8 @@ export interface DifyWorkflowSseErrorEvent {
 }
 
 /**
- * 所有 Workflow SSE 事件的联合类型
- * @description 用于描述所有可能的 Workflow SSE 事件的联合类型
+ * Union type for all Workflow SSE events
+ * @description Describes the union type of all possible Workflow SSE events
  */
 export type DifyWorkflowSseEvent =
   | DifyWorkflowSseStartedEvent
@@ -1086,26 +1098,26 @@ export type DifyWorkflowSseEvent =
   | DifySseLoopCompletedEvent;
 
 /**
- * Workflow 流式响应接口
- * @description 用于描述工作流流式响应的接口
+ * Workflow Stream Response Interface
+ * @description Describes the interface for a workflow streaming response
  */
 export interface DifyWorkflowStreamResponse {
-  // 🎯 修复：节点执行进度流，支持所有 workflow 事件类型
+  // 🎯 Fix: Node execution progress stream, supporting all workflow event types
   progressStream: AsyncGenerator<DifyWorkflowSseEvent, void, undefined>;
 
-  // 获取 workflow_run_id
+  // Get workflow_run_id
   getWorkflowRunId: () => string | null;
 
-  // 获取 task_id
+  // Get task_id
   getTaskId: () => string | null;
 
-  // 完成时的 Promise，包含最终结果
+  // Promise that resolves on completion, containing the final result
   completionPromise: Promise<DifyWorkflowFinishedData>;
 }
 
 /**
- * Workflow API 错误码
- * @description 用于描述工作流 API 可能出现的错误码
+ * Workflow API Error Codes
+ * @description Describes possible error codes for the Workflow API
  */
 export type DifyWorkflowErrorCode =
   | 'invalid_param'
@@ -1115,169 +1127,169 @@ export type DifyWorkflowErrorCode =
   | 'model_currently_not_support'
   | 'workflow_request_error';
 
-// 获取应用基本信息 API 类型定义
+// Get Application Basic Info API Type Definition
 // GET /info
 /**
- * 获取应用基本信息响应
- * @description 用于返回应用的基本信息
+ * Get Application Basic Info Response
+ * @description Returns basic information about the application
  */
 export interface DifyAppInfoResponse {
-  name: string; // 应用名称
-  description: string; // 应用描述
-  tags: string[]; // 应用标签
+  name: string; // Application name
+  description: string; // Application description
+  tags: string[]; // Application tags
 }
 
-// 消息反馈 API 类型定义
+// Message Feedback API Type Definitions
 // POST /messages/:message_id/feedbacks
 /**
- * 消息反馈请求体
- * @description 用于描述消息反馈请求的结构
+ * Message Feedback Request Payload
+ * @description Describes the structure of a message feedback request
  */
 export interface DifyMessageFeedbackRequestPayload {
-  rating: 'like' | 'dislike' | null; // 反馈类型：点赞 'like'、点踩 'dislike'、撤销 'null'
-  user: string; // 用户标识符
-  content?: string; // 消息反馈的具体信息（可选）
+  rating: 'like' | 'dislike' | null; // Feedback type: 'like', 'dislike', or 'null' to retract
+  user: string; // User identifier
+  content?: string; // Specific feedback message (optional)
 }
 
 /**
- * 消息反馈响应体
- * @description 用于返回消息反馈响应的结构
+ * Message Feedback Response
+ * @description Describes the structure of a message feedback response
  */
 export interface DifyMessageFeedbackResponse {
-  result: 'success'; // 固定返回 success
+  result: 'success'; // Always returns 'success'
 }
 
-// 语音转文本 API 类型定义
+// Speech-to-Text API Type Definitions
 // POST /audio-to-text
 /**
- * 语音转文本请求体
- * @description 用于描述语音转文本请求的结构
+ * Speech-to-Text Request Payload
+ * @description Describes the structure of a speech-to-text request
  */
 export interface DifyAudioToTextRequestPayload {
-  file: File; // 音频文件
-  user: string; // 用户标识符
+  file: File; // Audio file
+  user: string; // User identifier
 }
 
 /**
- * 语音转文本响应体
- * @description 用于返回语音转文本响应的结构
+ * Speech-to-Text Response
+ * @description Describes the structure of a speech-to-text response
  */
 export interface DifyAudioToTextResponse {
-  text: string; // 转换后的文本
+  text: string; // The converted text
 }
 
-// Text-Generation API 类型定义
+// Text-Generation API Type Definitions
 // POST /completion-messages
 /**
- * 文本生成请求体
- * @description 用于描述文本生成请求的结构
+ * Text Generation Request Payload
+ * @description Describes the structure of a text generation request
  */
 export interface DifyCompletionRequestPayload {
-  inputs: Record<string, any>; // 输入参数
-  response_mode: 'streaming' | 'blocking'; // 响应模式
-  user: string; // 用户标识符
-  files?: DifyFile[]; // 文件列表（可选）
+  inputs: Record<string, any>; // Input parameters
+  response_mode: 'streaming' | 'blocking'; // Response mode
+  user: string; // User identifier
+  files?: DifyFile[]; // List of files (optional)
 }
 
 /**
- * 文本生成完成响应 (blocking模式)
- * @description 用于描述文本生成完成响应的结构
+ * Text Generation Completion Response (blocking mode)
+ * @description Describes the structure of a text generation completion response
  */
 export interface DifyCompletionResponse {
-  message_id: string; // 消息 ID
-  mode: string; // App 模式，固定为 "completion"
-  answer: string; // 生成的文本
-  metadata: Record<string, any>; // 元数据
-  usage: DifyUsage; // 使用量信息
-  created_at: number; // 创建时间戳
+  message_id: string; // Message ID
+  mode: string; // App mode, always "completion"
+  answer: string; // The generated text
+  metadata: Record<string, any>; // Metadata
+  usage: DifyUsage; // Usage information
+  created_at: number; // Creation timestamp
 }
 
 /**
- * 文本生成流式响应接口
- * @description 用于描述文本生成流式响应的接口
+ * Text Generation Stream Response Interface
+ * @description Describes the interface for a text generation streaming response
  */
 export interface DifyCompletionStreamResponse {
-  // 文本块流
+  // Stream of text chunks
   answerStream: AsyncGenerator<string, void, undefined>;
 
-  // 获取消息 ID
+  // Get Message ID
   getMessageId: () => string | null;
 
-  // 获取任务 ID
+  // Get Task ID
   getTaskId: () => string | null;
 
-  // 完成时的 Promise
+  // Promise that resolves on completion
   completionPromise: Promise<{
     usage?: DifyUsage;
     metadata?: Record<string, any>;
   }>;
 }
 
-// WebApp 设置 API 类型定义
+// WebApp Settings API Type Definitions
 // GET /site
 /**
- * WebApp 设置响应
- * @description 用于返回WebApp设置的响应
+ * WebApp Settings Response
+ * @description Returns the WebApp settings
  */
 export interface DifyWebAppSettingsResponse {
-  title: string; // WebApp 名称
-  chat_color_theme: string; // 聊天颜色主题, hex 格式
-  chat_color_theme_inverted: boolean; // 聊天颜色主题是否反转
-  icon_type: 'emoji' | 'image'; // 图标类型
-  icon: string; // 图标内容 (emoji 或图片 URL)
-  icon_background: string; // hex 格式的背景色
-  icon_url: string | null; // 图标 URL
-  description: string; // 描述
-  copyright: string; // 版权信息
-  privacy_policy: string; // 隐私政策链接
-  custom_disclaimer: string; // 自定义免责声明
-  default_language: string; // 默认语言
-  show_workflow_steps: boolean; // 是否显示工作流详情
-  use_icon_as_answer_icon: boolean; // 是否使用 WebApp 图标替换聊天中的机器人图标
+  title: string; // WebApp name
+  chat_color_theme: string; // Chat color theme, in hex format
+  chat_color_theme_inverted: boolean; // Whether the chat color theme is inverted
+  icon_type: 'emoji' | 'image'; // Icon type
+  icon: string; // Icon content (emoji or image URL)
+  icon_background: string; // Background color in hex format
+  icon_url: string | null; // Icon URL
+  description: string; // Description
+  copyright: string; // Copyright information
+  privacy_policy: string; // Privacy policy link
+  custom_disclaimer: string; // Custom disclaimer
+  default_language: string; // Default language
+  show_workflow_steps: boolean; // Whether to show workflow details
+  use_icon_as_answer_icon: boolean; // Whether to use the WebApp icon to replace the bot icon in the chat
 }
 
-// 应用 Meta 信息 API 类型定义
+// Application Meta Info API Type Definitions
 // GET /meta
 /**
- * 工具图标详情
- * @description 用于描述工具图标的结构
+ * Tool Icon Detail
+ * @description Describes the structure of a tool icon
  */
 export interface DifyToolIconDetail {
-  background: string; // hex 格式的背景色
+  background: string; // Background color in hex format
   content: string; // emoji
 }
 
 /**
- * 应用 Meta 信息响应
- * @description 用于返回应用的Meta信息
+ * Application Meta Info Response
+ * @description Returns the application's meta information
  */
 export interface DifyAppMetaResponse {
-  tool_icons: Record<string, string | DifyToolIconDetail>; // 工具图标，键为工具名称，值为图标 URL 或详情对象
+  tool_icons: Record<string, string | DifyToolIconDetail>; // Tool icons, key is the tool name, value is the icon URL or detail object
 }
 
 /**
- * Workflow 执行详情响应
- * @description 用于返回工作流执行详情响应的结构
+ * Workflow Run Detail Response
+ * @description Describes the structure of a workflow run detail response
  */
 export interface DifyWorkflowRunDetailResponse {
-  id: string; // workflow 执行 ID (UUID)
-  workflow_id: string; // 关联的 Workflow ID (UUID)
-  status: 'running' | 'succeeded' | 'failed' | 'stopped'; // 执行状态
-  inputs: string; // 任务输入内容的 JSON 字符串
-  outputs: Record<string, any> | null; // 任务输出内容的 JSON 对象
-  error: string | null; // 错误原因
-  total_steps: number; // 任务执行总步数
-  total_tokens: number; // 任务执行总 tokens
-  created_at: number; // 任务开始时间 (Unix timestamp)
-  finished_at: number | null; // 任务结束时间 (Unix timestamp)
-  elapsed_time: number | null; // 耗时(秒)
+  id: string; // Workflow execution ID (UUID)
+  workflow_id: string; // Associated Workflow ID (UUID)
+  status: 'running' | 'succeeded' | 'failed' | 'stopped'; // Execution status
+  inputs: string; // JSON string of the task input content
+  outputs: Record<string, any> | null; // JSON object of the task output content
+  error: string | null; // Reason for error
+  total_steps: number; // Total steps in the task execution
+  total_tokens: number; // Total tokens used in the task execution
+  created_at: number; // Task start time (Unix timestamp)
+  finished_at: number | null; // Task end time (Unix timestamp)
+  elapsed_time: number | null; // Time elapsed (seconds)
 }
 
-// Workflow 日志 API 类型定义
+// Workflow Logs API Type Definitions
 // GET /workflows/logs
 /**
- * Workflow 执行状态枚举
- * @description 用于描述工作流执行状态的枚举类型
+ * Workflow Execution Status Enum
+ * @description Describes the enum for workflow execution statuses
  */
 export type DifyWorkflowLogStatus =
   | 'succeeded'
@@ -1286,168 +1298,171 @@ export type DifyWorkflowLogStatus =
   | 'running';
 
 /**
- * 获取 Workflow 日志的请求参数
- * @description 用于描述获取工作流日志请求的参数结构
+ * Request Parameters for Getting Workflow Logs
+ * @description Describes the parameter structure for a workflow log request
  */
 export interface GetDifyWorkflowLogsParams {
-  keyword?: string; // 关键字（可选）
-  status?: DifyWorkflowLogStatus; // 执行状态（可选）
-  page?: number; // 当前页码，默认 1
-  limit?: number; // 每页条数，默认 20
+  keyword?: string; // Keyword (optional)
+  status?: DifyWorkflowLogStatus; // Execution status (optional)
+  page?: number; // Current page number, default 1
+  limit?: number; // Number of items per page, default 20
 }
 
 /**
- * Workflow 日志单条记录
- * @description 用于描述工作流日志单条记录的结构
+ * Workflow Log Single Entry
+ * @description Describes the structure of a single workflow log entry
  */
 export interface DifyWorkflowLogEntry {
-  id: string; // workflow 执行 ID (UUID)
-  workflow_id: string; // 关联的 Workflow ID (UUID)
-  status: DifyWorkflowLogStatus; // 执行状态
-  inputs: string; // 任务输入内容的 JSON 字符串
-  outputs: Record<string, any> | null; // 任务输出内容的 JSON 对象
-  error: string | null; // 错误原因
-  total_steps: number; // 任务执行总步数
-  total_tokens: number; // 任务执行总 tokens
-  created_at: number; // 任务开始时间 (Unix timestamp)
-  finished_at: number | null; // 任务结束时间 (Unix timestamp)
-  elapsed_time: number | null; // 耗时(秒)
+  id: string; // Workflow execution ID (UUID)
+  workflow_id: string; // Associated Workflow ID (UUID)
+  status: DifyWorkflowLogStatus; // Execution status
+  inputs: string; // JSON string of the task input content
+  outputs: Record<string, any> | null; // JSON object of the task output content
+  error: string | null; // Reason for error
+  total_steps: number; // Total steps in the task execution
+  total_tokens: number; // Total tokens used in the task execution
+  created_at: number; // Task start time (Unix timestamp)
+  finished_at: number | null; // Task end time (Unix timestamp)
+  elapsed_time: number | null; // Time elapsed (seconds)
 }
 
 /**
- * 获取 Workflow 日志的响应体
- * @description 用于返回获取工作流日志响应的结构
+ * Response Body for Getting Workflow Logs
+ * @description Returns the response for a workflow log request
  */
 export interface GetDifyWorkflowLogsResponse {
-  page: number; // 当前页码
-  limit: number; // 每页条数
-  total: number; // 总条数
-  has_more: boolean; // 是否还有更多数据
-  data: DifyWorkflowLogEntry[]; // 当前页码的数据
+  page: number; // Current page number
+  limit: number; // Number of items per page
+  total: number; // Total number of items
+  has_more: boolean; // Indicates if there is more data
+  data: DifyWorkflowLogEntry[]; // Data for the current page
 }
 
-// 标注列表 API 类型定义
+// Annotation List API Type Definitions
 // GET /apps/annotations
 /**
- * 单个标注条目
- * @description 用于描述单个标注条目的结构
+ * Single Annotation Item
+ * @description Describes the structure of a single annotation item
  */
 export interface DifyAnnotationItem {
-  id: string; // 标注ID (UUID格式)
-  question: string; // 问题
-  answer: string; // 答案内容
-  hit_count: number; // 命中次数
-  created_at: number; // 创建时间戳
+  id: string; // Annotation ID (UUID format)
+  question: string; // Question
+  answer: string; // Answer content
+  hit_count: number; // Hit count
+  created_at: number; // Creation timestamp
 }
 
 /**
- * 获取标注列表的请求参数
- * @description 用于描述获取标注列表请求的参数结构
+ * Request Parameters for Getting Annotation List
+ * @description Describes the parameter structure for an annotation list request
  */
 export interface GetDifyAnnotationsParams {
-  page?: number; // 分页页码，默认：1
-  limit?: number; // 每页数量，默认 20，范围 1-100
+  page?: number; // Page number for pagination, default: 1
+  limit?: number; // Number of items per page, default 20, range 1-100
 }
 
 /**
- * 标注列表响应
- * @description 用于返回标注列表响应的结构
+ * Annotation List Response
+ * @description Returns the response for an annotation list request
  */
 export interface DifyAnnotationListResponse {
-  data: DifyAnnotationItem[]; // 标注列表
-  has_more: boolean; // 是否有更多数据
-  limit: number; // 每页数量
-  total: number; // 总数量
-  page: number; // 当前页码
+  data: DifyAnnotationItem[]; // List of annotations
+  has_more: boolean; // Indicates if there is more data
+  limit: number; // Number of items per page
+  total: number; // Total number of items
+  page: number; // Current page number
 }
 
-// 创建标注 API 类型定义
+// Create Annotation API Type Definitions
 // POST /apps/annotations
 /**
- * 创建标注请求体
- * @description 用于描述创建标注请求的结构
+ * Create Annotation Request Payload
+ * @description Describes the structure of a create annotation request
  */
 export interface CreateDifyAnnotationRequest {
-  question: string; // 问题
-  answer: string; // 答案内容
+  question: string; // Question
+  answer: string; // Answer content
 }
 
 /**
- * 创建标注响应 (返回创建的标注条目)
- * @description 用于返回创建标注响应的结构
+ * Create Annotation Response (returns the created annotation item)
+ * @description Describes the structure of a create annotation response
  */
 export interface CreateDifyAnnotationResponse extends DifyAnnotationItem {
-  // 继承 DifyAnnotationItem 的所有字段
+  // Inherits all fields from DifyAnnotationItem
 }
 
-// 更新标注 API 类型定义
+// Update Annotation API Type Definitions
 // PUT /apps/annotations/{annotation_id}
 /**
- * 更新标注请求体
- * @description 用于描述更新标注请求的结构
+ * Update Annotation Request Payload
+ * @description Describes the structure of an update annotation request
  */
 export interface UpdateDifyAnnotationRequest {
-  question: string; // 问题
-  answer: string; // 答案内容
+  question: string; // Question
+  answer: string; // Answer content
 }
 
 /**
- * 更新标注响应 (返回更新后的标注条目)
- * @description 用于返回更新标注响应的结构
+ * Update Annotation Response (returns the updated annotation item)
+ * @description Describes the structure of an update annotation response
  */
 export interface UpdateDifyAnnotationResponse extends DifyAnnotationItem {
-  // 继承 DifyAnnotationItem 的所有字段
+  // Inherits all fields from DifyAnnotationItem
 }
 
-// 删除标注 API 类型定义
+// Delete Annotation API Type Definitions
 // DELETE /apps/annotations/{annotation_id}
-// 删除成功返回 204 状态码，无响应体
+// Successful deletion returns a 204 status code with no response body
 /**
- * 删除标注响应 (204 状态码，无内容)
- * @description 用于描述删除标注响应的结构
+ * Delete Annotation Response (204 status code, no content)
+ * @description Describes the structure of a delete annotation response
  */
 export interface DeleteDifyAnnotationResponse {
-  // 空接口，表示无响应体
+  // Empty interface, indicates no response body
 }
 
-// 标注回复初始设置 API 类型定义
+// Annotation Reply Initial Settings API Type Definitions
 // POST /apps/annotation-reply/{action}
 /**
- * 标注回复设置动作类型
- * @description 用于描述标注回复设置动作类型的枚举类型
+ * Annotation Reply Settings Action Type
+ * @description Describes the enum for annotation reply setting actions
  */
 export type DifyAnnotationReplyAction = 'enable' | 'disable';
 
 /**
- * 标注回复初始设置请求体
- * @description 用于描述标注回复初始设置请求的结构
+ * Initial Annotation Reply Settings Request Payload
+ * @description Describes the structure of an initial annotation reply settings request
  */
 export interface InitialDifyAnnotationReplySettingsRequest {
-  embedding_provider_name?: string | null; // （可选）指定的嵌入模型提供商名称
-  embedding_model_name?: string | null; // （可选）指定的嵌入模型名称
-  score_threshold: number; // 相似度阈值
+  embedding_provider_name?: string | null; // (Optional) Specified embedding model provider name
+  embedding_model_name?: string | null; // (Optional) Specified embedding model name
+  score_threshold: number; // Similarity threshold
 }
 
 /**
- * 异步任务响应
- * @description 用于描述异步任务响应的结构
+ * Asynchronous Job Response
+ * @description Describes the structure of an asynchronous job response
  */
 export interface DifyAsyncJobResponse {
-  job_id: string; // 任务 ID (UUID格式)
-  job_status: string; // 任务状态
+  job_id: string; // Job ID (UUID format)
+  job_status: string; // Job status
 }
 
 /**
- * 异步任务状态响应
- * @description 用于描述异步任务状态响应的结构
+ * Asynchronous Job Status Response
+ * @description Describes the structure of an asynchronous job status response
  */
 export interface DifyAsyncJobStatusResponse {
-  job_id: string; // 任务 ID (UUID格式)
-  job_status: string; // 任务状态
-  error_msg?: string | null; // 错误信息（如果任务失败）
+  job_id: string; // Job ID (UUID format)
+  job_status: string; // Job status
+  error_msg?: string | null; // Error message (if the job failed)
 }
 
-// 所有可能的 SSE 事件联合类型
+/**
+ * Union type for all possible SSE events
+ * @description A union type that encompasses all possible Server-Sent Events from Dify.
+ */
 export type DifySseEvent =
   | DifySseMessageEvent
   | DifySseMessageFileEvent

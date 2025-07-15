@@ -15,9 +15,6 @@ export default function AppsLayout({ children }: AppsLayoutProps) {
   const isMobile = useMobile();
   const { isDark } = useTheme();
 
-  // remove duplicate setMounted calls, now managed by global ClientLayout
-  // calculate the left margin of the main content area
-  // set the margin based on the sidebar expansion state, push the main content
   const getMainMarginLeft = () => {
     if (isMobile) return 'ml-0';
     return isExpanded ? 'ml-64' : 'ml-16';
@@ -35,7 +32,7 @@ export default function AppsLayout({ children }: AppsLayoutProps) {
         {isMounted && <MobileNavButton />}
       </div>
 
-      {/* main content area - app market page */}
+      {/* main content area */}
       <main
         className={cn(
           'h-screen w-full overflow-auto', // use w-full instead of flex-1

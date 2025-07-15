@@ -40,12 +40,7 @@ export default function TextGenerationPage({
 
   // --- app related state ---
   const { apps, fetchApps } = useAppListStore();
-  const {
-    currentAppId,
-    isValidating,
-    switchToSpecificApp,
-    error: appError,
-  } = useCurrentApp();
+  const { currentAppId, isValidating, switchToSpecificApp } = useCurrentApp();
   const { selectItem } = useSidebarStore();
 
   // --- app initialization state ---
@@ -152,6 +147,7 @@ export default function TextGenerationPage({
     fetchApps,
     switchToSpecificApp,
     selectItem,
+    t,
   ]);
 
   // --- when page is unloaded, clear the selected state ---
