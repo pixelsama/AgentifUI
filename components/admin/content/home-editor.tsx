@@ -8,10 +8,7 @@ import {
   SelectValue,
 } from '@components/ui/select';
 import type { SupportedLocale } from '@lib/config/language-config';
-import {
-  SUPPORTED_LANGUAGES,
-  getLanguageInfo,
-} from '@lib/config/language-config';
+import { getLanguageInfo } from '@lib/config/language-config';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { Plus, Trash2 } from 'lucide-react';
@@ -20,11 +17,31 @@ import React from 'react';
 
 import { useTranslations } from 'next-intl';
 
+interface FeatureItem {
+  title: string;
+  description: string;
+}
+
+interface HomeTranslation {
+  title?: string;
+  subtitle?: string;
+  features?: FeatureItem[];
+  getStarted?: string;
+  learnMore?: string;
+  copyright?: {
+    prefix?: string;
+    linkText?: string;
+    suffix?: string;
+  };
+}
+
 interface HomeEditorProps {
-  translations: Record<SupportedLocale, any>;
+  translations: Record<SupportedLocale, HomeTranslation>;
   currentLocale: SupportedLocale;
   supportedLocales: SupportedLocale[];
-  onTranslationsChange: (newTranslations: Record<SupportedLocale, any>) => void;
+  onTranslationsChange: (
+    newTranslations: Record<SupportedLocale, HomeTranslation>
+  ) => void;
   onLocaleChange: (newLocale: SupportedLocale) => void;
 }
 
@@ -39,10 +56,13 @@ export function HomeEditor({
   const t = useTranslations('pages.admin.content.editor');
   const currentTranslation = translations[currentLocale] || {};
 
-  const handleFieldChange = (field: string, value: any) => {
-    const newTranslations = JSON.parse(JSON.stringify(translations));
+  const handleFieldChange = (field: string, value: string | FeatureItem[]) => {
+    const newTranslations = JSON.parse(JSON.stringify(translations)) as Record<
+      SupportedLocale,
+      HomeTranslation
+    >;
     const fieldParts = field.split('.');
-    let current = newTranslations[currentLocale];
+    let current = newTranslations[currentLocale] as any;
 
     for (let i = 0; i < fieldParts.length - 1; i++) {
       if (!current[fieldParts[i]]) {
@@ -75,7 +95,7 @@ export function HomeEditor({
 
   const removeFeatureCard = (index: number) => {
     const newItems = (currentTranslation.features || []).filter(
-      (_: any, i: number) => i !== index
+      (_: FeatureItem, i: number) => i !== index
     );
     handleFieldChange('features', newItems);
   };
@@ -217,7 +237,7 @@ export function HomeEditor({
 
         <div className="space-y-4">
           {(currentTranslation.features || []).map(
-            (card: any, index: number) => (
+            (card: FeatureItem, index: number) => (
               <div
                 key={index}
                 className={cn(

@@ -10,23 +10,23 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 /**
- * 管理员按钮组件
- * 特点：
- * - 仅对管理员用户显示，提供进入管理后台的入口
- * - 使用与语言切换器一致的样式设计，参考 sidebar button 的悬停效果
- * - 支持多语言显示
+ * Admin Button
+ * Features:
+ * - Only show to admin users
+ * - Use the same style as the language switcher
+ * - Support multi-language display
  */
 export function AdminButton() {
   const { isAdmin } = useAdminAuth(false);
   const { isDark } = useTheme();
   const t = useTranslations('pages.admin');
 
-  // 非管理员用户不显示此按钮
+  // Only show to admin users
   if (!isAdmin) {
     return null;
   }
 
-  // 根据主题获取按钮样式：参考 sidebar button 的悬停效果
+  // Get button style based on theme: reference sidebar button hover effect
   const getButtonColors = () => {
     if (isDark) {
       return 'bg-stone-800/50 hover:bg-stone-600/60 text-gray-200 border-stone-600/30';

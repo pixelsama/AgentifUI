@@ -45,9 +45,7 @@ export const TagsSelector = ({ tags, onTagsChange }: TagsSelectorProps) => {
         {t('tagsLabel')}
       </label>
       <div className="space-y-3">
-        {/* 预定义标签选择 - 按类别分组 */}
         <div className="space-y-3">
-          {/* 模型类型 */}
           <div>
             <div
               className={cn(
@@ -85,7 +83,6 @@ export const TagsSelector = ({ tags, onTagsChange }: TagsSelectorProps) => {
             </div>
           </div>
 
-          {/* 应用场景 */}
           <div>
             <div
               className={cn(
@@ -123,7 +120,6 @@ export const TagsSelector = ({ tags, onTagsChange }: TagsSelectorProps) => {
             </div>
           </div>
 
-          {/* 技术特性 */}
           <div>
             <div
               className={cn(
@@ -162,7 +158,6 @@ export const TagsSelector = ({ tags, onTagsChange }: TagsSelectorProps) => {
           </div>
         </div>
 
-        {/* 自定义标签输入 - 更小的输入框 */}
         <div className="flex gap-2">
           <input
             type="text"
@@ -185,7 +180,6 @@ export const TagsSelector = ({ tags, onTagsChange }: TagsSelectorProps) => {
           />
         </div>
 
-        {/* 已选标签显示 - 更小的标签 */}
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {tags.map((tag, index) => (

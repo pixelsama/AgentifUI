@@ -1,6 +1,8 @@
 'use client';
 
 import { useTheme } from '@lib/hooks/use-theme';
+import type { DifyAppType } from '@lib/types/dify-app-types';
+import type { DifyParametersSimplifiedConfig } from '@lib/types/dify-parameters';
 import { cn } from '@lib/utils';
 import { Eye, EyeOff, Globe, Key } from 'lucide-react';
 
@@ -18,14 +20,26 @@ interface Instance {
   provider_id?: string;
 }
 
-interface ApiConfigFieldsProps {
-  formData: {
-    config: {
-      api_url: string;
+interface InstanceFormData {
+  instance_id: string;
+  display_name: string;
+  description: string;
+  api_path: string;
+  apiKey: string;
+  config: {
+    api_url: string;
+    app_metadata: {
+      app_type: 'model' | 'marketplace';
+      dify_apptype: DifyAppType;
+      tags: string[];
     };
-    apiKey: string;
+    dify_parameters: DifyParametersSimplifiedConfig;
   };
-  setFormData: (updater: (prev: any) => any) => void;
+}
+
+interface ApiConfigFieldsProps {
+  formData: InstanceFormData;
+  setFormData: React.Dispatch<React.SetStateAction<InstanceFormData>>;
   isEditing: boolean;
   hasApiKey: boolean;
   instance?: Instance | null;
@@ -72,7 +86,6 @@ export const ApiConfigFields = ({
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      {/* --- API URL 输入框 - 禁用修改，显示供应商绑定逻辑 --- */}
       <div>
         <div className="mb-2 flex items-center justify-between">
           <label
@@ -84,7 +97,6 @@ export const ApiConfigFields = ({
             {t('apiUrl')}
           </label>
 
-          {/* 供应商绑定提示标签 */}
           <span
             className={cn(
               'inline-flex items-center gap-1 rounded-full px-2 py-1 font-serif text-xs font-medium',
@@ -101,10 +113,9 @@ export const ApiConfigFields = ({
         <input
           type="url"
           value={getApiUrl()}
-          disabled={true} // 禁用 URL 修改
+          disabled={true}
           className={cn(
             'w-full rounded-lg border px-3 py-2 font-serif',
-            // 禁用状态样式
             'cursor-not-allowed opacity-75',
             isDark
               ? 'border-stone-600 bg-stone-800/50 text-stone-300'
@@ -140,7 +151,6 @@ export const ApiConfigFields = ({
         </div>
       </div>
 
-      {/* --- API 密钥字段 --- */}
       <div>
         <div className="mb-2 flex items-start justify-between">
           <label
@@ -152,7 +162,6 @@ export const ApiConfigFields = ({
             {t('apiKey')} {!isEditing && '*'}
           </label>
 
-          {/* --- API密钥配置状态标签 - 靠上对齐，避免挤压输入框 --- */}
           {isEditing && (
             <span
               className={cn(
@@ -203,7 +212,6 @@ export const ApiConfigFields = ({
           </button>
         </div>
 
-        {/* --- 提示信息（仅在编辑模式且已配置时显示） --- */}
         {isEditing && hasApiKey && (
           <p
             className={cn(

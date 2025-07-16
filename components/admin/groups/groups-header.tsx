@@ -46,7 +46,7 @@ export function GroupsHeader({ onCreateGroup }: GroupsHeaderProps) {
       </div>
 
       <div className="flex items-center gap-3">
-        {/* 刷新按钮 */}
+        {/* Refresh button */}
         <button
           onClick={handleRefresh}
           disabled={loading.groups || loading.stats}
@@ -68,7 +68,7 @@ export function GroupsHeader({ onCreateGroup }: GroupsHeaderProps) {
           <span className="hidden sm:inline">{t('refreshData')}</span>
         </button>
 
-        {/* 创建群组按钮 */}
+        {/* Create group button */}
         <button
           onClick={onCreateGroup}
           className={cn(

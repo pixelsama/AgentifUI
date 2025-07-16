@@ -6,29 +6,20 @@ import type { DifyParametersSimplifiedConfig } from '@lib/types/dify-parameters'
 import { cn } from '@lib/utils';
 import {
   BookOpen,
-  Check,
   ChevronDown,
   ChevronRight,
-  Circle,
   ExternalLink,
-  File,
-  FileText,
   FormInput,
-  Globe,
-  Image,
   MessageSquare,
   Mic,
-  Music,
   Plus,
   RotateCcw,
   Save,
-  Settings,
   Settings2,
   Sparkles,
   Tag,
   Trash2,
   Upload,
-  Video,
   Volume2,
   X,
 } from 'lucide-react';
@@ -62,7 +53,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
   const [hasChanges, setHasChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // --- 文件上传配置状态 ---
+  // --- File upload configuration state ---
   const [fileUploadEnabled, setFileUploadEnabled] = useState(false);
   const [showFileUploadModal, setShowFileUploadModal] = useState(false);
   const [uploadMethod, setUploadMethod] = useState<'local' | 'url' | 'both'>(
@@ -72,9 +63,9 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
   const [enabledFileTypes, setEnabledFileTypes] = useState<Set<string>>(
     new Set(['image'])
   );
-  const [customFileTypes, setCustomFileTypes] = useState<string>(''); // 新增：自定义文件类型
+  const [customFileTypes, setCustomFileTypes] = useState<string>(''); // custom file types
 
-  // --- 初始状态保存（用于取消操作） ---
+  // --- Initial state for cancel operation ---
   const [initialFileUploadState, setInitialFileUploadState] = useState({
     fileUploadEnabled: false,
     uploadMethod: 'both' as 'local' | 'url' | 'both',
@@ -88,7 +79,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
     setHasChanges(false);
     setIsInitialized(false);
 
-    // 🎯 更新：初始化所有配置字段的默认值
+    // Initialize default configuration values
     const initializeConfig = () => {
       const initializedConfig: DifyParametersSimplifiedConfig = {
         opening_statement: config.opening_statement || '',
@@ -100,8 +91,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
         retriever_resource: config.retriever_resource || { enabled: false },
         annotation_reply: config.annotation_reply || { enabled: false },
         user_input_form: config.user_input_form || [],
-        // 🎯 修复：不要覆盖从 Dify 同步来的 file_upload 配置
-        // 只有当 config.file_upload 为 undefined 时才设置默认值
+        // Preserve file_upload config from Dify API
         file_upload: config.file_upload,
         system_parameters: config.system_parameters || {
           file_size_limit: 15,
@@ -117,24 +107,24 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
 
     initializeConfig();
 
-    // 初始化文件上传配置状态
+    // Initialize file upload state
     const initializeFileUploadState = () => {
       const fileUploadConfig = config.file_upload;
 
-      // 🎯 文件上传配置初始化完成，移除调试日志
-      // 🎯 修复：根据实际的 Dify API 返回格式检测文件上传是否启用
-      // 实际格式：{enabled: true, image: {...}, allowed_file_types: [...]}
-      // 而不是我们之前假设的：{image: {enabled: true, ...}}
+      // Detect file upload enabled state from Dify API format
       const hasFileUpload = !!(
-        fileUploadConfig?.enabled || // 检查顶层的 enabled 字段
-        fileUploadConfig?.image?.enabled || // 兼容标准格式
+        fileUploadConfig?.enabled || // Check the top-level enabled field
+        fileUploadConfig?.image?.enabled || // Compatible with standard format
         fileUploadConfig?.document?.enabled ||
         fileUploadConfig?.audio?.enabled ||
         fileUploadConfig?.video?.enabled ||
         fileUploadConfig?.other?.enabled
       );
 
-      console.log('[文件上传初始化] 检测到文件上传启用状态:', hasFileUpload);
+      console.log(
+        '[File upload initialization] Detected file upload enabled state:',
+        hasFileUpload
+      );
 
       let uploadMethodValue: 'local' | 'url' | 'both' = 'both';
       let maxFilesValue = 3;
@@ -142,12 +132,10 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
       let customFileTypesValue = '';
 
       if (hasFileUpload && fileUploadConfig) {
-        // 🎯 修复：根据实际的 Dify API 返回格式获取配置参数
-        // 优先从顶层字段获取，然后从具体文件类型配置获取
-        // 从顶层配置或第一个启用的文件类型获取通用配置
+        // Get config from Dify API format
         let configSource = null;
         if (fileUploadConfig.allowed_file_upload_methods) {
-          // 使用顶层配置
+          // Use top-level configuration
           const methods = fileUploadConfig.allowed_file_upload_methods || [];
           if (
             methods.includes('local_file') &&
@@ -160,14 +148,14 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
             uploadMethodValue = 'url';
           }
 
-          // 获取文件数量限制
+          // Get file number limit
           maxFilesValue =
             fileUploadConfig.number_limits ||
             fileUploadConfig.max_files ||
             fileUploadConfig.file_count_limit ||
-            3; // 默认值
+            3; // Default value
         } else {
-          // 回退到具体文件类型配置
+          // Fall back to specific file type configuration
           configSource =
             fileUploadConfig.image ||
             fileUploadConfig.document ||
@@ -191,40 +179,41 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
           }
         }
 
-        // 🎯 修复：根据实际的 API 返回格式设置启用的文件类型
-        // 从 allowed_file_types 字段或具体的文件类型配置中获取
-        // 注意：Dify 中"其他文件类型"与前四个类型是互斥的
+        // Set enabled file types from API response
         if (fileUploadConfig.allowed_file_types) {
-          // 从顶层的 allowed_file_types 字段获取
+          // Get the enabled file types from the allowed_file_types field
           const allowedTypes = fileUploadConfig.allowed_file_types;
 
-          // 检查是否包含标准类型
+          // Check if it contains standard types
           const hasStandardTypes = allowedTypes.some(type =>
             ['image', 'document', 'audio', 'video'].includes(type)
           );
 
           if (hasStandardTypes) {
-            // 如果有标准类型，只添加标准类型
+            // If there are standard types, only add standard types
             if (allowedTypes.includes('image')) enabledTypesSet.add('image');
             if (allowedTypes.includes('document'))
               enabledTypesSet.add('document');
             if (allowedTypes.includes('audio')) enabledTypesSet.add('audio');
             if (allowedTypes.includes('video')) enabledTypesSet.add('video');
           } else if (allowedTypes.includes('custom')) {
-            // 如果包含 custom，说明选择了"其他文件类型"
+            // If it contains custom, it means "Other file types" is selected
             enabledTypesSet.add('other');
-            // 从 allowed_file_extensions 获取自定义扩展名
+            // Get the custom extensions from the allowed_file_extensions field
             if (fileUploadConfig.allowed_file_extensions) {
               customFileTypesValue =
                 fileUploadConfig.allowed_file_extensions.join(', ');
             }
           } else {
-            // 如果没有标准类型也没有custom，可能是其他未知类型
-            console.warn('[文件上传初始化] 未知的文件类型:', allowedTypes);
+            // If there are no standard types and no custom, it may be other unknown types
+            console.warn(
+              '[File upload initialization] Unknown file types:',
+              allowedTypes
+            );
             enabledTypesSet.add('other');
           }
         } else {
-          // 回退到检查具体的文件类型配置
+          // Fall back to checking the specific file type configuration
           if (fileUploadConfig.image?.enabled) enabledTypesSet.add('image');
           if (fileUploadConfig.document?.enabled)
             enabledTypesSet.add('document');
@@ -233,14 +222,14 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
           if (fileUploadConfig.other?.enabled) {
             enabledTypesSet.add('other');
             customFileTypesValue =
-              (fileUploadConfig.other as any).custom_extensions?.join(', ') ||
-              '';
+              (
+                fileUploadConfig.other as { custom_extensions?: string[] }
+              ).custom_extensions?.join(', ') || '';
           }
         }
       }
 
-      // 如果没有启用任何类型，应该保持空集合，让用户自己选择
-      // 不再默认启用任何文件类型
+      // Keep empty set when no types enabled
 
       const newState = {
         fileUploadEnabled: hasFileUpload,
@@ -250,14 +239,14 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
         customFileTypes: customFileTypesValue,
       };
 
-      // 设置当前状态
+      // Update current state
       setFileUploadEnabled(newState.fileUploadEnabled);
       setUploadMethod(newState.uploadMethod);
       setMaxFiles(newState.maxFiles);
       setEnabledFileTypes(newState.enabledFileTypes);
       setCustomFileTypes(newState.customFileTypes);
 
-      // 保存初始状态
+      // Save initial state
       setInitialFileUploadState(newState);
     };
 
@@ -282,17 +271,20 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
     setExpandedSections(newExpanded);
   };
 
-  const updateConfig = (path: string, value: any) => {
+  const updateConfig = (path: string, value: unknown) => {
     setLocalConfig(prev => {
       const newConfig = { ...prev };
       const keys = path.split('.');
-      let current: any = newConfig;
+      let current: Record<string, unknown> = newConfig as Record<
+        string,
+        unknown
+      >;
 
       for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]]) {
           current[keys[i]] = {};
         }
-        current = current[keys[i]];
+        current = current[keys[i]] as Record<string, unknown>;
       }
 
       current[keys[keys.length - 1]] = value;
@@ -322,7 +314,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
     onSave(localConfig);
     setHasChanges(false);
 
-    // 更新初始状态
+    // Update the initial state
     setInitialFileUploadState({
       fileUploadEnabled,
       uploadMethod,
@@ -336,7 +328,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
     setLocalConfig(config);
     setHasChanges(false);
 
-    // 恢复文件上传状态到初始状态
+    // Restore the file upload state to the initial state
     setFileUploadEnabled(initialFileUploadState.fileUploadEnabled);
     setUploadMethod(initialFileUploadState.uploadMethod);
     setMaxFiles(initialFileUploadState.maxFiles);
@@ -357,17 +349,25 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
   const handleFileUploadToggle = (enabled: boolean) => {
     setFileUploadEnabled(enabled);
     if (!enabled) {
-      // 关闭时清空本地配置，但保持表单状态供用户重新配置
+      // When closing, clear the local configuration, but keep the form state for the user to reconfigure
       updateConfig('file_upload', undefined);
     } else {
-      // 开启时根据当前表单状态生成配置
+      // When opening, generate the configuration based on the current form state
       generateFileUploadConfig();
     }
   };
 
   const generateFileUploadConfig = () => {
-    // 🎯 修复：根据用户选择的文件类型生成对应的配置
-    const fileUploadConfig: any = {};
+    // Generate configuration from form state
+    const fileUploadConfig: Record<
+      string,
+      {
+        enabled: boolean;
+        number_limits: number;
+        transfer_methods: string[];
+        custom_extensions?: string[];
+      }
+    > = {};
 
     const transferMethods =
       uploadMethod === 'local'
@@ -437,8 +437,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
   };
 
   const handleFileUploadCancel = () => {
-    // 取消时恢复到打开模态框前的状态
-    // 不改变fileUploadEnabled状态，因为这是在外层控制的
+    // Restore state before modal opened
     setShowFileUploadModal(false);
   };
 
@@ -446,7 +445,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
 
   return (
     <>
-      {/* --- 背景遮罩 --- */}
+      {/* Background overlay */}
       <div
         className={cn(
           'fixed inset-0 z-50 cursor-pointer transition-opacity duration-300',
@@ -456,7 +455,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
         onClick={onClose}
       />
 
-      {/* --- 侧边栏 --- */}
+      {/* Sidebar panel */}
       <div
         className={cn(
           'fixed top-0 right-0 bottom-0 z-50 w-[520px]',
@@ -464,7 +463,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
           isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
-        {/* --- 弹窗容器，留上下空间 --- */}
+        {/* Modal container */}
         <div className="flex h-full flex-col p-4">
           <div
             className={cn(
@@ -475,14 +474,14 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                 : 'border-stone-200 bg-white'
             )}
           >
-            {/* --- 头部 --- */}
+            {/* Header */}
             <div
               className={cn(
                 'flex flex-shrink-0 items-center justify-between border-b p-6',
                 isDark ? 'border-stone-700' : 'border-stone-200'
               )}
             >
-              {/* 标题 */}
+              {/* Title */}
               <h2
                 className={cn(
                   'font-serif text-xl font-bold',
@@ -492,7 +491,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                 {t('title', { instanceName })}
               </h2>
 
-              {/* 关闭按钮 */}
+              {/* Close button */}
               <button
                 onClick={onClose}
                 className={cn(
@@ -506,10 +505,10 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
               </button>
             </div>
 
-            {/* --- 内容区域 --- */}
+            {/* Content area */}
             <div className="min-h-0 flex-1 overflow-y-auto">
               <div className="space-y-6 p-6 pb-8">
-                {/* --- 开场白配置 --- */}
+                {/* Opening statement config */}
                 <div className="space-y-4">
                   <button
                     onClick={() => toggleSection('basic')}
@@ -560,7 +559,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                           : 'border-stone-200 bg-stone-50/50'
                       )}
                     >
-                      {/* 开场白内容 */}
+                      {/* Opening statement */}
                       <div>
                         <label
                           className={cn(
@@ -588,7 +587,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                         />
                       </div>
 
-                      {/* 开场推荐问题 */}
+                      {/* Suggested questions */}
                       <div>
                         <label
                           className={cn(
@@ -655,7 +654,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   )}
                 </div>
 
-                {/* --- 回答后推荐问题配置 --- */}
+                {/* Post-answer suggestions */}
                 <div className="space-y-4">
                   <div
                     className={cn(
@@ -721,7 +720,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   </div>
                 </div>
 
-                {/* --- 文件上传配置 --- */}
+                {/* File upload config */}
                 <div className="space-y-4">
                   <div
                     className={cn(
@@ -747,7 +746,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                     </div>
                     <div className="flex h-6 items-center gap-3">
                       {' '}
-                      {/* 固定高度防止变化 */}
+                      {/* Fixed height to prevent changes */}
                       {fileUploadEnabled && (
                         <button
                           onClick={openFileUploadModal}
@@ -797,7 +796,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   </div>
                 </div>
 
-                {/* --- 语音转文本配置 --- */}
+                {/* Speech-to-text config */}
                 <div className="space-y-4">
                   <div
                     className={cn(
@@ -859,7 +858,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   </div>
                 </div>
 
-                {/* --- 文本转语音配置 --- */}
+                {/* Text-to-speech config */}
                 <div className="space-y-4">
                   <button
                     onClick={() => toggleSection('tts')}
@@ -918,7 +917,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                           : 'border-stone-200 bg-stone-50/50'
                       )}
                     >
-                      {/* 启用开关 */}
+                      {/* Enable switch */}
                       <div className="flex items-center justify-between">
                         <label
                           className={cn(
@@ -967,7 +966,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                         </label>
                       </div>
 
-                      {/* 语音类型 */}
+                      {/* Voice type */}
                       {localConfig.text_to_speech?.enabled && (
                         <>
                           <div>
@@ -1000,7 +999,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                             />
                           </div>
 
-                          {/* 语言 */}
+                          {/* Language */}
                           <div>
                             <label
                               className={cn(
@@ -1045,7 +1044,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                             </select>
                           </div>
 
-                          {/* 自动播放 */}
+                          {/* Auto play */}
                           <div>
                             <label
                               className={cn(
@@ -1108,7 +1107,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   )}
                 </div>
 
-                {/* --- 引用和归属配置 --- */}
+                {/* Retriever resource config */}
                 <div className="space-y-4">
                   <div
                     className={cn(
@@ -1172,7 +1171,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   </div>
                 </div>
 
-                {/* --- 标记回复配置 --- */}
+                {/* Annotation reply config */}
                 <div className="space-y-4">
                   <div
                     className={cn(
@@ -1234,7 +1233,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   </div>
                 </div>
 
-                {/* --- 用户输入表单配置 --- */}
+                {/* User input form config */}
                 <div className="space-y-4">
                   <button
                     onClick={() => toggleSection('user_input')}
@@ -1382,7 +1381,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   )}
                 </div>
 
-                {/* --- 系统参数配置 --- */}
+                {/* System parameters config */}
                 <div className="space-y-4">
                   <button
                     onClick={() => toggleSection('system')}
@@ -1424,7 +1423,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                       )}
                     >
                       <div className="grid grid-cols-2 gap-4">
-                        {/* 文档上传大小限制 */}
+                        {/* Document upload size limit */}
                         <div>
                           <label
                             className={cn(
@@ -1457,7 +1456,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                           />
                         </div>
 
-                        {/* 图片上传大小限制 */}
+                        {/* Image upload size limit */}
                         <div>
                           <label
                             className={cn(
@@ -1490,7 +1489,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                           />
                         </div>
 
-                        {/* 音频上传大小限制 */}
+                        {/* Audio upload size limit */}
                         <div>
                           <label
                             className={cn(
@@ -1523,7 +1522,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                           />
                         </div>
 
-                        {/* 视频上传大小限制 */}
+                        {/* Video upload size limit */}
                         <div>
                           <label
                             className={cn(
@@ -1562,7 +1561,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
               </div>
             </div>
 
-            {/* --- 底部操作栏 --- */}
+            {/* Action bar */}
             <div
               className={cn(
                 'flex-shrink-0 border-t p-6',
@@ -1619,7 +1618,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
         </div>
       </div>
 
-      {/* --- 文件上传配置小模态框 --- */}
+      {/* File upload modal */}
       {showFileUploadModal && (
         <>
           <div
@@ -1636,7 +1635,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                     : 'border-stone-200 bg-white'
                 )}
               >
-                {/* --- 模态框头部 --- */}
+                {/* Modal header */}
                 <div
                   className={cn(
                     'flex flex-shrink-0 items-center justify-between border-b p-4',
@@ -1664,10 +1663,10 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   </button>
                 </div>
 
-                {/* --- 模态框内容区域（可滚动） --- */}
+                {/* Modal content */}
                 <div className="min-h-0 flex-1 overflow-y-auto p-4">
                   <div className="space-y-4">
-                    {/* --- 上传文件类型 --- */}
+                    {/* Upload method */}
                     <div>
                       <label
                         className={cn(
@@ -1726,7 +1725,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                       </div>
                     </div>
 
-                    {/* --- 最大上传数 --- */}
+                    {/* Max files */}
                     <div>
                       <label
                         className={cn(
@@ -1767,7 +1766,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                       </div>
                     </div>
 
-                    {/* --- 支持的文件类型 --- */}
+                    {/* File types */}
                     <div>
                       <label
                         className={cn(
@@ -1863,7 +1862,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                                   />
                                 </div>
 
-                                {/* --- 其他文件类型的自定义输入 --- */}
+                                {/* Custom file types */}
                                 {fileType === 'other' && isEnabled && (
                                   <div
                                     className={cn(
@@ -1924,7 +1923,7 @@ const DifyParametersPanel: React.FC<DifyParametersPanelProps> = ({
                   </div>
                 </div>
 
-                {/* --- 模态框底部按钮 --- */}
+                {/* Modal actions */}
                 <div
                   className={cn(
                     'flex flex-shrink-0 gap-2 border-t p-4',

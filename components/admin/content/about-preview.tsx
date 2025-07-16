@@ -5,8 +5,6 @@ import { cn } from '@lib/utils';
 
 import React from 'react';
 
-// 移除对 about-editor 的依赖，因为类型现在在 page.tsx 中管理
-// 重新定义类型，因为它们将从 about-config.ts 中删除
 export interface ValueCard {
   id: string;
   title: string;
@@ -30,7 +28,6 @@ interface AboutPreviewProps {
 export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
   const { isDark } = useTheme();
 
-  // 与About页面完全一致的颜色系统
   const getColors = () => {
     if (isDark) {
       return {
@@ -65,7 +62,6 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
 
   const colors = getColors();
 
-  // 根据预览设备类型设置容器样式和尺寸
   const getDeviceStyles = () => {
     switch (previewDevice) {
       case 'mobile':
@@ -101,7 +97,6 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
 
   const deviceStyles = getDeviceStyles();
 
-  // 根据设备调整字体大小和间距，与About页面保持一致
   const getResponsiveClasses = () => {
     switch (previewDevice) {
       case 'mobile':
@@ -187,7 +182,6 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
           <div className={deviceStyles.content}>
             <main className={deviceStyles.mainClass}>
               <div className={deviceStyles.innerContainer}>
-                {/* Title section - fully consistent with About page */}
                 <section
                   className={cn('text-center', responsive.spacing.section)}
                 >
@@ -210,7 +204,6 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
                   </p>
                 </section>
 
-                {/* Mission section - fully consistent with About page */}
                 <section className={responsive.spacing.section}>
                   <p
                     className={cn(
@@ -222,7 +215,6 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
                   </p>
                 </section>
 
-                {/* Values section - fully consistent with About page, uses correct grid layout based on device type */}
                 <section className={responsive.spacing.section}>
                   <div
                     className={cn(
@@ -235,7 +227,7 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
                       responsive.spacing.cardGap
                     )}
                   >
-                    {config.valueCards.map((value, index) => (
+                    {config.valueCards.map(value => (
                       <div
                         key={value.id}
                         className={cn(
@@ -268,7 +260,6 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
                   </div>
                 </section>
 
-                {/* Call-to-action button - fully consistent with About page */}
                 <section
                   className={cn('text-center', responsive.spacing.section)}
                 >
@@ -283,7 +274,6 @@ export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
                   </button>
                 </section>
 
-                {/* Footer information - fully consistent with About page */}
                 <div
                   className={cn(
                     'text-center',

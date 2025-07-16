@@ -3,7 +3,7 @@
 import { useTheme } from '@lib/hooks/use-theme';
 import { Provider } from '@lib/types/database';
 import { cn } from '@lib/utils';
-import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 
 import React, { useState } from 'react';
 
@@ -32,23 +32,19 @@ export function CustomProviderSelector({
 
   const defaultPlaceholder = placeholder || t('placeholder');
 
-  // 获取当前选中的提供商信息
   const selectedProvider = selectedProviderId
     ? providers.find(p => p.id === selectedProviderId)
     : null;
 
-  // 处理提供商选择
   const handleProviderSelect = (providerId: string) => {
     onProviderChange(providerId);
     setIsOpen(false);
   };
 
-  // 过滤活跃的提供商
   const activeProviders = providers.filter(p => p.is_active);
 
   return (
     <div className={cn('relative', className)}>
-      {/* Main selection button: responsive design */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -56,21 +52,21 @@ export function CustomProviderSelector({
           'flex w-full items-center justify-between px-3 py-2 font-serif text-sm',
           'rounded-md border transition-all duration-200 ease-in-out',
           'focus:ring-2 focus:ring-offset-1 focus:outline-none',
-          // 基础样式
+          // Base style
           isDark
             ? 'border-stone-600 bg-stone-700 text-stone-200'
             : 'border-stone-300 bg-white text-stone-700',
-          // 悬停样式
+          // Hover style
           isDark
             ? 'hover:border-stone-500 hover:bg-stone-600'
             : 'hover:border-stone-400 hover:bg-stone-50',
-          // 焦点样式
+          // Focus style
           isDark
             ? 'focus:border-stone-500 focus:ring-stone-500'
             : 'focus:border-stone-400 focus:ring-stone-400',
-          // 错误样式
+          // Error style
           error && 'border-red-500 focus:ring-red-500',
-          // 响应式间距
+          // Responsive spacing
           'sm:px-4 sm:py-2.5'
         )}
       >
@@ -94,33 +90,32 @@ export function CustomProviderSelector({
         </div>
       </button>
 
-      {/* Error message display */}
       {error && <p className="mt-1 font-serif text-sm text-red-600">{error}</p>}
 
       {/* Dropdown options menu: responsive design */}
       {isOpen && (
         <>
-          {/* 背景遮罩 */}
+          {/* Background mask */}
           <div
             className="fixed inset-0 z-[90]"
             onClick={() => setIsOpen(false)}
           />
 
-          {/* 下拉选项 */}
+          {/* Dropdown options */}
           <div
             className={cn(
               'absolute top-full right-0 left-0 z-[95] mt-1',
               'overflow-hidden rounded-md border shadow-lg',
-              'max-h-60 overflow-y-auto', // 限制高度并允许滚动
-              // 主题样式
+              'max-h-60 overflow-y-auto', // Limit height and allow scrolling
+              // Theme style
               isDark
                 ? 'border-stone-600/80 bg-stone-700/95 backdrop-blur-sm'
                 : 'border-stone-300/80 bg-white/95 backdrop-blur-sm',
-              // 响应式宽度
+              // Responsive width
               'min-w-full'
             )}
           >
-            {/* 空选项（如果需要） */}
+            {/* Empty option (if needed) */}
             {!selectedProviderId && (
               <button
                 onClick={() => handleProviderSelect('')}
@@ -129,7 +124,7 @@ export function CustomProviderSelector({
                   'transition-colors duration-150',
                   'flex items-center justify-between gap-2',
                   'cursor-pointer',
-                  // 响应式间距
+                  // Responsive spacing
                   'sm:px-4 sm:py-3',
                   isDark
                     ? 'text-stone-400 hover:bg-stone-600/40'
@@ -140,7 +135,7 @@ export function CustomProviderSelector({
               </button>
             )}
 
-            {/* 提供商选项 */}
+            {/* Provider options */}
             {activeProviders.length > 0 ? (
               activeProviders.map(provider => (
                 <button
@@ -151,9 +146,9 @@ export function CustomProviderSelector({
                     'transition-colors duration-150',
                     'flex items-center justify-between gap-2',
                     'cursor-pointer',
-                    // 响应式间距
+                    // Responsive spacing
                     'sm:px-4 sm:py-3',
-                    // 选中状态
+                    // Selected state
                     selectedProviderId === provider.id
                       ? isDark
                         ? 'bg-stone-600/60 text-stone-200'

@@ -8,10 +8,7 @@ import {
   SelectValue,
 } from '@components/ui/select';
 import type { SupportedLocale } from '@lib/config/language-config';
-import {
-  SUPPORTED_LANGUAGES,
-  getLanguageInfo,
-} from '@lib/config/language-config';
+import { getLanguageInfo } from '@lib/config/language-config';
 import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { Plus, Trash2 } from 'lucide-react';
@@ -20,12 +17,37 @@ import React from 'react';
 
 import { useTranslations } from 'next-intl';
 
-// 编辑器现在直接处理翻译对象，不再需要独立的配置类型
+interface ValueItem {
+  title: string;
+  description: string;
+}
+
+interface Copyright {
+  prefix?: string;
+  linkText?: string;
+  suffix?: string;
+}
+
+interface AboutTranslation {
+  title?: string;
+  subtitle?: string;
+  mission?: {
+    description?: string;
+  };
+  values?: {
+    items?: ValueItem[];
+  };
+  buttonText?: string;
+  copyright?: Copyright;
+}
+
 interface AboutEditorProps {
-  translations: Record<SupportedLocale, any>;
+  translations: Record<SupportedLocale, AboutTranslation>;
   currentLocale: SupportedLocale;
   supportedLocales: SupportedLocale[];
-  onTranslationsChange: (newTranslations: Record<SupportedLocale, any>) => void;
+  onTranslationsChange: (
+    newTranslations: Record<SupportedLocale, AboutTranslation>
+  ) => void;
   onLocaleChange: (newLocale: SupportedLocale) => void;
 }
 
@@ -40,11 +62,13 @@ export function AboutEditor({
   const t = useTranslations('pages.admin.content.editor');
   const currentTranslation = translations[currentLocale] || {};
 
-  // 统一的字段更新处理器，支持点状路径
-  const handleFieldChange = (field: string, value: any) => {
-    const newTranslations = JSON.parse(JSON.stringify(translations)); // Deep copy
+  const handleFieldChange = (field: string, value: string | ValueItem[]) => {
+    const newTranslations = JSON.parse(JSON.stringify(translations)) as Record<
+      SupportedLocale,
+      AboutTranslation
+    >;
     const fieldParts = field.split('.');
-    let current = newTranslations[currentLocale];
+    let current = newTranslations[currentLocale] as any;
 
     for (let i = 0; i < fieldParts.length - 1; i++) {
       if (!current[fieldParts[i]]) {
@@ -77,14 +101,13 @@ export function AboutEditor({
 
   const removeValueCard = (index: number) => {
     const newItems = (currentTranslation.values?.items || []).filter(
-      (_: any, i: number) => i !== index
+      (_: ValueItem, i: number) => i !== index
     );
     handleFieldChange('values.items', newItems);
   };
 
   return (
     <div className="space-y-6">
-      {/* Language switcher */}
       <div>
         <label
           className={cn(
@@ -151,7 +174,6 @@ export function AboutEditor({
         </Select>
       </div>
 
-      {/* Page title settings */}
       <div>
         <label
           className={cn(
@@ -174,7 +196,6 @@ export function AboutEditor({
         />
       </div>
 
-      {/* Subtitle settings */}
       <div>
         <label
           className={cn(
@@ -197,7 +218,6 @@ export function AboutEditor({
         />
       </div>
 
-      {/* Mission description */}
       <div>
         <label
           className={cn(
@@ -222,7 +242,6 @@ export function AboutEditor({
         />
       </div>
 
-      {/* Values card management */}
       <div>
         <div className="mb-3 flex items-center justify-between">
           <label
@@ -248,7 +267,7 @@ export function AboutEditor({
 
         <div className="space-y-4">
           {(currentTranslation.values?.items || []).map(
-            (card: any, index: number) => (
+            (card: ValueItem, index: number) => (
               <div
                 key={index}
                 className={cn(
@@ -316,7 +335,6 @@ export function AboutEditor({
         </div>
       </div>
 
-      {/* Button text */}
       <div>
         <label
           className={cn(
@@ -339,7 +357,6 @@ export function AboutEditor({
         />
       </div>
 
-      {/* Copyright information */}
       <div>
         <label
           className={cn(

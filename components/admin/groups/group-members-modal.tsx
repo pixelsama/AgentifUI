@@ -50,10 +50,8 @@ export function GroupMembersModal({
   const [showAddMember, setShowAddMember] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // 获取当前群组的成员列表
   const members = groupMembers[group.id] || [];
 
-  // 过滤成员列表
   const filteredMembers = members.filter(member => {
     const user = member.user;
     if (!user) return false;
@@ -66,12 +64,10 @@ export function GroupMembersModal({
     );
   });
 
-  // 加载群组成员
   useEffect(() => {
     if (isOpen && group.id) {
       loadGroupMembers(group.id);
     } else if (!isOpen) {
-      // 关闭时重置状态
       setSearchTerm('');
       setShowAddMember(false);
     }
@@ -365,7 +361,6 @@ export function GroupMembersModal({
         </div>
       </div>
 
-      {/* 添加成员模态框 */}
       {showAddMember && (
         <AddMemberModal
           group={group}
@@ -391,14 +386,12 @@ function AddMemberModal({
   const { addMember, groupMembers } = useGroupManagementStore();
   const t = useTranslations('pages.admin.groups.addMembersModal');
 
-  // 分页用户列表状态管理
   const [users, setUsers] = useState<SearchableUser[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // 分页状态
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 10,
@@ -406,7 +399,6 @@ function AddMemberModal({
     totalPages: 0,
   });
 
-  // 重置状态当模态框关闭时
   useEffect(() => {
     if (!isOpen) {
       setUsers([]);
@@ -423,11 +415,9 @@ function AddMemberModal({
     }
   }, [isOpen]);
 
-  // 获取当前群组成员ID列表，用于排除已存在的成员
   const currentMembers = groupMembers[group.id] || [];
   const excludeUserIds = currentMembers.map(member => member.user_id);
 
-  // 加载用户列表
   const loadUsers = async (page: number = 1, search: string = '') => {
     setIsLoading(true);
     try {
@@ -465,19 +455,16 @@ function AddMemberModal({
     }
   };
 
-  // 初始加载时重新加载
   useEffect(() => {
     if (isOpen) {
       loadUsers(1, searchTerm);
     }
   }, [isOpen]);
 
-  // 分页变化时重新加载
   const handlePageChange = (newPage: number) => {
     loadUsers(newPage, searchTerm);
   };
 
-  // 搜索防抖
   useEffect(() => {
     if (!isOpen) return;
 
@@ -488,7 +475,6 @@ function AddMemberModal({
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // 全选/取消全选
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
       setSelectedUserIds(users.map(user => user.id));
@@ -497,7 +483,6 @@ function AddMemberModal({
     }
   };
 
-  // 切换单个用户选择
   const handleToggleUser = (userId: string) => {
     setSelectedUserIds(prev =>
       prev.includes(userId)
@@ -506,7 +491,6 @@ function AddMemberModal({
     );
   };
 
-  // 批量添加成员
   const handleBatchAddMembers = async () => {
     if (selectedUserIds.length === 0) return;
 
@@ -539,7 +523,6 @@ function AddMemberModal({
     }
   };
 
-  // 检查是否全选
   const isAllSelected =
     users.length > 0 && selectedUserIds.length === users.length;
   const isPartiallySelected = selectedUserIds.length > 0 && !isAllSelected;

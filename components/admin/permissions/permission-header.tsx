@@ -42,7 +42,6 @@ export function PermissionHeader() {
       </div>
 
       <div className="flex items-center gap-3">
-        {/* 刷新按钮 */}
         <button
           onClick={handleRefresh}
           disabled={loading.apps || loading.groups}

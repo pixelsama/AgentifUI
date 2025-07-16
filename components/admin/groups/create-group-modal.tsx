@@ -76,7 +76,6 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* 背景遮罩 */}
       <div
         className={cn(
           'absolute inset-0',
@@ -84,15 +83,12 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
         )}
         onClick={handleClose}
       />
-
-      {/* 模态框内容 */}
       <div
         className={cn(
           'relative w-full max-w-md rounded-xl border shadow-xl',
           isDark ? 'border-stone-700 bg-stone-800' : 'border-stone-200 bg-white'
         )}
       >
-        {/* 头部 */}
         <div className="flex items-center justify-between p-6 pb-4">
           <div className="flex items-center gap-3">
             <div
@@ -132,10 +128,8 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
           </button>
         </div>
 
-        {/* 表单 */}
         <form onSubmit={handleSubmit} className="px-6 pb-6">
           <div className="space-y-4">
-            {/* 群组名称 */}
             <div>
               <label
                 className={cn(
@@ -169,7 +163,6 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
               )}
             </div>
 
-            {/* 群组描述 */}
             <div>
               <label
                 className={cn(
@@ -212,7 +205,6 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
             </div>
           </div>
 
-          {/* 按钮 */}
           <div className="mt-6 flex gap-3">
             <button
               type="button"

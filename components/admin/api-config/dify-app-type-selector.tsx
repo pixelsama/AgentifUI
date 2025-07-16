@@ -29,8 +29,8 @@ const FEATURE_KEYS_MAP: Record<DifyAppType, string[]> = {
 };
 
 /**
- * Dify应用类型选择器组件
- * 基于现有app_type选择器的设计模式
+ * Dify app type selector component
+ * Based on the existing app_type selector design pattern
  */
 export function DifyAppTypeSelector({
   value,
@@ -46,7 +46,7 @@ export function DifyAppTypeSelector({
 
   return (
     <div className={cn('space-y-4', className)}>
-      {/* --- 标题和说明 --- */}
+      {/* --- Title and description --- */}
       <div>
         <label
           className={cn(
@@ -57,7 +57,7 @@ export function DifyAppTypeSelector({
           {tSelector('title')}
         </label>
 
-        {/* --- 响应式网格布局：移动端1列，平板2列，桌面3列 --- */}
+        {/* --- Responsive grid layout: mobile 1 column, tablet 2 columns, desktop 3 columns --- */}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           {allTypes.map(typeInfo => (
             <button
@@ -76,7 +76,7 @@ export function DifyAppTypeSelector({
                     : 'border-stone-300 hover:border-stone-400'
               )}
             >
-              {/* --- 顶部：图标、标题和选择指示器 --- */}
+              {/* --- Top: icon, title and selection indicator --- */}
               <div className="flex w-full items-center gap-3">
                 <div className="flex-shrink-0 text-2xl">{typeInfo.icon}</div>
                 <div className="flex-1">
@@ -98,7 +98,7 @@ export function DifyAppTypeSelector({
                   </div>
                 </div>
 
-                {/* --- 单选按钮指示器 --- */}
+                {/* --- Single select button indicator --- */}
                 <div
                   className={cn(
                     'flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2',
@@ -122,7 +122,7 @@ export function DifyAppTypeSelector({
                 </div>
               </div>
 
-              {/* --- 底部：功能特性标签 --- */}
+              {/* --- Bottom: feature tags --- */}
               <div className="mt-1 flex w-full flex-wrap gap-1">
                 {FEATURE_KEYS_MAP[typeInfo.key]?.slice(0, 3).map(featureKey => (
                   <span
@@ -142,7 +142,7 @@ export function DifyAppTypeSelector({
           ))}
         </div>
 
-        {/* --- 底部说明文字 --- */}
+        {/* --- Bottom description text --- */}
         <p
           className={cn(
             'mt-3 font-serif text-xs',
@@ -157,8 +157,8 @@ export function DifyAppTypeSelector({
 }
 
 /**
- * 紧凑版本的Dify应用类型选择器
- * 用于空间受限的场景
+ * Compact version of the Dify app type selector
+ * For space-constrained scenarios
  */
 export function DifyAppTypeSelectorCompact({
   value,

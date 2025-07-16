@@ -310,7 +310,7 @@ export function GroupsList({ groups, isLoading }: GroupsListProps) {
         ))}
       </div>
 
-      {/* 编辑群组模态框 */}
+      {/* Edit group modal */}
       {editingGroup && (
         <EditGroupModal
           group={editingGroup}
@@ -319,7 +319,7 @@ export function GroupsList({ groups, isLoading }: GroupsListProps) {
         />
       )}
 
-      {/* 成员管理模态框 */}
+      {/* Member management modal */}
       {viewingMembersGroup && (
         <GroupMembersModal
           group={viewingMembersGroup}

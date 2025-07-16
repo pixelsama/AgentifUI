@@ -49,12 +49,9 @@ export const useApiConfigEvents = ({
     };
 
     const handleDefaultInstanceChanged = () => {
-      // --- 始终显示成功提示，不管是否是当前选中的实例 ---
       toast.success(t('defaultInstanceSetSuccess'));
 
-      // --- 重新加载服务实例数据以更新UI状态 ---
       setTimeout(() => {
-        // 给数据库操作一点时间完成
         window.dispatchEvent(new CustomEvent('reloadInstances'));
       }, 100);
     };
@@ -64,7 +61,6 @@ export const useApiConfigEvents = ({
       setCurrentFilterProviderId(providerId);
     };
 
-    // --- 添加事件监听器 ---
     window.addEventListener(
       'selectInstance',
       handleSelectInstance as EventListener
@@ -83,7 +79,6 @@ export const useApiConfigEvents = ({
       handleFilterChanged as EventListener
     );
 
-    // --- 清理函数 ---
     return () => {
       window.removeEventListener(
         'selectInstance',
@@ -109,5 +104,6 @@ export const useApiConfigEvents = ({
     setSelectedInstance,
     setShowAddForm,
     setCurrentFilterProviderId,
+    t,
   ]);
 };

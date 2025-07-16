@@ -19,7 +19,6 @@ export function PreviewToolbar({
   activeTab,
   previewDevice,
   onDeviceChange,
-  showPreview,
   onPreviewToggle,
   onFullscreenPreview,
 }: PreviewToolbarProps) {

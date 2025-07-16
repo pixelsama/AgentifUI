@@ -49,7 +49,6 @@ export function PermissionPanel() {
   return (
     <div className="h-full overflow-y-auto p-4">
       <div className="space-y-4">
-        {/* 应用信息 */}
         <div>
           <div className="mb-3 flex items-center gap-3">
             <div
@@ -88,7 +87,6 @@ export function PermissionPanel() {
           </div>
         </div>
 
-        {/* 可见性设置 */}
         <div>
           <h4
             className={cn(
@@ -101,7 +99,6 @@ export function PermissionPanel() {
           <VisibilitySelector app={selectedApp} />
         </div>
 
-        {/* 群组权限设置 */}
         {selectedApp.visibility === 'group_only' && (
           <div>
             <h4
@@ -124,7 +121,6 @@ export function PermissionPanel() {
           </div>
         )}
 
-        {/* 权限说明 */}
         <div
           className={cn(
             'rounded-lg border p-3',

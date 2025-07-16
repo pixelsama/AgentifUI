@@ -166,7 +166,7 @@ export const UserTable: React.FC<UserTableProps> = ({
         };
       default:
         return {
-          label: t('messages.statuses.pending'), // 使用pending作为默认值
+          label: t('messages.statuses.pending'), // use pending as default value
           icon: <Clock className="h-4 w-4" />,
           variant: 'neutral' as const,
         };

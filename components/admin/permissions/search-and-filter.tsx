@@ -45,7 +45,6 @@ export function SearchAndFilter() {
       )}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        {/* 搜索框 */}
         <div className="relative max-w-md flex-1">
           <Search
             className={cn(
@@ -68,7 +67,6 @@ export function SearchAndFilter() {
           />
         </div>
 
-        {/* 可见性筛选 */}
         <div className="flex items-center gap-3">
           <span
             className={cn(

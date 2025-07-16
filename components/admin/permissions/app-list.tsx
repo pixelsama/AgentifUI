@@ -119,7 +119,6 @@ export function AppList() {
               )}
             >
               <div className="flex items-start gap-3">
-                {/* 应用图标 */}
                 <div
                   className={cn(
                     'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg transition-colors duration-200',
@@ -146,7 +145,6 @@ export function AppList() {
                   />
                 </div>
 
-                {/* 应用信息 */}
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 flex items-center justify-between">
                     <h3
@@ -158,7 +156,6 @@ export function AppList() {
                       {app.display_name || app.instance_id}
                     </h3>
 
-                    {/* 可见性标签 */}
                     <div
                       className={cn(
                         'ml-2 flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium',

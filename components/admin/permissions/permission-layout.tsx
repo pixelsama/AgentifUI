@@ -15,12 +15,9 @@ export function PermissionLayout() {
 
   return (
     <div className="space-y-6">
-      {/* 搜索和筛选 */}
       <SearchAndFilter />
 
-      {/* 主要布局 */}
       <div className="grid grid-cols-1 gap-6 lg:h-[calc(100vh-20rem)] lg:grid-cols-12">
-        {/* 左侧：应用列表 */}
         <div className="lg:col-span-5">
           <div
             className={cn(
@@ -59,7 +56,6 @@ export function PermissionLayout() {
           </div>
         </div>
 
-        {/* 右侧：权限配置面板 */}
         <div className="lg:col-span-7">
           <div
             className={cn(

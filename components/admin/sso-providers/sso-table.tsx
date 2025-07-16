@@ -284,7 +284,7 @@ export function SsoTable({
             </p>
           </div>
         ) : (
-          providers.map((provider, index) => {
+          providers.map(provider => {
             return (
               <div
                 key={provider.id}

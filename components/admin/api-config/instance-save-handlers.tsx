@@ -3,7 +3,6 @@
 import { useApiConfigStore } from '@lib/stores/api-config-store';
 import { toast } from 'sonner';
 
-// --- 创建实例的保存处理逻辑 ---
 export const handleCreateInstance = async (
   data: any,
   providers: any[],
@@ -14,10 +13,10 @@ export const handleCreateInstance = async (
 ) => {
   setIsProcessing(true);
 
-  // --- 提取setAsDefault状态和其他数据 ---
+  // Extract setAsDefault state and other data
   const { setAsDefault, ...instanceData } = data;
 
-  // --- 使用用户选择的提供商 ---
+  // Use the user-selected provider
   const providerId = data.selectedProviderId;
   if (!providerId) {
     toast.error(t('errors.selectProvider'));
@@ -25,7 +24,7 @@ export const handleCreateInstance = async (
     return;
   }
 
-  // 验证选择的提供商是否有效
+  // Verify if the selected provider is valid
   const selectedProvider = providers.find(p => p.id === providerId);
   if (!selectedProvider) {
     toast.error(t('errors.invalidProvider'));
@@ -50,7 +49,7 @@ export const handleCreateInstance = async (
 
     toast.success(t('success.instanceCreated'));
 
-    // --- 如果选择了设为默认，则在创建成功后设置为默认应用 ---
+    // If setAsDefault is true, set the new instance as the default application after creation
     if (setAsDefault && newInstance?.id) {
       try {
         await useApiConfigStore.getState().setDefaultInstance(newInstance.id);
@@ -70,7 +69,7 @@ export const handleCreateInstance = async (
   }
 };
 
-// --- 更新实例的保存处理逻辑 ---
+// Update instance save processing logic
 export const handleUpdateInstance = async (
   selectedInstance: any,
   data: any,

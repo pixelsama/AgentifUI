@@ -90,7 +90,6 @@ export function GroupPermissionList({ app }: GroupPermissionListProps) {
             )}
           >
             <div className="flex items-center justify-between">
-              {/* 群组信息 */}
               <div className="flex items-center gap-3">
                 <div
                   className={cn(
@@ -126,7 +125,6 @@ export function GroupPermissionList({ app }: GroupPermissionListProps) {
                 </div>
               </div>
 
-              {/* 开关控制 */}
               <div className="flex items-center gap-2">
                 <span
                   className={cn(

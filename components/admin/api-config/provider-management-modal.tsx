@@ -88,7 +88,6 @@ export function ProviderManagementModal({
   });
   const [errors, setErrors] = useState<Partial<ProviderFormData>>({});
 
-  // 加载提供商列表
   const loadProviders = async () => {
     setLoading(true);
     try {
@@ -106,14 +105,12 @@ export function ProviderManagementModal({
     }
   };
 
-  // 组件挂载时加载数据
   useEffect(() => {
     if (open) {
       loadProviders();
     }
-  }, [open]);
+  }, [open, loadProviders]);
 
-  // 表单验证函数
   const validateForm = (): boolean => {
     const newErrors: Partial<ProviderFormData> = {};
 
@@ -128,7 +125,6 @@ export function ProviderManagementModal({
     if (!formData.base_url.trim()) {
       newErrors.base_url = t('form.baseUrl.required');
     } else {
-      // 简单的URL格式验证
       try {
         new URL(formData.base_url);
       } catch {
@@ -144,7 +140,6 @@ export function ProviderManagementModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  // 重置表单
   const resetForm = () => {
     setFormData({
       name: '',
@@ -159,13 +154,11 @@ export function ProviderManagementModal({
     setIsCreating(false);
   };
 
-  // 开始创建新提供商
   const startCreating = () => {
     resetForm();
     setIsCreating(true);
   };
 
-  // 开始编辑提供商
   const startEditing = (provider: Provider) => {
     setFormData({
       name: provider.name,
@@ -180,7 +173,6 @@ export function ProviderManagementModal({
     setErrors({});
   };
 
-  // 保存提供商（创建或更新）
   const saveProvider = async () => {
     if (!validateForm()) {
       return;
@@ -189,7 +181,6 @@ export function ProviderManagementModal({
     setLoading(true);
     try {
       if (isCreating) {
-        // 创建新提供商
         const result = await createProvider(formData);
         if (result.success) {
           toast.success(t('messages.createSuccess'));
@@ -200,7 +191,6 @@ export function ProviderManagementModal({
           toast.error(t('messages.createFailed'));
         }
       } else if (editingProvider) {
-        // 更新现有提供商
         const result = await updateProvider(editingProvider.id, formData);
         if (result.success) {
           toast.success(t('messages.updateSuccess'));
@@ -219,7 +209,6 @@ export function ProviderManagementModal({
     }
   };
 
-  // 删除提供商
   const handleDeleteProvider = async (provider: Provider) => {
     if (!confirm(t('deleteConfirm', { name: provider.name }))) {
       return;
@@ -243,7 +232,6 @@ export function ProviderManagementModal({
     }
   };
 
-  // 处理模态框关闭
   const handleClose = () => {
     resetForm();
     onOpenChange(false);
@@ -257,7 +245,6 @@ export function ProviderManagementModal({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* --- 创建新提供商按钮 --- */}
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium">{t('providerList')}</h3>
             <Button
@@ -270,7 +257,6 @@ export function ProviderManagementModal({
             </Button>
           </div>
 
-          {/* --- 提供商列表 --- */}
           <div className="space-y-3">
             {loading && providers.length === 0 ? (
               <div className="text-muted-foreground py-8 text-center">
@@ -286,11 +272,9 @@ export function ProviderManagementModal({
                   key={provider.id}
                   className={cn(
                     'space-y-3 rounded-lg border p-4 transition-colors',
-                    // 基础样式
                     isDark
                       ? 'border-stone-600 bg-stone-800/50'
                       : 'border-stone-200 bg-white',
-                    // 编辑状态样式
                     editingProvider?.id === provider.id &&
                       (isDark
                         ? 'border-stone-400 bg-stone-700/50'
@@ -387,7 +371,6 @@ export function ProviderManagementModal({
             )}
           </div>
 
-          {/* --- 创建/编辑表单 --- */}
           {(isCreating || editingProvider) && (
             <div className="border-t pt-6">
               <div className="mb-4 flex items-center justify-between">
@@ -405,7 +388,6 @@ export function ProviderManagementModal({
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {/* --- 提供商名称 --- */}
                 <div className="space-y-2">
                   <Label htmlFor="name">{t('form.name.label')} *</Label>
                   <Input
@@ -422,7 +404,6 @@ export function ProviderManagementModal({
                   )}
                 </div>
 
-                {/* --- 提供商类型 --- */}
                 <div className="space-y-2">
                   <Label htmlFor="type">{t('form.type.label')} *</Label>
                   <Select
@@ -449,7 +430,6 @@ export function ProviderManagementModal({
                   )}
                 </div>
 
-                {/* --- API URL --- */}
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="base_url">{t('form.baseUrl.label')} *</Label>
                   <Input
@@ -469,7 +449,6 @@ export function ProviderManagementModal({
                   )}
                 </div>
 
-                {/* --- 认证类型 --- */}
                 <div className="space-y-2">
                   <Label htmlFor="auth_type">
                     {t('form.authType.label')} *
@@ -500,7 +479,6 @@ export function ProviderManagementModal({
                   )}
                 </div>
 
-                {/* --- 是否启用 --- */}
                 <div className="space-y-2">
                   <Label htmlFor="is_active">{t('form.isActive.label')}</Label>
                   <div className="flex items-center space-x-2">
@@ -519,7 +497,6 @@ export function ProviderManagementModal({
                   </div>
                 </div>
 
-                {/* --- 是否设为默认 --- */}
                 <div className="space-y-2">
                   <Label htmlFor="is_default">
                     {t('form.isDefault.label')}
@@ -544,7 +521,6 @@ export function ProviderManagementModal({
                 </div>
               </div>
 
-              {/* --- 保存按钮 --- */}
               <div className="mt-6 flex justify-end gap-2">
                 <Button
                   variant="outline"

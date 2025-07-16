@@ -120,9 +120,7 @@ export const useProfile = () => {
 export const useOrganizations = () => {
   const { user } = useSupabaseAuth();
   const supabase = createClient();
-  const [organizations, setOrganizations] = useState<
-    Database['public']['Tables']['organizations']['Row'][]
-  >([]);
+  const [organizations, setOrganizations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -134,22 +132,22 @@ export const useOrganizations = () => {
       }
 
       setLoading(true);
-      const { data, error } = await supabase
-        .from('organizations')
-        .select(
-          `
-          *,
-          org_members!inner(*)
-        `
-        )
-        .eq('org_members.user_id', user.id);
+      try {
+        const { data, error } = await supabase
+          .from('groups')
+          .select('*')
+          .order('name');
 
-      if (error) {
+        if (error) {
+          console.error('Error fetching organizations:', error);
+          setOrganizations([]);
+        } else {
+          setOrganizations(data || []);
+        }
+      } catch (error) {
         console.error('Error fetching organizations:', error);
-      } else {
-        setOrganizations(data || []);
+        setOrganizations([]);
       }
-
       setLoading(false);
     };
 
