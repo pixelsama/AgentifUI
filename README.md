@@ -132,7 +132,7 @@ docker run -p 8080:8080 ghcr.io/agentifui/community:latest
 
 ## 🤝 Getting Help / Contributing
 
-- **Issues & PRs**: Please open them on [GitHub Issues](https://github.com/yourusername/yourrepo/issues). All contributors must pass the CLA bot check.
+- **Issues & PRs**: Please open them on [GitHub Issues](https://github.com/ifLabX/AgentifUI/issues). All contributors must pass the CLA bot check.
 - **Security reports**: Please email [bitifirefly@gmail.com](mailto:bitifirefly@gmail.com)
 - **Enterprise/OEM inquiries**: For commercial support or integration, email [license@iflabx.com](mailto:license@iflabx.com)
 
