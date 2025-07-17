@@ -21,19 +21,19 @@ interface FavoriteAppsState {
   favoriteApps: FavoriteApp[];
   isLoading: boolean;
   error: string | null;
-  // 🎯 新增：展开/关闭状态，默认关闭
+  // Added: expanded/collapsed state, default is collapsed
   isExpanded: boolean;
 
-  // 操作方法
+  // Actions
   addFavoriteApp: (app: Omit<FavoriteApp, 'addedAt' | 'lastUsedAt'>) => void;
   removeFavoriteApp: (instanceId: string) => void;
   updateLastUsed: (instanceId: string) => void;
   loadFavoriteApps: () => Promise<void>;
   clearFavoriteApps: () => void;
   isFavorite: (instanceId: string) => boolean;
-  // 🎯 新增：简单的后台同步方法，非阻塞更新
+  // Added: simple background sync method, non-blocking update
   syncWithAppList: (apps: any[]) => void;
-  // 🎯 新增：展开/关闭切换方法
+  // Added: expand/collapse toggle methods
   toggleExpanded: () => void;
   setExpanded: (expanded: boolean) => void;
 }
@@ -44,7 +44,7 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
       favoriteApps: [],
       isLoading: false,
       error: null,
-      // 🎯 默认关闭状态
+      // Default collapsed state
       isExpanded: false,
 
       addFavoriteApp: app => {
@@ -56,13 +56,13 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
         };
 
         set(state => {
-          // 检查是否已存在
+          // Check if already exists
           const exists = state.favoriteApps.some(
             existingApp => existingApp.instanceId === app.instanceId
           );
 
           if (exists) {
-            // 如果已存在，更新最后使用时间
+            // If exists, update lastUsedAt
             return {
               favoriteApps: state.favoriteApps.map(existingApp =>
                 existingApp.instanceId === app.instanceId
@@ -71,14 +71,14 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
               ),
             };
           } else {
-            // 如果不存在，添加新应用
+            // If not exists, add new app
             return {
               favoriteApps: [...state.favoriteApps, newApp].sort(
                 (a, b) =>
                   new Date(b.lastUsedAt).getTime() -
                   new Date(a.lastUsedAt).getTime()
               ),
-              // 🎯 移除数量限制，允许用户收藏任意数量的应用
+              // Removed limit: allow user to favorite any number of apps
             };
           }
         });
@@ -111,13 +111,16 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
         set({ isLoading: true, error: null });
 
         try {
-          // 这里可以从服务器加载用户的常用应用
-          // 目前使用本地存储，所以直接设置加载完成
+          // Here you can load user's favorite apps from server
+          // Currently using local storage, so just set loading to false
           set({ isLoading: false });
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : '加载常用应用失败',
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to load favorite apps',
           });
         }
       },
@@ -134,18 +137,18 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
         const state = get();
         if (state.favoriteApps.length === 0) return;
 
-        // 🎯 增强同步：既更新应用信息，也清理已删除的应用
+        // Enhanced sync: update app info and remove deleted apps
         const validFavoriteApps: FavoriteApp[] = [];
         let hasRemovedApps = false;
 
         state.favoriteApps.forEach(favoriteApp => {
-          // 🎯 修复：使用instance_id进行匹配，因为favoriteApp.instanceId存储的是instance_id
+          // Fix: use instance_id for matching, since favoriteApp.instanceId stores instance_id
           const matchedApp = apps.find(
             app => app.instance_id === favoriteApp.instanceId
           );
 
           if (matchedApp) {
-            // 应用仍然存在，更新信息
+            // App still exists, update info
             const appMetadata = matchedApp.config?.app_metadata;
             validFavoriteApps.push({
               ...favoriteApp,
@@ -162,15 +165,15 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
                 appMetadata?.dify_apptype || favoriteApp.dify_apptype,
             });
           } else {
-            // 应用已被删除，不添加到新列表中
+            // App has been deleted, do not add to new list
             hasRemovedApps = true;
             console.log(
-              `[FavoriteApps] 清理已删除的应用: ${favoriteApp.displayName} (${favoriteApp.instanceId})`
+              `[FavoriteApps] Cleaned up deleted app: ${favoriteApp.displayName} (${favoriteApp.instanceId})`
             );
           }
         });
 
-        // 检查是否有变化（信息更新或应用删除）
+        // Check if there are changes (info updated or app deleted)
         const hasInfoChanges =
           validFavoriteApps.length !== state.favoriteApps.length ||
           validFavoriteApps.some((updated, index) => {
@@ -185,7 +188,7 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
 
         if (hasRemovedApps || hasInfoChanges) {
           console.log(
-            `[FavoriteApps] 同步完成 - 更新信息: ${hasInfoChanges}, 清理应用: ${hasRemovedApps}`
+            `[FavoriteApps] Sync complete - info updated: ${hasInfoChanges}, apps removed: ${hasRemovedApps}`
           );
           set({ favoriteApps: validFavoriteApps });
         }
@@ -202,7 +205,7 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
     {
       name: 'favorite-apps-storage',
       storage: createJSONStorage(() => localStorage),
-      // 只持久化favoriteApps数组
+      // Only persist favoriteApps array
       partialize: state => ({
         favoriteApps: state.favoriteApps,
       }),
@@ -210,20 +213,20 @@ export const useFavoriteAppsStore = create<FavoriteAppsState>()(
   )
 );
 
-// 🎯 导出便捷的hook用于在应用使用后自动添加到常用应用
+// Export a convenient hook to automatically add to favorites after app usage
 export function useAutoAddFavoriteApp() {
   const { addFavoriteApp, updateLastUsed } = useFavoriteAppsStore();
 
   const addToFavorites = async (instanceId: string) => {
-    console.log(`[addToFavorites] 添加应用到常用列表: ${instanceId}`);
+    console.log(`[addToFavorites] Add app to favorites: ${instanceId}`);
 
     try {
-      // 🎯 重构：支持多提供商，在所有活跃提供商中查找应用实例
-      // 不再硬编码只查找 Dify 提供商
+      // Refactor: support multiple providers, search for app instance in all active providers
+      // No longer hardcoded to only search Dify provider
       const { createClient } = await import('@lib/supabase/client');
       const supabase = createClient();
 
-      // 直接查找应用实例（包含提供商信息）
+      // Directly search for app instance (including provider info)
       const { data: instance, error: instanceError } = await supabase
         .from('service_instances')
         .select(
@@ -242,24 +245,24 @@ export function useAutoAddFavoriteApp() {
 
       if (instanceError || !instance) {
         console.error(
-          `[addToFavorites] 查询应用信息失败: ${instanceId}`,
+          `[addToFavorites] Failed to query app info: ${instanceId}`,
           instanceError
         );
         return;
       }
 
-      // 处理查找到的应用实例
+      // Handle found app instance
       const appMetadata = instance.config?.app_metadata;
       console.log(
-        `[addToFavorites] 找到应用实例: ${instanceId}，提供商: ${instance.providers?.name}`
+        `[addToFavorites] Found app instance: ${instanceId}, provider: ${instance.providers?.name}`
       );
 
-      // 🎯 关键修复：只添加marketplace类型的应用，跳过model类型
+      // Key fix: only add marketplace type apps, skip model type
       const appType = appMetadata?.app_type || 'marketplace';
 
       if (appType !== 'marketplace') {
         console.log(
-          `[addToFavorites] 跳过非marketplace应用: ${instance.display_name || instanceId} (类型: ${appType})`
+          `[addToFavorites] Skip non-marketplace app: ${instance.display_name || instanceId} (type: ${appType})`
         );
         return;
       }
@@ -276,11 +279,11 @@ export function useAutoAddFavoriteApp() {
       addFavoriteApp(favoriteApp);
 
       console.log(
-        `[addToFavorites] 成功添加到常用应用: ${instance.display_name || instanceId}`
+        `[addToFavorites] Successfully added to favorites: ${instance.display_name || instanceId}`
       );
     } catch (error) {
       console.error(
-        `[addToFavorites] 添加到常用应用失败:`,
+        `[addToFavorites] Failed to add to favorites:`,
         error instanceof Error ? error.message : String(error)
       );
     }

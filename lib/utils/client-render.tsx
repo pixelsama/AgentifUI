@@ -8,12 +8,13 @@ interface ClientRenderProps {
 }
 
 /**
- * 客户端专属渲染包装器
+ * Client-only render wrapper.
  *
- * 这个组件确保其子组件只在客户端渲染，避免服务器端渲染差异导致的水合错误
+ * This component ensures its children are only rendered on the client,
+ * preventing hydration errors caused by server/client rendering mismatches.
  *
- * @param children 需要在客户端渲染的内容或渲染函数
- * @param fallback 服务器端和初始客户端渲染时显示的内容（可选）
+ * @param children Content or render function to be rendered on the client
+ * @param fallback Content to display during SSR or initial client render (optional)
  */
 export function ClientRender({ children, fallback = null }: ClientRenderProps) {
   const [isMounted, setIsMounted] = useState(false);
@@ -30,10 +31,10 @@ export function ClientRender({ children, fallback = null }: ClientRenderProps) {
 }
 
 /**
- * 客户端渲染钩子
+ * Client render hook.
  *
- * 用于检测组件是否已在客户端渲染
- * 可用于条件性地渲染仅客户端内容
+ * Detects if the component has been mounted on the client.
+ * Useful for conditionally rendering client-only content.
  */
 export function useIsClient() {
   const [isMounted, setIsMounted] = useState(false);

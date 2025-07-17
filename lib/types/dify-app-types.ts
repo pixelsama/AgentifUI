@@ -1,6 +1,6 @@
 /**
- * Dify应用类型定义
- * 基于Dify官方API文档的应用类型规范
+ * Dify application type definitions
+ * Based on Dify official API documentation type specification
  */
 
 export type DifyAppType =
@@ -15,8 +15,8 @@ export interface DifyAppTypeInfo {
   label: string;
   description: string;
   icon: string;
-  apiEndpoint: string; // --- 对应的API端点 ---
-  features: string[]; // --- 支持的功能特性 ---
+  apiEndpoint: string; // Corresponding API endpoint
+  features: string[]; // Supported feature list
   color: {
     primary: string;
     secondary: string;
@@ -24,10 +24,10 @@ export interface DifyAppTypeInfo {
 }
 
 /**
- * 获取Dify应用类型的翻译信息
- * @param type Dify应用类型
- * @param t 翻译函数
- * @returns 应用类型信息，如果类型无效则返回null
+ * Get Dify application type info with optional translation
+ * @param type Dify application type
+ * @param t Optional translation function
+ * @returns Application type info, or null if invalid type
  */
 export function getDifyAppTypeInfo(
   type: string,
@@ -41,7 +41,7 @@ export function getDifyAppTypeInfo(
 
   const config = DIFY_APP_TYPES_CONFIG[typeKey];
 
-  // 如果提供了翻译函数，使用翻译；否则使用默认值
+  // If translation function is provided, use it; otherwise use default values
   if (t) {
     return {
       key: config.key,
@@ -54,12 +54,12 @@ export function getDifyAppTypeInfo(
     };
   }
 
-  // 如果没有翻译函数，返回向后兼容的默认值
+  // If no translation function, return default value for backward compatibility
   return DIFY_APP_TYPES[typeKey] || null;
 }
 
 /**
- * Dify应用类型基础配置（不含翻译文本）
+ * Dify application type base config (without translation text)
  */
 const DIFY_APP_TYPES_CONFIG: Record<
   DifyAppType,
@@ -129,17 +129,17 @@ const DIFY_APP_TYPES_CONFIG: Record<
 };
 
 /**
- * Dify应用类型配置映射（使用默认标签，用于向后兼容）
- * @deprecated 建议使用 getDifyAppTypeInfo 函数并传入翻译函数
+ * Dify application type config mapping (with default labels, for backward compatibility)
+ * @deprecated Use getDifyAppTypeInfo with translation function instead
  */
 export const DIFY_APP_TYPES: Record<DifyAppType, DifyAppTypeInfo> = {
   chatbot: {
     key: 'chatbot',
     label: 'Chatbot',
-    description: '基础对话聊天机器人',
+    description: 'Basic conversational chatbot',
     icon: '🤖',
     apiEndpoint: 'chat-messages',
-    features: ['对话', '文件上传', '语音转文字'],
+    features: ['Conversation', 'File Upload', 'Speech to Text'],
     color: {
       primary: 'blue',
       secondary: 'blue-100',
@@ -148,10 +148,15 @@ export const DIFY_APP_TYPES: Record<DifyAppType, DifyAppTypeInfo> = {
   agent: {
     key: 'agent',
     label: 'Agent',
-    description: '智能代理，支持工具调用',
+    description: 'Intelligent agent with tool calling support',
     icon: '🦾',
     apiEndpoint: 'chat-messages',
-    features: ['对话', '工具调用', '推理链', '多轮任务'],
+    features: [
+      'Conversation',
+      'Tool Calling',
+      'Reasoning Chain',
+      'Multi-turn Tasks',
+    ],
     color: {
       primary: 'purple',
       secondary: 'purple-100',
@@ -160,10 +165,14 @@ export const DIFY_APP_TYPES: Record<DifyAppType, DifyAppTypeInfo> = {
   chatflow: {
     key: 'chatflow',
     label: 'Chatflow',
-    description: '对话流程编排应用',
+    description: 'Conversational flow orchestration application',
     icon: '🔄',
     apiEndpoint: 'chat-messages',
-    features: ['流程编排', '条件分支', '对话管理'],
+    features: [
+      'Process Orchestration',
+      'Conditional Branching',
+      'Conversation Management',
+    ],
     color: {
       primary: 'green',
       secondary: 'green-100',
@@ -171,11 +180,11 @@ export const DIFY_APP_TYPES: Record<DifyAppType, DifyAppTypeInfo> = {
   },
   workflow: {
     key: 'workflow',
-    label: '工作流',
-    description: '自动化工作流程',
+    label: 'Workflow',
+    description: 'Automated workflow application',
     icon: '⚡',
     apiEndpoint: 'workflows/run',
-    features: ['自动化', '批处理', '流程控制'],
+    features: ['Automation', 'Batch Processing', 'Process Control'],
     color: {
       primary: 'orange',
       secondary: 'orange-100',
@@ -183,11 +192,11 @@ export const DIFY_APP_TYPES: Record<DifyAppType, DifyAppTypeInfo> = {
   },
   'text-generation': {
     key: 'text-generation',
-    label: '文本生成',
-    description: '单次文本生成应用',
+    label: 'Text Generation',
+    description: 'Single text generation application',
     icon: '📝',
     apiEndpoint: 'completion-messages',
-    features: ['文本生成', '内容创作', '格式化输出'],
+    features: ['Text Generation', 'Content Creation', 'Formatted Output'],
     color: {
       primary: 'pink',
       secondary: 'pink-100',
@@ -196,44 +205,44 @@ export const DIFY_APP_TYPES: Record<DifyAppType, DifyAppTypeInfo> = {
 };
 
 /**
- * 检查是否为有效的Dify应用类型
- * @param type 应用类型字符串
- * @returns 是否为有效类型
+ * Check if the given type is a valid Dify application type
+ * @param type Application type string
+ * @returns Whether it is a valid type
  */
 export function isValidDifyAppType(type: string): type is DifyAppType {
   return Object.keys(DIFY_APP_TYPES).includes(type);
 }
 
 /**
- * 获取所有Dify应用类型列表
- * @returns 应用类型信息数组
+ * Get all Dify application types
+ * @returns Array of application type info
  */
 export function getAllDifyAppTypes(): DifyAppTypeInfo[] {
   return Object.values(DIFY_APP_TYPES);
 }
 
 /**
- * 根据应用类型判断是否为对话类应用
- * @param type Dify应用类型
- * @returns 是否为对话类应用
+ * Check if the application type is chat-based
+ * @param type Dify application type
+ * @returns Whether it is a chat-based application
  */
 export function isChatBasedApp(type: DifyAppType): boolean {
   return ['chatbot', 'agent', 'chatflow'].includes(type);
 }
 
 /**
- * 根据应用类型判断是否为工作流应用
- * @param type Dify应用类型
- * @returns 是否为工作流应用
+ * Check if the application type is a workflow app
+ * @param type Dify application type
+ * @returns Whether it is a workflow application
  */
 export function isWorkflowApp(type: DifyAppType): boolean {
   return type === 'workflow';
 }
 
 /**
- * 根据应用类型判断是否为文本生成应用
- * @param type Dify应用类型
- * @returns 是否为文本生成应用
+ * Check if the application type is a text generation app
+ * @param type Dify application type
+ * @returns Whether it is a text generation application
  */
 export function isTextGenerationApp(type: DifyAppType): boolean {
   return type === 'text-generation';

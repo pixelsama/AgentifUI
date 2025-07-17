@@ -17,13 +17,13 @@ interface GroupStats {
 }
 
 interface GroupManagementState {
-  // 数据状态
+  // Data state
   groups: Group[];
   currentGroup: Group | null;
   groupMembers: Record<string, GroupMember[]>;
   stats: GroupStats;
 
-  // 加载状态
+  // Loading state
   loading: {
     groups: boolean;
     members: boolean;
@@ -33,13 +33,13 @@ interface GroupManagementState {
     deleting: boolean;
   };
 
-  // 错误状态
+  // Error state
   error: string | null;
 
-  // 筛选状态
+  // Filter state
   searchTerm: string;
 
-  // 操作方法
+  // Action methods
   loadGroups: () => Promise<void>;
   loadGroupMembers: (groupId: string) => Promise<void>;
   loadStats: () => Promise<void>;
@@ -64,7 +64,7 @@ interface GroupManagementState {
 
 export const useGroupManagementStore = create<GroupManagementState>(
   (set, get) => ({
-    // 初始状态
+    // Initial state
     groups: [],
     currentGroup: null,
     groupMembers: {},
@@ -86,7 +86,7 @@ export const useGroupManagementStore = create<GroupManagementState>(
     error: null,
     searchTerm: '',
 
-    // 加载群组列表
+    // Load group list
     loadGroups: async () => {
       set(state => ({
         loading: { ...state.loading, groups: true },
@@ -115,7 +115,7 @@ export const useGroupManagementStore = create<GroupManagementState>(
       }
     },
 
-    // 加载群组成员
+    // Load group members
     loadGroupMembers: async (groupId: string) => {
       set(state => ({
         loading: { ...state.loading, members: true },
@@ -147,7 +147,7 @@ export const useGroupManagementStore = create<GroupManagementState>(
       }
     },
 
-    // 加载统计数据
+    // Load statistics
     loadStats: async () => {
       set(state => ({
         loading: { ...state.loading, stats: true },
@@ -161,8 +161,8 @@ export const useGroupManagementStore = create<GroupManagementState>(
           const groups = groupsResult.data;
           const totalGroups = groups.length;
 
-          // 使用群组数据中的 member_count 字段计算总成员数
-          // 避免对每个群组单独查询成员，防止新群组导致的查询失败
+          // Use member_count field in group data to calculate total members
+          // Avoid querying members for each group to prevent failures for new groups
           const totalMembers = groups.reduce((sum, group) => {
             return sum + (group.member_count || 0);
           }, 0);
@@ -170,7 +170,7 @@ export const useGroupManagementStore = create<GroupManagementState>(
           const stats: GroupStats = {
             totalGroups,
             totalMembers,
-            activeGroups: totalGroups, // 暂时所有群组都算活跃
+            activeGroups: totalGroups, // All groups are considered active for now
           };
 
           set(state => ({
@@ -191,7 +191,7 @@ export const useGroupManagementStore = create<GroupManagementState>(
       }
     },
 
-    // 创建群组
+    // Create group
     createGroup: async data => {
       set(state => ({
         loading: { ...state.loading, creating: true },
@@ -202,11 +202,11 @@ export const useGroupManagementStore = create<GroupManagementState>(
         const result = await createGroup(data);
 
         if (result.success) {
-          // 直接添加新群组到列表，避免重新加载
+          // Directly add the new group to the list to avoid reloading
           const newGroup = { ...result.data, member_count: 0 };
           set(state => ({
             groups: [newGroup, ...state.groups],
-            // 立即更新统计数据
+            // Immediately update statistics
             stats: {
               ...state.stats,
               totalGroups: state.stats.totalGroups + 1,
@@ -231,7 +231,7 @@ export const useGroupManagementStore = create<GroupManagementState>(
       }
     },
 
-    // 更新群组
+    // Update group
     updateGroup: async (groupId, data) => {
       set(state => ({
         loading: { ...state.loading, updating: true },
@@ -242,7 +242,7 @@ export const useGroupManagementStore = create<GroupManagementState>(
         const result = await updateGroup(groupId, data);
 
         if (result.success) {
-          // 更新本地状态
+          // Update local state
           set(state => ({
             groups: state.groups.map(group =>
               group.id === groupId ? { ...group, ...data } : group
@@ -270,7 +270,7 @@ export const useGroupManagementStore = create<GroupManagementState>(
       }
     },
 
-    // 删除群组
+    // Delete group
     deleteGroup: async groupId => {
       set(state => ({
         loading: { ...state.loading, deleting: true },
@@ -281,11 +281,11 @@ export const useGroupManagementStore = create<GroupManagementState>(
         const result = await deleteGroup(groupId);
 
         if (result.success) {
-          // 获取被删除群组的成员数量，用于更新统计
+          // Get the member count of the deleted group for updating statistics
           const deletedGroup = get().groups.find(g => g.id === groupId);
           const memberCount = deletedGroup?.member_count || 0;
 
-          // 更新本地状态
+          // Update local state
           set(state => ({
             groups: state.groups.filter(group => group.id !== groupId),
             currentGroup:
@@ -295,7 +295,7 @@ export const useGroupManagementStore = create<GroupManagementState>(
                 ([id]) => id !== groupId
               )
             ),
-            // 立即更新统计数据
+            // Immediately update statistics
             stats: {
               ...state.stats,
               totalGroups: state.stats.totalGroups - 1,
@@ -322,15 +322,15 @@ export const useGroupManagementStore = create<GroupManagementState>(
       }
     },
 
-    // 添加成员
+    // Add member
     addMember: async (groupId, userId) => {
       try {
         const result = await addGroupMember(groupId, userId);
 
         if (result.success) {
-          // 重新加载该群组的成员列表
+          // Reload the member list for this group
           await get().loadGroupMembers(groupId);
-          // 更新群组列表中的成员数量和统计数据
+          // Update the member count in the group list and statistics
           set(state => ({
             groups: state.groups.map(group =>
               group.id === groupId
@@ -353,15 +353,15 @@ export const useGroupManagementStore = create<GroupManagementState>(
       }
     },
 
-    // 移除成员
+    // Remove member
     removeMember: async (groupId, userId) => {
       try {
         const result = await removeGroupMember(groupId, userId);
 
         if (result.success) {
-          // 重新加载该群组的成员列表
+          // Reload the member list for this group
           await get().loadGroupMembers(groupId);
-          // 更新群组列表中的成员数量和统计数据
+          // Update the member count in the group list and statistics
           set(state => ({
             groups: state.groups.map(group =>
               group.id === groupId
@@ -387,17 +387,17 @@ export const useGroupManagementStore = create<GroupManagementState>(
       }
     },
 
-    // 设置当前群组
+    // Set current group
     setCurrentGroup: group => {
       set({ currentGroup: group });
     },
 
-    // 设置搜索词
+    // Set search term
     setSearchTerm: term => {
       set({ searchTerm: term });
     },
 
-    // 清除错误
+    // Clear error
     clearError: () => {
       set({ error: null });
     },

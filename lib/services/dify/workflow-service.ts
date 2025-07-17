@@ -1,6 +1,6 @@
 // lib/services/dify/workflow-service.ts
-// 实现与 Dify Workflow API 的交互逻辑。
-// 参考文档: POST /workflows/run
+// Implements interaction logic with Dify Workflow API.
+// Reference: POST /workflows/run
 import { parseSseStream } from '@lib/utils/sse-parser';
 
 import {
@@ -16,43 +16,46 @@ import {
   GetDifyWorkflowLogsResponse,
 } from './types';
 
-// 定义 Dify API 基础 URL (指向我们的后端代理)
-const DIFY_API_BASE_URL = '/api/dify'; // 代理的基础路径
+// Define Dify API base URL (points to our backend proxy)
+const DIFY_API_BASE_URL = '/api/dify'; // Proxy base path
 
 /**
- * 处理 Dify Workflow API 错误响应
+ * Handle Dify Workflow API error response
  */
 function handleWorkflowApiError(status: number, errorBody: string): Error {
   try {
     const errorData = JSON.parse(errorBody) as DifyApiError;
     const errorCode = errorData.code as DifyWorkflowErrorCode;
 
-    // 根据错误码提供更友好的错误信息
+    // Provide more user-friendly error messages based on error code
     const errorMessages: Record<DifyWorkflowErrorCode, string> = {
-      invalid_param: '请求参数错误，请检查输入参数',
-      app_unavailable: '应用不可用，请检查应用状态',
-      provider_not_initialize: '模型提供商未初始化',
-      provider_quota_exceeded: '模型提供商配额已超限',
-      model_currently_not_support: '当前模型不支持此操作',
-      workflow_request_error: '工作流请求错误',
+      invalid_param: 'Request parameter error, please check input parameters',
+      app_unavailable: 'App unavailable, please check app status',
+      provider_not_initialize: 'Model provider not initialized',
+      provider_quota_exceeded: 'Model provider quota exceeded',
+      model_currently_not_support:
+        'Current model does not support this operation',
+      workflow_request_error: 'Workflow request error',
     };
 
     const friendlyMessage =
-      errorMessages[errorCode] || errorData.message || '未知错误';
-    return new Error(`Dify Workflow API 错误 (${status}): ${friendlyMessage}`);
+      errorMessages[errorCode] || errorData.message || 'Unknown error';
+    return new Error(`Dify Workflow API Error (${status}): ${friendlyMessage}`);
   } catch (parseError) {
-    // 如果无法解析错误响应，返回原始错误信息
-    return new Error(`Dify Workflow API 请求失败 (${status}): ${errorBody}`);
+    // If unable to parse error response, return raw error info
+    return new Error(
+      `Dify Workflow API request failed (${status}): ${errorBody}`
+    );
   }
 }
 
 /**
- * 执行 Dify Workflow (blocking 模式)
+ * Execute Dify Workflow (blocking mode)
  *
- * @param payload - 发送给 Dify Workflow API 的请求体
- * @param appId - Dify 应用的 ID
- * @returns 一个包含完整执行结果的 Promise
- * @throws 如果 fetch 请求失败或 API 返回错误状态，则抛出错误
+ * @param payload - Request body sent to Dify Workflow API
+ * @param appId - Dify app ID
+ * @returns A Promise containing the full execution result
+ * @throws Throws error if fetch fails or API returns error status
  */
 export async function executeDifyWorkflow(
   payload: DifyWorkflowRequestPayload,
@@ -65,7 +68,7 @@ export async function executeDifyWorkflow(
 
   const apiUrl = `${DIFY_API_BASE_URL}/${appId}/workflows/run`;
 
-  // 确保使用 blocking 模式
+  // Ensure blocking mode is used
   const blockingPayload: DifyWorkflowRequestPayload = {
     ...payload,
     response_mode: 'blocking',
@@ -90,7 +93,7 @@ export async function executeDifyWorkflow(
       try {
         errorBody = await response.text();
       } catch {
-        // 忽略读取错误体时的错误
+        // Ignore error when reading error body
       }
       throw handleWorkflowApiError(response.status, errorBody);
     }
@@ -112,13 +115,13 @@ export async function executeDifyWorkflow(
 }
 
 /**
- * 执行 Dify Workflow (streaming 模式)
+ * Execute Dify Workflow (streaming mode)
  *
- * @param payload - 发送给 Dify Workflow API 的请求体
- * @param appId - Dify 应用的 ID
- * @param onProgressUpdate - 可选的回调函数，当节点状态更新时调用
- * @returns 一个包含进度流和完成 Promise 的对象
- * @throws 如果 fetch 请求失败或 API 返回错误状态，则抛出错误
+ * @param payload - Request body sent to Dify Workflow API
+ * @param appId - Dify app ID
+ * @param onProgressUpdate - Optional callback, called when node status updates
+ * @returns An object containing the progress stream and completion Promise
+ * @throws Throws error if fetch fails or API returns error status
  */
 export async function streamDifyWorkflow(
   payload: DifyWorkflowRequestPayload,
@@ -129,7 +132,7 @@ export async function streamDifyWorkflow(
 
   const apiUrl = `${DIFY_API_BASE_URL}/${appId}/workflows/run`;
 
-  // 确保使用 streaming 模式
+  // Ensure streaming mode is used
   const streamingPayload: DifyWorkflowRequestPayload = {
     ...payload,
     response_mode: 'streaming',
@@ -154,7 +157,7 @@ export async function streamDifyWorkflow(
       try {
         errorBody = await response.text();
       } catch {
-        // 忽略读取错误体时的错误
+        // Ignore error when reading error body
       }
       throw handleWorkflowApiError(response.status, errorBody);
     }
@@ -169,7 +172,7 @@ export async function streamDifyWorkflow(
     let completionResolve: (value: DifyWorkflowFinishedData) => void;
     let completionReject: (reason: any) => void;
 
-    // 创建完成 Promise
+    // Create completion Promise
     const completionPromise = new Promise<DifyWorkflowFinishedData>(
       (resolve, reject) => {
         completionResolve = resolve;
@@ -177,7 +180,7 @@ export async function streamDifyWorkflow(
       }
     );
 
-    // 创建进度流生成器
+    // Create progress stream generator
     async function* processProgressStream(): AsyncGenerator<
       DifyWorkflowSseEvent,
       void,
@@ -199,7 +202,7 @@ export async function streamDifyWorkflow(
             `[Dify Workflow Service] Received SSE event: ${event.event}`
           );
 
-          // 提取 workflow_run_id 和 task_id
+          // Extract workflow_run_id and task_id
           if (event.workflow_run_id && !workflowRunId) {
             workflowRunId = event.workflow_run_id;
             console.log(
@@ -212,7 +215,7 @@ export async function streamDifyWorkflow(
             console.log('[Dify Workflow Service] Extracted taskId:', taskId);
           }
 
-          // 处理不同类型的事件
+          // Handle different event types
           switch (event.event) {
             case 'workflow_started':
               console.log(
@@ -259,7 +262,7 @@ export async function streamDifyWorkflow(
               yield event;
               break;
 
-            // 🎯 新增：Loop 事件处理 - 关键修复！
+            // Loop event handling
             case 'loop_started':
               console.log(
                 '[Dify Workflow Service] Loop started:',
@@ -317,7 +320,7 @@ export async function streamDifyWorkflow(
               yield event;
               break;
 
-            // 🎯 新增：Iteration 事件处理
+            // Iteration event handling
             case 'iteration_started':
               console.log(
                 '[Dify Workflow Service] Iteration started:',
@@ -381,7 +384,7 @@ export async function streamDifyWorkflow(
                 event.data.status
               );
               completionResolve(event.data);
-              return; // 结束生成器
+              return; // End generator
 
             case 'error':
               console.error(
@@ -430,13 +433,13 @@ export async function streamDifyWorkflow(
 }
 
 /**
- * 停止 Dify Workflow 执行
+ * Stop Dify Workflow execution
  *
- * @param appId - Dify 应用的 ID
- * @param taskId - 需要停止的任务 ID
- * @param user - 发起请求的用户标识符
- * @returns 一个表示停止操作结果的 Promise
- * @throws 如果请求失败或 API 返回错误状态，则抛出错误
+ * @param appId - Dify app ID
+ * @param taskId - Task ID to stop
+ * @param user - User identifier who initiates the request
+ * @returns A Promise representing the stop operation result
+ * @throws Throws error if request fails or API returns error status
  */
 export async function stopDifyWorkflow(
   appId: string,
@@ -489,18 +492,18 @@ export async function stopDifyWorkflow(
 }
 
 /**
- * 获取 workflow 执行情况
+ * Get workflow run detail
  *
- * @param appId - 应用 ID
- * @param workflowRunId - workflow 执行 ID
- * @returns Promise<DifyWorkflowRunDetailResponse> - workflow 执行详情
+ * @param appId - App ID
+ * @param workflowRunId - Workflow run ID
+ * @returns Promise<DifyWorkflowRunDetailResponse> - Workflow run detail
  */
 export async function getDifyWorkflowRunDetail(
   appId: string,
   workflowRunId: string
 ): Promise<DifyWorkflowRunDetailResponse> {
-  const slug = `workflows/run/${workflowRunId}`; // Dify API 路径
-  const apiUrl = `/api/dify/${appId}/${slug}`; // 指向后端代理
+  const slug = `workflows/run/${workflowRunId}`; // Dify API path
+  const apiUrl = `/api/dify/${appId}/${slug}`; // Points to backend proxy
 
   try {
     const response = await fetch(apiUrl, {
@@ -508,16 +511,16 @@ export async function getDifyWorkflowRunDetail(
       headers: {
         'Content-Type': 'application/json',
       },
-      // 不需要 Authorization 头，这是代理的职责
+      // No Authorization header needed, handled by proxy
     });
 
     if (!response.ok) {
-      // 处理 404 错误
+      // Handle 404 error
       if (response.status === 404) {
-        throw new Error('Workflow 执行记录未找到');
+        throw new Error('Workflow run record not found');
       }
 
-      // 尝试解析错误响应
+      // Try to parse error response
       let errorData: DifyApiError;
       try {
         errorData = await response.json();
@@ -525,31 +528,36 @@ export async function getDifyWorkflowRunDetail(
         errorData = {
           status: response.status,
           code: response.status.toString(),
-          message: response.statusText || '获取 workflow 执行情况失败',
+          message: response.statusText || 'Failed to get workflow run detail',
         };
       }
 
       console.error(
-        '[Dify Workflow Service] 获取 workflow 执行情况失败:',
+        '[Dify Workflow Service] Failed to get workflow run detail:',
         errorData
       );
-      throw new Error(`获取 workflow 执行情况失败: ${errorData.message}`);
+      throw new Error(
+        `Failed to get workflow run detail: ${errorData.message}`
+      );
     }
 
     const result: DifyWorkflowRunDetailResponse = await response.json();
 
-    console.log('[Dify Workflow Service] 成功获取 workflow 执行情况:', {
-      appId,
-      workflowRunId,
-      status: result.status,
-      totalSteps: result.total_steps,
-      totalTokens: result.total_tokens,
-    });
+    console.log(
+      '[Dify Workflow Service] Successfully got workflow run detail:',
+      {
+        appId,
+        workflowRunId,
+        status: result.status,
+        totalSteps: result.total_steps,
+        totalTokens: result.total_tokens,
+      }
+    );
 
     return result;
   } catch (error) {
     console.error(
-      '[Dify Workflow Service] 获取 workflow 执行情况时发生错误:',
+      '[Dify Workflow Service] Error occurred while getting workflow run detail:',
       error
     );
 
@@ -557,27 +565,27 @@ export async function getDifyWorkflowRunDetail(
       throw error;
     }
 
-    throw new Error('获取 workflow 执行情况时发生未知错误');
+    throw new Error('Unknown error occurred while getting workflow run detail');
   }
 }
 
-// 获取 Workflow 日志
+// Get Workflow logs
 // GET /workflows/logs
 /**
- * 获取 workflow 日志列表
- * 倒序返回 workflow 日志
+ * Get workflow log list
+ * Returns workflow logs in descending order
  *
- * @param appId - 应用 ID
- * @param params - 查询参数
- * @returns Promise<GetDifyWorkflowLogsResponse> - workflow 日志列表
+ * @param appId - App ID
+ * @param params - Query parameters
+ * @returns Promise<GetDifyWorkflowLogsResponse> - Workflow log list
  */
 export async function getDifyWorkflowLogs(
   appId: string,
   params?: GetDifyWorkflowLogsParams
 ): Promise<GetDifyWorkflowLogsResponse> {
-  const slug = 'workflows/logs'; // Dify API 路径
+  const slug = 'workflows/logs'; // Dify API path
 
-  // 构建查询参数
+  // Build query parameters
   const searchParams = new URLSearchParams();
   if (params?.keyword) {
     searchParams.append('keyword', params.keyword);
@@ -601,11 +609,11 @@ export async function getDifyWorkflowLogs(
       headers: {
         'Content-Type': 'application/json',
       },
-      // 不需要 Authorization 头，这是代理的职责
+      // No Authorization header needed, handled by proxy
     });
 
     if (!response.ok) {
-      // 尝试解析错误响应
+      // Try to parse error response
       let errorData: DifyApiError;
       try {
         errorData = await response.json();
@@ -613,20 +621,20 @@ export async function getDifyWorkflowLogs(
         errorData = {
           status: response.status,
           code: response.status.toString(),
-          message: response.statusText || '获取 workflow 日志失败',
+          message: response.statusText || 'Failed to get workflow logs',
         };
       }
 
       console.error(
-        '[Dify Workflow Service] 获取 workflow 日志失败:',
+        '[Dify Workflow Service] Failed to get workflow logs:',
         errorData
       );
-      throw new Error(`获取 workflow 日志失败: ${errorData.message}`);
+      throw new Error(`Failed to get workflow logs: ${errorData.message}`);
     }
 
     const result: GetDifyWorkflowLogsResponse = await response.json();
 
-    console.log('[Dify Workflow Service] 成功获取 workflow 日志:', {
+    console.log('[Dify Workflow Service] Successfully got workflow logs:', {
       appId,
       params,
       page: result.page,
@@ -639,7 +647,7 @@ export async function getDifyWorkflowLogs(
     return result;
   } catch (error) {
     console.error(
-      '[Dify Workflow Service] 获取 workflow 日志时发生错误:',
+      '[Dify Workflow Service] Error occurred while getting workflow logs:',
       error
     );
 
@@ -647,6 +655,6 @@ export async function getDifyWorkflowLogs(
       throw error;
     }
 
-    throw new Error('获取 workflow 日志时发生未知错误');
+    throw new Error('Unknown error occurred while getting workflow logs');
   }
 }

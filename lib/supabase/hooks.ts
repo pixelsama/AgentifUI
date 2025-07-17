@@ -6,8 +6,8 @@ import { createClient } from './client';
 import type { Database } from './types';
 
 /**
- * 用户认证钩子
- * 提供用户登录状态和会话信息
+ * Supabase authentication hook.
+ * Provides user login status and session information.
  */
 export const useSupabaseAuth = () => {
   const supabase = createClient();
@@ -51,8 +51,8 @@ export const useSupabaseAuth = () => {
 };
 
 /**
- * 用户资料钩子
- * 提供用户资料信息和更新方法
+ * User profile hook.
+ * Provides user profile information and update method.
  */
 export const useProfile = () => {
   const { user } = useSupabaseAuth();
@@ -114,8 +114,8 @@ export const useProfile = () => {
 };
 
 /**
- * 群组钩子
- * 提供用户所属群组信息
+ * Organizations hook.
+ * Provides information about the organizations the user belongs to.
  */
 export const useOrganizations = () => {
   const { user } = useSupabaseAuth();
@@ -158,8 +158,8 @@ export const useOrganizations = () => {
 };
 
 /**
- * 对话钩子
- * 提供用户对话列表
+ * Conversations hook.
+ * Provides the user's conversation list.
  */
 export const useConversations = (limit = 10) => {
   const { user } = useSupabaseAuth();
@@ -202,8 +202,8 @@ export const useConversations = (limit = 10) => {
 };
 
 /**
- * 消息钩子
- * 提供特定对话的消息列表和发送消息方法
+ * Messages hook.
+ * Provides the message list for a specific conversation and a method to send messages.
  */
 export const useMessages = (conversationId: string | null) => {
   const supabase = createClient();
@@ -238,7 +238,7 @@ export const useMessages = (conversationId: string | null) => {
 
     getMessages();
 
-    // 设置实时订阅
+    // Set up real-time subscription for new messages
     const subscription = supabase
       .channel(`messages:${conversationId}`)
       .on(

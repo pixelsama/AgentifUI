@@ -1,4 +1,3 @@
-// 导入数据库操作函数
 import {
   createApiKey,
   createProvider,
@@ -14,12 +13,10 @@ import {
   updateProvider,
   updateServiceInstance,
 } from '@lib/db';
-// 导入类型定义
 import { ApiKey, Provider, ServiceInstance } from '@lib/types/database';
 import { Result } from '@lib/types/result';
 import { create } from 'zustand';
 
-// 重新导出类型定义，供其他组件使用
 export type { Provider, ServiceInstance, ApiKey } from '@lib/types/database';
 
 interface ApiConfigState {
@@ -29,12 +26,10 @@ interface ApiConfigState {
   isLoading: boolean;
   error: Error | null;
 
-  // 新的配置值
   newApiKey: string;
   newApiUrl: string;
   isUpdating: boolean;
 
-  // 应用实例管理
   createAppInstance: (
     instance: Partial<ServiceInstance>,
     apiKey?: string
@@ -47,14 +42,12 @@ interface ApiConfigState {
   deleteAppInstance: (id: string) => Promise<void>;
   setDefaultInstance: (instanceId: string) => Promise<void>;
 
-  // 操作
   loadConfigData: () => Promise<void>;
   updateDifyConfig: () => Promise<void>;
   setNewApiKey: (key: string) => void;
   setNewApiUrl: (url: string) => void;
 }
 
-// 辅助函数：处理Result类型的返回值
 function handleResult<T>(result: Result<T>, operation: string): T {
   if (!result.success) {
     throw new Error(`${operation} failed: ${result.error.message}`);
@@ -73,18 +66,16 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
   newApiUrl: '',
   isUpdating: false,
 
-  // 创建应用实例
   createAppInstance: async (instance, apiKey) => {
     try {
-      // 创建服务实例
       const newInstanceResult = await createServiceInstance({
-        provider_id: instance.provider_id || '1', // 默认提供商ID
+        provider_id: instance.provider_id || '1',
         display_name: instance.display_name || '',
         description: instance.description || '',
         instance_id: instance.instance_id || '',
         api_path: instance.api_path || '',
         is_default: instance.is_default || false,
-        visibility: instance.visibility || 'public', // 默认为公开应用
+        visibility: instance.visibility || 'public',
         config: instance.config || {},
       });
 
@@ -93,13 +84,12 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
         'Create service instance'
       );
 
-      // 更新本地状态 - 添加新实例到列表
       const { serviceInstances } = get();
       set({ serviceInstances: [...serviceInstances, newInstance] });
 
-      // 如果提供了 API 密钥，则加密并存储
+      // if apiKey is provided, encrypt and store
       if (apiKey) {
-        // 加密 API 密钥
+        // encrypt apiKey
         const response = await fetch('/api/admin/encrypt', {
           method: 'POST',
           headers: {
@@ -114,7 +104,7 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
 
         const { encryptedKey } = await response.json();
 
-        // 创建 API 密钥 - 传递isEncrypted=true表示密钥已通过API端点加密
+        // create api key - pass isEncrypted=true to indicate that the key has been encrypted by the API endpoint
         const newApiKeyResult = await createApiKey(
           {
             service_instance_id: newInstance.id,
@@ -126,11 +116,11 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
             last_used_at: null,
           },
           true
-        ); // 标记密钥已加密
+        ); // mark the key as encrypted
 
         const newApiKey = handleResult(newApiKeyResult, 'Create API key');
 
-        // 更新本地状态 - 添加新密钥到列表
+        // update local state - add new key to list
         const { apiKeys } = get();
         set({ apiKeys: [...apiKeys, newApiKey] });
       }
@@ -142,10 +132,9 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
     }
   },
 
-  // 更新应用实例
   updateAppInstance: async (id, instance, apiKey) => {
     try {
-      // 获取现有实例信息
+      // get existing instance information
       const existingInstanceResult = await getServiceInstanceById(id);
       const existingInstance = handleResult(
         existingInstanceResult,
@@ -156,13 +145,13 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
         throw new Error('App instance not found for update');
       }
 
-      // 🎯 修复：正确处理config字段的更新
+      // correctly handle config field update
       const configToSave =
         instance.config !== undefined
           ? instance.config
           : existingInstance.config;
 
-      // 更新服务实例
+      // update service instance
       const updatedInstanceResult = await updateServiceInstance(id, {
         display_name:
           instance.display_name !== undefined
@@ -177,7 +166,7 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
           instance.is_default !== undefined
             ? instance.is_default
             : existingInstance.is_default,
-        config: configToSave, // 🎯 修复：正确更新config字段
+        config: configToSave, // correctly update config field
       });
 
       const updatedInstance = handleResult(
@@ -185,7 +174,7 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
         'Update service instance'
       );
 
-      // 更新本地状态 - 更新实例列表中的对应项
+      // update local state - update corresponding item in instance list
       const { serviceInstances } = get();
       set({
         serviceInstances: serviceInstances.map(si =>
@@ -193,9 +182,9 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
         ),
       });
 
-      // 如果提供了 API 密钥，则加密并存储/更新
+      // if apiKey is provided, encrypt and store/update
       if (apiKey) {
-        // 加密 API 密钥
+        // encrypt apiKey
         const response = await fetch('/api/admin/encrypt', {
           method: 'POST',
           headers: {
@@ -210,22 +199,22 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
 
         const { encryptedKey } = await response.json();
 
-        // 查找现有 API 密钥
+        // find existing api key
         const existingKeyResult = await getApiKeyByServiceInstance(id);
         const existingKey = handleResult(existingKeyResult, 'Get API key');
 
         if (existingKey) {
-          // 更新现有密钥 - 使用更新后的 updateApiKey 函数
-          // 传递 isEncrypted=true 表示密钥已经通过API端点加密
+          // update existing key - use updated updateApiKey function
+          // pass isEncrypted=true to indicate that the key has been encrypted by the API endpoint
           const updatedKeyResult = await updateApiKey(
             existingKey.id,
             { key_value: encryptedKey },
-            true // 标记密钥已加密
+            true // mark the key as encrypted
           );
 
           const updatedKey = handleResult(updatedKeyResult, 'Update API key');
 
-          // 更新本地状态 - 更新密钥列表中的对应项
+          // update local state - update corresponding item in key list
           const { apiKeys } = get();
           set({
             apiKeys: apiKeys.map(k =>
@@ -233,8 +222,8 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
             ),
           });
         } else {
-          // 创建新密钥 - 使用更新后的 createApiKey 函数
-          // 传递 isEncrypted=true 表示密钥已经通过API端点加密
+          // create new key - use updated createApiKey function
+          // pass isEncrypted=true to indicate that the key has been encrypted by the API endpoint
           const newKeyResult = await createApiKey(
             {
               service_instance_id: id,
@@ -246,11 +235,11 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
               last_used_at: null,
             },
             true
-          ); // 标记密钥已加密
+          ); // mark the key as encrypted
 
           const newKey = handleResult(newKeyResult, 'Create API key');
 
-          // 更新本地状态 - 添加新密钥到列表
+          // update local state - add new key to list
           const { apiKeys } = get();
           set({ apiKeys: [...apiKeys, newKey] });
         }
@@ -263,10 +252,9 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
     }
   },
 
-  // 删除应用实例
   deleteAppInstance: async id => {
     try {
-      // 获取现有实例信息
+      // get existing instance information
       const existingInstanceResult = await getServiceInstanceById(id);
       const existingInstance = handleResult(
         existingInstanceResult,
@@ -277,10 +265,10 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
         throw new Error('App instance not found for deletion');
       }
 
-      // 🎯 新增：删除应用实例时同步从常用应用存储中移除
+      // remove from favorite apps store when deleting app instance
       const instanceId = existingInstance.instance_id;
 
-      // 查找并删除相关的 API 密钥
+      // find and delete related api keys
       const existingKeyResult = await getApiKeyByServiceInstance(id);
       const existingKey = handleResult(existingKeyResult, 'Get API key');
 
@@ -288,31 +276,31 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
         const deletedResult = await deleteApiKey(existingKey.id);
         handleResult(deletedResult, 'Delete API key');
 
-        // 更新本地状态 - 从密钥列表中移除
+        // update local state - remove from key list
         const { apiKeys } = get();
         set({ apiKeys: apiKeys.filter(k => k.id !== existingKey.id) });
       }
 
-      // 删除服务实例
+      // delete service instance
       const deletedResult = await deleteServiceInstance(id);
       handleResult(deletedResult, 'Delete service instance');
 
-      // 更新本地状态 - 从实例列表中移除
+      // update local state - remove from instance list
       const { serviceInstances } = get();
       set({ serviceInstances: serviceInstances.filter(si => si.id !== id) });
 
-      // 🎯 新增：从常用应用存储中移除被删除的应用
+      // remove from favorite apps store when deleting app instance
       try {
         const { useFavoriteAppsStore } = await import('./favorite-apps-store');
         const { removeFavoriteApp } = useFavoriteAppsStore.getState();
         removeFavoriteApp(instanceId);
-        console.log(`[删除应用] 已从常用应用中移除: ${instanceId}`);
+        console.log(`[Delete app] Removed from favorite apps: ${instanceId}`);
       } catch (favoriteError) {
         console.warn(
-          `[删除应用] 从常用应用中移除失败: ${instanceId}`,
+          `[Delete app] Failed to remove from favorite apps: ${instanceId}`,
           favoriteError
         );
-        // 不抛出错误，因为这不应该阻止主要的删除操作
+        // don't throw error, because this shouldn't block the main delete operation
       }
     } catch (error) {
       console.error('Error deleting app instance:', error);
@@ -320,14 +308,14 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
     }
   },
 
-  // 设置默认应用实例
+  // set default app instance
   setDefaultInstance: async instanceId => {
     try {
-      // 调用数据库函数设置默认实例
+      // call database function to set default instance
       const result = await setDefaultServiceInstance(instanceId);
       const updatedInstance = handleResult(result, 'Set default app instance');
 
-      // 更新本地状态 - 更新所有相关实例的is_default状态
+      // update local state - update is_default status of all related instances
       const { serviceInstances } = get();
       set({
         serviceInstances: serviceInstances.map(si => ({
@@ -353,17 +341,16 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      console.time('[API Config] 总加载时间');
+      console.time('[API Config] Total loading time');
 
-      // 使用数据库函数获取所有提供商
-      console.time('[API Config] 获取提供商');
+      // use database function to get all providers
+      console.time('[API Config] Get providers');
       const providersResult = await getActiveProviders();
       const providers = handleResult(providersResult, 'Get active providers');
-      console.timeEnd('[API Config] 获取提供商');
+      console.timeEnd('[API Config] Get providers');
 
-      // 🚀 优化：并行获取每个提供商的服务实例
-      // 从串行查询改为并行查询，显著提升性能
-      console.time('[API Config] 并行获取服务实例');
+      // get service instances in parallel
+      console.time('[API Config] Get service instances in parallel');
       const instancePromises = providers.map(provider =>
         getServiceInstancesByProvider(provider.id)
           .then(result => ({
@@ -385,9 +372,9 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
       );
 
       const instanceResults = await Promise.all(instancePromises);
-      console.timeEnd('[API Config] 并行获取服务实例');
+      console.timeEnd('[API Config] Get service instances in parallel');
 
-      // 合并所有服务实例并处理错误
+      // merge all service instances and handle errors
       const serviceInstances: ServiceInstance[] = [];
       for (const { provider, result, instances } of instanceResults) {
         if (result.success) {
@@ -400,16 +387,14 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
         }
       }
 
-      // 按显示名称排序
+      // sort by display name
       const sortedServiceInstances = serviceInstances.sort((a, b) =>
         (a.display_name || a.instance_id).localeCompare(
           b.display_name || b.instance_id
         )
       );
 
-      // 🚀 优化：并行获取每个服务实例的API密钥
-      // 从串行查询改为并行查询，显著提升性能
-      console.time('[API Config] 并行获取API密钥');
+      console.time('[API Config] Get api keys in parallel');
       const keyPromises = sortedServiceInstances.map(instance =>
         getApiKeyByServiceInstance(instance.id)
           .then(result => ({
@@ -431,9 +416,9 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
       );
 
       const keyResults = await Promise.all(keyPromises);
-      console.timeEnd('[API Config] 并行获取API密钥');
+      console.timeEnd('[API Config] Get api keys in parallel');
 
-      // 筛选有效的API密钥并处理错误
+      // filter valid api keys and handle errors
       const apiKeys: ApiKey[] = [];
       for (const { instance, result, apiKey } of keyResults) {
         if (result.success && apiKey) {
@@ -444,15 +429,15 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
             result.error
           );
         }
-        // 如果 result.success 为 true 但 apiKey 为 null，说明该实例没有配置API密钥，这是正常情况
+        // if result.success is true but apiKey is null, it means the instance has no api key configured, which is normal
       }
 
-      console.timeEnd('[API Config] 总加载时间');
+      console.timeEnd('[API Config] Total loading time');
       console.log(
-        `[API Config] 加载完成 - 提供商: ${providers.length}, 服务实例: ${sortedServiceInstances.length}, API密钥: ${apiKeys.length}`
+        `[API Config] Loaded - providers: ${providers.length}, service instances: ${sortedServiceInstances.length}, api keys: ${apiKeys.length}`
       );
 
-      // 更新状态
+      // update state
       set({
         providers,
         serviceInstances: sortedServiceInstances,
@@ -461,15 +446,18 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
         error: null,
       });
 
-      // 设置默认 Dify URL
+      // set default Dify URL
       const difyProvider = providers.find(p => p.name === 'Dify');
       if (difyProvider) {
         set({ newApiUrl: difyProvider.base_url });
       }
     } catch (error) {
-      console.error('加载配置数据时出错:', error);
+      console.error('Error loading config data:', error);
       set({
-        error: error instanceof Error ? error : new Error('加载配置数据时出错'),
+        error:
+          error instanceof Error
+            ? error
+            : new Error('Error loading config data'),
         isLoading: false,
       });
     }
@@ -480,17 +468,19 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
       get();
 
     if (!newApiKey && !newApiUrl) {
-      set({ error: new Error('请至少提供 API 密钥或 URL') });
+      set({
+        error: new Error('Please provide at least one of API key or URL'),
+      });
       return;
     }
 
     set({ isUpdating: true, error: null });
 
     try {
-      // 查找 Dify 提供商
+      // find Dify provider
       let difyProvider = providers.find(p => p.name === 'Dify');
 
-      // 如果不存在，创建一个
+      // if not exists, create one
       if (!difyProvider && newApiUrl) {
         const newProviderResult = await createProvider({
           name: 'Dify',
@@ -507,14 +497,14 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
         );
         difyProvider = newProvider;
 
-        // 更新提供商列表
+        // update provider list
         set({ providers: [...providers, newProvider] });
       } else if (
         difyProvider &&
         newApiUrl &&
         difyProvider.base_url !== newApiUrl
       ) {
-        // 更新 URL
+        // update URL
         const updatedProviderResult = await updateProvider(difyProvider.id, {
           base_url: newApiUrl,
         });
@@ -524,7 +514,7 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
           'Update Dify provider'
         );
 
-        // 更新本地状态
+        // update local state
         set({
           providers: providers.map(p =>
             p.id === difyProvider?.id ? { ...p, base_url: newApiUrl } : p
@@ -532,23 +522,23 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
         });
       }
 
-      // 如果有新的 API 密钥
+      // if there is a new API key
       if (newApiKey && difyProvider) {
-        // 查找默认服务实例
+        // find default service instance
         let defaultInstance = serviceInstances.find(
           si => si.provider_id === difyProvider?.id && si.is_default
         );
 
-        // 如果不存在，创建一个
+        // if not exists, create one
         if (!defaultInstance) {
           const newInstanceResult = await createServiceInstance({
             provider_id: difyProvider.id,
             display_name: 'Default Dify Application',
-            description: '默认 Dify 应用实例',
+            description: 'Default Dify application instance',
             instance_id: 'default',
             api_path: '',
             is_default: true,
-            visibility: 'public', // 默认为公开应用
+            visibility: 'public', // default is public app
             config: {},
           });
 
@@ -558,11 +548,11 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
           );
           defaultInstance = newInstance;
 
-          // 更新服务实例列表
+          // update service instance list
           set({ serviceInstances: [...serviceInstances, newInstance] });
         }
 
-        // 加密 API 密钥
+        // encrypt API key
         const response = await fetch('/api/admin/encrypt', {
           method: 'POST',
           headers: {
@@ -577,17 +567,17 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
 
         const { encryptedKey } = await response.json();
 
-        // 查找默认 API 密钥
+        // find default API key
         const defaultKey = apiKeys.find(
           k => k.service_instance_id === defaultInstance?.id && k.is_default
         );
 
         if (defaultKey) {
-          // 更新现有密钥 - 传递isEncrypted=true表示密钥已通过API端点加密
+          // update existing key - pass isEncrypted=true to indicate that the key has been encrypted by the API endpoint
           const updatedKeyResult = await updateApiKey(
             defaultKey.id,
             { key_value: encryptedKey },
-            true // 标记密钥已加密
+            true // mark the key as encrypted
           );
 
           const updatedKey = handleResult(
@@ -595,14 +585,14 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
             'Update default API key'
           );
 
-          // 更新本地状态
+          // update local state
           set({
             apiKeys: apiKeys.map(k =>
               k.id === defaultKey.id ? { ...k, key_value: encryptedKey } : k
             ),
           });
         } else if (defaultInstance) {
-          // 创建新密钥 - 传递isEncrypted=true表示密钥已通过API端点加密
+          // create new key - pass isEncrypted=true to indicate that the key has been encrypted by the API endpoint
           const newKeyResult = await createApiKey(
             {
               service_instance_id: defaultInstance.id,
@@ -614,22 +604,24 @@ export const useApiConfigStore = create<ApiConfigState>((set, get) => ({
               last_used_at: null,
             },
             true
-          ); // 标记密钥已加密
+          ); // mark the key as encrypted
 
           const newKey = handleResult(newKeyResult, 'Create default API key');
 
-          // 更新 API 密钥列表
+          // update API key list
           set({ apiKeys: [...apiKeys, newKey] });
         }
       }
 
-      // 清空输入
+      // clear input
       set({ newApiKey: '', isUpdating: false });
     } catch (error) {
       console.error('Error updating Dify config:', error);
       set({
         error:
-          error instanceof Error ? error : new Error('更新 Dify 配置时出错'),
+          error instanceof Error
+            ? error
+            : new Error('Error updating Dify config'),
         isUpdating: false,
       });
     }

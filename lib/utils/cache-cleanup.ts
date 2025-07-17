@@ -1,75 +1,75 @@
 /**
- * 统一缓存清理服务
- * 用于在登录、登出、切换用户时清理所有相关缓存
+ * Unified cache cleanup service.
+ * Used to clear all related caches during login, logout, or user switching.
  */
 import { clearDifyConfigCache } from '@lib/config/dify-config';
 import { clearProfileCache } from '@lib/hooks/use-profile';
 
-// 所有需要清理的localStorage键名
+// All localStorage keys that need to be cleared
 const CACHE_KEYS = {
-  // 用户相关缓存
+  // User-related cache
   USER_PROFILE: 'user_profile_cache',
 
-  // 主题相关（可选保留，用户偏好）
+  // Theme-related (optionally preserved, user preference)
   THEME: 'theme',
 
-  // 应用相关缓存
+  // Application-related cache
   LAST_USED_MODEL_APP: 'last-used-model-app-id',
 
-  // 关于页面配置（可选保留，全局配置） - 已被移除
+  // About page config (optionally preserved, global config) - removed
   // ABOUT_PAGE_CONFIG: 'about-page-config',
 
-  // 其他需要清理的键名前缀
+  // Other keys with specific prefix to be cleared
   RESIZABLE_PANE_PREFIX: 'split-pane-',
 } as const;
 
-// 敏感缓存：包含用户敏感信息，必须在登出时清理
+// Sensitive cache: contains user sensitive info, must be cleared on logout
 const SENSITIVE_CACHE_KEYS = [
   CACHE_KEYS.USER_PROFILE,
   CACHE_KEYS.LAST_USED_MODEL_APP,
 ];
 
-// 用户相关缓存：与特定用户绑定，切换用户时需要清理
+// User-specific cache: bound to a specific user, should be cleared on user switch
 const USER_SPECIFIC_CACHE_KEYS = [
   CACHE_KEYS.USER_PROFILE,
   CACHE_KEYS.LAST_USED_MODEL_APP,
 ];
 
-// 全局配置缓存：可以跨用户保留的配置
+// Global config cache: can be preserved across users
 const GLOBAL_CONFIG_CACHE_KEYS = [
   CACHE_KEYS.THEME,
-  // CACHE_KEYS.ABOUT_PAGE_CONFIG, // 已被移除
+  // CACHE_KEYS.ABOUT_PAGE_CONFIG, // removed
 ];
 
-// 登出时需要清理的缓存
-// 将敏感缓存和用户特定缓存合并
+// Cache to be cleared on logout
+// Merge sensitive and user-specific cache
 // const LOGOUT_CLEANUP_KEYS = [
 //   ...new Set([...SENSITIVE_CACHE_KEYS, ...USER_SPECIFIC_CACHE_KEYS]),
 // ];
 
 /**
- * 清理敏感缓存
- * 用于登出时，清理所有包含用户敏感信息的缓存
+ * Clear sensitive cache.
+ * Used on logout to clear all caches containing sensitive user information.
  */
 export const clearSensitiveCache = (): void => {
-  console.log('[缓存清理] 开始清理敏感缓存');
+  console.log('[Cache Cleanup] Start clearing sensitive cache');
 
   try {
-    // 清理用户资料缓存
+    // Clear user profile cache
     clearProfileCache();
 
-    // 清理Dify配置缓存
+    // Clear Dify config cache
     clearDifyConfigCache();
 
-    // 清理其他敏感localStorage项
+    // Clear other sensitive localStorage items
     SENSITIVE_CACHE_KEYS.forEach(key => {
       if (typeof window !== 'undefined') {
         localStorage.removeItem(key);
-        console.log(`[缓存清理] 已清理敏感缓存: ${key}`);
+        console.log(`[Cache Cleanup] Cleared sensitive cache: ${key}`);
       }
     });
 
-    // 清理带前缀的缓存（如分割面板位置）
+    // Clear caches with specific prefix (e.g., resizable pane positions)
     if (typeof window !== 'undefined') {
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
@@ -80,75 +80,75 @@ export const clearSensitiveCache = (): void => {
       }
       keysToRemove.forEach(key => {
         localStorage.removeItem(key);
-        console.log(`[缓存清理] 已清理UI缓存: ${key}`);
+        console.log(`[Cache Cleanup] Cleared UI cache: ${key}`);
       });
     }
 
-    // 清理Zustand持久化存储
+    // Clear Zustand persistent storage
     clearZustandCache();
 
-    console.log('[缓存清理] 敏感缓存清理完成');
+    console.log('[Cache Cleanup] Sensitive cache cleanup completed');
   } catch (error) {
-    console.error('[缓存清理] 敏感缓存清理失败:', error);
+    console.error('[Cache Cleanup] Sensitive cache cleanup failed:', error);
   }
 };
 
 /**
- * 清理用户特定缓存
- * 用于切换用户时，清理与特定用户相关的缓存
+ * Clear user-specific cache.
+ * Used when switching users to clear caches related to the specific user.
  */
 export const clearUserSpecificCache = (): void => {
-  console.log('[缓存清理] 开始清理用户特定缓存');
+  console.log('[Cache Cleanup] Start clearing user-specific cache');
 
   try {
-    // 清理用户资料缓存
+    // Clear user profile cache
     clearProfileCache();
 
-    // 清理Dify配置缓存
+    // Clear Dify config cache
     clearDifyConfigCache();
 
-    // 清理用户特定的localStorage项
+    // Clear user-specific localStorage items
     USER_SPECIFIC_CACHE_KEYS.forEach(key => {
       if (typeof window !== 'undefined') {
         localStorage.removeItem(key);
-        console.log(`[缓存清理] 已清理用户缓存: ${key}`);
+        console.log(`[Cache Cleanup] Cleared user cache: ${key}`);
       }
     });
 
-    // 清理Zustand持久化存储中的用户相关数据
+    // Clear user-related data in Zustand persistent storage
     clearZustandUserCache();
 
-    console.log('[缓存清理] 用户特定缓存清理完成');
+    console.log('[Cache Cleanup] User-specific cache cleanup completed');
   } catch (error) {
-    console.error('[缓存清理] 用户特定缓存清理失败:', error);
+    console.error('[Cache Cleanup] User-specific cache cleanup failed:', error);
   }
 };
 
 /**
- * 清理所有缓存
- * 用于系统重置或完全清理
+ * Clear all cache.
+ * Used for system reset or full cleanup.
  */
 export const clearAllCache = (): void => {
-  console.log('[缓存清理] 开始清理所有缓存');
+  console.log('[Cache Cleanup] Start clearing all cache');
 
   try {
-    // 清理用户资料缓存
+    // Clear user profile cache
     clearProfileCache();
 
-    // 清理Dify配置缓存
+    // Clear Dify config cache
     clearDifyConfigCache();
 
-    // 清理所有localStorage（除了关键系统配置）
+    // Clear all localStorage (except for critical system config)
     if (typeof window !== 'undefined') {
       const keysToPreserve = new Set<string>();
 
-      // 可选：保留主题设置
+      // Optionally: preserve theme setting
       const preserveTheme = true;
       if (preserveTheme && localStorage.getItem(CACHE_KEYS.THEME)) {
         keysToPreserve.add(CACHE_KEYS.THEME);
       }
 
-      // 备份需要保留的数据
+      // Backup data to be preserved
       const preservedData: Record<string, string> = {};
       keysToPreserve.forEach(key => {
         const value = localStorage.getItem(key);
@@ -157,39 +157,39 @@ export const clearAllCache = (): void => {
         }
       });
 
-      // 清理所有localStorage
+      // Clear all localStorage
       localStorage.clear();
 
-      // 恢复保留的数据
+      // Restore preserved data
       Object.entries(preservedData).forEach(([key, value]) => {
         localStorage.setItem(key, value);
-        console.log(`[缓存清理] 已恢复保留项: ${key}`);
+        console.log(`[Cache Cleanup] Restored preserved item: ${key}`);
       });
     }
 
-    // 清理所有Zustand持久化存储
+    // Clear all Zustand persistent storage
     clearZustandCache();
 
-    console.log('[缓存清理] 所有缓存清理完成');
+    console.log('[Cache Cleanup] All cache cleanup completed');
   } catch (error) {
-    console.error('[缓存清理] 全量缓存清理失败:', error);
+    console.error('[Cache Cleanup] Full cache cleanup failed:', error);
   }
 };
 
 /**
- * 清理Zustand持久化存储
+ * Clear Zustand persistent storage.
  */
 const clearZustandCache = (): void => {
   try {
     if (typeof window === 'undefined') return;
 
-    // 清理常用应用存储
+    // Clear favorite apps storage
     localStorage.removeItem('favorite-apps-storage');
 
-    // 清理当前应用存储
+    // Clear current app storage
     localStorage.removeItem('current-app-storage');
 
-    // 清理其他Zustand存储（如果有的话）
+    // Clear other Zustand storage (if any)
     const zustandKeys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -200,50 +200,50 @@ const clearZustandCache = (): void => {
 
     zustandKeys.forEach(key => {
       localStorage.removeItem(key);
-      console.log(`[缓存清理] 已清理Zustand存储: ${key}`);
+      console.log(`[Cache Cleanup] Cleared Zustand storage: ${key}`);
     });
   } catch (error) {
-    console.warn('[缓存清理] Zustand缓存清理失败:', error);
+    console.warn('[Cache Cleanup] Zustand cache cleanup failed:', error);
   }
 };
 
 /**
- * 清理Zustand中的用户相关缓存
+ * Clear user-related cache in Zustand.
  */
 const clearZustandUserCache = (): void => {
   try {
     if (typeof window === 'undefined') return;
 
-    // 清理常用应用存储（用户相关）
+    // Clear favorite apps storage (user-related)
     localStorage.removeItem('favorite-apps-storage');
 
-    // 清理当前应用存储（用户相关）
+    // Clear current app storage (user-related)
     localStorage.removeItem('current-app-storage');
 
-    console.log('[缓存清理] Zustand用户缓存清理完成');
+    console.log('[Cache Cleanup] Zustand user cache cleanup completed');
   } catch (error) {
-    console.warn('[缓存清理] Zustand用户缓存清理失败:', error);
+    console.warn('[Cache Cleanup] Zustand user cache cleanup failed:', error);
   }
 };
 
 /**
- * 在登录时清理前一个用户的缓存
+ * Clear previous user's cache on login.
  */
 export const clearCacheOnLogin = (): void => {
-  console.log('[缓存清理] 登录时清理缓存');
+  console.log('[Cache Cleanup] Clear cache on login');
   clearUserSpecificCache();
 };
 
 /**
- * 在登出时清理敏感缓存
+ * Clear sensitive cache on logout.
  */
 export const clearCacheOnLogout = (): void => {
-  console.log('[缓存清理] 登出时清理缓存');
+  console.log('[Cache Cleanup] Clear cache on logout');
   clearSensitiveCache();
 };
 
 /**
- * 获取缓存清理状态报告
+ * Get cache cleanup status report.
  */
 export const getCacheCleanupReport = (): {
   sensitiveKeys: string[];

@@ -1,8 +1,8 @@
 /**
- * 统一的Result类型定义
+ * Unified Result type definition
  *
- * 用于标准化所有数据库操作和API调用的返回值
- * 提供一致的错误处理和成功状态检查
+ * Used to standardize return values for all database operations and API calls.
+ * Provides consistent error handling and success state checking.
  */
 
 export type Result<T> =
@@ -10,14 +10,14 @@ export type Result<T> =
   | { success: false; error: Error; data?: never };
 
 /**
- * 创建成功结果
+ * Create a successful result
  */
 export function success<T>(data: T): Result<T> {
   return { success: true, data };
 }
 
 /**
- * 创建失败结果
+ * Create a failed result
  */
 export function failure<T>(error: Error | string): Result<T> {
   const errorObj = typeof error === 'string' ? new Error(error) : error;
@@ -25,7 +25,7 @@ export function failure<T>(error: Error | string): Result<T> {
 }
 
 /**
- * 包装异步操作，自动捕获异常并返回Result类型
+ * Wrap an async operation, automatically catch exceptions and return Result type
  */
 export async function wrapAsync<T>(
   operation: () => Promise<T>,
@@ -44,7 +44,7 @@ export async function wrapAsync<T>(
 }
 
 /**
- * 数据库操作错误类型
+ * Database operation error type
  */
 export class DatabaseError extends Error {
   constructor(
@@ -58,7 +58,7 @@ export class DatabaseError extends Error {
 }
 
 /**
- * 网络操作错误类型
+ * Network operation error type
  */
 export class NetworkError extends Error {
   constructor(
@@ -72,7 +72,7 @@ export class NetworkError extends Error {
 }
 
 /**
- * 验证错误类型
+ * Validation error type
  */
 export class ValidationError extends Error {
   constructor(

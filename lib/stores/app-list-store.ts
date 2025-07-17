@@ -3,8 +3,8 @@ import type { DifyAppParametersResponse } from '@lib/services/dify/types';
 import type { AppVisibility, ServiceInstanceConfig } from '@lib/types/database';
 import { create } from 'zustand';
 
-// 🎯 应用信息接口，包含应用的基本信息和配置
-// 新增：provider_name 字段用于多提供商支持
+// App information interface, includes basic info and config
+// Added: provider_name field for multi-provider support
 export interface AppInfo {
   id: string;
   name: string;
@@ -16,10 +16,10 @@ export interface AppInfo {
   used_count?: number;
   quota_remaining?: number;
   visibility?: AppVisibility;
-  provider_name?: string; // 🎯 新增：提供商名称，用于多提供商支持
+  provider_name?: string; // Added: provider name for multi-provider support
 }
 
-// 🎯 新增：应用参数缓存接口
+// Added: App parameters cache interface
 interface AppParametersCache {
   [appId: string]: {
     data: DifyAppParametersResponse;
@@ -33,65 +33,65 @@ interface AppListState {
   error: string | null;
   lastFetchTime: number;
 
-  // 🎯 应用参数相关状态
+  // App parameters related state
   parametersCache: AppParametersCache;
   isLoadingParameters: boolean;
   parametersError: string | null;
   lastParametersFetchTime: number;
 
-  // 🎯 请求锁，防止同一应用的并发请求
+  // Request lock to prevent concurrent requests for the same app
   fetchingApps: Set<string>;
 
-  // 🎯 用户状态（自动管理）
+  // User state (auto managed)
   currentUserId: string | null;
 
-  // 🎯 核心方法
+  // Core methods
   fetchApps: () => Promise<void>;
   clearCache: () => void;
 
-  // 🎯 应用参数相关方法
+  // App parameters related methods
   fetchAllAppParameters: () => Promise<void>;
   fetchAppParameters: (appId: string) => Promise<void>;
   getAppParameters: (appId: string) => DifyAppParametersResponse | null;
   clearParametersCache: () => void;
 
-  // 🎯 权限检查方法
+  // Permission check method
   checkAppPermission: (appInstanceId: string) => Promise<boolean>;
 
-  // 🎯 管理员专用方法（管理界面使用）
+  // Admin only method (for admin UI)
   fetchAllApps: () => Promise<void>;
 }
 
-const CACHE_DURATION = 30 * 60 * 1000; // 30分钟 - 延长缓存时间，减少模型选择器按钮闪烁
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes - extend cache time to reduce selector flicker
 
 export const useAppListStore = create<AppListState>((set, get) => ({
   apps: [],
-  isLoading: false, // 🔧 恢复初始状态为false，通过其他方式解决时序问题
+  isLoading: false, // Restore initial state to false, handle timing issues elsewhere
   error: null,
   lastFetchTime: 0,
 
-  // 🎯 新增：应用参数相关状态初始化
+  // App parameters related state initialization
   parametersCache: {},
   isLoadingParameters: false,
   parametersError: null,
   lastParametersFetchTime: 0,
 
-  // 🎯 添加请求锁，防止同一应用的并发请求
+  // Add request lock to prevent concurrent requests for the same app
   fetchingApps: new Set(),
 
-  // 🎯 用户状态初始化
+  // User state initialization
   currentUserId: null,
 
   fetchApps: async () => {
     const now = Date.now();
     const state = get();
 
-    // 🔧 立即设置loading状态，避免初始闪烁
+    // Immediately set loading state to avoid initial flicker
     if (state.apps.length === 0) {
       set({ isLoading: true });
     }
 
-    // 🎯 修复缓存污染：先获取用户ID，检查用户变化
+    // Fix cache pollution: get user ID first, check for user change
     const { createClient } = await import('@lib/supabase/client');
     const supabase = createClient();
     const {
@@ -99,45 +99,47 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error('用户未登录'); // 理论上不会发生，middleware会拦截
+      throw new Error('User not logged in'); // Should not happen, middleware intercepts
     }
 
-    // 🔧 关键修复：如果用户ID变化，立即清除缓存
+    // Key fix: if user ID changes, clear cache immediately
     if (state.currentUserId !== user.id) {
-      // 清理用户相关的应用缓存和参数缓存
+      // Clear user-related app cache and parameter cache
       set({
         apps: [],
         lastFetchTime: 0,
         currentUserId: user.id,
         isLoading: true,
         error: null,
-        // 清理参数缓存
+        // Clear parameter cache
         parametersCache: {},
         lastParametersFetchTime: 0,
         parametersError: null,
         fetchingApps: new Set(),
       });
       console.log(
-        `[AppListStore] 检测到用户变化 (${state.currentUserId} → ${user.id})，清除所有应用缓存`
+        `[AppListStore] Detected user change (${state.currentUserId} → ${user.id}), cleared all app cache`
       );
     }
 
-    // 重新获取状态（可能已被清除）
+    // Get state again (may have been cleared)
     const currentState = get();
 
-    // 5分钟内不重复获取（现在是用户隔离的）
+    // Do not fetch again within cache duration (now user-isolated)
     if (
       now - currentState.lastFetchTime < CACHE_DURATION &&
       currentState.apps.length > 0
     ) {
-      console.log(`[AppListStore] 用户 ${user.id} 缓存仍然有效，跳过获取`);
+      console.log(
+        `[AppListStore] User ${user.id} cache still valid, skip fetch`
+      );
       return;
     }
 
     set({ isLoading: true, error: null });
 
     try {
-      // 🎯 使用权限管理API获取用户可访问的应用
+      // Use permission management API to get user accessible apps
       const { getUserAccessibleApps } = await import(
         '@lib/db/group-permissions'
       );
@@ -147,7 +149,7 @@ export const useAppListStore = create<AppListState>((set, get) => ({
         throw new Error(result.error.message);
       }
 
-      // 🎯 转换UserAccessibleApp到AppInfo格式，使用去重逻辑
+      // Convert UserAccessibleApp to AppInfo, use deduplication logic
       const appMap = new Map<string, AppInfo>();
 
       result.data.forEach((userApp: UserAccessibleApp) => {
@@ -162,11 +164,10 @@ export const useAppListStore = create<AppListState>((set, get) => ({
           used_count: userApp.used_count,
           quota_remaining: userApp.quota_remaining ?? undefined,
           visibility: userApp.visibility,
-          // 🎯 暂时注释掉，等待数据库层面支持
-          // provider_name: userApp.provider_name
+          // provider_name: userApp.provider_name // Uncomment when DB supports
         };
 
-        // 🔧 使用service_instance_id作为唯一键去重
+        // Use service_instance_id as unique key for deduplication
         if (!appMap.has(userApp.service_instance_id)) {
           appMap.set(userApp.service_instance_id, appInfo);
         }
@@ -182,18 +183,18 @@ export const useAppListStore = create<AppListState>((set, get) => ({
       });
 
       console.log(
-        `[AppListStore] 成功获取 ${apps.length} 个用户可访问应用（包含群组权限）`
+        `[AppListStore] Successfully fetched ${apps.length} user accessible apps (including group permissions)`
       );
 
-      // 🎯 后台同步：更新常用应用信息
+      // Background sync: update favorite app info
       try {
         const { useFavoriteAppsStore } = await import('./favorite-apps-store');
         useFavoriteAppsStore.getState().syncWithAppList(apps);
       } catch (error) {
-        console.warn('[AppListStore] 同步常用应用信息失败:', error);
+        console.warn('[AppListStore] Failed to sync favorite app info:', error);
       }
     } catch (error: any) {
-      console.error('[AppListStore] 获取应用列表失败:', error);
+      console.error('[AppListStore] Failed to fetch app list:', error);
       set({
         error: error.message,
         isLoading: false,
@@ -201,12 +202,12 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     }
   },
 
-  // 🎯 新增：获取所有应用（管理员用）
+  // Added: fetch all apps (admin use)
   fetchAllApps: async () => {
     const now = Date.now();
     const state = get();
 
-    // 🔧 管理员函数也需要用户隔离，避免缓存污染
+    // Admin function also needs user isolation to avoid cache pollution
     const { createClient } = await import('@lib/supabase/client');
     const supabase = createClient();
     const {
@@ -214,39 +215,39 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error('用户未登录');
+      throw new Error('User not logged in');
     }
 
-    // 🔧 如果用户ID变化，清除缓存
+    // If user ID changes, clear cache
     if (state.currentUserId !== user.id) {
-      // 管理员模式下也需要清理用户相关缓存
+      // In admin mode, also clear user-related cache
       set({
         apps: [],
         lastFetchTime: 0,
         currentUserId: user.id,
         isLoading: true,
         error: null,
-        // 清理参数缓存
+        // Clear parameter cache
         parametersCache: {},
         lastParametersFetchTime: 0,
         parametersError: null,
         fetchingApps: new Set(),
       });
       console.log(
-        `[AppListStore] fetchAllApps检测到用户变化 (${state.currentUserId} → ${user.id})，清除所有应用缓存`
+        `[AppListStore] fetchAllApps detected user change (${state.currentUserId} → ${user.id}), cleared all app cache`
       );
     }
 
-    // 重新获取状态
+    // Get state again
     const currentState = get();
 
-    // 5分钟内不重复获取（现在是用户隔离的）
+    // Do not fetch again within cache duration (now user-isolated)
     if (
       now - currentState.lastFetchTime < CACHE_DURATION &&
       currentState.apps.length > 0
     ) {
       console.log(
-        `[AppListStore] 管理员用户 ${user.id} 缓存仍然有效，跳过获取`
+        `[AppListStore] Admin user ${user.id} cache still valid, skip fetch`
       );
       return;
     }
@@ -257,12 +258,11 @@ export const useAppListStore = create<AppListState>((set, get) => ({
       const { getAllDifyApps } = await import('@lib/services/dify/app-service');
       const rawApps = await getAllDifyApps();
 
-      // 🎯 为所有应用列表添加visibility信息
+      // Add visibility info to all apps
       const apps: AppInfo[] = rawApps.map(app => ({
         ...app,
         visibility: (app.visibility as AppVisibility) || 'public',
-        // 🎯 暂时注释掉，等待数据库层面支持
-        // provider_name: app.provider_name
+        // provider_name: app.provider_name // Uncomment when DB supports
       }));
 
       set({
@@ -272,14 +272,16 @@ export const useAppListStore = create<AppListState>((set, get) => ({
         currentUserId: user.id,
       });
 
-      console.log(`[AppListStore] 成功获取 ${apps.length} 个应用（包括私有）`);
+      console.log(
+        `[AppListStore] Successfully fetched ${apps.length} apps (including private)`
+      );
 
-      // 🎯 后台同步：更新常用应用信息
+      // Background sync: update favorite app info
       try {
         const { useFavoriteAppsStore } = await import('./favorite-apps-store');
         useFavoriteAppsStore.getState().syncWithAppList(apps);
       } catch (error) {
-        console.warn('[AppListStore] 同步常用应用信息失败:', error);
+        console.warn('[AppListStore] Failed to sync favorite app info:', error);
       }
     } catch (error: any) {
       set({
@@ -289,12 +291,12 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     }
   },
 
-  // 🎯 新增：获取用户可访问的应用（带权限过滤）
+  // Added: fetch user accessible apps (with permission filtering)
   fetchUserAccessibleApps: async (userId: string) => {
     const now = Date.now();
     const state = get();
 
-    // 如果用户ID变化，清除缓存
+    // If user ID changes, clear cache
     if (state.currentUserId !== userId) {
       set({
         apps: [],
@@ -303,7 +305,7 @@ export const useAppListStore = create<AppListState>((set, get) => ({
       });
     }
 
-    // 5分钟内不重复获取
+    // Do not fetch again within cache duration
     if (now - state.lastFetchTime < CACHE_DURATION && state.apps.length > 0) {
       return;
     }
@@ -320,7 +322,7 @@ export const useAppListStore = create<AppListState>((set, get) => ({
         throw new Error(result.error.message);
       }
 
-      // 转换UserAccessibleApp到AppInfo格式，并去重
+      // Convert UserAccessibleApp to AppInfo, deduplicate
       const appMap = new Map<string, AppInfo>();
 
       result.data.forEach((app: UserAccessibleApp) => {
@@ -335,12 +337,11 @@ export const useAppListStore = create<AppListState>((set, get) => ({
           used_count: app.used_count,
           quota_remaining: app.quota_remaining ?? undefined,
           visibility: app.visibility,
-          // 🎯 暂时注释掉，等待数据库层面支持
-          // provider_name: app.provider_name
+          // provider_name: app.provider_name // Uncomment when DB supports
         };
 
-        // 🔧 关键修复：使用service_instance_id作为唯一键去重
-        // 如果用户在多个部门都有权限，只保留一条记录，避免React key重复错误
+        // Key fix: use service_instance_id as unique key for deduplication
+        // If user has access in multiple departments, keep only one record to avoid React key duplication
         if (!appMap.has(app.service_instance_id)) {
           appMap.set(app.service_instance_id, appInfo);
         }
@@ -356,10 +357,13 @@ export const useAppListStore = create<AppListState>((set, get) => ({
       });
 
       console.log(
-        `[AppListStore] 成功获取用户 ${userId} 可访问的 ${apps.length} 个应用`
+        `[AppListStore] Successfully fetched ${apps.length} apps accessible by user ${userId}`
       );
     } catch (error: any) {
-      console.error('[AppListStore] 获取用户可访问应用失败:', error);
+      console.error(
+        '[AppListStore] Failed to fetch user accessible apps:',
+        error
+      );
       set({
         error: error.message,
         isLoading: false,
@@ -367,12 +371,14 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     }
   },
 
-  // 🎯 检查用户对特定应用的访问权限
+  // Check if user has access to a specific app
   checkAppPermission: async (appInstanceId: string) => {
     const state = get();
 
     if (!state.currentUserId) {
-      console.warn('[AppListStore] 检查应用权限但未设置用户ID');
+      console.warn(
+        '[AppListStore] Tried to check app permission but user ID is not set'
+      );
       return false;
     }
 
@@ -387,43 +393,48 @@ export const useAppListStore = create<AppListState>((set, get) => ({
 
       if (!result.success) {
         console.warn(
-          `[AppListStore] 检查应用权限失败: ${result.error.message}`
+          `[AppListStore] Failed to check app permission: ${result.error.message}`
         );
         return false;
       }
 
       return result.data.has_access;
     } catch (error) {
-      console.error('[AppListStore] 检查应用权限异常:', error);
+      console.error(
+        '[AppListStore] Exception while checking app permission:',
+        error
+      );
       return false;
     }
   },
 
-  // 🎯 新增：批量获取所有应用的参数
+  // Added: fetch parameters for all apps in batch
   fetchAllAppParameters: async () => {
     const now = Date.now();
     const state = get();
 
-    // 检查缓存是否仍然有效
+    // Check if parameter cache is still valid
     if (
       now - state.lastParametersFetchTime < CACHE_DURATION &&
       Object.keys(state.parametersCache).length > 0
     ) {
-      console.log('[AppListStore] 应用参数缓存仍然有效，跳过获取');
+      console.log(
+        '[AppListStore] App parameters cache still valid, skip fetch'
+      );
       return;
     }
 
-    // 如果没有应用列表，先获取应用列表
+    // If no app list, fetch app list first
     if (state.apps.length === 0) {
-      console.log('[AppListStore] 应用列表为空，先获取应用列表');
+      console.log('[AppListStore] App list is empty, fetching app list first');
 
-      // 🎯 直接使用fetchApps获取应用列表
+      // Directly use fetchApps to get app list
       await get().fetchApps();
     }
 
     const currentApps = get().apps;
     if (currentApps.length === 0) {
-      console.warn('[AppListStore] 无可用应用，跳过参数获取');
+      console.warn('[AppListStore] No available apps, skip parameter fetch');
       return;
     }
 
@@ -436,25 +447,27 @@ export const useAppListStore = create<AppListState>((set, get) => ({
       const newParametersCache: AppParametersCache = {};
 
       console.log(
-        `[AppListStore] 开始批量获取 ${currentApps.length} 个应用的参数`
+        `[AppListStore] Start batch fetching parameters for ${currentApps.length} apps`
       );
 
-      // 并发获取所有应用的参数
+      // Fetch parameters for all apps concurrently
       const parameterPromises = currentApps.map(async app => {
         try {
-          const parameters = await getDifyAppParameters(app.instance_id); // 使用instance_id调用API
+          const parameters = await getDifyAppParameters(app.instance_id); // Use instance_id for API call
           newParametersCache[app.id] = {
-            // 但用id作为缓存key
+            // Use id as cache key
             data: parameters,
             timestamp: now,
           };
-          console.log(`[AppListStore] 成功获取应用 ${app.instance_id} 的参数`);
+          console.log(
+            `[AppListStore] Successfully fetched parameters for app ${app.instance_id}`
+          );
         } catch (error) {
           console.warn(
-            `[AppListStore] 获取应用 ${app.instance_id} 参数失败:`,
+            `[AppListStore] Failed to fetch parameters for app ${app.instance_id}:`,
             error
           );
-          // 单个应用失败不影响其他应用
+          // Failure for one app does not affect others
         }
       });
 
@@ -467,10 +480,13 @@ export const useAppListStore = create<AppListState>((set, get) => ({
       });
 
       console.log(
-        `[AppListStore] 批量获取应用参数完成，成功获取 ${Object.keys(newParametersCache).length} 个应用的参数`
+        `[AppListStore] Batch fetch of app parameters complete, successfully fetched parameters for ${Object.keys(newParametersCache).length} apps`
       );
     } catch (error: any) {
-      console.error('[AppListStore] 批量获取应用参数失败:', error);
+      console.error(
+        '[AppListStore] Failed to batch fetch app parameters:',
+        error
+      );
       set({
         parametersError: error.message,
         isLoadingParameters: false,
@@ -478,17 +494,17 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     }
   },
 
-  // 🎯 新增：获取指定应用的参数（从缓存）
+  // Added: get parameters for a specific app (from cache)
   getAppParameters: (appId: string) => {
     const state = get();
     const cached = state.parametersCache[appId];
 
     if (!cached) return null;
 
-    // 检查缓存是否过期
+    // Check if cache is expired
     const isExpired = Date.now() - cached.timestamp > CACHE_DURATION;
     if (isExpired) {
-      // 清理过期缓存
+      // Clear expired cache
       const newCache = { ...state.parametersCache };
       delete newCache[appId];
       set({ parametersCache: newCache });
@@ -498,31 +514,35 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     return cached.data;
   },
 
-  // 🎯 新增：获取指定应用的参数（单独请求）
+  // Added: fetch parameters for a specific app (individual request)
   fetchAppParameters: async (appId: string) => {
     const state = get();
 
-    // 防止重复请求
+    // Prevent duplicate requests
     if (state.fetchingApps.has(appId)) {
-      console.log(`[AppListStore] 应用 ${appId} 正在请求中，跳过重复请求`);
+      console.log(
+        `[AppListStore] App ${appId} is already being requested, skip duplicate request`
+      );
       return;
     }
 
-    // 检查缓存
+    // Check cache
     const cached = state.parametersCache[appId];
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      console.log(`[AppListStore] 应用 ${appId} 参数缓存有效，跳过请求`);
+      console.log(
+        `[AppListStore] App ${appId} parameter cache is valid, skip request`
+      );
       return;
     }
 
-    // 找到对应的应用信息
+    // Find corresponding app info
     const app = state.apps.find(a => a.id === appId);
     if (!app) {
-      console.warn(`[AppListStore] 未找到应用 ${appId}`);
+      console.warn(`[AppListStore] App ${appId} not found`);
       return;
     }
 
-    // 添加到请求锁
+    // Add to request lock
     set({
       fetchingApps: new Set([...state.fetchingApps, appId]),
     });
@@ -533,7 +553,7 @@ export const useAppListStore = create<AppListState>((set, get) => ({
       );
       const parameters = await getDifyAppParameters(app.instance_id);
 
-      // 更新缓存
+      // Update cache
       const newCache = {
         ...get().parametersCache,
         [appId]: {
@@ -543,14 +563,16 @@ export const useAppListStore = create<AppListState>((set, get) => ({
       };
 
       set({ parametersCache: newCache });
-      console.log(`[AppListStore] 成功获取应用 ${app.instance_id} 的参数`);
+      console.log(
+        `[AppListStore] Successfully fetched parameters for app ${app.instance_id}`
+      );
     } catch (error) {
       console.error(
-        `[AppListStore] 获取应用 ${app.instance_id} 参数失败:`,
+        `[AppListStore] Failed to fetch parameters for app ${app.instance_id}:`,
         error
       );
     } finally {
-      // 移除请求锁
+      // Remove from request lock
       const currentState = get();
       const newFetchingApps = new Set(currentState.fetchingApps);
       newFetchingApps.delete(appId);
@@ -558,7 +580,7 @@ export const useAppListStore = create<AppListState>((set, get) => ({
     }
   },
 
-  // 🎯 新增：清理参数缓存
+  // Added: clear parameter cache
   clearParametersCache: () => {
     set({
       parametersCache: {},
@@ -573,9 +595,9 @@ export const useAppListStore = create<AppListState>((set, get) => ({
       apps: [],
       lastFetchTime: 0,
       error: null,
-      // 🎯 清理用户状态
+      // Clear user state
       currentUserId: null,
-      // 清理参数缓存
+      // Clear parameter cache
       parametersCache: {},
       lastParametersFetchTime: 0,
       parametersError: null,

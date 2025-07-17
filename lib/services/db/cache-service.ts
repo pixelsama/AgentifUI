@@ -1,8 +1,8 @@
 /**
- * 统一的缓存服务
+ * Unified cache service
  *
- * 提供内存级别的数据缓存，支持TTL（生存时间）管理
- * 用于减少数据库查询次数，提高应用性能
+ * Provides in-memory data caching with TTL (time-to-live) management.
+ * Used to reduce database query frequency and improve application performance.
  */
 
 interface CacheItem<T> {
@@ -17,14 +17,14 @@ export class CacheService {
   private cleanupTimer: NodeJS.Timeout | null = null;
 
   private constructor() {
-    // 每分钟清理一次过期缓存
+    // Clean up expired cache items every minute
     this.cleanupTimer = setInterval(() => {
       this.cleanupExpired();
     }, 60000);
   }
 
   /**
-   * 获取缓存服务单例
+   * Get the singleton instance of the cache service
    */
   public static getInstance(): CacheService {
     if (!CacheService.instance) {
@@ -34,10 +34,10 @@ export class CacheService {
   }
 
   /**
-   * 获取缓存数据，如果不存在或过期则执行fetcher
-   * @param key 缓存键
-   * @param fetcher 数据获取函数
-   * @param ttl 生存时间（毫秒），默认5分钟
+   * Get cached data. If not present or expired, execute fetcher.
+   * @param key Cache key
+   * @param fetcher Data fetch function
+   * @param ttl Time to live (ms), default 5 minutes
    */
   async get<T>(
     key: string,
@@ -46,17 +46,17 @@ export class CacheService {
   ): Promise<T> {
     const cached = this.cache.get(key);
 
-    // 检查缓存是否存在且未过期
+    // Check if cache exists and is not expired
     if (cached && Date.now() - cached.timestamp < cached.ttl) {
-      console.log(`[缓存命中] 键: ${key}`);
+      console.log(`[Cache hit] Key: ${key}`);
       return cached.data;
     }
 
-    // 缓存不存在或已过期，重新获取数据
-    console.log(`[缓存未命中] 键: ${key}，重新获取数据`);
+    // Cache not found or expired, fetch new data
+    console.log(`[Cache miss] Key: ${key}, fetching new data`);
     const data = await fetcher();
 
-    // 存储到缓存
+    // Store in cache
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -67,7 +67,7 @@ export class CacheService {
   }
 
   /**
-   * 直接设置缓存
+   * Set cache directly
    */
   set<T>(key: string, data: T, ttl: number = 5 * 60 * 1000): void {
     this.cache.set(key, {
@@ -78,7 +78,7 @@ export class CacheService {
   }
 
   /**
-   * 检查缓存是否存在且未过期
+   * Check if cache exists and is not expired
    */
   has(key: string): boolean {
     const cached = this.cache.get(key);
@@ -93,14 +93,14 @@ export class CacheService {
   }
 
   /**
-   * 删除指定缓存
+   * Delete a specific cache entry
    */
   delete(key: string): boolean {
     return this.cache.delete(key);
   }
 
   /**
-   * 删除匹配模式的所有缓存
+   * Delete all cache entries matching a pattern
    */
   deletePattern(pattern: string): number {
     let deletedCount = 0;
@@ -117,14 +117,14 @@ export class CacheService {
   }
 
   /**
-   * 清除所有缓存
+   * Clear all cache entries
    */
   clear(): void {
     this.cache.clear();
   }
 
   /**
-   * 清理过期的缓存项
+   * Clean up expired cache items
    */
   private cleanupExpired(): void {
     const now = Date.now();
@@ -138,12 +138,14 @@ export class CacheService {
     }
 
     if (cleanedCount > 0) {
-      console.log(`[缓存清理] 清理了 ${cleanedCount} 个过期缓存项`);
+      console.log(
+        `[Cache cleanup] Cleaned ${cleanedCount} expired cache items`
+      );
     }
   }
 
   /**
-   * 获取缓存统计信息
+   * Get cache statistics
    */
   getStats(): {
     size: number;
@@ -155,7 +157,7 @@ export class CacheService {
     let totalMemorySize = 0;
 
     for (const [key, item] of this.cache.entries()) {
-      // 计算内存大小（粗略估算）
+      // Roughly estimate memory size
       totalMemorySize += key.length * 2 + JSON.stringify(item.data).length * 2;
 
       if (now - item.timestamp >= item.ttl) {
@@ -171,7 +173,7 @@ export class CacheService {
   }
 
   /**
-   * 销毁缓存服务
+   * Destroy the cache service
    */
   destroy(): void {
     if (this.cleanupTimer) {
@@ -182,10 +184,10 @@ export class CacheService {
   }
 }
 
-// 导出单例实例
+// Export singleton instance
 export const cacheService = CacheService.getInstance();
 
-// 常用的缓存键生成器
+// Common cache key generators
 export const CacheKeys = {
   userProfile: (userId: string) => `user:profile:${userId}`,
   userConversations: (userId: string, page: number = 0) =>
@@ -199,10 +201,10 @@ export const CacheKeys = {
   conversationByExternalId: (externalId: string) =>
     `conversation:external:${externalId}`,
 
-  // App Executions 缓存键（用于工作流和文本生成的一次性任务）
-  // 由于这些是历史记录查询，适合较长的缓存时间
+  // App Executions cache keys (for one-off workflow and text generation tasks)
+  // These are for history queries, suitable for longer cache times
   userExecutions: (userId: string, page: number = 0) =>
     `user:executions:${userId}:${page}`,
   execution: (executionId: string) => `execution:${executionId}`,
-  // 注：暂不添加实时订阅，因为执行记录主要用于历史查看，后续如需要可以添加
+  // Note: Real-time subscription is not added for now, as execution records are mainly for history viewing. Can be added later if needed.
 };

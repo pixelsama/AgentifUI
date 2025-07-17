@@ -7,9 +7,9 @@ interface WorkflowHistoryState {
 }
 
 /**
- * 工作流历史记录状态管理
+ * Workflow history state management
  *
- * 用于在NavBar和工作流页面之间同步历史记录显示状态
+ * Used to synchronize the display state of history between NavBar and workflow pages
  */
 export const useWorkflowHistoryStore = create<WorkflowHistoryState>(set => ({
   showHistory: false,

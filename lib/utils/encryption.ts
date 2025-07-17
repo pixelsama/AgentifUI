@@ -6,65 +6,65 @@ import {
 } from 'crypto';
 
 /**
- * 加密 API 密钥
- * @param apiKey 要加密的 API 密钥
- * @param masterKey 主密钥
- * @returns 加密后的字符串，格式为 "iv:authTag:encryptedData"
+ * Encrypt API key
+ * @param apiKey The API key to encrypt
+ * @param masterKey The master key
+ * @returns Encrypted string in the format "iv:authTag:encryptedData"
  */
 export function encryptApiKey(apiKey: string, masterKey: string): string {
-  // 使用 SHA-256 生成固定长度的密钥
+  // Generate a fixed-length key using SHA-256
   const hash = createHash('sha256');
   hash.update(masterKey);
-  const key = hash.digest(); // 生成 32 字节的密钥
+  const key = hash.digest(); // 32 bytes key
 
-  // 生成随机初始化向量
+  // Generate a random initialization vector (IV)
   const iv = randomBytes(16);
 
-  // 创建加密器
+  // Create cipher
   const cipher = createCipheriv('aes-256-gcm', key, iv);
 
-  // 加密数据
+  // Encrypt data
   let encrypted = cipher.update(apiKey, 'utf8', 'hex');
   encrypted += cipher.final('hex');
 
-  // 获取认证标签
+  // Get authentication tag
   const authTag = cipher.getAuthTag().toString('hex');
 
-  // 返回格式化的加密数据
+  // Return formatted encrypted data
   return `${iv.toString('hex')}:${authTag}:${encrypted}`;
 }
 
 /**
- * 解密 API 密钥
- * @param encryptedData 加密的数据，格式为 "iv:authTag:encryptedData"
- * @param masterKey 主密钥
- * @returns 解密后的 API 密钥
+ * Decrypt API key
+ * @param encryptedData Encrypted data in the format "iv:authTag:encryptedData"
+ * @param masterKey The master key
+ * @returns Decrypted API key
  */
 export function decryptApiKey(
   encryptedData: string,
   masterKey: string
 ): string {
-  // 使用 SHA-256 生成固定长度的密钥
+  // Generate a fixed-length key using SHA-256
   const hash = createHash('sha256');
   hash.update(masterKey);
-  const key = hash.digest(); // 生成 32 字节的密钥
+  const key = hash.digest(); // 32 bytes key
 
-  // 解析加密数据
+  // Parse encrypted data
   const [ivHex, authTagHex, encryptedHex] = encryptedData.split(':');
 
   if (!ivHex || !authTagHex || !encryptedHex) {
     throw new Error('Invalid encrypted data format');
   }
 
-  // 转换为 Buffer
+  // Convert to Buffer
   const iv = Buffer.from(ivHex, 'hex');
   const authTag = Buffer.from(authTagHex, 'hex');
 
-  // 创建解密器
+  // Create decipher
   const decipher = createDecipheriv('aes-256-gcm', key, iv);
   decipher.setAuthTag(authTag);
 
-  // 解密数据
+  // Decrypt data
   let decrypted = decipher.update(encryptedHex, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
 
@@ -72,8 +72,8 @@ export function decryptApiKey(
 }
 
 /**
- * 生成随机的主密钥
- * @returns 32 字节（256 位）的随机十六进制字符串
+ * Generate a random master key
+ * @returns A 32-byte (256-bit) random hexadecimal string
  */
 export function generateMasterKey(): string {
   return randomBytes(32).toString('hex');

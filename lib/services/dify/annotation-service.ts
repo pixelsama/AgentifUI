@@ -1,6 +1,9 @@
-// lib/services/dify/annotation-service.ts
-// 该文件负责处理与 Dify 标注相关的 API 交互，例如获取标注列表。
-// 它遵循与其他服务文件类似的设计模式，提供独立的、可导出的服务函数。
+/**
+ * Dify Annotation Service
+ *
+ * Handles Dify annotation-related API interactions, such as fetching annotation lists.
+ * Follows similar design patterns to other service files, providing independent, exportable service functions.
+ */
 import type {
   CreateDifyAnnotationRequest,
   CreateDifyAnnotationResponse,
@@ -15,20 +18,20 @@ import type {
   UpdateDifyAnnotationResponse,
 } from './types';
 
-// 定义指向我们后端 Dify 代理 API 的基础 URL。
-// 与其他服务保持一致，方便统一管理代理路径。
+// Define the base URL for our backend Dify proxy API.
+// Keeps consistency with other services for easier proxy path management.
 const DIFY_PROXY_BASE_URL = '/api/dify';
 
 /**
- * 获取应用的标注列表。
+ * Get the list of annotations for an application.
  *
- * 通过向后端的 Dify 代理服务发送请求来工作。
- * 支持分页加载，通过 `page` 和 `limit` 参数控制。
+ * Works by sending requests to the backend Dify proxy service.
+ * Supports pagination, controlled by `page` and `limit` parameters.
  *
- * @param appId - 当前 Dify 应用的 ID。
- * @param params - 包含可选的 `page` 和 `limit` 的对象。
- * @returns 一个解析为 `DifyAnnotationListResponse` 对象的 Promise，其中包含了标注列表和分页信息。
- * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象 (类似 DifyApiError)。
+ * @param appId - The ID of the current Dify application.
+ * @param params - An object containing optional `page` and `limit` parameters.
+ * @returns A Promise that resolves to a `DifyAnnotationListResponse` object, containing the annotation list and pagination information.
+ * @throws An object containing error details (similar to DifyApiError) if the request fails or the API returns a non-2xx status code.
  */
 export async function getDifyAnnotations(
   appId: string,
@@ -38,14 +41,14 @@ export async function getDifyAnnotations(
     console.warn(
       '[Dify Annotation Service] Warning: appId is not provided. API call may fail or use a default app.'
     );
-    // 或者根据业务需求抛出错误
+    // or throw an error based on business requirements
     // throw new Error('[Dify Annotation Service] appId is required.');
   }
 
-  const slug = 'apps/annotations'; // Dify API 中用于获取标注列表的端点路径
+  const slug = 'apps/annotations'; // Endpoint path for fetching annotation lists in Dify API
   const apiUrl = `${DIFY_PROXY_BASE_URL}/${appId}/${slug}`;
 
-  // 构造查询参数字符串
+  // Construct query string parameters
   const queryParams = new URLSearchParams();
 
   if (params.page !== undefined) {
@@ -67,26 +70,26 @@ export async function getDifyAnnotations(
     const response = await fetch(fullUrl, {
       method: 'GET',
       headers: {
-        Accept: 'application/json', // 期望接收 JSON 格式的响应
+        Accept: 'application/json', // Expect JSON response format
       },
     });
 
     if (!response.ok) {
-      // 尝试解析错误响应体，以便提供更详细的错误信息
+      // Try to parse the error response body to provide more detailed error information
       let errorData: DifyApiError | { message: string; code?: string } = {
         message: `API request failed with status ${response.status}: ${response.statusText}`,
       };
       try {
-        // 尝试将错误响应解析为 JSON。Dify 的错误响应通常是 JSON 格式。
+        // Try to parse the error response as JSON. Dify's error responses are usually in JSON format.
         const parsedError = await response.json();
         errorData = {
           status: response.status,
           code: parsedError.code || response.status.toString(),
           message: parsedError.message || response.statusText,
-          ...parsedError, // 包含其他可能的错误字段
+          ...parsedError, // Include other possible error fields
         };
       } catch (e) {
-        // 如果错误响应体不是有效的 JSON，则使用 HTTP 状态文本作为消息。
+        // If the error response body is not a valid JSON, use the HTTP status text as the message.
         console.warn(
           '[Dify Annotation Service] Failed to parse error response JSON.',
           e
@@ -97,11 +100,11 @@ export async function getDifyAnnotations(
         `[Dify Annotation Service] Failed to get annotations (${response.status}):`,
         errorData
       );
-      // 抛出错误对象，上层调用者可以捕获并处理
+      // Throw the error object, allowing the caller to catch and handle it
       throw errorData;
     }
 
-    // 响应成功，解析 JSON 数据
+    // Response successful, parse JSON data
     const data: DifyAnnotationListResponse = await response.json();
     console.log('[Dify Annotation Service] Successfully fetched annotations.', {
       total: data.total,
@@ -112,13 +115,13 @@ export async function getDifyAnnotations(
     });
     return data;
   } catch (error) {
-    // 处理 fetch 本身的网络错误或其他在 try 块中未被捕获的错误
+    // Handle network errors from fetch itself or other errors not caught in the try block
     console.error(
       '[Dify Annotation Service] Network or unexpected error while fetching annotations:',
       error
     );
-    // 重新抛出错误，或者将其包装成一个标准化的错误对象
-    // 如果 error 已经是我们上面抛出的 errorData 结构，直接抛出
+    // Re-throw the error or wrap it in a standardized error object
+    // If error is already our errorData structure, throw it directly
     if (
       error &&
       typeof error === 'object' &&
@@ -126,7 +129,7 @@ export async function getDifyAnnotations(
     ) {
       throw error;
     }
-    // 否则，包装成一个通用的错误结构
+    // Otherwise, wrap it in a generic error structure
     throw {
       message:
         error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -136,12 +139,12 @@ export async function getDifyAnnotations(
 }
 
 /**
- * 创建一个新的标注。
+ * Create a new annotation.
  *
- * @param appId - 当前 Dify 应用的 ID。
- * @param request - 包含问题和答案的创建请求体。
- * @returns 一个解析为 `CreateDifyAnnotationResponse` 对象的 Promise，包含创建的标注信息。
- * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象。
+ * @param appId - The ID of the current Dify application.
+ * @param request - The request body containing the question and answer.
+ * @returns A Promise that resolves to a `CreateDifyAnnotationResponse` object, containing the created annotation information.
+ * @throws An object containing error details if the request fails or the API returns a non-2xx status code.
  */
 export async function createDifyAnnotation(
   appId: string,
@@ -229,13 +232,13 @@ export async function createDifyAnnotation(
 }
 
 /**
- * 更新一个已存在的标注。
+ * Update an existing annotation.
  *
- * @param appId - 当前 Dify 应用的 ID。
- * @param annotationId - 要更新的标注 ID。
- * @param request - 包含更新后问题和答案的请求体。
- * @returns 一个解析为 `UpdateDifyAnnotationResponse` 对象的 Promise，包含更新后的标注信息。
- * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象。
+ * @param appId - The ID of the current Dify application.
+ * @param annotationId - The ID of the annotation to update.
+ * @param request - The request body containing the updated question and answer.
+ * @returns A Promise that resolves to a `UpdateDifyAnnotationResponse` object, containing the updated annotation information.
+ * @throws An object containing error details if the request fails or the API returns a non-2xx status code.
  */
 export async function updateDifyAnnotation(
   appId: string,
@@ -330,12 +333,12 @@ export async function updateDifyAnnotation(
 }
 
 /**
- * 删除一个标注。
+ * Delete an annotation.
  *
- * @param appId - 当前 Dify 应用的 ID。
- * @param annotationId - 要删除的标注 ID。
- * @returns 一个解析为 void 的 Promise，表示删除成功（204 状态码）。
- * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象。
+ * @param appId - The ID of the current Dify application.
+ * @param annotationId - The ID of the annotation to delete.
+ * @returns A Promise that resolves to void, indicating successful deletion (204 status code).
+ * @throws An object containing error details if the request fails or the API returns a non-2xx status code.
  */
 export async function deleteDifyAnnotation(
   appId: string,
@@ -398,7 +401,7 @@ export async function deleteDifyAnnotation(
     console.log('[Dify Annotation Service] Successfully deleted annotation:', {
       annotationId,
     });
-    // 204 状态码表示删除成功，无响应体
+    // 204 status
   } catch (error) {
     console.error(
       '[Dify Annotation Service] Network or unexpected error while deleting annotation:',
@@ -420,14 +423,14 @@ export async function deleteDifyAnnotation(
 }
 
 /**
- * 启用或禁用标注回复设置，并配置嵌入模型。
- * 此接口异步执行。
+ * Enable or disable annotation reply settings and configure the embedding model.
+ * This interface is asynchronous.
  *
- * @param appId - 当前 Dify 应用的 ID。
- * @param action - 动作类型，'enable' 或 'disable'。
- * @param request - 包含嵌入模型配置和相似度阈值的请求体。
- * @returns 一个解析为 `DifyAsyncJobResponse` 对象的 Promise，包含异步任务信息。
- * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象。
+ * @param appId - The ID of the current Dify application.
+ * @param action - The action type, 'enable' or 'disable'.
+ * @param request - The request body containing the embedding model configuration and similarity threshold.
+ * @returns A Promise that resolves to a `DifyAsyncJobResponse` object, containing the asynchronous task information.
+ * @throws An object containing error details if the request fails or the API returns a non-2xx status code.
  */
 export async function setDifyAnnotationReplySettings(
   appId: string,
@@ -528,13 +531,13 @@ export async function setDifyAnnotationReplySettings(
 }
 
 /**
- * 查询异步执行的标注回复初始设置任务的状态。
+ * Query the status of the asynchronous execution of the annotation reply initial settings task.
  *
- * @param appId - 当前 Dify 应用的 ID。
- * @param action - 动作类型，'enable' 或 'disable'。
- * @param jobId - 任务 ID，从标注回复初始设置接口返回。
- * @returns 一个解析为 `DifyAsyncJobStatusResponse` 对象的 Promise，包含任务状态信息。
- * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象。
+ * @param appId - The ID of the current Dify application.
+ * @param action - The action type, 'enable' or 'disable'.
+ * @param jobId - The task ID, returned from the annotation reply initial settings interface.
+ * @returns A Promise that resolves to a `DifyAsyncJobStatusResponse` object, containing the task status information.
+ * @throws An object containing error details if the request fails or the API returns a non-2xx status code.
  */
 export async function getDifyAnnotationReplyJobStatus(
   appId: string,
@@ -628,4 +631,4 @@ export async function getDifyAnnotationReplyJobStatus(
   }
 }
 
-export {}; // 确保文件被视为一个 ES模块
+export {}; // Ensure the file is treated as an ES module

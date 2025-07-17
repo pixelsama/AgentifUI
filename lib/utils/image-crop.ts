@@ -1,5 +1,6 @@
-// 图片裁切工具函数
-// 用于将裁切区域转换为实际的图片文件
+// Image cropping utility functions
+// Used to convert a crop area to an actual image file
+
 export interface Area {
   x: number;
   y: number;
@@ -7,7 +8,7 @@ export interface Area {
   height: number;
 }
 
-// 创建裁切后的图片
+// Create a cropped image file from the source image and crop area
 export const createCroppedImage = async (
   imageSrc: string,
   pixelCrop: Area,
@@ -27,11 +28,11 @@ export const createCroppedImage = async (
         return;
       }
 
-      // 设置canvas尺寸为裁切区域尺寸
+      // Set canvas size to the crop area size
       canvas.width = pixelCrop.width;
       canvas.height = pixelCrop.height;
 
-      // 绘制裁切后的图片
+      // Draw the cropped image onto the canvas
       ctx.drawImage(
         image,
         pixelCrop.x,
@@ -44,7 +45,7 @@ export const createCroppedImage = async (
         pixelCrop.height
       );
 
-      // 转换为Blob，然后转为File
+      // Convert canvas to Blob, then to File
       canvas.toBlob(
         blob => {
           if (!blob) {
@@ -72,7 +73,7 @@ export const createCroppedImage = async (
   });
 };
 
-// 获取图片的自然尺寸
+// Get the natural dimensions of an image
 export const getImageDimensions = (
   imageSrc: string
 ): Promise<{

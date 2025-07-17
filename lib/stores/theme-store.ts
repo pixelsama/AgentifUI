@@ -1,44 +1,44 @@
 import { create } from 'zustand';
 
-// 注意: 随着引入 next-themes，这个 Zustand store 的作用已大幅减小，甚至可能多余。
-// 组件应优先使用 @lib/hooks/use-theme.ts 中的 useTheme Hook (它封装了 next-themes)。
-// 保留此 store 主要是为了兼容可能直接导入其 action 的旧组件。
-// store 自身不再存储实际的主题状态，也不再负责持久化或 DOM 操作。
-type Theme = 'light' | 'dark' | 'system'; // 主题类型，与 next-themes 保持一致
+// Note: With the introduction of next-themes, the role of this Zustand store has been greatly reduced and may even be redundant.
+// Components should use the useTheme Hook from @lib/hooks/use-theme.ts (which wraps next-themes) instead.
+// This store is kept mainly for compatibility with legacy components that may directly import its actions.
+// The store itself no longer stores the actual theme state, nor is it responsible for persistence or DOM operations.
+type Theme = 'light' | 'dark' | 'system'; // Theme type, consistent with next-themes
 
 interface ThemeState {
-  // _theme_placeholder: 不再存储实际主题状态，由 next-themes 管理。
-  // 保留此占位符或移除皆可，取决于是否需要维持 store 的基本结构。
+  // _theme_placeholder: No longer stores the actual theme state, which is managed by next-themes.
+  // You may keep or remove this placeholder depending on whether you want to maintain the store's basic structure.
   _theme_placeholder?: Theme;
 
-  // toggleTheme: 切换主题的 action (已弃用)。
-  // 实际的切换逻辑应通过调用 useTheme() 返回的 toggleTheme 函数完成。
+  // toggleTheme: Action to toggle theme (deprecated).
+  // The actual toggle logic should be done by calling the toggleTheme function returned from useTheme().
   toggleTheme: () => void;
 
-  // setTheme: 设置特定主题的 action (已弃用)。
-  // 实际设置逻辑应通过调用 useTheme() 返回的 setTheme 函数完成。
+  // setTheme: Action to set a specific theme (deprecated).
+  // The actual set logic should be done by calling the setTheme function returned from useTheme().
   setTheme: (theme: Theme) => void;
 }
 
-// 不再需要 persist 中间件、getSystemTheme 或任何初始状态逻辑。
-// next-themes 会处理持久化和状态初始化。
+// No need for persist middleware, getSystemTheme, or any initial state logic.
+// next-themes will handle persistence and state initialization.
 export const useThemeStore = create<ThemeState>()(() => ({
-  _theme_placeholder: undefined, // 占位符状态，不实际使用
+  _theme_placeholder: undefined, // Placeholder state, not actually used
 
-  // 下方的 action 实现是"空壳"，因为它们无法在 store 创建函数内部直接调用 useTheme Hook。
-  // 如果组件完全迁移到使用 useTheme Hook，这些 action 理论上可以移除。
-  // 保留它们并添加警告是为了提醒开发者正确的用法。
+  // The following actions are "stubs" because you cannot call the useTheme Hook inside the store creation function.
+  // If all components migrate to using the useTheme Hook, these actions can theoretically be removed.
+  // They are kept with warnings to remind developers of the correct usage.
   toggleTheme: () => {
     console.warn(
-      '[DEPRECATED] 从 store 调用 toggleTheme 已弃用。请使用 useTheme() Hook 返回的 toggleTheme 函数。'
+      '[DEPRECATED] Calling toggleTheme from the store is deprecated. Please use the toggleTheme function returned from useTheme() Hook.'
     );
-    // 此处无法调用 next-themes 的 setTheme
+    // Cannot call next-themes setTheme here
   },
 
   setTheme: (theme: Theme) => {
     console.warn(
-      `[DEPRECATED] 从 store 调用 setTheme('${theme}') 已弃用。请使用 useTheme() Hook 返回的 setTheme 函数。`
+      `[DEPRECATED] Calling setTheme('${theme}') from the store is deprecated. Please use the setTheme function returned from useTheme() Hook.`
     );
-    // 此处无法调用 next-themes 的 setTheme
+    // Cannot call next-themes setTheme here
   },
 }));

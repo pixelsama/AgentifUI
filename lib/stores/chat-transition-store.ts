@@ -1,16 +1,16 @@
 import { create } from 'zustand';
 
 /**
- * 聊天界面过渡状态管理
+ * Chat transition state management
  *
- * 用于控制聊天界面的过渡效果，特别是从对话界面到欢迎界面的过渡
+ * Controls the transition effect of the chat interface, especially the transition from the conversation view to the welcome screen.
  */
 interface ChatTransitionState {
-  // 是否正在从对话界面过渡到欢迎界面
-  // 当为 true 时，使用闪烁效果而不是滑动
+  /** Whether the interface is transitioning from the conversation view to the welcome screen.
+   *  If true, use a flash effect instead of a slide transition. */
   isTransitioningToWelcome: boolean;
 
-  // 设置过渡状态
+  /** Set the transition state */
   setIsTransitioningToWelcome: (value: boolean) => void;
 }
 

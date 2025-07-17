@@ -1,46 +1,46 @@
 // lib/utils/sse-parser.ts
-// 负责解析 Server-Sent Events (SSE) 流。
-// 设计为通用的 SSE 解析器，但会特别处理 Dify API 返回的 JSON 数据格式。
-// 参考 SSE 规范: https://html.spec.whatwg.org/multipage/server-sent-events.html#parsing-an-event-stream
+// Responsible for parsing Server-Sent Events (SSE) streams.
+// Designed as a general SSE parser, but with special handling for Dify API JSON event format.
+// Reference SSE spec: https://html.spec.whatwg.org/multipage/server-sent-events.html#parsing-an-event-stream
 import type { DifySseEvent } from '@lib/services/dify/types';
 
-// 导入 Dify 事件类型用于类型推断
+// Import Dify event type for type inference
 
-// 定义解析器可能产生的事件类型
-// - 'event': 解析出一个完整的 SSE 事件 (包含 event, data, id 等)
-// - 'error': 解析过程中发生错误
+// Define possible parser result types
+// - 'event': Successfully parsed a complete SSE event (including event, data, id, etc.)
+// - 'error': Error occurred during parsing
 export type SseParserResult =
-  | { type: 'event'; event: DifySseEvent } // 成功解析一个 Dify 事件
+  | { type: 'event'; event: DifySseEvent } // Successfully parsed a Dify event
   | { type: 'error'; error: any };
 
-// 核心 SSE 解析函数
-// 使用异步生成器 (AsyncGenerator) 来处理流式数据。
-// 输入: ReadableStream (通常来自 fetch 响应的 response.body)
-// 输出: 异步迭代地产生 SseParserResult 对象
+// Core SSE parsing function
+// Uses an async generator (AsyncGenerator) to process streaming data.
+// Input: ReadableStream (usually from fetch response.body)
+// Output: Asynchronously yields SseParserResult objects
 export async function* parseSseStream(
   stream: ReadableStream<Uint8Array>
 ): AsyncGenerator<SseParserResult, void, undefined> {
   const reader = stream.getReader();
   const decoder = new TextDecoder('utf-8');
-  let buffer = ''; // 用于存储可能跨越多个 chunk 的行数据
-  let currentEvent = ''; // 当前事件类型 (event: 字段)
-  let currentData = ''; // 当前事件的数据 (data: 字段，可能有多行)
-  let currentId = ''; // 当前事件的 ID (id: 字段)
+  let buffer = ''; // Stores line data that may span multiple chunks
+  let currentEvent = ''; // Current event type (event: field)
+  let currentData = ''; // Current event data (data: field, may be multiline)
+  let currentId = ''; // Current event ID (id: field)
 
   try {
     while (true) {
       const { done, value } = await reader.read();
       if (done) {
-        // 流结束时，处理缓冲区中可能剩余的最后一行数据
-        buffer += decoder.decode(undefined, { stream: false }); // 解码剩余部分
+        // When stream ends, process any remaining data in the buffer
+        buffer += decoder.decode(undefined, { stream: false }); // Decode remaining part
         if (buffer.trim()) {
-          // 处理最后可能不完整的行，并尝试分发事件
-          const lineResult = processLine(buffer.trim()); // 处理行数据
+          // Handle the last possibly incomplete line and try to dispatch event
+          const lineResult = processLine(buffer.trim());
           if (lineResult) {
-            yield lineResult; // 如果 processLine 直接触发了事件分发，则 yield
+            yield lineResult;
           } else {
-            // 如果 processLine 没有触发分发（例如，最后一行不是空行），
-            // 则需要显式调用 dispatchEvent 来处理缓冲区中剩余的数据
+            // If processLine did not trigger dispatch (e.g., last line is not empty),
+            // explicitly call dispatchEvent to handle any remaining data in buffer
             const finalEventResult = dispatchEvent();
             if (finalEventResult) {
               yield finalEventResult;
@@ -51,15 +51,15 @@ export async function* parseSseStream(
         break;
       }
 
-      // 将新获取的 chunk 解码并添加到缓冲区
+      // Decode new chunk and append to buffer
       buffer += decoder.decode(value, { stream: true });
 
-      // 按行处理缓冲区中的数据
+      // Process buffer line by line
       let lineEndIndex;
       while ((lineEndIndex = buffer.indexOf('\n')) >= 0) {
         const line = buffer.substring(0, lineEndIndex);
         buffer = buffer.substring(lineEndIndex + 1);
-        // 处理单行，如果 processLine 返回一个事件对象，则 yield 它
+        // Process single line, yield if processLine returns an event object
         const result = processLine(line.trim());
         if (result) {
           yield result;
@@ -68,144 +68,144 @@ export async function* parseSseStream(
     }
   } catch (error) {
     console.error('[SSE Parser] Error reading or processing stream:', error);
-    // 这个 yield 在顶层 try...catch 中是合法的
-    yield { type: 'error', error: error }; // 发生读取错误时产生错误事件
+    // This yield is legal in the top-level try...catch
+    yield { type: 'error', error: error }; // Yield error event on read error
   } finally {
-    reader.releaseLock(); // 确保释放读取器锁
+    reader.releaseLock(); // Ensure reader lock is released
     console.log('[SSE Parser] Reader lock released.');
   }
 
-  // --- 辅助函数：处理单行数据 ---
-  // 返回 SseParserResult | undefined，表示是否需要分发事件
+  // --- Helper function: process a single line ---
+  // Returns SseParserResult | undefined, indicating whether to dispatch an event
   function processLine(line: string): SseParserResult | undefined {
-    console.log(`[SSE Parser] 📥 处理行: "${line}"`);
+    console.log(`[SSE Parser] 📥 Processing line: "${line}"`);
 
-    // 忽略空行 (事件分隔符) 和注释行
+    // Ignore empty lines (event delimiter) and comment lines
     if (line === '') {
-      console.log(`[SSE Parser] 🔄 遇到空行，分发事件`);
-      // 空行表示事件结束，调用 dispatchEvent 并返回结果
+      console.log(`[SSE Parser] 🔄 Empty line encountered, dispatching event`);
+      // Empty line indicates end of event, call dispatchEvent and return result
       return dispatchEvent();
     }
     if (line.startsWith(':')) {
-      console.log(`[SSE Parser] 💬 忽略注释行`);
-      // 忽略注释
+      console.log(`[SSE Parser] 💬 Ignoring comment line`);
+      // Ignore comment
       return undefined;
     }
 
-    // 解析字段名和值
+    // Parse field name and value
     let field = '';
     let value = '';
     const colonIndex = line.indexOf(':');
 
     if (colonIndex === 0) {
-      // 行以冒号开头，这是注释，忽略
-      console.log(`[SSE Parser] 💬 忽略冒号开头的注释行`);
+      // Line starts with colon, this is a comment, ignore
+      console.log(`[SSE Parser] 💬 Ignoring colon-prefixed comment line`);
       return undefined;
     } else if (colonIndex > 0) {
-      // 标准的 "field: value" 格式
+      // Standard "field: value" format
       field = line.substring(0, colonIndex);
-      value = line.substring(colonIndex + 1).trimStart(); // 去掉值前面的空格
+      value = line.substring(colonIndex + 1).trimStart(); // Remove leading spaces from value
       console.log(
-        `[SSE Parser] 🔍 解析字段 - ${field}: "${value.substring(0, 100)}${value.length > 100 ? '...' : ''}"`
+        `[SSE Parser] 🔍 Parsed field - ${field}: "${value.substring(0, 100)}${value.length > 100 ? '...' : ''}"`
       );
     } else {
-      // 没有冒号，整行作为字段名，值为空 (符合 SSE 规范)
+      // No colon, entire line is field name, value is empty (per SSE spec)
       field = line;
       value = '';
-      console.log(`[SSE Parser] 🔍 解析字段 (无值) - ${field}`);
+      console.log(`[SSE Parser] 🔍 Parsed field (no value) - ${field}`);
     }
 
-    // 根据字段名更新当前事件的状态
+    // Update current event state based on field name
     switch (field) {
       case 'event':
         currentEvent = value;
-        console.log(`[SSE Parser] 🎯 设置事件类型: "${currentEvent}"`);
+        console.log(`[SSE Parser] 🎯 Set event type: "${currentEvent}"`);
         break;
       case 'data':
-        // data 字段可能有多行，需要拼接，并在行之间加换行符
-        // (虽然 Dify 的 JSON 通常在一行，但要兼容标准 SSE)
+        // data field may be multiline, concatenate with newline between lines
+        // (Dify JSON is usually single line, but standard SSE allows multiline)
         currentData += (currentData ? '\n' : '') + value;
         console.log(
-          `[SSE Parser] 📄 累积数据，当前长度: ${currentData.length}`
+          `[SSE Parser] 📄 Accumulating data, current length: ${currentData.length}`
         );
         break;
       case 'id':
         currentId = value;
-        console.log(`[SSE Parser] 🆔 设置事件ID: "${currentId}"`);
+        console.log(`[SSE Parser] 🆔 Set event ID: "${currentId}"`);
         break;
       case 'retry':
-        console.log(`[SSE Parser] ⏱️ 收到retry字段: ${value}`);
-        // 我们可以忽略 retry 字段，浏览器会自动处理
-        // console.log('[SSE Parser] Retry timeout received:', value);
+        console.log(`[SSE Parser] ⏱️ Received retry field: ${value}`);
+        // We can ignore retry field, browser will handle it automatically
         break;
       default:
-        console.log(`[SSE Parser] ❓ 忽略未知字段: ${field}`);
-        // 忽略无法识别的字段
-        // console.log('[SSE Parser] Ignoring unknown field:', field);
+        console.log(`[SSE Parser] ❓ Ignoring unknown field: ${field}`);
+        // Ignore unrecognized fields
         break;
     }
 
-    // 🎯 修复：不在处理字段时分发事件，只在遇到空行时分发
-    // 这符合SSE规范：事件由空行分隔
+    // Do not dispatch event when processing fields, only dispatch on empty line
+    // This follows SSE spec: events are delimited by empty lines
     return undefined;
   }
 
-  // --- 辅助函数：分发解析出的事件 ---
-  // 返回 SseParserResult | undefined，表示成功构造事件/错误或无事件
+  // --- Helper function: dispatch parsed event ---
+  // Returns SseParserResult | undefined, indicating success/error or no event
   function dispatchEvent(): SseParserResult | undefined {
-    // 只有当 data 字段不为空时，才认为是一个有效的事件
-    // (规范要求至少有一个字段才分发，但通常 data 是必须的)
+    // Only treat as a valid event if data field is not empty
+    // (Spec requires at least one field to dispatch, but data is usually required)
     if (currentData === '') {
-      // 重置状态，准备下一个事件 (如果只有 event 或 id 而没有 data，则忽略)
+      // Reset state, prepare for next event (ignore if only event or id without data)
       resetEventState();
-      return undefined; // 没有事件可以分发
+      return undefined; // No event to dispatch
     }
 
     console.log(
-      `[SSE Parser] 🔧 准备分发事件 - event: "${currentEvent}", data长度: ${currentData.length}`
+      `[SSE Parser] 🔧 Preparing to dispatch event - event: "${currentEvent}", data length: ${currentData.length}`
     );
 
     let result: SseParserResult | undefined = undefined;
     try {
-      // 尝试将 data 解析为 JSON (Dify 的 data 是 JSON 字符串)
+      // Try to parse data as JSON (Dify data is JSON string)
       const jsonData = JSON.parse(currentData);
       console.log(
-        `[SSE Parser] ✅ JSON解析成功 - 事件类型: ${jsonData.event || currentEvent || 'unknown'}`
+        `[SSE Parser] ✅ JSON parse success - event type: ${jsonData.event || currentEvent || 'unknown'}`
       );
 
-      // 构造 DifySseEvent 对象。
-      // 🎯 修复：优先使用JSON数据中的event字段，而不是SSE头部的event字段
-      // 因为Dify的事件类型信息在JSON数据内部，SSE头部的event字段可能为空
+      // Build DifySseEvent object.
+      // Prefer event field from JSON data over SSE header event field.
+      // Because Dify event type info is inside JSON, SSE header event field may be empty.
       const eventType = jsonData.event || currentEvent || 'message';
       const parsedEvent: DifySseEvent = {
-        ...jsonData, // 将 JSON 数据解构进来
-        event: eventType, // 确保 event 字段正确
-        // 如果 JSON 数据中没有 task_id 或 conversation_id (理论上 Dify 总会提供)，
-        // 可以考虑添加默认值或抛出错误，但这取决于具体需求。
-        // 这里假设 Dify 返回的数据结构总是符合 types.ts 中的定义。
-        // id 字段也类似处理，如果 SSE 流中有 id: 字段，可以用 currentId 覆盖或补充。
-      } as DifySseEvent; // 使用类型断言，因为 jsonData 是 any
+        ...jsonData, // Spread JSON data
+        event: eventType, // Ensure event field is correct
+        // If JSON data does not have task_id or conversation_id (Dify should always provide),
+        // you may consider adding defaults or throwing error, depending on requirements.
+        // Here we assume Dify returns data structure matching types.ts definition.
+        // id field is similar, if SSE stream has id: field, can use currentId to override or supplement.
+      } as DifySseEvent; // Use type assertion since jsonData is any
 
-      // 使用 yield 将解析出的事件对象传递出去
-      console.log(`[SSE Parser] 🎯 成功分发事件: ${parsedEvent.event}`);
+      // Yield the parsed event object
+      console.log(
+        `[SSE Parser] 🎯 Successfully dispatched event: ${parsedEvent.event}`
+      );
       result = { type: 'event', event: parsedEvent };
     } catch (jsonError) {
       console.error(
-        '[SSE Parser] ❌ JSON解析失败:',
+        '[SSE Parser] ❌ JSON parse failed:',
         jsonError,
         'Data was:',
         currentData
       );
-      // 如果 data 无法解析为 JSON，构造一个错误事件对象返回
+      // If data cannot be parsed as JSON, return an error event object
       result = { type: 'error', error: jsonError };
     }
 
-    // 分发完一个事件后（无论成功或失败），重置状态以准备解析下一个事件
+    // After dispatching an event (success or error), reset state for next event
     resetEventState();
-    return result; // 返回构造的事件对象或错误对象
+    return result; // Return constructed event or error object
   }
 
-  // --- 辅助函数：重置当前事件状态 ---
+  // --- Helper function: reset current event state ---
   function resetEventState() {
     currentEvent = '';
     currentData = '';

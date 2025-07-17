@@ -4,11 +4,11 @@ import type { Result } from '@lib/types/result';
 import { failure, success } from '@lib/types/result';
 
 /**
- * 统一应用参数服务
+ * Unified App Parameters Service
  *
- * 🎯 核心策略：
- * 1. 优先使用数据库中的本地配置（instant loading）
- * 2. Fallback到Dify API调用（compatibility）
+ * Core strategy:
+ * 1. Prefer local config from database (instant loading)
+ * 2. No fallback to Dify API (compatibility not implemented here)
  */
 
 interface AppParametersCache {
@@ -19,11 +19,12 @@ interface AppParametersCache {
   };
 }
 
-const CACHE_DURATION = 30 * 60 * 1000; // 30分钟缓存 - 延长应用参数缓存时间
+// 30 minutes cache duration for app parameters
+const CACHE_DURATION = 30 * 60 * 1000;
 const parametersCache: AppParametersCache = {};
 
 /**
- * 从数据库配置转换为Dify参数格式
+ * Convert database config to Dify parameters format
  */
 function convertDatabaseConfigToDifyParameters(
   config: any
@@ -31,7 +32,7 @@ function convertDatabaseConfigToDifyParameters(
   if (!config) return null;
 
   try {
-    // 确保返回符合DifyAppParametersResponse格式的数据
+    // Ensure the returned object matches DifyAppParametersResponse format
     return {
       opening_statement: config.opening_statement || '',
       suggested_questions: config.suggested_questions || [],
@@ -52,13 +53,16 @@ function convertDatabaseConfigToDifyParameters(
       system_parameters: config.system_parameters || {},
     };
   } catch (error) {
-    console.error('[AppParametersService] 转换数据库配置失败:', error);
+    console.error(
+      '[AppParametersService] Failed to convert database config:',
+      error
+    );
     return null;
   }
 }
 
 /**
- * 获取缓存的参数
+ * Get cached parameters for an app
  */
 function getCachedParameters(appId: string): DifyAppParametersResponse | null {
   const cached = parametersCache[appId];
@@ -74,7 +78,7 @@ function getCachedParameters(appId: string): DifyAppParametersResponse | null {
 }
 
 /**
- * 设置缓存
+ * Set parameters cache for an app
  */
 function setCachedParameters(
   appId: string,
@@ -90,23 +94,29 @@ function setCachedParameters(
 
 class AppParametersService {
   /**
-   * 纯数据库模式获取应用参数
-   * @param instanceId 应用实例ID
-   * @returns 应用参数的Result，无数据时返回null
+   * Get app parameters in database-only mode
+   * @param instanceId - App instance ID
+   * @returns Result of app parameters, returns null if no data
    */
   async getAppParameters(
     instanceId: string
   ): Promise<Result<DifyAppParametersResponse | null>> {
     try {
-      // 1. 检查内存缓存
+      // 1. Check in-memory cache
       const cached = getCachedParameters(instanceId);
       if (cached) {
-        console.log('[AppParametersService] 使用缓存的应用参数:', instanceId);
+        console.log(
+          '[AppParametersService] Using cached app parameters:',
+          instanceId
+        );
         return success(cached);
       }
 
-      // 2. 仅从数据库获取
-      console.log('[AppParametersService] 从数据库获取应用参数:', instanceId);
+      // 2. Fetch from database only
+      console.log(
+        '[AppParametersService] Fetching app parameters from database:',
+        instanceId
+      );
       const dbResult = await getAppParametersFromDb(instanceId);
 
       if (dbResult.success && dbResult.data) {
@@ -114,26 +124,32 @@ class AppParametersService {
           dbResult.data
         );
         if (difyParameters) {
-          console.log('[AppParametersService] 数据库参数获取成功:', instanceId);
+          console.log(
+            '[AppParametersService] Successfully got parameters from database:',
+            instanceId
+          );
           setCachedParameters(instanceId, difyParameters, 'database');
           return success(difyParameters);
         }
       }
 
-      // 3. 数据库无数据，返回null（不再fallback到API）
+      // 3. No data in database, return null (no fallback to API)
       console.log(
-        '[AppParametersService] 数据库无应用参数，返回null:',
+        '[AppParametersService] No app parameters in database, returning null:',
         instanceId
       );
       return success(null);
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : '获取应用参数失败';
-      console.error('[AppParametersService] 获取应用参数失败:', error);
+        error instanceof Error ? error.message : 'Failed to get app parameters';
+      console.error(
+        '[AppParametersService] Failed to get app parameters:',
+        error
+      );
       return failure(new Error(errorMessage));
     }
   }
 }
 
-// 导出单例实例
+// Export singleton instance
 export const appParametersService = new AppParametersService();

@@ -1,8 +1,8 @@
 /**
- * 优化的数据库消息服务
+ * Optimized database message service
  *
- * 专门处理消息相关的数据操作，优化分页和排序逻辑
- * 使用数据库级别的排序，避免客户端复杂的排序逻辑
+ * Handles message-related data operations, optimized for pagination and sorting.
+ * Uses database-level sorting to avoid complex client-side logic.
  */
 import { ChatMessage } from '@lib/stores/chat-store';
 import { Message, MessageStatus } from '@lib/types/database';
@@ -30,7 +30,7 @@ export class MessageService {
   private constructor() {}
 
   /**
-   * 获取消息服务单例
+   * Get the singleton instance of the message service
    */
   public static getInstance(): MessageService {
     if (!MessageService.instance) {
@@ -40,8 +40,8 @@ export class MessageService {
   }
 
   /**
-   * 获取对话的消息（优化分页）
-   * 使用基于游标的分页，性能更好
+   * Get paginated messages for a conversation (optimized pagination)
+   * Uses cursor-based pagination for better performance
    */
   async getMessagesPaginated(
     conversationId: string,
@@ -67,26 +67,26 @@ export class MessageService {
 
     return dataService.query(
       async () => {
-        // 解析游标
+        // Parse cursor
         let cursorData: PaginationCursor | null = null;
         if (cursor) {
           try {
             cursorData = JSON.parse(atob(cursor));
           } catch {
-            throw new Error('无效的分页游标');
+            throw new Error('Invalid pagination cursor');
           }
         }
 
-        // 构建查询
+        // Build query
         let query = dataService['supabase']
           .from('messages')
           .select('*')
           .eq('conversation_id', conversationId)
           .order('created_at', { ascending: false })
           .order('sequence_index', { ascending: false })
-          .order('id', { ascending: false }); // 保证排序稳定性
+          .order('id', { ascending: false }); // Ensure stable sorting
 
-        // 应用游标条件
+        // Apply cursor conditions
         if (cursorData) {
           if (direction === 'older') {
             query = query.or(
@@ -99,7 +99,7 @@ export class MessageService {
           }
         }
 
-        // 应用分页限制（+1 用于检查是否有更多数据）
+        // Apply pagination limit (+1 to check if there is more data)
         query = query.limit(limit + 1);
 
         const { data: messages, error } = await query;
@@ -108,11 +108,11 @@ export class MessageService {
           throw error;
         }
 
-        // 检查是否有更多数据
+        // Check if there is more data
         const hasMore = messages.length > limit;
         const actualMessages = hasMore ? messages.slice(0, limit) : messages;
 
-        // 生成下一个游标
+        // Generate next cursor
         let nextCursor: string | undefined;
         if (hasMore && actualMessages.length > 0) {
           const lastMessage = actualMessages[actualMessages.length - 1];
@@ -123,7 +123,7 @@ export class MessageService {
           nextCursor = btoa(JSON.stringify(cursorObj));
         }
 
-        // 获取总数（如果需要）
+        // Get total count if needed
         let totalCount: number | undefined;
         if (includeCount) {
           const countResult = await dataService.count('messages', {
@@ -147,7 +147,7 @@ export class MessageService {
   }
 
   /**
-   * 获取最新的消息（用于初始加载）
+   * Get the latest messages (for initial load)
    */
   async getLatestMessages(
     conversationId: string,
@@ -155,7 +155,7 @@ export class MessageService {
     options: { cache?: boolean } = {}
   ): Promise<Result<Message[]>> {
     const { cache = true } = options;
-    // 直接用supabase查询，带上排序要求
+    // Query supabase directly with sorting
     const { data, error } = await dataService['supabase']
       .from('messages')
       .select('*')
@@ -171,8 +171,8 @@ export class MessageService {
   }
 
   /**
-   * 保存消息到数据库
-   * 对于助手消息，同时更新对话预览（智能提取主要内容）
+   * Save a message to the database
+   * For assistant messages, also update the conversation preview (extract main content intelligently)
    */
   async saveMessage(message: {
     conversation_id: string;
@@ -199,11 +199,11 @@ export class MessageService {
       sequence_index,
     };
 
-    // 🎯 优化：对于助手消息，在保存的同时更新对话预览
-    // 使用事务确保数据一致性，避免额外的数据库操作
+    // For assistant messages, update conversation preview when saving
+    // Use a transaction to ensure data consistency and avoid extra DB operations
     if (message.role === 'assistant') {
       return dataService.query(async () => {
-        // 1. 保存消息
+        // 1. Save the message
         const { data: savedMessage, error: messageError } = await dataService[
           'supabase'
         ]
@@ -216,16 +216,16 @@ export class MessageService {
           throw messageError;
         }
 
-        // 2. 提取主要内容用于预览
+        // 2. Extract main content for preview
         const mainContent = extractMainContentForPreview(message.content);
 
-        // 3. 生成预览文本（与原触发器保持一致的截断逻辑）
-        let previewText = mainContent || message.content; // 如果提取失败，使用原始内容
+        // 3. Generate preview text (truncate to match original trigger logic)
+        let previewText = mainContent || message.content; // Use original content if extraction fails
         if (previewText.length > 100) {
           previewText = previewText.substring(0, 100) + '...';
         }
 
-        // 4. 更新对话预览（在同一个事务中）
+        // 4. Update conversation preview (in the same transaction)
         const { error: conversationError } = await dataService['supabase']
           .from('conversations')
           .update({
@@ -235,11 +235,14 @@ export class MessageService {
           .eq('id', message.conversation_id);
 
         if (conversationError) {
-          console.warn('[MessageService] 更新对话预览失败:', conversationError);
-          // 不抛出错误，因为消息已经保存成功
+          console.warn(
+            '[MessageService] Failed to update conversation preview:',
+            conversationError
+          );
+          // Do not throw error, since the message has already been saved
         }
 
-        // 5. 清除相关缓存
+        // 5. Clear related cache
         cacheService.deletePattern(
           `conversation:messages:${message.conversation_id}:*`
         );
@@ -247,7 +250,7 @@ export class MessageService {
         return savedMessage;
       });
     } else {
-      // 🎯 非助手消息，使用原有逻辑，不影响现有功能
+      // For non-assistant messages, use the original logic, no impact on existing functionality
       const result = await dataService.create<Message>('messages', messageData);
 
       if (result.success) {
@@ -261,7 +264,7 @@ export class MessageService {
   }
 
   /**
-   * 批量保存消息
+   * Batch save messages
    */
   async saveMessages(
     messages: Array<{
@@ -303,7 +306,7 @@ export class MessageService {
         throw error;
       }
 
-      // 清除相关缓存
+      // Clear related cache
       const conversationIds = new Set(messages.map(m => m.conversation_id));
       conversationIds.forEach(convId => {
         cacheService.deletePattern(`conversation:messages:${convId}:*`);
@@ -314,7 +317,7 @@ export class MessageService {
   }
 
   /**
-   * 更新消息状态
+   * Update message status
    */
   async updateMessageStatus(
     messageId: string,
@@ -324,7 +327,7 @@ export class MessageService {
       status,
     });
 
-    // 清除相关缓存（需要先获取消息的conversation_id）
+    // Clear related cache (need to get the message's conversation_id first)
     if (result.success) {
       const message = result.data;
       cacheService.deletePattern(
@@ -336,7 +339,7 @@ export class MessageService {
   }
 
   /**
-   * 将前端ChatMessage转换为数据库Message
+   * Convert a frontend ChatMessage to a database Message
    */
   chatMessageToDbMessage(
     chatMessage: ChatMessage,
@@ -345,19 +348,19 @@ export class MessageService {
   ): Omit<Message, 'id' | 'created_at' | 'is_synced'> {
     const baseMetadata = chatMessage.metadata || {};
 
-    // 添加停止标记
+    // Add manual stop flag
     if (chatMessage.wasManuallyStopped && !baseMetadata.stopped_manually) {
       baseMetadata.stopped_manually = true;
       baseMetadata.stopped_at =
         baseMetadata.stopped_at || new Date().toISOString();
     }
 
-    // 添加附件信息
+    // Add attachments info
     if (chatMessage.attachments && chatMessage.attachments.length > 0) {
       baseMetadata.attachments = chatMessage.attachments;
     }
 
-    // sequence_index 直接作为字段，不再放metadata
+    // sequence_index is a direct field, not in metadata anymore
     const sequence_index =
       chatMessage.sequence_index !== undefined
         ? chatMessage.sequence_index
@@ -379,10 +382,10 @@ export class MessageService {
   }
 
   /**
-   * 将数据库Message转换为前端ChatMessage
+   * Convert a database Message to a frontend ChatMessage
    */
   dbMessageToChatMessage(dbMessage: Message): ChatMessage {
-    // 从metadata中提取附件信息
+    // Extract attachments from metadata
     const attachments = dbMessage.metadata?.attachments || [];
 
     return {
@@ -402,7 +405,7 @@ export class MessageService {
   }
 
   /**
-   * 查找重复消息（用于去重）
+   * Find duplicate message (for deduplication)
    */
   async findDuplicateMessage(
     content: string,
@@ -416,12 +419,12 @@ export class MessageService {
         role,
         content,
       },
-      { cache: true, cacheTTL: 30 * 1000 } // 30秒缓存
+      { cache: true, cacheTTL: 30 * 1000 } // 30 seconds cache
     );
   }
 
   /**
-   * 获取消息统计信息
+   * Get message statistics
    */
   async getMessageStats(conversationId: string): Promise<
     Result<{
@@ -431,7 +434,7 @@ export class MessageService {
     }>
   > {
     return dataService.query(async () => {
-      // 获取总数
+      // Get total count
       const totalResult = await dataService.count('messages', {
         conversation_id: conversationId,
       });
@@ -439,7 +442,7 @@ export class MessageService {
         throw totalResult.error;
       }
 
-      // 获取按角色统计
+      // Get count by role
       const { data: roleStats, error: roleError } = await dataService[
         'supabase'
       ]
@@ -456,7 +459,7 @@ export class MessageService {
         byRole[item.role] = (byRole[item.role] || 0) + 1;
       });
 
-      // 获取最后消息时间
+      // Get last message time
       const { data: lastMessage, error: lastError } = await dataService[
         'supabase'
       ]
@@ -480,7 +483,7 @@ export class MessageService {
   }
 
   /**
-   * 清除消息缓存
+   * Clear message cache
    */
   clearMessageCache(conversationId?: string): number {
     if (conversationId) {
@@ -493,5 +496,5 @@ export class MessageService {
   }
 }
 
-// 导出单例实例
+// Export singleton instance
 export const messageService = MessageService.getInstance();

@@ -17,7 +17,7 @@ export const useDropdownStore = create<DropdownState>(set => ({
   position: null,
   toggleDropdown: (id, position) => {
     set(state => {
-      // 如果点击的是已经打开的下拉菜单，则关闭它
+      // If the dropdown with the same id is already open, close it
       if (state.isOpen && state.activeDropdownId === id) {
         return {
           isOpen: false,
@@ -26,7 +26,7 @@ export const useDropdownStore = create<DropdownState>(set => ({
         };
       }
 
-      // 否则，打开新的下拉菜单
+      // Otherwise, open the new dropdown
       return {
         isOpen: true,
         activeDropdownId: id,

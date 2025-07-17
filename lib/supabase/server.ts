@@ -3,12 +3,12 @@ import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 
 /**
- * 创建 Supabase 服务器客户端
- * 用于服务器组件中访问 Supabase 服务
- * 注意：必须在服务器组件中使用此函数
+ * Create Supabase server client.
+ * For accessing Supabase services in server components.
+ * Note: This function must be used in server components.
  */
 export const createClient = async () => {
-  // 根据Next.js 15要求，cookies()需要被await
+  // According to Next.js 15, cookies() must be awaited
   const cookieStore = await cookies();
 
   return createServerClient(
@@ -31,9 +31,9 @@ export const createClient = async () => {
 };
 
 /**
- * 创建 Supabase 管理员客户端（Service Role）
- * 用于需要管理员权限的操作，如创建用户、绕过RLS等
- * ⚠️ 仅在服务器端使用，具有完全数据库访问权限
+ * Create Supabase admin client (Service Role).
+ * For operations requiring admin privileges, such as creating users or bypassing RLS.
+ * ⚠️ Use only on the server side, has full database access.
  */
 export const createAdminClient = async () => {
   const cookieStore = await cookies();

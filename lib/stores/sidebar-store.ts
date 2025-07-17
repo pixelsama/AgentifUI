@@ -1,100 +1,106 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-// 选中项目类型
+// Selected item type
 export type SelectedItemType = 'chat' | 'app' | null;
 
 interface SidebarState {
-  // 基础状态
-  isExpanded: boolean; // 侧边栏是否展开
-  // 客户端挂载状态
-  isMounted: boolean; // 组件是否已在客户端挂载
-  // 内容显示状态
-  contentVisible: boolean; // 侧边栏内容是否可见
-  // 移动端状态管理
-  isMobileNavVisible: boolean; // 移动端导航是否可见
-  // 动画状态管理
-  isAnimating: boolean; // 侧边栏是否正在动画中
-  // 选中状态管理
-  selectedType: SelectedItemType; // 选中的项目类型：'chat' 或 'app' 或 null
-  selectedId: string | number | null; // 选中项目的ID
+  // Whether the sidebar is expanded
+  isExpanded: boolean;
+  // Whether the component is mounted on the client
+  isMounted: boolean;
+  // Whether the sidebar content is visible
+  contentVisible: boolean;
+  // Whether the mobile navigation is visible
+  isMobileNavVisible: boolean;
+  // Whether the sidebar is animating
+  isAnimating: boolean;
+  // Selected item type: 'chat', 'app', or null
+  selectedType: SelectedItemType;
+  // Selected item ID
+  selectedId: string | number | null;
 
-  // 方法
+  // Toggle sidebar expand/collapse
   toggleSidebar: () => void;
-  // 客户端挂载方法
+  // Set mounted state to true
   setMounted: () => void;
-  // 内容显示方法
+  // Show sidebar content
   showContent: () => void;
+  // Hide sidebar content
   hideContent: () => void;
+  // Update content visibility based on device type
   updateContentVisibility: (isMobile: boolean) => void;
-  // 宽度计算方法
+  // Get sidebar width class based on device type
   getSidebarWidth: (isMobile: boolean) => string;
-  // 移动端方法
+  // Show mobile navigation
   showMobileNav: () => void;
+  // Hide mobile navigation
   hideMobileNav: () => void;
+  // Toggle mobile navigation
   toggleMobileNav: () => void;
-  // 选中状态管理方法
+  // Select an item in the sidebar
   selectItem: (
     type: SelectedItemType,
     id: string | number | null,
     keepCurrentExpandState?: boolean
   ) => void;
+  // Clear selection
   clearSelection: () => void;
 }
 
 export const useSidebarStore = create<SidebarState>()(
   persist(
     (set, get) => ({
-      // 基础状态 - 桌面端持久化记忆用户偏好
+      // Desktop: persist user preference for expanded state
       isExpanded: false,
-      // 客户端挂载状态 - 初始为 false
+      // Initial mounted state is false
       isMounted: false,
-      // 内容显示状态
+      // Initial content visibility
       contentVisible: false,
-      // 移动端状态
+      // Initial mobile navigation state
       isMobileNavVisible: false,
-      // 动画状态
+      // Initial animation state
       isAnimating: false,
-      // 选中状态初始值
+      // Initial selected state
       selectedType: null,
       selectedId: null,
 
-      // 客户端挂载方法
+      // Set mounted state to true
       setMounted: () => {
         set({ isMounted: true });
       },
 
-      // 内容显示管理
+      // Show sidebar content
       showContent: () => {
         set({ contentVisible: true });
       },
 
+      // Hide sidebar content
       hideContent: () => {
         set({ contentVisible: false });
       },
 
-      // 根据设备类型和侧边栏状态更新内容可见性
+      // Update content visibility based on sidebar and device state
       updateContentVisibility: (isMobile: boolean) => {
         const { isExpanded } = get();
 
         if (!isExpanded) {
-          // 侧边栏折叠时直接隐藏内容
+          // Hide content when sidebar is collapsed
           set({ contentVisible: false });
           return;
         }
 
-        // 如果是移动设备，立即显示内容，否则依赖外部延迟设置
+        // On mobile, show content immediately; on desktop, rely on external timer
         if (isMobile) {
           set({ contentVisible: true });
         }
-        // 桌面端由外部计时器延迟设置
+        // On desktop, contentVisible is set by external timer
       },
 
-      // 宽度计算方法
+      // Get sidebar width class based on device and expand state
       getSidebarWidth: (isMobile: boolean) => {
         const { isExpanded } = get();
 
-        // 根据设备类型和侧边栏状态返回不同宽度类名
         if (isMobile) {
           return isExpanded ? 'w-64' : 'w-0';
         } else {
@@ -102,20 +108,21 @@ export const useSidebarStore = create<SidebarState>()(
         }
       },
 
+      // Toggle sidebar expand/collapse
       toggleSidebar: () => {
         set(state => {
           const newIsExpanded = !state.isExpanded;
 
-          // 当收起侧边栏时，立即隐藏内容
+          // Hide content immediately when collapsing
           if (!newIsExpanded) {
             set({ contentVisible: false });
           }
-          // 展开时不立即设置contentVisible，让updateContentVisibility处理
+          // When expanding, let updateContentVisibility handle contentVisible
 
-          // 设置动画状态
+          // Set animating state
           set({ isAnimating: true });
 
-          // 150ms后清除动画状态
+          // Clear animating state after 150ms
           setTimeout(() => {
             set({ isAnimating: false });
           }, 150);
@@ -126,7 +133,7 @@ export const useSidebarStore = create<SidebarState>()(
         });
       },
 
-      // 移动端方法
+      // Show mobile navigation
       showMobileNav: () => {
         set({
           isExpanded: true,
@@ -136,6 +143,7 @@ export const useSidebarStore = create<SidebarState>()(
         });
       },
 
+      // Hide mobile navigation
       hideMobileNav: () => {
         set({
           isExpanded: false,
@@ -144,6 +152,7 @@ export const useSidebarStore = create<SidebarState>()(
         });
       },
 
+      // Toggle mobile navigation
       toggleMobileNav: () => {
         const { isMobileNavVisible } = get();
         const newState = !isMobileNavVisible;
@@ -156,7 +165,7 @@ export const useSidebarStore = create<SidebarState>()(
         });
       },
 
-      // 选中状态管理方法
+      // Select an item in the sidebar
       selectItem: (
         type: SelectedItemType,
         id: string | number | null,
@@ -164,13 +173,13 @@ export const useSidebarStore = create<SidebarState>()(
       ) => {
         const currentState = get();
 
-        // 更新选中状态
+        // Update selected state
         const updates: Partial<SidebarState> = {
           selectedType: type,
           selectedId: id,
         };
 
-        // 如果需要保持当前展开状态，确保内容可见
+        // If keeping current expand state and sidebar is expanded, ensure content is visible
         if (keepCurrentExpandState && currentState.isExpanded) {
           updates.contentVisible = true;
         }
@@ -178,6 +187,7 @@ export const useSidebarStore = create<SidebarState>()(
         set(updates);
       },
 
+      // Clear selection
       clearSelection: () => {
         set({
           selectedType: null,
@@ -188,7 +198,7 @@ export const useSidebarStore = create<SidebarState>()(
     {
       name: 'sidebar-desktop-preferences',
       storage: createJSONStorage(() => localStorage),
-      // 只在桌面端持久化 isExpanded 状态，移动端使用默认行为
+      // Only persist isExpanded state on desktop; use default on mobile
       partialize: state => {
         const isDesktop =
           typeof window !== 'undefined' && window.innerWidth >= 768;

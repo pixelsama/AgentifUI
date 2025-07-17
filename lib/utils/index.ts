@@ -1,12 +1,19 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-// 合并className的工具函数
+/**
+ * Utility function to merge className values.
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// 格式化字节数为可读的文件大小
+/**
+ * Format bytes as a human-readable file size string.
+ * @param bytes - The number of bytes.
+ * @param decimals - Number of decimal places to display.
+ * @returns Formatted file size string.
+ */
 export function formatBytes(bytes: number, decimals: number = 2): string {
   if (bytes === 0) return '0 Bytes';
 
@@ -19,11 +26,16 @@ export function formatBytes(bytes: number, decimals: number = 2): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
-// 🎯 提取助手消息的主要内容，移除推理文本（think和details标签）
-// 与前端的extractMainContentForCopy保持完全一致的逻辑
-// 用于生成对话预览时过滤掉推理过程，只显示真正的回答内容
+/**
+ * Extracts the main content from an assistant message, removing reasoning text
+ * (think and details tags). The logic is kept fully consistent with the frontend's
+ * extractMainContentForCopy. Used to generate conversation previews by filtering
+ * out reasoning and only showing the actual answer content.
+ * @param rawContent - The raw message content.
+ * @returns The cleaned main content string.
+ */
 export function extractMainContentForPreview(rawContent: string): string {
-  // 检查是否有未闭合的关键标签
+  // Check for unclosed key tags
   const openThinkCount = (rawContent.match(/<think(?:\s[^>]*)?>/gi) || [])
     .length;
   const closeThinkCount = (rawContent.match(/<\/think>/gi) || []).length;
@@ -31,7 +43,7 @@ export function extractMainContentForPreview(rawContent: string): string {
     .length;
   const closeDetailsCount = (rawContent.match(/<\/details>/gi) || []).length;
 
-  // 如果有未闭合的标签，说明内容还在生成中，返回空字符串
+  // If there are unclosed tags, the content is still being generated, return empty string
   if (
     openThinkCount > closeThinkCount ||
     openDetailsCount > closeDetailsCount
@@ -41,14 +53,14 @@ export function extractMainContentForPreview(rawContent: string): string {
 
   let cleanContent = rawContent;
 
-  // 移除所有 <think>...</think> 块
+  // Remove all <think>...</think> blocks
   const thinkRegex = /<think(?:\s[^>]*)?>[\s\S]*?<\/think>/gi;
   cleanContent = cleanContent.replace(thinkRegex, '');
 
-  // 移除所有 <details>...</details> 块
+  // Remove all <details>...</details> blocks
   const detailsRegex = /<details(?:\s[^>]*)?>[\s\S]*?<\/details>/gi;
   cleanContent = cleanContent.replace(detailsRegex, '');
 
-  // 清理多余的空白字符
+  // Clean up extra whitespace
   return cleanContent.replace(/\n\s*\n/g, '\n').trim();
 }

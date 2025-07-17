@@ -1,53 +1,53 @@
 import { create } from 'zustand';
 
-// 获取当前路由的工具函数
-// 支持SSR环境，避免hydration错误
+// Utility function to get the current route
+// Supports SSR environment to avoid hydration errors
 const getCurrentRoute = (): string => {
   if (typeof window !== 'undefined') {
     return window.location.pathname;
   }
-  return 'default'; // SSR环境下的默认路由
+  return 'default'; // Default route for SSR environment
 };
 
 interface ChatInputState {
-  // 🎯 新增：按路由存储消息内容
-  // 每个路由维护独立的输入框内容，提升用户体验
+  // Store message content by route
+  // Each route maintains its own input content for better UX
   messagesByRoute: Record<string, string>;
   currentRoute: string;
 
-  // 🎯 兼容接口：保持原有API不变
-  // 通过函数方式获取当前路由的消息
-  message: string; // 改为普通属性，通过computed更新
-  getMessage: () => string; // 手动getter函数
+  // Compatibility: keep original API unchanged
+  // Get message for current route via function
+  message: string; // Normal property, updated via computed
+  getMessage: () => string; // Manual getter function
   setMessage: (message: string) => void;
   clearMessage: () => void;
 
-  // 🎯 新增：路由管理功能
+  // Route management functions
   setCurrentRoute: (route: string) => void;
   clearAllMessages: () => void;
   clearRouteMessage: (route: string) => void;
 
-  // 输入法状态
+  // IME (input method) state
   isComposing: boolean;
   setIsComposing: (isComposing: boolean) => void;
 
-  // 聊天界面状态
+  // Chat UI state
   isWelcomeScreen: boolean;
   setIsWelcomeScreen: (isWelcome: boolean) => void;
 
-  // 暗黑模式
+  // Dark mode state
   isDark: boolean;
   toggleDarkMode: () => void;
   setDarkMode: (isDark: boolean) => void;
 }
 
 export const useChatInputStore = create<ChatInputState>((set, get) => ({
-  // 🎯 新增：按路由存储的消息内容
+  // Store message content by route
   messagesByRoute: {},
   currentRoute: getCurrentRoute(),
 
-  // 🎯 兼容接口：message属性
-  // 返回当前路由的消息内容，如果没有则返回空字符串
+  // Compatibility: message property
+  // Returns message for current route, or empty string if not set
   message: '',
 
   getMessage: () => {
@@ -55,13 +55,13 @@ export const useChatInputStore = create<ChatInputState>((set, get) => ({
     return state.messagesByRoute[state.currentRoute] || '';
   },
 
-  // 🎯 兼容接口：setMessage
-  // 设置当前路由的消息内容，防止重复更新
+  // Compatibility: setMessage
+  // Set message for current route, avoid unnecessary updates
   setMessage: (message: string) => {
     const state = get();
     const currentMessage = state.messagesByRoute[state.currentRoute] || '';
 
-    // 防止与当前值相同的更新，避免不必要的状态变化
+    // Prevent update if value is the same to avoid unnecessary state changes
     if (currentMessage === message) return;
 
     set(state => ({
@@ -69,29 +69,29 @@ export const useChatInputStore = create<ChatInputState>((set, get) => ({
         ...state.messagesByRoute,
         [state.currentRoute]: message,
       },
-      // 同时更新message属性以保持兼容性
+      // Also update message property for compatibility
       message: message,
     }));
   },
 
-  // 🎯 兼容接口：clearMessage
-  // 清空当前路由的消息内容
+  // Compatibility: clearMessage
+  // Clear message for current route
   clearMessage: () => {
     set(state => ({
       messagesByRoute: {
         ...state.messagesByRoute,
         [state.currentRoute]: '',
       },
-      // 同时更新message属性以保持兼容性
+      // Also update message property for compatibility
       message: '',
     }));
   },
 
-  // 🎯 新增：路由管理功能
+  // Route management: set current route
   setCurrentRoute: (route: string) => {
     const state = get();
     if (state.currentRoute !== route) {
-      // 切换路由时，更新message属性为新路由的内容
+      // When switching route, update message property to new route's content
       const newMessage = state.messagesByRoute[route] || '';
       set({
         currentRoute: route,
@@ -112,7 +112,7 @@ export const useChatInputStore = create<ChatInputState>((set, get) => ({
       const newMessages = { ...state.messagesByRoute };
       delete newMessages[route];
 
-      // 如果删除的是当前路由，也要更新message
+      // If deleting current route, also update message property
       const newMessage = route === state.currentRoute ? '' : state.message;
 
       return {
@@ -122,7 +122,7 @@ export const useChatInputStore = create<ChatInputState>((set, get) => ({
     });
   },
 
-  // 输入法状态
+  // IME (input method) state
   isComposing: false,
   setIsComposing: (isComposingValue: boolean) => {
     if (get().isComposing !== isComposingValue) {
@@ -130,11 +130,11 @@ export const useChatInputStore = create<ChatInputState>((set, get) => ({
     }
   },
 
-  // 聊天界面状态
+  // Chat UI state
   isWelcomeScreen: true,
   setIsWelcomeScreen: isWelcome => set({ isWelcomeScreen: isWelcome }),
 
-  // 暗黑模式
+  // Dark mode state
   isDark: false,
   toggleDarkMode: () => set(state => ({ isDark: !state.isDark })),
   setDarkMode: isDark => set({ isDark }),

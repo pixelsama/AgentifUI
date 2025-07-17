@@ -1,8 +1,8 @@
 /**
- * 统一的实时订阅管理服务
+ * Unified real-time subscription management service.
  *
- * 管理Supabase实时订阅，避免重复订阅和内存泄漏
- * 提供订阅、取消订阅和管理功能
+ * Manages Supabase real-time subscriptions to avoid duplicate subscriptions and memory leaks.
+ * Provides subscribe, unsubscribe, and management functions.
  */
 import { createClient } from '@lib/supabase/client';
 
@@ -30,7 +30,7 @@ export class RealtimeService {
   private constructor() {}
 
   /**
-   * 获取实时服务单例
+   * Get the singleton instance of the real-time service.
    */
   public static getInstance(): RealtimeService {
     if (!RealtimeService.instance) {
@@ -40,11 +40,11 @@ export class RealtimeService {
   }
 
   /**
-   * 订阅数据库变化
-   * @param key 订阅标识键
-   * @param config 订阅配置
-   * @param handler 变化处理函数
-   * @returns 取消订阅的函数
+   * Subscribe to database changes.
+   * @param key Subscription identifier key
+   * @param config Subscription configuration
+   * @param handler Change handler function
+   * @returns Unsubscribe function
    */
   subscribe(
     key: string,
@@ -54,16 +54,18 @@ export class RealtimeService {
     let subscription = this.subscriptions.get(key);
 
     if (subscription) {
-      // 如果订阅已存在，只添加新的处理函数
+      // If the subscription already exists, just add the new handler
       subscription.handlers.add(handler);
-      console.log(`[实时订阅] 添加处理函数到现有订阅: ${key}`);
+      console.log(
+        `[Realtime Subscription] Added handler to existing subscription: ${key}`
+      );
     } else {
-      // 创建新的订阅
-      // 🔧 修复重复订阅问题：使用订阅键作为channel名称，确保每个订阅都有唯一的channel
+      // Create a new subscription
+      // Fix duplicate subscription issue: use the subscription key as the channel name to ensure each subscription has a unique channel
       const channelKey = `channel-${key}`;
       const channel = this.supabase.channel(channelKey);
 
-      // 创建复合处理函数，调用所有注册的处理函数
+      // Create a composite handler to call all registered handlers
       const compositeHandler = (payload: any) => {
         const sub = this.subscriptions.get(key);
         if (sub) {
@@ -71,13 +73,16 @@ export class RealtimeService {
             try {
               h(payload);
             } catch (error) {
-              console.error(`[实时订阅] 处理函数执行出错:`, error);
+              console.error(
+                `[Realtime Subscription] Handler execution error:`,
+                error
+              );
             }
           });
         }
       };
 
-      // 配置订阅
+      // Configure subscription
       const subscriptionConfig = {
         event: config.event,
         schema: config.schema,
@@ -85,16 +90,16 @@ export class RealtimeService {
         ...(config.filter && { filter: config.filter }),
       };
 
-      // 配置订阅
+      // Configure subscription
       channel.on(
-        'postgres_changes' as any, // 临时类型转换，避免TypeScript类型错误
+        'postgres_changes' as any, // Temporary type cast to avoid TypeScript type error
         subscriptionConfig,
         compositeHandler
       );
 
-      // 订阅频道
+      // Subscribe to the channel
       channel.subscribe(status => {
-        console.log(`[实时订阅] ${key} 状态变化: ${status}`);
+        console.log(`[Realtime Subscription] ${key} status changed: ${status}`);
       });
 
       subscription = {
@@ -105,17 +110,17 @@ export class RealtimeService {
       };
 
       this.subscriptions.set(key, subscription);
-      console.log(`[实时订阅] 创建新订阅: ${key}`);
+      console.log(`[Realtime Subscription] Created new subscription: ${key}`);
     }
 
-    // 返回取消订阅的函数
+    // Return the unsubscribe function
     return () => {
       this.unsubscribeHandler(key, handler);
     };
   }
 
   /**
-   * 移除特定的处理函数
+   * Remove a specific handler from a subscription.
    */
   private unsubscribeHandler(
     key: string,
@@ -126,14 +131,14 @@ export class RealtimeService {
 
     subscription.handlers.delete(handler);
 
-    // 如果没有处理函数了，完全移除订阅
+    // If there are no handlers left, remove the subscription completely
     if (subscription.handlers.size === 0) {
       this.unsubscribe(key);
     }
   }
 
   /**
-   * 完全取消订阅
+   * Completely unsubscribe from a subscription.
    */
   unsubscribe(key: string): void {
     const subscription = this.subscriptions.get(key);
@@ -142,23 +147,28 @@ export class RealtimeService {
     try {
       this.supabase.removeChannel(subscription.channel);
       this.subscriptions.delete(key);
-      console.log(`[实时订阅] 取消订阅: ${key}`);
+      console.log(`[Realtime Subscription] Unsubscribed: ${key}`);
     } catch (error) {
-      console.error(`[实时订阅] 取消订阅失败: ${key}`, error);
+      console.error(
+        `[Realtime Subscription] Failed to unsubscribe: ${key}`,
+        error
+      );
     }
   }
 
   /**
-   * 取消所有订阅
+   * Unsubscribe from all subscriptions.
    */
   unsubscribeAll(): void {
     const keys = Array.from(this.subscriptions.keys());
     keys.forEach(key => this.unsubscribe(key));
-    console.log(`[实时订阅] 取消了所有订阅，共 ${keys.length} 个`);
+    console.log(
+      `[Realtime Subscription] Unsubscribed all, total ${keys.length}`
+    );
   }
 
   /**
-   * 获取订阅统计信息
+   * Get subscription statistics.
    */
   getStats(): {
     total: number;
@@ -177,15 +187,15 @@ export class RealtimeService {
     let oldestKey = '';
 
     for (const [key, subscription] of this.subscriptions.entries()) {
-      // 按表统计
+      // Count by table
       const table = subscription.config.table;
       stats.byTable[table] = (stats.byTable[table] || 0) + 1;
 
-      // 按事件统计
+      // Count by event
       const event = subscription.config.event;
       stats.byEvent[event] = (stats.byEvent[event] || 0) + 1;
 
-      // 找出最老的订阅
+      // Find the oldest subscription
       if (subscription.createdAt < oldestTimestamp) {
         oldestTimestamp = subscription.createdAt;
         oldestKey = key;
@@ -203,7 +213,7 @@ export class RealtimeService {
   }
 
   /**
-   * 列出所有活跃订阅
+   * List all active subscriptions.
    */
   listSubscriptions(): Array<{
     key: string;
@@ -226,24 +236,24 @@ export class RealtimeService {
   }
 
   /**
-   * 销毁服务，清理所有订阅
+   * Destroy the service and clean up all subscriptions.
    */
   destroy(): void {
     this.unsubscribeAll();
-    console.log('[实时订阅] 服务已销毁');
+    console.log('[Realtime Subscription] Service destroyed');
   }
 }
 
-// 导出单例实例
+// Export singleton instance
 export const realtimeService = RealtimeService.getInstance();
 
-// 常用的订阅键生成器
+// Common subscription key generators
 export const SubscriptionKeys = {
-  // 🔧 修复重复订阅问题：为不同用途的Hook提供差异化的订阅键
+  // Fix duplicate subscription issue: provide differentiated subscription keys for different hook usages
   sidebarConversations: (userId: string) => `sidebar-conversations:${userId}`,
   allConversations: (userId: string) => `all-conversations:${userId}`,
 
-  // 保持向后兼容性，现有代码可以继续使用
+  // Keep backward compatibility, existing code can continue to use
   userConversations: (userId: string) => `user-conversations:${userId}`,
 
   conversationMessages: (conversationId: string) =>
@@ -254,7 +264,7 @@ export const SubscriptionKeys = {
   apiKeys: () => 'api-keys',
 };
 
-// 常用的订阅配置
+// Common subscription configs
 export const SubscriptionConfigs = {
   conversations: (userId?: string): SubscriptionConfig => ({
     event: '*',

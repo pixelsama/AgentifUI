@@ -1,19 +1,22 @@
-// lib/services/dify/file-service.ts
-// 实现与 Dify 文件上传 API 的交互逻辑。
+/**
+ * Dify File Service
+ * @description Implements interaction logic with Dify file upload API
+ * @module lib/services/dify/file-service
+ */
 import type { DifyFileUploadResponse } from './types';
 
-// 指向我们的后端代理 API
+// Points to our backend proxy API
 const DIFY_API_BASE_URL = '/api/dify';
 
 /**
- * 上传单个文件到 Dify (通过后端代理)，支持进度回调。
+ * Upload a single file to Dify (via backend proxy), supporting progress callback.
  *
- * @param appId - Dify 应用的 ID。
- * @param file - 要上传的 File 对象。
- * @param user - Dify 需要的用户标识符。
- * @param onProgress - 上传进度回调 (0-100)
- * @returns 一个解析为 DifyFileUploadResponse 的 Promise。
- * @throws 如果请求失败或 API 返回错误状态，则抛出错误。
+ * @param appId - Dify application ID.
+ * @param file - File object to upload.
+ * @param user - User identifier required by Dify.
+ * @param onProgress - Upload progress callback (0-100).
+ * @returns A Promise resolving to DifyFileUploadResponse.
+ * @throws Throws an error if the request fails or API returns an error status.
  */
 export async function uploadDifyFile(
   appId: string,
@@ -25,7 +28,7 @@ export async function uploadDifyFile(
     `[Dify File Service] Uploading file "${file.name}" for app ${appId}, user ${user}`
   );
 
-  // 使用 XMLHttpRequest 以支持上传进度回调
+  // Use XMLHttpRequest to support upload progress callback
   return new Promise((resolve, reject) => {
     const slug = 'files/upload';
     const apiUrl = `${DIFY_API_BASE_URL}/${appId}/${slug}`;
@@ -36,7 +39,7 @@ export async function uploadDifyFile(
     const xhr = new XMLHttpRequest();
     xhr.open('POST', apiUrl, true);
 
-    // 监听上传进度
+    // Listen for upload progress events
     xhr.upload.onprogress = event => {
       if (event.lengthComputable && onProgress) {
         const percent = Math.round((event.loaded / event.total) * 100);
@@ -82,4 +85,4 @@ export async function uploadDifyFile(
 }
 
 export {};
-// 添加一个空的 export {} 确保它被视为一个模块
+// Ensure the file is treated as a module

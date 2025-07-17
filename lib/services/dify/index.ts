@@ -1,9 +1,13 @@
-// lib/services/dify/index.ts
-// 统一导出所有 Dify 服务函数
-// Chat 服务
+/**
+ * Dify Service Index
+ * @description Exports all Dify service functions
+ * @module lib/services/dify/index
+ */
+
+// Chat Service
 export { streamDifyChat, stopDifyStreamingTask } from './chat-service';
 
-// Workflow 服务
+// Workflow Service
 export {
   executeDifyWorkflow,
   streamDifyWorkflow,
@@ -12,7 +16,7 @@ export {
   getDifyWorkflowLogs,
 } from './workflow-service';
 
-// App 服务
+// App Service
 export {
   getAllDifyApps,
   getDifyAppParameters,
@@ -24,14 +28,14 @@ export {
   testDifyAppParameters,
 } from './app-service';
 
-// Message 服务
+// Message Service
 export {
   getConversationMessages,
   submitMessageFeedback,
   convertAudioToText,
 } from './message-service';
 
-// Conversation 服务
+// Conversation Service
 export {
   getConversations,
   deleteConversation,
@@ -39,14 +43,14 @@ export {
   getConversationVariables,
 } from './conversation-service';
 
-// Completion 服务
+// Completion Service
 export {
   executeDifyCompletion,
   streamDifyCompletion,
   stopDifyCompletion,
 } from './completion-service';
 
-// Annotation 服务
+// Annotation Service
 export {
   getDifyAnnotations,
   createDifyAnnotation,
@@ -56,16 +60,19 @@ export {
   getDifyAnnotationReplyJobStatus,
 } from './annotation-service';
 
-// 类型定义
+// File Service
+export { uploadDifyFile } from './file-service';
+
+// Type Definitions
 export type {
-  // Chat 相关类型
+  // Chat Related Types
   DifyChatRequestPayload,
   DifyStreamResponse,
   DifySseEvent,
   DifyUsage,
   DifyRetrieverResource,
 
-  // Workflow 相关类型
+  // Workflow Related Types
   DifyWorkflowRequestPayload,
   DifyWorkflowCompletionResponse,
   DifyWorkflowStreamResponse,
@@ -79,25 +86,25 @@ export type {
   GetDifyWorkflowLogsResponse,
   DifyWorkflowLogEntry,
 
-  // App 相关类型
+  // App Related Types
   DifyAppParametersResponse,
   DifyAppInfoResponse,
   DifyWebAppSettingsResponse,
   DifyAppMetaResponse,
   DifyToolIconDetail,
 
-  // Message 相关类型
+  // Message Related Types
   DifyMessageFeedbackRequestPayload,
   DifyMessageFeedbackResponse,
   DifyAudioToTextRequestPayload,
   DifyAudioToTextResponse,
 
-  // Completion 相关类型
+  // Completion Related Types
   DifyCompletionRequestPayload,
   DifyCompletionResponse,
   DifyCompletionStreamResponse,
 
-  // Annotation 相关类型
+  // Annotation Related Types
   DifyAnnotationItem,
   GetDifyAnnotationsParams,
   DifyAnnotationListResponse,
@@ -111,7 +118,7 @@ export type {
   DifyAsyncJobResponse,
   DifyAsyncJobStatusResponse,
 
-  // 通用类型
+  // Common Types
   DifyFile,
   DifyApiError,
 } from './types';

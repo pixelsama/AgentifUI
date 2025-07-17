@@ -9,8 +9,8 @@ import type {
 } from './types';
 
 /**
- * 获取所有可用的Dify应用（管理员用）
- * 返回所有应用，包括私有应用，用于管理界面
+ * Get all available Dify apps (for admin use).
+ * Returns all apps, including private ones, for the management interface.
  */
 export async function getAllDifyApps(): Promise<
   Array<{
@@ -24,7 +24,7 @@ export async function getAllDifyApps(): Promise<
   }>
 > {
   try {
-    // 🎯 重构：支持多提供商，获取所有活跃提供商的应用实例
+    // Refactor: Support multiple providers, get all active providers' app instances
     const { createClient } = await import('@lib/supabase/client');
     const supabase = createClient();
 
@@ -54,24 +54,24 @@ export async function getAllDifyApps(): Promise<
 
     return (
       instances?.map(instance => ({
-        id: instance.id, // 使用数据库UUID主键作为标识符
+        id: instance.id, // Use database UUID as identifier
         name: instance.display_name || instance.instance_id,
         instance_id: instance.instance_id,
         display_name: instance.display_name,
         description: instance.description,
         config: instance.config as ServiceInstanceConfig,
-        visibility: instance.visibility || 'public', // 默认为公开
+        visibility: instance.visibility || 'public', // Default to public
       })) || []
     );
   } catch (error) {
-    console.error('获取应用列表失败:', error);
+    console.error('Failed to get app list:', error);
     throw error;
   }
 }
 
 /**
- * 获取公开的Dify应用（未登录用户用）
- * 只返回公开应用，用于应用市场
+ * Get public Dify apps (for unauthenticated users).
+ * Only returns public apps, for the app marketplace.
  */
 export async function getPublicDifyApps(): Promise<
   Array<{
@@ -85,7 +85,7 @@ export async function getPublicDifyApps(): Promise<
   }>
 > {
   try {
-    // 🎯 重构：支持多提供商，获取所有活跃提供商的公开应用实例
+    // Refactor: Support multiple providers, get all active providers' public app instances
     const { createClient } = await import('@lib/supabase/client');
     const supabase = createClient();
 
@@ -107,7 +107,7 @@ export async function getPublicDifyApps(): Promise<
       `
       )
       .eq('providers.is_active', true)
-      .in('visibility', ['public']) // 只获取公开应用
+      .in('visibility', ['public']) // Only get public apps
       .order('display_name');
 
     if (error) {
@@ -126,23 +126,23 @@ export async function getPublicDifyApps(): Promise<
       })) || []
     );
   } catch (error) {
-    console.error('获取公开应用列表失败:', error);
+    console.error('Failed to get public app list:', error);
     throw error;
   }
 }
 
 /**
- * 获取应用参数
- * 用于进入页面一开始，获取功能开关、输入参数名称、类型及默认值等使用
+ * Get app parameters.
+ * Used at page entry to get feature switches, input parameter names, types, and default values, etc.
  *
- * @param appId - 应用ID
- * @returns Promise<DifyAppParametersResponse> - 应用参数配置
+ * @param appId - App ID
+ * @returns Promise<DifyAppParametersResponse> - App parameter configuration
  */
 export async function getDifyAppParameters(
   appId: string
 ): Promise<DifyAppParametersResponse> {
-  const slug = 'parameters'; // Dify API 路径
-  const apiUrl = `/api/dify/${appId}/${slug}`; // 指向后端代理
+  const slug = 'parameters'; // Dify API path
+  const apiUrl = `/api/dify/${appId}/${slug}`; // Points to backend proxy
 
   try {
     const response = await fetch(apiUrl, {
@@ -150,30 +150,33 @@ export async function getDifyAppParameters(
       headers: {
         'Content-Type': 'application/json',
       },
-      // 不需要 Authorization 头，这是代理的职责
+      // No Authorization header needed, handled by proxy
     });
 
     if (!response.ok) {
-      // 尝试解析错误响应
+      // Try to parse error response
       let errorData: DifyApiError;
       try {
         errorData = await response.json();
       } catch {
-        // 如果无法解析JSON，使用默认错误格式
+        // If cannot parse JSON, use default error format
         errorData = {
           status: response.status,
           code: response.status.toString(),
-          message: response.statusText || '获取应用参数失败',
+          message: response.statusText || 'Failed to get app parameters',
         };
       }
 
-      console.error('[Dify App Service] 获取应用参数失败:', errorData);
-      throw new Error(`获取应用参数失败: ${errorData.message}`);
+      console.error(
+        '[Dify App Service] Failed to get app parameters:',
+        errorData
+      );
+      throw new Error(`Failed to get app parameters: ${errorData.message}`);
     }
 
     const result: DifyAppParametersResponse = await response.json();
 
-    console.log('[Dify App Service] 成功获取应用参数:', {
+    console.log('[Dify App Service] Successfully got app parameters:', {
       appId,
       hasOpeningStatement: !!result.opening_statement,
       suggestedQuestionsCount: result.suggested_questions?.length || 0,
@@ -183,29 +186,32 @@ export async function getDifyAppParameters(
 
     return result;
   } catch (error) {
-    console.error('[Dify App Service] 获取应用参数时发生错误:', error);
+    console.error(
+      '[Dify App Service] Error occurred while getting app parameters:',
+      error
+    );
 
-    // 重新抛出错误，保持错误信息
+    // Rethrow error to preserve error info
     if (error instanceof Error) {
       throw error;
     }
 
-    throw new Error('获取应用参数时发生未知错误');
+    throw new Error('Unknown error occurred while getting app parameters');
   }
 }
 
 /**
- * 测试获取应用参数API（仅用于开发调试）
+ * Test get app parameters API (for development/debug only)
  *
- * @param appId - 应用ID
+ * @param appId - App ID
  */
 export async function testDifyAppParameters(appId: string): Promise<void> {
   try {
-    console.log(`[Test] 开始测试应用参数API，appId: ${appId}`);
+    console.log(`[Test] Start testing app parameters API, appId: ${appId}`);
 
     const parameters = await getDifyAppParameters(appId);
 
-    console.log(`[Test] 成功获取应用参数:`, {
+    console.log(`[Test] Successfully got app parameters:`, {
       appId,
       opening_statement: parameters.opening_statement,
       suggested_questions_count: parameters.suggested_questions?.length || 0,
@@ -218,22 +224,22 @@ export async function testDifyAppParameters(appId: string): Promise<void> {
       annotation_reply_enabled: parameters.annotation_reply?.enabled || false,
     });
   } catch (error) {
-    console.error(`[Test] 测试应用参数API失败:`, error);
+    console.error(`[Test] Failed to test app parameters API:`, error);
     throw error;
   }
 }
 
 /**
- * 获取应用基本信息
+ * Get app basic info
  *
- * @param appId - 应用ID
- * @returns Promise<DifyAppInfoResponse> - 应用基本信息
+ * @param appId - App ID
+ * @returns Promise<DifyAppInfoResponse> - App basic info
  */
 export async function getDifyAppInfo(
   appId: string
 ): Promise<DifyAppInfoResponse> {
-  const slug = 'info'; // Dify API 路径
-  const apiUrl = `/api/dify/${appId}/${slug}`; // 指向后端代理
+  const slug = 'info'; // Dify API path
+  const apiUrl = `/api/dify/${appId}/${slug}`; // Points to backend proxy
 
   try {
     const response = await fetch(apiUrl, {
@@ -241,30 +247,30 @@ export async function getDifyAppInfo(
       headers: {
         'Content-Type': 'application/json',
       },
-      // 不需要 Authorization 头，这是代理的职责
+      // No Authorization header needed, handled by proxy
     });
 
     if (!response.ok) {
-      // 尝试解析错误响应
+      // Try to parse error response
       let errorData: DifyApiError;
       try {
         errorData = await response.json();
       } catch {
-        // 如果无法解析JSON，使用默认错误格式
+        // If cannot parse JSON, use default error format
         errorData = {
           status: response.status,
           code: response.status.toString(),
-          message: response.statusText || '获取应用信息失败',
+          message: response.statusText || 'Failed to get app info',
         };
       }
 
-      console.error('[Dify App Service] 获取应用信息失败:', errorData);
-      throw new Error(`获取应用信息失败: ${errorData.message}`);
+      console.error('[Dify App Service] Failed to get app info:', errorData);
+      throw new Error(`Failed to get app info: ${errorData.message}`);
     }
 
     const result: DifyAppInfoResponse = await response.json();
 
-    console.log('[Dify App Service] 成功获取应用信息:', {
+    console.log('[Dify App Service] Successfully got app info:', {
       appId,
       name: result.name,
       description: result.description,
@@ -273,28 +279,31 @@ export async function getDifyAppInfo(
 
     return result;
   } catch (error) {
-    console.error('[Dify App Service] 获取应用信息时发生错误:', error);
+    console.error(
+      '[Dify App Service] Error occurred while getting app info:',
+      error
+    );
 
-    // 重新抛出错误，保持错误信息
+    // Rethrow error to preserve error info
     if (error instanceof Error) {
       throw error;
     }
 
-    throw new Error('获取应用信息时发生未知错误');
+    throw new Error('Unknown error occurred while getting app info');
   }
 }
 
 /**
- * 获取应用 WebApp 设置
+ * Get app WebApp settings
  *
- * @param appId - 应用ID
- * @returns Promise<DifyWebAppSettingsResponse> - WebApp 设置信息
+ * @param appId - App ID
+ * @returns Promise<DifyWebAppSettingsResponse> - WebApp settings info
  */
 export async function getDifyWebAppSettings(
   appId: string
 ): Promise<DifyWebAppSettingsResponse> {
-  const slug = 'site'; // Dify API 路径
-  const apiUrl = `/api/dify/${appId}/${slug}`; // 指向后端代理
+  const slug = 'site'; // Dify API path
+  const apiUrl = `/api/dify/${appId}/${slug}`; // Points to backend proxy
 
   try {
     const response = await fetch(apiUrl, {
@@ -302,30 +311,33 @@ export async function getDifyWebAppSettings(
       headers: {
         'Content-Type': 'application/json',
       },
-      // 不需要 Authorization 头，这是代理的职责
+      // No Authorization header needed, handled by proxy
     });
 
     if (!response.ok) {
-      // 尝试解析错误响应
+      // Try to parse error response
       let errorData: DifyApiError;
       try {
         errorData = await response.json();
       } catch {
-        // 如果无法解析JSON，使用默认错误格式
+        // If cannot parse JSON, use default error format
         errorData = {
           status: response.status,
           code: response.status.toString(),
-          message: response.statusText || '获取 WebApp 设置失败',
+          message: response.statusText || 'Failed to get WebApp settings',
         };
       }
 
-      console.error('[Dify App Service] 获取 WebApp 设置失败:', errorData);
-      throw new Error(`获取 WebApp 设置失败: ${errorData.message}`);
+      console.error(
+        '[Dify App Service] Failed to get WebApp settings:',
+        errorData
+      );
+      throw new Error(`Failed to get WebApp settings: ${errorData.message}`);
     }
 
     const result: DifyWebAppSettingsResponse = await response.json();
 
-    console.log('[Dify App Service] 成功获取 WebApp 设置:', {
+    console.log('[Dify App Service] Successfully got WebApp settings:', {
       appId,
       title: result.title,
       iconType: result.icon_type,
@@ -334,28 +346,31 @@ export async function getDifyWebAppSettings(
 
     return result;
   } catch (error) {
-    console.error('[Dify App Service] 获取 WebApp 设置时发生错误:', error);
+    console.error(
+      '[Dify App Service] Error occurred while getting WebApp settings:',
+      error
+    );
 
-    // 重新抛出错误，保持错误信息
+    // Rethrow error to preserve error info
     if (error instanceof Error) {
       throw error;
     }
 
-    throw new Error('获取 WebApp 设置时发生未知错误');
+    throw new Error('Unknown error occurred while getting WebApp settings');
   }
 }
 
 /**
- * 获取应用 Meta 信息
+ * Get app Meta info
  *
- * @param appId - 应用ID
- * @returns Promise<DifyAppMetaResponse> - 应用 Meta 信息
+ * @param appId - App ID
+ * @returns Promise<DifyAppMetaResponse> - App Meta info
  */
 export async function getDifyAppMeta(
   appId: string
 ): Promise<DifyAppMetaResponse> {
-  const slug = 'meta'; // Dify API 路径
-  const apiUrl = `/api/dify/${appId}/${slug}`; // 指向后端代理
+  const slug = 'meta'; // Dify API path
+  const apiUrl = `/api/dify/${appId}/${slug}`; // Points to backend proxy
 
   try {
     const response = await fetch(apiUrl, {
@@ -363,53 +378,59 @@ export async function getDifyAppMeta(
       headers: {
         'Content-Type': 'application/json',
       },
-      // 不需要 Authorization 头，这是代理的职责
+      // No Authorization header needed, handled by proxy
     });
 
     if (!response.ok) {
-      // 尝试解析错误响应
+      // Try to parse error response
       let errorData: DifyApiError;
       try {
         errorData = await response.json();
       } catch {
-        // 如果无法解析JSON，使用默认错误格式
+        // If cannot parse JSON, use default error format
         errorData = {
           status: response.status,
           code: response.status.toString(),
-          message: response.statusText || '获取应用 Meta 信息失败',
+          message: response.statusText || 'Failed to get app Meta info',
         };
       }
 
-      console.error('[Dify App Service] 获取应用 Meta 信息失败:', errorData);
-      throw new Error(`获取应用 Meta 信息失败: ${errorData.message}`);
+      console.error(
+        '[Dify App Service] Failed to get app Meta info:',
+        errorData
+      );
+      throw new Error(`Failed to get app Meta info: ${errorData.message}`);
     }
 
     const result: DifyAppMetaResponse = await response.json();
 
-    console.log('[Dify App Service] 成功获取应用 Meta 信息:', {
+    console.log('[Dify App Service] Successfully got app Meta info:', {
       appId,
       toolIconsCount: Object.keys(result.tool_icons).length,
     });
 
     return result;
   } catch (error) {
-    console.error('[Dify App Service] 获取应用 Meta 信息时发生错误:', error);
+    console.error(
+      '[Dify App Service] Error occurred while getting app Meta info:',
+      error
+    );
 
-    // 重新抛出错误，保持错误信息
+    // Rethrow error to preserve error info
     if (error instanceof Error) {
       throw error;
     }
 
-    throw new Error('获取应用 Meta 信息时发生未知错误');
+    throw new Error('Unknown error occurred while getting app Meta info');
   }
 }
 
 /**
- * 使用指定的API配置获取Dify应用参数（用于表单同步）
+ * Get Dify app parameters using the specified API config (for form sync)
  *
- * @param appId - 应用ID
- * @param apiConfig - API配置（URL和密钥）
- * @returns Promise<DifyAppParametersResponse> - 应用参数
+ * @param appId - App ID
+ * @param apiConfig - API config (URL and key)
+ * @returns Promise<DifyAppParametersResponse> - App parameters
  */
 export async function getDifyAppParametersWithConfig(
   appId: string,
@@ -418,20 +439,22 @@ export async function getDifyAppParametersWithConfig(
   const { apiUrl, apiKey } = apiConfig;
 
   if (!apiUrl || !apiKey) {
-    throw new Error('API URL 和 API Key 都是必需的');
+    throw new Error('API URL and API Key are required');
   }
 
-  // 🎯 架构修复：通过临时代理方式调用，避免直接调用外部API
-  // 创建一个临时的服务实例配置，通过代理服务器调用
+  // Architecture fix: Call via temporary proxy to avoid direct external API call
+  // Create a temporary service instance config, call via proxy server
   try {
-    console.log(`[Dify App Service] 使用表单配置通过代理同步参数: ${appId}`);
+    console.log(
+      `[Dify App Service] Sync parameters via proxy with form config: ${appId}`
+    );
 
-    // 通过代理服务器调用，但使用特殊的临时配置方式
+    // Call via proxy server, using special temporary config
     const slug = 'parameters';
     const proxyUrl = `/api/dify/${appId}/${slug}`;
 
     const response = await fetch(proxyUrl, {
-      method: 'POST', // 使用POST传递临时配置
+      method: 'POST', // Use POST to send temporary config
       headers: {
         'Content-Type': 'application/json',
       },
@@ -444,58 +467,63 @@ export async function getDifyAppParametersWithConfig(
     });
 
     if (!response.ok) {
-      // 尝试解析错误响应
+      // Try to parse error response
       let errorData: DifyApiError;
       try {
         errorData = await response.json();
       } catch {
-        // 如果无法解析JSON，使用默认错误格式
+        // If cannot parse JSON, use default error format
         errorData = {
           status: response.status,
           code: response.status.toString(),
-          message: response.statusText || '获取应用参数失败',
+          message: response.statusText || 'Failed to get app parameters',
         };
       }
 
       console.error(
-        '[Dify App Service] 使用表单配置获取应用参数失败:',
+        '[Dify App Service] Failed to get app parameters with form config:',
         errorData
       );
-      throw new Error(`获取应用参数失败: ${errorData.message}`);
+      throw new Error(`Failed to get app parameters: ${errorData.message}`);
     }
 
     const result: DifyAppParametersResponse = await response.json();
 
-    console.log('[Dify App Service] 使用表单配置成功获取应用参数:', {
-      appId,
-      hasOpeningStatement: !!result.opening_statement,
-      suggestedQuestionsCount: result.suggested_questions?.length || 0,
-      userInputFormCount: result.user_input_form?.length || 0,
-      textToSpeechEnabled: result.text_to_speech?.enabled || false,
-    });
+    console.log(
+      '[Dify App Service] Successfully got app parameters with form config:',
+      {
+        appId,
+        hasOpeningStatement: !!result.opening_statement,
+        suggestedQuestionsCount: result.suggested_questions?.length || 0,
+        userInputFormCount: result.user_input_form?.length || 0,
+        textToSpeechEnabled: result.text_to_speech?.enabled || false,
+      }
+    );
 
     return result;
   } catch (error) {
     console.error(
-      '[Dify App Service] 使用表单配置获取应用参数时发生错误:',
+      '[Dify App Service] Error occurred while getting app parameters with form config:',
       error
     );
 
-    // 重新抛出错误，保持错误信息
+    // Rethrow error to preserve error info
     if (error instanceof Error) {
       throw error;
     }
 
-    throw new Error('使用表单配置获取应用参数时发生未知错误');
+    throw new Error(
+      'Unknown error occurred while getting app parameters with form config'
+    );
   }
 }
 
 /**
- * 使用指定的API配置获取Dify应用基本信息（用于表单同步）
+ * Get Dify app basic info using the specified API config (for form sync)
  *
- * @param appId - 应用ID
- * @param apiConfig - API配置（URL和密钥）
- * @returns Promise<DifyAppInfoResponse> - 应用基本信息
+ * @param appId - App ID
+ * @param apiConfig - API config (URL and key)
+ * @returns Promise<DifyAppInfoResponse> - App basic info
  */
 export async function getDifyAppInfoWithConfig(
   appId: string,
@@ -504,22 +532,22 @@ export async function getDifyAppInfoWithConfig(
   const { apiUrl, apiKey } = apiConfig;
 
   if (!apiUrl || !apiKey) {
-    throw new Error('API URL 和 API Key 都是必需的');
+    throw new Error('API URL and API Key are required');
   }
 
-  // 🎯 架构修复：通过临时代理方式调用，避免直接调用外部API
-  // 创建一个临时的服务实例配置，通过代理服务器调用
+  // Architecture fix: Call via temporary proxy to avoid direct external API call
+  // Create a temporary service instance config, call via proxy server
   try {
     console.log(
-      `[Dify App Service] 使用表单配置通过代理同步基本信息: ${appId}`
+      `[Dify App Service] Sync basic info via proxy with form config: ${appId}`
     );
 
-    // 通过代理服务器调用，但使用特殊的临时配置方式
+    // Call via proxy server, using special temporary config
     const slug = 'info';
     const proxyUrl = `/api/dify/${appId}/${slug}`;
 
     const response = await fetch(proxyUrl, {
-      method: 'POST', // 使用POST传递临时配置
+      method: 'POST', // Use POST to send temporary config
       headers: {
         'Content-Type': 'application/json',
       },
@@ -532,47 +560,52 @@ export async function getDifyAppInfoWithConfig(
     });
 
     if (!response.ok) {
-      // 尝试解析错误响应
+      // Try to parse error response
       let errorData: DifyApiError;
       try {
         errorData = await response.json();
       } catch {
-        // 如果无法解析JSON，使用默认错误格式
+        // If cannot parse JSON, use default error format
         errorData = {
           status: response.status,
           code: response.status.toString(),
-          message: response.statusText || '获取应用基本信息失败',
+          message: response.statusText || 'Failed to get app basic info',
         };
       }
 
       console.error(
-        '[Dify App Service] 使用表单配置获取应用基本信息失败:',
+        '[Dify App Service] Failed to get app basic info with form config:',
         errorData
       );
-      throw new Error(`获取应用基本信息失败: ${errorData.message}`);
+      throw new Error(`Failed to get app basic info: ${errorData.message}`);
     }
 
     const result: DifyAppInfoResponse = await response.json();
 
-    console.log('[Dify App Service] 使用表单配置成功获取应用基本信息:', {
-      appId,
-      name: result.name,
-      description: result.description,
-      tagsCount: result.tags?.length || 0,
-    });
+    console.log(
+      '[Dify App Service] Successfully got app basic info with form config:',
+      {
+        appId,
+        name: result.name,
+        description: result.description,
+        tagsCount: result.tags?.length || 0,
+      }
+    );
 
     return result;
   } catch (error) {
     console.error(
-      '[Dify App Service] 使用表单配置获取应用基本信息时发生错误:',
+      '[Dify App Service] Error occurred while getting app basic info with form config:',
       error
     );
 
-    // 重新抛出错误，保持错误信息
+    // Rethrow error to preserve error info
     if (error instanceof Error) {
       throw error;
     }
 
-    throw new Error('使用表单配置获取应用基本信息时发生未知错误');
+    throw new Error(
+      'Unknown error occurred while getting app basic info with form config'
+    );
   }
 }

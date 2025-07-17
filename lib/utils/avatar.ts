@@ -1,12 +1,16 @@
 /**
- * 头像相关工具函数
- * 用于生成用户头像的首字母和背景颜色
+ * Avatar utility functions
+ * Used to generate user avatar initials and background color
  */
 
-// 生成用户头像的首字母
+/**
+ * Generate initials for user avatar
+ * @param name User's full name
+ * @returns Initials (up to 2 characters), defaults to 'U' if name is empty
+ */
 export const getInitials = (name: string): string => {
   if (!name || name.trim() === '') {
-    return 'U'; // 默认返回 U (User)
+    return 'U'; // Default to 'U' (User)
   }
 
   return name
@@ -18,7 +22,11 @@ export const getInitials = (name: string): string => {
     .slice(0, 2);
 };
 
-// 根据用户名生成一致的石色系背景颜色
+/**
+ * Generate a consistent stone color background for avatar based on username
+ * @param name User's name
+ * @returns Hex color string
+ */
 export const getAvatarBgColor = (name: string): string => {
   const colors = [
     '#78716c', // stone-500
@@ -32,7 +40,7 @@ export const getAvatarBgColor = (name: string): string => {
   ];
 
   if (!name || name.trim() === '') {
-    return colors[0]; // 默认返回第一个颜色
+    return colors[0]; // Default to the first color
   }
 
   let hash = 0;

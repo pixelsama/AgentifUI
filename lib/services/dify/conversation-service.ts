@@ -1,8 +1,8 @@
 /**
- * Dify 对话服务
- * @description 处理与 Dify 会话相关的 API 交互，例如获取会话列表
- * 遵循与 message-service.ts 和 chat-service.ts 类似的设计模式，
- * 即提供独立的、可导出的服务函数
+ * Dify Conversation Service
+ * @description Handles API interactions related to Dify conversations, such as fetching the conversation list.
+ * Follows a similar design pattern as message-service.ts and chat-service.ts,
+ * i.e., provides independent, exportable service functions.
  */
 import type {
   DeleteConversationRequestPayload,
@@ -16,21 +16,21 @@ import type {
   RenameConversationResponse,
 } from './types';
 
-// 定义指向我们后端 Dify 代理 API 的基础 URL。
-// 与其他服务保持一致，方便统一管理代理路径。
+// Define the base URL pointing to our backend Dify proxy API.
+// Keep consistent with other services for unified proxy path management.
 const DIFY_PROXY_BASE_URL = '/api/dify';
 
 /**
- * 获取用户的会话列表。
+ * Fetch the user's conversation list.
  *
- * 通过向后端的 Dify 代理服务发送请求来工作。
- * 支持分页加载，通过 `last_id` 和 `limit` 参数控制。
- * 支持排序，通过 `sort_by` 参数控制。
+ * Works by sending a request to the backend Dify proxy service.
+ * Supports pagination via `last_id` and `limit` parameters.
+ * Supports sorting via the `sort_by` parameter.
  *
- * @param appId - 当前 Dify 应用的 ID。
- * @param params - 包含 `user`, 以及可选的 `last_id`, `limit` 和 `sort_by` 的对象。
- * @returns 一个解析为 `GetConversationsResponse` 对象的 Promise，其中包含了会话列表和分页信息。
- * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象 (类似 DifyApiError)。
+ * @param appId - The current Dify application's ID.
+ * @param params - An object containing `user`, and optionally `last_id`, `limit`, and `sort_by`.
+ * @returns A Promise resolving to a `GetConversationsResponse` object, which contains the conversation list and pagination info.
+ * @throws If the request fails or the API returns a non-2xx status code, throws an error object (similar to DifyApiError).
  */
 export async function getConversations(
   appId: string,
@@ -40,14 +40,14 @@ export async function getConversations(
     console.warn(
       '[Dify Conversation Service] Warning: appId is not provided. API call may fail or use a default app.'
     );
-    // 或者根据业务需求抛出错误
+    // Or throw an error according to business requirements
     // throw new Error('[Dify Conversation Service] appId is required.');
   }
 
-  const slug = 'conversations'; // Dify API 中用于获取会话列表的端点路径
+  const slug = 'conversations'; // Endpoint path in Dify API for fetching conversation list
   const apiUrl = `${DIFY_PROXY_BASE_URL}/${appId}/${slug}`;
 
-  // 构造查询参数字符串
+  // Build query parameter string
   const queryParams = new URLSearchParams();
   queryParams.append('user', params.user);
 
@@ -55,7 +55,7 @@ export async function getConversations(
     queryParams.append('limit', String(params.limit));
   }
   if (params.last_id !== undefined && params.last_id !== null) {
-    // 只有当 last_id 存在且不为 null 时才添加它
+    // Only add last_id if it exists and is not null
     queryParams.append('last_id', params.last_id);
   }
   if (params.sort_by !== undefined) {
@@ -72,26 +72,26 @@ export async function getConversations(
     const response = await fetch(fullUrl, {
       method: 'GET',
       headers: {
-        Accept: 'application/json', // 期望接收 JSON 格式的响应
+        Accept: 'application/json', // Expect JSON response
       },
     });
 
     if (!response.ok) {
-      // 尝试解析错误响应体，以便提供更详细的错误信息
+      // Try to parse error response body for more detailed error info
       let errorData: DifyApiError | { message: string; code?: string } = {
         message: `API request failed with status ${response.status}: ${response.statusText}`,
       };
       try {
-        // 尝试将错误响应解析为 JSON。Dify 的错误响应通常是 JSON 格式。
+        // Try to parse error response as JSON. Dify error responses are usually JSON.
         const parsedError = await response.json();
         errorData = {
           status: response.status,
           code: parsedError.code || response.status.toString(),
           message: parsedError.message || response.statusText,
-          ...parsedError, // 包含其他可能的错误字段
+          ...parsedError, // Include other possible error fields
         };
       } catch (e) {
-        // 如果错误响应体不是有效的 JSON，则使用 HTTP 状态文本作为消息。
+        // If error response body is not valid JSON, use HTTP status text as message.
         console.warn(
           '[Dify Conversation Service] Failed to parse error response JSON.',
           e
@@ -102,11 +102,11 @@ export async function getConversations(
         `[Dify Conversation Service] Failed to get conversations (${response.status}):`,
         errorData
       );
-      // 抛出错误对象，上层调用者可以捕获并处理
+      // Throw error object, upper caller can catch and handle
       throw errorData;
     }
 
-    // 响应成功，解析 JSON 数据
+    // On success, parse JSON data
     const data: GetConversationsResponse = await response.json();
     console.log(
       '[Dify Conversation Service] Successfully fetched conversations.',
@@ -114,13 +114,13 @@ export async function getConversations(
     );
     return data;
   } catch (error) {
-    // 处理 fetch 本身的网络错误或其他在 try 块中未被捕获的错误
+    // Handle network errors from fetch or other uncaught errors in try block
     console.error(
       '[Dify Conversation Service] Network or unexpected error while fetching conversations:',
       error
     );
-    // 重新抛出错误，或者将其包装成一个标准化的错误对象
-    // 如果 error 已经是我们上面抛出的 errorData 结构，直接抛出
+    // Rethrow error, or wrap as a standardized error object
+    // If error is already our errorData structure, just throw it
     if (
       error &&
       typeof error === 'object' &&
@@ -128,7 +128,7 @@ export async function getConversations(
     ) {
       throw error;
     }
-    // 否则，包装成一个通用的错误结构
+    // Otherwise, wrap as a generic error structure
     throw {
       message:
         error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -138,16 +138,16 @@ export async function getConversations(
 }
 
 /**
- * 删除指定的会话。
+ * Delete a specific conversation.
  *
- * 通过向后端的 Dify 代理服务发送 DELETE 请求来工作。
- * 删除成功后会返回 { result: 'success' }。
+ * Works by sending a DELETE request to the backend Dify proxy service.
+ * On success, returns { result: 'success' }.
  *
- * @param appId - 当前 Dify 应用的 ID。
- * @param conversationId - 要删除的会话 ID。
- * @param payload - 包含 `user` 的对象，用于标识用户。
- * @returns 一个解析为 `DeleteConversationResponse` 对象的 Promise，表示操作结果。
- * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象 (类似 DifyApiError)。
+ * @param appId - The current Dify application's ID.
+ * @param conversationId - The ID of the conversation to delete.
+ * @param payload - An object containing `user`, used to identify the user.
+ * @returns A Promise resolving to a `DeleteConversationResponse` object, indicating the result.
+ * @throws If the request fails or the API returns a non-2xx status code, throws an error object (similar to DifyApiError).
  */
 export async function deleteConversation(
   appId: string,
@@ -164,7 +164,7 @@ export async function deleteConversation(
     throw new Error('[Dify Conversation Service] conversationId is required.');
   }
 
-  const slug = `conversations/${conversationId}`; // Dify API 中用于删除特定会话的端点路径
+  const slug = `conversations/${conversationId}`; // Endpoint path in Dify API for deleting a specific conversation
   const apiUrl = `${DIFY_PROXY_BASE_URL}/${appId}/${slug}`;
 
   console.log(
@@ -182,21 +182,21 @@ export async function deleteConversation(
     });
 
     if (!response.ok) {
-      // 尝试解析错误响应体，以便提供更详细的错误信息
+      // Try to parse error response body for more detailed error info
       let errorData: DifyApiError | { message: string; code?: string } = {
         message: `API request failed with status ${response.status}: ${response.statusText}`,
       };
       try {
-        // 尝试将错误响应解析为 JSON。Dify 的错误响应通常是 JSON 格式。
+        // Try to parse error response as JSON. Dify error responses are usually JSON.
         const parsedError = await response.json();
         errorData = {
           status: response.status,
           code: parsedError.code || response.status.toString(),
           message: parsedError.message || response.statusText,
-          ...parsedError, // 包含其他可能的错误字段
+          ...parsedError, // Include other possible error fields
         };
       } catch (e) {
-        // 如果错误响应体不是有效的 JSON，则使用 HTTP 状态文本作为消息。
+        // If error response body is not valid JSON, use HTTP status text as message.
         console.warn(
           '[Dify Conversation Service] Failed to parse error response JSON.',
           e
@@ -207,11 +207,11 @@ export async function deleteConversation(
         `[Dify Conversation Service] Failed to delete conversation (${response.status}):`,
         errorData
       );
-      // 抛出错误对象，上层调用者可以捕获并处理
+      // Throw error object, upper caller can catch and handle
       throw errorData;
     }
 
-    // 响应成功，解析 JSON 数据
+    // On success, parse JSON data
     const data: DeleteConversationResponse = await response.json();
     console.log(
       '[Dify Conversation Service] Successfully deleted conversation.',
@@ -219,13 +219,13 @@ export async function deleteConversation(
     );
     return data;
   } catch (error) {
-    // 处理 fetch 本身的网络错误或其他在 try 块中未被捕获的错误
+    // Handle network errors from fetch or other uncaught errors in try block
     console.error(
       '[Dify Conversation Service] Network or unexpected error while deleting conversation:',
       error
     );
-    // 重新抛出错误，或者将其包装成一个标准化的错误对象
-    // 如果 error 已经是我们上面抛出的 errorData 结构，直接抛出
+    // Rethrow error, or wrap as a standardized error object
+    // If error is already our errorData structure, just throw it
     if (
       error &&
       typeof error === 'object' &&
@@ -233,7 +233,7 @@ export async function deleteConversation(
     ) {
       throw error;
     }
-    // 否则，包装成一个通用的错误结构
+    // Otherwise, wrap as a generic error structure
     throw {
       message:
         error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -243,23 +243,23 @@ export async function deleteConversation(
 }
 
 /**
- * 重命名指定的会话或触发异步标题生成。
+ * Rename a specific conversation or trigger asynchronous title generation.
  *
- * 通过向后端的 Dify 代理服务发送 POST 请求到 `/conversations/{conversationId}/name` 端点。
+ * Works by sending a POST request to the backend Dify proxy service at `/conversations/{conversationId}/name`.
  *
- * 双重功能:
- * 1. **直接重命名**: 当 `payload` 中提供 `name` 字段时，直接将会话重命名为指定名称。
- * 2. **异步获取/生成标题**: 当 `payload` 中设置 `auto_generate: true` 且不提供 `name` 字段时，
- *    此接口会触发 Dify 后端异步为该会话生成一个标题。
- *    操作成功后，返回的 `RenameConversationResponse` (即更新后的会话对象) 中的 `name` 字段将包含 Dify 生成或已有的标题。
+ * Dual functionality:
+ * 1. **Direct rename**: When `name` is provided in `payload`, renames the conversation to the specified name.
+ * 2. **Async title generation**: When `auto_generate: true` is set in `payload` and `name` is not provided,
+ *    this endpoint triggers Dify backend to asynchronously generate a title for the conversation.
+ *    On success, the returned `RenameConversationResponse` (i.e., the updated conversation object) will have the `name` field containing the generated or existing title.
  *
- * @param appId - 当前 Dify 应用的 ID。
- * @param conversationId - 要操作的会话 ID。
- * @param payload - 包含 `user` 标识符的对象。
- *                  - 若要直接重命名，还需包含 `name` 字段。
- *                  - 若要异步生成/获取标题，需包含 `auto_generate: true` 且不包含 `name`。
- * @returns 一个解析为 `RenameConversationResponse` 对象的 Promise，其中包含了更新后的会话信息（包括其 `name` 即标题）。
- * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象 (类似 DifyApiError)。
+ * @param appId - The current Dify application's ID.
+ * @param conversationId - The ID of the conversation to operate on.
+ * @param payload - An object containing the `user` identifier.
+ *                  - To directly rename, also include the `name` field.
+ *                  - To trigger async title generation, include `auto_generate: true` and do not include `name`.
+ * @returns A Promise resolving to a `RenameConversationResponse` object, which contains the updated conversation info (including its `name`/title).
+ * @throws If the request fails or the API returns a non-2xx status code, throws an error object (similar to DifyApiError).
  */
 export async function renameConversation(
   appId: string,
@@ -276,7 +276,7 @@ export async function renameConversation(
     throw new Error('[Dify Conversation Service] conversationId is required.');
   }
 
-  const slug = `conversations/${conversationId}/name`; // Dify API 中用于重命名会话的端点路径
+  const slug = `conversations/${conversationId}/name`; // Endpoint path in Dify API for renaming a conversation
   const apiUrl = `${DIFY_PROXY_BASE_URL}/${appId}/${slug}`;
 
   console.log(
@@ -294,21 +294,21 @@ export async function renameConversation(
     });
 
     if (!response.ok) {
-      // 尝试解析错误响应体，以便提供更详细的错误信息
+      // Try to parse error response body for more detailed error info
       let errorData: DifyApiError | { message: string; code?: string } = {
         message: `API request failed with status ${response.status}: ${response.statusText}`,
       };
       try {
-        // 尝试将错误响应解析为 JSON。Dify 的错误响应通常是 JSON 格式。
+        // Try to parse error response as JSON. Dify error responses are usually JSON.
         const parsedError = await response.json();
         errorData = {
           status: response.status,
           code: parsedError.code || response.status.toString(),
           message: parsedError.message || response.statusText,
-          ...parsedError, // 包含其他可能的错误字段
+          ...parsedError, // Include other possible error fields
         };
       } catch (e) {
-        // 如果错误响应体不是有效的 JSON，则使用 HTTP 状态文本作为消息。
+        // If error response body is not valid JSON, use HTTP status text as message.
         console.warn(
           '[Dify Conversation Service] Failed to parse error response JSON.',
           e
@@ -319,11 +319,11 @@ export async function renameConversation(
         `[Dify Conversation Service] Failed to rename conversation (${response.status}):`,
         errorData
       );
-      // 抛出错误对象，上层调用者可以捕获并处理
+      // Throw error object, upper caller can catch and handle
       throw errorData;
     }
 
-    // 响应成功，解析 JSON 数据
+    // On success, parse JSON data
     const data: RenameConversationResponse = await response.json();
     console.log(
       '[Dify Conversation Service] Successfully renamed conversation.',
@@ -331,13 +331,13 @@ export async function renameConversation(
     );
     return data;
   } catch (error) {
-    // 处理 fetch 本身的网络错误或其他在 try 块中未被捕获的错误
+    // Handle network errors from fetch or other uncaught errors in try block
     console.error(
       '[Dify Conversation Service] Network or unexpected error while renaming conversation:',
       error
     );
-    // 重新抛出错误，或者将其包装成一个标准化的错误对象
-    // 如果 error 已经是我们上面抛出的 errorData 结构，直接抛出
+    // Rethrow error, or wrap as a standardized error object
+    // If error is already our errorData structure, just throw it
     if (
       error &&
       typeof error === 'object' &&
@@ -345,7 +345,7 @@ export async function renameConversation(
     ) {
       throw error;
     }
-    // 否则，包装成一个通用的错误结构
+    // Otherwise, wrap as a generic error structure
     throw {
       message:
         error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -355,16 +355,16 @@ export async function renameConversation(
 }
 
 /**
- * 获取指定对话的变量。
+ * Fetch variables for a specific conversation.
  *
- * 通过向后端的 Dify 代理服务发送 GET 请求来工作。
- * 支持分页加载，通过 `last_id` 和 `limit` 参数控制。
+ * Works by sending a GET request to the backend Dify proxy service.
+ * Supports pagination via `last_id` and `limit` parameters.
  *
- * @param appId - 当前 Dify 应用的 ID。
- * @param conversationId - 要获取变量的对话 ID。
- * @param params - 包含 `user`, 以及可选的 `last_id` 和 `limit` 的对象。
- * @returns 一个解析为 `GetConversationVariablesResponse` 对象的 Promise，其中包含了变量列表和分页信息。
- * @throws 如果请求失败或 API 返回非 2xx 状态码，则抛出一个包含错误详情的对象 (类似 DifyApiError)。
+ * @param appId - The current Dify application's ID.
+ * @param conversationId - The ID of the conversation to fetch variables for.
+ * @param params - An object containing `user`, and optionally `last_id` and `limit`.
+ * @returns A Promise resolving to a `GetConversationVariablesResponse` object, which contains the variable list and pagination info.
+ * @throws If the request fails or the API returns a non-2xx status code, throws an error object (similar to DifyApiError).
  */
 export async function getConversationVariables(
   appId: string,
@@ -381,10 +381,10 @@ export async function getConversationVariables(
     throw new Error('[Dify Conversation Service] conversationId is required.');
   }
 
-  const slug = `conversations/${conversationId}/variables`; // Dify API 中用于获取对话变量的端点路径
+  const slug = `conversations/${conversationId}/variables`; // Endpoint path in Dify API for fetching conversation variables
   const apiUrl = `${DIFY_PROXY_BASE_URL}/${appId}/${slug}`;
 
-  // 构造查询参数字符串
+  // Build query parameter string
   const queryParams = new URLSearchParams();
   queryParams.append('user', params.user);
 
@@ -392,7 +392,7 @@ export async function getConversationVariables(
     queryParams.append('limit', String(params.limit));
   }
   if (params.last_id !== undefined && params.last_id !== null) {
-    // 只有当 last_id 存在且不为 null 时才添加它
+    // Only add last_id if it exists and is not null
     queryParams.append('last_id', params.last_id);
   }
 
@@ -406,26 +406,26 @@ export async function getConversationVariables(
     const response = await fetch(fullUrl, {
       method: 'GET',
       headers: {
-        Accept: 'application/json', // 期望接收 JSON 格式的响应
+        Accept: 'application/json', // Expect JSON response
       },
     });
 
     if (!response.ok) {
-      // 尝试解析错误响应体，以便提供更详细的错误信息
+      // Try to parse error response body for more detailed error info
       let errorData: DifyApiError | { message: string; code?: string } = {
         message: `API request failed with status ${response.status}: ${response.statusText}`,
       };
       try {
-        // 尝试将错误响应解析为 JSON。Dify 的错误响应通常是 JSON 格式。
+        // Try to parse error response as JSON. Dify error responses are usually JSON.
         const parsedError = await response.json();
         errorData = {
           status: response.status,
           code: parsedError.code || response.status.toString(),
           message: parsedError.message || response.statusText,
-          ...parsedError, // 包含其他可能的错误字段
+          ...parsedError, // Include other possible error fields
         };
       } catch (e) {
-        // 如果错误响应体不是有效的 JSON，则使用 HTTP 状态文本作为消息。
+        // If error response body is not valid JSON, use HTTP status text as message.
         console.warn(
           '[Dify Conversation Service] Failed to parse error response JSON.',
           e
@@ -436,11 +436,11 @@ export async function getConversationVariables(
         `[Dify Conversation Service] Failed to get conversation variables (${response.status}):`,
         errorData
       );
-      // 抛出错误对象，上层调用者可以捕获并处理
+      // Throw error object, upper caller can catch and handle
       throw errorData;
     }
 
-    // 响应成功，解析 JSON 数据
+    // On success, parse JSON data
     const data: GetConversationVariablesResponse = await response.json();
     console.log(
       '[Dify Conversation Service] Successfully fetched conversation variables.',
@@ -448,13 +448,13 @@ export async function getConversationVariables(
     );
     return data;
   } catch (error) {
-    // 处理 fetch 本身的网络错误或其他在 try 块中未被捕获的错误
+    // Handle network errors from fetch or other uncaught errors in try block
     console.error(
       '[Dify Conversation Service] Network or unexpected error while fetching conversation variables:',
       error
     );
-    // 重新抛出错误，或者将其包装成一个标准化的错误对象
-    // 如果 error 已经是我们上面抛出的 errorData 结构，直接抛出
+    // Rethrow error, or wrap as a standardized error object
+    // If error is already our errorData structure, just throw it
     if (
       error &&
       typeof error === 'object' &&
@@ -462,7 +462,7 @@ export async function getConversationVariables(
     ) {
       throw error;
     }
-    // 否则，包装成一个通用的错误结构
+    // Otherwise, wrap as a generic error structure
     throw {
       message:
         error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -471,5 +471,5 @@ export async function getConversationVariables(
   }
 }
 
-// 可以根据需要在此文件中添加更多与会话相关的服务函数，
-// 例如：创建会话等。
+// You can add more conversation-related service functions in this file as needed,
+// e.g., createConversation, etc.

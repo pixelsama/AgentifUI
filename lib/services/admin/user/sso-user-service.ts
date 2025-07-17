@@ -1,31 +1,31 @@
-// SSO用户管理服务
-// 处理SSO用户的创建、查找和管理
+// SSO User Management Service
+// Handles creation, lookup, and management of SSO users
 import { createAdminClient, createClient } from '@lib/supabase/server';
 import type { Profile } from '@lib/types/database';
 
-// 创建SSO用户所需的数据
+// Data required to create an SSO user
 export interface CreateSSOUserData {
-  employeeNumber: string; // 学工号
-  username: string; // 用户名
-  ssoProviderId: string; // SSO提供商ID
-  ssoProviderName: string; // SSO提供商名称
-  emailDomain: string; // 邮箱域名
-  fullName?: string; // 全名（可选）
+  employeeNumber: string; // Employee number
+  username: string; // Username
+  ssoProviderId: string; // SSO provider ID
+  ssoProviderName: string; // SSO provider name
+  emailDomain: string; // Email domain
+  fullName?: string; // Full name (optional)
 }
 
-// SSO用户查找结果
+// SSO user lookup result
 export interface SSOUserLookupResult {
   user: Profile | null;
   exists: boolean;
   isActive: boolean;
 }
 
-// SSO用户服务类
+// SSO User Service class
 export class SSOUserService {
   /**
-   * 通过学工号查找用户（实际通过邮箱查找）
-   * @param employeeNumber 学工号
-   * @returns 用户信息或null
+   * Find user by employee number (actually by email)
+   * @param employeeNumber Employee number
+   * @returns User profile or null
    */
   static async findUserByEmployeeNumber(
     employeeNumber: string
@@ -37,15 +37,15 @@ export class SSOUserService {
     try {
       const supabase = await createClient();
 
-      // 构建SSO用户的邮箱地址（学工号@域名）
-      // 通过邮箱查找用户，因为email字段在触发器中会被正确设置
-      // 注意：此方法仅用于查找，实际邮箱应该从具体SSO提供商配置中获取
+      // Construct SSO user's email address (employeeNumber@domain)
+      // Lookup by email, as the email field will be set correctly by trigger
+      // Note: This method is for lookup only; actual email should be from SSO provider config
       const email = `${employeeNumber.trim()}@edu.cn`;
       console.log(
         `Looking up user by email: ${email} (for employee: ${employeeNumber})`
       );
 
-      // 首先尝试通过普通客户端查找（受RLS策略限制）
+      // First try to find user with normal client (subject to RLS)
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -58,8 +58,8 @@ export class SSOUserService {
             `No user found with email via normal client: ${email}, trying admin client...`
           );
 
-          // 如果普通客户端找不到，尝试使用Admin客户端（绕过RLS）
-          // 这对于SSO用户查找很重要，因为可能存在RLS策略限制
+          // If not found, try with admin client (bypass RLS)
+          // This is important for SSO user lookup as RLS may block access
           try {
             const adminSupabase = await createAdminClient();
             const { data: adminData, error: adminError } = await adminSupabase
@@ -122,9 +122,9 @@ export class SSOUserService {
   }
 
   /**
-   * 通过ID直接查找用户（使用Admin客户端，绕过RLS）
-   * @param userId 用户ID
-   * @returns 用户信息或null
+   * Find user by ID directly (using admin client, bypassing RLS)
+   * @param userId User ID
+   * @returns User profile or null
    */
   static async findUserByIdWithAdmin(userId: string): Promise<Profile | null> {
     if (!userId) {
@@ -166,12 +166,12 @@ export class SSOUserService {
   }
 
   /**
-   * 创建SSO用户 - 使用Supabase Admin API
-   * @param userData 用户数据
-   * @returns 创建的用户信息
+   * Create SSO user - uses Supabase Admin API
+   * @param userData User data
+   * @returns Created user profile
    */
   static async createSSOUser(userData: CreateSSOUserData): Promise<Profile> {
-    // 验证输入数据
+    // Validate input data
     if (
       !userData.employeeNumber ||
       !userData.username ||
@@ -183,7 +183,7 @@ export class SSOUserService {
     }
 
     try {
-      // 使用普通客户端查找用户，使用Admin客户端创建用户
+      // Use normal client to lookup user, admin client to create user
       const supabase = await createClient();
       const adminSupabase = await createAdminClient();
 
@@ -191,7 +191,7 @@ export class SSOUserService {
         `Creating SSO user: ${userData.username} (${userData.employeeNumber})`
       );
 
-      // 检查用户是否已存在（通过邮箱查找）
+      // Check if user already exists (by email)
       const existingUser = await this.findUserByEmployeeNumber(
         userData.employeeNumber
       );
@@ -202,9 +202,9 @@ export class SSOUserService {
         return existingUser;
       }
 
-      // 使用Supabase Admin API创建auth.users记录
-      // 这样会同时创建auth.users记录和通过触发器自动创建profiles记录
-      const email = `${userData.employeeNumber}@${userData.emailDomain}`; // 使用学工号和提供商域名生成邮箱
+      // Create auth.users record using Supabase Admin API
+      // This will also trigger creation of profiles record via trigger
+      const email = `${userData.employeeNumber}@${userData.emailDomain}`; // Use employee number and provider domain to generate email
 
       console.log(
         `Creating auth user with email: ${email}, employee_number: ${userData.employeeNumber}`
@@ -224,17 +224,17 @@ export class SSOUserService {
             provider: `${userData.ssoProviderName.toLowerCase().replace(/\s+/g, '_')}_sso`,
             employee_number: userData.employeeNumber,
           },
-          email_confirm: true, // SSO用户自动确认邮箱
+          email_confirm: true, // SSO users auto-confirm email
         });
 
-      // 处理邮箱冲突问题
-      // 如果邮箱已存在，说明用户已经注册过，尝试查找现有用户
+      // Handle email conflict
+      // If email already exists, user is already registered, try to find existing user
       if (authError && authError.message.includes('already been registered')) {
         console.log(
           `Email ${email} already exists, trying to find existing user`
         );
 
-        // 策略1：重新查找用户，使用增强的查找方法（包括Admin客户端）
+        // Strategy 1: Lookup user again, using enhanced method (including admin client)
         const existingUser = await this.findUserByEmployeeNumber(
           userData.employeeNumber
         );
@@ -245,12 +245,12 @@ export class SSOUserService {
           return existingUser;
         }
 
-        // 策略2：如果邮箱查找失败，尝试通过Auth API获取用户ID，然后直接查找Profile
+        // Strategy 2: If email lookup fails, try to get user ID from Auth API, then lookup profile directly
         console.log(
           'Email lookup failed, trying to find auth user and corresponding profile...'
         );
         try {
-          // 使用Admin API查找auth.users记录
+          // Use Admin API to list auth.users
           const { data: authUsers, error: authLookupError } =
             await adminSupabase.auth.admin.listUsers();
 
@@ -259,7 +259,7 @@ export class SSOUserService {
             if (authUser) {
               console.log(`Found auth.users record with ID: ${authUser.id}`);
 
-              // 直接通过ID查找Profile
+              // Lookup profile by ID
               const profileUser = await this.findUserByIdWithAdmin(authUser.id);
               if (profileUser) {
                 console.log(
@@ -269,7 +269,7 @@ export class SSOUserService {
               } else {
                 console.log('Profile not found, creating one...');
 
-                // 如果auth.users存在但profiles不存在，创建profiles记录
+                // If auth.users exists but profiles does not, create profiles record
                 const { data: newProfile, error: createError } =
                   await adminSupabase
                     .from('profiles')
@@ -307,14 +307,14 @@ export class SSOUserService {
           console.warn('Failed to lookup auth user:', lookupError);
         }
 
-        // 如果所有策略都失败，抛出错误
+        // If all strategies fail, throw error
         console.error(
           'Auth user exists but no corresponding profile found and could not create one'
         );
         throw new Error('ACCOUNT_DATA_INCONSISTENT');
       }
 
-      // 如果是其他类型的auth错误，直接抛出
+      // If other auth error, throw
       if (authError) {
         console.error('Error creating auth user:', authError);
         throw authError;
@@ -328,18 +328,18 @@ export class SSOUserService {
         `Successfully created auth.users record with ID: ${authUser.user.id}`
       );
 
-      // 等待触发器创建profiles记录，然后通过邮箱查找用户
-      // 使用重试机制，通过邮箱查找比ID查找更可靠
+      // Wait for trigger to create profiles record, then lookup user by email
+      // Use retry mechanism; lookup by email is more reliable than by ID
       let profile = null;
       let retryCount = 0;
-      const maxRetries = 3; // 减少重试次数
+      const maxRetries = 3; // Reduce retry count
 
       while (retryCount < maxRetries) {
         try {
-          // 先等待触发器执行
+          // Wait for trigger to execute
           await new Promise(resolve => setTimeout(resolve, 500));
 
-          // 使用邮箱查找用户，因为email字段在触发器中会被正确设置
+          // Lookup user by email, as email field will be set correctly by trigger
           profile = await this.findUserByEmployeeNumber(
             userData.employeeNumber
           );
@@ -349,8 +349,8 @@ export class SSOUserService {
               'Successfully found user via email after trigger execution'
             );
 
-            // 更新SSO专用字段（employee_number, sso_provider_id等）
-            // 确保employee_number字段被正确设置
+            // Update SSO-specific fields (employee_number, sso_provider_id, etc.)
+            // Ensure employee_number is set correctly
             console.log(
               `Updating profile ${profile.id} with employee_number: ${userData.employeeNumber}`
             );
@@ -363,7 +363,7 @@ export class SSOUserService {
                 sso_provider_id: userData.ssoProviderId,
                 full_name: userData.fullName || userData.username,
                 username: userData.username,
-                email: email, // 确保邮箱正确设置
+                email: email, // Ensure email is set correctly
                 updated_at: new Date().toISOString(),
               })
               .eq('id', profile.id)
@@ -375,12 +375,12 @@ export class SSOUserService {
                 'Failed to update SSO fields, but user exists:',
                 updateError
               );
-              // 不阻断流程，返回原始profile
+              // Do not block process, return original profile
             } else {
               profile = updatedProfile;
             }
 
-            break; // 成功，退出重试循环
+            break; // Success, exit retry loop
           } else {
             retryCount++;
             console.log(
@@ -391,12 +391,12 @@ export class SSOUserService {
           retryCount++;
           console.warn(`Profile lookup attempt ${retryCount} failed:`, error);
           if (retryCount >= maxRetries) {
-            break; // 退出重试，进入备用方案
+            break; // Exit retry, enter fallback
           }
         }
       }
 
-      // 备用方案：如果触发器创建的记录无法通过email查找到，使用Admin客户端直接查找并更新
+      // Fallback: if trigger-created record cannot be found by email, use admin client to lookup and update
       if (!profile) {
         console.log(
           'Trying admin client to find and update existing profile...'
@@ -405,7 +405,7 @@ export class SSOUserService {
         try {
           const adminSupabaseForProfile = await createAdminClient();
 
-          // 使用Admin客户端直接通过ID查找profiles记录（绕过RLS）
+          // Use admin client to lookup profiles by ID (bypass RLS)
           const { data: existingProfile, error: findError } =
             await adminSupabaseForProfile
               .from('profiles')
@@ -418,7 +418,7 @@ export class SSOUserService {
               'Found existing profile via admin client, updating SSO fields...'
             );
 
-            // 更新现有记录的SSO字段
+            // Update SSO fields in existing record
             console.log(
               `Updating existing profile ${authUser.user.id} with employee_number: ${userData.employeeNumber}, email: ${email}`
             );
@@ -432,8 +432,8 @@ export class SSOUserService {
                   sso_provider_id: userData.ssoProviderId,
                   full_name: userData.fullName || userData.username,
                   username: userData.username,
-                  email: email, // 确保email字段正确
-                  status: 'active', // 确保status为active
+                  email: email, // Ensure email is set correctly
+                  status: 'active', // Ensure status is active
                   updated_at: new Date().toISOString(),
                 })
                 .eq('id', authUser.user.id)
@@ -450,7 +450,7 @@ export class SSOUserService {
               'Successfully updated existing profile with SSO fields'
             );
           } else {
-            // 如果真的没有profiles记录，创建新的
+            // If no profiles record, create a new one
             console.log(
               `No profile found, creating new one with admin client for user ${authUser.user.id}, employee_number: ${userData.employeeNumber}, email: ${email}`
             );
@@ -490,7 +490,7 @@ export class SSOUserService {
           const errorMsg = 'Failed to handle profile with admin client';
           console.error(errorMsg, adminError);
 
-          // 清理已创建的auth用户
+          // Cleanup created auth user
           try {
             await adminSupabase.auth.admin.deleteUser(authUser.user.id);
             console.log('Cleaned up auth user after profile handling failure');
@@ -513,9 +513,9 @@ export class SSOUserService {
   }
 
   /**
-   * 更新用户最后登录时间
-   * @param userId 用户ID
-   * @returns 是否更新成功
+   * Update user's last login time
+   * @param userId User ID
+   * @returns Whether update was successful
    */
   static async updateLastLogin(userId: string): Promise<boolean> {
     if (!userId) {
@@ -527,7 +527,7 @@ export class SSOUserService {
 
       console.log(`Updating last login time for user: ${userId}`);
 
-      // 使用数据库函数更新登录时间
+      // Use database function to update login time
       const { data: success, error } = await supabase.rpc(
         'update_sso_user_login',
         {
@@ -555,9 +555,9 @@ export class SSOUserService {
   }
 
   /**
-   * 获取SSO用户详细查找结果
-   * @param employeeNumber 学工号
-   * @returns 查找结果包括用户信息和状态
+   * Get detailed SSO user lookup result
+   * @param employeeNumber Employee number
+   * @returns Lookup result including user profile and status
    */
   static async lookupSSOUser(
     employeeNumber: string
@@ -581,9 +581,9 @@ export class SSOUserService {
   }
 
   /**
-   * 根据名称获取SSO提供商信息
-   * @param providerName 提供商名称
-   * @returns SSO提供商信息
+   * Get SSO provider info by name
+   * @param providerName Provider name
+   * @returns SSO provider info
    */
   static async getSSOProviderByName(providerName: string): Promise<{
     id: string;
@@ -593,7 +593,7 @@ export class SSOUserService {
     try {
       const supabase = await createClient();
 
-      // 查找指定SSO提供商配置
+      // Lookup specified SSO provider config
       const { data, error } = await supabase
         .from('sso_providers')
         .select('id, name, protocol')
@@ -603,7 +603,7 @@ export class SSOUserService {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          // 未找到记录
+          // Not found
           console.warn(`SSO provider '${providerName}' not found in database`);
           return null;
         }
@@ -618,9 +618,9 @@ export class SSOUserService {
   }
 
   /**
-   * 批量更新SSO用户信息（管理员功能）
-   * @param updates 更新数据数组
-   * @returns 更新结果
+   * Batch update SSO user info (admin feature)
+   * @param updates Array of update data
+   * @returns Update result
    */
   static async batchUpdateSSOUsers(
     updates: Array<{ employeeNumber: string; data: Partial<Profile> }>

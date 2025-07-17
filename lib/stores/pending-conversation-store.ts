@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 
-// 定义待处理会话的状态和结构
+// Define the structure and state for a pending conversation
 export interface PendingConversation {
-  tempId: string; // 客户端生成的临时 ID
-  realId?: string; // 从后端获取的真实对话 ID
+  tempId: string; // Client-generated temporary ID
+  realId?: string; // Real conversation ID from backend
   status:
     | 'creating'
     | 'title_fetching'
@@ -11,31 +11,31 @@ export interface PendingConversation {
     | 'stream_completed_title_pending'
     | 'title_resolved'
     | 'persisted_optimistic'
-    | 'failed'; // 会话状态
-  title: string; // 当前显示的标题 (可能是 "创建中...", "新对话...", "Untitled", 或真实标题)
-  isTitleFinal: boolean; // 标题是否已最终确定从 /name API 获取
-  createdAt: string; // 创建时间
-  updatedAt: string; // 最后更新时间
-  supabase_pk?: string; // 数据库主键 (Supabase ID)，当已存入DB但仍在pending状态时使用
+    | 'failed'; // Conversation status
+  title: string; // Current displayed title (could be "Creating...", "New conversation...", "Untitled", or the real title)
+  isTitleFinal: boolean; // Whether the title is finalized (from /name API)
+  createdAt: string; // Creation time
+  updatedAt: string; // Last update time
+  supabase_pk?: string; // Database primary key (Supabase ID), used when stored in DB but still pending
 
-  // 🎯 新增：打字机效果相关状态
+  // Typewriter effect state
   titleTypewriterState?: {
-    isTyping: boolean; // 是否正在打字
-    targetTitle: string; // 目标标题（完整标题）
-    displayTitle: string; // 当前显示的标题（可能是部分标题）
-    shouldStartTyping: boolean; // 是否应该开始打字效果
+    isTyping: boolean; // Whether the typewriter effect is active
+    targetTitle: string; // The full target title
+    displayTitle: string; // The currently displayed (possibly partial) title
+    shouldStartTyping: boolean; // Whether the typewriter effect should start
   };
 }
 
-// 定义 Store 的 State 接口
+// Define the store state interface
 interface PendingConversationState {
-  // 使用 Map 存储待处理会话，以便通过 tempId 或 realId 高效查找和更新
-  // Key 可以是 tempId，value 是 PendingConversation 对象
+  // Use a Map to store pending conversations for efficient lookup and update by tempId or realId
+  // Key is tempId, value is the PendingConversation object
   pendingConversations: Map<string, PendingConversation>;
 
   // Actions
   addPending: (tempId: string, initialTitle?: string) => void;
-  // 🎯 新增：智能添加临时对话，支持"挤出"第五个对话的动态效果
+  // Add a pending conversation with a limit, supporting "eviction" of the oldest when exceeding max
   addPendingWithLimit: (
     tempId: string,
     initialTitle?: string,
@@ -47,30 +47,30 @@ interface PendingConversationState {
     realId: string,
     status: PendingConversation['status']
   ) => void;
-  updateStatus: (id: string, status: PendingConversation['status']) => void; // id 可以是 tempId 或 realId
-  updateTitle: (id: string, title: string, isFinal: boolean) => void; // 更新标题并设置是否为最终标题
-  removePending: (id: string) => void; // id 可以是 tempId 或 realId
-  markAsOptimistic: (id: string) => void; // 将对话标记为乐观持久化状态
-  setSupabasePK: (id: string, supabasePK: string) => void; // 设置已存入DB的pending对话的Supabase PK
+  updateStatus: (id: string, status: PendingConversation['status']) => void; // id can be tempId or realId
+  updateTitle: (id: string, title: string, isFinal: boolean) => void; // Update title and set if it's final
+  removePending: (id: string) => void; // id can be tempId or realId
+  markAsOptimistic: (id: string) => void; // Mark conversation as optimistically persisted
+  setSupabasePK: (id: string, supabasePK: string) => void; // Set Supabase PK for a pending conversation stored in DB
 
-  // 🎯 新增：打字机效果相关Actions
-  startTitleTypewriter: (id: string, targetTitle: string) => void; // 开始标题打字机效果
-  updateTypewriterDisplay: (id: string, displayTitle: string) => void; // 更新打字机显示的标题
-  completeTitleTypewriter: (id: string) => void; // 完成标题打字机效果
+  // Typewriter effect actions
+  startTitleTypewriter: (id: string, targetTitle: string) => void; // Start typewriter effect for title
+  updateTypewriterDisplay: (id: string, displayTitle: string) => void; // Update the displayed title during typewriter effect
+  completeTitleTypewriter: (id: string) => void; // Complete the typewriter effect
 
-  // 🎯 新增：原子性状态更新，避免竞态条件
+  // Atomic state update to avoid race conditions
   markAsPersistedComplete: (
     id: string,
     supabasePK: string,
     finalTitle?: string
-  ) => void; // 原子性标记为完全持久化状态
+  ) => void; // Atomically mark as fully persisted
 
-  // Selectors / Getters (可选，但推荐，以便在 store 外部安全地访问状态)
+  // Selectors / Getters (optional but recommended for safe access outside the store)
   getPendingByTempId: (tempId: string) => PendingConversation | undefined;
   getPendingByRealId: (realId: string) => PendingConversation | undefined;
 }
 
-// 创建 Zustand Store
+// Create Zustand store
 export const usePendingConversationStore = create<PendingConversationState>(
   (set, get) => ({
     pendingConversations: new Map(),
@@ -80,15 +80,15 @@ export const usePendingConversationStore = create<PendingConversationState>(
         const newMap = new Map(state.pendingConversations);
         if (newMap.has(tempId)) {
           console.warn(
-            `[PendingConversationStore] 尝试添加已存在的临时ID: ${tempId}`
+            `[PendingConversationStore] Attempted to add an existing tempId: ${tempId}`
           );
           return state;
         }
         newMap.set(tempId, {
           tempId,
-          status: 'creating', // 初始状态为 'creating'
+          status: 'creating', // Initial status is 'creating'
           title: initialTitle,
-          isTitleFinal: false, // 初始标题不是最终标题
+          isTitleFinal: false, // Initial title is not final
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
@@ -113,7 +113,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
           });
           return { pendingConversations: newMap };
         }
-        console.warn(`[PendingConversationStore] 未找到临时ID: ${tempId}`);
+        console.warn(`[PendingConversationStore] tempId not found: ${tempId}`);
         return state;
       });
     },
@@ -122,10 +122,10 @@ export const usePendingConversationStore = create<PendingConversationState>(
       set(state => {
         const newMap = new Map(state.pendingConversations);
         let entryKey: string | undefined = id;
-        let entry = newMap.get(id); // 尝试按 tempId 查找
+        let entry = newMap.get(id); // Try to find by tempId
 
         if (!entry) {
-          // 如果按 tempId 没找到，尝试按 realId 查找
+          // If not found by tempId, try to find by realId
           for (const [key, value] of newMap.entries()) {
             if (value.realId === id) {
               entry = value;
@@ -136,8 +136,8 @@ export const usePendingConversationStore = create<PendingConversationState>(
         }
 
         if (entry && entryKey) {
-          // 更新标题和 isTitleFinal 标志
-          // 如果 isFinal 为 true 且当前状态是 'title_fetching'，则同时更新状态为 'title_resolved'
+          // Update title and isTitleFinal
+          // If isFinal is true and current status is 'title_fetching', also update status to 'title_resolved'
           const newStatus =
             isFinal && entry.status === 'title_fetching'
               ? 'title_resolved'
@@ -151,7 +151,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
           });
           return { pendingConversations: newMap };
         }
-        console.warn(`[PendingConversationStore] 未找到ID: ${id}`);
+        console.warn(`[PendingConversationStore] ID not found: ${id}`);
         return state;
       });
     },
@@ -160,10 +160,10 @@ export const usePendingConversationStore = create<PendingConversationState>(
       set(state => {
         const newMap = new Map(state.pendingConversations);
         let entryKey: string | undefined = id;
-        let entry = newMap.get(id); // 尝试按 tempId 查找
+        let entry = newMap.get(id); // Try to find by tempId
 
         if (!entry) {
-          // 如果按 tempId 没找到，尝试按 realId 查找
+          // If not found by tempId, try to find by realId
           for (const [key, value] of newMap.entries()) {
             if (value.realId === id) {
               entry = value;
@@ -181,7 +181,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
           });
           return { pendingConversations: newMap };
         }
-        console.warn(`[PendingConversationStore] 未找到ID: ${id}`);
+        console.warn(`[PendingConversationStore] ID not found: ${id}`);
         return state;
       });
     },
@@ -192,10 +192,10 @@ export const usePendingConversationStore = create<PendingConversationState>(
         let keyToDelete: string | undefined = id;
 
         if (!newMap.has(id)) {
-          // 如果 id 不是 tempId
+          // If id is not a tempId, try to find by realId
           for (const [key, value] of newMap.entries()) {
             if (value.realId === id) {
-              keyToDelete = key; // 找到了对应的 tempId
+              keyToDelete = key; // Found the corresponding tempId
               break;
             }
           }
@@ -205,7 +205,9 @@ export const usePendingConversationStore = create<PendingConversationState>(
           newMap.delete(keyToDelete);
           return { pendingConversations: newMap };
         }
-        console.warn(`[PendingConversationStore] 未找到要删除的ID: ${id}`);
+        console.warn(
+          `[PendingConversationStore] ID to delete not found: ${id}`
+        );
         return state;
       });
     },
@@ -227,10 +229,10 @@ export const usePendingConversationStore = create<PendingConversationState>(
       set(state => {
         const newMap = new Map(state.pendingConversations);
         let entryKey: string | undefined = id;
-        let entry = newMap.get(id); // 尝试按 tempId 查找
+        let entry = newMap.get(id); // Try to find by tempId
 
         if (!entry) {
-          // 如果按 tempId 没找到，尝试按 realId 查找
+          // If not found by tempId, try to find by realId
           for (const [key, value] of newMap.entries()) {
             if (value.realId === id) {
               entry = value;
@@ -241,7 +243,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
         }
 
         if (entry && entryKey) {
-          // 确保对话至少有 realId 才能标记为 optimistic
+          // Ensure the conversation has a realId before marking as optimistic
           if (entry.realId) {
             newMap.set(entryKey, {
               ...entry,
@@ -258,7 +260,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
           }
         }
         console.warn(
-          `[PendingConversationStore] markAsOptimistic: 未找到ID: ${id}`
+          `[PendingConversationStore] markAsOptimistic: ID not found: ${id}`
         );
         return state;
       });
@@ -268,10 +270,10 @@ export const usePendingConversationStore = create<PendingConversationState>(
       set(state => {
         const newMap = new Map(state.pendingConversations);
         let entryKey: string | undefined = id;
-        let entry = newMap.get(id); // 尝试按 tempId 查找
+        let entry = newMap.get(id); // Try to find by tempId
 
         if (!entry) {
-          // 如果按 tempId 没找到，尝试按 realId 查找
+          // If not found by tempId, try to find by realId
           for (const [key, value] of newMap.entries()) {
             if (value.realId === id) {
               entry = value;
@@ -291,21 +293,21 @@ export const usePendingConversationStore = create<PendingConversationState>(
           return { pendingConversations: newMap };
         }
         console.warn(
-          `[PendingConversationStore] setSupabasePK: 未找到ID: ${id}`
+          `[PendingConversationStore] setSupabasePK: ID not found: ${id}`
         );
         return state;
       });
     },
 
-    // 🎯 实现打字机效果相关Actions
+    // Typewriter effect actions
     startTitleTypewriter: (id: string, targetTitle: string) => {
       set(state => {
         const newMap = new Map(state.pendingConversations);
         let entryKey: string | undefined = id;
-        let entry = newMap.get(id); // 尝试按 tempId 查找
+        let entry = newMap.get(id); // Try to find by tempId
 
         if (!entry) {
-          // 如果按 tempId 没找到，尝试按 realId 查找
+          // If not found by tempId, try to find by realId
           for (const [key, value] of newMap.entries()) {
             if (value.realId === id) {
               entry = value;
@@ -321,7 +323,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
             titleTypewriterState: {
               isTyping: true,
               targetTitle,
-              displayTitle: entry.title, // 从当前标题开始
+              displayTitle: entry.title, // Start from current title
               shouldStartTyping: true,
             },
             updatedAt: new Date().toISOString(),
@@ -329,7 +331,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
           return { pendingConversations: newMap };
         }
         console.warn(
-          `[PendingConversationStore] startTitleTypewriter: 未找到ID: ${id}`
+          `[PendingConversationStore] startTitleTypewriter: ID not found: ${id}`
         );
         return state;
       });
@@ -339,10 +341,10 @@ export const usePendingConversationStore = create<PendingConversationState>(
       set(state => {
         const newMap = new Map(state.pendingConversations);
         let entryKey: string | undefined = id;
-        let entry = newMap.get(id); // 尝试按 tempId 查找
+        let entry = newMap.get(id); // Try to find by tempId
 
         if (!entry) {
-          // 如果按 tempId 没找到，尝试按 realId 查找
+          // If not found by tempId, try to find by realId
           for (const [key, value] of newMap.entries()) {
             if (value.realId === id) {
               entry = value;
@@ -358,7 +360,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
             titleTypewriterState: {
               ...entry.titleTypewriterState,
               displayTitle,
-              shouldStartTyping: false, // 已经开始打字，不需要再次触发
+              shouldStartTyping: false, // Already started typing, do not trigger again
             },
             updatedAt: new Date().toISOString(),
           });
@@ -372,10 +374,10 @@ export const usePendingConversationStore = create<PendingConversationState>(
       set(state => {
         const newMap = new Map(state.pendingConversations);
         let entryKey: string | undefined = id;
-        let entry = newMap.get(id); // 尝试按 tempId 查找
+        let entry = newMap.get(id); // Try to find by tempId
 
         if (!entry) {
-          // 如果按 tempId 没找到，尝试按 realId 查找
+          // If not found by tempId, try to find by realId
           for (const [key, value] of newMap.entries()) {
             if (value.realId === id) {
               entry = value;
@@ -389,7 +391,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
           const finalTitle = entry.titleTypewriterState.targetTitle;
           newMap.set(entryKey, {
             ...entry,
-            title: finalTitle, // 更新最终标题
+            title: finalTitle, // Update to final title
             titleTypewriterState: {
               ...entry.titleTypewriterState,
               isTyping: false,
@@ -404,8 +406,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
       });
     },
 
-    // 🎯 新增：智能添加临时对话，支持"挤出"第五个对话的动态效果
-    // 当对话总数达到限制时，自动移除最老的对话
+    // Add a pending conversation with a limit, supporting "eviction" of the oldest when exceeding max
     addPendingWithLimit: (
       tempId: string,
       initialTitle = 'Creating...',
@@ -417,12 +418,12 @@ export const usePendingConversationStore = create<PendingConversationState>(
 
         if (newMap.has(tempId)) {
           console.warn(
-            `[PendingConversationStore] 尝试添加已存在的临时ID: ${tempId}`
+            `[PendingConversationStore] Attempted to add an existing tempId: ${tempId}`
           );
           return state;
         }
 
-        // 创建新的临时对话
+        // Create a new pending conversation
         const newPending: PendingConversation = {
           tempId,
           title: initialTitle,
@@ -430,7 +431,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
           isTitleFinal: false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          // 🎯 初始化打字机效果状态
+          // Initialize typewriter effect state
           titleTypewriterState: {
             isTyping: false,
             targetTitle: initialTitle,
@@ -439,18 +440,18 @@ export const usePendingConversationStore = create<PendingConversationState>(
           },
         };
 
-        // 添加新对话
+        // Add the new conversation
         newMap.set(tempId, newPending);
 
-        // 🎯 注意：由于此store只管理临时对话，真正的"挤出"逻辑
-        // 需要在整合数据的地方（useCombinedConversations）处理
-        // 这里先通知回调函数，让上层决定如何处理
+        // Note: This store only manages pending conversations.
+        // The actual "eviction" logic should be handled in the combined data layer (e.g., useCombinedConversations).
+        // Here, just notify the callback so the upper layer can decide how to handle it.
         if (onNeedEviction && typeof onNeedEviction === 'function') {
-          // 计算当前临时对话数量，如果超过限制则通知
+          // Calculate the current number of pending conversations, and notify if exceeding the limit
           const pendingCount = newMap.size;
           if (pendingCount > 1) {
-            // 新对话已经添加，检查是否需要挤出
-            onNeedEviction(1); // 简单通知需要挤出1个对话
+            // New conversation already added, check if eviction is needed
+            onNeedEviction(1); // Simply notify that 1 conversation needs to be evicted
           }
         }
 
@@ -458,7 +459,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
       });
     },
 
-    // 🎯 新增：原子性状态更新，避免竞态条件
+    // Atomically mark as fully persisted, avoiding race conditions
     markAsPersistedComplete: (
       id: string,
       supabasePK: string,
@@ -467,10 +468,10 @@ export const usePendingConversationStore = create<PendingConversationState>(
       set(state => {
         const newMap = new Map(state.pendingConversations);
         let entryKey: string | undefined = id;
-        let entry = newMap.get(id); // 尝试按 tempId 查找
+        let entry = newMap.get(id); // Try to find by tempId
 
         if (!entry) {
-          // 如果按 tempId 没找到，尝试按 realId 查找
+          // If not found by tempId, try to find by realId
           for (const [key, value] of newMap.entries()) {
             if (value.realId === id) {
               entry = value;
@@ -492,7 +493,7 @@ export const usePendingConversationStore = create<PendingConversationState>(
           return { pendingConversations: newMap };
         }
         console.warn(
-          `[PendingConversationStore] markAsPersistedComplete: 未找到ID: ${id}`
+          `[PendingConversationStore] markAsPersistedComplete: ID not found: ${id}`
         );
         return state;
       });
@@ -500,5 +501,5 @@ export const usePendingConversationStore = create<PendingConversationState>(
   })
 );
 
-// 可以在这里添加一些辅助 selector，如果需要的话
-// 例如：selectIsAnyPending, selectPendingTitles, etc.
+// You can add some helper selectors here if needed
+// For example: selectIsAnyPending, selectPendingTitles, etc.

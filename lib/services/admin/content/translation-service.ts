@@ -4,7 +4,7 @@ import {
   isValidLocale,
 } from '@lib/config/language-config';
 
-// 翻译服务接口定义
+// translation service interface
 export interface TranslationResponse {
   locale: string;
   section?: string;
@@ -42,21 +42,21 @@ export interface BatchUpdateResult {
   totalErrors: number;
 }
 
-// 翻译管理服务类
+// translation management service class
 export class TranslationService {
   private static readonly API_BASE = '/api/admin/translations';
 
-  // 获取支持的语言列表
+  // get supported languages list
   static getSupportedLanguages(): SupportedLocale[] {
     return getSupportedLocales();
   }
 
-  // 验证语言代码
+  // validate language code
   static isValidLanguage(locale: string): locale is SupportedLocale {
     return isValidLocale(locale);
   }
 
-  // 获取所有支持的语言信息
+  // get all supported languages information
   static async getLanguageMetadata(): Promise<{
     supportedLocales: SupportedLocale[];
     availableLanguages: number;
@@ -71,7 +71,7 @@ export class TranslationService {
     return response.json();
   }
 
-  // 读取指定语言的翻译内容
+  // read translations for a specific language
   static async getTranslations(
     locale: SupportedLocale,
     section?: string
@@ -90,7 +90,7 @@ export class TranslationService {
     return response.json();
   }
 
-  // 获取所有语言的特定部分翻译
+  // get all translations for a specific section
   static async getAllTranslationsForSection(
     section: string
   ): Promise<Record<SupportedLocale, any>> {
@@ -112,7 +112,7 @@ export class TranslationService {
     return results as Record<SupportedLocale, any>;
   }
 
-  // 更新单个语言的翻译
+  // update translation for a specific language
   static async updateTranslation(
     request: UpdateTranslationRequest
   ): Promise<TranslationUpdateResult> {
@@ -134,7 +134,7 @@ export class TranslationService {
     return response.json();
   }
 
-  // 批量更新多语言翻译
+  // batch update translations for multiple languages
   static async batchUpdateTranslations(
     request: BatchUpdateRequest
   ): Promise<BatchUpdateResult> {
@@ -157,14 +157,14 @@ export class TranslationService {
     return response.json();
   }
 
-  // 专门用于About页面的翻译管理
+  // get translations for About page
   static async getAboutPageTranslations(): Promise<
     Record<SupportedLocale, any>
   > {
     return this.getAllTranslationsForSection('pages.about');
   }
 
-  // 更新About页面翻译
+  // update translations for About page
   static async updateAboutPageTranslations(
     updates: Record<SupportedLocale, any>,
     mode: 'merge' | 'replace' = 'merge'
@@ -176,14 +176,14 @@ export class TranslationService {
     });
   }
 
-  // 专门用于Home页面的翻译管理
+  // get translations for Home page
   static async getHomePageTranslations(): Promise<
     Record<SupportedLocale, any>
   > {
     return this.getAllTranslationsForSection('pages.home');
   }
 
-  // 更新Home页面翻译
+  // update translations for Home page
   static async updateHomePageTranslations(
     updates: Record<SupportedLocale, any>,
     mode: 'merge' | 'replace' = 'merge'
@@ -195,7 +195,7 @@ export class TranslationService {
     });
   }
 
-  // 获取特定部分的翻译结构模板 (用于管理界面初始化)
+  // get translation structure template for a specific section (for admin interface initialization)
   static async getTranslationTemplate(
     section: string,
     baseLocale: SupportedLocale = 'zh-CN'
@@ -209,7 +209,7 @@ export class TranslationService {
     }
   }
 
-  // 验证翻译数据结构的完整性
+  // validate translation data structure completeness
   static validateTranslationStructure(
     template: any,
     data: any,
@@ -218,7 +218,7 @@ export class TranslationService {
     const missingKeys: string[] = [];
     const extraKeys: string[] = [];
 
-    // 检查模板中的所有键是否在数据中存在
+    // check if all keys in template exist in data
     if (template && typeof template === 'object' && !Array.isArray(template)) {
       for (const key in template) {
         const currentPath = path ? `${path}.${key}` : key;
@@ -229,7 +229,7 @@ export class TranslationService {
           typeof template[key] === 'object' &&
           !Array.isArray(template[key])
         ) {
-          // 递归检查嵌套对象
+          // recursively check nested objects
           const nested = this.validateTranslationStructure(
             template[key],
             data[key],
@@ -241,7 +241,7 @@ export class TranslationService {
       }
     }
 
-    // 检查数据中是否有模板中不存在的键
+    // check if there are keys in data that do not exist in template
     if (data && typeof data === 'object' && !Array.isArray(data)) {
       for (const key in data) {
         const currentPath = path ? `${path}.${key}` : key;
@@ -259,21 +259,21 @@ export class TranslationService {
     };
   }
 
-  // 创建翻译备份 (在更新前)
+  // create translation backup (before update)
   static async createBackup(
     section: string
   ): Promise<{ timestamp: string; data: Record<SupportedLocale, any> }> {
     const timestamp = new Date().toISOString();
     const data = await this.getAllTranslationsForSection(section);
 
-    // 这里可以选择存储到 localStorage 或发送到后端存储
+    // here you can choose to store in localStorage or send to backend storage
     const backupKey = `translation_backup_${section}_${timestamp}`;
     localStorage.setItem(backupKey, JSON.stringify({ timestamp, data }));
 
     return { timestamp, data };
   }
 
-  // 恢复翻译备份
+  // restore translation backup
   static async restoreFromBackup(
     section: string,
     timestamp: string

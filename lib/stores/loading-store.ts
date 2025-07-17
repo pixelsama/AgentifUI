@@ -1,38 +1,38 @@
 import { create } from 'zustand';
 
 /**
- * 页面标识类型
+ * Page key type.
  *
- * 注意: 不需要直接修改这个类型定义，而是使用 registerPage 方法注册新页面
- * 例如: loadingStore.registerPage('new-page');
+ * Note: Do not modify this type directly. Use the registerPage method to add new pages.
+ * Example: loadingStore.registerPage('new-page');
  */
 export type PageKey = string;
 
 interface LoadingState {
-  // 页面加载状态
+  // Loading state for each page
   pageLoading: Record<string, boolean>;
 
-  // 设置特定页面的加载状态
+  // Set loading state for a specific page
   setPageLoading: (page: PageKey, isLoading: boolean) => void;
 
-  // 获取特定页面的加载状态
+  // Get loading state for a specific page
   getPageLoading: (page: PageKey) => boolean;
 
-  // 注册新页面
+  // Register a new page
   registerPage: (page: PageKey) => void;
 
-  // 检查页面是否已注册
+  // Check if a page is registered
   hasPage: (page: PageKey) => boolean;
 
-  // 重置所有页面加载状态
+  // Reset loading state for all pages
   resetPageLoading: () => void;
 }
 
-// 预定义的页面列表
-// 注意: 这只是初始页面列表，可以通过 registerPage 动态添加新页面
+// Predefined page list
+// Note: This is just the initial page list. You can add new pages dynamically via registerPage.
 const DEFAULT_PAGES = ['settings', 'chat', 'about'];
 
-// 初始状态
+// Initial state creator
 const createInitialState = () => {
   const state: Record<string, boolean> = {};
   DEFAULT_PAGES.forEach(page => {
@@ -42,12 +42,12 @@ const createInitialState = () => {
 };
 
 export const useLoadingStore = create<LoadingState>((set, get) => ({
-  // 初始状态
+  // Initial state
   pageLoading: createInitialState(),
 
-  // 设置特定页面的加载状态
+  // Set loading state for a specific page
   setPageLoading: (page, isLoading) => {
-    // 如果页面不存在，先注册它
+    // Register the page if it does not exist
     if (!get().hasPage(page)) {
       get().registerPage(page);
     }
@@ -57,16 +57,16 @@ export const useLoadingStore = create<LoadingState>((set, get) => ({
     }));
   },
 
-  // 获取特定页面的加载状态
+  // Get loading state for a specific page
   getPageLoading: page => {
-    // 如果页面不存在，返回 false
+    // Return false if the page does not exist
     if (!get().hasPage(page)) {
       return false;
     }
     return get().pageLoading[page];
   },
 
-  // 注册新页面
+  // Register a new page
   registerPage: page => {
     if (!get().hasPage(page)) {
       set(state => ({
@@ -75,12 +75,12 @@ export const useLoadingStore = create<LoadingState>((set, get) => ({
     }
   },
 
-  // 检查页面是否已注册
+  // Check if a page is registered
   hasPage: page => {
     return Object.prototype.hasOwnProperty.call(get().pageLoading, page);
   },
 
-  // 重置所有页面加载状态
+  // Reset loading state for all pages
   resetPageLoading: () => {
     const currentPages = Object.keys(get().pageLoading);
     const resetState: Record<string, boolean> = {};

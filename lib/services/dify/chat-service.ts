@@ -1,6 +1,6 @@
 /**
- * Dify 聊天服务
- * @description 实现与 Dify 聊天相关 API 的交互逻辑
+ * Dify Chat Service
+ * @description Implements interaction logic with Dify chat-related APIs
  * @module lib/services/dify/chat-service
  */
 import { parseSseStream } from '@lib/utils/sse-parser';
@@ -21,24 +21,24 @@ import {
   DifyStreamResponse,
 } from './types';
 /**
- * 停止 Dify 流式任务的相关类型定义
- * @description 调用后端代理以安全地与 Dify API 交互
- * @see Dify 文档: POST /chat-messages/:task_id/stop
+ * Type definitions for stopping Dify streaming tasks
+ * @description Calls backend proxy to safely interact with Dify API
+ * @see Dify docs: POST /chat-messages/:task_id/stop
  */
 import { DifyStopTaskRequestPayload, DifyStopTaskResponse } from './types';
 
-/** Dify API 基础 URL (指向我们的后端代理) */
+/** Dify API base URL (points to our backend proxy) */
 const DIFY_API_BASE_URL = '/api/dify';
 
 /**
- * 调用 Dify 的 chat-messages 接口并处理流式响应
+ * Calls Dify's chat-messages endpoint and handles streaming response
  *
- * @param payload - 发送给 Dify API 的请求体
- * @param appId - Dify 应用的 ID
- * @param onConversationIdReceived - 可选的回调函数，当 conversationId 首次被提取时调用
- * @param onNodeEvent - 可选的回调函数，当节点事件发生时调用
- * @returns 一个包含异步生成器 (answerStream)、conversationId 和 taskId 的 Promise
- * @throws 如果 fetch 请求失败或 API 返回错误状态，则抛出错误
+ * @param payload - Request body sent to Dify API
+ * @param appId - Dify application ID
+ * @param onConversationIdReceived - Optional callback, called when conversationId is first extracted
+ * @param onNodeEvent - Optional callback, called when a node event occurs
+ * @returns A Promise containing an async generator (answerStream), conversationId, and taskId
+ * @throws Throws if fetch fails or API returns error status
  */
 export async function streamDifyChat(
   payload: DifyChatRequestPayload,
@@ -73,20 +73,20 @@ export async function streamDifyChat(
 
     console.log('[Dify Service] Received response status:', response.status);
 
-    // 检查响应状态，如果不是 2xx，则抛出错误
+    // Check response status, throw if not 2xx
     if (!response.ok) {
       let errorBody = 'Unknown error';
       try {
         errorBody = await response.text();
       } catch {
-        // 忽略读取错误体时的错误
+        // Ignore error when reading error body
       }
       throw new Error(
         `Dify API request failed with status ${response.status}: ${response.statusText}. Body: ${errorBody}`
       );
     }
 
-    // 检查响应体是否存在
+    // Check if response body exists
     if (!response.body) {
       throw new Error('Dify API response body is null.');
     }
@@ -96,7 +96,7 @@ export async function streamDifyChat(
     let taskId: string | null = null;
     let conversationIdCallbackCalled = false;
 
-    // 创建completionPromise来捕获message_end事件的metadata
+    // Create completionPromise to capture metadata from message_end event
     let completionResolve: (value: {
       usage?: any;
       metadata?: Record<string, any>;
@@ -115,31 +115,31 @@ export async function streamDifyChat(
     });
 
     /**
-     * 处理流式响应的内部异步生成器
-     * @description 解析 SSE 事件并提取所需信息
+     * Internal async generator to process streaming response
+     * @description Parses SSE events and extracts required information
      */
     async function* processStream(): AsyncGenerator<string, void, undefined> {
       try {
-        // 使用 sse-parser 解析流
+        // Use sse-parser to parse the stream
         for await (const result of parseSseStream(stream)) {
           if (result.type === 'error') {
-            // 如果 SSE 解析器报告错误，则向上抛出
+            // If SSE parser reports error, throw up
             console.error('[Dify Service] SSE Parser Error:', result.error);
             completionReject(new Error('Error parsing SSE stream.'));
             throw new Error('Error parsing SSE stream.');
           }
 
-          // 处理成功解析的事件
+          // Handle successfully parsed event
           const event = result.event as DifySseEvent;
 
-          // 过滤message事件，只显示关键事件
+          // Filter message events, only log key events
           if (event.event !== 'message') {
             console.log(
-              `[Dify Service] 🎯 收到关键SSE事件: ${event.event}${event.event === 'message_end' ? ' (关键事件!)' : ''}`
+              `[Dify Service] 🎯 Received key SSE event: ${event.event}${event.event === 'message_end' ? ' (key event!)' : ''}`
             );
           }
 
-          // 提取 conversation_id 和 task_id (通常在 message_end 事件中)
+          // Extract conversation_id and task_id (usually in message_end event)
           if (event.conversation_id) {
             if (!conversationId) {
               conversationId = event.conversation_id;
@@ -155,7 +155,7 @@ export async function streamDifyChat(
                 }
               } else if (conversationId !== event.conversation_id) {
                 console.warn(
-                  '[Dify Service] 警告：事件中的对话ID与已保存的不同！',
+                  '[Dify Service] Warning: conversationId in event differs from saved one!',
                   {
                     saved: conversationId,
                     fromEvent: event.conversation_id,
@@ -169,17 +169,17 @@ export async function streamDifyChat(
             console.log('[Dify Service] Extracted taskId:', taskId);
           }
 
-          // 根据事件类型处理
+          // Handle by event type
           switch (event.event) {
             case 'agent_thought':
-              // agent_thought 事件包含 Agent 的思考过程，但通常 thought 字段为空
-              // 这个事件主要用于标记思考阶段的开始，不需要 yield 内容
+              // agent_thought event contains agent's thought process, but usually thought field is empty
+              // This event mainly marks the start of thinking phase, no need to yield content
               console.log('[Dify Service] Agent thought event received');
               break;
             case 'agent_message':
               if (event.answer) {
-                // 🎯 关键修复：agent_message 事件包含 Agent 应用的实际回答内容
-                // 应该像 message 事件一样 yield 出来，供前端显示
+                // agent_message event contains actual answer from agent application
+                // Should be yielded like message event for frontend display
                 yield event.answer;
               }
               break;
@@ -425,13 +425,13 @@ export async function streamDifyChat(
 }
 
 /**
- * 请求停止 Dify 的流式聊天任务。
+ * Request to stop a Dify streaming chat task.
  *
- * @param appId - Dify 应用的 ID。
- * @param taskId - 需要停止的任务 ID (从流式响应中获取)。
- * @param user - 发起请求的用户标识符，必须与启动任务时相同。
- * @returns 一个解析为 DifyStopTaskResponse 的 Promise (包含 { result: 'success' })。
- * @throws 如果请求失败或 API 返回错误状态，则抛出错误。
+ * @param appId - Dify application ID.
+ * @param taskId - Task ID to stop (obtained from streaming response).
+ * @param user - User identifier who initiated the request, must match the one who started the task.
+ * @returns A Promise resolving to DifyStopTaskResponse (contains { result: 'success' }).
+ * @throws Throws if request fails or API returns error status.
  */
 export async function stopDifyStreamingTask(
   appId: string,
@@ -468,7 +468,7 @@ export async function stopDifyStreamingTask(
       try {
         errorBody = await response.text();
       } catch {
-        // 忽略读取错误
+        // Ignore error when reading error body
       }
       throw new Error(
         `Failed to stop Dify task ${taskId}. Status: ${response.status} ${response.statusText}. Body: ${errorBody}`

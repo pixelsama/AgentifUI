@@ -1,8 +1,8 @@
 /**
- * 用户管理状态管理
+ * User Management State Store
  *
- * 使用Zustand管理用户管理界面的状态
- * 包括用户列表、筛选条件、分页、统计信息等
+ * Uses Zustand to manage the state for the user management interface,
+ * including user list, filters, pagination, statistics, etc.
  */
 import {
   type EnhancedUser,
@@ -19,7 +19,7 @@ import {
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-// 加载状态
+// Loading state interface
 interface LoadingState {
   users: boolean;
   stats: boolean;
@@ -29,23 +29,23 @@ interface LoadingState {
   batchOperating: boolean;
 }
 
-// 筛选选项类型
+// Filter options type (simplified, no organization/department)
 interface FilterOptions {
-  // 简化后的筛选选项，移除组织和部门概念
+  // No organization/department options needed in group system
 }
 
-// 用户管理状态接口
+// User management state interface
 interface UserManagementState {
-  // 数据状态
+  // Data state
   users: EnhancedUser[];
   stats: UserStats | null;
   selectedUser: EnhancedUser | null;
   selectedUserIds: string[];
 
-  // 筛选选项数据
+  // Filter options data
   filterOptions: FilterOptions;
 
-  // 分页和筛选
+  // Pagination and filters
   filters: UserFilters;
   pagination: {
     total: number;
@@ -54,11 +54,11 @@ interface UserManagementState {
     totalPages: number;
   };
 
-  // 加载状态
+  // Loading state
   loading: LoadingState;
   error: string | null;
 
-  // UI状态
+  // UI state
   showUserDetail: boolean;
   showBatchActions: boolean;
 
@@ -76,7 +76,7 @@ interface UserManagementState {
   toggleUserSelection: (userId: string) => void;
   clearSelection: () => void;
 
-  // 用户操作
+  // User operations
   updateUser: (
     userId: string,
     updates: Partial<EnhancedUser>
@@ -91,29 +91,29 @@ interface UserManagementState {
   ) => Promise<boolean>;
   removeUser: (userId: string) => Promise<boolean>;
 
-  // 批量操作
+  // Batch operations
   batchChangeStatus: (
     status: 'active' | 'suspended' | 'pending'
   ) => Promise<boolean>;
   batchChangeRole: (role: 'admin' | 'manager' | 'user') => Promise<boolean>;
 
-  // UI操作
+  // UI operations
   showUserDetailModal: (user: EnhancedUser) => void;
   hideUserDetailModal: () => void;
 
-  // 清理
+  // Cleanup
   clearError: () => void;
   resetStore: () => void;
 }
 
-// 初始状态
+// Initial state
 const initialState = {
   users: [],
   stats: null,
   selectedUser: null,
   selectedUserIds: [],
   filterOptions: {
-    // 群组系统下已简化，无需组织部门选项
+    // No organization/department options needed in group system
   },
   filters: {
     page: 1,
@@ -145,7 +145,7 @@ export const useUserManagementStore = create<UserManagementState>()(
     (set, get) => ({
       ...initialState,
 
-      // 加载用户列表
+      // Load user list
       loadUsers: async () => {
         const state = get();
         set(state => ({
@@ -169,19 +169,22 @@ export const useUserManagementStore = create<UserManagementState>()(
             }));
           } else {
             set(state => ({
-              error: result.error?.message || '加载用户列表失败',
+              error: result.error?.message || 'Failed to load user list',
               loading: { ...state.loading, users: false },
             }));
           }
         } catch (error) {
           set(state => ({
-            error: error instanceof Error ? error.message : '加载用户列表失败',
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to load user list',
             loading: { ...state.loading, users: false },
           }));
         }
       },
 
-      // 加载统计信息
+      // Load statistics
       loadStats: async () => {
         set(state => ({
           loading: { ...state.loading, stats: true },
@@ -198,19 +201,22 @@ export const useUserManagementStore = create<UserManagementState>()(
             }));
           } else {
             set(state => ({
-              error: result.error?.message || '加载统计信息失败',
+              error: result.error?.message || 'Failed to load statistics',
               loading: { ...state.loading, stats: false },
             }));
           }
         } catch (error) {
           set(state => ({
-            error: error instanceof Error ? error.message : '加载统计信息失败',
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to load statistics',
             loading: { ...state.loading, stats: false },
           }));
         }
       },
 
-      // 加载用户详情
+      // Load user detail
       loadUserDetail: async (userId: string) => {
         set(state => ({
           loading: { ...state.loading, userDetail: true },
@@ -227,72 +233,75 @@ export const useUserManagementStore = create<UserManagementState>()(
             }));
           } else {
             set(state => ({
-              error: result.error?.message || '加载用户详情失败',
+              error: result.error?.message || 'Failed to load user detail',
               loading: { ...state.loading, userDetail: false },
             }));
           }
         } catch (error) {
           set(state => ({
-            error: error instanceof Error ? error.message : '加载用户详情失败',
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to load user detail',
             loading: { ...state.loading, userDetail: false },
           }));
         }
       },
 
-      // 加载筛选选项（简化后无需加载组织部门选项）
+      // Load filter options (no-op in group system)
       loadFilterOptions: async () => {
-        // 群组系统下无需预加载筛选选项
-        console.log('筛选选项加载：群组系统下已简化');
+        // No need to preload filter options in group system
+        console.log('Filter options loading: simplified in group system');
       },
 
-      // 根据组织加载部门选项（已移除）
+      // Load departments by organization (removed in group system)
       loadDepartmentsByOrganization: async (organizationName: string) => {
-        // 群组系统下此功能已移除
-        console.log('部门选项加载：群组系统下已移除');
+        // This feature is removed in group system
+        console.log('Department options loading: removed in group system');
       },
 
-      // 更新筛选条件
+      // Update filter conditions
       updateFilters: (newFilters: Partial<UserFilters>) => {
         set(state => ({
-          filters: { ...state.filters, ...newFilters, page: 1 }, // 重置到第一页
-          selectedUserIds: [], // 清空选择
+          filters: { ...state.filters, ...newFilters, page: 1 }, // Reset to first page
+          selectedUserIds: [], // Clear selection
         }));
 
-        // 自动重新加载数据
+        // Automatically reload data
         get().loadUsers();
       },
 
-      // 设置页码
+      // Set page number
       setPage: (page: number) => {
         set(state => ({
           filters: { ...state.filters, page },
         }));
 
-        // 自动重新加载数据
+        // Automatically reload data
         get().loadUsers();
       },
 
-      // 设置页面大小
+      // Set page size
       setPageSize: (pageSize: number) => {
         set(state => ({
-          filters: { ...state.filters, pageSize, page: 1 }, // 重置到第一页
+          filters: { ...state.filters, pageSize, page: 1 }, // Reset to first page
         }));
 
-        // 自动重新加载数据
+        // Automatically reload data
         get().loadUsers();
       },
 
-      // 选择用户
+      // Select a user
       selectUser: (user: EnhancedUser) => {
         set({ selectedUser: user });
       },
 
-      // 批量选择用户
+      // Select multiple users
       selectUsers: (userIds: string[]) => {
         set({ selectedUserIds: userIds });
       },
 
-      // 切换用户选择状态
+      // Toggle user selection
       toggleUserSelection: (userId: string) => {
         set(state => {
           const selectedIds = state.selectedUserIds;
@@ -306,12 +315,12 @@ export const useUserManagementStore = create<UserManagementState>()(
         });
       },
 
-      // 清空选择
+      // Clear selection
       clearSelection: () => {
         set({ selectedUserIds: [], selectedUser: null });
       },
 
-      // 更新用户
+      // Update user
       updateUser: async (userId: string, updates: Partial<EnhancedUser>) => {
         set(state => ({
           loading: { ...state.loading, updating: true },
@@ -322,7 +331,7 @@ export const useUserManagementStore = create<UserManagementState>()(
           const result = await updateUserProfile(userId, updates);
 
           if (result.success) {
-            // 更新本地状态
+            // Update local state
             set(state => ({
               users: state.users.map(user =>
                 user.id === userId ? { ...user, ...updates } : user
@@ -337,47 +346,48 @@ export const useUserManagementStore = create<UserManagementState>()(
             return true;
           } else {
             set(state => ({
-              error: result.error?.message || '更新用户失败',
+              error: result.error?.message || 'Failed to update user',
               loading: { ...state.loading, updating: false },
             }));
             return false;
           }
         } catch (error) {
           set(state => ({
-            error: error instanceof Error ? error.message : '更新用户失败',
+            error:
+              error instanceof Error ? error.message : 'Failed to update user',
             loading: { ...state.loading, updating: false },
           }));
           return false;
         }
       },
 
-      // 修改用户角色
+      // Change user role
       changeUserRole: async (
         userId: string,
         role: 'admin' | 'manager' | 'user'
       ) => {
         const result = await get().updateUser(userId, { role });
         if (result) {
-          // 重新加载统计数据
+          // Reload statistics
           get().loadStats();
         }
         return result;
       },
 
-      // 修改用户状态
+      // Change user status
       changeUserStatus: async (
         userId: string,
         status: 'active' | 'suspended' | 'pending'
       ) => {
         const result = await get().updateUser(userId, { status });
         if (result) {
-          // 重新加载统计数据
+          // Reload statistics
           get().loadStats();
         }
         return result;
       },
 
-      // 删除用户
+      // Remove user
       removeUser: async (userId: string) => {
         set(state => ({
           loading: { ...state.loading, deleting: true },
@@ -388,7 +398,7 @@ export const useUserManagementStore = create<UserManagementState>()(
           const result = await deleteUser(userId);
 
           if (result.success) {
-            // 从本地状态中移除用户
+            // Remove user from local state
             set(state => ({
               users: state.users.filter(user => user.id !== userId),
               selectedUserIds: state.selectedUserIds.filter(
@@ -399,26 +409,27 @@ export const useUserManagementStore = create<UserManagementState>()(
               loading: { ...state.loading, deleting: false },
             }));
 
-            // 重新加载统计数据
+            // Reload statistics
             get().loadStats();
             return true;
           } else {
             set(state => ({
-              error: result.error?.message || '删除用户失败',
+              error: result.error?.message || 'Failed to delete user',
               loading: { ...state.loading, deleting: false },
             }));
             return false;
           }
         } catch (error) {
           set(state => ({
-            error: error instanceof Error ? error.message : '删除用户失败',
+            error:
+              error instanceof Error ? error.message : 'Failed to delete user',
             loading: { ...state.loading, deleting: false },
           }));
           return false;
         }
       },
 
-      // 批量修改状态
+      // Batch change user status
       batchChangeStatus: async (status: 'active' | 'suspended' | 'pending') => {
         const state = get();
         const userIds = state.selectedUserIds;
@@ -434,35 +445,38 @@ export const useUserManagementStore = create<UserManagementState>()(
           const result = await batchUpdateUserStatus(userIds, status);
 
           if (result.success) {
-            // 更新本地状态
+            // Update local state
             set(state => ({
               users: state.users.map(user =>
                 userIds.includes(user.id) ? { ...user, status } : user
               ),
-              selectedUserIds: [], // 清空选择
+              selectedUserIds: [], // Clear selection
               loading: { ...state.loading, batchOperating: false },
             }));
 
-            // 重新加载统计数据
+            // Reload statistics
             get().loadStats();
             return true;
           } else {
             set(state => ({
-              error: result.error?.message || '批量更新状态失败',
+              error: result.error?.message || 'Failed to batch update status',
               loading: { ...state.loading, batchOperating: false },
             }));
             return false;
           }
         } catch (error) {
           set(state => ({
-            error: error instanceof Error ? error.message : '批量更新状态失败',
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to batch update status',
             loading: { ...state.loading, batchOperating: false },
           }));
           return false;
         }
       },
 
-      // 批量修改角色
+      // Batch change user role
       batchChangeRole: async (role: 'admin' | 'manager' | 'user') => {
         const state = get();
         const userIds = state.selectedUserIds;
@@ -478,35 +492,38 @@ export const useUserManagementStore = create<UserManagementState>()(
           const result = await batchUpdateUserRole(userIds, role);
 
           if (result.success) {
-            // 更新本地状态
+            // Update local state
             set(state => ({
               users: state.users.map(user =>
                 userIds.includes(user.id) ? { ...user, role } : user
               ),
-              selectedUserIds: [], // 清空选择
+              selectedUserIds: [], // Clear selection
               loading: { ...state.loading, batchOperating: false },
             }));
 
-            // 重新加载统计数据
+            // Reload statistics
             get().loadStats();
             return true;
           } else {
             set(state => ({
-              error: result.error?.message || '批量更新角色失败',
+              error: result.error?.message || 'Failed to batch update role',
               loading: { ...state.loading, batchOperating: false },
             }));
             return false;
           }
         } catch (error) {
           set(state => ({
-            error: error instanceof Error ? error.message : '批量更新角色失败',
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to batch update role',
             loading: { ...state.loading, batchOperating: false },
           }));
           return false;
         }
       },
 
-      // 显示用户详情模态框
+      // Show user detail modal
       showUserDetailModal: (user: EnhancedUser) => {
         set({
           selectedUser: user,
@@ -514,7 +531,7 @@ export const useUserManagementStore = create<UserManagementState>()(
         });
       },
 
-      // 隐藏用户详情模态框
+      // Hide user detail modal
       hideUserDetailModal: () => {
         set({
           showUserDetail: false,
@@ -522,12 +539,12 @@ export const useUserManagementStore = create<UserManagementState>()(
         });
       },
 
-      // 清理错误
+      // Clear error
       clearError: () => {
         set({ error: null });
       },
 
-      // 重置store
+      // Reset store
       resetStore: () => {
         set(initialState);
       },
@@ -535,7 +552,7 @@ export const useUserManagementStore = create<UserManagementState>()(
     {
       name: 'user-management-store',
       partialize: (state: UserManagementState) => ({
-        filters: state.filters, // 只持久化筛选条件
+        filters: state.filters, // Only persist filter conditions
       }),
     }
   )

@@ -2,23 +2,23 @@ import { createBrowserClient } from '@supabase/ssr';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 /**
- * 全局单例 Supabase 客户端实例
- * 用于避免创建多个客户端实例
+ * Global singleton Supabase client instance.
+ * Prevents creating multiple client instances.
  */
 let supabaseInstance: SupabaseClient | null = null;
 
 /**
- * 创建或获取 Supabase 浏览器客户端
- * 使用单例模式，确保整个应用只创建一个客户端实例
- * 用于客户端组件中访问 Supabase 服务
+ * Create or get the Supabase browser client.
+ * Uses singleton pattern to ensure only one client instance is created for the entire app.
+ * For accessing Supabase services in client components.
  */
 export const createClient = () => {
-  // 如果实例已存在，直接返回
+  // Return the instance if it already exists
   if (supabaseInstance) {
     return supabaseInstance;
   }
 
-  // 如果实例不存在，创建新实例
+  // Create a new instance if it does not exist
   supabaseInstance = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

@@ -7,22 +7,22 @@ interface TypewriterState {
 }
 
 /**
- * 打字机状态管理
- * 用于协调欢迎文字打字机和推荐问题的显示时机
+ * Typewriter state management
+ * Used to coordinate the display timing of welcome text typewriter and recommended questions
  */
 export const useTypewriterStore = create<TypewriterState>(set => ({
   isWelcomeTypewriterComplete: false,
 
   setWelcomeTypewriterComplete: (complete: boolean) => {
     console.log(
-      '[TypewriterStore] 欢迎文字打字机状态:',
-      complete ? '完成' : '重置'
+      '[TypewriterStore] Welcome text typewriter state:',
+      complete ? 'Complete' : 'Reset'
     );
     set({ isWelcomeTypewriterComplete: complete });
   },
 
   resetWelcomeTypewriter: () => {
-    console.log('[TypewriterStore] 重置欢迎文字打字机状态');
+    console.log('[TypewriterStore] Reset welcome text typewriter state');
     set({ isWelcomeTypewriterComplete: false });
   },
 }));

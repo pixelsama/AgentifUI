@@ -4,9 +4,9 @@ import type { Group } from '@lib/db/group-permissions';
 import type { AppVisibility, ServiceInstance } from '@lib/types/database';
 import { create } from 'zustand';
 
-// 🎯 权限管理Store - 统一管理应用权限和群组分配
+// Permission management store - manage app permissions and group assignments
 export interface AppWithPermissions extends ServiceInstance {
-  // 当前应用的群组权限配置
+  // Group permission configuration for the current app
   groupPermissions: Array<{
     group_id: string;
     group_name: string;
@@ -16,40 +16,40 @@ export interface AppWithPermissions extends ServiceInstance {
 }
 
 interface PermissionManagementState {
-  // 数据状态
+  // Data state
   apps: AppWithPermissions[];
   groups: Group[];
   selectedApp: AppWithPermissions | null;
 
-  // 加载状态
+  // Loading state
   loading: {
     apps: boolean;
     groups: boolean;
     updating: boolean;
   };
 
-  // 错误状态
+  // Error state
   error: string | null;
 
-  // 搜索和筛选
+  // Search and filter
   searchTerm: string;
   visibilityFilter: AppVisibility | 'all';
 }
 
 interface PermissionManagementActions {
-  // 数据加载
+  // Data loading
   loadApps: () => Promise<void>;
   loadGroups: () => Promise<void>;
   loadAppPermissions: (appId: string) => Promise<void>;
 
-  // 应用管理
+  // App management
   updateAppVisibility: (
     appId: string,
     visibility: AppVisibility
   ) => Promise<boolean>;
   selectApp: (app: AppWithPermissions | null) => void;
 
-  // 群组权限管理
+  // Group permission management
   setGroupPermission: (
     appId: string,
     groupId: string,
@@ -57,11 +57,11 @@ interface PermissionManagementActions {
     quota?: number | null
   ) => Promise<boolean>;
 
-  // 搜索和筛选
+  // Search and filter
   setSearchTerm: (term: string) => void;
   setVisibilityFilter: (filter: AppVisibility | 'all') => void;
 
-  // 工具方法
+  // Utility methods
   getFilteredApps: () => AppWithPermissions[];
   reset: () => void;
 }
@@ -87,7 +87,7 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
   (set, get) => ({
     ...initialState,
 
-    // 🔄 数据加载函数
+    // Data loading function
     loadApps: async () => {
       set(state => ({
         loading: { ...state.loading, apps: true },
@@ -95,26 +95,26 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
       }));
 
       try {
-        // 使用现有的getAllDifyApps函数获取所有应用
+        // Use getAllDifyApps to fetch all apps
         const { getAllDifyApps } = await import(
           '@lib/services/dify/app-service'
         );
         const appsData = await getAllDifyApps();
 
-        // 转换为AppWithPermissions格式
+        // Convert to AppWithPermissions format
         const apps: AppWithPermissions[] = appsData.map(app => ({
           id: app.id,
-          provider_id: '', // 暂时为空，后续可扩展
+          provider_id: '', // Empty for now, can be extended later
           display_name: app.display_name || null,
           description: app.description || null,
           instance_id: app.instance_id,
-          api_path: '', // 从config中获取
+          api_path: '', // Get from config
           is_default: false,
           visibility: (app.visibility as AppVisibility) || 'public',
           config: app.config || {},
           created_at: '',
           updated_at: '',
-          groupPermissions: [], // 初始为空，需要单独加载
+          groupPermissions: [], // Initially empty, needs to be loaded separately
         }));
 
         set(state => ({
@@ -122,9 +122,9 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
           loading: { ...state.loading, apps: false },
         }));
       } catch (error: any) {
-        console.error('加载应用列表失败:', error);
+        console.error('Failed to load app list:', error);
         set(state => ({
-          error: error.message || '加载应用列表失败',
+          error: error.message || 'Failed to load app list',
           loading: { ...state.loading, apps: false },
         }));
       }
@@ -149,9 +149,9 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
           throw new Error(result.error.message);
         }
       } catch (error: any) {
-        console.error('加载群组列表失败:', error);
+        console.error('Failed to load group list:', error);
         set(state => ({
-          error: error.message || '加载群组列表失败',
+          error: error.message || 'Failed to load group list',
           loading: { ...state.loading, groups: false },
         }));
       }
@@ -164,7 +164,7 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
         );
         const { groups } = get();
 
-        // 为每个群组获取对该应用的权限
+        // Get permissions for each group for the given app
         const groupPermissions = await Promise.all(
           groups.map(async group => {
             const result = await getGroupAppPermissions(group.id);
@@ -191,7 +191,7 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
           })
         );
 
-        // 更新应用的群组权限信息
+        // Update group permission info for the app
         set(state => ({
           apps: state.apps.map(app =>
             app.id === appId ? { ...app, groupPermissions } : app
@@ -202,12 +202,12 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
               : state.selectedApp,
         }));
       } catch (error: any) {
-        console.error('加载应用权限失败:', error);
-        set({ error: error.message || '加载应用权限失败' });
+        console.error('Failed to load app permissions:', error);
+        set({ error: error.message || 'Failed to load app permissions' });
       }
     },
 
-    // 🎯 应用管理函数
+    // App management function
     updateAppVisibility: async (appId: string, visibility: AppVisibility) => {
       set(state => ({
         loading: { ...state.loading, updating: true },
@@ -221,9 +221,9 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
         const result = await updateServiceInstance(appId, { visibility });
 
         if (result.success) {
-          // 🎯 权限切换后的数据清理逻辑
-          // 当从group_only切换到其他权限时，清理组权限表中的相关记录
-          // 如果切换到非group_only权限，清理所有相关的组权限记录
+          // Data cleanup logic after permission switch
+          // When switching from group_only to other permissions, clean up related records in the group permission table
+          // If switching to non-group_only permission, remove all related group permission records
           if (visibility !== 'group_only') {
             try {
               const { removeAllGroupAppPermissions } = await import(
@@ -231,12 +231,15 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
               );
               await removeAllGroupAppPermissions(appId);
             } catch (cleanupError) {
-              console.warn('清理组权限记录时出现警告:', cleanupError);
-              // 不阻断主流程，只记录警告
+              console.warn(
+                'Warning during group permission cleanup:',
+                cleanupError
+              );
+              // Do not block main process, just log warning
             }
           }
 
-          // 更新本地状态
+          // Update local state
           set(state => ({
             apps: state.apps.map(app =>
               app.id === appId ? { ...app, visibility } : app
@@ -248,7 +251,7 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
             loading: { ...state.loading, updating: false },
           }));
 
-          // 如果当前选中的应用就是被更新的应用，重新加载其权限信息
+          // If the currently selected app is the one being updated, reload its permissions
           if (get().selectedApp?.id === appId) {
             await get().loadAppPermissions(appId);
           }
@@ -258,9 +261,9 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
           throw new Error(result.error.message);
         }
       } catch (error: any) {
-        console.error('更新应用可见性失败:', error);
+        console.error('Failed to update app visibility:', error);
         set(state => ({
-          error: error.message || '更新应用可见性失败',
+          error: error.message || 'Failed to update app visibility',
           loading: { ...state.loading, updating: false },
         }));
         return false;
@@ -270,13 +273,13 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
     selectApp: (app: AppWithPermissions | null) => {
       set({ selectedApp: app });
 
-      // 如果选择了应用，加载其权限信息
+      // If an app is selected, load its permission info
       if (app) {
         get().loadAppPermissions(app.id);
       }
     },
 
-    // 👥 群组权限管理函数
+    // Group permission management function
     setGroupPermission: async (
       appId: string,
       groupId: string,
@@ -298,7 +301,7 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
         });
 
         if (result.success) {
-          // 重新加载应用权限信息
+          // Reload app permission info
           await get().loadAppPermissions(appId);
 
           set(state => ({ loading: { ...state.loading, updating: false } }));
@@ -307,16 +310,16 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
           throw new Error(result.error.message);
         }
       } catch (error: any) {
-        console.error('设置群组权限失败:', error);
+        console.error('Failed to set group permission:', error);
         set(state => ({
-          error: error.message || '设置群组权限失败',
+          error: error.message || 'Failed to set group permission',
           loading: { ...state.loading, updating: false },
         }));
         return false;
       }
     },
 
-    // 🔍 搜索和筛选函数
+    // Search and filter functions
     setSearchTerm: (term: string) => {
       set({ searchTerm: term });
     },
@@ -329,14 +332,14 @@ export const usePermissionManagementStore = create<PermissionManagementStore>(
       const { apps, searchTerm, visibilityFilter } = get();
 
       return apps.filter(app => {
-        // 搜索过滤
+        // Search filter
         const matchesSearch =
           !searchTerm ||
           app.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           app.instance_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
           app.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-        // 可见性过滤
+        // Visibility filter
         const matchesVisibility =
           visibilityFilter === 'all' || app.visibility === visibilityFilter;
 

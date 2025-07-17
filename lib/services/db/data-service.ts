@@ -1,8 +1,8 @@
 /**
- * 统一的数据服务层
+ * Unified Data Service Layer
  *
- * 整合缓存、错误处理、重试逻辑和Result类型
- * 为所有数据库操作提供统一的接口
+ * Integrates cache, error handling, retry logic, and Result type.
+ * Provides a unified interface for all database operations.
  */
 import { createClient } from '@lib/supabase/client';
 import {
@@ -36,7 +36,7 @@ export class DataService {
   private constructor() {}
 
   /**
-   * 获取数据服务单例
+   * Get the singleton instance of the data service
    */
   public static getInstance(): DataService {
     if (!DataService.instance) {
@@ -46,7 +46,7 @@ export class DataService {
   }
 
   /**
-   * 通用查询方法，集成缓存和错误处理
+   * General query method with cache and error handling
    */
   async query<T>(
     operation: () => Promise<T>,
@@ -55,12 +55,12 @@ export class DataService {
   ): Promise<Result<T>> {
     const {
       cache = false,
-      cacheTTL = 5 * 60 * 1000, // 5分钟
+      cacheTTL = 5 * 60 * 1000, // 5 minutes
       retries = 3,
       retryDelay = 1000,
     } = options;
 
-    // 如果启用缓存且有缓存键
+    // Use cache if enabled and cacheKey is provided
     if (cache && cacheKey) {
       try {
         return success(await cacheService.get(cacheKey, operation, cacheTTL));
@@ -71,7 +71,7 @@ export class DataService {
       }
     }
 
-    // 不使用缓存时的重试逻辑
+    // Retry logic if not using cache
     for (let attempt = 1; attempt <= retries; attempt++) {
       const result = await wrapAsync(operation);
 
@@ -79,24 +79,26 @@ export class DataService {
         return result;
       }
 
-      // 如果是最后一次尝试或者是不可重试的错误，直接返回失败
+      // Return failure if last attempt or non-retryable error
       if (attempt === retries || this.isNonRetryableError(result.error)) {
         return result;
       }
 
-      // 等待后重试
+      // Wait and retry
       await this.delay(retryDelay * attempt);
       console.log(
-        `[数据服务] 重试第 ${attempt} 次，错误:`,
+        `[DataService] Retry attempt ${attempt}, error:`,
         result.error.message
       );
     }
 
-    return failure(new DatabaseError('查询失败，已达到最大重试次数', 'query'));
+    return failure(
+      new DatabaseError('Query failed, max retries reached', 'query')
+    );
   }
 
   /**
-   * 判断是否为不可重试的错误
+   * Determine if the error is non-retryable
    */
   private isNonRetryableError(error: Error): boolean {
     const message = error.message.toLowerCase();
@@ -111,14 +113,14 @@ export class DataService {
   }
 
   /**
-   * 延迟函数
+   * Delay helper
    */
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
-   * 执行Supabase查询并返回Result
+   * Execute a Supabase query and return Result
    */
   async executeQuery<T>(
     queryBuilder: any,
@@ -132,7 +134,7 @@ export class DataService {
 
         if (error) {
           throw new DatabaseError(
-            `${operation}失败: ${error.message}`,
+            `${operation} failed: ${error.message}`,
             operation,
             error
           );
@@ -146,7 +148,7 @@ export class DataService {
   }
 
   /**
-   * 获取单条记录
+   * Get a single record
    */
   async findOne<T>(
     table: string,
@@ -161,12 +163,12 @@ export class DataService {
 
     const result = await this.executeQuery<T>(
       this.supabase.from(table).select('*').match(filters).maybeSingle(),
-      `查询${table}`,
+      `Query ${table}`,
       cacheKey,
       options
     );
 
-    // 设置实时订阅
+    // Setup realtime subscription
     if (options.subscribe && options.subscriptionKey && options.onUpdate) {
       realtimeService.subscribe(
         options.subscriptionKey,
@@ -179,7 +181,7 @@ export class DataService {
   }
 
   /**
-   * 获取多条记录
+   * Get multiple records
    */
   async findMany<T>(
     table: string,
@@ -204,17 +206,17 @@ export class DataService {
 
     let query = this.supabase.from(table).select('*');
 
-    // 应用过滤器
+    // Apply filters
     if (Object.keys(filters).length > 0) {
       query = query.match(filters);
     }
 
-    // 应用排序
+    // Apply ordering
     if (orderBy) {
       query = query.order(orderBy.column, { ascending: orderBy.ascending });
     }
 
-    // 应用分页
+    // Apply pagination
     if (pagination) {
       query = query.range(
         pagination.offset,
@@ -224,12 +226,12 @@ export class DataService {
 
     const result = await this.executeQuery<T[]>(
       query,
-      `查询${table}列表`,
+      `Query ${table} list`,
       cacheKey,
       options
     );
 
-    // 设置实时订阅
+    // Setup realtime subscription
     if (options.subscribe && options.subscriptionKey && options.onUpdate) {
       realtimeService.subscribe(
         options.subscriptionKey,
@@ -242,7 +244,7 @@ export class DataService {
   }
 
   /**
-   * 创建记录
+   * Create a record
    */
   async create<T>(
     table: string,
@@ -251,12 +253,12 @@ export class DataService {
   ): Promise<Result<T>> {
     const result = await this.executeQuery<T>(
       this.supabase.from(table).insert(data).select().single(),
-      `创建${table}`,
+      `Create ${table}`,
       undefined,
       options
     );
 
-    // 清除相关缓存
+    // Clear related cache
     if (result.success) {
       cacheService.deletePattern(`${table}:*`);
     }
@@ -265,7 +267,7 @@ export class DataService {
   }
 
   /**
-   * 更新记录
+   * Update a record
    */
   async update<T>(
     table: string,
@@ -275,12 +277,12 @@ export class DataService {
   ): Promise<Result<T>> {
     const result = await this.executeQuery<T>(
       this.supabase.from(table).update(data).eq('id', id).select().single(),
-      `更新${table}`,
+      `Update ${table}`,
       undefined,
       options
     );
 
-    // 清除相关缓存
+    // Clear related cache
     if (result.success) {
       cacheService.deletePattern(`${table}:*`);
     }
@@ -289,7 +291,7 @@ export class DataService {
   }
 
   /**
-   * 删除记录
+   * Delete a record
    */
   async delete(
     table: string,
@@ -298,12 +300,12 @@ export class DataService {
   ): Promise<Result<void>> {
     const result = await this.executeQuery<void>(
       this.supabase.from(table).delete().eq('id', id),
-      `删除${table}`,
+      `Delete ${table}`,
       undefined,
       options
     );
 
-    // 清除相关缓存
+    // Clear related cache
     if (result.success) {
       cacheService.deletePattern(`${table}:*`);
     }
@@ -312,7 +314,7 @@ export class DataService {
   }
 
   /**
-   * 软删除记录（设置status为deleted）
+   * Soft delete a record (set status to 'deleted')
    */
   async softDelete<T>(
     table: string,
@@ -329,12 +331,12 @@ export class DataService {
         .eq('id', id)
         .select()
         .single(),
-      `软删除${table}`,
+      `Soft delete ${table}`,
       undefined,
       options
     );
 
-    // 清除相关缓存
+    // Clear related cache
     if (result.success) {
       cacheService.deletePattern(`${table}:*`);
     }
@@ -343,7 +345,7 @@ export class DataService {
   }
 
   /**
-   * 获取记录数量
+   * Get record count
    */
   async count(
     table: string,
@@ -360,7 +362,7 @@ export class DataService {
       .from(table)
       .select('*', { count: 'exact', head: true });
 
-    // 应用过滤器
+    // Apply filters
     if (Object.keys(filters).length > 0) {
       query = query.match(filters);
     }
@@ -371,7 +373,7 @@ export class DataService {
 
         if (error) {
           throw new DatabaseError(
-            `获取${table}数量失败: ${error.message}`,
+            `Failed to get ${table} count: ${error.message}`,
             'count',
             error
           );
@@ -385,21 +387,21 @@ export class DataService {
   }
 
   /**
-   * 清除指定表的所有缓存
+   * Clear all cache for a specific table
    */
   clearCache(table: string): number {
     return cacheService.deletePattern(`${table}:*`);
   }
 
   /**
-   * 清除所有缓存
+   * Clear all cache
    */
   clearAllCache(): void {
     cacheService.clear();
   }
 
   /**
-   * 销毁服务
+   * Destroy the service
    */
   destroy(): void {
     cacheService.destroy();
@@ -407,5 +409,5 @@ export class DataService {
   }
 }
 
-// 导出单例实例
+// Export singleton instance
 export const dataService = DataService.getInstance();

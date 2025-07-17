@@ -1,137 +1,137 @@
 /**
- * 设置页面主题颜色管理
- * 集中定义所有设置页面相关的颜色，确保设置页面的视觉一致性
+ * Settings page theme color management
+ * Centralized definition of all colors related to the settings page to ensure visual consistency
  */
 
-// 亮色模式颜色
+// Light mode colors
 export const lightSettingsColors = {
-  // 设置页面主背景色
+  // Main background color for settings page
   pageBackground: {
     tailwind: 'bg-stone-100',
     rgb: 'rgb(245, 245, 244)',
     hex: '#f5f5f4',
   },
 
-  // 设置卡片背景色
+  // Card background color
   cardBackground: {
     tailwind: 'bg-white',
     rgb: 'rgb(255, 255, 255)',
     hex: '#ffffff',
   },
 
-  // 设置文本颜色
+  // Main text color
   textColor: {
     tailwind: 'text-stone-900',
     rgb: 'rgb(28, 25, 23)',
     hex: '#1c1917',
   },
 
-  // 设置次要文本颜色
+  // Secondary text color
   secondaryTextColor: {
     tailwind: 'text-stone-600',
     rgb: 'rgb(87, 83, 78)',
     hex: '#57534e',
   },
 
-  // 设置边框颜色
+  // Border color
   borderColor: {
     tailwind: 'border-stone-200',
     rgb: 'rgb(231, 229, 228)',
     hex: '#e7e5e4',
   },
 
-  // 设置侧边栏项目悬停效果
+  // Sidebar item hover effect
   sidebarItemHover: {
     tailwind: 'hover:bg-stone-200',
     rgb: 'rgb(231, 229, 228)',
     hex: '#e7e5e4',
   },
 
-  // 设置侧边栏项目激活状态
+  // Sidebar item active state
   sidebarItemActive: {
     tailwind: 'bg-stone-200',
     rgb: 'rgb(231, 229, 228)',
     hex: '#e7e5e4',
   },
 
-  // 设置卡片悬停效果
+  // Card hover effect
   cardHover: {
     tailwind: 'hover:bg-stone-50',
     rgb: 'rgb(250, 250, 249)',
     hex: '#fafaf9',
   },
 
-  // 设置按钮背景色
+  // Button background color
   buttonBackground: {
     tailwind: 'bg-white',
     rgb: 'rgb(255, 255, 255)',
     hex: '#ffffff',
   },
 
-  // 设置按钮边框色
+  // Button border color
   buttonBorder: {
     tailwind: 'border-stone-200',
     rgb: 'rgb(231, 229, 228)',
     hex: '#e7e5e4',
   },
 
-  // 设置按钮文本色
+  // Button text color
   buttonText: {
     tailwind: 'text-stone-800',
     rgb: 'rgb(41, 37, 36)',
     hex: '#292524',
   },
 
-  // 设置按钮悬停效果
+  // Button hover effect
   buttonHover: {
     tailwind: 'hover:bg-stone-100',
     rgb: 'rgb(245, 245, 244)',
     hex: '#f5f5f4',
   },
 
-  // 设置按钮激活状态
+  // Button active state
   buttonActive: {
     tailwind: 'bg-stone-200',
     rgb: 'rgb(231, 229, 228)',
     hex: '#e7e5e4',
   },
 
-  // 设置主按钮背景色
+  // Primary button background color
   primaryButtonBackground: {
     tailwind: 'bg-stone-800',
     rgb: 'rgb(41, 37, 36)',
     hex: '#292524',
   },
 
-  // 设置主按钮文本色
+  // Primary button text color
   primaryButtonText: {
     tailwind: 'text-white',
     rgb: 'rgb(255, 255, 255)',
     hex: '#ffffff',
   },
 
-  // 设置主按钮悬停效果
+  // Primary button hover effect
   primaryButtonHover: {
     tailwind: 'hover:bg-stone-900',
     rgb: 'rgb(28, 25, 23)',
     hex: '#1c1917',
   },
 
-  // 设置骨架屏背景色
+  // Skeleton background color
   skeletonBackground: {
     tailwind: 'bg-stone-200',
     rgb: 'rgb(231, 229, 228)',
     hex: '#e7e5e4',
   },
 
-  // 设置骨架屏动画色
+  // Skeleton animation color
   skeletonHighlight: {
     tailwind: 'from-stone-200 via-stone-100 to-stone-200',
     rgb: 'rgb(231, 229, 228), rgb(245, 245, 244), rgb(231, 229, 228)',
     hex: '#e7e5e4, #f5f5f4, #e7e5e4',
   },
 
-  // 返回按钮样式
+  // Back button styles
   backButton: {
     background: {
       tailwind: 'bg-stone-100',
@@ -166,135 +166,135 @@ export const lightSettingsColors = {
   },
 };
 
-// 暗色模式颜色
+// Dark mode colors
 export const darkSettingsColors = {
-  // 设置页面主背景色
+  // Main background color for settings page
   pageBackground: {
     tailwind: 'bg-stone-800',
     rgb: 'rgb(28, 25, 23)',
     hex: '#1c1917',
   },
 
-  // 设置卡片背景色
+  // Card background color
   cardBackground: {
     tailwind: 'bg-stone-800',
     rgb: 'rgb(41, 37, 36)',
     hex: '#292524',
   },
 
-  // 设置文本颜色
+  // Main text color
   textColor: {
     tailwind: 'text-stone-100',
     rgb: 'rgb(245, 245, 244)',
     hex: '#f5f5f4',
   },
 
-  // 设置次要文本颜色
+  // Secondary text color
   secondaryTextColor: {
     tailwind: 'text-stone-400',
     rgb: 'rgb(168, 162, 158)',
     hex: '#a8a29e',
   },
 
-  // 设置边框颜色
+  // Border color
   borderColor: {
     tailwind: 'border-stone-700',
     rgb: 'rgb(68, 64, 60)',
     hex: '#44403c',
   },
 
-  // 设置侧边栏项目悬停效果
+  // Sidebar item hover effect
   sidebarItemHover: {
     tailwind: 'hover:bg-stone-700',
     rgb: 'rgb(68, 64, 60)',
     hex: '#44403c',
   },
 
-  // 设置侧边栏项目激活状态
+  // Sidebar item active state
   sidebarItemActive: {
     tailwind: 'bg-stone-700',
     rgb: 'rgb(68, 64, 60)',
     hex: '#44403c',
   },
 
-  // 设置卡片悬停效果
+  // Card hover effect
   cardHover: {
     tailwind: 'hover:bg-stone-700',
     rgb: 'rgb(68, 64, 60)',
     hex: '#44403c',
   },
 
-  // 设置按钮背景色
+  // Button background color
   buttonBackground: {
     tailwind: 'bg-stone-800',
     rgb: 'rgb(41, 37, 36)',
     hex: '#292524',
   },
 
-  // 设置按钮边框色
+  // Button border color
   buttonBorder: {
     tailwind: 'border-stone-700',
     rgb: 'rgb(68, 64, 60)',
     hex: '#44403c',
   },
 
-  // 设置按钮文本色
+  // Button text color
   buttonText: {
     tailwind: 'text-stone-100',
     rgb: 'rgb(245, 245, 244)',
     hex: '#f5f5f4',
   },
 
-  // 设置按钮悬停效果
+  // Button hover effect
   buttonHover: {
     tailwind: 'hover:bg-stone-700',
     rgb: 'rgb(68, 64, 60)',
     hex: '#44403c',
   },
 
-  // 设置按钮激活状态
+  // Button active state
   buttonActive: {
     tailwind: 'bg-stone-600',
     rgb: 'rgb(87, 83, 78)',
     hex: '#57534e',
   },
 
-  // 设置主按钮背景色
+  // Primary button background color
   primaryButtonBackground: {
     tailwind: 'bg-stone-600',
     rgb: 'rgb(87, 83, 78)',
     hex: '#57534e',
   },
 
-  // 设置主按钮文本色
+  // Primary button text color
   primaryButtonText: {
     tailwind: 'text-white',
     rgb: 'rgb(255, 255, 255)',
     hex: '#ffffff',
   },
 
-  // 设置主按钮悬停效果
+  // Primary button hover effect
   primaryButtonHover: {
     tailwind: 'hover:bg-stone-700',
     rgb: 'rgb(68, 64, 60)',
     hex: '#44403c',
   },
 
-  // 设置骨架屏背景色
+  // Skeleton background color
   skeletonBackground: {
     tailwind: 'bg-stone-700',
     rgb: 'rgb(68, 64, 60)',
     hex: '#44403c',
   },
 
-  // 设置骨架屏动画色
+  // Skeleton animation color
   skeletonHighlight: {
     tailwind: 'from-stone-700 via-stone-600 to-stone-700',
     rgb: 'rgb(68, 64, 60), rgb(87, 83, 78), rgb(68, 64, 60)',
     hex: '#44403c, #57534e, #44403c',
   },
 
-  // 返回按钮样式
+  // Back button styles
   backButton: {
     background: {
       tailwind: 'bg-stone-800',
@@ -330,9 +330,9 @@ export const darkSettingsColors = {
 };
 
 /**
- * 获取当前主题的设置页面颜色
- * @param isDark 是否为暗色模式
- * @returns 当前主题的设置页面颜色对象
+ * Get the settings page color object for the current theme
+ * @param isDark Whether it is dark mode
+ * @returns The settings page color object for the current theme
  */
 export function getSettingsColors(isDark: boolean) {
   return isDark ? darkSettingsColors : lightSettingsColors;

@@ -5,16 +5,16 @@ import type { Provider, ServiceInstance } from '@lib/types/database';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-// 新增：导入缓存清除函数
+// Added: import cache clearing function
 
 interface CurrentAppState {
   currentAppId: string | null;
   currentAppInstance: ServiceInstance | null;
   isLoadingAppId: boolean;
   errorLoadingAppId: string | null;
-  lastValidatedAt: number | null; // 新增：最后验证时间戳
-  isValidating: boolean; // 新增：是否正在验证配置
-  isValidatingForMessage: boolean; // 🎯 新增：专门用于消息发送时的验证状态
+  lastValidatedAt: number | null; // Added: last validation timestamp
+  isValidating: boolean; // Added: whether config is being validated
+  isValidatingForMessage: boolean; // Added: validation state specifically for message sending
   setCurrentAppId: (appId: string, instance: ServiceInstance) => void;
   clearCurrentApp: () => void;
   initializeDefaultAppId: () => Promise<void>;
@@ -22,23 +22,23 @@ interface CurrentAppState {
   validateAndRefreshConfig: (
     targetAppId?: string,
     context?: 'message' | 'switch' | 'general'
-  ) => Promise<void>; // 🎯 修改：添加上下文参数
-  switchToApp: (appId: string) => Promise<void>; // 新增：切换到指定app
+  ) => Promise<void>; // Modified: add context parameter
+  switchToApp: (appId: string) => Promise<void>; // Added: switch to a specific app
 }
 
-// 🎯 重构：完全移除硬编码，仅依赖数据库的 is_default 字段
-// 获取默认提供商的辅助函数，支持多提供商环境
+// Refactor: Remove hardcoding, rely only on is_default field in database
+// Helper function to get the default provider, supports multi-provider environments
 async function getDefaultProviderForApp(): Promise<Provider> {
-  // 获取系统默认提供商（基于 is_default 字段）
+  // Get the system default provider (based on is_default field)
   const defaultProviderResult = await getDefaultProvider();
 
   if (defaultProviderResult.success && defaultProviderResult.data) {
     return defaultProviderResult.data;
   }
 
-  // 如果没有设置默认提供商，抛出错误要求管理员配置
+  // If no default provider is set, throw an error to require admin configuration
   throw new Error(
-    '未找到默认提供商。请在管理面板中设置一个提供商为默认提供商。'
+    'No default provider found. Please set a provider as default in the admin panel.'
   );
 }
 
@@ -49,9 +49,9 @@ export const useCurrentAppStore = create<CurrentAppState>()(
       currentAppInstance: null,
       isLoadingAppId: false,
       errorLoadingAppId: null,
-      lastValidatedAt: null, // 新增：最后验证时间戳
-      isValidating: false, // 新增：是否正在验证配置
-      isValidatingForMessage: false, // 🎯 新增：专门用于消息发送时的验证状态
+      lastValidatedAt: null, // Added: last validation timestamp
+      isValidating: false, // Added: whether config is being validated
+      isValidatingForMessage: false, // Added: validation state specifically for message sending
 
       setCurrentAppId: (appId, instance) => {
         set({
@@ -59,12 +59,12 @@ export const useCurrentAppStore = create<CurrentAppState>()(
           currentAppInstance: instance,
           isLoadingAppId: false,
           errorLoadingAppId: null,
-          lastValidatedAt: Date.now(), // 更新验证时间戳
+          lastValidatedAt: Date.now(), // Update validation timestamp
         });
-        // @future 当 appId 改变时，可能需要触发相关数据的重新加载
-        // 例如，对话列表 useConversations 可能需要根据新的 appId 刷新。
-        // 这可以通过在 useConversations 中也订阅 currentAppId 来实现，
-        // 或者在这里调用一个全局的刷新函数/事件。
+        // @future When appId changes, may need to trigger reload of related data
+        // For example, useConversations may need to refresh based on new appId.
+        // This can be done by subscribing to currentAppId in useConversations,
+        // or by calling a global refresh function/event here.
       },
 
       clearCurrentApp: () => {
@@ -73,20 +73,20 @@ export const useCurrentAppStore = create<CurrentAppState>()(
           currentAppInstance: null,
           isLoadingAppId: false,
           errorLoadingAppId: null,
-          lastValidatedAt: null, // 清除验证时间戳
-          isValidating: false, // 🎯 清除验证状态
-          isValidatingForMessage: false, // 🎯 清除消息验证状态
+          lastValidatedAt: null, // Clear validation timestamp
+          isValidating: false, // Clear validation state
+          isValidatingForMessage: false, // Clear message validation state
         });
       },
 
       initializeDefaultAppId: async () => {
-        // 防止重复初始化或在已加载时再次加载
+        // Prevent re-initialization or loading if already loaded
         if (get().currentAppId || get().isLoadingAppId) {
           return;
         }
 
-        // 🔒 安全检查：确保用户已登录才初始化应用存储
-        // 防止未认证用户触发缓存创建
+        // Security check: ensure user is logged in before initializing app store
+        // Prevent unauthenticated users from triggering cache creation
         try {
           const { createClient } = await import('../supabase/client');
           const supabase = createClient();
@@ -96,12 +96,14 @@ export const useCurrentAppStore = create<CurrentAppState>()(
           } = await supabase.auth.getUser();
 
           if (!user || error) {
-            console.log('[CurrentAppStore] 用户未登录，跳过应用存储初始化');
+            console.log(
+              '[CurrentAppStore] User not logged in, skipping app store initialization'
+            );
             return;
           }
         } catch (authError) {
           console.warn(
-            '[CurrentAppStore] 认证检查失败，跳过初始化:',
+            '[CurrentAppStore] Auth check failed, skipping initialization:',
             authError
           );
           return;
@@ -110,8 +112,8 @@ export const useCurrentAppStore = create<CurrentAppState>()(
         set({ isLoadingAppId: true, errorLoadingAppId: null });
 
         try {
-          // 🎯 重构：使用默认提供商替代硬编码的 Dify 提供商
-          // 支持多提供商环境，优先使用系统默认提供商
+          // Refactor: use default provider instead of hardcoded Dify provider
+          // Support multi-provider environment, prefer system default provider
           const provider = await getDefaultProviderForApp();
 
           const defaultInstanceResult = await getDefaultServiceInstance(
@@ -120,7 +122,7 @@ export const useCurrentAppStore = create<CurrentAppState>()(
 
           if (!defaultInstanceResult.success) {
             throw new Error(
-              `获取默认服务实例失败: ${defaultInstanceResult.error.message}`
+              `Failed to get default service instance: ${defaultInstanceResult.error.message}`
             );
           }
 
@@ -132,13 +134,13 @@ export const useCurrentAppStore = create<CurrentAppState>()(
               currentAppId: defaultInstanceResult.data.instance_id,
               currentAppInstance: defaultInstanceResult.data,
               isLoadingAppId: false,
-              lastValidatedAt: Date.now(), // 设置验证时间戳
+              lastValidatedAt: Date.now(), // Set validation timestamp
             });
           } else {
-            // 如果数据库中没有配置默认的服务实例，这是一个需要处理的场景。
-            // UI 层应该提示用户选择一个应用，或者管理员需要配置一个默认应用。
-            // 当前我们将 appId 设为 null，并记录错误。
-            const errorMessage = `未找到提供商"${provider.name}"的默认服务实例。请配置一个默认的应用实例。`;
+            // If there is no default service instance in the database, this needs to be handled.
+            // The UI should prompt the user to select an app, or the admin should configure a default app.
+            // For now, set appId to null and record the error.
+            const errorMessage = `No default service instance found for provider "${provider.name}". Please configure a default app instance.`;
             console.warn(errorMessage);
             set({
               currentAppId: null,
@@ -150,7 +152,7 @@ export const useCurrentAppStore = create<CurrentAppState>()(
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : String(error);
-          console.error('初始化默认应用ID失败:', errorMessage);
+          console.error('Failed to initialize default app ID:', errorMessage);
           set({
             isLoadingAppId: false,
             errorLoadingAppId: errorMessage,
@@ -158,12 +160,12 @@ export const useCurrentAppStore = create<CurrentAppState>()(
         }
       },
 
-      // 新增刷新当前应用的方法，用于重新获取最新的应用实例信息
+      // Added: refresh current app method, used to fetch the latest app instance info
       refreshCurrentApp: async () => {
         const currentState = get();
 
         if (!currentState.currentAppInstance) {
-          // 如果没有当前应用，尝试初始化默认应用
+          // If there is no current app, try to initialize the default app
           await get().initializeDefaultAppId();
           return;
         }
@@ -177,7 +179,7 @@ export const useCurrentAppStore = create<CurrentAppState>()(
 
           if (!defaultInstanceResult.success) {
             throw new Error(
-              `刷新应用实例失败: ${defaultInstanceResult.error.message}`
+              `Failed to refresh app instance: ${defaultInstanceResult.error.message}`
             );
           }
 
@@ -189,10 +191,10 @@ export const useCurrentAppStore = create<CurrentAppState>()(
               currentAppId: defaultInstanceResult.data.instance_id,
               currentAppInstance: defaultInstanceResult.data,
               isLoadingAppId: false,
-              lastValidatedAt: Date.now(), // 设置验证时间戳
+              lastValidatedAt: Date.now(), // Set validation timestamp
             });
           } else {
-            const errorMessage = '未找到默认服务实例';
+            const errorMessage = 'Default service instance not found';
             set({
               isLoadingAppId: false,
               errorLoadingAppId: errorMessage,
@@ -201,7 +203,7 @@ export const useCurrentAppStore = create<CurrentAppState>()(
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : String(error);
-          console.error('刷新当前应用失败:', errorMessage);
+          console.error('Failed to refresh current app:', errorMessage);
           set({
             isLoadingAppId: false,
             errorLoadingAppId: errorMessage,
@@ -209,17 +211,17 @@ export const useCurrentAppStore = create<CurrentAppState>()(
         }
       },
 
-      // 新增：验证并刷新配置方法
-      // 检查当前配置是否仍然有效，如果无效则重新获取
-      // 支持验证特定app或默认app
-      // 用于解决管理端配置变更后的同步问题
+      // Added: validate and refresh config method
+      // Checks if the current config is still valid, if not, re-fetches it
+      // Supports validating a specific app or the default app
+      // Used to solve sync issues after admin config changes
       validateAndRefreshConfig: async (
         targetAppId?: string,
         context: 'message' | 'switch' | 'general' = 'general'
       ) => {
         const currentState = get();
 
-        // 🎯 根据上下文设置不同的验证状态
+        // Set different validation states based on context
         if (context === 'message') {
           set({ isValidating: true, isValidatingForMessage: true });
         } else {
@@ -227,39 +229,43 @@ export const useCurrentAppStore = create<CurrentAppState>()(
         }
 
         try {
-          // 如果指定了targetAppId，则切换到该app
+          // If a targetAppId is specified, switch to that app
           if (targetAppId && targetAppId !== currentState.currentAppId) {
             console.log(
-              `[validateAndRefreshConfig] 切换到指定app: ${targetAppId}`
+              `[validateAndRefreshConfig] Switching to specified app: ${targetAppId}`
             );
             await get().switchToApp(targetAppId);
             return;
           }
 
-          // 如果没有当前配置，直接初始化
+          // If there is no current config, initialize directly
           if (!currentState.currentAppId || !currentState.currentAppInstance) {
             await get().initializeDefaultAppId();
             return;
           }
 
-          // 检查是否需要验证（避免频繁验证）
+          // Check if validation is needed (avoid frequent validation)
           const now = Date.now();
           const lastValidated = currentState.lastValidatedAt || 0;
-          const VALIDATION_INTERVAL = 30 * 1000; // 30秒验证间隔
+          const VALIDATION_INTERVAL = 30 * 1000; // 30 seconds validation interval
 
           if (now - lastValidated < VALIDATION_INTERVAL && !targetAppId) {
-            console.log('[validateAndRefreshConfig] 验证间隔未到，跳过验证');
+            console.log(
+              '[validateAndRefreshConfig] Validation interval not reached, skipping validation'
+            );
             return;
           }
 
-          console.log('[validateAndRefreshConfig] 开始验证配置有效性...');
+          console.log(
+            '[validateAndRefreshConfig] Start validating config validity...'
+          );
 
-          // 🎯 修改：支持验证特定app实例，而不仅仅是默认app
+          // Support validating a specific app instance, not just the default app
           let targetInstance: any = null;
 
           if (targetAppId) {
-            // 🎯 重构：在所有活跃提供商中查找指定的应用实例
-            // 支持多提供商环境下的应用验证
+            // Refactor: search for the specified app instance among all active providers
+            // Support app validation in multi-provider environments
             const { createClient } = await import('../supabase/client');
             const supabase = createClient();
 
@@ -282,13 +288,15 @@ export const useCurrentAppStore = create<CurrentAppState>()(
                 .single();
 
             if (specificError || !specificInstance) {
-              throw new Error(`未找到指定的app实例: ${targetAppId}`);
+              throw new Error(
+                `Specified app instance not found: ${targetAppId}`
+              );
             }
 
             targetInstance = specificInstance;
           } else {
-            // 🎯 重构：验证当前应用时也支持多提供商查找
-            // 如果当前应用不存在，fallback到默认提供商的默认应用
+            // Refactor: when validating the current app, also support multi-provider lookup
+            // If the current app does not exist, fallback to the default provider's default app
             const { createClient } = await import('../supabase/client');
             const supabase = createClient();
 
@@ -311,9 +319,9 @@ export const useCurrentAppStore = create<CurrentAppState>()(
                 .single();
 
             if (currentError || !currentInstance) {
-              // 当前app不存在，fallback到默认提供商的默认app
+              // Current app does not exist, fallback to default provider's default app
               console.warn(
-                `[validateAndRefreshConfig] 当前app ${currentState.currentAppId} 不存在，fallback到默认app`
+                `[validateAndRefreshConfig] Current app ${currentState.currentAppId} not found, fallback to default app`
               );
 
               const provider = await getDefaultProviderForApp();
@@ -326,7 +334,7 @@ export const useCurrentAppStore = create<CurrentAppState>()(
                 !defaultInstanceResult.data
               ) {
                 console.warn(
-                  '[validateAndRefreshConfig] 默认服务实例也不存在，清除当前配置'
+                  '[validateAndRefreshConfig] Default service instance also not found, clearing current config'
                 );
                 get().clearCurrentApp();
                 return;
@@ -338,8 +346,8 @@ export const useCurrentAppStore = create<CurrentAppState>()(
             }
           }
 
-          // 检查当前配置是否与目标配置一致
-          // 🎯 修复：不仅检查ID，还要检查实例的详细信息是否有变化
+          // Check if the current config matches the target config
+          // Fix: check not only ID, but also if instance details have changed
           const hasInstanceChanged =
             currentState.currentAppId !== targetInstance.instance_id ||
             currentState.currentAppInstance?.display_name !==
@@ -350,10 +358,10 @@ export const useCurrentAppStore = create<CurrentAppState>()(
 
           if (hasInstanceChanged) {
             console.log(
-              '[validateAndRefreshConfig] 配置已变更，更新为最新配置'
+              '[validateAndRefreshConfig] Config has changed, updating to latest config'
             );
 
-            // 🎯 配置变更时清除Dify配置缓存，确保API调用使用最新配置
+            // On config change, clear Dify config cache to ensure API calls use latest config
             if (currentState.currentAppId) {
               clearDifyConfigCache(currentState.currentAppId);
             }
@@ -369,40 +377,43 @@ export const useCurrentAppStore = create<CurrentAppState>()(
             });
           } else {
             console.log(
-              '[validateAndRefreshConfig] 配置仍然有效，更新验证时间戳'
+              '[validateAndRefreshConfig] Config is still valid, updating validation timestamp'
             );
             set({ lastValidatedAt: now });
           }
         } catch (error) {
-          console.error('[validateAndRefreshConfig] 验证配置时出错:', error);
-          // 🎯 错误恢复机制：验证失败时不清除配置，只记录错误
-          // 这确保即使数据库暂时不可用，用户仍能使用缓存的配置
+          console.error(
+            '[validateAndRefreshConfig] Error during config validation:',
+            error
+          );
+          // Error recovery: on validation failure, do not clear config, just record the error
+          // This ensures that even if the database is temporarily unavailable, the user can still use the cached config
           const errorMessage =
             error instanceof Error ? error.message : String(error);
           set({
-            errorLoadingAppId: `配置验证失败: ${errorMessage}。当前使用缓存配置，请检查网络连接。`,
-            lastValidatedAt: Date.now(), // 即使失败也更新时间戳，避免频繁重试
+            errorLoadingAppId: `Config validation failed: ${errorMessage}. Using cached config, please check network connection.`,
+            lastValidatedAt: Date.now(), // Even on failure, update timestamp to avoid frequent retries
           });
         } finally {
-          // 🎯 清除所有验证状态
+          // Clear all validation states
           set({ isValidating: false, isValidatingForMessage: false });
         }
       },
 
-      // 新增：切换到指定app的方法
-      // 🎯 重构：支持多提供商，在所有活跃提供商中查找应用实例
+      // Added: method to switch to a specific app
+      // Refactor: support multi-provider, search for app instance among all active providers
       switchToApp: async (appId: string) => {
-        console.log(`[switchToApp] 开始切换到app: ${appId}`);
+        console.log(`[switchToApp] Start switching to app: ${appId}`);
 
         set({ isLoadingAppId: true, errorLoadingAppId: null });
 
         try {
-          // 🎯 重构：在所有活跃提供商中查找应用实例，而不仅仅是默认提供商
-          // 这样可以支持来自不同提供商的应用切换
+          // Refactor: search for app instance among all active providers, not just default provider
+          // This allows switching to apps from different providers
           const { createClient } = await import('../supabase/client');
           const supabase = createClient();
 
-          // 首先在所有活跃提供商中查找指定的应用实例
+          // First, search for the specified app instance among all active providers
           const { data: targetInstance, error: targetError } = await supabase
             .from('service_instances')
             .select(
@@ -421,17 +432,17 @@ export const useCurrentAppStore = create<CurrentAppState>()(
             .single();
 
           if (targetError || !targetInstance) {
-            throw new Error(`未找到app实例: ${appId}`);
+            throw new Error(`App instance not found: ${appId}`);
           }
 
-          // 清除旧的配置缓存
+          // Clear old config cache
           const currentState = get();
           if (currentState.currentAppId) {
             clearDifyConfigCache(currentState.currentAppId);
           }
           clearDifyConfigCache(appId);
 
-          // 更新状态
+          // Update state
           set({
             currentAppId: targetInstance.instance_id,
             currentAppInstance: targetInstance,
@@ -441,24 +452,24 @@ export const useCurrentAppStore = create<CurrentAppState>()(
           });
 
           console.log(
-            `[switchToApp] 成功切换到app: ${appId}，提供商: ${targetInstance.providers?.name}`
+            `[switchToApp] Successfully switched to app: ${appId}, provider: ${targetInstance.providers?.name}`
           );
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : String(error);
-          console.error(`[switchToApp] 切换app失败:`, error);
+          console.error(`[switchToApp] Failed to switch app:`, error);
           set({
             isLoadingAppId: false,
-            errorLoadingAppId: `切换app失败: ${errorMessage}`,
+            errorLoadingAppId: `Failed to switch app: ${errorMessage}`,
           });
-          throw error; // 重新抛出错误，让调用者处理
+          throw error; // Rethrow error for caller to handle
         }
       },
     }),
     {
-      name: 'current-app-storage', // localStorage 中的 key
+      name: 'current-app-storage', // Key in localStorage
       storage: createJSONStorage(() => localStorage),
-      // 只持久化 appId 和 instance，其他状态是临时的
+      // Only persist appId and instance, other states are temporary
       partialize: state => ({
         currentAppId: state.currentAppId,
         currentAppInstance: state.currentAppInstance,
@@ -467,14 +478,14 @@ export const useCurrentAppStore = create<CurrentAppState>()(
   )
 );
 
-// 使用建议:
-// 在应用的主布局组件 (例如 app/providers.tsx 或 app/layout.tsx) 的顶层，
-// 使用 useEffect 来调用一次 initializeDefaultAppId，以确保应用加载时会尝试设置默认应用。
-// 例如:
+// Usage suggestion:
+// In the top-level of your main layout component (e.g. app/providers.tsx or app/layout.tsx),
+// use useEffect to call initializeDefaultAppId once, to ensure the app tries to set a default app on load.
+// For example:
 // import { useEffect } from 'react';
 // import { useCurrentAppStore } from '@lib/stores/current-app-store';
 //
-// function AppProviders({ children }) { // 或者你的根布局组件
+// function AppProviders({ children }) { // or your root layout component
 //   const initializeDefaultAppId = useCurrentAppStore(state => state.initializeDefaultAppId);
 //
 //   useEffect(() => {
