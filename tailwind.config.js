@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: 'class', // 使用类切换，而不是媒体查询
+  darkMode: 'class', // Use class strategy for dark mode instead of media query
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -13,10 +13,10 @@ module.exports = {
         foreground: 'var(--foreground)',
       },
       fontFamily: {
-        // 🎯 全局衬线字体配置 - 所有字体族都指向衬线字体
-        // sans: 现在也指向 Crimson Pro + 思源宋体，避免退化
-        // serif: Crimson Pro + 思源宋体 - 优雅易读的阅读字体
-        // display: Playfair Display + 思源宋体 - 装饰性标题字体
+        // Global serif font configuration - all font families point to serif fonts
+        // sans: Crimson Pro + Noto Serif + Georgia + serif fallback
+        // serif: Crimson Pro + Noto Serif + Georgia + serif fallback
+        // display: Playfair Display + Noto Serif + serif fallback
         sans: [
           'var(--font-crimson)',
           'var(--font-noto-serif)',

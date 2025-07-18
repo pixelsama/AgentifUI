@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-i18n翻译文件一致性验证脚本
-用于确保所有语言的翻译文件具有相同的结构和键
+i18n translation file consistency validation script
+Ensures that all language translation files have the same structure and keys.
 """
 
 import json
@@ -12,8 +12,8 @@ from typing import Dict, Set, List, Any
 from pathlib import Path
 
 def load_languages_from_ts(verbose: bool = True) -> List[str]:
-    """从 lib/config/language-config.ts 加载支持的语言列表"""
-    # 脚本位于 scripts/ 目录，TS 文件路径相对于项目根目录
+    """Load supported language list from lib/config/language-config.ts"""
+    # Script is in scripts/ directory, TS file path is relative to project root
     project_root = Path(__file__).resolve().parent.parent
     ts_file_path = project_root / "lib/config/language-config.ts"
 
@@ -24,7 +24,7 @@ def load_languages_from_ts(verbose: bool = True) -> List[str]:
     try:
         content = ts_file_path.read_text(encoding="utf-8")
 
-        # 查找 SUPPORTED_LANGUAGES 对象体（非贪婪匹配）
+        # Find SUPPORTED_LANGUAGES object body (non-greedy match)
         match = re.search(
             r"export\s+const\s+SUPPORTED_LANGUAGES\s*=\s*{(.+?)}\s*as\s+const;",
             content,
@@ -36,7 +36,7 @@ def load_languages_from_ts(verbose: bool = True) -> List[str]:
 
         obj_content = match.group(1)
 
-        # 匹配更通用的语言代码（支持 en, zh-Hans, es-419, sr-Latn-RS 等）
+        # Match more general language codes (supporting en, zh-Hans, es-419, sr-Latn-RS, etc.)
         lang_codes = re.findall(
             r"\s*['\"]([a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*)['\"]\s*:",
             obj_content,
@@ -55,7 +55,7 @@ def load_languages_from_ts(verbose: bool = True) -> List[str]:
         return []
          
 def get_all_keys(obj: Any, prefix: str = "") -> Set[str]:
-    """递归获取JSON对象中的所有键路径"""
+    """Recursively get all key paths in a JSON object"""
     keys = set()
     
     if isinstance(obj, dict):
@@ -70,7 +70,7 @@ def get_all_keys(obj: Any, prefix: str = "") -> Set[str]:
     return keys
 
 def load_translation_files() -> Dict[str, Dict]:
-    """加载所有翻译文件"""
+    """Load all translation files"""
     languages = load_languages_from_ts()
     translations = {}
     
@@ -94,16 +94,16 @@ def load_translation_files() -> Dict[str, Dict]:
     return translations
 
 def validate_structure_consistency(translations: Dict[str, Dict]) -> bool:
-    """验证所有翻译文件的结构一致性"""
+    """Validate structure consistency of all translation files"""
     print("\n🔍 Validating structure consistency...")
     
-    # 获取所有语言的键集合
+    # Get key sets for all languages
     all_keys = {}
     for lang, data in translations.items():
         all_keys[lang] = get_all_keys(data)
         print(f"  {lang}: {len(all_keys[lang])} keys")
     
-    # 以中文为基准检查其他语言
+    # Use zh-CN as the base language for comparison
     base_lang = 'zh-CN'
     base_keys = all_keys[base_lang]
     
@@ -115,7 +115,7 @@ def validate_structure_consistency(translations: Dict[str, Dict]) -> bool:
         
         current_keys = all_keys[lang]
         
-        # 检查缺失的键
+        # Check for missing keys
         missing_keys = base_keys - current_keys
         if missing_keys:
             print(f"❌ {lang} missing keys ({len(missing_keys)} keys):")
@@ -123,7 +123,7 @@ def validate_structure_consistency(translations: Dict[str, Dict]) -> bool:
                 print(f"    - {key}")
             inconsistent = True
         
-        # 检查多余的键
+        # Check for extra keys
         extra_keys = current_keys - base_keys
         if extra_keys:
             print(f"❌ {lang} extra keys ({len(extra_keys)} keys):")
@@ -137,7 +137,7 @@ def validate_structure_consistency(translations: Dict[str, Dict]) -> bool:
     return not inconsistent
 
 def validate_file_consistency() -> bool:
-    """验证文件行数一致性"""
+    """Validate file line count consistency"""
     print("\n📊 Validating file line consistency...")
     
     languages = load_languages_from_ts()
@@ -149,7 +149,7 @@ def validate_file_consistency() -> bool:
             line_counts[lang] = len(f.readlines())
         print(f"  {lang}: {line_counts[lang]} lines")
     
-    # 检查是否所有文件行数相同
+    # Check if all files have the same line count
     unique_counts = set(line_counts.values())
     if len(unique_counts) == 1:
         print("✅ All files have consistent line counts")
@@ -159,12 +159,12 @@ def validate_file_consistency() -> bool:
         return False
 
 def validate_json_format(translations: Dict[str, Dict]) -> bool:
-    """验证JSON格式正确性"""
+    """Validate JSON format correctness"""
     print("\n🔧 Validating JSON format...")
     
     for lang, data in translations.items():
         try:
-            # 尝试重新序列化以验证格式
+            # Try to re-serialize to validate format
             json.dumps(data, ensure_ascii=False, indent=2)
             print(f"✅ {lang} JSON format is valid")
         except Exception as e:
@@ -174,25 +174,25 @@ def validate_json_format(translations: Dict[str, Dict]) -> bool:
     return True
 
 def main():
-    """主函数"""
+    """Main function"""
     print("🚀 Starting i18n translation file consistency validation...")
     
-    # 检查是否在正确的目录
+    # Check if in the correct directory
     if not os.path.exists("messages"):
         print("❌ Messages directory not found, please run this script from project root")
         sys.exit(1)
     
-    # 加载翻译文件
+    # Load translation files
     translations = load_translation_files()
     
-    # 执行所有验证
+    # Run all validations
     validations = [
         validate_file_consistency(),
         validate_json_format(translations),
         validate_structure_consistency(translations)
     ]
     
-    # 输出结果
+    # Output result
     print("\n" + "="*50)
     if all(validations):
         print("🎉 All validations passed! Translation file structures are fully consistent")

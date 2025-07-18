@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-i18n一致性检查脚本
-专注于检查翻译文件的结构一致性
+i18n consistency check script
+Focuses on checking the structural consistency of translation files
 """
 
 import json
@@ -22,8 +22,8 @@ class I18nConsistencyChecker:
             
 
     def load_languages_from_ts(self, verbose: bool = True) -> List[str]:
-        """从 lib/config/language-config.ts 加载支持的语言列表"""
-        # 脚本位于 scripts/ 目录，TS 文件路径相对于项目根目录
+        """Load supported language list from lib/config/language-config.ts"""
+        # Script is in scripts/ directory, TS file path is relative to project root
         project_root = Path(__file__).resolve().parent.parent
         ts_file_path = project_root / "lib/config/language-config.ts"
     
@@ -34,7 +34,7 @@ class I18nConsistencyChecker:
         try:
             content = ts_file_path.read_text(encoding="utf-8")
 
-            # 查找 SUPPORTED_LANGUAGES 对象体（非贪婪匹配）
+            # Find SUPPORTED_LANGUAGES object body (non-greedy match)
             match = re.search(
                 r"export\s+const\s+SUPPORTED_LANGUAGES\s*=\s*{(.+?)}\s*as\s+const;",
                 content,
@@ -46,7 +46,7 @@ class I18nConsistencyChecker:
 
             obj_content = match.group(1)
 
-            # 匹配更通用的语言代码（支持 en, zh-Hans, es-419, sr-Latn-RS 等）
+            # Match general language codes (supporting en, zh-Hans, es-419, sr-Latn-RS, etc.)
             lang_codes = re.findall(
                 r"\s*['\"]([a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*)['\"]\s*:",
                 obj_content,
@@ -65,7 +65,7 @@ class I18nConsistencyChecker:
             return []
 
     def get_all_keys(self, obj: Any, prefix: str = "") -> Set[str]:
-        """递归获取所有键路径"""
+        """Recursively get all key paths"""
         keys = set()
         if isinstance(obj, dict):
             for key, value in obj.items():
@@ -76,16 +76,16 @@ class I18nConsistencyChecker:
         return keys
     
     def find_key_line_number(self, file_path: Path, key_path: str) -> Optional[int]:
-        """查找键在文件中的行号"""
+        """Find the line number of a key in the file"""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
             
-            # 提取最后一级键名
+            # Extract the last level key name
             key_parts = key_path.split('.')
             target_key = key_parts[-1]
             
-            # 搜索包含该键的行
+            # Search for the line containing the key
             for i, line in enumerate(lines, 1):
                 if f'"{target_key}":' in line:
                     return i
@@ -95,7 +95,7 @@ class I18nConsistencyChecker:
             return None
     
     def load_translation_files(self) -> Optional[Dict[str, Dict]]:
-        """加载所有翻译文件"""
+        """Load all translation files"""
         translations = {}
         
         for lang in self.languages:
@@ -118,19 +118,19 @@ class I18nConsistencyChecker:
         return translations
 
     def detect_missing_keys(self) -> Optional[Dict[str, List[Dict[str, Any]]]]:
-        """检测缺失的键，返回详细信息包括行号"""
+        """Detect missing keys, return details including line number"""
         print("🔍 Detecting missing keys...")
         
         translations = self.load_translation_files()
         if not translations:
             return None
         
-        # 获取所有键
+        # Get all keys
         all_keys = {}
         for lang, data in translations.items():
             all_keys[lang] = self.get_all_keys(data)
         
-        # 以中文为基准检查其他语言
+        # Use Chinese as the base to check other languages
         base_lang = 'zh-CN'
         base_keys = all_keys[base_lang]
         base_file = self.messages_dir / f"{base_lang}.json"
@@ -153,7 +153,7 @@ class I18nConsistencyChecker:
                 print(f"\n❌ {lang} missing {len(missing_keys)} keys:")
                 
                 for key in sorted(missing_keys):
-                    # 获取行号
+                    # Get line number
                     line_num = self.find_key_line_number(base_file, key)
                     
                     print(f"    📍 {key} (line ~{line_num if line_num else 'unknown'})")
@@ -170,7 +170,7 @@ class I18nConsistencyChecker:
         return missing_info if has_missing else None
 
     def validate_consistency(self, silent: bool = False) -> bool:
-        """验证翻译文件一致性"""
+        """Validate translation file consistency"""
         if not silent:
             print("🔍 Validating translation file consistency...")
         
@@ -178,7 +178,7 @@ class I18nConsistencyChecker:
         if not translations:
             return False
         
-        # 验证行数一致性
+        # Validate line count consistency
         line_counts = {}
         for lang in self.languages:
             file_path = self.messages_dir / f"{lang}.json"
@@ -195,7 +195,7 @@ class I18nConsistencyChecker:
             print("❌ File line counts are inconsistent")
             return False
         
-        # 验证结构一致性
+        # Validate structure consistency
         all_keys = {}
         for lang, data in translations.items():
             all_keys[lang] = self.get_all_keys(data)
@@ -205,7 +205,7 @@ class I18nConsistencyChecker:
             for lang, keys in all_keys.items():
                 print(f"  {lang}: {len(keys)} keys")
         
-        # 以中文为基准检查其他语言
+        # Use Chinese as the base to check other languages
         base_lang = 'zh-CN'
         base_keys = all_keys[base_lang]
         
@@ -232,11 +232,11 @@ class I18nConsistencyChecker:
         return not inconsistent
 
     def quick_check(self) -> bool:
-        """快速检查（静默模式）"""
+        """Quick check (silent mode)"""
         return self.validate_consistency(silent=True)
 
 def main():
-    """主函数"""
+    """Main function"""
     if len(sys.argv) < 2:
         print("Usage: python3 i18n-refactor-helper.py <command>")
         print("Commands:")

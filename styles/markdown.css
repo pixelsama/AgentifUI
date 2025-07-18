@@ -1,8 +1,8 @@
-/* Markdown样式 */
+/* Markdown Styles */
 
-/* 代码语法高亮 - 使用CSS变量实现 */
+/* Code syntax highlighting - using CSS variables */
 :root {
-  /* 基础语法高亮颜色 - 亮色主题 */
+  /* Base syntax highlight colors - light theme */
   --syntax-comment: #6a737d;
   --syntax-keyword: #d73a49;
   --syntax-string: #032f62;
@@ -19,7 +19,7 @@
 }
 
 .dark {
-  /* 基础语法高亮颜色 - 暗色主题 */
+  /* Base syntax highlight colors - dark theme */
   --syntax-comment: #8b949e;
   --syntax-keyword: #ff7b72;
   --syntax-string: #a5d6ff;
@@ -35,7 +35,7 @@
   --syntax-punctuation: #c9d1d9;
 }
 
-/* 语法高亮类 */
+/* Syntax highlight classes */
 .token.comment,
 .token.prolog,
 .token.doctype,
@@ -211,7 +211,7 @@
   border: 0;
 }
 
-/* 代码块样式 */
+/* Code block styles */
 .markdown-body pre {
   overflow: auto;
   border-radius: 6px;
@@ -221,7 +221,7 @@
   font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
 }
 
-/* 表格样式 */
+/* Table styles */
 .markdown-body table {
   border-spacing: 0;
   border-collapse: collapse;
@@ -257,19 +257,19 @@
   border-bottom-color: var(--md-table-divide) !important;
 }
 
-/* LaTeX公式样式 */
+/* LaTeX formula styles */
 .markdown-body .katex-display {
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0.5em 0;
 }
 
-/* 引用块样式 */
+/* Blockquote styles */
 .markdown-body blockquote {
   margin: 0 0 16px 0;
 }
 
-/* 暗色模式适配 */
+/* Dark mode adaptation */
 .dark .markdown-body a {
   color: #58a6ff;
 }
@@ -279,47 +279,47 @@
 }
 
 /* ========================================
-   助手消息专用行间距和段落间距控制系统
+   Assistant message custom line and paragraph spacing system
    ======================================== */
 
 /* 
- * 助手消息内容容器的基础行间距设置
- * 作用域：所有 .assistant-message-content 类下的内容
+ * Base line-height for assistant message content container
+ * Scope: all content under .assistant-message-content class
  * 
- * line-height: 1.35 - 设置相对紧凑的基础行间距
- * 目的：为大部分内容提供紧凑的默认行间距，节省垂直空间
+ * line-height: 1.35 - relatively compact base line height
+ * Purpose: provide compact default line height for most content, saving vertical space
  * 
- * 修改建议：
- * - 如需更紧凑：调整为 1.2-1.3
- * - 如需更宽松：调整为 1.4-1.5
+ * Suggestions:
+ * - For more compact: set to 1.2-1.3
+ * - For looser: set to 1.4-1.5
  */
 .assistant-message-content {
   line-height: 1.35 !important;
 }
 
 /* 
- * 段落元素的专用样式设置
- * 这是文本显示的核心样式，控制段落内行间距和段落间距离
+ * Paragraph element custom styles
+ * This is the core style for text display, controlling line height within paragraphs and spacing between paragraphs
  * 
- * line-height: 1.9 - 段落内文本的行间距
- * 目的：让段落内的文本有足够的呼吸空间，提高可读性
- * 与基础 line-height 1.35 形成差异化，段落文本更舒适
+ * line-height: 1.9 - line height within paragraph text
+ * Purpose: give enough breathing room for text in paragraphs, improving readability
+ * Creates a difference from the base line-height 1.35, making paragraph text more comfortable
  * 
- * margin: 0 0 0.1em 0 - 段落间的垂直间距控制
- * 上边距：0 - 不添加上边距，避免累积间距
- * 右边距：0 - 不影响水平布局
- * 下边距：0.1em - 段落之间的小间距，提供视觉分隔
- * 左边距：0 - 不影响水平布局
+ * margin: 0 0 0.1em 0 - vertical spacing between paragraphs
+ * Top: 0 - no top margin, avoids cumulative spacing
+ * Right: 0 - does not affect horizontal layout
+ * Bottom: 0.1em - small space between paragraphs for visual separation
+ * Left: 0 - does not affect horizontal layout
  * 
- * 调整段落间距的方法：
- * - 增大段落间距：将 0.1em 改为 0.3em, 0.5em, 1em 等
- * - 减小段落间距：将 0.1em 改为 0.05em 或 0
- * - 完全移除段落间距：设置为 margin: 0 !important;
+ * How to adjust paragraph spacing:
+ * - Increase: change 0.1em to 0.3em, 0.5em, 1em, etc.
+ * - Decrease: change 0.1em to 0.05em or 0
+ * - Remove spacing: set margin: 0 !important;
  * 
- * 调整段落内行间距的方法：
- * - 更紧凑的段落：将 1.9 改为 1.5-1.7
- * - 更宽松的段落：将 1.9 改为 2.0-2.2
- * - 极紧凑模式：将 1.9 改为 1.3-1.4
+ * How to adjust line height within paragraphs:
+ * - More compact: change 1.9 to 1.5-1.7
+ * - Looser: change 1.9 to 2.0-2.2
+ * - Ultra compact: change 1.9 to 1.3-1.4
  */
 .assistant-message-content p {
   line-height: 1.5 !important;
@@ -327,15 +327,15 @@
 }
 
 /* 
- * 列表项的行间距控制
- * 目的：让列表项保持与基础内容一致的紧凑行间距
+ * List item line-height control
+ * Purpose: keep list items as compact as the base content
  * 
- * line-height: 1.35 - 与基础行间距保持一致
- * 原因：列表通常包含较短的条目，不需要段落那样的宽松行间距
+ * line-height: 1.35 - same as base line height
+ * Reason: lists usually have short entries, do not need as loose line height as paragraphs
  * 
- * 修改建议：
- * - 如果列表内容较长，可以调整为 1.5-1.6
- * - 如果希望列表更紧凑，可以调整为 1.2-1.3
+ * Suggestions:
+ * - If list content is long, set to 1.5-1.6
+ * - For more compact lists, set to 1.2-1.3
  */
 .assistant-message-content ul li,
 .assistant-message-content ol li {
@@ -344,20 +344,20 @@
 }
 
 /* 
- * 标题元素的行间距控制
- * 目的：维持标题的视觉层次结构和可读性
+ * Heading element line-height control
+ * Purpose: maintain visual hierarchy and readability for headings
  * 
- * line-height: 1.25 - 相对紧凑的标题行间距
- * 原因：标题通常较短，紧凑的行间距能突出标题的重要性
- * 同时与 markdown.css 中的标题默认行间距保持一致
+ * line-height: 1.25 - relatively compact heading line height
+ * Reason: headings are usually short, compact line height emphasizes their importance
+ * Also matches the default heading line height in markdown.css
  * 
- * 层次说明：
- * 标题 (1.25) < 基础内容 (1.35) < 段落文本 (1.9)
- * 形成清晰的视觉层次，标题最紧凑，段落最宽松
+ * Hierarchy:
+ * Heading (1.25) < Base content (1.35) < Paragraph text (1.9)
+ * Creates a clear visual hierarchy: headings most compact, paragraphs loosest
  * 
- * 修改建议：
- * - 如需更突出的标题：调整为 1.1-1.2
- * - 如需更舒缓的标题：调整为 1.3-1.4
+ * Suggestions:
+ * - For more prominent headings: set to 1.1-1.2
+ * - For more relaxed headings: set to 1.3-1.4
  */
 .assistant-message-content h1,
 .assistant-message-content h2,
@@ -371,16 +371,16 @@
 }
 
 /* 
- * 列表容器的边距控制 - 解决列表与标题间距过大的问题
- * 目的：控制列表与其他元素（特别是后续标题）之间的距离
+ * List container margin control - fix too much space between lists and headings
+ * Purpose: control the distance between lists and other elements (especially following headings)
  * 
- * margin-bottom: 0.6em - 列表的下边距
- * 原因：默认的 16px (约1em) 太大，会导致列表与后续标题间距过大
- * 设置为 0.6em 与段落间距 1em 相比更紧凑，形成合理的视觉层次
+ * margin-bottom: 0.6em - bottom margin for lists
+ * Reason: default 16px (about 1em) is too large, causing too much space between lists and following headings
+ * Set to 0.6em for a more compact look compared to 1em paragraph spacing, creating a reasonable visual hierarchy
  * 
- * 调整建议：
- * - 如需更紧凑：改为 0.4em 或 0.5em
- * - 如需更宽松：改为 0.8em 或 1em
+ * Suggestions:
+ * - For more compact: set to 0.4em or 0.5em
+ * - For looser: set to 0.8em or 1em
  */
 .assistant-message-content ul,
 .assistant-message-content ol {

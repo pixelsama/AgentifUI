@@ -2,12 +2,12 @@
 @import '../styles/markdown.css';
 @import '../styles/markdown-variables.css';
 
-/* 添加防闪烁的基础样式 */
+/* Add base style to prevent flicker */
 html {
   transition: background-color 0ms ease-out;
 }
 
-/* 添加初始隐藏和延迟显示 */
+/* Add initial hidden and delayed show */
 body {
   opacity: 0;
 }
@@ -44,8 +44,8 @@ body.render-ready {
   --chart-4: 43 74% 66%;
   --chart-5: 27 87% 67%;
 
-  --page-height: auto; /* 默认高度为自动 */
-  --page-overflow: visible; /* 默认溢出为可见 */
+  --page-height: auto; /* default height is auto */
+  --page-overflow: visible; /* default overflow is visible */
 
   /* Toast notification color variables */
   --toast-bg: 255 255 255;
@@ -58,47 +58,47 @@ body.render-ready {
   --color-foreground: var(--foreground);
 }
 
-/* 明确的暗色主题类 */
+/* Explicit dark theme class */
 .dark {
   --background: #292524; /* stone-800 */
   --foreground: #f3f4f6; /* gray-100 */
 
-  /* 卡片背景 */
+  /* Card background */
   --card: 2 6 23;
   --card-foreground: 248 250 252;
 
-  /* 弹出层背景 */
+  /* Popover background */
   --popover: 2 6 23;
   --popover-foreground: 248 250 252;
 
-  /* 主色调 */
+  /* Primary color */
   --primary: 248 250 252;
   --primary-foreground: 15 23 42;
 
-  /* 次要色 */
+  /* Secondary color */
   --secondary: 30 41 59;
   --secondary-foreground: 248 250 252;
 
-  /* 静音色 */
+  /* Muted color */
   --muted: 30 41 59;
   --muted-foreground: 148 163 184;
 
-  /* 强调色 */
+  /* Accent color */
   --accent: 30 41 59;
   --accent-foreground: 248 250 252;
 
-  /* 破坏性操作色 */
+  /* Destructive color */
   --destructive: 220 38 38;
   --destructive-foreground: 248 250 252;
 
-  /* 边框色 */
+  /* Border color */
   --border: 30 41 59;
   --input: 30 41 59;
 
-  /* 焦点环色 */
+  /* Focus ring color */
   --ring: 147 197 253;
 
-  /* 图表色调 */
+  /* Chart colors */
   --chart-1: 34 197 94;
   --chart-2: 59 130 246;
   --chart-3: 168 85 247;
@@ -111,7 +111,7 @@ body.render-ready {
   --toast-border: 51 65 85;
 }
 
-/* 系统偏好设置（仅作为初始值） */
+/* System preference (only as initial value) */
 @media (prefers-color-scheme: dark) {
   :root:not(.light):not(.dark) {
     --background: #292524; /* stone-800 */
@@ -124,7 +124,7 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow-y: auto; /* 默认允许垂直滚动 */
+  overflow-y: auto; /* allow vertical scroll by default */
 }
 
 /* Global font rules - ensure all routes use consistent fonts */
@@ -154,7 +154,7 @@ body {
     display: none;
   }
 
-  /* --- 强制隐藏所有滚动条的全局类 --- */
+  /* --- Force hide all scrollbars globally --- */
   .hide-all-scrollbars,
   .hide-all-scrollbars * {
     -ms-overflow-style: none !important;
@@ -172,7 +172,7 @@ body {
 
 @layer base {
   /* Global serif font settings - maintain previous font sizes, use serif fonts throughout
-     Keep font-size-adjust to ensure consistent height between Chinese and English text */
+     Keep font-size-adjust to ensure consistent height between English and CJK text */
   html,
   body,
   * {
@@ -192,7 +192,7 @@ body {
     transition: opacity 0.2s;
   }
 
-  /* 🔥 代码字体最高优先级 - 覆盖全局字体 */
+  /* Highest priority for code font - override global font */
   .font-mono, code, pre, kbd, samp, tt,
   .hljs, .hljs *,
   .token, .token *,
@@ -214,10 +214,10 @@ body {
   .vscode-highlight, .vscode-highlight *,
   .cm-editor, .cm-editor *,
   .CodeMirror, .CodeMirror *,
-  /* 行内代码也要保护 */
+  /* Also protect inline code */
   p code, li code, td code, th code, span code,
   div code:not(.hljs), span code:not(.token),
-  /* markdown 中的代码 */
+  /* Markdown code */
   .markdown-body code, .markdown-body pre,
   .markdown-body code *, .markdown-body pre *,
   .prose code, .prose pre,
@@ -232,7 +232,7 @@ body {
       'calt' 0 !important;
   }
 
-  /* 🎯 标题使用装饰字体，但排除欢迎屏幕 */
+  /* Headings use decorative font, except welcome screen */
   h1,
   h2,
   h3,
@@ -244,14 +244,14 @@ body {
     font-weight: 600;
   }
 
-  /* 🎯 欢迎屏幕使用衬线字体，所有文本都更优雅 */
+  /* Welcome screen uses serif font for all text */
   .welcome-screen,
   .welcome-screen * {
     font-family:
       var(--font-crimson), var(--font-noto-serif), Georgia, serif !important;
   }
 
-  /* 🎯 欢迎屏幕标题使用装饰字体 */
+  /* Welcome screen headings use display font */
   .welcome-screen h1,
   .welcome-screen h2,
   .welcome-screen h3,
@@ -262,7 +262,7 @@ body {
     font-weight: 700;
   }
 
-  /* 🎯 特殊字体类 - 现在全局默认就是serif，保留.font-sans用于特殊需要 */
+  /* Special font classes - default is serif globally, keep .font-sans for special needs */
   .font-sans {
     font-family:
       var(--font-inter),
@@ -282,7 +282,7 @@ body {
     font-family: var(--font-playfair), var(--font-noto-serif), serif !important;
   }
 
-  /* 🎯 输入框和表单元素的字体优化 */
+  /* Input and form element font optimization */
   input,
   textarea,
   select,
@@ -292,7 +292,7 @@ body {
     font-size-adjust: 0.52;
   }
 
-  /* 🎯 特别优化输入框中的字体显示 */
+  /* Special optimization for input font rendering */
   input[type='text'],
   input[type='email'],
   input[type='password'],
@@ -301,17 +301,17 @@ body {
   input[type='tel'],
   input[type='number'],
   textarea {
-    /* 确保输入框内的文字大小一致 */
+    /* Ensure consistent font size in input */
     font-size: inherit;
     font-size-adjust: 0.52;
     line-height: 1.5;
-    /* 改善中英文混排的视觉效果 */
+    /* Improve visual effect for mixed English and CJK */
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* 🎯 占位符文本的字体调整 */
+  /* Placeholder text font adjustment */
   ::placeholder {
     font-family:
       var(--font-crimson), var(--font-noto-serif), Georgia, serif !important;
@@ -319,7 +319,7 @@ body {
     opacity: 0.6;
   }
 
-  /* 🎯 阅读内容使用衬线字体 */
+  /* Reading content uses serif font */
   .prose,
   article,
   .markdown-content {
@@ -327,7 +327,7 @@ body {
       var(--font-crimson), var(--font-noto-serif), Georgia, serif !important;
   }
 
-  /* 🎯 覆盖 markdown.css 中的硬编码字体 */
+  /* Override hardcoded font in markdown.css */
   .markdown-body,
   .markdown-body * {
     font-family:
@@ -366,7 +366,7 @@ body {
       'calt' 0 !important;
   }
 
-  /* 🎯 字体大小调整工具类 */
+  /* Font size adjust utility class */
   .font-size-adjust-serif {
     font-size-adjust: 0.52 !important;
     line-height: 1.6 !important;
@@ -431,29 +431,29 @@ article pre * {
   font-size-adjust: none !important;
 }
 
-/* 聊天页面特定样式 - 控制滚动行为 */
+/* Chat page specific styles - control scroll behavior */
 body.chat-page {
-  overflow: hidden; /* 防止页面级别的滚动 */
+  overflow: hidden; /* prevent page-level scroll */
 }
 
 body.chat-page main {
   height: 100%;
-  overflow: auto; /* 在主内容区域允许滚动 */
+  overflow: auto; /* allow scroll in main content area */
 }
 
-/* 非聊天页面样式 - 自然滚动 */
+/* Non-chat page styles - natural scroll */
 body.default-page {
   min-height: 100%;
   overflow-y: auto;
 }
 
-/* 确保内容容器有足够的空间和滚动行为 */
+/* Ensure content container has enough space and scroll behavior */
 .content-wrapper {
   flex: 1;
   overflow-y: auto;
 }
 
-/* 自定义主内容区域过渡效果 */
+/* Custom main content transition effect */
 .main-transition {
   transition-property: transform, opacity, margin;
   transition-duration: 150ms, 150ms, 300ms;
@@ -472,7 +472,7 @@ body.default-page {
   transition-delay: 100ms, 100ms, 0ms;
 }
 
-/* 自定义动画 */
+/* Custom animations */
 @keyframes pulse {
   0%,
   100% {
@@ -527,8 +527,8 @@ body.default-page {
   animation: slideInDown 200ms ease-out forwards;
 }
 
-/* 🎯 Markdown标题也使用衬线字体，保持与正文一致 */
-*/ .markdown-body h1,
+/* Markdown headings also use serif font, consistent with body text */
+.markdown-body h1,
 .markdown-body h2,
 .markdown-body h3,
 .markdown-body h4,
@@ -591,25 +591,26 @@ body.default-page {
 /* Chatflow Iteration hierarchy indicator styles
    Decorative line close to bar left edge, consistent with bar style */
 
-/* 迭代节点容器 */
+/* Iteration node container */
 .iteration-node {
   position: relative;
 }
 
-/* 左侧装饰线 - 紧贴bar左边缘，与bar高度和圆角保持一致 */
+/* Left decorative line - close to bar left edge, matches bar height and border radius */
 .iteration-node::before {
   content: '';
   position: absolute;
-  left: -1px; /* 紧贴bar的左边框 */
+  left: -1px; /* close to bar's left border */
   top: 0;
   bottom: 0;
   width: 3px;
   background: linear-gradient(
     to bottom,
     rgba(168, 162, 158, 0.6),
-    /* stone-400 半透明 */ rgba(168, 162, 158, 0.8) /* stone-400 更不透明 */
+    /* stone-400 semi-transparent */ rgba(168, 162, 158, 0.8)
+      /* stone-400 more opaque */
   );
-  border-radius: 6px 0 0 6px; /* 左侧圆角与bar的rounded-md匹配 */
+  border-radius: 6px 0 0 6px; /* left border radius matches bar's rounded-md */
   transition: all 0.2s ease;
 }
 
@@ -617,15 +618,16 @@ body.default-page {
   background: linear-gradient(
     to bottom,
     rgba(87, 83, 78, 0.6),
-    /* stone-600 半透明 */ rgba(87, 83, 78, 0.8) /* stone-600 更不透明 */
+    /* stone-600 semi-transparent */ rgba(87, 83, 78, 0.8)
+      /* stone-600 more opaque */
   );
 }
 
-/* 连接点 - 在装饰线中央的小指示器 */
+/* Connection point - small indicator in the center of the decorative line */
 .iteration-node::after {
   content: '';
   position: absolute;
-  left: -0.5px; /* 在装饰线中央 */
+  left: -0.5px; /* center of the decorative line */
   top: 50%;
   transform: translateY(-50%);
   width: 2px;
@@ -647,7 +649,7 @@ body.default-page {
   background: linear-gradient(
     to bottom,
     rgba(120, 113, 108, 0.8),
-    /* stone-500 */ rgba(120, 113, 108, 1) /* stone-500 完全不透明 */
+    /* stone-500 */ rgba(120, 113, 108, 1) /* stone-500 fully opaque */
   );
 }
 
@@ -655,7 +657,7 @@ body.default-page {
   background: linear-gradient(
     to bottom,
     rgba(120, 113, 108, 0.8),
-    /* stone-500 */ rgba(120, 113, 108, 1) /* stone-500 完全不透明 */
+    /* stone-500 */ rgba(120, 113, 108, 1) /* stone-500 fully opaque */
   );
 }
 
@@ -673,25 +675,26 @@ body.default-page {
 /* Chatflow Loop hierarchy indicator styles
    Maintain completely consistent styles and behavior with Iteration */
 
-/* 循环节点容器 */
+/* Loop node container */
 .loop-node {
   position: relative;
 }
 
-/* 左侧装饰线 - 与iteration-node完全一致 */
+/* Left decorative line - exactly the same as iteration-node */
 .loop-node::before {
   content: '';
   position: absolute;
-  left: -1px; /* 紧贴bar的左边框 */
+  left: -1px; /* close to bar's left border */
   top: 0;
   bottom: 0;
   width: 3px;
   background: linear-gradient(
     to bottom,
     rgba(168, 162, 158, 0.6),
-    /* stone-400 半透明 */ rgba(168, 162, 158, 0.8) /* stone-400 更不透明 */
+    /* stone-400 semi-transparent */ rgba(168, 162, 158, 0.8)
+      /* stone-400 more opaque */
   );
-  border-radius: 6px 0 0 6px; /* 左侧圆角与bar的rounded-md匹配 */
+  border-radius: 6px 0 0 6px; /* left border radius matches bar's rounded-md */
   transition: all 0.2s ease;
 }
 
@@ -699,15 +702,16 @@ body.default-page {
   background: linear-gradient(
     to bottom,
     rgba(87, 83, 78, 0.6),
-    /* stone-600 半透明 */ rgba(87, 83, 78, 0.8) /* stone-600 更不透明 */
+    /* stone-600 semi-transparent */ rgba(87, 83, 78, 0.8)
+      /* stone-600 more opaque */
   );
 }
 
-/* 连接点 - 与iteration-node完全一致 */
+/* Connection point - exactly the same as iteration-node */
 .loop-node::after {
   content: '';
   position: absolute;
-  left: -0.5px; /* 在装饰线中央 */
+  left: -0.5px; /* center of the decorative line */
   top: 50%;
   transform: translateY(-50%);
   width: 2px;
@@ -722,14 +726,14 @@ body.default-page {
   background: #57534e; /* stone-600 */
 }
 
-/* 悬停效果 - 与iteration-node完全一致 */
+/* Hover effect - exactly the same as iteration-node */
 .loop-node:hover::before {
   width: 4px;
   left: -2px;
   background: linear-gradient(
     to bottom,
     rgba(120, 113, 108, 0.8),
-    /* stone-500 */ rgba(120, 113, 108, 1) /* stone-500 完全不透明 */
+    /* stone-500 */ rgba(120, 113, 108, 1) /* stone-500 fully opaque */
   );
 }
 
@@ -737,7 +741,7 @@ body.default-page {
   background: linear-gradient(
     to bottom,
     rgba(120, 113, 108, 0.8),
-    /* stone-500 */ rgba(120, 113, 108, 1) /* stone-500 完全不透明 */
+    /* stone-500 */ rgba(120, 113, 108, 1) /* stone-500 fully opaque */
   );
 }
 
