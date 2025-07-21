@@ -1,5 +1,5 @@
 {
-  "name": "AgentifUI",
+  "name": "agentifui",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -27,7 +27,10 @@
       "sharp",
       "unrs-resolver",
       "utf-8-validate"
-    ]
+    ],
+    "overrides": {
+      "@eslint/plugin-kit": "^0.3.3"
+    }
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -75,7 +78,7 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@eslint/eslintrc": "^3",
-    "@stagewise/toolbar-next": "^0.6.1",
+    "@stagewise/toolbar-next": "^0.6.2",
     "@tailwindcss/postcss": "^4",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/lodash": "^4.17.16",
@@ -83,7 +86,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19.1.6",
     "autoprefixer": "^10.0.1",
-    "eslint": "^9.28.0",
+    "eslint": "^9.31.0",
     "eslint-config-next": "15.3.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
