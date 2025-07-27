@@ -1,9 +1,7 @@
 'use client';
 
 import { Spinner } from '@components/ui/spinner';
-// Remove useTheme and useThemeColors imports, use CSS variables instead
 import { useMobile } from '@lib/hooks/use-mobile';
-// Removed react-i18next import
 import { cn } from '@lib/utils';
 
 import React from 'react';
@@ -28,24 +26,18 @@ interface ThinkBlockHeaderProps {
 }
 
 /**
- * ThinkBlockHeader is a horizontal button-style header component.
- * It displays an expand/collapse icon, status text, and a loading spinner when thinking.
+ * Header component for think blocks with status display and expand/collapse functionality
+ * @description Displays thinking status with loading indicator and controls content visibility
  */
 export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
   status,
   isOpen,
   onToggle,
 }) => {
-  // Determine if the current device is mobile
   const isMobile = useMobile();
-
-  // i18n translation hook
   const t = useTranslations('components.chat.thinkBlock');
-
-  // Check if the current status is "thinking"
   const isThinking = status === 'thinking';
 
-  // Get the status text based on the current status
   const getStatusText = () => {
     switch (status) {
       case 'thinking':
@@ -58,20 +50,20 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
     }
   };
 
+  const statusText = getStatusText();
+
   return (
     <button
       className={cn(
-        // Layout: flex, center vertically, space between
-        'flex items-center justify-between',
-        // Responsive width: full on mobile, 22% on desktop
-        isMobile ? 'w-full' : 'w-[22%]',
+        'flex items-center justify-between gap-2',
+        isMobile ? 'w-full' : 'max-w-[50%] min-w-[22%]',
         'mb-1 cursor-pointer rounded-md border px-3 py-1.5 text-sm',
-        // Focus and transition styles
         'focus:outline-none'
       )}
       onClick={onToggle}
       aria-expanded={isOpen}
       aria-controls="think-block-content"
+      aria-label={`${statusText} - ${isOpen ? 'Collapse' : 'Expand'} think block`}
       style={{
         backgroundColor: isThinking
           ? 'var(--md-think-thinking-bg)'
@@ -84,11 +76,12 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
           : 'var(--md-think-header-text)',
       }}
     >
-      {/* Left section: expand/collapse icon and status text */}
-      <div className="flex items-center">
-        {/* Expand/collapse icon */}
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         <svg
-          className={cn('mr-2 h-4 w-4', isOpen ? 'rotate-90' : 'rotate-0')}
+          className={cn(
+            'h-4 w-4 flex-shrink-0',
+            isOpen ? 'rotate-90' : 'rotate-0'
+          )}
           style={{
             color: isThinking
               ? 'var(--md-think-thinking-icon)'
@@ -97,6 +90,7 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -105,22 +99,27 @@ export const ThinkBlockHeader: React.FC<ThinkBlockHeaderProps> = ({
             d="M9 5l7 7-7 7"
           />
         </svg>
-        {/* Status text */}
         <span
-          className={cn('font-medium whitespace-nowrap')}
+          className={cn('min-w-0 flex-1 truncate font-medium')}
+          title={statusText}
           style={{
             color: isThinking
               ? 'var(--md-think-thinking-text)'
               : 'var(--md-think-header-text)',
           }}
         >
-          {getStatusText()}
+          {statusText}
         </span>
       </div>
 
-      {/* Right section: Spinner, only shown when thinking */}
       <div className="h-4 w-4 flex-shrink-0">
-        {isThinking && <Spinner size="md" className="text-current" />}
+        {isThinking && (
+          <Spinner
+            size="md"
+            className="text-current"
+            aria-label={t('thinking')}
+          />
+        )}
       </div>
     </button>
   );
