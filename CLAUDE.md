@@ -82,7 +82,7 @@ supabase/              # Database migrations and configuration
 1. **Security-First**: Uses Supabase RLS (Row Level Security) and encrypted API key storage
 2. **Layered Architecture**: Clear separation between UI, services, and data layers
 3. **Type Safety**: Full TypeScript coverage with strict typing
-4. **Internationalization**: Multi-language support with next-intl (zh-CN, en-US, es-ES, zh-TW, ja-JP)
+4. **Internationalization**: Multi-language support with next-intl (en-US, zh-CN, es-ES, zh-TW, ja-JP, de-DE, fr-FR, ru-RU, it-IT, pt-PT)
 5. **Real-time Updates**: Supabase realtime subscriptions for live data
 
 ### Dify Integration Architecture
@@ -144,12 +144,12 @@ Example JSDoc:
 ### I18n Development
 
 - All user-facing text must be internationalized
-- Add keys to `messages/zh-CN.json` first (source language)
+- Add keys to `messages/en-US.json` first (source language)
 - Maintain structure consistency across all language files
 - Run `pnpm i18n:check` after adding translations
 - **NEVER replace existing `t()` calls with hardcoded English text**
 - **NEVER use hardcoded strings like "Loading..." - always use translations**
-- When adding dynamic translation features, preserve existing translation patterns
+- English-first development: write in English, then translate to other languages
 
 ### Dify API Integration
 
@@ -198,13 +198,11 @@ Example JSDoc:
 - **I18n Work**: MUST NOT hardcode text, maintain key structure consistency
 - **Dify API**: MUST follow 3-layer architecture (proxy→service→type)
 
-### Mandatory Validation Commands
+### Essential Validation
 
 ```bash
-# Before any commit
-pnpm run type-check    # TypeScript validation
-pnpm run i18n:check    # Translation validation
-pnpm run build         # Build validation (ask user first)
+pnpm type-check    # TypeScript validation
+pnpm i18n:check    # Translation validation
 ```
 
 ### Rule Enforcement Protocol
@@ -215,3 +213,31 @@ pnpm run build         # Build validation (ask user first)
 4. Update documentation when needed
 
 **Memory Anchor**: These rule summaries provide persistent reference for AI agents, extracted from detailed rule files for quick compliance checking.
+
+# Testing
+
+Uses Jest with React Testing Library. Husky handles precommit testing automatically.
+Config: jest.config.js and jest.setup.js
+Test files: `*.test.{ts,tsx}` or `*.spec.{ts,tsx}` in same directory, or in `__tests__/` directory.
+
+```bash
+pnpm test
+```
+
+# Code Quality Tools
+
+```bash
+# Essential linting
+pnpm lint
+pnpm fix:eslint
+
+# Type checking
+pnpm type-check
+```
+
+# important-instruction-reminders
+
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly requested by the User.
