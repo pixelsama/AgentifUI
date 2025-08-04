@@ -26,6 +26,9 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
+      actions: read
+      checks: read
+      statuses: read
       id-token: write
     
     steps:
@@ -75,6 +78,20 @@ jobs:
             - Zustand for state management
             - next-intl for internationalization
             
+            **Decision Framework:**
+            - **Pull Request Reviews**: Focus on code quality, security, TypeScript compliance, i18n usage
+            - **Issue Analysis**: Provide actionable solutions and implementation guidance  
+            - **Code Changes**: Only make commits for clear, non-breaking improvements
+            - **Documentation**: Update when code changes affect usage or architecture
+            
+            **Quality Checks to Perform:**
+            - TypeScript type safety
+            - Next.js 15 App Router best practices
+            - Supabase security patterns
+            - i18n key usage (no hardcoded strings)
+            - Tailwind CSS 4 compatibility
+            - Comment quality (English, explain 'why')
+            
             **Always decide autonomously** whether to:
             - Comment with analysis/feedback
             - Make code changes via commits
@@ -113,3 +130,6 @@ jobs:
             "Bash(uniq:*)",
             "Bash(supabase:*)"
           max_turns: 3
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          auto_pr_review: true
+          auto_pr_review_draft: false
