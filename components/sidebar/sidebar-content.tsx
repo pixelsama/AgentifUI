@@ -61,27 +61,17 @@ export function SidebarContent() {
    * @param chatId ID of the chat item
    */
   const handleSelectChat = React.useCallback(
-    async (chatId: number | string) => {
-      const chatIdStr = String(chatId);
-
+    (chatId: number | string) => {
       try {
-        // 1. Update the sidebar selected state - keep current expansion state
         selectItem('chat', chatId, true);
-        // 2. No longer call lockExpanded, user controls locking
-
-        // 3. Set the current conversation ID
-        setCurrentConversationId(chatIdStr);
-        // 4. Close the welcome screen
-        setIsWelcomeScreen(false);
-        // 5. Route to the conversation page
         router.push(`/chat/${chatId}`);
-
-        console.log('[ChatList] Route jump initiated:', `/chat/${chatId}`);
+        setCurrentConversationId(String(chatId));
+        setIsWelcomeScreen(false);
       } catch (error) {
         console.error('[ChatList] Failed to switch conversation:', error);
       }
     },
-    [selectItem, setCurrentConversationId, setIsWelcomeScreen, router]
+    [selectItem, router, setCurrentConversationId, setIsWelcomeScreen]
   );
 
   return (
