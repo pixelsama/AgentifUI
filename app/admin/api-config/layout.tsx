@@ -1,6 +1,7 @@
 'use client';
 
 import { InstanceFilterSelector } from '@components/admin/api-config/instance-filter-selector';
+import { SearchInput } from '@components/ui';
 import { useTheme } from '@lib/hooks/use-theme';
 import { useApiConfigStore } from '@lib/stores/api-config-store';
 import { cn } from '@lib/utils';
@@ -82,6 +83,7 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
       return searchParams.get('provider') || null;
     }
   );
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   // initialize data loading
   useEffect(() => {
@@ -135,13 +137,34 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
 
   // 🎯 filter instances based on filter conditions
   const filteredInstances = useMemo(() => {
-    if (!filterProviderId) {
-      return instances; // show all
+    let filtered = instances;
+
+    // Filter by provider
+    if (filterProviderId) {
+      filtered = filtered.filter(
+        instance => instance.provider_id === filterProviderId
+      );
     }
-    return instances.filter(
-      instance => instance.provider_id === filterProviderId
-    );
-  }, [instances, filterProviderId]);
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(instance => {
+        const provider = providers.find(p => p.id === instance.provider_id);
+        const difyAppType = instance.config?.app_metadata?.dify_apptype || '';
+
+        return (
+          instance.display_name?.toLowerCase().includes(searchLower) ||
+          instance.instance_id?.toLowerCase().includes(searchLower) ||
+          instance.description?.toLowerCase().includes(searchLower) ||
+          difyAppType.toLowerCase().includes(searchLower) ||
+          provider?.name?.toLowerCase().includes(searchLower)
+        );
+      });
+    }
+
+    return filtered;
+  }, [instances, filterProviderId, searchTerm, providers]);
 
   const handleSetDefaultInstance = useCallback(
     async (instanceId: string) => {
@@ -322,6 +345,13 @@ export default function ApiConfigLayout({ children }: ApiConfigLayoutProps) {
               />
             </button>
           </div>
+
+          {/* Search input */}
+          <SearchInput
+            value={searchTerm}
+            onValueChange={setSearchTerm}
+            placeholder={t('searchPlaceholder')}
+          />
         </div>
 
         {/* list: independent scroll area */}
