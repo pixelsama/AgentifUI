@@ -13,6 +13,7 @@ import { getCurrentLocaleFromCookie } from '@lib/config/language-config';
 import { clearTranslationCache } from '@lib/hooks/use-dynamic-translations';
 import { useTheme } from '@lib/hooks/use-theme';
 import { TranslationService } from '@lib/services/admin/content/translation-service';
+import type { AboutTranslationData } from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
 import { Eye } from 'lucide-react';
 import { toast } from 'sonner';
@@ -188,19 +189,6 @@ export default function ContentManagementPage() {
   const handleCloseFullscreenPreview = () => {
     setShowFullscreenPreview(false);
   };
-
-  interface AboutTranslationData {
-    title?: string;
-    subtitle?: string;
-    mission?: { description?: string };
-    values?: { items?: Array<{ title: string; description: string }> };
-    buttonText?: string;
-    copyright?: {
-      prefix?: string;
-      linkText?: string;
-      suffix?: string;
-    };
-  }
 
   interface HomeTranslationData {
     title?: string;
