@@ -154,6 +154,8 @@ const ComponentPalette: React.FC<ComponentPaletteProps> = ({ className }) => {
         <StrictModeDroppable
           droppableId="component-palette"
           isDropDisabled={true}
+          isCombineEnabled={false}
+          ignoreContainerClipping={false}
         >
           {provided => (
             <div

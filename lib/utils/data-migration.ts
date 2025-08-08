@@ -167,6 +167,7 @@ export function migrateLegacyToSections(legacy: LegacyAboutData): PageContent {
   // 按钮段落
   if (legacy.buttonText) {
     const buttonComponent = createDefaultComponent('button', legacy.buttonText);
+    buttonComponent.props.textAlign = 'center';
     sections.push({
       id: generateUniqueId('section'),
       layout: 'single-column',

@@ -15,7 +15,7 @@ import {
 import { cn } from '@lib/utils';
 import { motion } from 'framer-motion';
 
-import React from 'react';
+import React, { lazy, memo, useMemo, Suspense } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -120,9 +120,20 @@ export function DynamicAboutRenderer({
   };
 
   /**
+   * Memoized component loader for better performance
+   */
+  const ComponentLoader = memo<{ component: ComponentInstance; index: number }>(
+    ({ component, index }) => {
+      return renderComponentInternal(component, index, colors);
+    }
+  );
+
+  ComponentLoader.displayName = 'ComponentLoader';
+
+  /**
    * Render individual component based on type
    */
-  const renderComponent = (component: ComponentInstance, index: number) => {
+  const renderComponentInternal = (component: ComponentInstance, index: number, colors: any) => {
     const { type, props } = component;
 
     const baseAnimation = {
@@ -339,7 +350,11 @@ export function DynamicAboutRenderer({
           {section.columns.map((column, columnIndex) => (
             <div key={columnIndex} className="space-y-4">
               {column.map((component, componentIndex) =>
-                renderComponent(component, sectionIndex + componentIndex)
+                <ComponentLoader
+                  key={component.id}
+                  component={component}
+                  index={sectionIndex + componentIndex}
+                />
               )}
             </div>
           ))}

@@ -21,10 +21,11 @@ import {
   migrateAboutTranslationData,
 } from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
+import { useDebouncedCallback, useThrottledCallback } from '@lib/utils/performance';
 import { Plus, Redo2, RotateCcw, Save, Trash2, Undo2 } from 'lucide-react';
 import { DragDropContext, Draggable } from 'react-beautiful-dnd';
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { useTranslations } from 'next-intl';
 
@@ -111,12 +112,44 @@ export function AboutEditor({
     setCurrentLanguage(currentLocale);
   }, [currentLocale, currentTranslation, setPageContent, setCurrentLanguage]);
 
+  // Debounced auto-save function
+  const debouncedSave = useDebouncedCallback(
+    useCallback(() => {
+      if (!pageContent) return;
+
+      const updatedTranslation: AboutTranslationData = {
+        sections: pageContent.sections,
+        metadata: {
+          ...pageContent.metadata,
+          lastModified: new Date().toISOString(),
+        },
+      };
+
+      const newTranslations = {
+        ...translations,
+        [currentLocale]: updatedTranslation,
+      };
+      
+      onTranslationsChange(newTranslations);
+    }, [pageContent, translations, currentLocale, onTranslationsChange]),
+    1000, // 1 second delay
+    [pageContent, translations, currentLocale]
+  );
+
+  // Throttled property change handler for better performance
+  const throttledPropsChange = useThrottledCallback(
+    useCallback((newProps: Record<string, unknown>) => {
+      if (selectedComponentId) {
+        updateComponentProps(selectedComponentId, newProps);
+        debouncedSave(); // Auto-save after prop changes
+      }
+    }, [selectedComponentId, updateComponentProps, debouncedSave]),
+    100, // 100ms throttle
+    [selectedComponentId, updateComponentProps]
+  );
+
   // Handle property changes
-  const handlePropsChange = (newProps: Record<string, unknown>) => {
-    if (selectedComponentId) {
-      updateComponentProps(selectedComponentId, newProps);
-    }
-  };
+  const handlePropsChange = throttledPropsChange;
 
   // Handle component deletion
   const handleDeleteComponent = () => {
@@ -305,6 +338,9 @@ export function AboutEditor({
                   {sectionIndex > 0 && (
                     <StrictModeDroppable
                       droppableId={`section-drop-${sectionIndex}`}
+                      isCombineEnabled={false}
+                      isDropDisabled={false}
+                      ignoreContainerClipping={false}
                     >
                       {(provided, snapshot) => (
                         <div
@@ -360,6 +396,9 @@ export function AboutEditor({
                           <StrictModeDroppable
                             key={`${section.id}-${columnIndex}`}
                             droppableId={`section-${section.id}-${columnIndex}`}
+                            isCombineEnabled={false}
+                            isDropDisabled={false}
+                            ignoreContainerClipping={false}
                           >
                             {(provided, snapshot) => (
                               <div
@@ -421,7 +460,7 @@ export function AboutEditor({
               ))}
 
               {/* Final Drop Zone */}
-              <StrictModeDroppable droppableId="section-drop-final">
+              <StrictModeDroppable droppableId="section-drop-final" isCombineEnabled={false} isDropDisabled={false} ignoreContainerClipping={false}>
                 {(provided, snapshot) => (
                   <div
                     {...provided.droppableProps}

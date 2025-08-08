@@ -1,0 +1,42 @@
+{
+  "originalFile": "en-US.json",
+  "migrationTimestamp": "2025-08-08T12:23:05.489Z",
+  "data": {
+    "title": "About AgentifUI",
+    "subtitle": "Connecting AI with enterprises, creating new experiences with large language models",
+    "loading": "Loading...",
+    "mission": {
+      "title": "Our Mission",
+      "description": "AgentifUI is committed to leveraging the power of large language models to provide innovative application solutions for enterprises. We integrate capabilities from multiple model providers and provide stable, reliable services based on Dify backend, helping organizations fully utilize the value of AI technology."
+    },
+    "values": {
+      "title": "Our Values",
+      "items": [
+        {
+          "title": "Technical Innovation",
+          "description": "Continuously integrate cutting-edge large model technologies to provide leading AI solutions for enterprises"
+        },
+        {
+          "title": "Data Security",
+          "description": "Support private deployment and strict data protection measures to ensure the security and privacy of enterprise data"
+        },
+        {
+          "title": "Flexible Customization",
+          "description": "Provide highly customizable solutions to meet specific needs of different industries and scenarios"
+        },
+        {
+          "title": "Knowledge Enhancement",
+          "description": "Integrate private knowledge bases through RAG technology to enhance model's contextual awareness capabilities"
+        }
+      ]
+    },
+    "buttonText": "Start Exploring",
+    "copyright": {
+      "prefix": "© {year} ",
+      "linkText": "AgentifUI",
+      "suffix": ". Explore the future of large model applications."
+    }
+  },
+  "timestamp": "2025-08-08T12:23:05.489Z",
+  "version": "1.0.0"
+}

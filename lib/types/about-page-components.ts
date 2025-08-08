@@ -199,7 +199,7 @@ export interface AboutTranslationData {
 
 // 检查数据是否为新的动态格式
 export function isDynamicFormat(data: AboutTranslationData): boolean {
-  return Boolean(data.sections && data.sections.length > 0);
+  return Boolean(data && data.sections && data.sections.length > 0);
 }
 
 // 检查数据是否为旧的固定格式

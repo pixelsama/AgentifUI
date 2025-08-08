@@ -1,0 +1,42 @@
+{
+  "originalFile": "es-ES.json",
+  "migrationTimestamp": "2025-08-08T12:23:05.507Z",
+  "data": {
+    "title": "Acerca de AgentifUI",
+    "subtitle": "Conectando IA con empresas, creando nuevas experiencias con modelos de lenguaje grandes",
+    "loading": "Cargando...",
+    "mission": {
+      "title": "Nuestra Misión",
+      "description": "AgentifUI se compromete a aprovechar el poder de los modelos de lenguaje grandes para proporcionar soluciones de aplicación innovadoras para empresas. Integramos capacidades de múltiples proveedores de modelos y proporcionamos servicios estables y confiables basados en backend Dify, ayudando a las organizaciones a utilizar completamente el valor de la tecnología IA."
+    },
+    "values": {
+      "title": "Nuestros Valores",
+      "items": [
+        {
+          "title": "Innovación Técnica",
+          "description": "Integrar continuamente tecnologías de modelos grandes de vanguardia para proporcionar soluciones IA líderes para empresas"
+        },
+        {
+          "title": "Seguridad de Datos",
+          "description": "Soporte para despliegue privado y medidas estrictas de protección de datos para garantizar la seguridad y privacidad de los datos empresariales"
+        },
+        {
+          "title": "Personalización Flexible",
+          "description": "Proporcionar soluciones altamente personalizables para satisfacer necesidades específicas de diferentes industrias y escenarios"
+        },
+        {
+          "title": "Mejora de Conocimiento",
+          "description": "Integrar bases de conocimiento privadas a través de tecnología RAG para mejorar las capacidades de conciencia contextual del modelo"
+        }
+      ]
+    },
+    "buttonText": "Comenzar a Explorar",
+    "copyright": {
+      "prefix": "© {year} ",
+      "linkText": "AgentifUI",
+      "suffix": ". Explora el futuro de las aplicaciones de modelos grandes."
+    }
+  },
+  "timestamp": "2025-08-08T12:23:05.507Z",
+  "version": "1.0.0"
+}

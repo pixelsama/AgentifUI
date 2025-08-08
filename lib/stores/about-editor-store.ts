@@ -200,7 +200,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     }
   },
 
-  // Handle drag and drop
+  // Handle drag and drop (optimized with performance considerations)
   handleDragEnd: (result: DropResult) => {
     const { destination, source, draggableId } = result;
 
@@ -209,9 +209,14 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     const state = get();
     if (!state.pageContent) return;
 
-    const newPageContent = JSON.parse(
-      JSON.stringify(state.pageContent)
-    ) as PageContent;
+    // More efficient cloning - only clone what we need to modify
+    const newPageContent: PageContent = {
+      ...state.pageContent,
+      sections: state.pageContent.sections.map(section => ({
+        ...section,
+        columns: section.columns.map(column => [...column])
+      }))
+    };
 
     // Handle dragging from component palette
     if (source.droppableId === 'component-palette') {
