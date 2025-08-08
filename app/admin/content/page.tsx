@@ -22,21 +22,6 @@ import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-interface ValueCard {
-  id: string;
-  title: string;
-  description: string;
-}
-
-interface AboutPageConfig {
-  title: string;
-  subtitle: string;
-  mission: string;
-  valueCards: ValueCard[];
-  buttonText: string;
-  copyrightText: string;
-}
-
 interface FeatureCard {
   title: string;
   description: string;
@@ -217,31 +202,6 @@ export default function ContentManagementPage() {
     };
   }
 
-  const transformToAboutPreviewConfig = (
-    translations: Record<SupportedLocale, AboutTranslationData> | null,
-    locale: SupportedLocale
-  ): AboutPageConfig | null => {
-    const t = translations?.[locale];
-    if (!t) return null;
-
-    return {
-      title: t.title || '',
-      subtitle: t.subtitle || '',
-      mission: t.mission?.description || '',
-      valueCards: (t.values?.items || []).map(
-        (item: { title: string; description: string }, index: number) => ({
-          id: `value-${index}`,
-          title: item.title,
-          description: item.description,
-        })
-      ),
-      buttonText: t.buttonText || '',
-      copyrightText: t.copyright
-        ? `${(t.copyright.prefix || '').replace('{year}', new Date().getFullYear().toString())}${t.copyright.linkText || ''}${t.copyright.suffix || ''}`
-        : '',
-    };
-  };
-
   interface HomeTranslationData {
     title?: string;
     subtitle?: string;
@@ -278,10 +238,6 @@ export default function ContentManagementPage() {
     };
   };
 
-  const aboutPreviewConfig = transformToAboutPreviewConfig(
-    aboutTranslations,
-    currentLocale
-  );
   const homePreviewConfig = transformToHomePreviewConfig(
     homeTranslations,
     currentLocale
@@ -322,9 +278,10 @@ export default function ContentManagementPage() {
 
   const renderPreview = () => {
     if (activeTab === 'about') {
-      return aboutPreviewConfig ? (
+      const currentTranslation = aboutTranslations?.[currentLocale];
+      return currentTranslation ? (
         <AboutPreview
-          config={aboutPreviewConfig}
+          translation={currentTranslation}
           previewDevice={previewDevice}
         />
       ) : (
@@ -577,7 +534,7 @@ export default function ContentManagementPage() {
                 >
                   {t('fullscreenPreview')} -
                   {activeTab === 'about'
-                    ? aboutPreviewConfig?.title
+                    ? aboutTranslations?.[currentLocale]?.title || 'About'
                     : homePreviewConfig?.title}
                 </span>
               </div>

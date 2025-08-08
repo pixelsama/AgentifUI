@@ -1,10 +1,167 @@
 'use client';
 
-import { useTheme } from '@lib/hooks/use-theme';
+import {
+  AboutTranslationData,
+  PageContent,
+  isDynamicFormat,
+  migrateAboutTranslationData,
+} from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
 
 import React from 'react';
 
+import ComponentRenderer from './component-renderer';
+
+interface AboutPreviewProps {
+  /**
+   * Translation data for the about page
+   * Can be either legacy or dynamic format
+   */
+  translation: AboutTranslationData;
+  /**
+   * Preview device type for responsive preview
+   */
+  previewDevice: 'desktop' | 'tablet' | 'mobile';
+}
+
+/**
+ * About Page Preview Component
+ *
+ * Displays a preview of the about page with responsive device frames
+ * Supports both legacy and dynamic component formats
+ */
+export function AboutPreview({
+  translation,
+  previewDevice,
+}: AboutPreviewProps) {
+  // Ensure translation is in dynamic format
+  const dynamicTranslation = React.useMemo(() => {
+    if (!isDynamicFormat(translation)) {
+      return migrateAboutTranslationData(translation);
+    }
+    return translation;
+  }, [translation]);
+
+  // Create page content from translation
+  const pageContent: PageContent = React.useMemo(() => {
+    return {
+      sections: dynamicTranslation.sections || [],
+      metadata: dynamicTranslation.metadata || {
+        version: '1.0.0',
+        lastModified: new Date().toISOString(),
+        author: 'preview',
+      },
+    };
+  }, [dynamicTranslation]);
+
+  /**
+   * Get device-specific container styles
+   */
+  const getDeviceStyles = () => {
+    switch (previewDevice) {
+      case 'mobile':
+        return {
+          container: 'mx-auto bg-black rounded-[2rem] p-2 shadow-2xl',
+          screen:
+            'w-[375px] h-[667px] bg-white dark:bg-gray-900 rounded-[1.75rem] overflow-hidden relative',
+          content: 'h-full overflow-y-auto',
+          mainClass: 'min-h-full w-full py-4 px-4',
+          innerContainer: 'w-full',
+          maxWidth: 'max-w-none',
+        };
+      case 'tablet':
+        return {
+          container: 'mx-auto bg-black rounded-xl p-3 shadow-2xl',
+          screen:
+            'w-[768px] h-[1024px] bg-white dark:bg-gray-900 rounded-lg overflow-hidden relative',
+          content: 'h-full overflow-y-auto',
+          mainClass: 'min-h-full w-full py-6 px-6',
+          innerContainer: 'max-w-2xl mx-auto',
+          maxWidth: 'max-w-2xl',
+        };
+      case 'desktop':
+      default:
+        return {
+          container: 'w-full h-full',
+          screen: 'w-full h-full overflow-hidden relative bg-background',
+          content: 'h-full overflow-y-auto',
+          mainClass:
+            'min-h-screen w-full py-6 px-4 sm:px-6 lg:px-8 overflow-x-hidden',
+          innerContainer: 'max-w-5xl mx-auto',
+          maxWidth: 'max-w-5xl',
+        };
+    }
+  };
+
+  const deviceStyles = getDeviceStyles();
+
+  /**
+   * Render page sections with responsive layout
+   */
+  const renderSections = () => {
+    if (!pageContent.sections || pageContent.sections.length === 0) {
+      return (
+        <div className="text-muted-foreground flex h-64 items-center justify-center">
+          <p>No content to preview</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-8 md:space-y-12">
+        {pageContent.sections.map(section => (
+          <section key={section.id} className="w-full">
+            <div
+              className={cn(
+                'grid gap-4 md:gap-6',
+                section.layout === 'single-column' && 'grid-cols-1',
+                section.layout === 'two-column' && 'grid-cols-1 md:grid-cols-2',
+                section.layout === 'three-column' &&
+                  'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+              )}
+            >
+              {section.columns.map((column, columnIndex) => (
+                <div key={columnIndex} className="space-y-4">
+                  {column.map(component => (
+                    <div key={component.id}>
+                      <ComponentRenderer component={component} />
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div
+      className={cn(
+        'flex h-full items-center justify-center',
+        previewDevice !== 'desktop' && 'p-4'
+      )}
+    >
+      <div className={deviceStyles.container}>
+        <div className={deviceStyles.screen}>
+          <div className={deviceStyles.content}>
+            <main className={deviceStyles.mainClass}>
+              <div className={deviceStyles.innerContainer}>
+                {renderSections()}
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Legacy interface for backward compatibility
+ * This is for existing components that still use the old preview format
+ */
 export interface ValueCard {
   id: string;
   title: string;
@@ -20,274 +177,40 @@ export interface AboutPageConfig {
   copyrightText: string;
 }
 
-interface AboutPreviewProps {
+/**
+ * Legacy preview component for backward compatibility
+ * @deprecated Use AboutPreview with dynamic translation data instead
+ */
+export function LegacyAboutPreview({
+  config,
+  previewDevice,
+}: {
   config: AboutPageConfig;
   previewDevice: 'desktop' | 'tablet' | 'mobile';
-}
-
-export function AboutPreview({ config, previewDevice }: AboutPreviewProps) {
-  const { isDark } = useTheme();
-
-  const getColors = () => {
-    if (isDark) {
-      return {
-        titleGradient: 'from-stone-300 to-stone-500',
-        textColor: 'text-gray-300',
-        headingColor: 'text-gray-100',
-        paragraphColor: 'text-gray-400',
-        cardBg: 'bg-stone-700',
-        cardBorder: 'border-stone-600',
-        cardShadow: 'shadow-[0_4px_20px_rgba(0,0,0,0.3)]',
-        cardHeadingColor: 'text-stone-300',
-        cardTextColor: 'text-gray-400',
-        buttonClass:
-          'bg-stone-600 hover:bg-stone-500 text-gray-100 cursor-pointer hover:scale-105',
-      };
-    } else {
-      return {
-        titleGradient: 'from-stone-700 to-stone-900',
-        textColor: 'text-stone-700',
-        headingColor: 'text-stone-800',
-        paragraphColor: 'text-stone-600',
-        cardBg: 'bg-stone-100',
-        cardBorder: 'border-stone-200',
-        cardShadow: 'shadow-[0_4px_20px_rgba(0,0,0,0.1)]',
-        cardHeadingColor: 'text-stone-700',
-        cardTextColor: 'text-stone-600',
-        buttonClass:
-          'bg-stone-800 hover:bg-stone-700 text-gray-100 cursor-pointer hover:scale-105',
-      };
-    }
+}) {
+  // Convert legacy config to new format
+  const legacyTranslation: AboutTranslationData = {
+    title: config.title,
+    subtitle: config.subtitle,
+    mission: { description: config.mission },
+    values: {
+      items: config.valueCards.map(card => ({
+        title: card.title,
+        description: card.description,
+      })),
+    },
+    buttonText: config.buttonText,
+    copyright: {
+      prefix: config.copyrightText,
+      linkText: '',
+      suffix: '',
+    },
   };
-
-  const colors = getColors();
-
-  const getDeviceStyles = () => {
-    switch (previewDevice) {
-      case 'mobile':
-        return {
-          container: 'mx-auto bg-black rounded-[2rem] p-2 shadow-2xl',
-          screen:
-            'w-[375px] h-[667px] bg-white rounded-[1.75rem] overflow-hidden relative',
-          content: 'h-full overflow-y-auto',
-          mainClass: 'min-h-full w-full py-4 px-4',
-          innerContainer: 'w-full',
-        };
-      case 'tablet':
-        return {
-          container: 'mx-auto bg-black rounded-xl p-3 shadow-2xl mt-50',
-          screen:
-            'w-[768px] h-[1024px] bg-white rounded-lg overflow-hidden relative',
-          content: 'h-full overflow-y-auto',
-          mainClass: 'min-h-full w-full py-6 px-6',
-          innerContainer: 'max-w-2xl mx-auto',
-        };
-      case 'desktop':
-      default:
-        return {
-          container: 'w-full h-full',
-          screen: 'w-full h-full overflow-hidden relative',
-          content: 'h-full overflow-y-auto',
-          mainClass:
-            'min-h-screen w-full py-6 px-4 sm:px-6 lg:px-8 overflow-x-hidden',
-          innerContainer: 'max-w-5xl mx-auto',
-        };
-    }
-  };
-
-  const deviceStyles = getDeviceStyles();
-
-  const getResponsiveClasses = () => {
-    switch (previewDevice) {
-      case 'mobile':
-        return {
-          title: 'text-3xl font-bold mb-4 leading-tight py-1',
-          subtitle: 'text-base font-light',
-          missionTitle: 'text-xl font-bold mb-4',
-          missionContent: 'text-sm',
-          valuesTitle: 'text-xl font-bold mb-4',
-          cardTitle: 'text-base font-semibold mb-2',
-          cardContent: 'text-sm',
-          button: 'px-6 py-2 text-sm font-medium rounded-lg',
-          copyright: 'text-xs',
-          spacing: {
-            section: 'mb-6',
-            missionPadding: 'p-4',
-            cardPadding: 'p-4',
-            cardGap: 'gap-4',
-          },
-        };
-      case 'tablet':
-        return {
-          title: 'text-4xl md:text-4xl font-bold mb-4 leading-tight py-1',
-          subtitle: 'text-lg font-light',
-          missionTitle: 'text-2xl font-bold mb-4',
-          missionContent: 'text-base',
-          valuesTitle: 'text-2xl font-bold mb-4',
-          cardTitle: 'text-lg font-semibold mb-2',
-          cardContent: 'text-sm',
-          button: 'px-6 py-2.5 text-base font-medium rounded-lg',
-          copyright: 'text-sm',
-          spacing: {
-            section: 'mb-8',
-            missionPadding: 'p-6',
-            cardPadding: 'p-5',
-            cardGap: 'gap-5',
-          },
-        };
-      case 'desktop':
-      default:
-        return {
-          title: 'text-4xl md:text-5xl font-bold mb-6 leading-tight py-2',
-          subtitle: 'text-xl font-light',
-          missionTitle: 'text-2xl font-bold mb-6',
-          missionContent: 'text-lg',
-          valuesTitle: 'text-2xl font-bold mb-6',
-          cardTitle: 'text-lg font-semibold mb-2',
-          cardContent: '',
-          button: 'px-8 py-3 text-base font-medium rounded-lg',
-          copyright: 'text-sm',
-          spacing: {
-            section: 'mb-10',
-            missionPadding: '',
-            cardPadding: 'p-6',
-            cardGap: 'gap-6',
-          },
-        };
-    }
-  };
-
-  const responsive = getResponsiveClasses();
 
   return (
-    <div
-      className={cn(
-        'flex h-full items-center justify-center',
-        previewDevice !== 'desktop' && 'p-4'
-      )}
-    >
-      <div className={deviceStyles.container}>
-        <div
-          className={cn(
-            deviceStyles.screen,
-            previewDevice === 'desktop'
-              ? isDark
-                ? 'bg-stone-900'
-                : 'bg-stone-50'
-              : isDark
-                ? 'bg-stone-800'
-                : 'bg-white'
-          )}
-        >
-          <div className={deviceStyles.content}>
-            <main className={deviceStyles.mainClass}>
-              <div className={deviceStyles.innerContainer}>
-                <section
-                  className={cn('text-center', responsive.spacing.section)}
-                >
-                  <h1
-                    className={cn(
-                      responsive.title,
-                      `bg-gradient-to-r ${colors.titleGradient} bg-clip-text text-transparent`
-                    )}
-                  >
-                    {config.title}
-                  </h1>
-                  <p
-                    className={cn(
-                      responsive.subtitle,
-                      colors.textColor,
-                      'mx-auto max-w-3xl'
-                    )}
-                  >
-                    {config.subtitle}
-                  </p>
-                </section>
-
-                <section className={responsive.spacing.section}>
-                  <p
-                    className={cn(
-                      responsive.missionContent,
-                      colors.paragraphColor
-                    )}
-                  >
-                    {config.mission}
-                  </p>
-                </section>
-
-                <section className={responsive.spacing.section}>
-                  <div
-                    className={cn(
-                      'grid',
-                      previewDevice === 'mobile'
-                        ? 'grid-cols-1'
-                        : previewDevice === 'tablet'
-                          ? 'grid-cols-1 sm:grid-cols-2'
-                          : 'grid-cols-1 md:grid-cols-2',
-                      responsive.spacing.cardGap
-                    )}
-                  >
-                    {config.valueCards.map(value => (
-                      <div
-                        key={value.id}
-                        className={cn(
-                          colors.cardBg,
-                          colors.cardShadow,
-                          'border',
-                          colors.cardBorder,
-                          'rounded-xl',
-                          responsive.spacing.cardPadding
-                        )}
-                      >
-                        <h3
-                          className={cn(
-                            responsive.cardTitle,
-                            colors.cardHeadingColor
-                          )}
-                        >
-                          {value.title}
-                        </h3>
-                        <p
-                          className={cn(
-                            responsive.cardContent,
-                            colors.cardTextColor
-                          )}
-                        >
-                          {value.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                <section
-                  className={cn('text-center', responsive.spacing.section)}
-                >
-                  <button
-                    className={cn(
-                      responsive.button,
-                      colors.buttonClass,
-                      'h-auto transition-all duration-200'
-                    )}
-                  >
-                    {config.buttonText}
-                  </button>
-                </section>
-
-                <div
-                  className={cn(
-                    'text-center',
-                    colors.textColor,
-                    responsive.copyright
-                  )}
-                >
-                  <p>{config.copyrightText}</p>
-                </div>
-              </div>
-            </main>
-          </div>
-        </div>
-      </div>
-    </div>
+    <AboutPreview
+      translation={legacyTranslation}
+      previewDevice={previewDevice}
+    />
   );
 }

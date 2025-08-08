@@ -213,3 +213,15 @@ export function isLegacyFormat(data: AboutTranslationData): boolean {
         data.buttonText)
   );
 }
+
+// Re-export utility functions from data-migration for convenience
+export {
+  generateUniqueId,
+  createDefaultComponent,
+  createDefaultSection,
+  migrateLegacyToSections,
+  migrateAboutTranslationData,
+  batchMigrateTranslations,
+  validateMigratedData,
+  createBackupData,
+} from '@lib/utils/data-migration';
