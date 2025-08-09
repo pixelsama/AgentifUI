@@ -1,6 +1,5 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { ComponentType } from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
 import {
@@ -142,14 +141,25 @@ interface ComponentPaletteProps {
  */
 const ComponentPalette: React.FC<ComponentPaletteProps> = ({ className }) => {
   return (
-    <Card className={cn('h-full', className)}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <div
+      className={cn(
+        'h-full rounded-lg border',
+        'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800',
+        className
+      )}
+    >
+      <div className="border-b border-stone-200 p-4 dark:border-stone-700">
+        <h3
+          className={cn(
+            'flex items-center gap-2 text-lg font-medium',
+            'text-stone-900 dark:text-stone-100'
+          )}
+        >
           <Palette className="h-5 w-5" />
           Components
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
+        </h3>
+      </div>
+      <div className="p-0">
         <Droppable
           id="component-palette"
           disabled={true}
@@ -164,22 +174,48 @@ const ComponentPalette: React.FC<ComponentPaletteProps> = ({ className }) => {
 
             return (
               <div key={category.id} className="space-y-2">
-                <h3 className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
+                <h3
+                  className={cn(
+                    'flex items-center gap-2 text-sm font-medium',
+                    'text-stone-600 dark:text-stone-400'
+                  )}
+                >
                   {category.icon}
                   {category.name}
                 </h3>
                 <div className="space-y-2">
                   {categoryComponents.map(comp => {
                     const componentPreview = (
-                      <div className="bg-card hover:bg-accent hover:text-accent-foreground flex cursor-grab items-center gap-3 rounded-md border p-3 transition-colors active:cursor-grabbing">
-                        <div className="text-muted-foreground flex-shrink-0">
+                      <div
+                        className={cn(
+                          'flex cursor-grab items-center gap-3 rounded-md border p-3 transition-colors active:cursor-grabbing',
+                          'border-stone-200 bg-stone-50 hover:border-stone-300 hover:bg-stone-100',
+                          'dark:border-stone-600 dark:bg-stone-700 dark:hover:border-stone-500 dark:hover:bg-stone-600'
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            'flex-shrink-0',
+                            'text-stone-600 dark:text-stone-400'
+                          )}
+                        >
                           {comp.icon}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium">
+                          <p
+                            className={cn(
+                              'truncate text-sm font-medium',
+                              'text-stone-900 dark:text-stone-100'
+                            )}
+                          >
                             {comp.name}
                           </p>
-                          <p className="text-muted-foreground truncate text-xs">
+                          <p
+                            className={cn(
+                              'truncate text-xs',
+                              'text-stone-600 dark:text-stone-400'
+                            )}
+                          >
                             {comp.description}
                           </p>
                         </div>
@@ -201,8 +237,8 @@ const ComponentPalette: React.FC<ComponentPaletteProps> = ({ className }) => {
             );
           })}
         </Droppable>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

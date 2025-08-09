@@ -2,7 +2,6 @@
 
 import { Badge } from '@components/ui/badge';
 import { Button } from '@components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import {
   Select,
   SelectContent,
@@ -216,7 +215,12 @@ export function AboutEditor({
     <DndContextWrapper onDragEnd={handleDragEnd}>
       <div className="flex h-full flex-col">
         {/* Header */}
-        <div className="bg-card space-y-4 border-b p-4">
+        <div
+          className={cn(
+            'space-y-4 border-b p-4',
+            'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800'
+          )}
+        >
           {/* Language Selector */}
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -323,7 +327,12 @@ export function AboutEditor({
         {/* Main Content */}
         <div className="flex min-h-0 flex-1">
           {/* Left Panel - Components & Properties */}
-          <div className="bg-background w-80 space-y-6 overflow-y-auto border-r p-4">
+          <div
+            className={cn(
+              'w-80 space-y-6 overflow-y-auto border-r p-4',
+              'border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-900'
+            )}
+          >
             {/* Component Palette */}
             <ComponentPalette />
 
@@ -353,77 +362,91 @@ export function AboutEditor({
                   )}
 
                   {/* Section Content */}
-                  <Card className="border">
-                    <CardHeader className="pb-3">
+                  <div
+                    className={cn(
+                      'rounded-lg border p-4',
+                      'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800'
+                    )}
+                  >
+                    <div className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-muted-foreground text-sm">
+                        <h3
+                          className={cn(
+                            'text-sm font-medium',
+                            'text-stone-600 dark:text-stone-400'
+                          )}
+                        >
                           Section {sectionIndex + 1} • {section.layout}
-                        </CardTitle>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        </h3>
+                        <button
                           onClick={() => {
                             // Delete section logic here
                           }}
-                          className="text-destructive hover:text-destructive h-6 w-6 p-0"
+                          className={cn(
+                            'h-6 w-6 rounded p-0 text-red-500 transition-colors',
+                            'hover:bg-red-100 dark:hover:bg-red-900/50'
+                          )}
                         >
                           <Trash2 className="h-3 w-3" />
-                        </Button>
+                        </button>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div
-                        className={cn(
-                          'grid gap-4',
-                          section.layout === 'single-column' && 'grid-cols-1',
-                          section.layout === 'two-column' && 'grid-cols-2',
-                          section.layout === 'three-column' && 'grid-cols-3'
-                        )}
-                      >
-                        {section.columns.map((column, columnIndex) => {
-                          const columnItems = column.map(comp => comp.id);
-                          return (
-                            <SortableContainer
-                              key={`${section.id}-${columnIndex}`}
-                              id={`section-${section.id}-${columnIndex}`}
-                              items={columnItems}
-                              className={cn(
-                                'min-h-24 rounded-lg border-2 border-dashed p-3 transition-colors',
-                                'border-border bg-muted/30'
-                              )}
-                            >
-                              {column.length === 0 && (
-                                <div className="text-muted-foreground flex h-16 items-center justify-center text-sm">
-                                  Drop components here
-                                </div>
-                              )}
+                    </div>
+                    <div
+                      className={cn(
+                        'grid gap-4',
+                        section.layout === 'single-column' && 'grid-cols-1',
+                        section.layout === 'two-column' && 'grid-cols-2',
+                        section.layout === 'three-column' && 'grid-cols-3'
+                      )}
+                    >
+                      {section.columns.map((column, columnIndex) => {
+                        const columnItems = column.map(comp => comp.id);
+                        return (
+                          <SortableContainer
+                            key={`${section.id}-${columnIndex}`}
+                            id={`section-${section.id}-${columnIndex}`}
+                            items={columnItems}
+                            className={cn(
+                              'min-h-24 rounded-md border-2 border-dashed p-3 transition-colors',
+                              'border-stone-300 bg-stone-50 dark:border-stone-600 dark:bg-stone-700/50'
+                            )}
+                          >
+                            {column.length === 0 && (
+                              <div
+                                className={cn(
+                                  'flex h-16 items-center justify-center text-sm',
+                                  'text-stone-500 dark:text-stone-400'
+                                )}
+                              >
+                                Drop components here
+                              </div>
+                            )}
 
-                              {column.map(component => (
-                                <Sortable
-                                  key={component.id}
-                                  id={component.id}
-                                  className={cn(
-                                    'mb-3 cursor-pointer rounded-lg border p-3 transition-all',
-                                    selectedComponentId === component.id
-                                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
-                                      : 'border-border bg-card hover:border-blue-200 hover:bg-blue-50/50'
-                                  )}
+                            {column.map(component => (
+                              <Sortable
+                                key={component.id}
+                                id={component.id}
+                                className={cn(
+                                  'mb-3 cursor-pointer rounded-lg border p-3 transition-all',
+                                  selectedComponentId === component.id
+                                    ? 'border-stone-500 bg-stone-100 dark:border-stone-400 dark:bg-stone-700'
+                                    : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:hover:border-stone-500 dark:hover:bg-stone-700'
+                                )}
+                              >
+                                <div
+                                  onClick={() =>
+                                    handleComponentClick(component.id)
+                                  }
                                 >
-                                  <div
-                                    onClick={() =>
-                                      handleComponentClick(component.id)
-                                    }
-                                  >
-                                    <ComponentRenderer component={component} />
-                                  </div>
-                                </Sortable>
-                              ))}
-                            </SortableContainer>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
+                                  <ComponentRenderer component={component} />
+                                </div>
+                              </Sortable>
+                            ))}
+                          </SortableContainer>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               ))}
 

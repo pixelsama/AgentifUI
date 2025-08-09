@@ -1,7 +1,5 @@
 'use client';
 
-import { Button } from '@components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
 import {
@@ -13,6 +11,7 @@ import {
 } from '@components/ui/select';
 import { Textarea } from '@components/ui/textarea';
 import { ComponentInstance } from '@lib/types/about-page-components';
+import { cn } from '@lib/utils';
 import { Plus, Trash2 } from 'lucide-react';
 
 import React from 'react';
@@ -60,22 +59,36 @@ const ArrayPropertyEditor: React.FC<ArrayPropertyEditorProps> = ({
   return (
     <div className="space-y-3">
       {items.map((item, index) => (
-        <Card key={index} className="border">
-          <CardHeader className="pb-2">
+        <div
+          key={index}
+          className={cn(
+            'rounded-lg border p-4',
+            'border-stone-200 bg-white dark:border-stone-600 dark:bg-stone-800'
+          )}
+        >
+          <div className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">Item {index + 1}</CardTitle>
-              <Button
+              <h4
+                className={cn(
+                  'text-sm font-medium',
+                  'text-stone-900 dark:text-stone-100'
+                )}
+              >
+                Item {index + 1}
+              </h4>
+              <button
                 type="button"
-                variant="ghost"
-                size="sm"
                 onClick={() => handleRemoveItem(index)}
-                className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                className={cn(
+                  'h-8 w-8 rounded p-0 text-red-500 transition-colors',
+                  'hover:bg-red-100 dark:hover:bg-red-900/50'
+                )}
               >
                 <Trash2 className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
+          </div>
+          <div className="space-y-3">
             {Object.entries(item).map(([key, value]) => (
               <div key={key} className="space-y-2">
                 <Label
@@ -93,18 +106,22 @@ const ArrayPropertyEditor: React.FC<ArrayPropertyEditorProps> = ({
                 />
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
-      <Button
+      <button
         type="button"
-        variant="outline"
         onClick={handleAddItem}
-        className="w-full"
+        className={cn(
+          'w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors',
+          'border-stone-300 bg-white text-stone-900 hover:bg-stone-50',
+          'dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100 dark:hover:bg-stone-700',
+          'flex items-center justify-center gap-2'
+        )}
       >
-        <Plus className="mr-2 h-4 w-4" />
+        <Plus className="h-4 w-4" />
         Add Item
-      </Button>
+      </button>
     </div>
   );
 };
@@ -121,7 +138,12 @@ const PropertyEditor: React.FC<PropertyEditorProps> = ({
 }) => {
   if (!component) {
     return (
-      <div className="text-muted-foreground flex h-32 items-center justify-center">
+      <div
+        className={cn(
+          'flex h-32 items-center justify-center',
+          'text-stone-500 dark:text-stone-400'
+        )}
+      >
         <p>Select a component to edit its properties</p>
       </div>
     );
@@ -289,31 +311,45 @@ const PropertyEditor: React.FC<PropertyEditorProps> = ({
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
+    <div
+      className={cn(
+        'w-full rounded-lg border',
+        'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800'
+      )}
+    >
+      <div className="border-b border-stone-200 p-4 dark:border-stone-700">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg capitalize">
+          <h3
+            className={cn(
+              'text-lg font-medium capitalize',
+              'text-stone-900 dark:text-stone-100'
+            )}
+          >
             {component.type} Properties
-          </CardTitle>
+          </h3>
           {onDeleteComponent && (
-            <Button
+            <button
               type="button"
-              variant="destructive"
-              size="sm"
               onClick={onDeleteComponent}
+              className={cn(
+                'rounded px-3 py-1.5 text-sm font-medium transition-colors',
+                'bg-red-600 text-white hover:bg-red-700',
+                'dark:bg-red-500 dark:hover:bg-red-600',
+                'flex items-center gap-2'
+              )}
             >
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Trash2 className="h-4 w-4" />
               Delete
-            </Button>
+            </button>
           )}
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      </div>
+      <div className="space-y-4 p-4">
         {Object.entries(component.props).map(([key, value]) =>
           renderPropertyField(key, value)
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
