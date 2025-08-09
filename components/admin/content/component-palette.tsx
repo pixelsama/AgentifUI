@@ -12,11 +12,10 @@ import {
   Palette,
   Type,
 } from 'lucide-react';
-import { Draggable } from 'react-beautiful-dnd';
 
 import React from 'react';
 
-import StrictModeDroppable from './strict-mode-droppable';
+import { Draggable, Droppable } from './dnd-components';
 
 /**
  * Available component definitions for the palette
@@ -151,75 +150,57 @@ const ComponentPalette: React.FC<ComponentPaletteProps> = ({ className }) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <StrictModeDroppable
-          droppableId="component-palette"
-          isDropDisabled={true}
-          isCombineEnabled={false}
-          ignoreContainerClipping={false}
+        <Droppable
+          id="component-palette"
+          disabled={true}
+          className="space-y-6 px-4 pb-4"
         >
-          {provided => (
-            <div
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className="space-y-6 px-4 pb-4"
-            >
-              {categories.map(category => {
-                const categoryComponents = availableComponents.filter(
-                  comp => comp.category === category.id
-                );
+          {categories.map(category => {
+            const categoryComponents = availableComponents.filter(
+              comp => comp.category === category.id
+            );
 
-                if (categoryComponents.length === 0) return null;
+            if (categoryComponents.length === 0) return null;
 
-                return (
-                  <div key={category.id} className="space-y-2">
-                    <h3 className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
-                      {category.icon}
-                      {category.name}
-                    </h3>
-                    <div className="space-y-2">
-                      {categoryComponents.map(comp => {
-                        const globalIndex = availableComponents.indexOf(comp);
+            return (
+              <div key={category.id} className="space-y-2">
+                <h3 className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
+                  {category.icon}
+                  {category.name}
+                </h3>
+                <div className="space-y-2">
+                  {categoryComponents.map(comp => {
+                    const componentPreview = (
+                      <div className="bg-card hover:bg-accent hover:text-accent-foreground flex cursor-grab items-center gap-3 rounded-md border p-3 transition-colors active:cursor-grabbing">
+                        <div className="text-muted-foreground flex-shrink-0">
+                          {comp.icon}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">
+                            {comp.name}
+                          </p>
+                          <p className="text-muted-foreground truncate text-xs">
+                            {comp.description}
+                          </p>
+                        </div>
+                      </div>
+                    );
 
-                        return (
-                          <Draggable
-                            key={comp.type}
-                            draggableId={comp.type}
-                            index={globalIndex}
-                          >
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={cn(
-                                  'bg-card hover:bg-accent hover:text-accent-foreground flex cursor-grab items-center gap-3 rounded-md border p-3 transition-colors active:cursor-grabbing',
-                                  snapshot.isDragging && 'opacity-50 shadow-lg'
-                                )}
-                              >
-                                <div className="text-muted-foreground flex-shrink-0">
-                                  {comp.icon}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm font-medium">
-                                    {comp.name}
-                                  </p>
-                                  <p className="text-muted-foreground truncate text-xs">
-                                    {comp.description}
-                                  </p>
-                                </div>
-                              </div>
-                            )}
-                          </Draggable>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-              {provided.placeholder}
-            </div>
-          )}
-        </StrictModeDroppable>
+                    return (
+                      <Draggable
+                        key={comp.type}
+                        id={`palette-${comp.type}`}
+                        preview={componentPreview}
+                      >
+                        {componentPreview}
+                      </Draggable>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </Droppable>
       </CardContent>
     </Card>
   );

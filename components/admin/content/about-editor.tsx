@@ -21,9 +21,11 @@ import {
   migrateAboutTranslationData,
 } from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
-import { useDebouncedCallback, useThrottledCallback } from '@lib/utils/performance';
+import {
+  useDebouncedCallback,
+  useThrottledCallback,
+} from '@lib/utils/performance';
 import { Plus, Redo2, RotateCcw, Save, Trash2, Undo2 } from 'lucide-react';
-import { DragDropContext, Draggable } from 'react-beautiful-dnd';
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
@@ -31,8 +33,9 @@ import { useTranslations } from 'next-intl';
 
 import ComponentPalette from './component-palette';
 import ComponentRenderer from './component-renderer';
+import { Droppable, Sortable, SortableContainer } from './dnd-components';
+import { DndContextWrapper } from './dnd-context';
 import PropertyEditor from './property-editor';
-import StrictModeDroppable from './strict-mode-droppable';
 
 interface AboutEditorProps {
   translations: Record<SupportedLocale, AboutTranslationData>;
@@ -129,7 +132,7 @@ export function AboutEditor({
         ...translations,
         [currentLocale]: updatedTranslation,
       };
-      
+
       onTranslationsChange(newTranslations);
     }, [pageContent, translations, currentLocale, onTranslationsChange]),
     1000, // 1 second delay
@@ -138,12 +141,15 @@ export function AboutEditor({
 
   // Throttled property change handler for better performance
   const throttledPropsChange = useThrottledCallback(
-    useCallback((newProps: Record<string, unknown>) => {
-      if (selectedComponentId) {
-        updateComponentProps(selectedComponentId, newProps);
-        debouncedSave(); // Auto-save after prop changes
-      }
-    }, [selectedComponentId, updateComponentProps, debouncedSave]),
+    useCallback(
+      (newProps: Record<string, unknown>) => {
+        if (selectedComponentId) {
+          updateComponentProps(selectedComponentId, newProps);
+          debouncedSave(); // Auto-save after prop changes
+        }
+      },
+      [selectedComponentId, updateComponentProps, debouncedSave]
+    ),
     100, // 100ms throttle
     [selectedComponentId, updateComponentProps]
   );
@@ -207,7 +213,7 @@ export function AboutEditor({
   }
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
+    <DndContextWrapper onDragEnd={handleDragEnd}>
       <div className="flex h-full flex-col">
         {/* Header */}
         <div className="bg-card space-y-4 border-b p-4">
@@ -336,32 +342,14 @@ export function AboutEditor({
                 <div key={section.id} className="space-y-4">
                   {/* Section Drop Zone (before each section) */}
                   {sectionIndex > 0 && (
-                    <StrictModeDroppable
-                      droppableId={`section-drop-${sectionIndex}`}
-                      isCombineEnabled={false}
-                      isDropDisabled={false}
-                      ignoreContainerClipping={false}
+                    <Droppable
+                      id={`section-drop-${sectionIndex}`}
+                      className="h-2 rounded-lg border-2 border-dashed border-transparent transition-all duration-200 hover:h-16 hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-600 dark:hover:bg-blue-950"
                     >
-                      {(provided, snapshot) => (
-                        <div
-                          {...provided.droppableProps}
-                          ref={provided.innerRef}
-                          className={cn(
-                            'rounded-lg border-2 border-dashed transition-all duration-200',
-                            snapshot.isDraggingOver
-                              ? 'h-16 border-blue-300 bg-blue-50 dark:border-blue-600 dark:bg-blue-950'
-                              : 'h-2 border-transparent'
-                          )}
-                        >
-                          {snapshot.isDraggingOver && (
-                            <div className="flex h-full items-center justify-center text-sm font-medium text-blue-600 dark:text-blue-400">
-                              Drop here to create new section
-                            </div>
-                          )}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </StrictModeDroppable>
+                      <div className="flex h-full items-center justify-center text-sm font-medium text-blue-600 opacity-0 hover:opacity-100 dark:text-blue-400">
+                        Drop here to create new section
+                      </div>
+                    </Droppable>
                   )}
 
                   {/* Section Content */}
@@ -392,67 +380,47 @@ export function AboutEditor({
                           section.layout === 'three-column' && 'grid-cols-3'
                         )}
                       >
-                        {section.columns.map((column, columnIndex) => (
-                          <StrictModeDroppable
-                            key={`${section.id}-${columnIndex}`}
-                            droppableId={`section-${section.id}-${columnIndex}`}
-                            isCombineEnabled={false}
-                            isDropDisabled={false}
-                            ignoreContainerClipping={false}
-                          >
-                            {(provided, snapshot) => (
-                              <div
-                                {...provided.droppableProps}
-                                ref={provided.innerRef}
-                                className={cn(
-                                  'min-h-24 rounded-lg border-2 border-dashed p-3 transition-colors',
-                                  snapshot.isDraggingOver
-                                    ? 'border-blue-300 bg-blue-50 dark:border-blue-600 dark:bg-blue-950'
-                                    : 'border-border bg-muted/30'
-                                )}
-                              >
-                                {column.length === 0 &&
-                                  !snapshot.isDraggingOver && (
-                                    <div className="text-muted-foreground flex h-16 items-center justify-center text-sm">
-                                      Drop components here
-                                    </div>
-                                  )}
+                        {section.columns.map((column, columnIndex) => {
+                          const columnItems = column.map(comp => comp.id);
+                          return (
+                            <SortableContainer
+                              key={`${section.id}-${columnIndex}`}
+                              id={`section-${section.id}-${columnIndex}`}
+                              items={columnItems}
+                              className={cn(
+                                'min-h-24 rounded-lg border-2 border-dashed p-3 transition-colors',
+                                'border-border bg-muted/30'
+                              )}
+                            >
+                              {column.length === 0 && (
+                                <div className="text-muted-foreground flex h-16 items-center justify-center text-sm">
+                                  Drop components here
+                                </div>
+                              )}
 
-                                {column.map((component, componentIndex) => (
-                                  <Draggable
-                                    key={component.id}
-                                    draggableId={component.id}
-                                    index={componentIndex}
+                              {column.map(component => (
+                                <Sortable
+                                  key={component.id}
+                                  id={component.id}
+                                  className={cn(
+                                    'mb-3 cursor-pointer rounded-lg border p-3 transition-all',
+                                    selectedComponentId === component.id
+                                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
+                                      : 'border-border bg-card hover:border-blue-200 hover:bg-blue-50/50'
+                                  )}
+                                >
+                                  <div
+                                    onClick={() =>
+                                      handleComponentClick(component.id)
+                                    }
                                   >
-                                    {(provided, snapshot) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        onClick={() =>
-                                          handleComponentClick(component.id)
-                                        }
-                                        className={cn(
-                                          'mb-3 cursor-pointer rounded-lg border p-3 transition-all',
-                                          selectedComponentId === component.id
-                                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
-                                            : 'border-border bg-card hover:border-blue-200 hover:bg-blue-50/50',
-                                          snapshot.isDragging &&
-                                            'rotate-2 shadow-lg'
-                                        )}
-                                      >
-                                        <ComponentRenderer
-                                          component={component}
-                                        />
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                ))}
-                                {provided.placeholder}
-                              </div>
-                            )}
-                          </StrictModeDroppable>
-                        ))}
+                                    <ComponentRenderer component={component} />
+                                  </div>
+                                </Sortable>
+                              ))}
+                            </SortableContainer>
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </Card>
@@ -460,31 +428,18 @@ export function AboutEditor({
               ))}
 
               {/* Final Drop Zone */}
-              <StrictModeDroppable droppableId="section-drop-final" isCombineEnabled={false} isDropDisabled={false} ignoreContainerClipping={false}>
-                {(provided, snapshot) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className={cn(
-                      'rounded-lg border-2 border-dashed transition-all duration-200',
-                      snapshot.isDraggingOver
-                        ? 'h-16 border-blue-300 bg-blue-50 dark:border-blue-600 dark:bg-blue-950'
-                        : 'h-8 border-transparent'
-                    )}
-                  >
-                    {snapshot.isDraggingOver && (
-                      <div className="flex h-full items-center justify-center text-sm font-medium text-blue-600 dark:text-blue-400">
-                        Drop here to create new section
-                      </div>
-                    )}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </StrictModeDroppable>
+              <Droppable
+                id="section-drop-final"
+                className="h-8 rounded-lg border-2 border-dashed border-transparent transition-all duration-200 hover:h-16 hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-600 dark:hover:bg-blue-950"
+              >
+                <div className="flex h-full items-center justify-center text-sm font-medium text-blue-600 opacity-0 hover:opacity-100 dark:text-blue-400">
+                  Drop here to create new section
+                </div>
+              </Droppable>
             </div>
           </div>
         </div>
       </div>
-    </DragDropContext>
+    </DndContextWrapper>
   );
 }

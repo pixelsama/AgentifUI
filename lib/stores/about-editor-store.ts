@@ -1,11 +1,12 @@
 import { availableComponents } from '@components/admin/content/component-palette';
+import { arrayMove } from '@components/admin/content/dnd-components';
+import { DragEndEvent } from '@dnd-kit/core';
 import {
   ComponentInstance,
   PageContent,
   createDefaultSection,
   generateUniqueId,
 } from '@lib/types/about-page-components';
-import { DropResult } from 'react-beautiful-dnd';
 import { create } from 'zustand';
 
 /**
@@ -45,7 +46,7 @@ interface AboutEditorState {
   // Delete a component by ID
   deleteComponent: (id: string) => void;
   // Handle drag and drop operations
-  handleDragEnd: (result: DropResult) => void;
+  handleDragEnd: (event: DragEndEvent) => void;
   // Create a new section
   addSection: (
     layout?: 'single-column' | 'two-column' | 'three-column'
@@ -201,10 +202,10 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
   },
 
   // Handle drag and drop (optimized with performance considerations)
-  handleDragEnd: (result: DropResult) => {
-    const { destination, source, draggableId } = result;
+  handleDragEnd: (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    if (!destination) return;
+    if (!over) return;
 
     const state = get();
     if (!state.pageContent) return;
@@ -214,19 +215,45 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
       ...state.pageContent,
       sections: state.pageContent.sections.map(section => ({
         ...section,
-        columns: section.columns.map(column => [...column])
-      }))
+        columns: section.columns.map(column => [...column]),
+      })),
     };
 
+    const activeId = String(active.id);
+    const overId = String(over.id);
+
     // Handle dragging from component palette
-    if (source.droppableId === 'component-palette') {
+    if (activeId.startsWith('palette-')) {
+      const componentType = activeId.replace('palette-', '');
       const componentDef = availableComponents.find(
-        comp => comp.type === draggableId
+        comp => comp.type === componentType
       );
       if (!componentDef) return;
 
-      // Parse destination
-      const [type, sectionId, columnIndex] = destination.droppableId.split('-');
+      // Parse destination - handle both direct drops on containers and on components
+      let targetContainerId = overId;
+
+      // If dropping on a component, get its container
+      if (!overId.startsWith('section-')) {
+        // Find which container this component belongs to
+        for (const section of newPageContent.sections) {
+          for (
+            let colIndex = 0;
+            colIndex < section.columns.length;
+            colIndex++
+          ) {
+            const componentExists = section.columns[colIndex].find(
+              comp => comp.id === overId
+            );
+            if (componentExists) {
+              targetContainerId = `section-${section.id}-${colIndex}`;
+              break;
+            }
+          }
+        }
+      }
+
+      const [type, sectionId, columnIndex] = targetContainerId.split('-');
 
       if (type === 'section' && sectionId && columnIndex !== undefined) {
         const section = newPageContent.sections.find(s => s.id === sectionId);
@@ -237,38 +264,87 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
             props: { ...componentDef.defaultProps },
           };
 
-          section.columns[parseInt(columnIndex)].splice(
-            destination.index,
-            0,
-            newComponent
-          );
+          // Add to the end of the column
+          section.columns[parseInt(columnIndex)].push(newComponent);
         }
       }
     } else {
-      // Handle moving existing components
-      const [sourceType, sourceSectionId, sourceColumnIndex] =
-        source.droppableId.split('-');
-      const [destType, destSectionId, destColumnIndex] =
-        destination.droppableId.split('-');
+      // Handle moving existing components within or between containers
+      const activeContainer = active.data.current?.sortable?.containerId;
+      const overContainer = over.data.current?.sortable?.containerId || overId;
 
-      if (sourceType === 'section' && destType === 'section') {
-        const sourceSection = newPageContent.sections.find(
-          s => s.id === sourceSectionId
-        );
-        const destSection = newPageContent.sections.find(
-          s => s.id === destSectionId
-        );
+      if (activeContainer && overContainer) {
+        if (activeContainer === overContainer) {
+          // Reordering within the same container
+          const [containerType, sectionId, columnIndex] =
+            activeContainer.split('-');
 
-        if (sourceSection && destSection) {
-          const sourceColumn =
-            sourceSection.columns[parseInt(sourceColumnIndex)];
-          const destColumn = destSection.columns[parseInt(destColumnIndex)];
+          if (
+            containerType === 'section' &&
+            sectionId &&
+            columnIndex !== undefined
+          ) {
+            const section = newPageContent.sections.find(
+              s => s.id === sectionId
+            );
+            if (section && section.columns[parseInt(columnIndex)]) {
+              const column = section.columns[parseInt(columnIndex)];
+              const activeIndex = column.findIndex(
+                comp => comp.id === activeId
+              );
+              const overIndex = column.findIndex(comp => comp.id === overId);
 
-          if (sourceColumn && destColumn) {
-            // Remove from source
-            const [removed] = sourceColumn.splice(source.index, 1);
-            // Add to destination
-            destColumn.splice(destination.index, 0, removed);
+              if (
+                activeIndex !== -1 &&
+                overIndex !== -1 &&
+                activeIndex !== overIndex
+              ) {
+                // Use arrayMove to reorder within the same container
+                section.columns[parseInt(columnIndex)] = arrayMove(
+                  column,
+                  activeIndex,
+                  overIndex
+                );
+              }
+            }
+          }
+        } else {
+          // Moving between containers
+          const [sourceType, sourceSectionId, sourceColumnIndex] =
+            activeContainer.split('-');
+          const [destType, destSectionId, destColumnIndex] =
+            overContainer.split('-');
+
+          if (sourceType === 'section' && destType === 'section') {
+            const sourceSection = newPageContent.sections.find(
+              s => s.id === sourceSectionId
+            );
+            const destSection = newPageContent.sections.find(
+              s => s.id === destSectionId
+            );
+
+            if (sourceSection && destSection) {
+              const sourceColumn =
+                sourceSection.columns[parseInt(sourceColumnIndex)];
+              const destColumn = destSection.columns[parseInt(destColumnIndex)];
+
+              if (sourceColumn && destColumn) {
+                // Find and move the component
+                const componentIndex = sourceColumn.findIndex(
+                  comp => comp.id === activeId
+                );
+                if (componentIndex !== -1) {
+                  const [removed] = sourceColumn.splice(componentIndex, 1);
+                  // Insert at the position of the over item, or at the end
+                  const overIndex = over.data.current?.sortable?.index;
+                  if (typeof overIndex === 'number') {
+                    destColumn.splice(overIndex, 0, removed);
+                  } else {
+                    destColumn.push(removed);
+                  }
+                }
+              }
+            }
           }
         }
       }
