@@ -266,6 +266,7 @@ export default function ContentManagementPage() {
 
   const renderPreview = () => {
     if (activeTab === 'about') {
+      // Use the most up-to-date translation data that includes real-time edits
       const currentTranslation = aboutTranslations?.[currentLocale];
       return currentTranslation ? (
         <AboutPreview

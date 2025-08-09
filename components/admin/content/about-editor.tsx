@@ -159,9 +159,16 @@ export function AboutEditor({
 
       onTranslationsChange(newTranslations);
     }, [pageContent, translations, currentLocale, onTranslationsChange]),
-    1000, // 1 second delay
+    100, // 100ms delay for near real-time sync
     [pageContent, translations, currentLocale]
   );
+
+  // Auto-save when pageContent changes
+  useEffect(() => {
+    if (pageContent) {
+      debouncedSave();
+    }
+  }, [pageContent, debouncedSave]);
 
   // Throttled property change handler for better performance
   const throttledPropsChange = useThrottledCallback(
