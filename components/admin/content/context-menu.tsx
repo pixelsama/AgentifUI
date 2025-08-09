@@ -1,0 +1,371 @@
+'use client';
+
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select';
+import { Textarea } from '@components/ui/textarea';
+import { ComponentInstance } from '@lib/types/about-page-components';
+import { cn } from '@lib/utils';
+import { Plus, Trash2, X } from 'lucide-react';
+
+import React, { useEffect, useRef, useState } from 'react';
+
+interface ContextMenuProps {
+  x: number;
+  y: number;
+  component: ComponentInstance | null;
+  onPropsChange: (newProps: Record<string, unknown>) => void;
+  onDelete: (componentId: string) => void;
+  onClose: () => void;
+}
+
+/**
+ * Context Menu Component
+ *
+ * Right-click context menu that directly shows property editor
+ */
+export const ContextMenu: React.FC<ContextMenuProps> = ({
+  x,
+  y,
+  component,
+  onPropsChange,
+  onDelete,
+  onClose,
+}) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x, y });
+
+  useEffect(() => {
+    if (modalRef.current) {
+      const modal = modalRef.current;
+      const rect = modal.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let newX = x;
+      let newY = y;
+
+      // Adjust position if modal would go outside viewport
+      if (x + rect.width > viewportWidth) {
+        newX = viewportWidth - rect.width - 20;
+      }
+      if (y + rect.height > viewportHeight) {
+        newY = viewportHeight - rect.height - 20;
+      }
+      if (newX < 20) newX = 20;
+      if (newY < 20) newY = 20;
+
+      setPosition({ x: newX, y: newY });
+    }
+  }, [x, y]);
+
+  const handleInputChange = (name: string, value: unknown) => {
+    if (!component) return;
+    onPropsChange({ ...component.props, [name]: value });
+  };
+
+  const handleItemsChange = (newItems: Array<Record<string, unknown>>) => {
+    handleInputChange('items', newItems);
+  };
+
+  const handleItemChange = (index: number, key: string, value: unknown) => {
+    if (!component) return;
+    const items = component.props.items as Array<Record<string, unknown>>;
+    const newItems = [...items];
+    newItems[index] = { ...newItems[index], [key]: value };
+    handleItemsChange(newItems);
+  };
+
+  const handleAddItem = () => {
+    if (!component) return;
+    const items =
+      (component.props.items as Array<Record<string, unknown>>) || [];
+    const newItem = {
+      title: 'New Item',
+      description: 'Add description here',
+    };
+    handleItemsChange([...items, newItem]);
+  };
+
+  const handleRemoveItem = (index: number) => {
+    if (!component) return;
+    const items = component.props.items as Array<Record<string, unknown>>;
+    const newItems = items.filter((_, i) => i !== index);
+    handleItemsChange(newItems);
+  };
+
+  const handleDelete = () => {
+    if (component) {
+      onDelete(component.id);
+      onClose();
+    }
+  };
+
+  if (!component) return null;
+
+  const renderPropertyField = (key: string, value: unknown) => {
+    const fieldId = `prop-${key}`;
+
+    // Array properties (cards items)
+    if (key === 'items' && component.type === 'cards') {
+      const items = value as Array<Record<string, unknown>>;
+      return (
+        <div key={key} className="space-y-2">
+          <Label htmlFor={fieldId} className="capitalize">
+            {key}
+          </Label>
+          <div className="max-h-48 space-y-2 overflow-y-auto">
+            {items.map((item, index) => (
+              <div
+                key={index}
+                className={cn(
+                  'rounded-lg border p-3',
+                  'border-stone-200 bg-stone-50 dark:border-stone-600 dark:bg-stone-700'
+                )}
+              >
+                <div className="flex items-center justify-between pb-2">
+                  <h5 className="text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Item {index + 1}
+                  </h5>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveItem(index)}
+                    className="h-6 w-6 rounded p-0 text-red-500 transition-colors hover:bg-red-100 dark:hover:bg-red-900/50"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {Object.entries(item).map(([itemKey, itemValue]) => (
+                    <div key={itemKey}>
+                      <Label className="text-xs capitalize">{itemKey}</Label>
+                      <Textarea
+                        value={String(itemValue || '')}
+                        onChange={e =>
+                          handleItemChange(index, itemKey, e.target.value)
+                        }
+                        className="min-h-[40px] text-xs"
+                        placeholder={`Enter ${itemKey}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={handleAddItem}
+              className={cn(
+                'w-full rounded-md border px-3 py-2 text-xs font-medium transition-colors',
+                'border-stone-300 bg-white text-stone-900 hover:bg-stone-50',
+                'dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100 dark:hover:bg-stone-700',
+                'flex items-center justify-center gap-2'
+              )}
+            >
+              <Plus className="h-3 w-3" />
+              Add Item
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Select fields
+    const selectFields: Record<
+      string,
+      Array<{ value: string; label: string }>
+    > = {
+      layout: [
+        { value: 'grid', label: 'Grid' },
+        { value: 'list', label: 'List' },
+      ],
+      thickness: [
+        { value: 'thin', label: 'Thin' },
+        { value: 'medium', label: 'Medium' },
+        { value: 'thick', label: 'Thick' },
+      ],
+      style: [
+        { value: 'solid', label: 'Solid' },
+        { value: 'dashed', label: 'Dashed' },
+        { value: 'dotted', label: 'Dotted' },
+      ],
+      alignment: [
+        { value: 'left', label: 'Left' },
+        { value: 'center', label: 'Center' },
+        { value: 'right', label: 'Right' },
+      ],
+      textAlign: [
+        { value: 'left', label: 'Left' },
+        { value: 'center', label: 'Center' },
+        { value: 'right', label: 'Right' },
+      ],
+      action: [
+        { value: 'link', label: 'Link' },
+        { value: 'submit', label: 'Submit' },
+        { value: 'external', label: 'External' },
+      ],
+      variant: [
+        { value: 'primary', label: 'Primary' },
+        { value: 'secondary', label: 'Secondary' },
+        { value: 'outline', label: 'Outline' },
+      ],
+      level: [
+        { value: '1', label: 'H1' },
+        { value: '2', label: 'H2' },
+        { value: '3', label: 'H3' },
+        { value: '4', label: 'H4' },
+        { value: '5', label: 'H5' },
+        { value: '6', label: 'H6' },
+      ],
+    };
+
+    if (selectFields[key]) {
+      return (
+        <div key={key} className="space-y-2">
+          <Label htmlFor={fieldId} className="text-sm capitalize">
+            {key}
+          </Label>
+          <Select
+            value={String(value || '')}
+            onValueChange={newValue =>
+              handleInputChange(
+                key,
+                key === 'level' ? Number(newValue) : newValue
+              )
+            }
+          >
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue placeholder={`Select ${key}`} />
+            </SelectTrigger>
+            <SelectContent>
+              {selectFields[key].map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      );
+    }
+
+    // Multi-line text fields
+    if (
+      key === 'content' &&
+      (component.type === 'paragraph' || component.type === 'heading')
+    ) {
+      return (
+        <div key={key} className="space-y-2">
+          <Label htmlFor={fieldId} className="text-sm capitalize">
+            {key}
+          </Label>
+          <Textarea
+            id={fieldId}
+            value={String(value || '')}
+            onChange={e => handleInputChange(key, e.target.value)}
+            placeholder={`Enter ${key}`}
+            className="min-h-[60px] text-sm"
+          />
+        </div>
+      );
+    }
+
+    // Number fields
+    if (typeof value === 'number') {
+      return (
+        <div key={key} className="space-y-2">
+          <Label htmlFor={fieldId} className="text-sm capitalize">
+            {key}
+          </Label>
+          <Input
+            id={fieldId}
+            type="number"
+            value={String(value || '')}
+            onChange={e => handleInputChange(key, Number(e.target.value) || 0)}
+            placeholder={`Enter ${key}`}
+            className="h-8 text-sm"
+          />
+        </div>
+      );
+    }
+
+    // String fields
+    if (typeof value === 'string') {
+      return (
+        <div key={key} className="space-y-2">
+          <Label htmlFor={fieldId} className="text-sm capitalize">
+            {key}
+          </Label>
+          <Input
+            id={fieldId}
+            type="text"
+            value={String(value || '')}
+            onChange={e => handleInputChange(key, e.target.value)}
+            placeholder={`Enter ${key}`}
+            className="h-8 text-sm"
+          />
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 z-40 bg-black/20" onClick={onClose} />
+
+      {/* Property Editor Modal */}
+      <div
+        ref={modalRef}
+        className={cn(
+          'fixed z-50 max-h-96 w-80 overflow-y-auto',
+          'rounded-lg border shadow-lg',
+          'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800'
+        )}
+        style={{
+          left: position.x,
+          top: position.y,
+        }}
+      >
+        <div className="border-b border-stone-200 p-3 dark:border-stone-700">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-stone-900 capitalize dark:text-stone-100">
+              {component.type} Properties
+            </h3>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="h-6 w-6 rounded p-0 text-red-500 transition-colors hover:bg-red-100 dark:hover:bg-red-900/50"
+                title="Delete Component"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="h-6 w-6 rounded p-0 text-stone-500 transition-colors hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-700"
+                title="Close"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="space-y-3 p-3">
+          {Object.entries(component.props).map(([key, value]) =>
+            renderPropertyField(key, value)
+          )}
+        </div>
+      </div>
+    </>
+  );
+};

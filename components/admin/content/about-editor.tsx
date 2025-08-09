@@ -15,6 +15,7 @@ import { getLanguageInfo } from '@lib/config/language-config';
 import { useAboutEditorStore } from '@lib/stores/about-editor-store';
 import {
   AboutTranslationData,
+  ComponentInstance,
   PageContent,
   isDynamicFormat,
   migrateAboutTranslationData,
@@ -32,9 +33,9 @@ import { useTranslations } from 'next-intl';
 
 import ComponentPalette from './component-palette';
 import ComponentRenderer from './component-renderer';
+import { ContextMenu } from './context-menu';
 import { Droppable, Sortable, SortableContainer } from './dnd-components';
 import { DndContextWrapper } from './dnd-context';
-import PropertyEditor from './property-editor';
 
 interface AboutEditorProps {
   translations: Record<SupportedLocale, AboutTranslationData>;
@@ -54,6 +55,13 @@ export function AboutEditor({
   onLocaleChange,
 }: AboutEditorProps) {
   const t = useTranslations('pages.admin.content.editor');
+
+  // Context menu state
+  const [contextMenu, setContextMenu] = React.useState<{
+    x: number;
+    y: number;
+    componentId: string;
+  } | null>(null);
 
   // Zustand store
   const {
@@ -85,7 +93,8 @@ export function AboutEditor({
     return translation;
   }, [translations, currentLocale]);
 
-  // Get selected component from page content
+  // Get selected component from page content (currently unused but kept for future use)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const selectedComponent = useMemo(() => {
     if (!pageContent || !selectedComponentId) return null;
 
@@ -98,7 +107,22 @@ export function AboutEditor({
     return null;
   }, [pageContent, selectedComponentId]);
 
-  // Load current translation into editor when locale changes
+  // Get context menu component (dynamically updated)
+  const contextMenuComponent = useMemo(() => {
+    if (!pageContent || !contextMenu?.componentId) return null;
+
+    for (const section of pageContent.sections) {
+      for (const column of section.columns) {
+        const component = column.find(
+          comp => comp.id === contextMenu.componentId
+        );
+        if (component) return component;
+      }
+    }
+    return null;
+  }, [pageContent, contextMenu?.componentId]);
+
+  // Initial load and locale change handling
   useEffect(() => {
     if (currentTranslation.sections) {
       const content: PageContent = {
@@ -112,7 +136,8 @@ export function AboutEditor({
       setPageContent(content);
     }
     setCurrentLanguage(currentLocale);
-  }, [currentLocale, currentTranslation, setPageContent, setCurrentLanguage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentLocale, setPageContent, setCurrentLanguage]); // Only reload on locale change, not on translation data updates
 
   // Debounced auto-save function
   const debouncedSave = useDebouncedCallback(
@@ -153,19 +178,55 @@ export function AboutEditor({
     [selectedComponentId, updateComponentProps]
   );
 
-  // Handle property changes
+  // Handle property changes (currently unused but kept for future use)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handlePropsChange = throttledPropsChange;
 
   // Handle component deletion
-  const handleDeleteComponent = () => {
-    if (selectedComponentId) {
-      deleteComponent(selectedComponentId);
-    }
+  const handleDeleteComponent = (componentId: string) => {
+    deleteComponent(componentId);
+    setContextMenu(null);
   };
 
   // Handle component selection
   const handleComponentClick = (componentId: string) => {
     setSelectedComponent(componentId);
+  };
+
+  // Handle right-click context menu
+  const handleContextMenu = (e: React.MouseEvent, componentId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Find the component
+    let targetComponent: ComponentInstance | null = null;
+    for (const section of pageContent?.sections || []) {
+      for (const column of section.columns) {
+        const component = column.find(comp => comp.id === componentId);
+        if (component) {
+          targetComponent = component;
+          break;
+        }
+      }
+      if (targetComponent) break;
+    }
+
+    if (targetComponent) {
+      setSelectedComponent(componentId); // Set as selected when right-clicking
+      setContextMenu({
+        x: e.clientX,
+        y: e.clientY,
+        componentId: componentId,
+      });
+    }
+  };
+
+  // Handle context menu props change
+  const handleContextMenuPropsChange = (newProps: Record<string, unknown>) => {
+    if (contextMenu?.componentId) {
+      updateComponentProps(contextMenu.componentId, newProps);
+      debouncedSave(); // Auto-save after prop changes
+    }
   };
 
   // Save changes back to translations
@@ -326,25 +387,17 @@ export function AboutEditor({
 
         {/* Main Content */}
         <div className="flex min-h-0 flex-1">
-          {/* Left Panel - Components & Properties */}
+          {/* Left Panel - Component Palette */}
           <div
             className={cn(
-              'w-80 space-y-6 overflow-y-auto border-r p-4',
+              'w-64 overflow-y-auto border-r p-4',
               'border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-900'
             )}
           >
-            {/* Component Palette */}
             <ComponentPalette />
-
-            {/* Property Editor */}
-            <PropertyEditor
-              component={selectedComponent}
-              onPropsChange={handlePropsChange}
-              onDeleteComponent={handleDeleteComponent}
-            />
           </div>
 
-          {/* Right Panel - Canvas */}
+          {/* Canvas */}
           <div className="flex-1 overflow-y-auto">
             <div className="space-y-6 p-6">
               {pageContent.sections.map((section, sectionIndex) => (
@@ -437,6 +490,9 @@ export function AboutEditor({
                                   onClick={() =>
                                     handleComponentClick(component.id)
                                   }
+                                  onContextMenu={e =>
+                                    handleContextMenu(e, component.id)
+                                  }
                                 >
                                   <ComponentRenderer component={component} />
                                 </div>
@@ -463,6 +519,18 @@ export function AboutEditor({
           </div>
         </div>
       </div>
+
+      {/* Context Menu */}
+      {contextMenu && contextMenuComponent && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          component={contextMenuComponent}
+          onPropsChange={handleContextMenuPropsChange}
+          onDelete={handleDeleteComponent}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </DndContextWrapper>
   );
 }
