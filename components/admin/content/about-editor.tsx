@@ -25,7 +25,7 @@ import {
   useDebouncedCallback,
   useThrottledCallback,
 } from '@lib/utils/performance';
-import { Plus, Redo2, RotateCcw, Save, Trash2, Undo2 } from 'lucide-react';
+import { Plus, Redo2, Trash2, Undo2 } from 'lucide-react';
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
@@ -229,41 +229,6 @@ export function AboutEditor({
     }
   };
 
-  // Save changes back to translations
-  const handleSave = () => {
-    if (!pageContent) return;
-
-    const updatedTranslation: AboutTranslationData = {
-      sections: pageContent.sections,
-      metadata: {
-        ...pageContent.metadata,
-        lastModified: new Date().toISOString(),
-      },
-    };
-
-    const newTranslations = {
-      ...translations,
-      [currentLocale]: updatedTranslation,
-    };
-
-    onTranslationsChange(newTranslations);
-  };
-
-  // Handle reset
-  const handleReset = () => {
-    if (currentTranslation.sections) {
-      const content: PageContent = {
-        sections: currentTranslation.sections,
-        metadata: currentTranslation.metadata || {
-          version: '1.0.0',
-          lastModified: new Date().toISOString(),
-          author: 'admin',
-        },
-      };
-      setPageContent(content);
-    }
-  };
-
   if (!pageContent) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -364,22 +329,6 @@ export function AboutEditor({
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Section
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleReset}
-                disabled={!isDirty}
-              >
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Reset
-              </Button>
-              <Button onClick={handleSave} disabled={!isDirty}>
-                <Save className="mr-2 h-4 w-4" />
-                Save
               </Button>
             </div>
           </div>

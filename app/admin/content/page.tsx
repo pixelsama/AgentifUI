@@ -437,63 +437,6 @@ export default function ContentManagementPage() {
             )}
           >
             <div className="h-full overflow-auto p-6">{renderEditor()}</div>
-            <div
-              className={cn(
-                'absolute right-0 bottom-0 left-0 p-4',
-                isDark ? 'bg-stone-900/80' : 'bg-white/80',
-                'backdrop-blur-sm'
-              )}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  {hasChanges && (
-                    <div
-                      className={cn(
-                        'flex items-center gap-2 text-sm',
-                        isDark ? 'text-stone-400' : 'text-stone-500'
-                      )}
-                    >
-                      <div className="h-2 w-2 rounded-full bg-orange-500" />
-                      <span>{t('saveActions.hasChanges')}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleReset}
-                    disabled={!hasChanges || isSaving}
-                    className={cn(
-                      'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
-                      !hasChanges || isSaving
-                        ? 'cursor-not-allowed text-stone-500'
-                        : isDark
-                          ? 'text-stone-300 hover:bg-stone-800'
-                          : 'text-stone-600 hover:bg-stone-100'
-                    )}
-                  >
-                    {t('saveActions.reset')}
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={!hasChanges || isSaving}
-                    className={cn(
-                      'rounded-lg px-6 py-2 text-sm font-medium shadow-sm transition-colors',
-                      !hasChanges || isSaving
-                        ? isDark
-                          ? 'cursor-not-allowed bg-stone-700 text-stone-400'
-                          : 'cursor-not-allowed bg-stone-300 text-stone-500'
-                        : isDark
-                          ? 'bg-stone-100 text-stone-900 hover:bg-white'
-                          : 'bg-stone-900 text-white hover:bg-stone-800'
-                    )}
-                  >
-                    {isSaving
-                      ? t('saveActions.saving_')
-                      : t('saveActions.save')}
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         )}
       </div>
