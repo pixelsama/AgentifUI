@@ -423,7 +423,7 @@ export default function ContentManagementPage() {
                   onPreviewToggle={() => setShowPreview(!showPreview)}
                   onFullscreenPreview={handleFullscreenPreview}
                 />
-                <div className="min-h-0 flex-1 overflow-auto">
+                <div className="min-h-0 flex-1 overflow-hidden">
                   {renderPreview()}
                 </div>
               </div>
@@ -432,7 +432,7 @@ export default function ContentManagementPage() {
         ) : (
           <div
             className={cn(
-              'relative flex-1',
+              'relative flex-1 overflow-hidden',
               isDark ? 'bg-stone-900' : 'bg-white'
             )}
           >

@@ -86,7 +86,7 @@ export function AboutPreview({
           screen: 'w-full h-full overflow-hidden relative bg-background',
           content: 'h-full overflow-y-auto',
           mainClass:
-            'min-h-screen w-full py-6 px-4 sm:px-6 lg:px-8 overflow-x-hidden',
+            'min-h-0 w-full py-6 px-4 sm:px-6 lg:px-8 overflow-x-hidden',
           innerContainer: 'max-w-5xl mx-auto',
           maxWidth: 'max-w-5xl',
         };
