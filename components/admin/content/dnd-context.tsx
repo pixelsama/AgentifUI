@@ -62,6 +62,9 @@ export function DndContextWrapper({
       if (element) {
         originalRect = element.getBoundingClientRect();
       }
+
+      // Add CSS class to disable pointer events on sortable components during palette drag
+      document.body.classList.add('palette-dragging');
     }
 
     setDragState({
@@ -83,7 +86,8 @@ export function DndContextWrapper({
       const isValidDrop =
         over &&
         (String(over.id).startsWith('section-') ||
-          String(over.id).includes('drop'));
+          String(over.id).includes('drop') ||
+          over.data.current?.type === 'container');
 
       return {
         ...prev,
@@ -99,7 +103,8 @@ export function DndContextWrapper({
       const isValidDrop =
         over &&
         (String(over.id).startsWith('section-') ||
-          String(over.id).includes('drop'));
+          String(over.id).includes('drop') ||
+          over.data.current?.type === 'container');
 
       if (isPaletteItem && !isValidDrop && dragState?.originalRect) {
         // Animate return to original position
@@ -134,6 +139,9 @@ export function DndContextWrapper({
         setIsAnimatingReturn(false);
         onDragEnd(event);
       }
+
+      // Always remove the palette-dragging class
+      document.body.classList.remove('palette-dragging');
     },
     [dragState, onDragEnd]
   );

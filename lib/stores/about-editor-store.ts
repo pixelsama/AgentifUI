@@ -245,7 +245,8 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
       const isValidDropZone =
         overId.startsWith('section-drop-') ||
         overId.startsWith('section-') ||
-        over.data.current?.type === 'container';
+        over.data.current?.type === 'container' ||
+        over.data.current?.accepts?.includes('palette-item');
 
       if (!isValidDropZone) {
         console.log('Invalid drop zone:', overId);
@@ -302,9 +303,13 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
       }
 
       // Check if we're dropping directly on a container
-      if (overId.startsWith('section-')) {
+      if (overId.startsWith('section-') && !overId.includes('drop')) {
         targetContainerId = overId;
         console.log('Dropping on container:', targetContainerId);
+      } else if (over.data.current?.type === 'container') {
+        // Handle drops on SortableContainer components
+        targetContainerId = overId;
+        console.log('Dropping on sortable container:', targetContainerId);
       } else {
         // Find which container this component belongs to and get insert position
         for (const section of newPageContent.sections) {

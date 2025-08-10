@@ -197,7 +197,7 @@ export function SortableContainer({
         className={cn(
           className,
           isOver &&
-            'ring-opacity-75 bg-blue-50/50 ring-2 ring-blue-400 dark:bg-blue-900/20'
+            'ring-opacity-75 bg-blue-50/70 shadow-lg ring-2 ring-blue-400 dark:bg-blue-900/30 dark:ring-blue-300'
         )}
       >
         {children}

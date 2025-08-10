@@ -47,6 +47,67 @@ interface AboutEditorProps {
   onLocaleChange: (newLocale: SupportedLocale) => void;
 }
 
+// Section Drop Zone Component for visual feedback - simplified approach
+function SectionDropZone({
+  sectionId,
+  children,
+  className,
+}: {
+  sectionId: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const [isHighlighted, setIsHighlighted] = React.useState(false);
+  const sectionRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleDragOver = (e: DragEvent) => {
+      // Only handle palette item drags
+      if (!document.body.classList.contains('palette-dragging')) {
+        setIsHighlighted(false);
+        return;
+      }
+
+      if (sectionRef.current) {
+        const rect = sectionRef.current.getBoundingClientRect();
+        const isInside =
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom;
+
+        setIsHighlighted(isInside);
+      }
+    };
+
+    const handleDragEnd = () => {
+      setIsHighlighted(false);
+    };
+
+    document.addEventListener('dragover', handleDragOver);
+    document.addEventListener('dragend', handleDragEnd);
+
+    return () => {
+      document.removeEventListener('dragover', handleDragOver);
+      document.removeEventListener('dragend', handleDragEnd);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={sectionRef}
+      data-section-id={sectionId}
+      className={cn(
+        className,
+        isHighlighted &&
+          'ring-opacity-75 bg-blue-50/30 ring-2 ring-blue-400 dark:bg-blue-900/30 dark:ring-blue-300'
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function AboutEditor({
   translations,
   currentLocale,
@@ -371,9 +432,10 @@ export function AboutEditor({
                   )}
 
                   {/* Section Content */}
-                  <div
+                  <SectionDropZone
+                    sectionId={section.id}
                     className={cn(
-                      'rounded-lg border p-4',
+                      'rounded-lg border p-4 transition-all duration-200',
                       'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800'
                     )}
                   >
@@ -461,7 +523,7 @@ export function AboutEditor({
                         );
                       })}
                     </div>
-                  </div>
+                  </SectionDropZone>
                 </div>
               ))}
 
