@@ -201,7 +201,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     }
   },
 
-  // Handle drag and drop (optimized with performance considerations)
+  // Handle drag and drop with enhanced animations and validation
   handleDragEnd: (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -241,11 +241,22 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
       let targetContainerId = overId;
       let insertIndex = -1; // -1 means append to end
 
+      // Validate drop zone - only allow drops on valid targets
+      const isValidDropZone =
+        overId.startsWith('section-drop-') ||
+        overId.startsWith('section-') ||
+        over.data.current?.type === 'container';
+
+      if (!isValidDropZone) {
+        console.log('Invalid drop zone:', overId);
+        return;
+      }
+
       // Handle dropping on section drop zones (creates new section)
       if (overId.startsWith('section-drop-')) {
         console.log('Dropping on section drop zone:', overId);
 
-        // Create a new section
+        // Create a new section with animation-ready component
         const newSection = createDefaultSection('single-column');
         const newComponent: ComponentInstance = {
           id: generateUniqueId('comp'),
@@ -268,13 +279,25 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
 
         console.log('New section created with component:', newComponent.id);
 
-        // Save changes and exit early
+        // Save changes with animation trigger
         set(state => ({
           pageContent: newPageContent,
           undoStack: [...state.undoStack, state.pageContent!].slice(-20),
           redoStack: [],
           isDirty: true,
+          selectedComponentId: newComponent.id, // Highlight the new component
         }));
+
+        // Trigger component appear animation
+        setTimeout(() => {
+          const element = document.querySelector(
+            `[data-component-id="${newComponent.id}"]`
+          );
+          if (element) {
+            element.classList.add('animate-component-appear');
+          }
+        }, 50);
+
         return;
       }
 
@@ -331,6 +354,27 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
           }
 
           console.log('Component added successfully:', newComponent.id);
+
+          // Set the new component as selected and trigger appear animation
+          set(state => ({
+            pageContent: newPageContent,
+            undoStack: [...state.undoStack, state.pageContent!].slice(-20),
+            redoStack: [],
+            isDirty: true,
+            selectedComponentId: newComponent.id,
+          }));
+
+          // Trigger component appear animation
+          setTimeout(() => {
+            const element = document.querySelector(
+              `[data-component-id="${newComponent.id}"]`
+            );
+            if (element) {
+              element.classList.add('animate-component-appear');
+            }
+          }, 50);
+
+          return;
         }
       }
     } else {

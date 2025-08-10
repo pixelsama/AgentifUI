@@ -228,7 +228,9 @@ const ComponentPalette: React.FC<ComponentPaletteProps> = ({ className }) => {
                         id={`palette-${comp.type}`}
                         preview={componentPreview}
                       >
-                        {componentPreview}
+                        <div data-dnd-id={`palette-${comp.type}`}>
+                          {componentPreview}
+                        </div>
                       </Draggable>
                     );
                   })}
