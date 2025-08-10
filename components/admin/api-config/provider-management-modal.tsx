@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@components/ui/button';
+import { ConfirmDialog } from '@components/ui/confirm-dialog';
 import {
   Dialog,
   DialogContent,
@@ -29,7 +30,7 @@ import { cn } from '@lib/utils';
 import { Edit, Plus, Save, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
@@ -87,8 +88,13 @@ export function ProviderManagementModal({
     is_default: false,
   });
   const [errors, setErrors] = useState<Partial<ProviderFormData>>({});
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [providerToDelete, setProviderToDelete] = useState<Provider | null>(
+    null
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadProviders = async () => {
+  const loadProviders = useCallback(async () => {
     setLoading(true);
     try {
       const result = await getAllProviders();
@@ -103,7 +109,7 @@ export function ProviderManagementModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     if (open) {
@@ -209,18 +215,23 @@ export function ProviderManagementModal({
     }
   };
 
-  const handleDeleteProvider = async (provider: Provider) => {
-    if (!confirm(t('deleteConfirm', { name: provider.name }))) {
-      return;
-    }
+  const handleDeleteProvider = (provider: Provider) => {
+    setProviderToDelete(provider);
+    setShowDeleteDialog(true);
+  };
 
-    setLoading(true);
+  const handleConfirmDelete = async () => {
+    if (!providerToDelete) return;
+
+    setIsDeleting(true);
     try {
-      const result = await deleteProvider(provider.id);
+      const result = await deleteProvider(providerToDelete.id);
       if (result.success) {
         toast.success(t('messages.deleteSuccess'));
         await loadProviders();
         onProviderChange?.();
+        setShowDeleteDialog(false);
+        setProviderToDelete(null);
       } else {
         toast.error(t('messages.deleteFailed'));
       }
@@ -228,7 +239,7 @@ export function ProviderManagementModal({
       console.error('Failed to delete provider:', error);
       toast.error(t('messages.deleteFailed'));
     } finally {
-      setLoading(false);
+      setIsDeleting(false);
     }
   };
 
@@ -542,6 +553,18 @@ export function ProviderManagementModal({
           )}
         </div>
       </DialogContent>
+
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => !isDeleting && setShowDeleteDialog(false)}
+        onConfirm={handleConfirmDelete}
+        title={t('buttons.delete')}
+        message={t('deleteConfirm', { name: providerToDelete?.name || '' })}
+        confirmText={t('buttons.delete')}
+        variant="danger"
+        icon="delete"
+        isLoading={isDeleting}
+      />
     </Dialog>
   );
 }
