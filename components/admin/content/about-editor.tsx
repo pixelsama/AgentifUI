@@ -416,8 +416,9 @@ export function AboutEditor({
                             id={`section-${section.id}-${columnIndex}`}
                             items={columnItems}
                             className={cn(
-                              'min-h-24 rounded-md border-2 border-dashed p-3 transition-colors',
-                              'border-stone-300 bg-stone-50 dark:border-stone-600 dark:bg-stone-700/50'
+                              'min-h-24 rounded-md border-2 border-dashed p-3 transition-all duration-200',
+                              'border-stone-300 bg-stone-50 hover:border-stone-400 hover:bg-stone-100',
+                              'dark:border-stone-600 dark:bg-stone-700/50 dark:hover:border-stone-500 dark:hover:bg-stone-600/50'
                             )}
                           >
                             {column.length === 0 && (

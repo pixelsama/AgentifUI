@@ -79,6 +79,7 @@ export function Draggable({
       id,
       disabled,
       data: {
+        type: id.startsWith('palette-') ? 'palette-item' : 'component',
         preview,
       },
     });
@@ -93,7 +94,7 @@ export function Draggable({
       style={style}
       className={cn(
         className,
-        isDragging && 'opacity-50',
+        isDragging && 'scale-95 opacity-50',
         !disabled && 'cursor-grab active:cursor-grabbing'
       )}
       {...listeners}
@@ -133,6 +134,9 @@ export function Sortable({
   } = useSortable({
     id,
     disabled,
+    data: {
+      type: 'component',
+    },
   });
 
   const style = {
@@ -146,7 +150,7 @@ export function Sortable({
       style={style}
       className={cn(
         className,
-        isDragging && 'z-50 opacity-50',
+        isDragging && 'z-50 scale-105 opacity-60',
         !disabled && 'cursor-grab active:cursor-grabbing'
       )}
       {...listeners}
@@ -180,6 +184,10 @@ export function SortableContainer({
 }: SortableContainerProps) {
   const { isOver, setNodeRef } = useDroppable({
     id,
+    data: {
+      type: 'container',
+      accepts: ['component', 'palette-item'],
+    },
   });
 
   return (
@@ -188,7 +196,8 @@ export function SortableContainer({
         ref={setNodeRef}
         className={cn(
           className,
-          isOver && 'ring-opacity-50 ring-2 ring-blue-500'
+          isOver &&
+            'ring-opacity-75 bg-blue-50/50 ring-2 ring-blue-400 dark:bg-blue-900/20'
         )}
       >
         {children}

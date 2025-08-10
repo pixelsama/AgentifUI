@@ -222,31 +222,86 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     const activeId = String(active.id);
     const overId = String(over.id);
 
+    console.log('Drag End - Active:', activeId, 'Over:', overId);
+    console.log('Active data:', active.data.current);
+    console.log('Over data:', over.data.current);
+
     // Handle dragging from component palette
     if (activeId.startsWith('palette-')) {
       const componentType = activeId.replace('palette-', '');
       const componentDef = availableComponents.find(
         comp => comp.type === componentType
       );
-      if (!componentDef) return;
+      if (!componentDef) {
+        console.log('Component definition not found for:', componentType);
+        return;
+      }
 
-      // Parse destination - handle both direct drops on containers and on components
+      // Parse destination - handle direct drops on containers
       let targetContainerId = overId;
+      let insertIndex = -1; // -1 means append to end
 
-      // If dropping on a component, get its container
-      if (!overId.startsWith('section-')) {
-        // Find which container this component belongs to
+      // Handle dropping on section drop zones (creates new section)
+      if (overId.startsWith('section-drop-')) {
+        console.log('Dropping on section drop zone:', overId);
+
+        // Create a new section
+        const newSection = createDefaultSection('single-column');
+        const newComponent: ComponentInstance = {
+          id: generateUniqueId('comp'),
+          type: componentDef.type,
+          props: { ...componentDef.defaultProps },
+        };
+
+        // Add component to the new section
+        newSection.columns[0].push(newComponent);
+
+        // Handle different drop zones
+        if (overId === 'section-drop-final') {
+          // Add to the end
+          newPageContent.sections.push(newSection);
+        } else {
+          // Parse the drop zone index to insert at the right position
+          const dropIndex = parseInt(overId.replace('section-drop-', ''));
+          newPageContent.sections.splice(dropIndex, 0, newSection);
+        }
+
+        console.log('New section created with component:', newComponent.id);
+
+        // Save changes and exit early
+        set(state => ({
+          pageContent: newPageContent,
+          undoStack: [...state.undoStack, state.pageContent!].slice(-20),
+          redoStack: [],
+          isDirty: true,
+        }));
+        return;
+      }
+
+      // Check if we're dropping directly on a container
+      if (overId.startsWith('section-')) {
+        targetContainerId = overId;
+        console.log('Dropping on container:', targetContainerId);
+      } else {
+        // Find which container this component belongs to and get insert position
         for (const section of newPageContent.sections) {
           for (
             let colIndex = 0;
             colIndex < section.columns.length;
             colIndex++
           ) {
-            const componentExists = section.columns[colIndex].find(
+            const componentIndex = section.columns[colIndex].findIndex(
               comp => comp.id === overId
             );
-            if (componentExists) {
+            if (componentIndex !== -1) {
               targetContainerId = `section-${section.id}-${colIndex}`;
+              insertIndex = componentIndex; // Insert before this component
+              console.log(
+                'Dropping before component:',
+                overId,
+                'at index:',
+                insertIndex
+              );
               break;
             }
           }
@@ -264,8 +319,18 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
             props: { ...componentDef.defaultProps },
           };
 
-          // Add to the end of the column
-          section.columns[parseInt(columnIndex)].push(newComponent);
+          // Insert at the specified position or append to end
+          if (insertIndex === -1) {
+            section.columns[parseInt(columnIndex)].push(newComponent);
+          } else {
+            section.columns[parseInt(columnIndex)].splice(
+              insertIndex,
+              0,
+              newComponent
+            );
+          }
+
+          console.log('Component added successfully:', newComponent.id);
         }
       }
     } else {
