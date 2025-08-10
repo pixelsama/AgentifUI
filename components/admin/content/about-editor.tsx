@@ -35,7 +35,7 @@ import ComponentPalette from './component-palette';
 import ComponentRenderer from './component-renderer';
 import { ContextMenu } from './context-menu';
 import { Droppable, Sortable, SortableContainer } from './dnd-components';
-import { DndContextWrapper } from './dnd-context';
+import { DndContextWrapper, useDragState } from './dnd-context';
 
 interface AboutEditorProps {
   translations: Record<SupportedLocale, AboutTranslationData>;
@@ -47,7 +47,7 @@ interface AboutEditorProps {
   onLocaleChange: (newLocale: SupportedLocale) => void;
 }
 
-// Section Drop Zone Component for visual feedback - simplified approach
+// Section Drop Zone Component using @dnd-kit drag state
 function SectionDropZone({
   sectionId,
   children,
@@ -57,50 +57,21 @@ function SectionDropZone({
   children: React.ReactNode;
   className?: string;
 }) {
-  const [isHighlighted, setIsHighlighted] = React.useState(false);
-  const sectionRef = React.useRef<HTMLDivElement>(null);
+  // Use the drag state from DndContext to determine if this section should be highlighted
+  const dragState = useDragState();
 
-  React.useEffect(() => {
-    const handleDragOver = (e: DragEvent) => {
-      // Only handle palette item drags
-      if (!document.body.classList.contains('palette-dragging')) {
-        setIsHighlighted(false);
-        return;
-      }
-
-      if (sectionRef.current) {
-        const rect = sectionRef.current.getBoundingClientRect();
-        const isInside =
-          e.clientX >= rect.left &&
-          e.clientX <= rect.right &&
-          e.clientY >= rect.top &&
-          e.clientY <= rect.bottom;
-
-        setIsHighlighted(isInside);
-      }
-    };
-
-    const handleDragEnd = () => {
-      setIsHighlighted(false);
-    };
-
-    document.addEventListener('dragover', handleDragOver);
-    document.addEventListener('dragend', handleDragEnd);
-
-    return () => {
-      document.removeEventListener('dragover', handleDragOver);
-      document.removeEventListener('dragend', handleDragEnd);
-    };
-  }, []);
+  const isHighlighted = React.useMemo(() => {
+    if (!dragState?.isPaletteItem) return false;
+    return dragState.hoveredSectionId === sectionId;
+  }, [dragState, sectionId]);
 
   return (
     <div
-      ref={sectionRef}
       data-section-id={sectionId}
       className={cn(
         className,
         isHighlighted &&
-          'ring-opacity-75 bg-blue-50/30 ring-2 ring-blue-400 dark:bg-blue-900/30 dark:ring-blue-300'
+          'ring-opacity-75 bg-blue-50/30 ring-2 ring-blue-400 transition-all duration-200 dark:bg-blue-900/30 dark:ring-blue-300'
       )}
     >
       {children}
@@ -137,6 +108,7 @@ export function AboutEditor({
     deleteComponent,
     handleDragEnd,
     addSection,
+    deleteSection,
     undo,
     redo,
     setCurrentLanguage,
@@ -451,7 +423,7 @@ export function AboutEditor({
                         </h3>
                         <button
                           onClick={() => {
-                            // Delete section logic here
+                            deleteSection(section.id);
                           }}
                           className={cn(
                             'h-6 w-6 rounded p-0 text-red-500 transition-colors',
@@ -515,7 +487,10 @@ export function AboutEditor({
                                   }
                                   className="animate-component-target"
                                 >
-                                  <ComponentRenderer component={component} />
+                                  <ComponentRenderer
+                                    component={component}
+                                    sectionCommonProps={section.commonProps}
+                                  />
                                 </div>
                               </Sortable>
                             ))}

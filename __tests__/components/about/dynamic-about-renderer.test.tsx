@@ -1,7 +1,8 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { DynamicAboutRenderer } from '@components/about/dynamic-about-renderer';
 import type { AboutTranslationData } from '@lib/types/about-page-components';
+import '@testing-library/jest-dom';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 // Skip NextIntl for testing
 
 // Mock next-intl
@@ -29,7 +30,9 @@ jest.mock('@lib/supabase/client', () => ({
 jest.mock('framer-motion', () => ({
   motion: {
     div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    section: ({ children, ...props }: any) => <section {...props}>{children}</section>,
+    section: ({ children, ...props }: any) => (
+      <section {...props}>{children}</section>
+    ),
     p: ({ children, ...props }: any) => <p {...props}>{children}</p>,
     hr: ({ children, ...props }: any) => <hr {...props}>{children}</hr>,
   },
@@ -170,7 +173,7 @@ describe('DynamicAboutRenderer', () => {
   describe('Component Rendering', () => {
     it('renders heading components correctly', () => {
       const translationData = createMockTranslationData(true);
-      
+
       renderWithIntl(
         <DynamicAboutRenderer
           translationData={translationData}
@@ -178,13 +181,17 @@ describe('DynamicAboutRenderer', () => {
         />
       );
 
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Test Heading');
-      expect(screen.getByRole('heading', { level: 1 })).toHaveClass('text-center');
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+        'Test Heading'
+      );
+      expect(screen.getByRole('heading', { level: 1 })).toHaveClass(
+        'text-center'
+      );
     });
 
     it('renders paragraph components correctly', () => {
       const translationData = createMockTranslationData(true);
-      
+
       renderWithIntl(
         <DynamicAboutRenderer
           translationData={translationData}
@@ -197,7 +204,7 @@ describe('DynamicAboutRenderer', () => {
 
     it('renders card components correctly', () => {
       const translationData = createMockTranslationData(true);
-      
+
       renderWithIntl(
         <DynamicAboutRenderer
           translationData={translationData}
@@ -213,7 +220,7 @@ describe('DynamicAboutRenderer', () => {
 
     it('renders button components correctly', () => {
       const translationData = createMockTranslationData(true);
-      
+
       renderWithIntl(
         <DynamicAboutRenderer
           translationData={translationData}
@@ -230,7 +237,7 @@ describe('DynamicAboutRenderer', () => {
   describe('Layout Rendering', () => {
     it('renders single-column layout correctly', () => {
       const translationData = createMockTranslationData(true);
-      
+
       const { container } = renderWithIntl(
         <DynamicAboutRenderer
           translationData={translationData}
@@ -244,7 +251,7 @@ describe('DynamicAboutRenderer', () => {
 
     it('renders two-column layout correctly', () => {
       const translationData = createMockTranslationData(true);
-      
+
       const { container } = renderWithIntl(
         <DynamicAboutRenderer
           translationData={translationData}
@@ -260,7 +267,7 @@ describe('DynamicAboutRenderer', () => {
   describe('Legacy Data Migration', () => {
     it('handles legacy format data correctly', () => {
       const legacyData = createMockTranslationData(false);
-      
+
       renderWithIntl(
         <DynamicAboutRenderer
           translationData={legacyData}
@@ -271,7 +278,9 @@ describe('DynamicAboutRenderer', () => {
       // Should migrate and render legacy data
       expect(screen.getByText('Legacy Title')).toBeInTheDocument();
       expect(screen.getByText('Legacy Subtitle')).toBeInTheDocument();
-      expect(screen.getByText('Legacy mission description')).toBeInTheDocument();
+      expect(
+        screen.getByText('Legacy mission description')
+      ).toBeInTheDocument();
     });
   });
 
@@ -279,7 +288,7 @@ describe('DynamicAboutRenderer', () => {
     it('calls onButtonClick when button is clicked', async () => {
       const mockOnButtonClick = jest.fn();
       const translationData = createMockTranslationData(true);
-      
+
       renderWithIntl(
         <DynamicAboutRenderer
           translationData={translationData}
@@ -307,12 +316,9 @@ describe('DynamicAboutRenderer', () => {
           author: 'test',
         },
       };
-      
+
       renderWithIntl(
-        <DynamicAboutRenderer
-          translationData={emptyData}
-          colors={mockColors}
-        />
+        <DynamicAboutRenderer translationData={emptyData} colors={mockColors} />
       );
 
       expect(screen.getByText('No content available')).toBeInTheDocument();
@@ -343,7 +349,7 @@ describe('DynamicAboutRenderer', () => {
           author: 'test',
         },
       };
-      
+
       renderWithIntl(
         <DynamicAboutRenderer
           translationData={invalidData}
@@ -351,14 +357,16 @@ describe('DynamicAboutRenderer', () => {
         />
       );
 
-      expect(screen.getByText('Unknown component type: unknown')).toBeInTheDocument();
+      expect(
+        screen.getByText('Unknown component type: unknown')
+      ).toBeInTheDocument();
     });
   });
 
   describe('Performance Optimizations', () => {
     it('uses memoized component rendering', () => {
       const translationData = createMockTranslationData(true);
-      
+
       const { rerender } = renderWithIntl(
         <DynamicAboutRenderer
           translationData={translationData}

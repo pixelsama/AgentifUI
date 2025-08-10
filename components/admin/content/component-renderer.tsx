@@ -9,6 +9,8 @@ import {
   HeadingProps,
   ImageProps,
   ParagraphProps,
+  SectionCommonProps,
+  getResolvedComponentProps,
 } from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
 
@@ -219,11 +221,13 @@ const componentMap: Record<string, React.FC<any>> = {
 interface ComponentRendererProps {
   component: ComponentInstance;
   className?: string;
+  sectionCommonProps?: SectionCommonProps;
 }
 
 const ComponentRenderer: React.FC<ComponentRendererProps> = ({
   component,
   className,
+  sectionCommonProps,
 }) => {
   const Component = componentMap[component.type];
 
@@ -244,9 +248,15 @@ const ComponentRenderer: React.FC<ComponentRendererProps> = ({
     );
   }
 
+  // 获取合并后的最终属性 (包含属性继承逻辑)
+  const resolvedProps = getResolvedComponentProps(
+    component,
+    sectionCommonProps
+  );
+
   return (
     <div className={className}>
-      <Component {...component.props} />
+      <Component {...resolvedProps} />
     </div>
   );
 };

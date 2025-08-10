@@ -27,6 +27,32 @@ export interface ComponentInstance {
   id: string;
   type: ComponentType;
   props: Record<string, unknown>;
+  // 是否继承section的共享属性 (默认true)
+  inheritFromSection?: boolean;
+  // 要覆盖的section属性键名列表
+  overrideProps?: string[];
+}
+
+// Section共享属性接口
+export interface SectionCommonProps {
+  // 样式主题
+  theme?: 'light' | 'dark' | 'auto';
+  // 间距设置
+  spacing?: 'compact' | 'normal' | 'spacious';
+  // 文本对齐
+  textAlign?: 'left' | 'center' | 'right';
+  // 动画效果
+  animation?: 'fade' | 'slide' | 'none';
+  // 是否可交互
+  interactive?: boolean;
+  // 拖拽行为
+  dragBehavior?: 'inherit' | 'custom';
+  // 背景样式
+  backgroundColor?: string;
+  // 边框样式
+  borderStyle?: 'none' | 'solid' | 'dashed' | 'dotted';
+  // 自定义属性扩展
+  [key: string]: unknown;
 }
 
 // 页面段落接口
@@ -35,6 +61,8 @@ export interface PageSection {
   layout: LayoutType;
   columns: ComponentInstance[][];
   shouldDelete?: boolean;
+  // 新增：section级别的共享属性
+  commonProps?: SectionCommonProps;
 }
 
 // 页面内容接口
@@ -225,3 +253,57 @@ export {
   validateMigratedData,
   createBackupData,
 } from '@lib/utils/data-migration';
+
+// === 属性继承工具函数 ===
+
+/**
+ * 合并section公共属性和组件特有属性
+ *
+ * @param sectionCommonProps - Section级别的公共属性
+ * @param componentProps - 组件特有属性
+ * @param overrideProps - 要覆盖的公共属性键名列表
+ * @returns 合并后的最终属性对象
+ */
+export function mergeComponentProps(
+  sectionCommonProps: SectionCommonProps = {},
+  componentProps: Record<string, unknown> = {},
+  overrideProps: string[] = []
+): Record<string, unknown> {
+  // 创建section属性副本
+  const inherited = { ...sectionCommonProps };
+
+  // 移除被覆盖的属性
+  overrideProps.forEach(key => {
+    delete inherited[key];
+  });
+
+  // 组件特有属性优先级更高
+  return {
+    ...inherited,
+    ...componentProps,
+  };
+}
+
+/**
+ * 获取组件的最终属性 (包含继承逻辑)
+ *
+ * @param component - 组件实例
+ * @param sectionCommonProps - Section的公共属性
+ * @returns 解析后的最终属性对象
+ */
+export function getResolvedComponentProps(
+  component: ComponentInstance,
+  sectionCommonProps?: SectionCommonProps
+): Record<string, unknown> {
+  // 如果不继承或没有section公共属性，直接返回组件props
+  if (component.inheritFromSection === false || !sectionCommonProps) {
+    return component.props;
+  }
+
+  // 合并属性 (默认继承)
+  return mergeComponentProps(
+    sectionCommonProps,
+    component.props,
+    component.overrideProps || []
+  );
+}

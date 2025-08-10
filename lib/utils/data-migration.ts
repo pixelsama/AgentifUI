@@ -81,6 +81,9 @@ export function createDefaultComponent(
     id,
     type,
     props: defaultProps[type] || {},
+    // 默认继承section属性
+    inheritFromSection: true,
+    overrideProps: [],
   };
 }
 
@@ -98,6 +101,15 @@ export function createDefaultSection(
     columns: Array(columnCount)
       .fill([])
       .map(() => []),
+    // 默认的section公共属性
+    commonProps: {
+      theme: 'auto',
+      spacing: 'normal',
+      textAlign: 'left',
+      animation: 'none',
+      interactive: true,
+      dragBehavior: 'inherit',
+    },
   };
 }
 

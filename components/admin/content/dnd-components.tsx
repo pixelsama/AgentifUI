@@ -147,6 +147,7 @@ export function Sortable({
   return (
     <div
       ref={setNodeRef}
+      data-sortable
       style={style}
       className={cn(
         className,
@@ -194,6 +195,7 @@ export function SortableContainer({
     <SortableContext items={items} strategy={strategy}>
       <div
         ref={setNodeRef}
+        data-sortable
         className={cn(
           className,
           isOver &&

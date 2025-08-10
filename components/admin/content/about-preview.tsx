@@ -124,7 +124,10 @@ export function AboutPreview({
                 <div key={columnIndex} className="space-y-4">
                   {column.map(component => (
                     <div key={component.id}>
-                      <ComponentRenderer component={component} />
+                      <ComponentRenderer
+                        component={component}
+                        sectionCommonProps={section.commonProps}
+                      />
                     </div>
                   ))}
                 </div>

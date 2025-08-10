@@ -1,10 +1,9 @@
 /**
  * Performance optimization utilities
- * 
+ *
  * Provides debouncing, throttling, and lazy loading utilities
  * for better performance in dynamic component editing.
  */
-
 import React from 'react';
 
 /**
@@ -20,7 +19,7 @@ export function debounce<T extends (...args: any[]) => any>(
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
-    
+
     timeoutId = setTimeout(() => {
       func(...args);
       timeoutId = null;
@@ -40,16 +39,19 @@ export function throttle<T extends (...args: any[]) => any>(
 
   return (...args: Parameters<T>) => {
     const now = Date.now();
-    
+
     if (now - lastCall >= delay) {
       lastCall = now;
       func(...args);
     } else if (!timeoutId) {
-      timeoutId = setTimeout(() => {
-        lastCall = Date.now();
-        func(...args);
-        timeoutId = null;
-      }, delay - (now - lastCall));
+      timeoutId = setTimeout(
+        () => {
+          lastCall = Date.now();
+          func(...args);
+          timeoutId = null;
+        },
+        delay - (now - lastCall)
+      );
     }
   };
 }
@@ -121,13 +123,13 @@ export function calculateVirtualScroll(
   options: VirtualScrollOptions
 ): VirtualScrollResult {
   const { itemHeight, containerHeight, overscan = 2 } = options;
-  
+
   const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
   const endIndex = Math.min(
     itemCount - 1,
     Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan
   );
-  
+
   return {
     startIndex,
     endIndex,
@@ -153,7 +155,7 @@ export function useIntersectionObserver(
     const observer = new IntersectionObserver(([entry]) => {
       const isElementIntersecting = entry.isIntersecting;
       setIsIntersecting(isElementIntersecting);
-      
+
       if (isElementIntersecting && !hasIntersected) {
         setHasIntersected(true);
       }
@@ -172,35 +174,37 @@ export function useIntersectionObserver(
  */
 export class PerformanceMonitor {
   private static measurements = new Map<string, number>();
-  
+
   static startMeasurement(name: string): void {
     this.measurements.set(name, performance.now());
   }
-  
+
   static endMeasurement(name: string): number | null {
     const startTime = this.measurements.get(name);
     if (!startTime) return null;
-    
+
     const endTime = performance.now();
     const duration = endTime - startTime;
-    
+
     this.measurements.delete(name);
-    
+
     // Log slow operations in development
     if (process.env.NODE_ENV === 'development' && duration > 16) {
-      console.warn(`Slow operation detected: ${name} took ${duration.toFixed(2)}ms`);
+      console.warn(
+        `Slow operation detected: ${name} took ${duration.toFixed(2)}ms`
+      );
     }
-    
+
     return duration;
   }
-  
+
   static measureAsync<T>(name: string, fn: () => Promise<T>): Promise<T> {
     this.startMeasurement(name);
     return fn().finally(() => {
       this.endMeasurement(name);
     });
   }
-  
+
   static measure<T>(name: string, fn: () => T): T {
     this.startMeasurement(name);
     try {

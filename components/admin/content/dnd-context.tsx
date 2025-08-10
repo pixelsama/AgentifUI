@@ -25,6 +25,14 @@ interface DragState {
   isPaletteItem: boolean;
   isValidDrop: boolean;
   originalRect?: DOMRect;
+  hoveredSectionId?: string;
+}
+
+// Export the drag state context to share with other components
+export const DragStateContext = React.createContext<DragState | null>(null);
+
+export function useDragState() {
+  return React.useContext(DragStateContext);
 }
 
 /**
@@ -89,9 +97,26 @@ export function DndContextWrapper({
           String(over.id).includes('drop') ||
           over.data.current?.type === 'container');
 
+      // Extract section ID from the over.id (e.g., "section-abc123-0" -> "abc123")
+      let hoveredSectionId: string | undefined;
+      if (prev.isPaletteItem) {
+        if (over) {
+          const overId = String(over.id);
+          if (overId.startsWith('section-')) {
+            // Extract section ID from patterns like "section-abc123-0" or "section-drop-abc123"
+            const match = overId.match(/section-(?:drop-)?([^-]+)/);
+            if (match) {
+              hoveredSectionId = match[1];
+            }
+          }
+        }
+        // If not over any section, clear the hoveredSectionId
+      }
+
       return {
         ...prev,
         isValidDrop: Boolean(isValidDrop),
+        hoveredSectionId,
       };
     });
   }, []);
@@ -147,36 +172,38 @@ export function DndContextWrapper({
   );
 
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
-    >
-      {children}
-      {typeof document !== 'undefined' &&
-        createPortal(
-          <DragOverlay dropAnimation={null}>
-            {dragState ? (
-              <div
-                ref={dragOverlayRef}
-                className={`rounded-lg border p-2 shadow-xl transition-all duration-200 ${
-                  dragState.isValidDrop
-                    ? 'scale-105 border-emerald-200 bg-emerald-50 shadow-emerald-200/50 dark:border-emerald-700 dark:bg-emerald-900/20'
-                    : dragState.isPaletteItem
-                      ? 'border-stone-200 bg-white shadow-stone-200/50 dark:border-stone-600 dark:bg-stone-800'
-                      : 'border-stone-200 bg-white shadow-stone-200/50 dark:border-stone-600 dark:bg-stone-800'
-                } ${isAnimatingReturn ? 'pointer-events-none' : ''} `}
-                style={{
-                  transform: isAnimatingReturn ? undefined : 'rotate(5deg)',
-                }}
-              >
-                {dragState.content}
-              </div>
-            ) : null}
-          </DragOverlay>,
-          document.body
-        )}
-    </DndContext>
+    <DragStateContext.Provider value={dragState}>
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
+        {children}
+        {typeof document !== 'undefined' &&
+          createPortal(
+            <DragOverlay dropAnimation={null}>
+              {dragState ? (
+                <div
+                  ref={dragOverlayRef}
+                  className={`rounded-lg border p-2 shadow-xl transition-all duration-200 ${
+                    dragState.isValidDrop
+                      ? 'scale-105 border-emerald-200 bg-emerald-50 shadow-emerald-200/50 dark:border-emerald-700 dark:bg-emerald-900/20'
+                      : dragState.isPaletteItem
+                        ? 'border-stone-200 bg-white shadow-stone-200/50 dark:border-stone-600 dark:bg-stone-800'
+                        : 'border-stone-200 bg-white shadow-stone-200/50 dark:border-stone-600 dark:bg-stone-800'
+                  } ${isAnimatingReturn ? 'pointer-events-none' : ''} `}
+                  style={{
+                    transform: isAnimatingReturn ? undefined : 'rotate(5deg)',
+                  }}
+                >
+                  {dragState.content}
+                </div>
+              ) : null}
+            </DragOverlay>,
+            document.body
+          )}
+      </DndContext>
+    </DragStateContext.Provider>
   );
 }

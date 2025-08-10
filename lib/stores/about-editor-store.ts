@@ -387,75 +387,119 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
       const activeContainer = active.data.current?.sortable?.containerId;
       const overContainer = over.data.current?.sortable?.containerId || overId;
 
-      if (activeContainer && overContainer) {
-        if (activeContainer === overContainer) {
-          // Reordering within the same container
-          const [containerType, sectionId, columnIndex] =
-            activeContainer.split('-');
+      console.log('Container IDs:', {
+        activeContainer,
+        overContainer,
+        overId,
+        activeData: active.data.current,
+        overData: over.data.current,
+      });
 
-          if (
-            containerType === 'section' &&
-            sectionId &&
-            columnIndex !== undefined
-          ) {
-            const section = newPageContent.sections.find(
-              s => s.id === sectionId
+      // 检查是否是同一个容器内的排序
+      // 如果activeContainer和overContainer相同，说明在同一个SortableContext内
+      if (
+        activeContainer &&
+        overContainer &&
+        activeContainer === overContainer
+      ) {
+        // 通过组件ID找到它们所在的section和column
+        let activeSectionId = '';
+        let activeColumnIndex = -1;
+        let overSectionId = '';
+        let overColumnIndex = -1;
+
+        // 查找activeId所在的位置
+        for (const section of newPageContent.sections) {
+          for (let colIdx = 0; colIdx < section.columns.length; colIdx++) {
+            const activeIdx = section.columns[colIdx].findIndex(
+              comp => comp.id === activeId
             );
-            if (section && section.columns[parseInt(columnIndex)]) {
-              const column = section.columns[parseInt(columnIndex)];
-              const activeIndex = column.findIndex(
-                comp => comp.id === activeId
-              );
-              const overIndex = column.findIndex(comp => comp.id === overId);
+            if (activeIdx !== -1) {
+              activeSectionId = section.id;
+              activeColumnIndex = colIdx;
+            }
 
-              if (
-                activeIndex !== -1 &&
-                overIndex !== -1 &&
-                activeIndex !== overIndex
-              ) {
-                // Use arrayMove to reorder within the same container
-                section.columns[parseInt(columnIndex)] = arrayMove(
-                  column,
-                  activeIndex,
-                  overIndex
-                );
-              }
+            const overIdx = section.columns[colIdx].findIndex(
+              comp => comp.id === overId
+            );
+            if (overIdx !== -1) {
+              overSectionId = section.id;
+              overColumnIndex = colIdx;
             }
           }
-        } else {
-          // Moving between containers
-          const [sourceType, sourceSectionId, sourceColumnIndex] =
-            activeContainer.split('-');
-          const [destType, destSectionId, destColumnIndex] =
-            overContainer.split('-');
+        }
 
-          if (sourceType === 'section' && destType === 'section') {
-            const sourceSection = newPageContent.sections.find(
-              s => s.id === sourceSectionId
-            );
-            const destSection = newPageContent.sections.find(
-              s => s.id === destSectionId
-            );
+        // 确保两个组件在同一个section的同一列中
+        if (
+          activeSectionId === overSectionId &&
+          activeColumnIndex === overColumnIndex &&
+          activeSectionId !== '' &&
+          activeColumnIndex !== -1
+        ) {
+          const section = newPageContent.sections.find(
+            s => s.id === activeSectionId
+          );
+          if (section && section.columns[activeColumnIndex]) {
+            const column = section.columns[activeColumnIndex];
+            const activeIndex = column.findIndex(comp => comp.id === activeId);
+            const overIndex = column.findIndex(comp => comp.id === overId);
 
-            if (sourceSection && destSection) {
-              const sourceColumn =
-                sourceSection.columns[parseInt(sourceColumnIndex)];
-              const destColumn = destSection.columns[parseInt(destColumnIndex)];
+            if (
+              activeIndex !== -1 &&
+              overIndex !== -1 &&
+              activeIndex !== overIndex
+            ) {
+              console.log('Reordering components within same container:', {
+                sectionId: activeSectionId,
+                columnIndex: activeColumnIndex,
+                activeIndex,
+                overIndex,
+                activeId,
+                overId,
+              });
 
-              if (sourceColumn && destColumn) {
-                // Find and move the component
-                const componentIndex = sourceColumn.findIndex(
-                  comp => comp.id === activeId
-                );
-                if (componentIndex !== -1) {
-                  const [removed] = sourceColumn.splice(componentIndex, 1);
-                  // Insert at the position of the over item, or at the end
-                  const overIndex = over.data.current?.sortable?.index;
-                  if (typeof overIndex === 'number') {
-                    destColumn.splice(overIndex, 0, removed);
-                  } else {
-                    destColumn.push(removed);
-                  }
+              section.columns[activeColumnIndex] = arrayMove(
+                column,
+                activeIndex,
+                overIndex
+              );
+              console.log('Components reordered successfully');
+            }
+          }
+        }
+      } else if (activeContainer && overContainer) {
+        // Moving between containers
+        const [sourceType, sourceSectionId, sourceColumnIndex] =
+          activeContainer.split('-');
+        const [destType, destSectionId, destColumnIndex] =
+          overContainer.split('-');
+
+        if (sourceType === 'section' && destType === 'section') {
+          const sourceSection = newPageContent.sections.find(
+            s => s.id === sourceSectionId
+          );
+          const destSection = newPageContent.sections.find(
+            s => s.id === destSectionId
+          );
+
+          if (sourceSection && destSection) {
+            const sourceColumn =
+              sourceSection.columns[parseInt(sourceColumnIndex)];
+            const destColumn = destSection.columns[parseInt(destColumnIndex)];
+
+            if (sourceColumn && destColumn) {
+              // Find and move the component
+              const componentIndex = sourceColumn.findIndex(
+                comp => comp.id === activeId
+              );
+              if (componentIndex !== -1) {
+                const [removed] = sourceColumn.splice(componentIndex, 1);
+                // Insert at the position of the over item, or at the end
+                const overIndex = over.data.current?.sortable?.index;
+                if (typeof overIndex === 'number') {
+                  destColumn.splice(overIndex, 0, removed);
+                } else {
+                  destColumn.push(removed);
                 }
               }
             }
