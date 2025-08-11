@@ -444,7 +444,7 @@ export function AboutEditor({
           {/* Left Panel - Component Palette */}
           <div
             className={cn(
-              'w-64 overflow-y-auto border-r p-4',
+              'w-64 overflow-x-hidden overflow-y-auto border-r p-4',
               'border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-900'
             )}
           >

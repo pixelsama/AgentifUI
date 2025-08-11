@@ -13,7 +13,15 @@ import { getCurrentLocaleFromCookie } from '@lib/config/language-config';
 import { clearTranslationCache } from '@lib/hooks/use-dynamic-translations';
 import { useTheme } from '@lib/hooks/use-theme';
 import { TranslationService } from '@lib/services/admin/content/translation-service';
-import type { AboutTranslationData } from '@lib/types/about-page-components';
+import { useAboutEditorStore } from '@lib/stores/about-editor-store';
+import type {
+  AboutTranslationData,
+  PageContent,
+} from '@lib/types/about-page-components';
+import {
+  isDynamicFormat,
+  migrateAboutTranslationData,
+} from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
 import { Eye } from 'lucide-react';
 import { toast } from 'sonner';
@@ -46,6 +54,9 @@ export default function ContentManagementPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const t = useTranslations('pages.admin.content.page');
+
+  // About editor store for resetting editor state
+  const { setPageContent, reset: resetAboutEditor } = useAboutEditorStore();
 
   const [activeTab, setActiveTab] = useState<'about' | 'home'>('about');
   const [showPreview, setShowPreview] = useState(true);
@@ -164,9 +175,37 @@ export default function ContentManagementPage() {
 
   const handleReset = () => {
     if (activeTab === 'about' && originalAboutTranslations) {
+      // Reset page-level state
       setAboutTranslations({ ...originalAboutTranslations });
+
+      // Reset editor state to match the original data
+      const currentTranslation = originalAboutTranslations[currentLocale] || {};
+      let translation = currentTranslation;
+
+      // Ensure it's in dynamic format
+      if (!isDynamicFormat(translation)) {
+        translation = migrateAboutTranslationData(translation);
+      }
+
+      if (translation.sections) {
+        const content: PageContent = {
+          sections: translation.sections,
+          metadata: translation.metadata || {
+            version: '1.0.0',
+            lastModified: new Date().toISOString(),
+            author: 'admin',
+          },
+        };
+
+        // Reset the editor state completely - this clears undo/redo stacks
+        resetAboutEditor();
+        // Set the page content to original state
+        setPageContent(content);
+      }
     } else if (activeTab === 'home' && originalHomeTranslations) {
+      // Reset page-level state for home tab
       setHomeTranslations({ ...originalHomeTranslations });
+      // Note: Home editor doesn't use the same Zustand store, so just reset the state
     }
   };
 
