@@ -516,82 +516,182 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
             return false;
           }
         } else {
-          // Moving between containers
-          const [sourceType, sourceSectionId, sourceColumnIndex] =
-            activeContainer.split('-');
-          const [destType, destSectionId, destColumnIndex] =
-            overContainer.split('-');
+          // Moving between containers - find components by their actual locations
+          console.log('🔄 CROSS-CONTAINER MOVE DETECTED:', {
+            activeId,
+            overId,
+            activeContainer,
+            overContainer,
+          });
 
-          if (sourceType === 'section' && destType === 'section') {
-            const sourceSection = newPageContent.sections.find(
-              s => s.id === sourceSectionId
-            );
-            const destSection = newPageContent.sections.find(
-              s => s.id === destSectionId
-            );
-
-            if (sourceSection && destSection) {
-              const sourceColumn =
-                sourceSection.columns[parseInt(sourceColumnIndex)];
-              const destColumn = destSection.columns[parseInt(destColumnIndex)];
-
-              if (sourceColumn && destColumn) {
-                // Find and move the component
-                const componentIndex = sourceColumn.findIndex(
-                  comp => comp.id === activeId
+          // Helper function to find component location
+          const findComponentLocation = (componentId: string) => {
+            for (
+              let sectionIndex = 0;
+              sectionIndex < newPageContent.sections.length;
+              sectionIndex++
+            ) {
+              const section = newPageContent.sections[sectionIndex];
+              for (
+                let columnIndex = 0;
+                columnIndex < section.columns.length;
+                columnIndex++
+              ) {
+                const column = section.columns[columnIndex];
+                const componentIndex = column.findIndex(
+                  comp => comp.id === componentId
                 );
                 if (componentIndex !== -1) {
-                  const [removed] = sourceColumn.splice(componentIndex, 1);
-                  // Insert at the position of the over item, or at the end
-                  const overIndex = over.data.current?.sortable?.index;
-                  if (typeof overIndex === 'number') {
-                    destColumn.splice(overIndex, 0, removed);
-                  } else {
-                    destColumn.push(removed);
-                  }
-
-                  console.log('✅ CROSS-CONTAINER MOVE SUCCESSFUL');
-
-                  // Save changes and return success
-                  const cleanedSections = newPageContent.sections.filter(
-                    section => section.columns.some(column => column.length > 0)
-                  );
-
-                  set(state => ({
-                    pageContent: {
-                      ...newPageContent,
-                      sections: cleanedSections,
-                    },
-                    undoStack: [...state.undoStack, state.pageContent!].slice(
-                      -20
-                    ),
-                    redoStack: [],
-                    isDirty: true,
-                  }));
-
-                  return true;
-                } else {
-                  console.log(
-                    '❌ CROSS-CONTAINER MOVE FAILED - Component not found'
-                  );
-                  return false;
+                  return {
+                    sectionIndex,
+                    columnIndex,
+                    componentIndex,
+                    section,
+                    column,
+                    component: column[componentIndex],
+                  };
                 }
-              } else {
-                console.log('❌ CROSS-CONTAINER MOVE FAILED - Invalid columns');
-                return false;
               }
-            } else {
-              console.log(
-                '❌ CROSS-CONTAINER MOVE FAILED - Sections not found'
+            }
+            return null;
+          };
+
+          const sourceLocation = findComponentLocation(activeId);
+
+          // Check if dropping directly on an empty container (overId is container ID)
+          if (overId.startsWith('section-')) {
+            const targetParts = overId.split('-');
+            const sectionId = targetParts.slice(1, -1).join('-');
+            const columnIndex = targetParts[targetParts.length - 1];
+
+            console.log('📦 DROPPING ON EMPTY CONTAINER:', {
+              overId,
+              sectionId,
+              columnIndex,
+              sourceLocation: sourceLocation
+                ? sourceLocation.section.id
+                : 'not found',
+            });
+
+            if (sourceLocation && sectionId && columnIndex !== undefined) {
+              const targetSection = newPageContent.sections.find(
+                s => s.id === sectionId
               );
-              return false;
+              if (
+                targetSection &&
+                targetSection.columns[parseInt(columnIndex)]
+              ) {
+                // Remove component from source
+                const [removed] = sourceLocation.column.splice(
+                  sourceLocation.componentIndex,
+                  1
+                );
+
+                // Add to target empty container
+                targetSection.columns[parseInt(columnIndex)].push(removed);
+
+                console.log('✅ MOVE TO EMPTY CONTAINER SUCCESSFUL:', {
+                  movedComponent: removed.id,
+                  fromSection: sourceLocation.section.id,
+                  fromColumn: sourceLocation.columnIndex,
+                  toSection: targetSection.id,
+                  toColumn: parseInt(columnIndex),
+                });
+
+                // Save changes and return success
+                const cleanedSections = newPageContent.sections.filter(
+                  section => section.columns.some(column => column.length > 0)
+                );
+
+                set(state => ({
+                  pageContent: {
+                    ...newPageContent,
+                    sections: cleanedSections,
+                  },
+                  undoStack: [...state.undoStack, state.pageContent!].slice(
+                    -20
+                  ),
+                  redoStack: [],
+                  isDirty: true,
+                }));
+
+                return true;
+              }
             }
           } else {
-            console.log(
-              '❌ CROSS-CONTAINER MOVE FAILED - Invalid container format'
-            );
-            return false;
+            // Moving to a location with existing components
+            const destLocation = findComponentLocation(overId);
+
+            console.log('📍 COMPONENT LOCATIONS:', {
+              source: sourceLocation
+                ? {
+                    sectionId: sourceLocation.section.id,
+                    sectionIndex: sourceLocation.sectionIndex,
+                    columnIndex: sourceLocation.columnIndex,
+                    componentIndex: sourceLocation.componentIndex,
+                  }
+                : null,
+              dest: destLocation
+                ? {
+                    sectionId: destLocation.section.id,
+                    sectionIndex: destLocation.sectionIndex,
+                    columnIndex: destLocation.columnIndex,
+                    componentIndex: destLocation.componentIndex,
+                  }
+                : null,
+            });
+
+            if (sourceLocation && destLocation) {
+              // Remove component from source
+              const [removed] = sourceLocation.column.splice(
+                sourceLocation.componentIndex,
+                1
+              );
+
+              // Insert into destination - insert before the target component
+              destLocation.column.splice(
+                destLocation.componentIndex,
+                0,
+                removed
+              );
+
+              console.log('✅ CROSS-CONTAINER MOVE SUCCESSFUL:', {
+                movedComponent: removed.id,
+                fromSection: sourceLocation.section.id,
+                fromColumn: sourceLocation.columnIndex,
+                toSection: destLocation.section.id,
+                toColumn: destLocation.columnIndex,
+                insertIndex: destLocation.componentIndex,
+              });
+
+              // Save changes and return success
+              const cleanedSections = newPageContent.sections.filter(section =>
+                section.columns.some(column => column.length > 0)
+              );
+
+              set(state => ({
+                pageContent: {
+                  ...newPageContent,
+                  sections: cleanedSections,
+                },
+                undoStack: [...state.undoStack, state.pageContent!].slice(-20),
+                redoStack: [],
+                isDirty: true,
+              }));
+
+              return true;
+            }
           }
+
+          console.log(
+            '❌ CROSS-CONTAINER MOVE FAILED - Could not find component locations or target container:',
+            {
+              sourceFound: !!sourceLocation,
+              overId,
+              activeId,
+            }
+          );
+          return false;
         }
       } else {
         console.log('❌ NO CONTAINERS FOUND - Drag operation failed');
