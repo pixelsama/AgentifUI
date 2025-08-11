@@ -2019,7 +2019,7 @@
                 "type": "button",
                 "props": {
                   "text": "Commencer à explorer",
-                  "variant": "primary",
+                  "variant": "solid",
                   "action": "link",
                   "url": "#",
                   "textAlign": "center"
