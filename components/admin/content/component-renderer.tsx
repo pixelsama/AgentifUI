@@ -160,12 +160,12 @@ const DynamicButton: React.FC<DynamicButtonProps> = ({
   const buttonStyles = {
     solid: cn(
       'inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-all duration-200',
-      'bg-stone-900 text-white hover:scale-105 hover:bg-stone-800 focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-none',
+      'min-w-[8rem] bg-stone-900 text-white hover:scale-105 hover:bg-stone-800 focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-none',
       'dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200 dark:focus:ring-stone-400'
     ),
     outline: cn(
       'inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-all duration-200',
-      'border border-stone-300 bg-transparent text-stone-900 hover:scale-105 hover:bg-stone-50 focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-none',
+      'min-w-[8rem] border border-stone-300 bg-transparent text-stone-900 hover:scale-105 hover:bg-stone-50 focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-none',
       'dark:border-stone-600 dark:text-stone-100 dark:hover:bg-stone-800 dark:focus:ring-stone-400'
     ),
   };
