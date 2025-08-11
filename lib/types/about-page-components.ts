@@ -78,6 +78,13 @@ export interface ButtonProps {
   variant: 'solid' | 'outline';
   action: 'link' | 'submit' | 'external';
   url?: string;
+  // 可选的第二个按钮
+  secondaryButton?: {
+    text: string;
+    variant: 'solid' | 'outline';
+    action: 'link' | 'submit' | 'external';
+    url?: string;
+  };
 }
 
 // 图片组件 Props

@@ -135,15 +135,21 @@ const Cards: React.FC<CardsProps> = ({ items, layout }) => {
  * Button component renderer
  *
  * Renders interactive buttons with stone color system variants
+ * Supports dual button layout with homepage-style spacing
  */
 const DynamicButton: React.FC<DynamicButtonProps> = ({
   text,
   variant,
   action,
   url,
+  secondaryButton,
 }) => {
-  const handleClick = (e: React.MouseEvent) => {
-    if (action === 'link' && url === '#') {
+  const handleClick = (
+    e: React.MouseEvent,
+    buttonAction?: string,
+    buttonUrl?: string
+  ) => {
+    if (buttonAction === 'link' && buttonUrl === '#') {
       e.preventDefault();
       // In preview mode, prevent default action
     }
@@ -163,14 +169,25 @@ const DynamicButton: React.FC<DynamicButtonProps> = ({
   };
 
   return (
-    <div className="mb-6 text-center">
+    <div className="mb-6 flex flex-wrap justify-center gap-4">
       <a
         href={url || '#'}
-        onClick={handleClick}
+        onClick={e => handleClick(e, action, url)}
         className={buttonStyles[variant]}
       >
         {text}
       </a>
+      {secondaryButton && (
+        <a
+          href={secondaryButton.url || '#'}
+          onClick={e =>
+            handleClick(e, secondaryButton.action, secondaryButton.url)
+          }
+          className={buttonStyles[secondaryButton.variant]}
+        >
+          {secondaryButton.text}
+        </a>
+      )}
     </div>
   );
 };

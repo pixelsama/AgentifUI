@@ -70,6 +70,38 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     onPropsChange({ ...component.props, [name]: value });
   };
 
+  const handleSecondaryButtonChange = (key: string, value: unknown) => {
+    if (!component) return;
+    const currentSecondaryButton =
+      (component.props.secondaryButton as Record<string, unknown>) || {};
+    const updatedSecondaryButton = { ...currentSecondaryButton, [key]: value };
+    onPropsChange({
+      ...component.props,
+      secondaryButton: updatedSecondaryButton,
+    });
+  };
+
+  const handleAddSecondaryButton = () => {
+    if (!component) return;
+    const defaultSecondaryButton = {
+      text: 'Secondary Button',
+      variant: 'outline',
+      action: 'link',
+      url: '#',
+    };
+    onPropsChange({
+      ...component.props,
+      secondaryButton: defaultSecondaryButton,
+    });
+  };
+
+  const handleRemoveSecondaryButton = () => {
+    if (!component) return;
+    const newProps = { ...component.props };
+    delete newProps.secondaryButton;
+    onPropsChange(newProps);
+  };
+
   const handleItemsChange = (newItems: Array<Record<string, unknown>>) => {
     handleInputChange('items', newItems);
   };
@@ -171,6 +203,120 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
               <Plus className="h-3 w-3" />
               Add Item
             </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Secondary button for button component
+    if (key === 'secondaryButton' && component.type === 'button') {
+      const secondaryButton = value as Record<string, unknown> | undefined;
+
+      if (!secondaryButton) {
+        return (
+          <div key={key} className="space-y-2">
+            <Label className="text-sm">Secondary Button</Label>
+            <button
+              type="button"
+              onClick={handleAddSecondaryButton}
+              className={cn(
+                'w-full rounded-md border px-3 py-2 text-xs font-medium transition-colors',
+                'border-stone-300 bg-white text-stone-900 hover:bg-stone-50',
+                'dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100 dark:hover:bg-stone-700',
+                'flex items-center justify-center gap-2'
+              )}
+            >
+              <Plus className="h-3 w-3" />
+              Add Second Button
+            </button>
+          </div>
+        );
+      }
+
+      return (
+        <div key={key} className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm">Secondary Button</Label>
+            <button
+              type="button"
+              onClick={handleRemoveSecondaryButton}
+              className="h-6 w-6 rounded p-0 text-red-500 transition-colors hover:bg-red-100 dark:hover:bg-red-900/50"
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
+          </div>
+          <div
+            className={cn(
+              'space-y-3 rounded-lg border p-3',
+              'border-stone-200 bg-stone-50 dark:border-stone-600 dark:bg-stone-700'
+            )}
+          >
+            {/* Text field */}
+            <div className="space-y-2">
+              <Label className="text-xs">Text</Label>
+              <Input
+                type="text"
+                value={String(secondaryButton.text || '')}
+                onChange={e =>
+                  handleSecondaryButtonChange('text', e.target.value)
+                }
+                placeholder="Enter button text"
+                className="h-8 text-sm"
+              />
+            </div>
+
+            {/* Variant field */}
+            <div className="space-y-2">
+              <Label className="text-xs">Variant</Label>
+              <Select
+                value={String(secondaryButton.variant || 'outline')}
+                onValueChange={newValue =>
+                  handleSecondaryButtonChange('variant', newValue)
+                }
+              >
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="Select variant" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="solid">Solid</SelectItem>
+                  <SelectItem value="outline">Outline</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Action field */}
+            <div className="space-y-2">
+              <Label className="text-xs">Action</Label>
+              <Select
+                value={String(secondaryButton.action || 'link')}
+                onValueChange={newValue =>
+                  handleSecondaryButtonChange('action', newValue)
+                }
+              >
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="Select action" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="link">Link</SelectItem>
+                  <SelectItem value="submit">Submit</SelectItem>
+                  <SelectItem value="external">External</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* URL field */}
+            <div className="space-y-2">
+              <Label className="text-xs">URL</Label>
+              <Input
+                type="text"
+                value={String(secondaryButton.url || '')}
+                onChange={e =>
+                  handleSecondaryButtonChange('url', e.target.value)
+                }
+                placeholder="Enter URL"
+                className="h-8 text-sm"
+              />
+            </div>
           </div>
         </div>
       );
@@ -363,6 +509,10 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           {Object.entries(component.props).map(([key, value]) =>
             renderPropertyField(key, value)
           )}
+          {/* Always show secondary button option for button components */}
+          {component.type === 'button' &&
+            !component.props.secondaryButton &&
+            renderPropertyField('secondaryButton', undefined)}
         </div>
       </div>
     </>
