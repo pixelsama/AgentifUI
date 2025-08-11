@@ -45,8 +45,8 @@ interface AboutEditorState {
   ) => void;
   // Delete a component by ID
   deleteComponent: (id: string) => void;
-  // Handle drag and drop operations
-  handleDragEnd: (event: DragEndEvent) => void;
+  // Handle drag and drop operations - returns true if drop was successful
+  handleDragEnd: (event: DragEndEvent) => boolean;
   // Create a new section
   addSection: (
     layout?: 'single-column' | 'two-column' | 'three-column'
@@ -202,13 +202,19 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
   },
 
   // Handle drag and drop (optimized with performance considerations)
-  handleDragEnd: (event: DragEndEvent) => {
+  handleDragEnd: (event: DragEndEvent): boolean => {
     const { active, over } = event;
 
-    if (!over) return;
+    if (!over) {
+      console.log('❌ NO DROP TARGET - returning false');
+      return false;
+    }
 
     const state = get();
-    if (!state.pageContent) return;
+    if (!state.pageContent) {
+      console.log('❌ NO PAGE CONTENT - returning false');
+      return false;
+    }
 
     // More efficient cloning - only clone what we need to modify
     const newPageContent: PageContent = {
@@ -233,8 +239,8 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
         comp => comp.type === componentType
       );
       if (!componentDef) {
-        console.log('Component definition not found for:', componentType);
-        return;
+        console.log('❌ Component definition not found for:', componentType);
+        return false;
       }
 
       console.log('🎨 PALETTE DROP DETECTED:', {
@@ -274,14 +280,16 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
 
         console.log('New section created with component:', newComponent.id);
 
-        // Save changes and exit early
+        // Save changes and return success
         set(state => ({
           pageContent: newPageContent,
           undoStack: [...state.undoStack, state.pageContent!].slice(-20),
           redoStack: [],
           isDirty: true,
         }));
-        return;
+
+        console.log('✅ SECTION DROP SUCCESSFUL');
+        return true;
       }
 
       // Check if we're dropping directly on a container
@@ -361,11 +369,26 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
             columnIndex,
             newColumnLength: section.columns[parseInt(columnIndex)].length,
           });
+
+          // Save changes and return success for component drop
+          const cleanedSections = newPageContent.sections.filter(section =>
+            section.columns.some(column => column.length > 0)
+          );
+
+          set(state => ({
+            pageContent: { ...newPageContent, sections: cleanedSections },
+            undoStack: [...state.undoStack, state.pageContent!].slice(-20),
+            redoStack: [],
+            isDirty: true,
+          }));
+
+          return true;
         } else {
           console.log('❌ FAILED TO FIND SECTION OR COLUMN:', {
             sectionFound: !!section,
             columnExists: !!section?.columns[parseInt(columnIndex)],
           });
+          return false;
         }
       } else {
         console.log('❌ INVALID TARGET CONTAINER FORMAT:', {
@@ -374,6 +397,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
           columnIndex,
           targetContainerId,
         });
+        return false;
       }
     } else {
       // Handle moving existing components within or between containers
@@ -463,8 +487,33 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
                   before: originalColumn.map(c => c.id),
                   after: section.columns[targetColumnIndex].map(c => c.id),
                 });
+
+                // Save changes and return success for reordering
+                const cleanedSections = newPageContent.sections.filter(
+                  section => section.columns.some(column => column.length > 0)
+                );
+
+                set(state => ({
+                  pageContent: { ...newPageContent, sections: cleanedSections },
+                  undoStack: [...state.undoStack, state.pageContent!].slice(
+                    -20
+                  ),
+                  redoStack: [],
+                  isDirty: true,
+                }));
+
+                return true;
+              } else {
+                console.log('❌ REORDER FAILED - Invalid indices');
+                return false;
               }
+            } else {
+              console.log('❌ REORDER FAILED - Section or column not found');
+              return false;
             }
+          } else {
+            console.log('❌ REORDER FAILED - Target location not found');
+            return false;
           }
         } else {
           // Moving between containers
@@ -500,26 +549,55 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
                   } else {
                     destColumn.push(removed);
                   }
+
+                  console.log('✅ CROSS-CONTAINER MOVE SUCCESSFUL');
+
+                  // Save changes and return success
+                  const cleanedSections = newPageContent.sections.filter(
+                    section => section.columns.some(column => column.length > 0)
+                  );
+
+                  set(state => ({
+                    pageContent: {
+                      ...newPageContent,
+                      sections: cleanedSections,
+                    },
+                    undoStack: [...state.undoStack, state.pageContent!].slice(
+                      -20
+                    ),
+                    redoStack: [],
+                    isDirty: true,
+                  }));
+
+                  return true;
+                } else {
+                  console.log(
+                    '❌ CROSS-CONTAINER MOVE FAILED - Component not found'
+                  );
+                  return false;
                 }
+              } else {
+                console.log('❌ CROSS-CONTAINER MOVE FAILED - Invalid columns');
+                return false;
               }
+            } else {
+              console.log(
+                '❌ CROSS-CONTAINER MOVE FAILED - Sections not found'
+              );
+              return false;
             }
+          } else {
+            console.log(
+              '❌ CROSS-CONTAINER MOVE FAILED - Invalid container format'
+            );
+            return false;
           }
         }
+      } else {
+        console.log('❌ NO CONTAINERS FOUND - Drag operation failed');
+        return false;
       }
     }
-
-    // Clean up empty sections
-    const cleanedSections = newPageContent.sections.filter(section =>
-      section.columns.some(column => column.length > 0)
-    );
-
-    // Save changes
-    set(state => ({
-      pageContent: { ...newPageContent, sections: cleanedSections },
-      undoStack: [...state.undoStack, state.pageContent!].slice(-20),
-      redoStack: [],
-      isDirty: true,
-    }));
   },
 
   // Add new section

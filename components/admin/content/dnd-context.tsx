@@ -15,7 +15,7 @@ import React, { createContext, useContext, useState } from 'react';
 
 interface DndContextWrapperProps {
   children: React.ReactNode;
-  onDragEnd: (event: DragEndEvent) => void;
+  onDragEnd: (event: DragEndEvent) => boolean; // Return true if drop was successful
 }
 
 interface DndStateContextValue {
@@ -44,6 +44,8 @@ export function DndContextWrapper({
   } | null>(null);
 
   const [isDraggingFromPalette, setIsDraggingFromPalette] = useState(false);
+  const [dropWasSuccessful, setDropWasSuccessful] = useState(false);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -82,9 +84,28 @@ export function DndContextWrapper({
       isDraggingFromPalette,
     });
 
-    setActiveItem(null);
-    setIsDraggingFromPalette(false);
-    onDragEnd(event);
+    // Call the store's drag end handler and get success status
+    const wasSuccessful = onDragEnd(event);
+    setDropWasSuccessful(wasSuccessful);
+
+    if (wasSuccessful && activeItem) {
+      // For successful drops, animate out in place
+      setIsAnimatingOut(true);
+
+      // Clear the item after animation completes
+      setTimeout(() => {
+        setActiveItem(null);
+        setIsDraggingFromPalette(false);
+        setDropWasSuccessful(false);
+        setIsAnimatingOut(false);
+      }, 200); // 200ms fade out animation
+    } else {
+      // For failed drops, clear immediately (allows default return animation)
+      setActiveItem(null);
+      setIsDraggingFromPalette(false);
+      setDropWasSuccessful(false);
+      setIsAnimatingOut(false);
+    }
   };
 
   return (
@@ -97,9 +118,18 @@ export function DndContextWrapper({
         {children}
         {typeof document !== 'undefined' &&
           createPortal(
-            <DragOverlay>
+            <DragOverlay dropAnimation={dropWasSuccessful ? null : undefined}>
               {activeItem ? (
-                <div className="rounded-lg border bg-white p-2 shadow-lg dark:bg-gray-800">
+                <div
+                  className={`rounded-lg border bg-white p-2 shadow-lg transition-all duration-200 dark:bg-gray-800 ${
+                    isAnimatingOut
+                      ? 'scale-95 transform opacity-0'
+                      : 'scale-100 opacity-100'
+                  }`}
+                >
+                  {dropWasSuccessful && (
+                    <div className="absolute inset-0 animate-pulse rounded-lg border-green-500 bg-green-500/20" />
+                  )}
                   {activeItem.content}
                 </div>
               ) : null}

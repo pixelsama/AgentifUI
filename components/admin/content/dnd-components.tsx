@@ -232,6 +232,7 @@ export function SortableContainer({
   strategy = verticalListSortingStrategy,
 }: SortableContainerProps) {
   const { isDraggingFromPalette } = useDndState();
+  const [recentDrop, setRecentDrop] = React.useState(false);
 
   const { isOver, setNodeRef } = useDroppable({
     id,
@@ -251,6 +252,15 @@ export function SortableContainer({
     });
   }
 
+  // Show success feedback when items are added
+  React.useEffect(() => {
+    if (items.length > 0 && isDraggingFromPalette && isOver) {
+      setRecentDrop(true);
+      const timer = setTimeout(() => setRecentDrop(false), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [items.length, isDraggingFromPalette, isOver]);
+
   return (
     <SortableContext items={items} strategy={strategy}>
       <div
@@ -258,10 +268,18 @@ export function SortableContainer({
         className={cn(
           className,
           isOver &&
-            'ring-opacity-75 bg-blue-50/50 ring-2 ring-blue-400 dark:bg-blue-900/20'
+            'ring-opacity-75 bg-blue-50/50 ring-2 ring-blue-400 dark:bg-blue-900/20',
+          recentDrop &&
+            'ring-opacity-75 animate-pulse bg-green-50/50 ring-2 ring-green-400 dark:bg-green-900/20'
         )}
       >
         {children}
+        {recentDrop && (
+          <div className="animate-fadeIn absolute top-2 right-2 flex items-center gap-1 rounded-full bg-green-500 px-2 py-1 text-xs text-white">
+            <span>✓</span>
+            <span>Added</span>
+          </div>
+        )}
       </div>
     </SortableContext>
   );
