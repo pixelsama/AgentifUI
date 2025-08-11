@@ -437,21 +437,19 @@ export function AboutEditor({
                                 key={component.id}
                                 id={component.id}
                                 className={cn(
-                                  'mb-3 cursor-pointer rounded-lg border p-3 transition-all duration-300',
+                                  'mb-3 cursor-pointer rounded-lg border p-3 transition-all',
                                   selectedComponentId === component.id
                                     ? 'border-stone-500 bg-stone-100 dark:border-stone-400 dark:bg-stone-700'
                                     : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:hover:border-stone-500 dark:hover:bg-stone-700'
                                 )}
                               >
                                 <div
-                                  data-component-id={component.id}
                                   onClick={() =>
                                     handleComponentClick(component.id)
                                   }
                                   onContextMenu={e =>
                                     handleContextMenu(e, component.id)
                                   }
-                                  className="animate-component-target"
                                 >
                                   <ComponentRenderer component={component} />
                                 </div>
