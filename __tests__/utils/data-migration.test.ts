@@ -1,26 +1,24 @@
-import {
-  generateUniqueId,
-  createDefaultComponent,
-  migrateLegacyToSections,
-  validateMigratedData,
-  migrateAboutTranslationData,
-} from '@lib/utils/data-migration';
-import {
-  isDynamicFormat,
-} from '@lib/types/about-page-components';
+import { isDynamicFormat } from '@lib/types/about-page-components';
 import type {
-  LegacyAboutData,
   AboutTranslationData,
   ComponentInstance,
+  LegacyAboutData,
   PageContent,
 } from '@lib/types/about-page-components';
+import {
+  createDefaultComponent,
+  generateUniqueId,
+  migrateAboutTranslationData,
+  migrateLegacyToSections,
+  validateMigratedData,
+} from '@lib/utils/data-migration';
 
 describe('Data Migration Utilities', () => {
   describe('generateUniqueId', () => {
     it('generates unique IDs with correct prefix', () => {
       const id1 = generateUniqueId('comp');
       const id2 = generateUniqueId('comp');
-      
+
       expect(id1).toMatch(/^comp-\d+-[a-z0-9]+$/);
       expect(id2).toMatch(/^comp-\d+-[a-z0-9]+$/);
       expect(id1).not.toBe(id2);
@@ -29,7 +27,7 @@ describe('Data Migration Utilities', () => {
     it('generates IDs with different prefixes', () => {
       const compId = generateUniqueId('comp');
       const sectionId = generateUniqueId('section');
-      
+
       expect(compId).toMatch(/^comp-/);
       expect(sectionId).toMatch(/^section-/);
     });
@@ -38,7 +36,7 @@ describe('Data Migration Utilities', () => {
   describe('createDefaultComponent', () => {
     it('creates default heading component', () => {
       const component = createDefaultComponent('heading', 'Test Heading');
-      
+
       expect(component.type).toBe('heading');
       expect(component.props.content).toBe('Test Heading');
       expect(component.props.level).toBe(2);
@@ -48,7 +46,7 @@ describe('Data Migration Utilities', () => {
 
     it('creates default paragraph component', () => {
       const component = createDefaultComponent('paragraph', 'Test paragraph');
-      
+
       expect(component.type).toBe('paragraph');
       expect(component.props.content).toBe('Test paragraph');
       expect(component.props.textAlign).toBe('left');
@@ -56,7 +54,7 @@ describe('Data Migration Utilities', () => {
 
     it('creates default button component', () => {
       const component = createDefaultComponent('button', 'Click Me');
-      
+
       expect(component.type).toBe('button');
       expect(component.props.text).toBe('Click Me');
       expect(component.props.variant).toBe('primary');
@@ -66,7 +64,7 @@ describe('Data Migration Utilities', () => {
 
     it('creates default cards component', () => {
       const component = createDefaultComponent('cards');
-      
+
       expect(component.type).toBe('cards');
       expect(component.props.layout).toBe('grid');
       expect(component.props.items).toEqual([]);
@@ -74,7 +72,7 @@ describe('Data Migration Utilities', () => {
 
     it('uses fallback content when no content provided', () => {
       const component = createDefaultComponent('heading');
-      
+
       expect(component.props.content).toBe('New Heading');
     });
   });
@@ -145,18 +143,22 @@ describe('Data Migration Utilities', () => {
       const migrated = migrateLegacyToSections(legacy);
 
       expect(migrated.sections).toHaveLength(5); // title, mission, values, button, copyright
-      
+
       const titleSection = migrated.sections[0];
       expect(titleSection.layout).toBe('single-column');
       expect(titleSection.columns[0]).toHaveLength(2); // title + subtitle
-      
+
       expect(titleSection.columns[0][0].type).toBe('heading');
-      expect(titleSection.columns[0][0].props.content).toBe('About Our Company');
+      expect(titleSection.columns[0][0].props.content).toBe(
+        'About Our Company'
+      );
       expect(titleSection.columns[0][0].props.level).toBe(1);
       expect(titleSection.columns[0][0].props.textAlign).toBe('center');
-      
+
       expect(titleSection.columns[0][1].type).toBe('paragraph');
-      expect(titleSection.columns[0][1].props.content).toBe('Innovation and Excellence');
+      expect(titleSection.columns[0][1].props.content).toBe(
+        'Innovation and Excellence'
+      );
       expect(titleSection.columns[0][1].props.textAlign).toBe('center');
     });
 
@@ -166,12 +168,14 @@ describe('Data Migration Utilities', () => {
 
       const missionSection = migrated.sections[1];
       expect(missionSection.columns[0]).toHaveLength(2); // heading + paragraph
-      
+
       expect(missionSection.columns[0][0].type).toBe('heading');
       expect(missionSection.columns[0][0].props.content).toBe('Our Mission');
-      
+
       expect(missionSection.columns[0][1].type).toBe('paragraph');
-      expect(missionSection.columns[0][1].props.content).toBe('To provide excellent services to our customers.');
+      expect(missionSection.columns[0][1].props.content).toBe(
+        'To provide excellent services to our customers.'
+      );
     });
 
     it('migrates values section with cards correctly', () => {
@@ -180,10 +184,10 @@ describe('Data Migration Utilities', () => {
 
       const valuesSection = migrated.sections[2];
       expect(valuesSection.columns[0]).toHaveLength(2); // heading + cards
-      
+
       expect(valuesSection.columns[0][0].type).toBe('heading');
       expect(valuesSection.columns[0][0].props.content).toBe('Our Values');
-      
+
       expect(valuesSection.columns[0][1].type).toBe('cards');
       expect(valuesSection.columns[0][1].props.items).toEqual([
         { title: 'Quality', description: 'We deliver high-quality products' },
@@ -197,7 +201,7 @@ describe('Data Migration Utilities', () => {
 
       const buttonSection = migrated.sections[3];
       expect(buttonSection.columns[0]).toHaveLength(1);
-      
+
       const buttonComponent = buttonSection.columns[0][0];
       expect(buttonComponent.type).toBe('button');
       expect(buttonComponent.props.text).toBe('Get Started');
@@ -210,10 +214,12 @@ describe('Data Migration Utilities', () => {
 
       const copyrightSection = migrated.sections[4];
       expect(copyrightSection.columns[0]).toHaveLength(1);
-      
+
       const copyrightComponent = copyrightSection.columns[0][0];
       expect(copyrightComponent.type).toBe('paragraph');
-      expect(copyrightComponent.props.content).toContain(new Date().getFullYear().toString()); // Current year
+      expect(copyrightComponent.props.content).toContain(
+        new Date().getFullYear().toString()
+      ); // Current year
       expect(copyrightComponent.props.content).toContain('Company Name');
       expect(copyrightComponent.props.textAlign).toBe('center');
     });
@@ -229,10 +235,12 @@ describe('Data Migration Utilities', () => {
       };
 
       const migrated = migrateLegacyToSections(minimal);
-      
+
       // Should only create title section (other sections should be skipped for empty content)
       expect(migrated.sections).toHaveLength(1);
-      expect(migrated.sections[0].columns[0][0].props.content).toBe('Title Only');
+      expect(migrated.sections[0].columns[0][0].props.content).toBe(
+        'Title Only'
+      );
     });
 
     it('includes proper metadata', () => {
@@ -288,7 +296,7 @@ describe('Data Migration Utilities', () => {
     it('detects missing section ID', () => {
       const data = createValidData();
       delete (data.sections?.[0] as any).id;
-      
+
       const result = validateMigratedData(data);
 
       expect(result.isValid).toBe(false);
@@ -298,11 +306,13 @@ describe('Data Migration Utilities', () => {
     it('detects missing component properties', () => {
       const data = createValidData();
       delete (data.sections?.[0]?.columns[0][0] as any).props;
-      
+
       const result = validateMigratedData(data);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Section 0, Column 0, Component 0 缺少props');
+      expect(result.errors).toContain(
+        'Section 0, Column 0, Component 0 缺少props'
+      );
     });
   });
 
@@ -316,11 +326,15 @@ describe('Data Migration Utilities', () => {
             columns: [[]],
           },
         ],
-        metadata: { version: '1.0.0', lastModified: '2024-01-01', author: 'test' },
+        metadata: {
+          version: '1.0.0',
+          lastModified: '2024-01-01',
+          author: 'test',
+        },
       };
 
       const result = migrateAboutTranslationData(dynamicData);
-      
+
       expect(result).toBe(dynamicData); // Should return same object
     });
 
@@ -335,7 +349,7 @@ describe('Data Migration Utilities', () => {
       } as any;
 
       const result = migrateAboutTranslationData(legacyData);
-      
+
       expect(result.sections).toBeDefined();
       expect(result.sections!.length).toBeGreaterThan(0);
       expect(result.metadata?.migrated).toBe(true);
