@@ -237,6 +237,12 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
         return;
       }
 
+      console.log('🎨 PALETTE DROP DETECTED:', {
+        componentType,
+        overId,
+        overData: over.data.current,
+      });
+
       // Parse destination - handle direct drops on containers
       let targetContainerId = overId;
       let insertIndex = -1; // -1 means append to end
@@ -308,10 +314,29 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
         }
       }
 
-      const [type, sectionId, columnIndex] = targetContainerId.split('-');
+      const targetParts = targetContainerId.split('-');
+      // Format is: section-{sectionId}-{columnIndex}
+      // But sectionId might contain hyphens, so we need to handle this carefully
+      const type = targetParts[0];
+      const columnIndex = targetParts[targetParts.length - 1];
+      const sectionId = targetParts.slice(1, -1).join('-'); // Everything between type and columnIndex
+
+      console.log('🔍 PARSING TARGET CONTAINER:', {
+        targetContainerId,
+        targetParts,
+        parsed: { type, sectionId, columnIndex },
+        insertIndex,
+      });
 
       if (type === 'section' && sectionId && columnIndex !== undefined) {
         const section = newPageContent.sections.find(s => s.id === sectionId);
+
+        console.log('🎯 FOUND SECTION:', {
+          section: section?.id,
+          hasColumn: section?.columns[parseInt(columnIndex)] !== undefined,
+          columnLength: section?.columns[parseInt(columnIndex)]?.length,
+        });
+
         if (section && section.columns[parseInt(columnIndex)]) {
           const newComponent: ComponentInstance = {
             id: generateUniqueId('comp'),
@@ -330,8 +355,25 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
             );
           }
 
-          console.log('Component added successfully:', newComponent.id);
+          console.log('✅ COMPONENT ADDED SUCCESSFULLY:', {
+            componentId: newComponent.id,
+            sectionId,
+            columnIndex,
+            newColumnLength: section.columns[parseInt(columnIndex)].length,
+          });
+        } else {
+          console.log('❌ FAILED TO FIND SECTION OR COLUMN:', {
+            sectionFound: !!section,
+            columnExists: !!section?.columns[parseInt(columnIndex)],
+          });
         }
+      } else {
+        console.log('❌ INVALID TARGET CONTAINER FORMAT:', {
+          type,
+          sectionId,
+          columnIndex,
+          targetContainerId,
+        });
       }
     } else {
       // Handle moving existing components within or between containers

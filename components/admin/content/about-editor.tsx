@@ -433,29 +433,43 @@ export function AboutEditor({
                               </div>
                             )}
 
-                            {column.map(component => (
-                              <Sortable
-                                key={component.id}
-                                id={component.id}
-                                className={cn(
-                                  'mb-3 cursor-pointer rounded-lg border p-3 transition-all',
-                                  selectedComponentId === component.id
-                                    ? 'border-stone-500 bg-stone-100 dark:border-stone-400 dark:bg-stone-700'
-                                    : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:hover:border-stone-500 dark:hover:bg-stone-700'
-                                )}
-                              >
+                            {column.map(component => {
+                              const componentPreview = (
                                 <div
-                                  onClick={() =>
-                                    handleComponentClick(component.id)
-                                  }
-                                  onContextMenu={e =>
-                                    handleContextMenu(e, component.id)
-                                  }
+                                  className={cn(
+                                    'mb-3 cursor-pointer rounded-lg border p-3 transition-all',
+                                    'border-stone-200 bg-white dark:border-stone-600 dark:bg-stone-800'
+                                  )}
                                 >
                                   <ComponentRenderer component={component} />
                                 </div>
-                              </Sortable>
-                            ))}
+                              );
+
+                              return (
+                                <Sortable
+                                  key={component.id}
+                                  id={component.id}
+                                  preview={componentPreview}
+                                  className={cn(
+                                    'mb-3 cursor-pointer rounded-lg border p-3 transition-all',
+                                    selectedComponentId === component.id
+                                      ? 'border-stone-500 bg-stone-100 dark:border-stone-400 dark:bg-stone-700'
+                                      : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:hover:border-stone-500 dark:hover:bg-stone-700'
+                                  )}
+                                >
+                                  <div
+                                    onClick={() =>
+                                      handleComponentClick(component.id)
+                                    }
+                                    onContextMenu={e =>
+                                      handleContextMenu(e, component.id)
+                                    }
+                                  >
+                                    <ComponentRenderer component={component} />
+                                  </div>
+                                </Sortable>
+                              );
+                            })}
                           </SortableContainer>
                         );
                       })}

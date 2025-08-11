@@ -113,6 +113,7 @@ interface SortableProps {
   children: React.ReactNode;
   className?: string;
   disabled?: boolean;
+  preview?: React.ReactNode;
 }
 
 /**
@@ -125,6 +126,7 @@ export function Sortable({
   children,
   className,
   disabled = false,
+  preview,
 }: SortableProps) {
   const { isDraggingFromPalette } = useDndState();
 
@@ -144,6 +146,7 @@ export function Sortable({
     disabled: shouldDisable,
     data: {
       type: 'component',
+      preview,
     },
   });
 
