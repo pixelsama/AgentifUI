@@ -338,26 +338,71 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
       const activeContainer = active.data.current?.sortable?.containerId;
       const overContainer = over.data.current?.sortable?.containerId || overId;
 
+      console.log('🔄 COMPONENT REORDERING:', {
+        activeId,
+        overId,
+        activeContainer,
+        overContainer,
+        activeData: active.data.current,
+        overData: over.data.current,
+      });
+
       if (activeContainer && overContainer) {
         if (activeContainer === overContainer) {
           // Reordering within the same container
-          const [containerType, sectionId, columnIndex] =
-            activeContainer.split('-');
+          console.log('📋 SAME CONTAINER REORDER - ORIGINAL:', {
+            activeContainer,
+            overContainer,
+          });
 
-          if (
-            containerType === 'section' &&
-            sectionId &&
-            columnIndex !== undefined
-          ) {
+          // DndKit generates container IDs automatically, need to map them back to our section IDs
+          // Find the section and column based on the component positions
+          let targetSectionId = null;
+          let targetColumnIndex = null;
+
+          // Search through all sections to find where these components are located
+          for (const section of newPageContent.sections) {
+            for (
+              let colIndex = 0;
+              colIndex < section.columns.length;
+              colIndex++
+            ) {
+              const column = section.columns[colIndex];
+              if (
+                column.some(comp => comp.id === activeId) &&
+                column.some(comp => comp.id === overId)
+              ) {
+                targetSectionId = section.id;
+                targetColumnIndex = colIndex;
+                break;
+              }
+            }
+            if (targetSectionId) break;
+          }
+
+          console.log('📋 FOUND TARGET LOCATION:', {
+            targetSectionId,
+            targetColumnIndex,
+          });
+
+          if (targetSectionId && targetColumnIndex !== null) {
             const section = newPageContent.sections.find(
-              s => s.id === sectionId
+              s => s.id === targetSectionId
             );
-            if (section && section.columns[parseInt(columnIndex)]) {
-              const column = section.columns[parseInt(columnIndex)];
+            if (section && section.columns[targetColumnIndex]) {
+              const column = section.columns[targetColumnIndex];
               const activeIndex = column.findIndex(
                 comp => comp.id === activeId
               );
               const overIndex = column.findIndex(comp => comp.id === overId);
+
+              console.log('🎯 REORDER INDICES:', {
+                activeIndex,
+                overIndex,
+                columnLength: column.length,
+                targetSectionId,
+                targetColumnIndex,
+              });
 
               if (
                 activeIndex !== -1 &&
@@ -365,11 +410,17 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
                 activeIndex !== overIndex
               ) {
                 // Use arrayMove to reorder within the same container
-                section.columns[parseInt(columnIndex)] = arrayMove(
+                const originalColumn = [...column];
+                section.columns[targetColumnIndex] = arrayMove(
                   column,
                   activeIndex,
                   overIndex
                 );
+
+                console.log('✅ REORDER APPLIED:', {
+                  before: originalColumn.map(c => c.id),
+                  after: section.columns[targetColumnIndex].map(c => c.id),
+                });
               }
             }
           }

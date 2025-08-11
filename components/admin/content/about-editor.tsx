@@ -74,6 +74,7 @@ export function AboutEditor({
     setSelectedComponent,
     updateComponentProps,
     deleteComponent,
+    deleteSection,
     handleDragEnd,
     addSection,
     undo,
@@ -389,7 +390,7 @@ export function AboutEditor({
                         </h3>
                         <button
                           onClick={() => {
-                            // Delete section logic here
+                            deleteSection(section.id);
                           }}
                           className={cn(
                             'h-6 w-6 rounded p-0 text-red-500 transition-colors',

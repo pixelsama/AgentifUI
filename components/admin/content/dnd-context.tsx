@@ -11,12 +11,22 @@ import {
 } from '@dnd-kit/core';
 import { createPortal } from 'react-dom';
 
-import React, { useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 interface DndContextWrapperProps {
   children: React.ReactNode;
   onDragEnd: (event: DragEndEvent) => void;
 }
+
+interface DndStateContextValue {
+  isDraggingFromPalette: boolean;
+}
+
+const DndStateContext = createContext<DndStateContextValue>({
+  isDraggingFromPalette: false,
+});
+
+export const useDndState = () => useContext(DndStateContext);
 
 /**
  * DndKit Context Wrapper
@@ -33,6 +43,8 @@ export function DndContextWrapper({
     content: React.ReactNode;
   } | null>(null);
 
+  const [isDraggingFromPalette, setIsDraggingFromPalette] = useState(false);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -43,35 +55,58 @@ export function DndContextWrapper({
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
+    const activeId = String(active.id);
+
+    // Check if dragging from palette
+    const isFromPalette = activeId.startsWith('palette-');
+    setIsDraggingFromPalette(isFromPalette);
+
+    console.log('🚀 DND START:', {
+      activeId,
+      isFromPalette,
+      isDraggingFromPalette: isFromPalette,
+      activeData: active.data.current,
+    });
+
     setActiveItem({
-      id: String(active.id),
-      content: active.data.current?.preview || String(active.id),
+      id: activeId,
+      content: active.data.current?.preview || activeId,
     });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    console.log('🏁 DND END:', {
+      activeId: event.active.id,
+      overId: event.over?.id,
+      overData: event.over?.data.current,
+      isDraggingFromPalette,
+    });
+
     setActiveItem(null);
+    setIsDraggingFromPalette(false);
     onDragEnd(event);
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      {children}
-      {typeof document !== 'undefined' &&
-        createPortal(
-          <DragOverlay>
-            {activeItem ? (
-              <div className="rounded-lg border bg-white p-2 shadow-lg dark:bg-gray-800">
-                {activeItem.content}
-              </div>
-            ) : null}
-          </DragOverlay>,
-          document.body
-        )}
-    </DndContext>
+    <DndStateContext.Provider value={{ isDraggingFromPalette }}>
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        {children}
+        {typeof document !== 'undefined' &&
+          createPortal(
+            <DragOverlay>
+              {activeItem ? (
+                <div className="rounded-lg border bg-white p-2 shadow-lg dark:bg-gray-800">
+                  {activeItem.content}
+                </div>
+              ) : null}
+            </DragOverlay>,
+            document.body
+          )}
+      </DndContext>
+    </DndStateContext.Provider>
   );
 }

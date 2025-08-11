@@ -13,6 +13,8 @@ import { cn } from '@lib/utils';
 
 import React from 'react';
 
+import { useDndState } from './dnd-context';
+
 // Re-export arrayMove for convenience
 export { arrayMove };
 
@@ -124,6 +126,11 @@ export function Sortable({
   className,
   disabled = false,
 }: SortableProps) {
+  const { isDraggingFromPalette } = useDndState();
+
+  // Normal sortable behavior - always call hooks at the top level
+  const shouldDisable = disabled;
+
   const {
     attributes,
     listeners,
@@ -131,13 +138,52 @@ export function Sortable({
     transform,
     transition,
     isDragging,
+    isOver,
   } = useSortable({
     id,
-    disabled,
+    disabled: shouldDisable,
     data: {
       type: 'component',
     },
   });
+
+  // Conditional rendering after all hooks are called
+  if (isDraggingFromPalette) {
+    console.log('🚫 SORTABLE RENDERED AS PLAIN DIV:', {
+      componentId: id,
+      isDraggingFromPalette,
+      reason: 'palette dragging - avoiding drop conflicts',
+    });
+
+    return (
+      <div
+        className={cn(className, 'pointer-events-none')}
+        style={{ opacity: 0.5 }}
+      >
+        {children}
+      </div>
+    );
+  }
+
+  // Log component dragging state
+  if (isDragging) {
+    console.log('🔥 COMPONENT BEING DRAGGED:', {
+      componentId: id,
+      isDragging,
+      transform,
+      isDraggingFromPalette,
+    });
+  }
+
+  // Log if somehow this component is still receiving hover events
+  if (isDraggingFromPalette && isOver) {
+    console.log('⚠️ SORTABLE STILL HOVERING (Should not happen!):', {
+      componentId: id,
+      isOver,
+      shouldDisable,
+      isDraggingFromPalette,
+    });
+  }
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -151,7 +197,7 @@ export function Sortable({
       className={cn(
         className,
         isDragging && 'z-50 scale-105 opacity-60',
-        !disabled && 'cursor-grab active:cursor-grabbing'
+        !shouldDisable && 'cursor-grab active:cursor-grabbing'
       )}
       {...listeners}
       {...attributes}
@@ -182,6 +228,8 @@ export function SortableContainer({
   className,
   strategy = verticalListSortingStrategy,
 }: SortableContainerProps) {
+  const { isDraggingFromPalette } = useDndState();
+
   const { isOver, setNodeRef } = useDroppable({
     id,
     data: {
@@ -189,6 +237,16 @@ export function SortableContainer({
       accepts: ['component', 'palette-item'],
     },
   });
+
+  // Log hover events when dragging from palette
+  if (isDraggingFromPalette && isOver) {
+    console.log('📦 CONTAINER HOVER:', {
+      containerId: id,
+      isOver,
+      isDraggingFromPalette,
+      itemCount: items.length,
+    });
+  }
 
   return (
     <SortableContext items={items} strategy={strategy}>
