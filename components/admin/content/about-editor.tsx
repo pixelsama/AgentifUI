@@ -237,6 +237,27 @@ export function AboutEditor({
     }
   };
 
+  // Global context menu handler as fallback - finds component under cursor
+  const handleGlobalContextMenu = (e: React.MouseEvent) => {
+    // Only handle if no specific component context menu was triggered
+    if (contextMenu) return;
+
+    // Find the closest component element
+    const target = e.target as HTMLElement;
+    const componentElement = target.closest(
+      '[data-component-id]'
+    ) as HTMLElement;
+
+    if (componentElement) {
+      const componentId = componentElement.getAttribute('data-component-id');
+      if (componentId) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleContextMenu(e, componentId);
+      }
+    }
+  };
+
   if (!pageContent) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -356,7 +377,10 @@ export function AboutEditor({
 
           {/* Canvas */}
           <div className="flex-1 overflow-y-auto">
-            <div className="space-y-6 p-6">
+            <div
+              className="space-y-6 p-6"
+              onContextMenu={handleGlobalContextMenu}
+            >
               {pageContent.sections.map((section, sectionIndex) => (
                 <div key={section.id} className="space-y-4">
                   {/* Section Drop Zone (before each section) */}
@@ -456,17 +480,15 @@ export function AboutEditor({
                                       ? 'border-stone-500 bg-stone-100 dark:border-stone-400 dark:bg-stone-700'
                                       : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:hover:border-stone-500 dark:hover:bg-stone-700'
                                   )}
+                                  onClick={() =>
+                                    handleComponentClick(component.id)
+                                  }
+                                  onContextMenu={e =>
+                                    handleContextMenu(e, component.id)
+                                  }
+                                  data-component-id={component.id}
                                 >
-                                  <div
-                                    onClick={() =>
-                                      handleComponentClick(component.id)
-                                    }
-                                    onContextMenu={e =>
-                                      handleContextMenu(e, component.id)
-                                    }
-                                  >
-                                    <ComponentRenderer component={component} />
-                                  </div>
+                                  <ComponentRenderer component={component} />
                                 </Sortable>
                               );
                             })}

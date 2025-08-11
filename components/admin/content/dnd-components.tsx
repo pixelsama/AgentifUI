@@ -114,6 +114,8 @@ interface SortableProps {
   className?: string;
   disabled?: boolean;
   preview?: React.ReactNode;
+  onClick?: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }
 
 /**
@@ -127,6 +129,8 @@ export function Sortable({
   className,
   disabled = false,
   preview,
+  onClick,
+  onContextMenu,
 }: SortableProps) {
   const { isDraggingFromPalette } = useDndState();
 
@@ -149,6 +153,20 @@ export function Sortable({
       preview,
     },
   });
+
+  // Filter out context menu interfering events and handle them separately
+  // IMPORTANT: This hook must be called before any conditional returns!
+  const filteredListeners = React.useMemo(() => {
+    if (!listeners) return {};
+
+    // Create a copy without onContextMenu to prevent conflicts
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { onContextMenu: _, ...otherListeners } = listeners as Record<
+      string,
+      unknown
+    >;
+    return otherListeners;
+  }, [listeners]);
 
   // Conditional rendering after all hooks are called
   if (isDraggingFromPalette) {
@@ -202,8 +220,17 @@ export function Sortable({
         isDragging && 'z-50 scale-105 opacity-60',
         !shouldDisable && 'cursor-grab active:cursor-grabbing'
       )}
-      {...listeners}
+      {...filteredListeners}
       {...attributes}
+      onClick={onClick}
+      onContextMenu={e => {
+        // Call the provided context menu handler if available
+        if (onContextMenu) {
+          onContextMenu(e);
+        }
+        // Don't prevent default or stop propagation to ensure proper handling
+      }}
+      data-component-id={id}
     >
       {children}
     </div>
