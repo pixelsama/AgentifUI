@@ -127,9 +127,6 @@ export function DndContextWrapper({
                       : 'scale-100 opacity-100'
                   }`}
                 >
-                  {dropWasSuccessful && (
-                    <div className="absolute inset-0 animate-pulse rounded-lg border-green-500 bg-green-500/20" />
-                  )}
                   {activeItem.content}
                 </div>
               ) : null}

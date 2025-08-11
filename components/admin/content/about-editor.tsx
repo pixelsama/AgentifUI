@@ -63,6 +63,12 @@ export function AboutEditor({
     componentId: string;
   } | null>(null);
 
+  // Inline editing state
+  const [editingComponent, setEditingComponent] = React.useState<{
+    componentId: string;
+    content: string;
+  } | null>(null);
+
   // Zustand store
   const {
     pageContent,
@@ -199,6 +205,11 @@ export function AboutEditor({
   // Handle component selection
   const handleComponentClick = (componentId: string) => {
     setSelectedComponent(componentId);
+    // Focus the main container so keyboard events work
+    const container = document.querySelector('[tabindex="0"]') as HTMLElement;
+    if (container) {
+      container.focus();
+    }
   };
 
   // Handle right-click context menu
@@ -226,6 +237,11 @@ export function AboutEditor({
         y: e.clientY,
         componentId: componentId,
       });
+      // Focus the main container so keyboard events work
+      const container = document.querySelector('[tabindex="0"]') as HTMLElement;
+      if (container) {
+        container.focus();
+      }
     }
   };
 
@@ -234,6 +250,62 @@ export function AboutEditor({
     if (contextMenu?.componentId) {
       updateComponentProps(contextMenu.componentId, newProps);
       debouncedSave(); // Auto-save after prop changes
+    }
+  };
+
+  // Handle keyboard shortcuts
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Delete' && selectedComponentId) {
+      e.preventDefault();
+      handleDeleteComponent(selectedComponentId);
+    }
+    if (e.key === 'Escape' && editingComponent) {
+      e.preventDefault();
+      setEditingComponent(null);
+    }
+  };
+
+  // Handle double-click to edit content
+  const handleDoubleClick = (componentId: string) => {
+    // Find the component
+    let targetComponent: ComponentInstance | null = null;
+    for (const section of pageContent?.sections || []) {
+      for (const column of section.columns) {
+        const component = column.find(comp => comp.id === componentId);
+        if (component) {
+          targetComponent = component;
+          break;
+        }
+      }
+      if (targetComponent) break;
+    }
+
+    if (targetComponent && targetComponent.props.content) {
+      setEditingComponent({
+        componentId,
+        content: String(targetComponent.props.content || ''),
+      });
+    }
+  };
+
+  // Handle saving inline edit
+  const handleSaveEdit = () => {
+    if (editingComponent) {
+      updateComponentProps(editingComponent.componentId, {
+        content: editingComponent.content,
+      });
+      setEditingComponent(null);
+      debouncedSave();
+    }
+  };
+
+  // Handle input change during editing
+  const handleEditInputChange = (value: string) => {
+    if (editingComponent) {
+      setEditingComponent({
+        ...editingComponent,
+        content: value,
+      });
     }
   };
 
@@ -268,7 +340,11 @@ export function AboutEditor({
 
   return (
     <DndContextWrapper onDragEnd={handleDragEnd}>
-      <div className="flex h-full flex-col">
+      <div
+        className="flex h-full flex-col focus:outline-none"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+      >
         {/* Header */}
         <div
           className={cn(
@@ -387,9 +463,9 @@ export function AboutEditor({
                   {sectionIndex > 0 && (
                     <Droppable
                       id={`section-drop-${sectionIndex}`}
-                      className="h-2 rounded-lg border-2 border-dashed border-transparent transition-all duration-200 hover:h-16 hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-600 dark:hover:bg-blue-950"
+                      className="h-2 rounded-lg border-2 border-dashed border-transparent transition-all duration-200 hover:h-16 hover:border-stone-400 hover:bg-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800"
                     >
-                      <div className="flex h-full items-center justify-center text-sm font-medium text-blue-600 opacity-0 hover:opacity-100 dark:text-blue-400">
+                      <div className="flex h-full items-center justify-center text-sm font-medium text-stone-600 opacity-0 hover:opacity-100 dark:text-stone-400">
                         Drop here to create new section
                       </div>
                     </Droppable>
@@ -483,12 +559,88 @@ export function AboutEditor({
                                   onClick={() =>
                                     handleComponentClick(component.id)
                                   }
+                                  onDoubleClick={() =>
+                                    handleDoubleClick(component.id)
+                                  }
                                   onContextMenu={e =>
                                     handleContextMenu(e, component.id)
                                   }
                                   data-component-id={component.id}
                                 >
-                                  <ComponentRenderer component={component} />
+                                  {editingComponent?.componentId ===
+                                  component.id ? (
+                                    <div
+                                      className="space-y-2"
+                                      onClick={e => {
+                                        // Prevent event bubbling to parent Sortable component
+                                        e.stopPropagation();
+                                      }}
+                                      onMouseDown={e => {
+                                        // Prevent event bubbling to parent Sortable component
+                                        e.stopPropagation();
+                                      }}
+                                    >
+                                      <textarea
+                                        value={editingComponent.content}
+                                        onChange={e =>
+                                          handleEditInputChange(e.target.value)
+                                        }
+                                        onClick={e => {
+                                          // Prevent event bubbling when clicking inside textarea
+                                          e.stopPropagation();
+                                        }}
+                                        onMouseDown={e => {
+                                          // Prevent event bubbling when mouse down in textarea
+                                          e.stopPropagation();
+                                        }}
+                                        onKeyDown={e => {
+                                          if (e.key === 'Enter' && e.ctrlKey) {
+                                            e.preventDefault();
+                                            handleSaveEdit();
+                                          }
+                                          if (e.key === 'Escape') {
+                                            e.preventDefault();
+                                            setEditingComponent(null);
+                                          }
+                                          e.stopPropagation(); // Prevent parent keyboard handlers
+                                        }}
+                                        className="resize-vertical min-h-[60px] w-full rounded border p-2 text-sm focus:ring-2 focus:ring-stone-500 focus:outline-none"
+                                        placeholder="Enter content..."
+                                        autoFocus
+                                        onBlur={e => {
+                                          // Only auto-save if focus is truly leaving the editing area
+                                          // Check if focus is moving to another element outside the editing container
+                                          const relatedTarget =
+                                            e.relatedTarget as HTMLElement;
+                                          const editContainer =
+                                            e.currentTarget.closest(
+                                              '.space-y-2'
+                                            );
+
+                                          if (
+                                            !relatedTarget ||
+                                            !editContainer?.contains(
+                                              relatedTarget
+                                            )
+                                          ) {
+                                            // Auto-save on blur if there are changes and focus truly left
+                                            setTimeout(() => {
+                                              if (editingComponent) {
+                                                handleSaveEdit();
+                                              }
+                                            }, 100);
+                                          }
+                                        }}
+                                      />
+                                      <div className="text-muted-foreground flex gap-2 text-xs">
+                                        <span>
+                                          Ctrl+Enter to save • Escape to cancel
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <ComponentRenderer component={component} />
+                                  )}
                                 </Sortable>
                               );
                             })}
@@ -503,9 +655,9 @@ export function AboutEditor({
               {/* Final Drop Zone */}
               <Droppable
                 id="section-drop-final"
-                className="h-8 rounded-lg border-2 border-dashed border-transparent transition-all duration-200 hover:h-16 hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-600 dark:hover:bg-blue-950"
+                className="h-8 rounded-lg border-2 border-dashed border-transparent transition-all duration-200 hover:h-16 hover:border-stone-400 hover:bg-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800"
               >
-                <div className="flex h-full items-center justify-center text-sm font-medium text-blue-600 opacity-0 hover:opacity-100 dark:text-blue-400">
+                <div className="flex h-full items-center justify-center text-sm font-medium text-stone-600 opacity-0 hover:opacity-100 dark:text-stone-400">
                   Drop here to create new section
                 </div>
               </Droppable>
