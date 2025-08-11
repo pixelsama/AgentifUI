@@ -211,8 +211,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         { value: 'external', label: 'External' },
       ],
       variant: [
-        { value: 'primary', label: 'Primary' },
-        { value: 'secondary', label: 'Secondary' },
+        { value: 'solid', label: 'Solid' },
         { value: 'outline', label: 'Outline' },
       ],
       level: [

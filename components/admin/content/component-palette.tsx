@@ -59,7 +59,7 @@ const availableComponents: ComponentDefinition[] = [
     description: 'Interactive button',
     defaultProps: {
       text: 'Click me',
-      variant: 'primary',
+      variant: 'solid',
       action: 'link',
       url: '#',
     },

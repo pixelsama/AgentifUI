@@ -75,7 +75,7 @@ export interface CardsProps {
 // 按钮组件 Props
 export interface ButtonProps {
   text: string;
-  variant: 'primary' | 'secondary' | 'outline';
+  variant: 'solid' | 'outline';
   action: 'link' | 'submit' | 'external';
   url?: string;
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@components/ui/button';
 import {
   CardsProps,
   ComponentInstance,
@@ -105,7 +104,7 @@ const Cards: React.FC<CardsProps> = ({ items, layout }) => {
 /**
  * Button component renderer
  *
- * Renders interactive buttons with different variants
+ * Renders interactive buttons with stone color system variants
  */
 const DynamicButton: React.FC<DynamicButtonProps> = ({
   text,
@@ -120,19 +119,28 @@ const DynamicButton: React.FC<DynamicButtonProps> = ({
     }
   };
 
-  const variantMap = {
-    primary: 'default' as const,
-    secondary: 'secondary' as const,
-    outline: 'outline' as const,
+  const buttonStyles = {
+    solid: cn(
+      'inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-all duration-200',
+      'bg-stone-900 text-white hover:scale-105 hover:bg-stone-800 focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-none',
+      'dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200 dark:focus:ring-stone-400'
+    ),
+    outline: cn(
+      'inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-all duration-200',
+      'border border-stone-300 bg-transparent text-stone-900 hover:scale-105 hover:bg-stone-50 focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-none',
+      'dark:border-stone-600 dark:text-stone-100 dark:hover:bg-stone-800 dark:focus:ring-stone-400'
+    ),
   };
 
   return (
     <div className="mb-6 text-center">
-      <Button variant={variantMap[variant]} size="lg" asChild>
-        <a href={url || '#'} onClick={handleClick} className="inline-block">
-          {text}
-        </a>
-      </Button>
+      <a
+        href={url || '#'}
+        onClick={handleClick}
+        className={buttonStyles[variant]}
+      >
+        {text}
+      </a>
     </div>
   );
 };
