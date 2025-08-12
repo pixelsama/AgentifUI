@@ -439,7 +439,9 @@ export default function ContentManagementPage() {
                   isDark ? 'bg-stone-900' : 'bg-white'
                 )}
               >
-                <div className="flex-1 overflow-auto p-6">{renderEditor()}</div>
+                <div className="flex-1 overflow-auto px-6">
+                  {renderEditor()}
+                </div>
                 <div
                   className={cn(
                     'flex-shrink-0 p-4',
@@ -521,7 +523,7 @@ export default function ContentManagementPage() {
               isDark ? 'bg-stone-900' : 'bg-white'
             )}
           >
-            <div className="h-full overflow-auto p-6">{renderEditor()}</div>
+            <div className="h-full overflow-auto px-6">{renderEditor()}</div>
           </div>
         )}
       </div>
