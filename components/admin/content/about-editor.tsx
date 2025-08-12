@@ -465,9 +465,18 @@ export function AboutEditor({
                       id={`section-drop-${sectionIndex}`}
                       className="h-2 rounded-lg border-2 border-dashed border-transparent transition-all duration-200 hover:h-16 hover:border-stone-400 hover:bg-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800"
                     >
-                      <div className="flex h-full items-center justify-center text-sm font-medium text-stone-600 opacity-0 hover:opacity-100 dark:text-stone-400">
-                        Drop here to create new section
-                      </div>
+                      {(isOver: boolean) => (
+                        <div
+                          className={cn(
+                            'flex h-full items-center justify-center text-sm font-medium text-stone-600 transition-opacity duration-200 dark:text-stone-400',
+                            isOver || undefined
+                              ? 'opacity-100'
+                              : 'opacity-0 hover:opacity-100'
+                          )}
+                        >
+                          Drop here to create new section
+                        </div>
+                      )}
                     </Droppable>
                   )}
 
@@ -657,9 +666,18 @@ export function AboutEditor({
                 id="section-drop-final"
                 className="h-8 rounded-lg border-2 border-dashed border-transparent transition-all duration-200 hover:h-16 hover:border-stone-400 hover:bg-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800"
               >
-                <div className="flex h-full items-center justify-center text-sm font-medium text-stone-600 opacity-0 hover:opacity-100 dark:text-stone-400">
-                  Drop here to create new section
-                </div>
+                {(isOver: boolean) => (
+                  <div
+                    className={cn(
+                      'flex h-full items-center justify-center text-sm font-medium text-stone-600 transition-opacity duration-200 dark:text-stone-400',
+                      isOver || undefined
+                        ? 'opacity-100'
+                        : 'opacity-0 hover:opacity-100'
+                    )}
+                  >
+                    Drop here to create new section
+                  </div>
+                )}
               </Droppable>
             </div>
           </div>

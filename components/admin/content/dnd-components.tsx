@@ -21,7 +21,7 @@ export { arrayMove };
 // Droppable component interface
 interface DroppableProps {
   id: string;
-  children: React.ReactNode;
+  children: React.ReactNode | ((isOver: boolean) => React.ReactNode);
   className?: string;
   disabled?: boolean;
 }
@@ -42,15 +42,36 @@ export function Droppable({
     disabled,
   });
 
+  // Check if this is a section drop zone that should have special hover effects
+  const isSectionDropZone = id.includes('section-drop');
+
+  // Apply drag-over styles that mimic hover effects for section drop zones
+  const dragOverStyles =
+    isSectionDropZone && isOver
+      ? {
+          height: '4rem', // equivalent to h-16
+          borderColor: 'rgb(168 162 158)', // stone-400
+          backgroundColor: 'rgb(245 245 244)', // stone-100 light mode
+        }
+      : {};
+
   return (
     <div
       ref={setNodeRef}
       className={cn(
         className,
-        isOver && 'ring-opacity-50 ring-2 ring-stone-500'
+        // Apply enhanced styles for section drop zones when dragging over
+        isSectionDropZone &&
+          isOver &&
+          'h-16 border-stone-400 bg-stone-100 dark:border-stone-500 dark:bg-stone-800',
+        // Default ring effect for other droppables
+        !isSectionDropZone && isOver && 'ring-opacity-50 ring-2 ring-stone-500'
       )}
+      style={dragOverStyles}
     >
-      {children}
+      {typeof children === 'function'
+        ? (children as (isOver: boolean) => React.ReactNode)(isOver)
+        : children}
     </div>
   );
 }
