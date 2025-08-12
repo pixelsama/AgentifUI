@@ -493,7 +493,7 @@ export function AboutEditor({
                             deleteSection(section.id);
                           }}
                           className={cn(
-                            'h-6 w-6 rounded p-0 text-red-500 transition-colors',
+                            'flex h-6 w-6 items-center justify-center rounded p-0 text-red-500 transition-colors',
                             'hover:bg-red-100 dark:hover:bg-red-900/50'
                           )}
                         >

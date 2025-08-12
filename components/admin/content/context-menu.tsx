@@ -168,7 +168,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                   <button
                     type="button"
                     onClick={() => handleRemoveItem(index)}
-                    className="h-6 w-6 rounded p-0 text-red-500 transition-colors hover:bg-red-100 dark:hover:bg-red-900/50"
+                    className="flex h-6 w-6 items-center justify-center rounded p-0 text-red-500 transition-colors hover:bg-red-100 dark:hover:bg-red-900/50"
                   >
                     <Trash2 className="h-3 w-3" />
                   </button>
@@ -240,7 +240,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             <button
               type="button"
               onClick={handleRemoveSecondaryButton}
-              className="h-6 w-6 rounded p-0 text-red-500 transition-colors hover:bg-red-100 dark:hover:bg-red-900/50"
+              className="flex h-6 w-6 items-center justify-center rounded p-0 text-red-500 transition-colors hover:bg-red-100 dark:hover:bg-red-900/50"
             >
               <Trash2 className="h-3 w-3" />
             </button>
@@ -489,7 +489,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
               <button
                 type="button"
                 onClick={handleDelete}
-                className="h-6 w-6 rounded p-0 text-red-500 transition-colors hover:bg-red-100 dark:hover:bg-red-900/50"
+                className="flex h-6 w-6 items-center justify-center rounded p-0 text-red-500 transition-colors hover:bg-red-100 dark:hover:bg-red-900/50"
                 title="Delete Component"
               >
                 <Trash2 className="h-3 w-3" />
@@ -497,7 +497,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="h-6 w-6 rounded p-0 text-stone-500 transition-colors hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-700"
+                className="flex h-6 w-6 items-center justify-center rounded p-0 text-stone-500 transition-colors hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-700"
                 title="Close"
               >
                 <X className="h-3 w-3" />
