@@ -374,7 +374,7 @@ export default function ContentManagementPage() {
   return (
     <div
       className={cn(
-        'flex h-screen flex-col overflow-hidden',
+        'flex h-[calc(100vh-3rem)] flex-col overflow-hidden',
         isDark ? 'bg-stone-950' : 'bg-stone-100'
       )}
     >
