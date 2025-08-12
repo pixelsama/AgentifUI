@@ -48,7 +48,7 @@ const Heading: React.FC<HeadingProps> = ({ content, level, textAlign }) => {
       {
         className: cn(
           'bg-gradient-to-r from-stone-700 to-stone-900 dark:from-stone-300 dark:to-stone-500',
-          'mb-6 bg-clip-text py-2 leading-normal font-bold text-transparent',
+          'mb-6 bg-clip-text py-3 leading-normal font-bold text-transparent',
           sizeClasses[level],
           alignmentClass
         ),
