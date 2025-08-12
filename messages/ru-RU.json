@@ -45,28 +45,109 @@
   },
   "pages": {
     "home": {
-      "title": "AgentifUI",
-      "subtitle": "Исследуйте безграничные возможности ИИ и создавайте новые интеллектуальные решения",
-      "getStarted": "Начать",
-      "learnMore": "Узнать больше",
-      "features": [
+      "sections": [
         {
-          "title": "Интеграция больших моделей",
-          "description": "Поддержка нескольких поставщиков моделей, включая OpenAI, Anthropic, Dify и т.д., для удовлетворения различных потребностей предприятий"
+          "id": "section-home-hero",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-title",
+                "type": "heading",
+                "props": {
+                  "content": "AgentifUI",
+                  "level": 1,
+                  "textAlign": "center"
+                }
+              },
+              {
+                "id": "comp-home-subtitle",
+                "type": "paragraph",
+                "props": {
+                  "content": "Исследуйте безграничные возможности ИИ и создавайте новые интеллектуальные решения",
+                  "textAlign": "center"
+                }
+              }
+            ]
+          ]
         },
         {
-          "title": "Улучшение знаний с помощью RAG",
-          "description": "Интеграция технологии Retrieval-Augmented Generation (RAG) для использования частных баз знаний и контекстной осведомленности"
+          "id": "section-home-features",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-features",
+                "type": "cards",
+                "props": {
+                  "layout": "grid",
+                  "items": [
+                    {
+                      "title": "Интеграция больших моделей",
+                      "description": "Поддержка нескольких поставщиков моделей, включая OpenAI, Anthropic, Dify и т.д., для удовлетворения различных потребностей предприятий"
+                    },
+                    {
+                      "title": "Улучшение знаний с помощью RAG",
+                      "description": "Интеграция технологии Retrieval-Augmented Generation (RAG) для использования частных баз знаний и контекстной осведомленности"
+                    },
+                    {
+                      "title": "Развертывание на предприятии",
+                      "description": "Поддержка частного развертывания, обеспечивающая безопасность данных и предоставляющая стабильные и надежные услуги на базе бэкенда Dify"
+                    }
+                  ]
+                }
+              }
+            ]
+          ]
         },
         {
-          "title": "Развертывание на предприятии",
-          "description": "Поддержка частного развертывания, обеспечивающая безопасность данных и предоставляющая стабильные и надежные услуги на базе бэкенда Dify"
+          "id": "section-home-buttons",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-button-primary",
+                "type": "button",
+                "props": {
+                  "text": "Начать",
+                  "variant": "solid",
+                  "action": "link",
+                  "url": "/chat",
+                  "textAlign": "center",
+                  "secondaryButton": {
+                    "text": "Узнать больше",
+                    "variant": "outline",
+                    "action": "link",
+                    "url": "/about"
+                  }
+                }
+              }
+            ]
+          ]
+        },
+        {
+          "id": "section-home-footer",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-copyright",
+                "type": "paragraph",
+                "props": {
+                  "content": "© {year} AgentifUI. Исследуйте безграничные возможности ИИ.",
+                  "textAlign": "center"
+                }
+              }
+            ]
+          ]
         }
       ],
-      "copyright": {
-        "prefix": "© {year} ",
-        "linkText": "AgentifUI",
-        "suffix": ". Исследуйте безграничные возможности ИИ."
+      "metadata": {
+        "version": "1.0.0",
+        "lastModified": "2025-08-12T12:00:00.000Z",
+        "author": "system-migration",
+        "migrationTimestamp": "2025-08-12T12:00:00.000Z",
+        "locale": "ru-RU"
       }
     },
     "chat": {

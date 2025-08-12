@@ -4,8 +4,7 @@ import { AboutEditor } from '@components/admin/content/about-editor';
 import { AboutPreview } from '@components/admin/content/about-preview';
 import { ContentTabs } from '@components/admin/content/content-tabs';
 import { EditorSkeleton } from '@components/admin/content/editor-skeleton';
-import { HomeEditor } from '@components/admin/content/home-editor';
-import { HomePreview } from '@components/admin/content/home-preview';
+import { HomePreviewDynamic } from '@components/admin/content/home-preview-dynamic';
 import { PreviewToolbar } from '@components/admin/content/preview-toolbar';
 import { ResizableSplitPane } from '@components/ui/resizable-split-pane';
 import type { SupportedLocale } from '@lib/config/language-config';
@@ -14,6 +13,7 @@ import { clearTranslationCache } from '@lib/hooks/use-dynamic-translations';
 import { useTheme } from '@lib/hooks/use-theme';
 import { TranslationService } from '@lib/services/admin/content/translation-service';
 import { useAboutEditorStore } from '@lib/stores/about-editor-store';
+import { useHomeEditorStore } from '@lib/stores/home-editor-store';
 import type {
   AboutTranslationData,
   PageContent,
@@ -23,6 +23,11 @@ import {
   migrateAboutTranslationData,
 } from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
+import type { HomeTranslationData } from '@lib/utils/data-migration';
+import {
+  isHomeDynamicFormat,
+  migrateHomeTranslationData,
+} from '@lib/utils/data-migration';
 import { Eye } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -55,8 +60,11 @@ export default function ContentManagementPage() {
   const router = useRouter();
   const t = useTranslations('pages.admin.content.page');
 
-  // About editor store for resetting editor state
-  const { setPageContent, reset: resetAboutEditor } = useAboutEditorStore();
+  // Editor stores for resetting editor state
+  const { setPageContent: setAboutPageContent, reset: resetAboutEditor } =
+    useAboutEditorStore();
+  const { setPageContent: setHomePageContent, reset: resetHomeEditor } =
+    useHomeEditorStore();
 
   const [activeTab, setActiveTab] = useState<'about' | 'home'>('about');
   const [showPreview, setShowPreview] = useState(true);
@@ -200,12 +208,36 @@ export default function ContentManagementPage() {
         // Reset the editor state completely - this clears undo/redo stacks
         resetAboutEditor();
         // Set the page content to original state
-        setPageContent(content);
+        setAboutPageContent(content);
       }
     } else if (activeTab === 'home' && originalHomeTranslations) {
       // Reset page-level state for home tab
       setHomeTranslations({ ...originalHomeTranslations });
-      // Note: Home editor doesn't use the same Zustand store, so just reset the state
+
+      // Reset home editor state to match the original data
+      const currentTranslation = originalHomeTranslations[currentLocale] || {};
+      let translation = currentTranslation;
+
+      // Ensure it's in dynamic format
+      if (!isHomeDynamicFormat(translation)) {
+        translation = migrateHomeTranslationData(translation);
+      }
+
+      if (translation.sections) {
+        const content: PageContent = {
+          sections: translation.sections,
+          metadata: translation.metadata || {
+            version: '1.0.0',
+            lastModified: new Date().toISOString(),
+            author: 'admin',
+          },
+        };
+
+        // Reset the home editor state completely - this clears undo/redo stacks
+        resetHomeEditor();
+        // Set the page content to original state
+        setHomePageContent(content);
+      }
     }
   };
 
@@ -228,19 +260,6 @@ export default function ContentManagementPage() {
   const handleCloseFullscreenPreview = () => {
     setShowFullscreenPreview(false);
   };
-
-  interface HomeTranslationData {
-    title?: string;
-    subtitle?: string;
-    getStarted?: string;
-    learnMore?: string;
-    features?: FeatureCard[];
-    copyright?: {
-      prefix?: string;
-      linkText?: string;
-      suffix?: string;
-    };
-  }
 
   const transformToHomePreviewConfig = (
     translations: Record<SupportedLocale, HomeTranslationData> | null,
@@ -288,12 +307,33 @@ export default function ContentManagementPage() {
     }
 
     if (activeTab === 'home') {
-      return homeTranslations ? (
-        <HomeEditor
-          translations={homeTranslations}
+      // Convert HomeTranslationData to AboutTranslationData format for dynamic editing
+      const convertedHomeTranslations = homeTranslations
+        ? (Object.fromEntries(
+            Object.entries(homeTranslations).map(([locale, translation]) => [
+              locale,
+              isHomeDynamicFormat(translation)
+                ? translation
+                : migrateHomeTranslationData(translation),
+            ])
+          ) as Record<SupportedLocale, AboutTranslationData>)
+        : null;
+
+      return convertedHomeTranslations ? (
+        <AboutEditor
+          translations={convertedHomeTranslations}
           currentLocale={currentLocale}
           supportedLocales={supportedLocales}
-          onTranslationsChange={handleHomeTranslationsChange}
+          onTranslationsChange={newTranslations => {
+            // Convert back to HomeTranslationData format
+            const convertedBack = Object.fromEntries(
+              Object.entries(newTranslations).map(([locale, translation]) => [
+                locale,
+                translation as HomeTranslationData,
+              ])
+            ) as Record<SupportedLocale, HomeTranslationData>;
+            handleHomeTranslationsChange(convertedBack);
+          }}
           onLocaleChange={setCurrentLocale}
         />
       ) : (
@@ -317,8 +357,13 @@ export default function ContentManagementPage() {
       );
     }
     if (activeTab === 'home') {
-      return homePreviewConfig ? (
-        <HomePreview config={homePreviewConfig} previewDevice={previewDevice} />
+      // Use the most up-to-date home translation data that includes real-time edits
+      const currentHomeTranslation = homeTranslations?.[currentLocale];
+      return currentHomeTranslation ? (
+        <HomePreviewDynamic
+          translation={currentHomeTranslation}
+          previewDevice={previewDevice}
+        />
       ) : (
         <div>{t('loadingPreview')}</div>
       );

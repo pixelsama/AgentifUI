@@ -24,6 +24,52 @@ export type {
   IdPrefix,
 } from '@lib/types/about-page-components';
 
+// 主页数据结构接口
+export interface LegacyHomeData {
+  title?: string;
+  subtitle?: string;
+  getStarted?: string;
+  learnMore?: string;
+  features?: Array<{
+    title: string;
+    description: string;
+  }>;
+  copyright?: {
+    prefix?: string;
+    linkText?: string;
+    suffix?: string;
+  };
+}
+
+// 扩展主页翻译数据接口，支持动态组件结构
+export interface HomeTranslationData {
+  // 新的动态组件结构
+  sections?: PageSection[];
+
+  // 向后兼容：保留原有的固定结构 (用于数据迁移)
+  title?: string;
+  subtitle?: string;
+  getStarted?: string;
+  learnMore?: string;
+  features?: Array<{
+    title: string;
+    description: string;
+  }>;
+  copyright?: {
+    prefix?: string;
+    linkText?: string;
+    suffix?: string;
+  };
+
+  // 元数据
+  metadata?: {
+    version?: string;
+    lastModified?: string;
+    author?: string;
+    migrated?: boolean; // 标记是否已从固定结构迁移到动态结构
+  };
+}
+
 // ID 生成函数
 export function generateUniqueId(prefix: IdPrefix): string {
   const timestamp = Date.now();
@@ -55,7 +101,7 @@ export function createDefaultComponent(
     },
     button: {
       text: content || 'New Button',
-      variant: 'primary',
+      variant: 'solid',
       action: 'link',
       url: '#',
     },
@@ -321,9 +367,260 @@ export function validateMigratedData(data: AboutTranslationData): {
   };
 }
 
+// === 主页数据迁移功能 ===
+
+// 检查主页数据是否为新的动态格式
+export function isHomeDynamicFormat(data: HomeTranslationData): boolean {
+  return Boolean(data && data.sections && data.sections.length > 0);
+}
+
+// 检查主页数据是否为旧的固定格式
+export function isHomeLegacyFormat(data: HomeTranslationData): boolean {
+  return Boolean(
+    !data.sections &&
+      (data.title ||
+        data.subtitle ||
+        data.getStarted ||
+        data.learnMore ||
+        data.features)
+  );
+}
+
+// 从主页固定结构迁移到动态组件结构
+export function migrateHomeLegacyToSections(
+  legacy: LegacyHomeData
+): PageContent {
+  const sections: PageSection[] = [];
+
+  // 标题和副标题段落
+  if (legacy.title || legacy.subtitle) {
+    const titleComponents: ComponentInstance[] = [];
+
+    if (legacy.title) {
+      titleComponents.push(createDefaultComponent('heading', legacy.title));
+      titleComponents[titleComponents.length - 1].props.level = 1;
+      titleComponents[titleComponents.length - 1].props.textAlign = 'center';
+    }
+
+    if (legacy.subtitle) {
+      titleComponents.push(
+        createDefaultComponent('paragraph', legacy.subtitle)
+      );
+      titleComponents[titleComponents.length - 1].props.textAlign = 'center';
+    }
+
+    if (titleComponents.length > 0) {
+      sections.push({
+        id: generateUniqueId('section'),
+        layout: 'single-column',
+        columns: [titleComponents],
+      });
+    }
+  }
+
+  // 特性卡片段落
+  if (legacy.features && legacy.features.length > 0) {
+    const cardsComponent = createDefaultComponent('cards');
+    cardsComponent.props = {
+      layout: 'grid',
+      items: legacy.features,
+    };
+
+    sections.push({
+      id: generateUniqueId('section'),
+      layout: 'single-column',
+      columns: [[cardsComponent]],
+    });
+  }
+
+  // 双按钮段落
+  if (legacy.getStarted || legacy.learnMore) {
+    const buttonComponent = createDefaultComponent(
+      'button',
+      legacy.getStarted || 'Get Started'
+    );
+
+    // 如果有两个按钮，使用双按钮功能
+    if (legacy.getStarted && legacy.learnMore) {
+      buttonComponent.props = {
+        text: legacy.getStarted,
+        variant: 'solid',
+        action: 'link',
+        url: '/chat',
+        secondaryButton: {
+          text: legacy.learnMore,
+          variant: 'outline',
+          action: 'link',
+          url: '/about',
+        },
+      };
+    } else {
+      // 单按钮
+      buttonComponent.props = {
+        text: legacy.getStarted || legacy.learnMore,
+        variant: 'solid',
+        action: 'link',
+        url: legacy.getStarted ? '/chat' : '/about',
+      };
+    }
+
+    sections.push({
+      id: generateUniqueId('section'),
+      layout: 'single-column',
+      columns: [[buttonComponent]],
+    });
+  }
+
+  // 版权段落
+  if (legacy.copyright) {
+    const copyrightText = [
+      legacy.copyright.prefix?.replace(
+        '{year}',
+        new Date().getFullYear().toString()
+      ) || '',
+      legacy.copyright.linkText || '',
+      legacy.copyright.suffix || '',
+    ].join('');
+
+    if (copyrightText.trim()) {
+      const copyrightComponent = createDefaultComponent(
+        'paragraph',
+        copyrightText
+      );
+      copyrightComponent.props.textAlign = 'center';
+
+      sections.push({
+        id: generateUniqueId('section'),
+        layout: 'single-column',
+        columns: [[copyrightComponent]],
+      });
+    }
+  }
+
+  return {
+    sections,
+    metadata: {
+      version: '1.0.0',
+      lastModified: new Date().toISOString(),
+      author: 'system-migration',
+    },
+  };
+}
+
+// 迁移完整的主页翻译数据
+export function migrateHomeTranslationData(
+  legacy: HomeTranslationData
+): HomeTranslationData {
+  // 如果已经是动态格式，直接返回
+  if (legacy.sections && legacy.sections.length > 0) {
+    return legacy;
+  }
+
+  // 迁移固定结构到动态结构
+  const pageContent = migrateHomeLegacyToSections(legacy);
+
+  return {
+    sections: pageContent.sections,
+    metadata: {
+      ...legacy.metadata,
+      ...pageContent.metadata,
+      migrated: true,
+    },
+  };
+}
+
+// 批量迁移主页多语言数据
+export function batchMigrateHomeTranslations(
+  translations: Record<string, HomeTranslationData>
+): Record<string, HomeTranslationData> {
+  const migratedTranslations: Record<string, HomeTranslationData> = {};
+
+  for (const [locale, data] of Object.entries(translations)) {
+    migratedTranslations[locale] = migrateHomeTranslationData(data);
+  }
+
+  return migratedTranslations;
+}
+
+// 验证主页迁移后的数据完整性
+export function validateHomeMigratedData(data: HomeTranslationData): {
+  isValid: boolean;
+  errors: string[];
+} {
+  const errors: string[] = [];
+
+  // 检查是否有sections
+  if (!data.sections || data.sections.length === 0) {
+    errors.push('迁移后的主页数据缺少sections');
+  }
+
+  // 检查每个section的完整性
+  data.sections?.forEach((section: PageSection, index: number) => {
+    if (!section.id) {
+      errors.push(`主页 Section ${index} 缺少ID`);
+    }
+
+    if (!section.layout) {
+      errors.push(`主页 Section ${index} 缺少布局配置`);
+    }
+
+    if (!section.columns || !Array.isArray(section.columns)) {
+      errors.push(`主页 Section ${index} 缺少或无效的columns`);
+    }
+
+    // 检查组件完整性
+    section.columns?.forEach(
+      (column: ComponentInstance[], columnIndex: number) => {
+        if (!Array.isArray(column)) {
+          errors.push(`主页 Section ${index}, Column ${columnIndex} 不是数组`);
+          return;
+        }
+
+        column.forEach((component, componentIndex) => {
+          if (!component.id) {
+            errors.push(
+              `主页 Section ${index}, Column ${columnIndex}, Component ${componentIndex} 缺少ID`
+            );
+          }
+
+          if (!component.type) {
+            errors.push(
+              `主页 Section ${index}, Column ${columnIndex}, Component ${componentIndex} 缺少类型`
+            );
+          }
+
+          if (!component.props) {
+            errors.push(
+              `主页 Section ${index}, Column ${columnIndex}, Component ${componentIndex} 缺少props`
+            );
+          }
+        });
+      }
+    );
+  });
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
 // 创建备份数据
 export function createBackupData(data: AboutTranslationData): {
   data: AboutTranslationData;
+  timestamp: string;
+  version: string;
+} {
+  return {
+    data: JSON.parse(JSON.stringify(data)), // 深拷贝
+    timestamp: new Date().toISOString(),
+    version: '1.0.0',
+  };
+}
+
+// 创建主页备份数据
+export function createHomeBackupData(data: HomeTranslationData): {
+  data: HomeTranslationData;
   timestamp: string;
   version: string;
 } {

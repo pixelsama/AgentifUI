@@ -45,28 +45,109 @@
   },
   "pages": {
     "home": {
-      "title": "AgentifUI",
-      "subtitle": "Entdecken Sie die unendlichen Möglichkeiten der KI und schaffen Sie intelligente neue Erfahrungen",
-      "getStarted": "Loslegen",
-      "learnMore": "Mehr erfahren",
-      "features": [
+      "sections": [
         {
-          "title": "Integration großer Modelle",
-          "description": "Unterstützung für mehrere Modellanbieter wie OpenAI, Anthropic, Dify usw., um verschiedene Unternehmensanforderungen zu erfüllen"
+          "id": "section-home-hero",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-title",
+                "type": "heading",
+                "props": {
+                  "content": "AgentifUI",
+                  "level": 1,
+                  "textAlign": "center"
+                }
+              },
+              {
+                "id": "comp-home-subtitle",
+                "type": "paragraph",
+                "props": {
+                  "content": "Entdecken Sie die unendlichen Möglichkeiten der KI und schaffen Sie intelligente neue Erfahrungen",
+                  "textAlign": "center"
+                }
+              }
+            ]
+          ]
         },
         {
-          "title": "RAG-Wissenserweiterung",
-          "description": "Integration der Retrieval-Augmented Generation (RAG) Technologie für private Wissensdatenbanken und Kontextbewusstsein"
+          "id": "section-home-features",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-features",
+                "type": "cards",
+                "props": {
+                  "layout": "grid",
+                  "items": [
+                    {
+                      "title": "Integration großer Modelle",
+                      "description": "Unterstützung für mehrere Modellanbieter wie OpenAI, Anthropic, Dify usw., um verschiedene Unternehmensanforderungen zu erfüllen"
+                    },
+                    {
+                      "title": "RAG-Wissenserweiterung",
+                      "description": "Integration der Retrieval-Augmented Generation (RAG) Technologie für private Wissensdatenbanken und Kontextbewusstsein"
+                    },
+                    {
+                      "title": "Unternehmensbereitstellung",
+                      "description": "Unterstützung für private Bereitstellung, Gewährleistung der Datensicherheit, Bereitstellung stabiler und zuverlässiger Dienste basierend auf Dify-Backend"
+                    }
+                  ]
+                }
+              }
+            ]
+          ]
         },
         {
-          "title": "Unternehmensbereitstellung",
-          "description": "Unterstützung für private Bereitstellung, Gewährleistung der Datensicherheit, Bereitstellung stabiler und zuverlässiger Dienste basierend auf Dify-Backend"
+          "id": "section-home-buttons",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-button-primary",
+                "type": "button",
+                "props": {
+                  "text": "Loslegen",
+                  "variant": "solid",
+                  "action": "link",
+                  "url": "/chat",
+                  "textAlign": "center",
+                  "secondaryButton": {
+                    "text": "Mehr erfahren",
+                    "variant": "outline",
+                    "action": "link",
+                    "url": "/about"
+                  }
+                }
+              }
+            ]
+          ]
+        },
+        {
+          "id": "section-home-footer",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-copyright",
+                "type": "paragraph",
+                "props": {
+                  "content": "© {year} AgentifUI. Entdecken Sie die unendlichen Möglichkeiten der KI.",
+                  "textAlign": "center"
+                }
+              }
+            ]
+          ]
         }
       ],
-      "copyright": {
-        "prefix": "© {year} ",
-        "linkText": "AgentifUI",
-        "suffix": ". Entdecken Sie die unendlichen Möglichkeiten der KI."
+      "metadata": {
+        "version": "1.0.0",
+        "lastModified": "2025-08-12T12:00:00.000Z",
+        "author": "system-migration",
+        "migrationTimestamp": "2025-08-12T12:00:00.000Z",
+        "locale": "de-DE"
       }
     },
     "chat": {

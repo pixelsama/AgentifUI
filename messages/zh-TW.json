@@ -45,28 +45,110 @@
   },
   "pages": {
     "home": {
-      "title": "AgentifUI",
-      "subtitle": "探索AI的無限可能，打造智慧新體驗",
-      "getStarted": "立即開始",
-      "learnMore": "了解更多",
-      "features": [
+      "sections": [
         {
-          "title": "大模型整合",
-          "description": "支援多種模型供應商，包括OpenAI、Anthropic、Dify等，滿足不同企業需求"
+          "id": "section-home-hero",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-title",
+                "type": "heading",
+                "props": {
+                  "content": "AgentifUI",
+                  "level": 1,
+                  "textAlign": "center"
+                }
+              },
+              {
+                "id": "comp-home-subtitle",
+                "type": "paragraph",
+                "props": {
+                  "content": "探索AI的無限可能，打造智慧新體驗",
+                  "textAlign": "center"
+                }
+              }
+            ]
+          ]
         },
         {
-          "title": "RAG知識增強",
-          "description": "整合檢索增強生成(RAG)技術，實現私有知識庫和上下文感知"
+          "id": "section-home-features",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-features",
+                "type": "cards",
+                "props": {
+                  "layout": "grid",
+                  "items": [
+                    {
+                      "title": "大模型整合",
+                      "description": "支援多種模型供應商，包括OpenAI、Anthropic、Dify等，滿足不同企業需求"
+                    },
+                    {
+                      "title": "RAG知識增強",
+                      "description": "整合檢索增強生成(RAG)技術，實現私有知識庫和上下文感知"
+                    },
+                    {
+                      "title": "企業級部署",
+                      "description": "支援私有化部署，保障資料安全，基於Dify後端提供穩定可靠的服務"
+                    }
+                  ]
+                }
+              }
+            ]
+          ]
         },
         {
-          "title": "企業級部署",
-          "description": "支援私有化部署，保障資料安全，基於Dify後端提供穩定可靠的服務"
+          "id": "section-home-buttons",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-button-primary",
+                "type": "button",
+                "props": {
+                  "text": "立即開始",
+                  "variant": "solid",
+                  "action": "link",
+                  "url": "/chat",
+                  "textAlign": "center",
+                  "secondaryButton": {
+                    "text": "了解更多",
+                    "variant": "outline",
+                    "action": "link",
+                    "url": "/about"
+                  }
+                }
+              }
+            ]
+          ]
+        },
+        {
+          "id": "section-home-footer",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-copyright",
+                "type": "paragraph",
+                "props": {
+                  "content": "© {year} AgentifUI. 探索AI的無限可能。",
+                  "textAlign": "center"
+                }
+              }
+            ]
+          ]
         }
       ],
-      "copyright": {
-        "prefix": "© {year} ",
-        "linkText": "AgentifUI",
-        "suffix": ". 探索AI的無限可能。"
+      "metadata": {
+        "version": "1.0.0",
+        "lastModified": "2025-08-12T12:00:00.000Z",
+        "author": "system-migration",
+        "migratedFrom": "legacy-format",
+        "migrationTimestamp": "2025-08-12T12:00:00.000Z",
+        "locale": "zh-TW"
       }
     },
     "chat": {

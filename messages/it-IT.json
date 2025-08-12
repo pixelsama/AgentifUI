@@ -45,28 +45,109 @@
   },
   "pages": {
     "home": {
-      "title": "AgentifUI",
-      "subtitle": "Esplora le infinite possibilità dell'IA e crea nuove esperienze intelligenti",
-      "getStarted": "Inizia",
-      "learnMore": "Scopri di più",
-      "features": [
+      "sections": [
         {
-          "title": "Integrazione di Grandi Modelli",
-          "description": "Supporto per più fornitori di modelli, tra cui OpenAI, Anthropic, Dify, ecc., per soddisfare le diverse esigenze aziendali"
+          "id": "section-home-hero",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-title",
+                "type": "heading",
+                "props": {
+                  "content": "AgentifUI",
+                  "level": 1,
+                  "textAlign": "center"
+                }
+              },
+              {
+                "id": "comp-home-subtitle",
+                "type": "paragraph",
+                "props": {
+                  "content": "Esplora le infinite possibilità dell'IA e crea nuove esperienze intelligenti",
+                  "textAlign": "center"
+                }
+              }
+            ]
+          ]
         },
         {
-          "title": "Miglioramento della Conoscenza con RAG",
-          "description": "Integra la tecnologia Retrieval-Augmented Generation (RAG) per abilitare basi di conoscenza private e consapevolezza del contesto"
+          "id": "section-home-features",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-features",
+                "type": "cards",
+                "props": {
+                  "layout": "grid",
+                  "items": [
+                    {
+                      "title": "Integrazione di Grandi Modelli",
+                      "description": "Supporto per più fornitori di modelli, tra cui OpenAI, Anthropic, Dify, ecc., per soddisfare le diverse esigenze aziendali"
+                    },
+                    {
+                      "title": "Miglioramento della Conoscenza con RAG",
+                      "description": "Integra la tecnologia Retrieval-Augmented Generation (RAG) per abilitare basi di conoscenza private e consapevolezza del contesto"
+                    },
+                    {
+                      "title": "Distribuzione Aziendale",
+                      "description": "Supporto per la distribuzione privata, garantendo la sicurezza dei dati e fornendo servizi stabili e affidabili basati sul backend di Dify"
+                    }
+                  ]
+                }
+              }
+            ]
+          ]
         },
         {
-          "title": "Distribuzione Aziendale",
-          "description": "Supporto per la distribuzione privata, garantendo la sicurezza dei dati e fornendo servizi stabili e affidabili basati sul backend di Dify"
+          "id": "section-home-buttons",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-button-primary",
+                "type": "button",
+                "props": {
+                  "text": "Inizia",
+                  "variant": "solid",
+                  "action": "link",
+                  "url": "/chat",
+                  "textAlign": "center",
+                  "secondaryButton": {
+                    "text": "Scopri di più",
+                    "variant": "outline",
+                    "action": "link",
+                    "url": "/about"
+                  }
+                }
+              }
+            ]
+          ]
+        },
+        {
+          "id": "section-home-footer",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-copyright",
+                "type": "paragraph",
+                "props": {
+                  "content": "© {year} AgentifUI. Esplora le infinite possibilità dell'IA.",
+                  "textAlign": "center"
+                }
+              }
+            ]
+          ]
         }
       ],
-      "copyright": {
-        "prefix": "© {year} ",
-        "linkText": "AgentifUI",
-        "suffix": ". Esplora le infinite possibilità dell'IA."
+      "metadata": {
+        "version": "1.0.0",
+        "lastModified": "2025-08-12T12:00:00.000Z",
+        "author": "system-migration",
+        "migrationTimestamp": "2025-08-12T12:00:00.000Z",
+        "locale": "it-IT"
       }
     },
     "chat": {
