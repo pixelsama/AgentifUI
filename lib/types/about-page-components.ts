@@ -1,19 +1,19 @@
 /**
- * 动态关于页面组件类型定义
+ * Dynamic "About" Page Component Type Definitions
  *
- * 这个文件定义了动态组件编辑器所需的所有类型，包括：
- * - 组件类型枚举
- * - 布局类型枚举
- * - 组件实例结构
- * - 页面段落结构
- * - 页面内容结构
- * - 各种组件的 props 接口定义
+ * This file defines all the types required for the dynamic component editor, including:
+ * - Component type enums
+ * - Layout type enums
+ * - Component instance structure
+ * - Page section structure
+ * - Page content structure
+ * - Prop interface definitions for various components
  */
 
-// 支持的布局类型
+// Supported layout types
 export type LayoutType = 'single-column' | 'two-column' | 'three-column';
 
-// 支持的组件类型
+// Supported component types
 export type ComponentType =
   | 'heading'
   | 'paragraph'
@@ -22,50 +22,50 @@ export type ComponentType =
   | 'image'
   | 'divider';
 
-// 组件实例接口
+// Component instance interface
 export interface ComponentInstance {
   id: string;
   type: ComponentType;
   props: Record<string, unknown>;
-  // 是否继承section的共享属性 (默认true)
+  // Whether to inherit shared properties from the section (defaults to true)
   inheritFromSection?: boolean;
-  // 要覆盖的section属性键名列表
+  // List of section property keys to override
   overrideProps?: string[];
 }
 
-// Section共享属性接口
+// Section shared properties interface
 export interface SectionCommonProps {
-  // 样式主题
+  // Style theme
   theme?: 'light' | 'dark' | 'auto';
-  // 间距设置
+  // Spacing settings
   spacing?: 'compact' | 'normal' | 'spacious';
-  // 文本对齐
+  // Text alignment
   textAlign?: 'left' | 'center' | 'right';
-  // 动画效果
+  // Animation effect
   animation?: 'fade' | 'slide' | 'none';
-  // 是否可交互
+  // Whether it is interactive
   interactive?: boolean;
-  // 拖拽行为
+  // Drag behavior
   dragBehavior?: 'inherit' | 'custom';
-  // 背景样式
+  // Background style
   backgroundColor?: string;
-  // 边框样式
+  // Border style
   borderStyle?: 'none' | 'solid' | 'dashed' | 'dotted';
-  // 自定义属性扩展
+  // Custom property extension
   [key: string]: unknown;
 }
 
-// 页面段落接口
+// Page section interface
 export interface PageSection {
   id: string;
   layout: LayoutType;
   columns: ComponentInstance[][];
   shouldDelete?: boolean;
-  // 新增：section级别的共享属性
+  // New: Section-level shared properties
   commonProps?: SectionCommonProps;
 }
 
-// 页面内容接口
+// Page content interface
 export interface PageContent {
   sections: PageSection[];
   metadata?: {
@@ -75,22 +75,22 @@ export interface PageContent {
   };
 }
 
-// === 组件 Props 接口定义 ===
+// === Component Props Interface Definitions ===
 
-// 标题组件 Props
+// Heading component Props
 export interface HeadingProps {
   content: string;
   level: 1 | 2 | 3 | 4 | 5 | 6;
   textAlign: 'left' | 'center' | 'right';
 }
 
-// 段落组件 Props
+// Paragraph component Props
 export interface ParagraphProps {
   content: string;
   textAlign: 'left' | 'center' | 'right';
 }
 
-// 卡片组件 Props
+// Cards component Props
 export interface CardsProps {
   layout: 'grid' | 'list';
   items: Array<{
@@ -100,13 +100,13 @@ export interface CardsProps {
   }>;
 }
 
-// 按钮组件 Props
+// Button component Props
 export interface ButtonProps {
   text: string;
   variant: 'solid' | 'outline';
   action: 'link' | 'submit' | 'external';
   url?: string;
-  // 可选的第二个按钮
+  // Optional second button
   secondaryButton?: {
     text: string;
     variant: 'solid' | 'outline';
@@ -115,7 +115,7 @@ export interface ButtonProps {
   };
 }
 
-// 图片组件 Props
+// Image component Props
 export interface ImageProps {
   src: string;
   alt: string;
@@ -125,14 +125,14 @@ export interface ImageProps {
   height?: string | number;
 }
 
-// 分隔线组件 Props
+// Divider component Props
 export interface DividerProps {
   style: 'solid' | 'dashed' | 'dotted';
   color?: string;
   thickness?: 'thin' | 'medium' | 'thick';
 }
 
-// 组件 Props 联合类型
+// Component Props union type
 export type ComponentProps =
   | HeadingProps
   | ParagraphProps
@@ -141,7 +141,7 @@ export type ComponentProps =
   | ImageProps
   | DividerProps;
 
-// 组件定义接口 (用于组件注册系统)
+// Component definition interface (for the component registration system)
 export interface ComponentDefinition {
   type: ComponentType;
   name: string;
@@ -151,7 +151,7 @@ export interface ComponentDefinition {
   description?: string;
 }
 
-// 编辑器状态接口
+// Editor state interface
 export interface AboutEditorState {
   pageContent: PageContent | null;
   selectedComponentId: string | null;
@@ -161,7 +161,7 @@ export interface AboutEditorState {
   isLoading: boolean;
 }
 
-// 拖拽结果接口 (来自 react-beautiful-dnd)
+// Drag result interface (from react-beautiful-dnd)
 export interface DragResult {
   draggableId: string;
   type: string;
@@ -175,10 +175,10 @@ export interface DragResult {
   } | null;
 }
 
-// ID 生成相关类型
+// ID generation related types
 export type IdPrefix = 'section' | 'comp';
 
-// 数据迁移相关接口
+// Data migration related interfaces
 export interface LegacyAboutData {
   title?: string;
   subtitle?: string;
@@ -199,12 +199,12 @@ export interface LegacyAboutData {
   };
 }
 
-// 扩展的 About 翻译数据接口，支持动态组件结构
+// Extended "About" translation data interface, supporting dynamic component structure
 export interface AboutTranslationData {
-  // 新的动态组件结构
+  // New dynamic component structure
   sections?: PageSection[];
 
-  // 向后兼容：保留原有的固定结构 (用于数据迁移)
+  // Backward compatibility: Retain the original fixed structure (for data migration)
   title?: string;
   subtitle?: string;
   mission?: {
@@ -223,21 +223,21 @@ export interface AboutTranslationData {
     suffix?: string;
   };
 
-  // 元数据
+  // Metadata
   metadata?: {
     version?: string;
     lastModified?: string;
     author?: string;
-    migrated?: boolean; // 标记是否已从固定结构迁移到动态结构
+    migrated?: boolean; // Flag to indicate if migration from fixed to dynamic structure has occurred
   };
 }
 
-// 检查数据是否为新的动态格式
+// Checks if the data is in the new dynamic format
 export function isDynamicFormat(data: AboutTranslationData): boolean {
   return Boolean(data && data.sections && data.sections.length > 0);
 }
 
-// 检查数据是否为旧的固定格式
+// Checks if the data is in the old legacy format
 export function isLegacyFormat(data: AboutTranslationData): boolean {
   return Boolean(
     !data.sections &&
@@ -261,30 +261,30 @@ export {
   createBackupData,
 } from '@lib/utils/data-migration';
 
-// === 属性继承工具函数 ===
+// === Property Inheritance Utility Functions ===
 
 /**
- * 合并section公共属性和组件特有属性
+ * Merges section common properties and component-specific properties
  *
- * @param sectionCommonProps - Section级别的公共属性
- * @param componentProps - 组件特有属性
- * @param overrideProps - 要覆盖的公共属性键名列表
- * @returns 合并后的最终属性对象
+ * @param sectionCommonProps - Section-level common properties
+ * @param componentProps - Component-specific properties
+ * @param overrideProps - List of common property keys to override
+ * @returns The merged final properties object
  */
 export function mergeComponentProps(
   sectionCommonProps: SectionCommonProps = {},
   componentProps: Record<string, unknown> = {},
   overrideProps: string[] = []
 ): Record<string, unknown> {
-  // 创建section属性副本
+  // Create a copy of section properties
   const inherited = { ...sectionCommonProps };
 
-  // 移除被覆盖的属性
+  // Remove the overridden properties
   overrideProps.forEach(key => {
     delete inherited[key];
   });
 
-  // 组件特有属性优先级更高
+  // Component-specific properties have higher priority
   return {
     ...inherited,
     ...componentProps,
@@ -292,22 +292,22 @@ export function mergeComponentProps(
 }
 
 /**
- * 获取组件的最终属性 (包含继承逻辑)
+ * Gets the final resolved properties for a component (including inheritance logic)
  *
- * @param component - 组件实例
- * @param sectionCommonProps - Section的公共属性
- * @returns 解析后的最终属性对象
+ * @param component - The component instance
+ * @param sectionCommonProps - The common properties of the section
+ * @returns The resolved final properties object
  */
 export function getResolvedComponentProps(
   component: ComponentInstance,
   sectionCommonProps?: SectionCommonProps
 ): Record<string, unknown> {
-  // 如果不继承或没有section公共属性，直接返回组件props
+  // If not inheriting or no section common props exist, return component props directly
   if (component.inheritFromSection === false || !sectionCommonProps) {
     return component.props;
   }
 
-  // 合并属性 (默认继承)
+  // Merge properties (default inheritance)
   return mergeComponentProps(
     sectionCommonProps,
     component.props,

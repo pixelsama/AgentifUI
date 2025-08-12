@@ -1,7 +1,7 @@
 /**
- * 数据迁移工具
+ * Data Migration Tool
  *
- * 提供从固定结构到动态组件结构的迁移功能
+ * Provides functionality to migrate from a fixed structure to a dynamic component structure.
  */
 import {
   AboutTranslationData,
@@ -13,7 +13,7 @@ import {
   PageSection,
 } from '@lib/types/about-page-components';
 
-// 重新导出类型，以便其他模块使用
+// Re-export types for use in other modules
 export type {
   LegacyAboutData,
   AboutTranslationData,
@@ -24,7 +24,7 @@ export type {
   IdPrefix,
 } from '@lib/types/about-page-components';
 
-// 主页数据结构接口
+// Home page data structure interface
 export interface LegacyHomeData {
   title?: string;
   subtitle?: string;
@@ -41,12 +41,12 @@ export interface LegacyHomeData {
   };
 }
 
-// 扩展主页翻译数据接口，支持动态组件结构
+// Extended home page translation data interface, supporting a dynamic component structure
 export interface HomeTranslationData {
-  // 新的动态组件结构
+  // New dynamic component structure
   sections?: PageSection[];
 
-  // 向后兼容：保留原有的固定结构 (用于数据迁移)
+  // Backward compatibility: Retain the original fixed structure (for data migration)
   title?: string;
   subtitle?: string;
   getStarted?: string;
@@ -61,28 +61,28 @@ export interface HomeTranslationData {
     suffix?: string;
   };
 
-  // 元数据
+  // Metadata
   metadata?: {
     version?: string;
     lastModified?: string;
     author?: string;
-    migrated?: boolean; // 标记是否已从固定结构迁移到动态结构
+    migrated?: boolean; // Flag to indicate if migration from fixed to dynamic structure has occurred
   };
 }
 
-// ID 生成函数
+// ID generation function
 export function generateUniqueId(prefix: IdPrefix): string {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substr(2, 9);
   return `${prefix}-${timestamp}-${random}`;
 }
 
-// 生成多个唯一ID
+// Generate multiple unique IDs
 export function generateUniqueIds(prefix: IdPrefix, count: number): string[] {
   return Array.from({ length: count }, () => generateUniqueId(prefix));
 }
 
-// 创建默认组件实例
+// Create a default component instance
 export function createDefaultComponent(
   type: ComponentType,
   content?: string
@@ -127,13 +127,13 @@ export function createDefaultComponent(
     id,
     type,
     props: defaultProps[type] || {},
-    // 默认继承section属性
+    // Inherit section properties by default
     inheritFromSection: true,
     overrideProps: [],
   };
 }
 
-// 创建默认段落
+// Create a default section
 export function createDefaultSection(
   layout: 'single-column' | 'two-column' | 'three-column' = 'single-column'
 ): PageSection {
@@ -147,7 +147,7 @@ export function createDefaultSection(
     columns: Array(columnCount)
       .fill([])
       .map(() => []),
-    // 默认的section公共属性
+    // Default common properties for the section
     commonProps: {
       theme: 'auto',
       spacing: 'normal',
@@ -159,11 +159,11 @@ export function createDefaultSection(
   };
 }
 
-// 从固定结构迁移到动态组件结构
+// Migrate from a fixed structure to a dynamic component structure
 export function migrateLegacyToSections(legacy: LegacyAboutData): PageContent {
   const sections: PageSection[] = [];
 
-  // 标题和副标题段落
+  // Title and subtitle section
   if (legacy.title || legacy.subtitle) {
     const titleComponents: ComponentInstance[] = [];
 
@@ -189,7 +189,7 @@ export function migrateLegacyToSections(legacy: LegacyAboutData): PageContent {
     }
   }
 
-  // 使命段落
+  // Mission section
   if (legacy.mission?.description) {
     sections.push({
       id: generateUniqueId('section'),
@@ -203,7 +203,7 @@ export function migrateLegacyToSections(legacy: LegacyAboutData): PageContent {
     });
   }
 
-  // 价值观段落
+  // Values section
   if (legacy.values?.items && legacy.values.items.length > 0) {
     const valuesSection: PageSection = {
       id: generateUniqueId('section'),
@@ -211,7 +211,7 @@ export function migrateLegacyToSections(legacy: LegacyAboutData): PageContent {
       columns: [[createDefaultComponent('heading', 'Our Values')]],
     };
 
-    // 添加卡片组件
+    // Add cards component
     const cardsComponent = createDefaultComponent('cards');
     cardsComponent.props = {
       layout: 'grid',
@@ -222,7 +222,7 @@ export function migrateLegacyToSections(legacy: LegacyAboutData): PageContent {
     sections.push(valuesSection);
   }
 
-  // 按钮段落
+  // Button section
   if (legacy.buttonText) {
     const buttonComponent = createDefaultComponent('button', legacy.buttonText);
     buttonComponent.props.textAlign = 'center';
@@ -233,7 +233,7 @@ export function migrateLegacyToSections(legacy: LegacyAboutData): PageContent {
     });
   }
 
-  // 版权段落
+  // Copyright section
   if (legacy.copyright) {
     const copyrightText = [
       legacy.copyright.prefix?.replace(
@@ -269,16 +269,16 @@ export function migrateLegacyToSections(legacy: LegacyAboutData): PageContent {
   };
 }
 
-// 迁移完整的翻译数据
+// Migrate complete translation data
 export function migrateAboutTranslationData(
   legacy: AboutTranslationData
 ): AboutTranslationData {
-  // 如果已经是动态格式，直接返回
+  // If it's already in the dynamic format, return directly
   if (legacy.sections && legacy.sections.length > 0) {
     return legacy;
   }
 
-  // 迁移固定结构到动态结构
+  // Migrate the fixed structure to the dynamic structure
   const pageContent = migrateLegacyToSections(legacy);
 
   return {
@@ -291,7 +291,7 @@ export function migrateAboutTranslationData(
   };
 }
 
-// 批量迁移多语言数据
+// Batch migrate multi-language data
 export function batchMigrateTranslations(
   translations: Record<string, AboutTranslationData>
 ): Record<string, AboutTranslationData> {
@@ -304,56 +304,58 @@ export function batchMigrateTranslations(
   return migratedTranslations;
 }
 
-// 验证迁移后的数据完整性
+// Validate the integrity of the migrated data
 export function validateMigratedData(data: AboutTranslationData): {
   isValid: boolean;
   errors: string[];
 } {
   const errors: string[] = [];
 
-  // 检查是否有sections
+  // Check if sections exist
   if (!data.sections || data.sections.length === 0) {
-    errors.push('迁移后的数据缺少sections');
+    errors.push('Migrated data is missing sections');
   }
 
-  // 检查每个section的完整性
+  // Check the integrity of each section
   data.sections?.forEach((section: PageSection, index: number) => {
     if (!section.id) {
-      errors.push(`Section ${index} 缺少ID`);
+      errors.push(`Section ${index} is missing an ID`);
     }
 
     if (!section.layout) {
-      errors.push(`Section ${index} 缺少布局配置`);
+      errors.push(`Section ${index} is missing a layout configuration`);
     }
 
     if (!section.columns || !Array.isArray(section.columns)) {
-      errors.push(`Section ${index} 缺少或无效的columns`);
+      errors.push(`Section ${index} has missing or invalid columns`);
     }
 
-    // 检查组件完整性
+    // Check component integrity
     section.columns?.forEach(
       (column: ComponentInstance[], columnIndex: number) => {
         if (!Array.isArray(column)) {
-          errors.push(`Section ${index}, Column ${columnIndex} 不是数组`);
+          errors.push(
+            `Section ${index}, Column ${columnIndex} is not an array`
+          );
           return;
         }
 
         column.forEach((component, componentIndex) => {
           if (!component.id) {
             errors.push(
-              `Section ${index}, Column ${columnIndex}, Component ${componentIndex} 缺少ID`
+              `Section ${index}, Column ${columnIndex}, Component ${componentIndex} is missing an ID`
             );
           }
 
           if (!component.type) {
             errors.push(
-              `Section ${index}, Column ${columnIndex}, Component ${componentIndex} 缺少类型`
+              `Section ${index}, Column ${columnIndex}, Component ${componentIndex} is missing a type`
             );
           }
 
           if (!component.props) {
             errors.push(
-              `Section ${index}, Column ${columnIndex}, Component ${componentIndex} 缺少props`
+              `Section ${index}, Column ${columnIndex}, Component ${componentIndex} is missing props`
             );
           }
         });
@@ -367,14 +369,14 @@ export function validateMigratedData(data: AboutTranslationData): {
   };
 }
 
-// === 主页数据迁移功能 ===
+// === Home Page Data Migration Functions ===
 
-// 检查主页数据是否为新的动态格式
+// Check if the home page data is in the new dynamic format
 export function isHomeDynamicFormat(data: HomeTranslationData): boolean {
   return Boolean(data && data.sections && data.sections.length > 0);
 }
 
-// 检查主页数据是否为旧的固定格式
+// Check if the home page data is in the old fixed format
 export function isHomeLegacyFormat(data: HomeTranslationData): boolean {
   return Boolean(
     !data.sections &&
@@ -386,13 +388,13 @@ export function isHomeLegacyFormat(data: HomeTranslationData): boolean {
   );
 }
 
-// 从主页固定结构迁移到动态组件结构
+// Migrate from the home page's fixed structure to a dynamic component structure
 export function migrateHomeLegacyToSections(
   legacy: LegacyHomeData
 ): PageContent {
   const sections: PageSection[] = [];
 
-  // 标题和副标题段落
+  // Title and subtitle section
   if (legacy.title || legacy.subtitle) {
     const titleComponents: ComponentInstance[] = [];
 
@@ -418,7 +420,7 @@ export function migrateHomeLegacyToSections(
     }
   }
 
-  // 特性卡片段落
+  // Features cards section
   if (legacy.features && legacy.features.length > 0) {
     const cardsComponent = createDefaultComponent('cards');
     cardsComponent.props = {
@@ -433,14 +435,14 @@ export function migrateHomeLegacyToSections(
     });
   }
 
-  // 双按钮段落
+  // Double button section
   if (legacy.getStarted || legacy.learnMore) {
     const buttonComponent = createDefaultComponent(
       'button',
       legacy.getStarted || 'Get Started'
     );
 
-    // 如果有两个按钮，使用双按钮功能
+    // If there are two buttons, use the double button feature
     if (legacy.getStarted && legacy.learnMore) {
       buttonComponent.props = {
         text: legacy.getStarted,
@@ -455,7 +457,7 @@ export function migrateHomeLegacyToSections(
         },
       };
     } else {
-      // 单按钮
+      // Single button
       buttonComponent.props = {
         text: legacy.getStarted || legacy.learnMore,
         variant: 'solid',
@@ -471,7 +473,7 @@ export function migrateHomeLegacyToSections(
     });
   }
 
-  // 版权段落
+  // Copyright section
   if (legacy.copyright) {
     const copyrightText = [
       legacy.copyright.prefix?.replace(
@@ -507,16 +509,16 @@ export function migrateHomeLegacyToSections(
   };
 }
 
-// 迁移完整的主页翻译数据
+// Migrate complete home page translation data
 export function migrateHomeTranslationData(
   legacy: HomeTranslationData
 ): HomeTranslationData {
-  // 如果已经是动态格式，直接返回
+  // If it's already in the dynamic format, return directly
   if (legacy.sections && legacy.sections.length > 0) {
     return legacy;
   }
 
-  // 迁移固定结构到动态结构
+  // Migrate the fixed structure to the dynamic structure
   const pageContent = migrateHomeLegacyToSections(legacy);
 
   return {
@@ -529,7 +531,7 @@ export function migrateHomeTranslationData(
   };
 }
 
-// 批量迁移主页多语言数据
+// Batch migrate multi-language home page data
 export function batchMigrateHomeTranslations(
   translations: Record<string, HomeTranslationData>
 ): Record<string, HomeTranslationData> {
@@ -542,56 +544,60 @@ export function batchMigrateHomeTranslations(
   return migratedTranslations;
 }
 
-// 验证主页迁移后的数据完整性
+// Validate the integrity of the migrated home page data
 export function validateHomeMigratedData(data: HomeTranslationData): {
   isValid: boolean;
   errors: string[];
 } {
   const errors: string[] = [];
 
-  // 检查是否有sections
+  // Check if sections exist
   if (!data.sections || data.sections.length === 0) {
-    errors.push('迁移后的主页数据缺少sections');
+    errors.push('Migrated home page data is missing sections');
   }
 
-  // 检查每个section的完整性
+  // Check the integrity of each section
   data.sections?.forEach((section: PageSection, index: number) => {
     if (!section.id) {
-      errors.push(`主页 Section ${index} 缺少ID`);
+      errors.push(`Home page Section ${index} is missing an ID`);
     }
 
     if (!section.layout) {
-      errors.push(`主页 Section ${index} 缺少布局配置`);
+      errors.push(
+        `Home page Section ${index} is missing a layout configuration`
+      );
     }
 
     if (!section.columns || !Array.isArray(section.columns)) {
-      errors.push(`主页 Section ${index} 缺少或无效的columns`);
+      errors.push(`Home page Section ${index} has missing or invalid columns`);
     }
 
-    // 检查组件完整性
+    // Check component integrity
     section.columns?.forEach(
       (column: ComponentInstance[], columnIndex: number) => {
         if (!Array.isArray(column)) {
-          errors.push(`主页 Section ${index}, Column ${columnIndex} 不是数组`);
+          errors.push(
+            `Home page Section ${index}, Column ${columnIndex} is not an array`
+          );
           return;
         }
 
         column.forEach((component, componentIndex) => {
           if (!component.id) {
             errors.push(
-              `主页 Section ${index}, Column ${columnIndex}, Component ${componentIndex} 缺少ID`
+              `Home page Section ${index}, Column ${columnIndex}, Component ${componentIndex} is missing an ID`
             );
           }
 
           if (!component.type) {
             errors.push(
-              `主页 Section ${index}, Column ${columnIndex}, Component ${componentIndex} 缺少类型`
+              `Home page Section ${index}, Column ${columnIndex}, Component ${componentIndex} is missing a type`
             );
           }
 
           if (!component.props) {
             errors.push(
-              `主页 Section ${index}, Column ${columnIndex}, Component ${componentIndex} 缺少props`
+              `Home page Section ${index}, Column ${columnIndex}, Component ${componentIndex} is missing props`
             );
           }
         });
@@ -605,27 +611,27 @@ export function validateHomeMigratedData(data: HomeTranslationData): {
   };
 }
 
-// 创建备份数据
+// Create backup data
 export function createBackupData(data: AboutTranslationData): {
   data: AboutTranslationData;
   timestamp: string;
   version: string;
 } {
   return {
-    data: JSON.parse(JSON.stringify(data)), // 深拷贝
+    data: JSON.parse(JSON.stringify(data)), // Deep copy
     timestamp: new Date().toISOString(),
     version: '1.0.0',
   };
 }
 
-// 创建主页备份数据
+// Create home page backup data
 export function createHomeBackupData(data: HomeTranslationData): {
   data: HomeTranslationData;
   timestamp: string;
   version: string;
 } {
   return {
-    data: JSON.parse(JSON.stringify(data)), // 深拷贝
+    data: JSON.parse(JSON.stringify(data)), // Deep copy
     timestamp: new Date().toISOString(),
     version: '1.0.0',
   };

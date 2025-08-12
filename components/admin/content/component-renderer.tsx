@@ -303,7 +303,7 @@ const ComponentRenderer: React.FC<ComponentRendererProps> = ({
     );
   }
 
-  // 获取合并后的最终属性 (包含属性继承逻辑)
+  // Final properties after merge (including inheritance logic)
   const resolvedProps = getResolvedComponentProps(
     component,
     sectionCommonProps
