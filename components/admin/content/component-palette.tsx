@@ -143,7 +143,7 @@ const ComponentPalette: React.FC<ComponentPaletteProps> = ({ className }) => {
   return (
     <div
       className={cn(
-        'h-full rounded-lg border',
+        'flex h-0 min-h-full flex-col rounded-lg border',
         'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800',
         className
       )}
@@ -159,7 +159,7 @@ const ComponentPalette: React.FC<ComponentPaletteProps> = ({ className }) => {
           Components
         </h3>
       </div>
-      <div className="p-0">
+      <div className="min-h-0 flex-1 overflow-y-auto p-0">
         <Droppable
           id="component-palette"
           disabled={true}
