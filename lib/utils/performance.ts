@@ -67,7 +67,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
   const debouncedCallback = React.useMemo(
     () => debounce(callback, delay),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    deps
+    [callback, delay, ...deps]
   );
 
   // Cleanup on unmount
