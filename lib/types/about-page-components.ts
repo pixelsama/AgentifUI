@@ -1,19 +1,19 @@
 /**
- * 动态关于页面组件类型定义
+ * Dynamic "About" Page Component Type Definitions
  *
- * 这个文件定义了动态组件编辑器所需的所有类型，包括：
- * - 组件类型枚举
- * - 布局类型枚举
- * - 组件实例结构
- * - 页面段落结构
- * - 页面内容结构
- * - 各种组件的 props 接口定义
+ * This file defines all the types required for the dynamic component editor, including:
+ * - Component type enums
+ * - Layout type enums
+ * - Component instance structure
+ * - Page section structure
+ * - Page content structure
+ * - Prop interface definitions for various components
  */
 
-// 支持的布局类型
+// Supported layout types
 export type LayoutType = 'single-column' | 'two-column' | 'three-column';
 
-// 支持的组件类型
+// Supported component types
 export type ComponentType =
   | 'heading'
   | 'paragraph'
@@ -22,22 +22,50 @@ export type ComponentType =
   | 'image'
   | 'divider';
 
-// 组件实例接口
+// Component instance interface
 export interface ComponentInstance {
   id: string;
   type: ComponentType;
   props: Record<string, unknown>;
+  // Whether to inherit shared properties from the section (defaults to true)
+  inheritFromSection?: boolean;
+  // List of section property keys to override
+  overrideProps?: string[];
 }
 
-// 页面段落接口
+// Section shared properties interface
+export interface SectionCommonProps {
+  // Style theme
+  theme?: 'light' | 'dark' | 'auto';
+  // Spacing settings
+  spacing?: 'compact' | 'normal' | 'spacious';
+  // Text alignment
+  textAlign?: 'left' | 'center' | 'right';
+  // Animation effect
+  animation?: 'fade' | 'slide' | 'none';
+  // Whether it is interactive
+  interactive?: boolean;
+  // Drag behavior
+  dragBehavior?: 'inherit' | 'custom';
+  // Background style
+  backgroundColor?: string;
+  // Border style
+  borderStyle?: 'none' | 'solid' | 'dashed' | 'dotted';
+  // Custom property extension
+  customProps?: Record<string, unknown>;
+}
+
+// Page section interface
 export interface PageSection {
   id: string;
   layout: LayoutType;
   columns: ComponentInstance[][];
   shouldDelete?: boolean;
+  // New: Section-level shared properties
+  commonProps?: SectionCommonProps;
 }
 
-// 页面内容接口
+// Page content interface
 export interface PageContent {
   sections: PageSection[];
   metadata?: {
@@ -47,22 +75,22 @@ export interface PageContent {
   };
 }
 
-// === 组件 Props 接口定义 ===
+// === Component Props Interface Definitions ===
 
-// 标题组件 Props
+// Heading component Props
 export interface HeadingProps {
   content: string;
   level: 1 | 2 | 3 | 4 | 5 | 6;
   textAlign: 'left' | 'center' | 'right';
 }
 
-// 段落组件 Props
+// Paragraph component Props
 export interface ParagraphProps {
   content: string;
   textAlign: 'left' | 'center' | 'right';
 }
 
-// 卡片组件 Props
+// Cards component Props
 export interface CardsProps {
   layout: 'grid' | 'list';
   items: Array<{
@@ -72,15 +100,22 @@ export interface CardsProps {
   }>;
 }
 
-// 按钮组件 Props
+// Button component Props
 export interface ButtonProps {
   text: string;
-  variant: 'primary' | 'secondary' | 'outline';
+  variant: 'solid' | 'outline';
   action: 'link' | 'submit' | 'external';
   url?: string;
+  // Optional second button
+  secondaryButton?: {
+    text: string;
+    variant: 'solid' | 'outline';
+    action: 'link' | 'submit' | 'external';
+    url?: string;
+  };
 }
 
-// 图片组件 Props
+// Image component Props
 export interface ImageProps {
   src: string;
   alt: string;
@@ -90,14 +125,14 @@ export interface ImageProps {
   height?: string | number;
 }
 
-// 分隔线组件 Props
+// Divider component Props
 export interface DividerProps {
   style: 'solid' | 'dashed' | 'dotted';
   color?: string;
   thickness?: 'thin' | 'medium' | 'thick';
 }
 
-// 组件 Props 联合类型
+// Component Props union type
 export type ComponentProps =
   | HeadingProps
   | ParagraphProps
@@ -106,7 +141,7 @@ export type ComponentProps =
   | ImageProps
   | DividerProps;
 
-// 组件定义接口 (用于组件注册系统)
+// Component definition interface (for the component registration system)
 export interface ComponentDefinition {
   type: ComponentType;
   name: string;
@@ -116,7 +151,7 @@ export interface ComponentDefinition {
   description?: string;
 }
 
-// 编辑器状态接口
+// Editor state interface
 export interface AboutEditorState {
   pageContent: PageContent | null;
   selectedComponentId: string | null;
@@ -126,7 +161,7 @@ export interface AboutEditorState {
   isLoading: boolean;
 }
 
-// 拖拽结果接口 (来自 react-beautiful-dnd)
+// Drag result interface (from react-beautiful-dnd)
 export interface DragResult {
   draggableId: string;
   type: string;
@@ -140,10 +175,10 @@ export interface DragResult {
   } | null;
 }
 
-// ID 生成相关类型
+// ID generation related types
 export type IdPrefix = 'section' | 'comp';
 
-// 数据迁移相关接口
+// Data migration related interfaces
 export interface LegacyAboutData {
   title?: string;
   subtitle?: string;
@@ -164,12 +199,12 @@ export interface LegacyAboutData {
   };
 }
 
-// 扩展的 About 翻译数据接口，支持动态组件结构
+// Extended "About" translation data interface, supporting dynamic component structure
 export interface AboutTranslationData {
-  // 新的动态组件结构
+  // New dynamic component structure
   sections?: PageSection[];
 
-  // 向后兼容：保留原有的固定结构 (用于数据迁移)
+  // Backward compatibility: Retain the original fixed structure (for data migration)
   title?: string;
   subtitle?: string;
   mission?: {
@@ -188,21 +223,21 @@ export interface AboutTranslationData {
     suffix?: string;
   };
 
-  // 元数据
+  // Metadata
   metadata?: {
     version?: string;
     lastModified?: string;
     author?: string;
-    migrated?: boolean; // 标记是否已从固定结构迁移到动态结构
+    migrated?: boolean; // Flag to indicate if migration from fixed to dynamic structure has occurred
   };
 }
 
-// 检查数据是否为新的动态格式
+// Checks if the data is in the new dynamic format
 export function isDynamicFormat(data: AboutTranslationData): boolean {
   return Boolean(data && data.sections && data.sections.length > 0);
 }
 
-// 检查数据是否为旧的固定格式
+// Checks if the data is in the old legacy format
 export function isLegacyFormat(data: AboutTranslationData): boolean {
   return Boolean(
     !data.sections &&
@@ -225,3 +260,65 @@ export {
   validateMigratedData,
   createBackupData,
 } from '@lib/utils/data-migration';
+
+// === Property Inheritance Utility Functions ===
+
+/**
+ * Merges section common properties and component-specific properties
+ *
+ * @param sectionCommonProps - Section-level common properties
+ * @param componentProps - Component-specific properties
+ * @param overrideProps - List of common property keys to override
+ * @returns The merged final properties object
+ */
+export function mergeComponentProps(
+  sectionCommonProps: SectionCommonProps = {},
+  componentProps: Record<string, unknown> = {},
+  overrideProps: string[] = []
+): Record<string, unknown> {
+  // Extract known properties and customProps from sectionCommonProps
+  const { customProps, ...knownSectionProps } = sectionCommonProps;
+
+  // Create a copy of all section properties (known + custom)
+  const allSectionProps = {
+    ...knownSectionProps,
+    ...(customProps || {}),
+  };
+
+  // Create inherited properties by removing overridden ones
+  const inherited = Object.fromEntries(
+    Object.entries(allSectionProps).filter(
+      ([key]) => !overrideProps.includes(key)
+    )
+  );
+
+  // Component-specific properties have higher priority
+  return {
+    ...inherited,
+    ...componentProps,
+  };
+}
+
+/**
+ * Gets the final resolved properties for a component (including inheritance logic)
+ *
+ * @param component - The component instance
+ * @param sectionCommonProps - The common properties of the section
+ * @returns The resolved final properties object
+ */
+export function getResolvedComponentProps(
+  component: ComponentInstance,
+  sectionCommonProps?: SectionCommonProps
+): Record<string, unknown> {
+  // If not inheriting or no section common props exist, return component props directly
+  if (component.inheritFromSection === false || !sectionCommonProps) {
+    return component.props;
+  }
+
+  // Merge properties (default inheritance)
+  return mergeComponentProps(
+    sectionCommonProps,
+    component.props,
+    component.overrideProps || []
+  );
+}

@@ -13,13 +13,15 @@ import { cn } from '@lib/utils';
 
 import React from 'react';
 
+import { useDndState } from './dnd-context';
+
 // Re-export arrayMove for convenience
 export { arrayMove };
 
 // Droppable component interface
 interface DroppableProps {
   id: string;
-  children: React.ReactNode;
+  children: React.ReactNode | ((isOver: boolean) => React.ReactNode);
   className?: string;
   disabled?: boolean;
 }
@@ -40,15 +42,36 @@ export function Droppable({
     disabled,
   });
 
+  // Check if this is a section drop zone that should have special hover effects
+  const isSectionDropZone = id.includes('section-drop');
+
+  // Apply drag-over styles that mimic hover effects for section drop zones
+  const dragOverStyles =
+    isSectionDropZone && isOver
+      ? {
+          height: '4rem', // equivalent to h-16
+          borderColor: 'rgb(168 162 158)', // stone-400
+          backgroundColor: 'rgb(245 245 244)', // stone-100 light mode
+        }
+      : {};
+
   return (
     <div
       ref={setNodeRef}
       className={cn(
         className,
-        isOver && 'ring-opacity-50 ring-2 ring-blue-500'
+        // Apply enhanced styles for section drop zones when dragging over
+        isSectionDropZone &&
+          isOver &&
+          'h-16 border-stone-400 bg-stone-100 dark:border-stone-500 dark:bg-stone-800',
+        // Default ring effect for other droppables
+        !isSectionDropZone && isOver && 'ring-opacity-50 ring-2 ring-stone-500'
       )}
+      style={dragOverStyles}
     >
-      {children}
+      {typeof children === 'function'
+        ? (children as (isOver: boolean) => React.ReactNode)(isOver)
+        : children}
     </div>
   );
 }
@@ -111,6 +134,10 @@ interface SortableProps {
   children: React.ReactNode;
   className?: string;
   disabled?: boolean;
+  preview?: React.ReactNode;
+  onClick?: () => void;
+  onDoubleClick?: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }
 
 /**
@@ -123,7 +150,16 @@ export function Sortable({
   children,
   className,
   disabled = false,
+  preview,
+  onClick,
+  onDoubleClick,
+  onContextMenu,
 }: SortableProps) {
+  const { isDraggingFromPalette } = useDndState();
+
+  // Normal sortable behavior - always call hooks at the top level
+  const shouldDisable = disabled;
+
   const {
     attributes,
     listeners,
@@ -131,13 +167,67 @@ export function Sortable({
     transform,
     transition,
     isDragging,
+    isOver,
   } = useSortable({
     id,
-    disabled,
+    disabled: shouldDisable,
     data: {
       type: 'component',
+      preview,
     },
   });
+
+  // Filter out context menu interfering events and handle them separately
+  // IMPORTANT: This hook must be called before any conditional returns!
+  const filteredListeners = React.useMemo(() => {
+    if (!listeners) return {};
+
+    // Create a copy without onContextMenu to prevent conflicts
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { onContextMenu: _, ...otherListeners } = listeners as Record<
+      string,
+      unknown
+    >;
+    return otherListeners;
+  }, [listeners]);
+
+  // Conditional rendering after all hooks are called
+  if (isDraggingFromPalette) {
+    console.log('🚫 SORTABLE RENDERED AS PLAIN DIV:', {
+      componentId: id,
+      isDraggingFromPalette,
+      reason: 'palette dragging - avoiding drop conflicts',
+    });
+
+    return (
+      <div
+        className={cn(className, 'pointer-events-none')}
+        style={{ opacity: 0.5 }}
+      >
+        {children}
+      </div>
+    );
+  }
+
+  // Log component dragging state
+  if (isDragging) {
+    console.log('🔥 COMPONENT BEING DRAGGED:', {
+      componentId: id,
+      isDragging,
+      transform,
+      isDraggingFromPalette,
+    });
+  }
+
+  // Log if somehow this component is still receiving hover events
+  if (isDraggingFromPalette && isOver) {
+    console.log('⚠️ SORTABLE STILL HOVERING (Should not happen!):', {
+      componentId: id,
+      isOver,
+      shouldDisable,
+      isDraggingFromPalette,
+    });
+  }
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -151,10 +241,20 @@ export function Sortable({
       className={cn(
         className,
         isDragging && 'z-50 scale-105 opacity-60',
-        !disabled && 'cursor-grab active:cursor-grabbing'
+        !shouldDisable && 'cursor-grab active:cursor-grabbing'
       )}
-      {...listeners}
+      {...filteredListeners}
       {...attributes}
+      onClick={onClick}
+      onDoubleClick={onDoubleClick}
+      onContextMenu={e => {
+        // Call the provided context menu handler if available
+        if (onContextMenu) {
+          onContextMenu(e);
+        }
+        // Don't prevent default or stop propagation to ensure proper handling
+      }}
+      data-component-id={id}
     >
       {children}
     </div>
@@ -182,6 +282,8 @@ export function SortableContainer({
   className,
   strategy = verticalListSortingStrategy,
 }: SortableContainerProps) {
+  const { isDraggingFromPalette } = useDndState();
+
   const { isOver, setNodeRef } = useDroppable({
     id,
     data: {
@@ -190,6 +292,16 @@ export function SortableContainer({
     },
   });
 
+  // Log hover events when dragging from palette
+  if (isDraggingFromPalette && isOver) {
+    console.log('📦 CONTAINER HOVER:', {
+      containerId: id,
+      isOver,
+      isDraggingFromPalette,
+      itemCount: items.length,
+    });
+  }
+
   return (
     <SortableContext items={items} strategy={strategy}>
       <div
@@ -197,7 +309,7 @@ export function SortableContainer({
         className={cn(
           className,
           isOver &&
-            'ring-opacity-75 bg-blue-50/50 ring-2 ring-blue-400 dark:bg-blue-900/20'
+            'ring-opacity-75 bg-stone-50/50 ring-2 ring-stone-400 dark:bg-stone-900/20'
         )}
       >
         {children}

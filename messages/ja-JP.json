@@ -23,7 +23,12 @@
       },
       "moreButton": {
         "ariaLabel": "その他のオプション"
-      }
+      },
+      "download": "ダウンロード",
+      "copy": "コピー",
+      "copied": "コピーしました！",
+      "open": "開く",
+      "dismiss": "閉じる"
     },
     "time": {
       "notRecorded": "記録なし",
@@ -40,28 +45,110 @@
   },
   "pages": {
     "home": {
-      "title": "AgentifUI",
-      "subtitle": "AIの無限の可能性を探求し、インテリジェントな新体験を創造",
-      "getStarted": "始める",
-      "learnMore": "詳しく見る",
-      "features": [
+      "sections": [
         {
-          "title": "大規模モデル統合",
-          "description": "OpenAI、Anthropic、Difyなど複数のモデルプロバイダーをサポートし、様々な企業ニーズに対応"
+          "id": "section-home-hero",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-title",
+                "type": "heading",
+                "props": {
+                  "content": "AgentifUI",
+                  "level": 1,
+                  "textAlign": "center"
+                }
+              },
+              {
+                "id": "comp-home-subtitle",
+                "type": "paragraph",
+                "props": {
+                  "content": "AIの無限の可能性を探求し、インテリジェントな新体験を創造",
+                  "textAlign": "center"
+                }
+              }
+            ]
+          ]
         },
         {
-          "title": "RAG知識強化",
-          "description": "検索拡張生成（RAG）技術を統合し、プライベート知識ベースとコンテキスト認識を実現"
+          "id": "section-home-features",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-features",
+                "type": "cards",
+                "props": {
+                  "layout": "grid",
+                  "items": [
+                    {
+                      "title": "大規模モデル統合",
+                      "description": "OpenAI、Anthropic、Difyなど複数のモデルプロバイダーをサポートし、様々な企業ニーズに対応"
+                    },
+                    {
+                      "title": "RAG知識強化",
+                      "description": "検索拡張生成（RAG）技術を統合し、プライベート知識ベースとコンテキスト認識を実現"
+                    },
+                    {
+                      "title": "エンタープライズ展開",
+                      "description": "プライベート展開をサポートし、データセキュリティを保証、Difyバックエンドに基づく安定した信頼性の高いサービスを提供"
+                    }
+                  ]
+                }
+              }
+            ]
+          ]
         },
         {
-          "title": "エンタープライズ展開",
-          "description": "プライベート展開をサポートし、データセキュリティを保証、Difyバックエンドに基づく安定した信頼性の高いサービスを提供"
+          "id": "section-home-buttons",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-button-primary",
+                "type": "button",
+                "props": {
+                  "text": "始める",
+                  "variant": "solid",
+                  "action": "link",
+                  "url": "/chat",
+                  "textAlign": "center",
+                  "secondaryButton": {
+                    "text": "詳しく見る",
+                    "variant": "outline",
+                    "action": "link",
+                    "url": "/about"
+                  }
+                }
+              }
+            ]
+          ]
+        },
+        {
+          "id": "section-home-footer",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-copyright",
+                "type": "paragraph",
+                "props": {
+                  "content": "© {year} AgentifUI。AIの無限の可能性を探求。",
+                  "textAlign": "center"
+                }
+              }
+            ]
+          ]
         }
       ],
-      "copyright": {
-        "prefix": "© {year} ",
-        "linkText": "AgentifUI",
-        "suffix": "。AIの無限の可能性を探求。"
+      "metadata": {
+        "version": "1.0.0",
+        "lastModified": "2025-08-12T12:00:00.000Z",
+        "author": "system-migration",
+        "migratedFrom": "legacy-format",
+        "migrationTimestamp": "2025-08-12T12:00:00.000Z",
+        "locale": "ja-JP"
       }
     },
     "chat": {
@@ -1058,7 +1145,8 @@
             "buttons": {
               "cancel": "キャンセル",
               "save": "保存",
-              "saving": "保存中..."
+              "saving": "保存中...",
+              "delete": "削除"
             }
           }
         },
@@ -1307,8 +1395,7 @@
             "current": "現在のアプリケーションサービスプロバイダー（変更不可）",
             "select": "サービスプロバイダーを選択",
             "unknown": "不明なプロバイダー",
-            "selectPlaceholder": "プロバイダーを選択してください",
-            "configUpdated": "プロバイダー設定が更新されました"
+            "selectPlaceholder": "プロバイダーを選択してください"
           },
           "fields": {
             "instanceId": {
@@ -1522,7 +1609,8 @@
           "phoneIcon": "📱",
           "moreGroups": "+{count} グループ",
           "notInGroup": "グループ未参加",
-          "moreGroupsTooltip": "他 {count} グループ：{names}"
+          "moreGroupsTooltip": "他 {count} グループ：{names}",
+          "confirm": "確認"
         },
         "pagination": {
           "showing": "{start} - {end} 件を表示、全 {total} 件",
@@ -1551,7 +1639,11 @@
             "active": "アクティブ",
             "suspended": "停止中",
             "pending": "承認待ち"
-          }
+          },
+          "roleChangeConfirm": "{name}の役割を{role}に変更しますか？",
+          "statusChangeConfirm": "{name}のステータスを{status}に変更しますか？",
+          "batchRoleChangeConfirm": "{count}ユーザーの役割を{role}に変更しますか？",
+          "batchStatusChangeConfirm": "{count}ユーザーのステータスを{status}に変更しますか？"
         }
       },
       "ssoProviders": {
@@ -2019,7 +2111,7 @@
                 "type": "button",
                 "props": {
                   "text": "探索を始める",
-                  "variant": "primary",
+                  "variant": "solid",
                   "action": "link",
                   "url": "#",
                   "textAlign": "center"
@@ -2423,5 +2515,67 @@
         "conversationManagement": "会話管理"
       }
     }
+  },
+  "filePreview": {
+    "loading": "ファイル内容を読み込み中...",
+    "failed": "ファイルの読み込みに失敗しました",
+    "retryButton": "再試行",
+    "dismissButton": "閉じる",
+    "downloadButton": "ファイルダウンロード",
+    "noFileSelected": "ファイルが選択されていません",
+    "previewNotSupported": "このファイルタイプのプレビューはサポートされていません。ダウンロードして内容を確認できます。",
+    "textPreview": {
+      "title": "テキストプレビュー",
+      "copyButton": "コピー",
+      "copiedButton": "コピーしました！",
+      "downloadButton": "ダウンロード",
+      "charactersCount": "{count} 文字"
+    },
+    "pdfPreview": {
+      "title": "PDFプレビュー",
+      "openButton": "開く",
+      "downloadButton": "ダウンロード",
+      "fileSize": "{size} MB"
+    },
+    "imagePreview": {
+      "title": "画像プレビュー",
+      "downloadButton": "ダウンロード",
+      "loadError": "画像の読み込みに失敗しました",
+      "downloadToView": "ダウンロードして表示",
+      "filename": "ファイル名",
+      "fileSize": "ファイルサイズ",
+      "fileType": "ファイルタイプ"
+    },
+    "audio": {
+      "title": "オーディオプレビュー",
+      "duration": "時間",
+      "loadError": "オーディオファイルの読み込みに失敗しました",
+      "notSupported": "お使いのブラウザーはオーディオ再生に対応していません"
+    },
+    "video": {
+      "title": "ビデオプレビュー",
+      "duration": "時間",
+      "resolution": "解像度",
+      "loadError": "ビデオファイルの読み込みに失敗しました",
+      "notSupported": "お使いのブラウザーはビデオ再生に対応していません"
+    },
+    "markdownPreview": {
+      "title": "Markdownプレビュー",
+      "renderedMode": "レンダリング",
+      "rawMode": "生テキスト",
+      "downloadButton": "ダウンロード",
+      "charactersCount": "{count} 文字"
+    },
+    "errors": {
+      "noAppId": "ファイルプレビューに必要なアプリケーションIDがありません",
+      "downloadNoAppId": "ファイルダウンロードに必要なアプリケーションIDがありません"
+    },
+    "fileInfo": {
+      "title": "ファイル情報",
+      "name": "名前：",
+      "type": "タイプ：",
+      "size": "サイズ："
+    },
+    "closeButton": "プレビューを閉じる"
   }
 }

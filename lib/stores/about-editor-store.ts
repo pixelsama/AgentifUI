@@ -7,6 +7,7 @@ import {
   createDefaultSection,
   generateUniqueId,
 } from '@lib/types/about-page-components';
+import { clonePageContent } from '@lib/utils/performance';
 import { create } from 'zustand';
 
 /**
@@ -45,8 +46,8 @@ interface AboutEditorState {
   ) => void;
   // Delete a component by ID
   deleteComponent: (id: string) => void;
-  // Handle drag and drop operations
-  handleDragEnd: (event: DragEndEvent) => void;
+  // Handle drag and drop operations - returns true if drop was successful
+  handleDragEnd: (event: DragEndEvent) => boolean;
   // Create a new section
   addSection: (
     layout?: 'single-column' | 'two-column' | 'three-column'
@@ -102,9 +103,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     if (!pageContent) return;
 
     // Create deep copy of page content
-    const newPageContent = JSON.parse(
-      JSON.stringify(pageContent)
-    ) as PageContent;
+    const newPageContent = clonePageContent(pageContent);
 
     // Find and update the component
     let updated = false;
@@ -143,9 +142,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     const state = get();
     if (!state.pageContent) return;
 
-    const newPageContent = JSON.parse(
-      JSON.stringify(state.pageContent)
-    ) as PageContent;
+    const newPageContent = clonePageContent(state.pageContent);
 
     const section = newPageContent.sections.find(s => s.id === sectionId);
     if (section && section.columns[columnIndex]) {
@@ -166,9 +163,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     const state = get();
     if (!state.pageContent) return;
 
-    const newPageContent = JSON.parse(
-      JSON.stringify(state.pageContent)
-    ) as PageContent;
+    const newPageContent = clonePageContent(state.pageContent);
     let deleted = false;
 
     // Find and remove the component
@@ -201,14 +196,20 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     }
   },
 
-  // Handle drag and drop with enhanced animations and validation
-  handleDragEnd: (event: DragEndEvent) => {
+  // Handle drag and drop (optimized with performance considerations)
+  handleDragEnd: (event: DragEndEvent): boolean => {
     const { active, over } = event;
 
-    if (!over) return;
+    if (!over) {
+      console.log('❌ NO DROP TARGET - returning false');
+      return false;
+    }
 
     const state = get();
-    if (!state.pageContent) return;
+    if (!state.pageContent) {
+      console.log('❌ NO PAGE CONTENT - returning false');
+      return false;
+    }
 
     // More efficient cloning - only clone what we need to modify
     const newPageContent: PageContent = {
@@ -233,30 +234,25 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
         comp => comp.type === componentType
       );
       if (!componentDef) {
-        console.log('Component definition not found for:', componentType);
-        return;
+        console.log('❌ Component definition not found for:', componentType);
+        return false;
       }
+
+      console.log('🎨 PALETTE DROP DETECTED:', {
+        componentType,
+        overId,
+        overData: over.data.current,
+      });
 
       // Parse destination - handle direct drops on containers
       let targetContainerId = overId;
       let insertIndex = -1; // -1 means append to end
 
-      // Validate drop zone - only allow drops on valid targets
-      const isValidDropZone =
-        overId.startsWith('section-drop-') ||
-        overId.startsWith('section-') ||
-        over.data.current?.type === 'container';
-
-      if (!isValidDropZone) {
-        console.log('Invalid drop zone:', overId);
-        return;
-      }
-
       // Handle dropping on section drop zones (creates new section)
       if (overId.startsWith('section-drop-')) {
         console.log('Dropping on section drop zone:', overId);
 
-        // Create a new section with animation-ready component
+        // Create a new section
         const newSection = createDefaultSection('single-column');
         const newComponent: ComponentInstance = {
           id: generateUniqueId('comp'),
@@ -279,26 +275,16 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
 
         console.log('New section created with component:', newComponent.id);
 
-        // Save changes with animation trigger
+        // Save changes and return success
         set(state => ({
           pageContent: newPageContent,
           undoStack: [...state.undoStack, state.pageContent!].slice(-20),
           redoStack: [],
           isDirty: true,
-          selectedComponentId: newComponent.id, // Highlight the new component
         }));
 
-        // Trigger component appear animation
-        setTimeout(() => {
-          const element = document.querySelector(
-            `[data-component-id="${newComponent.id}"]`
-          );
-          if (element) {
-            element.classList.add('animate-component-appear');
-          }
-        }, 50);
-
-        return;
+        console.log('✅ SECTION DROP SUCCESSFUL');
+        return true;
       }
 
       // Check if we're dropping directly on a container
@@ -331,10 +317,29 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
         }
       }
 
-      const [type, sectionId, columnIndex] = targetContainerId.split('-');
+      const targetParts = targetContainerId.split('-');
+      // Format is: section-{sectionId}-{columnIndex}
+      // But sectionId might contain hyphens, so we need to handle this carefully
+      const type = targetParts[0];
+      const columnIndex = targetParts[targetParts.length - 1];
+      const sectionId = targetParts.slice(1, -1).join('-'); // Everything between type and columnIndex
+
+      console.log('🔍 PARSING TARGET CONTAINER:', {
+        targetContainerId,
+        targetParts,
+        parsed: { type, sectionId, columnIndex },
+        insertIndex,
+      });
 
       if (type === 'section' && sectionId && columnIndex !== undefined) {
         const section = newPageContent.sections.find(s => s.id === sectionId);
+
+        console.log('🎯 FOUND SECTION:', {
+          section: section?.id,
+          hasColumn: section?.columns[parseInt(columnIndex)] !== undefined,
+          columnLength: section?.columns[parseInt(columnIndex)]?.length,
+        });
+
         if (section && section.columns[parseInt(columnIndex)]) {
           const newComponent: ComponentInstance = {
             id: generateUniqueId('comp'),
@@ -353,55 +358,112 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
             );
           }
 
-          console.log('Component added successfully:', newComponent.id);
+          console.log('✅ COMPONENT ADDED SUCCESSFULLY:', {
+            componentId: newComponent.id,
+            sectionId,
+            columnIndex,
+            newColumnLength: section.columns[parseInt(columnIndex)].length,
+          });
 
-          // Set the new component as selected and trigger appear animation
+          // Save changes and return success for component drop
+          const cleanedSections = newPageContent.sections.filter(section =>
+            section.columns.some(column => column.length > 0)
+          );
+
           set(state => ({
-            pageContent: newPageContent,
+            pageContent: { ...newPageContent, sections: cleanedSections },
             undoStack: [...state.undoStack, state.pageContent!].slice(-20),
             redoStack: [],
             isDirty: true,
-            selectedComponentId: newComponent.id,
           }));
 
-          // Trigger component appear animation
-          setTimeout(() => {
-            const element = document.querySelector(
-              `[data-component-id="${newComponent.id}"]`
-            );
-            if (element) {
-              element.classList.add('animate-component-appear');
-            }
-          }, 50);
-
-          return;
+          return true;
+        } else {
+          console.log('❌ FAILED TO FIND SECTION OR COLUMN:', {
+            sectionFound: !!section,
+            columnExists: !!section?.columns[parseInt(columnIndex)],
+          });
+          return false;
         }
+      } else {
+        console.log('❌ INVALID TARGET CONTAINER FORMAT:', {
+          type,
+          sectionId,
+          columnIndex,
+          targetContainerId,
+        });
+        return false;
       }
     } else {
       // Handle moving existing components within or between containers
       const activeContainer = active.data.current?.sortable?.containerId;
       const overContainer = over.data.current?.sortable?.containerId || overId;
 
+      console.log('🔄 COMPONENT REORDERING:', {
+        activeId,
+        overId,
+        activeContainer,
+        overContainer,
+        activeData: active.data.current,
+        overData: over.data.current,
+      });
+
       if (activeContainer && overContainer) {
         if (activeContainer === overContainer) {
           // Reordering within the same container
-          const [containerType, sectionId, columnIndex] =
-            activeContainer.split('-');
+          console.log('📋 SAME CONTAINER REORDER - ORIGINAL:', {
+            activeContainer,
+            overContainer,
+          });
 
-          if (
-            containerType === 'section' &&
-            sectionId &&
-            columnIndex !== undefined
-          ) {
+          // DndKit generates container IDs automatically, need to map them back to our section IDs
+          // Find the section and column based on the component positions
+          let targetSectionId = null;
+          let targetColumnIndex = null;
+
+          // Search through all sections to find where these components are located
+          for (const section of newPageContent.sections) {
+            for (
+              let colIndex = 0;
+              colIndex < section.columns.length;
+              colIndex++
+            ) {
+              const column = section.columns[colIndex];
+              if (
+                column.some(comp => comp.id === activeId) &&
+                column.some(comp => comp.id === overId)
+              ) {
+                targetSectionId = section.id;
+                targetColumnIndex = colIndex;
+                break;
+              }
+            }
+            if (targetSectionId) break;
+          }
+
+          console.log('📋 FOUND TARGET LOCATION:', {
+            targetSectionId,
+            targetColumnIndex,
+          });
+
+          if (targetSectionId && targetColumnIndex !== null) {
             const section = newPageContent.sections.find(
-              s => s.id === sectionId
+              s => s.id === targetSectionId
             );
-            if (section && section.columns[parseInt(columnIndex)]) {
-              const column = section.columns[parseInt(columnIndex)];
+            if (section && section.columns[targetColumnIndex]) {
+              const column = section.columns[targetColumnIndex];
               const activeIndex = column.findIndex(
                 comp => comp.id === activeId
               );
               const overIndex = column.findIndex(comp => comp.id === overId);
+
+              console.log('🎯 REORDER INDICES:', {
+                activeIndex,
+                overIndex,
+                columnLength: column.length,
+                targetSectionId,
+                targetColumnIndex,
+              });
 
               if (
                 activeIndex !== -1 &&
@@ -409,68 +471,228 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
                 activeIndex !== overIndex
               ) {
                 // Use arrayMove to reorder within the same container
-                section.columns[parseInt(columnIndex)] = arrayMove(
+                const originalColumn = [...column];
+                section.columns[targetColumnIndex] = arrayMove(
                   column,
                   activeIndex,
                   overIndex
                 );
+
+                console.log('✅ REORDER APPLIED:', {
+                  before: originalColumn.map(c => c.id),
+                  after: section.columns[targetColumnIndex].map(c => c.id),
+                });
+
+                // Save changes and return success for reordering
+                const cleanedSections = newPageContent.sections.filter(
+                  section => section.columns.some(column => column.length > 0)
+                );
+
+                set(state => ({
+                  pageContent: { ...newPageContent, sections: cleanedSections },
+                  undoStack: [...state.undoStack, state.pageContent!].slice(
+                    -20
+                  ),
+                  redoStack: [],
+                  isDirty: true,
+                }));
+
+                return true;
+              } else {
+                console.log('❌ REORDER FAILED - Invalid indices');
+                return false;
               }
+            } else {
+              console.log('❌ REORDER FAILED - Section or column not found');
+              return false;
             }
+          } else {
+            console.log('❌ REORDER FAILED - Target location not found');
+            return false;
           }
         } else {
-          // Moving between containers
-          const [sourceType, sourceSectionId, sourceColumnIndex] =
-            activeContainer.split('-');
-          const [destType, destSectionId, destColumnIndex] =
-            overContainer.split('-');
+          // Moving between containers - find components by their actual locations
+          console.log('🔄 CROSS-CONTAINER MOVE DETECTED:', {
+            activeId,
+            overId,
+            activeContainer,
+            overContainer,
+          });
 
-          if (sourceType === 'section' && destType === 'section') {
-            const sourceSection = newPageContent.sections.find(
-              s => s.id === sourceSectionId
-            );
-            const destSection = newPageContent.sections.find(
-              s => s.id === destSectionId
-            );
-
-            if (sourceSection && destSection) {
-              const sourceColumn =
-                sourceSection.columns[parseInt(sourceColumnIndex)];
-              const destColumn = destSection.columns[parseInt(destColumnIndex)];
-
-              if (sourceColumn && destColumn) {
-                // Find and move the component
-                const componentIndex = sourceColumn.findIndex(
-                  comp => comp.id === activeId
+          // Helper function to find component location
+          const findComponentLocation = (componentId: string) => {
+            for (
+              let sectionIndex = 0;
+              sectionIndex < newPageContent.sections.length;
+              sectionIndex++
+            ) {
+              const section = newPageContent.sections[sectionIndex];
+              for (
+                let columnIndex = 0;
+                columnIndex < section.columns.length;
+                columnIndex++
+              ) {
+                const column = section.columns[columnIndex];
+                const componentIndex = column.findIndex(
+                  comp => comp.id === componentId
                 );
                 if (componentIndex !== -1) {
-                  const [removed] = sourceColumn.splice(componentIndex, 1);
-                  // Insert at the position of the over item, or at the end
-                  const overIndex = over.data.current?.sortable?.index;
-                  if (typeof overIndex === 'number') {
-                    destColumn.splice(overIndex, 0, removed);
-                  } else {
-                    destColumn.push(removed);
-                  }
+                  return {
+                    sectionIndex,
+                    columnIndex,
+                    componentIndex,
+                    section,
+                    column,
+                    component: column[componentIndex],
+                  };
                 }
               }
             }
+            return null;
+          };
+
+          const sourceLocation = findComponentLocation(activeId);
+
+          // Check if dropping directly on an empty container (overId is container ID)
+          if (overId.startsWith('section-')) {
+            const targetParts = overId.split('-');
+            const sectionId = targetParts.slice(1, -1).join('-');
+            const columnIndex = targetParts[targetParts.length - 1];
+
+            console.log('📦 DROPPING ON EMPTY CONTAINER:', {
+              overId,
+              sectionId,
+              columnIndex,
+              sourceLocation: sourceLocation
+                ? sourceLocation.section.id
+                : 'not found',
+            });
+
+            if (sourceLocation && sectionId && columnIndex !== undefined) {
+              const targetSection = newPageContent.sections.find(
+                s => s.id === sectionId
+              );
+              if (
+                targetSection &&
+                targetSection.columns[parseInt(columnIndex)]
+              ) {
+                // Remove component from source
+                const [removed] = sourceLocation.column.splice(
+                  sourceLocation.componentIndex,
+                  1
+                );
+
+                // Add to target empty container
+                targetSection.columns[parseInt(columnIndex)].push(removed);
+
+                console.log('✅ MOVE TO EMPTY CONTAINER SUCCESSFUL:', {
+                  movedComponent: removed.id,
+                  fromSection: sourceLocation.section.id,
+                  fromColumn: sourceLocation.columnIndex,
+                  toSection: targetSection.id,
+                  toColumn: parseInt(columnIndex),
+                });
+
+                // Save changes and return success
+                const cleanedSections = newPageContent.sections.filter(
+                  section => section.columns.some(column => column.length > 0)
+                );
+
+                set(state => ({
+                  pageContent: {
+                    ...newPageContent,
+                    sections: cleanedSections,
+                  },
+                  undoStack: [...state.undoStack, state.pageContent!].slice(
+                    -20
+                  ),
+                  redoStack: [],
+                  isDirty: true,
+                }));
+
+                return true;
+              }
+            }
+          } else {
+            // Moving to a location with existing components
+            const destLocation = findComponentLocation(overId);
+
+            console.log('📍 COMPONENT LOCATIONS:', {
+              source: sourceLocation
+                ? {
+                    sectionId: sourceLocation.section.id,
+                    sectionIndex: sourceLocation.sectionIndex,
+                    columnIndex: sourceLocation.columnIndex,
+                    componentIndex: sourceLocation.componentIndex,
+                  }
+                : null,
+              dest: destLocation
+                ? {
+                    sectionId: destLocation.section.id,
+                    sectionIndex: destLocation.sectionIndex,
+                    columnIndex: destLocation.columnIndex,
+                    componentIndex: destLocation.componentIndex,
+                  }
+                : null,
+            });
+
+            if (sourceLocation && destLocation) {
+              // Remove component from source
+              const [removed] = sourceLocation.column.splice(
+                sourceLocation.componentIndex,
+                1
+              );
+
+              // Insert into destination - insert before the target component
+              destLocation.column.splice(
+                destLocation.componentIndex,
+                0,
+                removed
+              );
+
+              console.log('✅ CROSS-CONTAINER MOVE SUCCESSFUL:', {
+                movedComponent: removed.id,
+                fromSection: sourceLocation.section.id,
+                fromColumn: sourceLocation.columnIndex,
+                toSection: destLocation.section.id,
+                toColumn: destLocation.columnIndex,
+                insertIndex: destLocation.componentIndex,
+              });
+
+              // Save changes and return success
+              const cleanedSections = newPageContent.sections.filter(section =>
+                section.columns.some(column => column.length > 0)
+              );
+
+              set(state => ({
+                pageContent: {
+                  ...newPageContent,
+                  sections: cleanedSections,
+                },
+                undoStack: [...state.undoStack, state.pageContent!].slice(-20),
+                redoStack: [],
+                isDirty: true,
+              }));
+
+              return true;
+            }
           }
+
+          console.log(
+            '❌ CROSS-CONTAINER MOVE FAILED - Could not find component locations or target container:',
+            {
+              sourceFound: !!sourceLocation,
+              overId,
+              activeId,
+            }
+          );
+          return false;
         }
+      } else {
+        console.log('❌ NO CONTAINERS FOUND - Drag operation failed');
+        return false;
       }
     }
-
-    // Clean up empty sections
-    const cleanedSections = newPageContent.sections.filter(section =>
-      section.columns.some(column => column.length > 0)
-    );
-
-    // Save changes
-    set(state => ({
-      pageContent: { ...newPageContent, sections: cleanedSections },
-      undoStack: [...state.undoStack, state.pageContent!].slice(-20),
-      redoStack: [],
-      isDirty: true,
-    }));
   },
 
   // Add new section

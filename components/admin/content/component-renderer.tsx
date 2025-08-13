@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@components/ui/button';
 import {
   CardsProps,
   ComponentInstance,
@@ -9,6 +8,8 @@ import {
   HeadingProps,
   ImageProps,
   ParagraphProps,
+  SectionCommonProps,
+  getResolvedComponentProps,
 } from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
 
@@ -17,7 +18,7 @@ import React from 'react';
 /**
  * Heading component renderer
  *
- * Renders heading elements with proper styling and alignment
+ * Renders heading elements with homepage-style gradients and styling
  */
 const Heading: React.FC<HeadingProps> = ({ content, level, textAlign }) => {
   const textAlignClasses = {
@@ -30,19 +31,37 @@ const Heading: React.FC<HeadingProps> = ({ content, level, textAlign }) => {
 
   // Define font sizes for different heading levels with responsive design
   const sizeClasses = {
-    1: 'text-3xl sm:text-4xl md:text-5xl',
-    2: 'text-2xl sm:text-3xl md:text-4xl',
-    3: 'text-xl sm:text-2xl md:text-3xl',
-    4: 'text-lg sm:text-xl md:text-2xl',
-    5: 'text-base sm:text-lg md:text-xl',
-    6: 'text-sm sm:text-base md:text-lg',
+    1: 'text-5xl md:text-6xl',
+    2: 'text-3xl sm:text-4xl md:text-5xl',
+    3: 'text-2xl sm:text-3xl md:text-4xl',
+    4: 'text-xl sm:text-2xl md:text-3xl',
+    5: 'text-lg sm:text-xl md:text-2xl',
+    6: 'text-base sm:text-lg md:text-xl',
   };
+
+  // Apply gradient for large headings (H1, H2)
+  const shouldUseGradient = level <= 2;
+
+  if (shouldUseGradient) {
+    return React.createElement(
+      `h${level}`,
+      {
+        className: cn(
+          'bg-gradient-to-r from-stone-700 to-stone-900 dark:from-stone-300 dark:to-stone-500',
+          'mb-6 bg-clip-text py-3 leading-normal font-bold text-transparent',
+          sizeClasses[level],
+          alignmentClass
+        ),
+      },
+      content
+    );
+  }
 
   return React.createElement(
     `h${level}`,
     {
       className: cn(
-        'text-foreground mb-4 font-bold sm:mb-6',
+        'mb-4 font-bold text-stone-900 sm:mb-6 dark:text-stone-100',
         sizeClasses[level],
         alignmentClass
       ),
@@ -54,7 +73,7 @@ const Heading: React.FC<HeadingProps> = ({ content, level, textAlign }) => {
 /**
  * Paragraph component renderer
  *
- * Renders paragraph text with proper styling and alignment
+ * Renders paragraph text with stone color system styling
  */
 const Paragraph: React.FC<ParagraphProps> = ({ content, textAlign }) => {
   const textAlignClasses = {
@@ -66,7 +85,8 @@ const Paragraph: React.FC<ParagraphProps> = ({ content, textAlign }) => {
   return (
     <p
       className={cn(
-        'text-foreground/80 mb-4 text-sm leading-relaxed sm:text-base lg:text-lg',
+        'mb-4 text-lg leading-relaxed font-light text-stone-700 md:text-xl dark:text-stone-300',
+        'mx-auto max-w-3xl',
         textAlignClasses[textAlign]
       )}
     >
@@ -78,7 +98,7 @@ const Paragraph: React.FC<ParagraphProps> = ({ content, textAlign }) => {
 /**
  * Cards component renderer
  *
- * Renders a grid or list of cards with title and description
+ * Renders a grid or list of cards with homepage-inspired shadows and stone color system
  */
 const Cards: React.FC<CardsProps> = ({ items, layout }) => {
   const gridClass = layout === 'grid' ? 'md:grid-cols-2' : 'grid-cols-1';
@@ -88,12 +108,23 @@ const Cards: React.FC<CardsProps> = ({ items, layout }) => {
       {items.map((item, index) => (
         <div
           key={index}
-          className="border-border bg-card rounded-xl border p-4 shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-6"
+          className={cn(
+            'flex flex-col items-center rounded-xl p-4 text-center transition-all duration-200 sm:p-6',
+            'border border-stone-200 bg-stone-100 shadow-[0_4px_20px_rgba(0,0,0,0.1)]',
+            'hover:-translate-y-1 hover:shadow-[0_6px_25px_rgba(0,0,0,0.15)]',
+            'dark:border-stone-600 dark:bg-stone-700 dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)]',
+            'dark:hover:shadow-[0_6px_25px_rgba(0,0,0,0.4)]'
+          )}
         >
-          <h3 className="text-card-foreground mb-2 text-base font-semibold sm:text-lg">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-stone-200 dark:bg-stone-600">
+            <span className="text-xl text-stone-600 dark:text-stone-300">
+              #{index + 1}
+            </span>
+          </div>
+          <h3 className="mb-2 text-base font-semibold text-stone-900 sm:text-lg dark:text-stone-100">
             {item.title}
           </h3>
-          <p className="text-muted-foreground text-sm leading-relaxed sm:text-base">
+          <p className="text-sm leading-relaxed text-stone-700 sm:text-base dark:text-stone-300">
             {item.description}
           </p>
         </div>
@@ -105,34 +136,60 @@ const Cards: React.FC<CardsProps> = ({ items, layout }) => {
 /**
  * Button component renderer
  *
- * Renders interactive buttons with different variants
+ * Renders interactive buttons with stone color system variants
+ * Supports dual button layout with homepage-style spacing
  */
 const DynamicButton: React.FC<DynamicButtonProps> = ({
   text,
   variant,
   action,
   url,
+  secondaryButton,
 }) => {
-  const handleClick = (e: React.MouseEvent) => {
-    if (action === 'link' && url === '#') {
+  const handleClick = (
+    e: React.MouseEvent,
+    buttonAction?: string,
+    buttonUrl?: string
+  ) => {
+    if (buttonAction === 'link' && buttonUrl === '#') {
       e.preventDefault();
       // In preview mode, prevent default action
     }
   };
 
-  const variantMap = {
-    primary: 'default' as const,
-    secondary: 'secondary' as const,
-    outline: 'outline' as const,
+  const buttonStyles = {
+    solid: cn(
+      'inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-all duration-200',
+      'min-w-[8rem] bg-stone-900 text-white hover:scale-105 hover:bg-stone-800 focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-none',
+      'dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200 dark:focus:ring-stone-400'
+    ),
+    outline: cn(
+      'inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-all duration-200',
+      'min-w-[8rem] border border-stone-300 bg-transparent text-stone-900 hover:scale-105 hover:bg-stone-50 focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-none',
+      'dark:border-stone-600 dark:text-stone-100 dark:hover:bg-stone-800 dark:focus:ring-stone-400'
+    ),
   };
 
   return (
-    <div className="mb-6 text-center">
-      <Button variant={variantMap[variant]} size="lg" asChild>
-        <a href={url || '#'} onClick={handleClick} className="inline-block">
-          {text}
+    <div className="mb-6 flex flex-wrap justify-center gap-4">
+      <a
+        href={url || '#'}
+        onClick={e => handleClick(e, action, url)}
+        className={buttonStyles[variant]}
+      >
+        {text}
+      </a>
+      {secondaryButton && (
+        <a
+          href={secondaryButton.url || '#'}
+          onClick={e =>
+            handleClick(e, secondaryButton.action, secondaryButton.url)
+          }
+          className={buttonStyles[secondaryButton.variant]}
+        >
+          {secondaryButton.text}
         </a>
-      </Button>
+      )}
     </div>
   );
 };
@@ -219,11 +276,13 @@ const componentMap: Record<string, React.FC<any>> = {
 interface ComponentRendererProps {
   component: ComponentInstance;
   className?: string;
+  sectionCommonProps?: SectionCommonProps;
 }
 
 const ComponentRenderer: React.FC<ComponentRendererProps> = ({
   component,
   className,
+  sectionCommonProps,
 }) => {
   const Component = componentMap[component.type];
 
@@ -244,9 +303,15 @@ const ComponentRenderer: React.FC<ComponentRendererProps> = ({
     );
   }
 
+  // Final properties after merge (including inheritance logic)
+  const resolvedProps = getResolvedComponentProps(
+    component,
+    sectionCommonProps
+  );
+
   return (
     <div className={className}>
-      <Component {...component.props} />
+      <Component {...resolvedProps} />
     </div>
   );
 };

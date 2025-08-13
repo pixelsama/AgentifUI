@@ -1,11 +1,11 @@
 /**
  * Performance optimization utilities
- * 
+ *
  * Provides debouncing, throttling, and lazy loading utilities
  * for better performance in dynamic component editing.
  */
-
 import React from 'react';
+import { PageContent } from '@lib/types/about-page-components';
 
 /**
  * Debounce function - delays execution until after delay period of inactivity
@@ -20,7 +20,7 @@ export function debounce<T extends (...args: any[]) => any>(
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
-    
+
     timeoutId = setTimeout(() => {
       func(...args);
       timeoutId = null;
@@ -40,16 +40,19 @@ export function throttle<T extends (...args: any[]) => any>(
 
   return (...args: Parameters<T>) => {
     const now = Date.now();
-    
+
     if (now - lastCall >= delay) {
       lastCall = now;
       func(...args);
     } else if (!timeoutId) {
-      timeoutId = setTimeout(() => {
-        lastCall = Date.now();
-        func(...args);
-        timeoutId = null;
-      }, delay - (now - lastCall));
+      timeoutId = setTimeout(
+        () => {
+          lastCall = Date.now();
+          func(...args);
+          timeoutId = null;
+        },
+        delay - (now - lastCall)
+      );
     }
   };
 }
@@ -65,7 +68,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
   const debouncedCallback = React.useMemo(
     () => debounce(callback, delay),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    deps
+    [callback, delay, ...deps]
   );
 
   // Cleanup on unmount
@@ -121,13 +124,13 @@ export function calculateVirtualScroll(
   options: VirtualScrollOptions
 ): VirtualScrollResult {
   const { itemHeight, containerHeight, overscan = 2 } = options;
-  
+
   const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
   const endIndex = Math.min(
     itemCount - 1,
     Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan
   );
-  
+
   return {
     startIndex,
     endIndex,
@@ -153,7 +156,7 @@ export function useIntersectionObserver(
     const observer = new IntersectionObserver(([entry]) => {
       const isElementIntersecting = entry.isIntersecting;
       setIsIntersecting(isElementIntersecting);
-      
+
       if (isElementIntersecting && !hasIntersected) {
         setHasIntersected(true);
       }
@@ -172,35 +175,37 @@ export function useIntersectionObserver(
  */
 export class PerformanceMonitor {
   private static measurements = new Map<string, number>();
-  
+
   static startMeasurement(name: string): void {
     this.measurements.set(name, performance.now());
   }
-  
+
   static endMeasurement(name: string): number | null {
     const startTime = this.measurements.get(name);
     if (!startTime) return null;
-    
+
     const endTime = performance.now();
     const duration = endTime - startTime;
-    
+
     this.measurements.delete(name);
-    
+
     // Log slow operations in development
     if (process.env.NODE_ENV === 'development' && duration > 16) {
-      console.warn(`Slow operation detected: ${name} took ${duration.toFixed(2)}ms`);
+      console.warn(
+        `Slow operation detected: ${name} took ${duration.toFixed(2)}ms`
+      );
     }
-    
+
     return duration;
   }
-  
+
   static measureAsync<T>(name: string, fn: () => Promise<T>): Promise<T> {
     this.startMeasurement(name);
     return fn().finally(() => {
       this.endMeasurement(name);
     });
   }
-  
+
   static measure<T>(name: string, fn: () => T): T {
     this.startMeasurement(name);
     try {
@@ -267,4 +272,30 @@ function deepEqual(a: any, b: any): boolean {
   }
 
   return true;
+}
+
+/**
+ * Optimized deep clone using structuredClone with fallback
+ */
+export function deepClone<T>(obj: T): T {
+  if (typeof structuredClone !== 'undefined') {
+    return structuredClone(obj);
+  }
+  
+  // Fallback for older browsers
+  return JSON.parse(JSON.stringify(obj));
+}
+
+/**
+ * Specialized clone function for PageContent with optimized structure copying
+ */
+export function clonePageContent(pageContent: PageContent): PageContent {
+  return {
+    ...pageContent,
+    sections: pageContent.sections.map(section => ({
+      ...section,
+      columns: section.columns.map(column => [...column.map(comp => ({ ...comp, props: { ...comp.props } }))])
+    })),
+    metadata: pageContent.metadata ? { ...pageContent.metadata } : undefined
+  };
 }

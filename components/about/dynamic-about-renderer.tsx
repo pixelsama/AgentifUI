@@ -15,7 +15,7 @@ import {
 import { cn } from '@lib/utils';
 import { motion } from 'framer-motion';
 
-import React, { lazy, memo, useMemo, Suspense } from 'react';
+import React, { Suspense, lazy, memo, useMemo } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -133,7 +133,11 @@ export function DynamicAboutRenderer({
   /**
    * Render individual component based on type
    */
-  const renderComponentInternal = (component: ComponentInstance, index: number, colors: any) => {
+  const renderComponentInternal = (
+    component: ComponentInstance,
+    index: number,
+    colors: any
+  ) => {
     const { type, props } = component;
 
     const baseAnimation = {
@@ -349,13 +353,13 @@ export function DynamicAboutRenderer({
         >
           {section.columns.map((column, columnIndex) => (
             <div key={columnIndex} className="space-y-4">
-              {column.map((component, componentIndex) =>
+              {column.map((component, componentIndex) => (
                 <ComponentLoader
                   key={component.id}
                   component={component}
                   index={sectionIndex + componentIndex}
                 />
-              )}
+              ))}
             </div>
           ))}
         </div>

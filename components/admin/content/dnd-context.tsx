@@ -3,7 +3,6 @@
 import {
   DndContext,
   DragEndEvent,
-  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
@@ -12,33 +11,41 @@ import {
 } from '@dnd-kit/core';
 import { createPortal } from 'react-dom';
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 interface DndContextWrapperProps {
   children: React.ReactNode;
-  onDragEnd: (event: DragEndEvent) => void;
+  onDragEnd: (event: DragEndEvent) => boolean; // Return true if drop was successful
 }
 
-interface DragState {
-  id: string;
-  content: React.ReactNode;
-  isPaletteItem: boolean;
-  isValidDrop: boolean;
-  originalRect?: DOMRect;
+interface DndStateContextValue {
+  isDraggingFromPalette: boolean;
 }
+
+const DndStateContext = createContext<DndStateContextValue>({
+  isDraggingFromPalette: false,
+});
+
+export const useDndState = () => useContext(DndStateContext);
 
 /**
  * DndKit Context Wrapper
  *
- * Enhanced drag and drop with component cloning, drop validation, and animations
+ * Provides drag and drop context using @dnd-kit/core
+ * Replaces react-beautiful-dnd's DragDropContext
  */
 export function DndContextWrapper({
   children,
   onDragEnd,
 }: DndContextWrapperProps) {
-  const [dragState, setDragState] = useState<DragState | null>(null);
-  const [isAnimatingReturn, setIsAnimatingReturn] = useState(false);
-  const dragOverlayRef = useRef<HTMLDivElement>(null);
+  const [activeItem, setActiveItem] = useState<{
+    id: string;
+    content: React.ReactNode;
+  } | null>(null);
+
+  const [isDraggingFromPalette, setIsDraggingFromPalette] = useState(false);
+  const [dropWasSuccessful, setDropWasSuccessful] = useState(false);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -48,127 +55,85 @@ export function DndContextWrapper({
     })
   );
 
-  const handleDragStart = useCallback((event: DragStartEvent) => {
+  const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    const isPaletteItem = String(active.id).startsWith('palette-');
+    const activeId = String(active.id);
 
-    // Get original element position for return animation
-    let originalRect: DOMRect | undefined;
-    if (isPaletteItem) {
-      const element =
-        document.querySelector(
-          `[data-rbd-drag-handle-draggable-id="${active.id}"]`
-        ) || document.querySelector(`[data-dnd-id="${active.id}"]`);
-      if (element) {
-        originalRect = element.getBoundingClientRect();
-      }
+    // Check if dragging from palette
+    const isFromPalette = activeId.startsWith('palette-');
+    setIsDraggingFromPalette(isFromPalette);
+
+    console.log('🚀 DND START:', {
+      activeId,
+      isFromPalette,
+      isDraggingFromPalette: isFromPalette,
+      activeData: active.data.current,
+    });
+
+    setActiveItem({
+      id: activeId,
+      content: active.data.current?.preview || activeId,
+    });
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    console.log('🏁 DND END:', {
+      activeId: event.active.id,
+      overId: event.over?.id,
+      overData: event.over?.data.current,
+      isDraggingFromPalette,
+    });
+
+    // Call the store's drag end handler and get success status
+    const wasSuccessful = onDragEnd(event);
+    setDropWasSuccessful(wasSuccessful);
+
+    if (wasSuccessful && activeItem) {
+      // For successful drops, animate out in place
+      setIsAnimatingOut(true);
+
+      // Clear the item after animation completes
+      setTimeout(() => {
+        setActiveItem(null);
+        setIsDraggingFromPalette(false);
+        setDropWasSuccessful(false);
+        setIsAnimatingOut(false);
+      }, 200); // 200ms fade out animation
+    } else {
+      // For failed drops, clear immediately (allows default return animation)
+      setActiveItem(null);
+      setIsDraggingFromPalette(false);
+      setDropWasSuccessful(false);
+      setIsAnimatingOut(false);
     }
-
-    setDragState({
-      id: String(active.id),
-      content: active.data.current?.preview || String(active.id),
-      isPaletteItem,
-      isValidDrop: false,
-      originalRect,
-    });
-  }, []);
-
-  const handleDragOver = useCallback((event: DragOverEvent) => {
-    const { over } = event;
-
-    setDragState(prev => {
-      if (!prev) return prev;
-
-      // Check if current position is a valid drop zone
-      const isValidDrop =
-        over &&
-        (String(over.id).startsWith('section-') ||
-          String(over.id).includes('drop'));
-
-      return {
-        ...prev,
-        isValidDrop: Boolean(isValidDrop),
-      };
-    });
-  }, []);
-
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-      const isPaletteItem = String(active.id).startsWith('palette-');
-      const isValidDrop =
-        over &&
-        (String(over.id).startsWith('section-') ||
-          String(over.id).includes('drop'));
-
-      if (isPaletteItem && !isValidDrop && dragState?.originalRect) {
-        // Animate return to original position
-        setIsAnimatingReturn(true);
-
-        // Start return animation
-        const overlay = dragOverlayRef.current;
-        if (overlay) {
-          const currentRect = overlay.getBoundingClientRect();
-          const deltaX = dragState.originalRect.left - currentRect.left;
-          const deltaY = dragState.originalRect.top - currentRect.top;
-
-          overlay.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
-          overlay.style.transition =
-            'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)';
-
-          // Clean up after animation
-          setTimeout(() => {
-            setDragState(null);
-            setIsAnimatingReturn(false);
-          }, 300);
-        } else {
-          // Fallback if no overlay ref
-          setTimeout(() => {
-            setDragState(null);
-            setIsAnimatingReturn(false);
-          }, 100);
-        }
-      } else {
-        // Normal drag end handling
-        setDragState(null);
-        setIsAnimatingReturn(false);
-        onDragEnd(event);
-      }
-    },
-    [dragState, onDragEnd]
-  );
+  };
 
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
-    >
-      {children}
-      {typeof document !== 'undefined' &&
-        createPortal(
-          <DragOverlay dropAnimation={null}>
-            {dragState ? (
-              <div
-                ref={dragOverlayRef}
-                className={`rounded-lg border p-2 shadow-xl transition-all duration-200 ${
-                  dragState.isValidDrop
-                    ? 'scale-105 border-emerald-200 bg-emerald-50 shadow-emerald-200/50 dark:border-emerald-700 dark:bg-emerald-900/20'
-                    : dragState.isPaletteItem
-                      ? 'border-stone-200 bg-white shadow-stone-200/50 dark:border-stone-600 dark:bg-stone-800'
-                      : 'border-stone-200 bg-white shadow-stone-200/50 dark:border-stone-600 dark:bg-stone-800'
-                } ${isAnimatingReturn ? 'pointer-events-none' : ''} `}
-                style={{
-                  transform: isAnimatingReturn ? undefined : 'rotate(5deg)',
-                }}
-              >
-                {dragState.content}
-              </div>
-            ) : null}
-          </DragOverlay>,
-          document.body
-        )}
-    </DndContext>
+    <DndStateContext.Provider value={{ isDraggingFromPalette }}>
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        {children}
+        {typeof document !== 'undefined' &&
+          createPortal(
+            <DragOverlay dropAnimation={dropWasSuccessful ? null : undefined}>
+              {activeItem ? (
+                <div
+                  className={`rounded-lg border bg-white p-2 shadow-lg transition-all duration-200 dark:bg-gray-800 ${
+                    isAnimatingOut
+                      ? 'scale-95 transform opacity-0'
+                      : 'scale-100 opacity-100'
+                  }`}
+                >
+                  {activeItem.content}
+                </div>
+              ) : null}
+            </DragOverlay>,
+            document.body
+          )}
+      </DndContext>
+    </DndStateContext.Provider>
   );
 }

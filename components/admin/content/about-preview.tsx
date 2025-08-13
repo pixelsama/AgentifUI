@@ -1,5 +1,6 @@
 'use client';
 
+import { useTheme } from '@lib/hooks/use-theme';
 import {
   AboutTranslationData,
   PageContent,
@@ -7,6 +8,7 @@ import {
   migrateAboutTranslationData,
 } from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import React from 'react';
 
@@ -27,13 +29,15 @@ interface AboutPreviewProps {
 /**
  * About Page Preview Component
  *
- * Displays a preview of the about page with responsive device frames
- * Supports both legacy and dynamic component formats
+ * Displays a preview of the about page with homepage-style visual effects
+ * Unified styling with stone color system, animations, and shadows
  */
 export function AboutPreview({
   translation,
   previewDevice,
 }: AboutPreviewProps) {
+  const { isDark } = useTheme();
+
   // Ensure translation is in dynamic format
   const dynamicTranslation = React.useMemo(() => {
     if (!isDynamicFormat(translation)) {
@@ -54,8 +58,25 @@ export function AboutPreview({
     };
   }, [dynamicTranslation]);
 
+  // Get homepage-style colors
+  const getColors = () => {
+    if (isDark) {
+      return {
+        bgColor: '#1c1917',
+        textColor: 'text-gray-300',
+      };
+    } else {
+      return {
+        bgColor: '#f5f5f4',
+        textColor: 'text-stone-700',
+      };
+    }
+  };
+
+  const colors = getColors();
+
   /**
-   * Get device-specific container styles
+   * Get device-specific container styles with homepage styling
    */
   const getDeviceStyles = () => {
     switch (previewDevice) {
@@ -63,32 +84,25 @@ export function AboutPreview({
         return {
           container: 'mx-auto bg-black rounded-[2rem] p-2 shadow-2xl',
           screen:
-            'w-[375px] h-[667px] bg-white dark:bg-gray-900 rounded-[1.75rem] overflow-hidden relative',
+            'w-[375px] h-[667px] bg-white rounded-[1.75rem] overflow-hidden relative',
           content: 'h-full overflow-y-auto',
-          mainClass: 'min-h-full w-full py-4 px-4',
-          innerContainer: 'w-full',
-          maxWidth: 'max-w-none',
+          mainClass: 'relative w-full px-4 py-12 sm:px-6 lg:px-8',
         };
       case 'tablet':
         return {
-          container: 'mx-auto bg-black rounded-xl p-3 shadow-2xl',
+          container: 'mx-auto bg-black rounded-xl p-3 shadow-2xl mt-50',
           screen:
-            'w-[768px] h-[1024px] bg-white dark:bg-gray-900 rounded-lg overflow-hidden relative',
+            'w-[768px] h-[1024px] bg-white rounded-lg overflow-hidden relative',
           content: 'h-full overflow-y-auto',
-          mainClass: 'min-h-full w-full py-6 px-6',
-          innerContainer: 'max-w-2xl mx-auto',
-          maxWidth: 'max-w-2xl',
+          mainClass: 'relative w-full px-4 py-12 sm:px-6 lg:px-8',
         };
       case 'desktop':
       default:
         return {
           container: 'w-full h-full',
-          screen: 'w-full h-full overflow-hidden relative bg-background',
+          screen: 'w-full h-full overflow-hidden relative',
           content: 'h-full overflow-y-auto',
-          mainClass:
-            'min-h-0 w-full py-6 px-4 sm:px-6 lg:px-8 overflow-x-hidden',
-          innerContainer: 'max-w-5xl mx-auto',
-          maxWidth: 'max-w-5xl',
+          mainClass: 'relative w-full px-4 py-12 sm:px-6 lg:px-8',
         };
     }
   };
@@ -96,61 +110,96 @@ export function AboutPreview({
   const deviceStyles = getDeviceStyles();
 
   /**
-   * Render page sections with responsive layout
+   * Render page sections with homepage-style animations and layout
    */
   const renderSections = () => {
     if (!pageContent.sections || pageContent.sections.length === 0) {
       return (
-        <div className="text-muted-foreground flex h-64 items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className={cn(
+            'flex h-64 items-center justify-center',
+            colors.textColor
+          )}
+        >
           <p>No content to preview</p>
-        </div>
+        </motion.div>
       );
     }
 
     return (
-      <div className="space-y-8 md:space-y-12">
-        {pageContent.sections.map(section => (
-          <section key={section.id} className="w-full">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="mx-auto max-w-5xl space-y-16"
+      >
+        {pageContent.sections.map((section, sectionIndex) => (
+          <motion.section
+            key={section.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.6,
+              delay: 0.1 + sectionIndex * 0.1,
+            }}
+            className="w-full"
+          >
             <div
               className={cn(
-                'grid gap-4 md:gap-6',
-                section.layout === 'single-column' && 'grid-cols-1',
-                section.layout === 'two-column' && 'grid-cols-1 md:grid-cols-2',
+                'gap-8',
+                section.layout === 'single-column' && 'space-y-8',
+                section.layout === 'two-column' &&
+                  'grid grid-cols-1 md:grid-cols-2',
                 section.layout === 'three-column' &&
-                  'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                  'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
               )}
             >
               {section.columns.map((column, columnIndex) => (
-                <div key={columnIndex} className="space-y-4">
-                  {column.map(component => (
-                    <div key={component.id}>
-                      <ComponentRenderer component={component} />
-                    </div>
+                <div key={columnIndex} className="space-y-8">
+                  {column.map((component, componentIndex) => (
+                    <motion.div
+                      key={component.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.5,
+                        delay: 0.2 + sectionIndex * 0.1 + componentIndex * 0.05,
+                      }}
+                    >
+                      <ComponentRenderer 
+                        component={component} 
+                        sectionCommonProps={section.commonProps}
+                      />
+                    </motion.div>
                   ))}
                 </div>
               ))}
             </div>
-          </section>
+          </motion.section>
         ))}
-      </div>
+      </motion.div>
     );
   };
 
   return (
     <div
       className={cn(
-        'flex h-full items-center justify-center',
+        'flex h-full w-full items-center justify-center',
         previewDevice !== 'desktop' && 'p-4'
       )}
     >
       <div className={deviceStyles.container}>
-        <div className={deviceStyles.screen}>
+        <div
+          className={cn(deviceStyles.screen)}
+          style={{ backgroundColor: colors.bgColor }}
+        >
           <div className={deviceStyles.content}>
-            <main className={deviceStyles.mainClass}>
-              <div className={deviceStyles.innerContainer}>
-                {renderSections()}
-              </div>
-            </main>
+            <AnimatePresence>
+              <main className={deviceStyles.mainClass}>{renderSections()}</main>
+            </AnimatePresence>
           </div>
         </div>
       </div>

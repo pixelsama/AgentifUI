@@ -23,7 +23,12 @@
       },
       "moreButton": {
         "ariaLabel": "Más opciones"
-      }
+      },
+      "download": "Descargar",
+      "copy": "Copiar",
+      "copied": "¡Copiado!",
+      "open": "Abrir",
+      "dismiss": "Cerrar"
     },
     "time": {
       "notRecorded": "No registrado",
@@ -40,28 +45,109 @@
   },
   "pages": {
     "home": {
-      "title": "AgentifUI",
-      "subtitle": "Explora las posibilidades infinitas de la IA y crea nuevas experiencias inteligentes",
-      "getStarted": "Comenzar",
-      "learnMore": "Saber más",
-      "features": [
+      "sections": [
         {
-          "title": "Integración de Modelos Grandes",
-          "description": "Soporte para múltiples proveedores de modelos incluyendo OpenAI, Anthropic, Dify, etc., satisfaciendo diferentes necesidades empresariales"
+          "id": "section-home-hero",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-title",
+                "type": "heading",
+                "props": {
+                  "content": "AgentifUI",
+                  "level": 1,
+                  "textAlign": "center"
+                }
+              },
+              {
+                "id": "comp-home-subtitle",
+                "type": "paragraph",
+                "props": {
+                  "content": "Explora las posibilidades infinitas de la IA y crea nuevas experiencias inteligentes",
+                  "textAlign": "center"
+                }
+              }
+            ]
+          ]
         },
         {
-          "title": "Mejora de Conocimiento RAG",
-          "description": "Integra tecnología de Generación Aumentada por Recuperación (RAG) para habilitar bases de conocimiento privadas y conciencia contextual"
+          "id": "section-home-features",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-features",
+                "type": "cards",
+                "props": {
+                  "layout": "grid",
+                  "items": [
+                    {
+                      "title": "Integración de Modelos Grandes",
+                      "description": "Soporte para múltiples proveedores de modelos incluyendo OpenAI, Anthropic, Dify, etc., satisfaciendo diferentes necesidades empresariales"
+                    },
+                    {
+                      "title": "Mejora de Conocimiento RAG",
+                      "description": "Integra tecnología de Generación Aumentada por Recuperación (RAG) para habilitar bases de conocimiento privadas y conciencia contextual"
+                    },
+                    {
+                      "title": "Despliegue Empresarial",
+                      "description": "Soporte para despliegue privado, garantizando la seguridad de datos, proporcionando servicios estables y confiables basados en backend Dify"
+                    }
+                  ]
+                }
+              }
+            ]
+          ]
         },
         {
-          "title": "Despliegue Empresarial",
-          "description": "Soporte para despliegue privado, garantizando la seguridad de datos, proporcionando servicios estables y confiables basados en backend Dify"
+          "id": "section-home-buttons",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-button-primary",
+                "type": "button",
+                "props": {
+                  "text": "Comenzar",
+                  "variant": "solid",
+                  "action": "link",
+                  "url": "/chat",
+                  "textAlign": "center",
+                  "secondaryButton": {
+                    "text": "Saber más",
+                    "variant": "outline",
+                    "action": "link",
+                    "url": "/about"
+                  }
+                }
+              }
+            ]
+          ]
+        },
+        {
+          "id": "section-home-footer",
+          "layout": "single-column",
+          "columns": [
+            [
+              {
+                "id": "comp-home-copyright",
+                "type": "paragraph",
+                "props": {
+                  "content": "© {year} AgentifUI. Explora las posibilidades infinitas de la IA.",
+                  "textAlign": "center"
+                }
+              }
+            ]
+          ]
         }
       ],
-      "copyright": {
-        "prefix": "© {year} ",
-        "linkText": "AgentifUI",
-        "suffix": ". Explora las posibilidades infinitas de la IA."
+      "metadata": {
+        "version": "1.0.0",
+        "lastModified": "2025-08-12T12:00:00.000Z",
+        "author": "system-migration",
+        "migrationTimestamp": "2025-08-12T12:00:00.000Z",
+        "locale": "es-ES"
       }
     },
     "chat": {
@@ -1058,7 +1144,8 @@
             "buttons": {
               "cancel": "Cancelar",
               "save": "Guardar",
-              "saving": "Guardando..."
+              "saving": "Guardando...",
+              "delete": "Eliminar"
             }
           }
         },
@@ -1307,8 +1394,7 @@
             "current": "Proveedor de servicios de aplicación actual (no se puede modificar)",
             "select": "Seleccionar proveedor de servicios",
             "unknown": "Proveedor Desconocido",
-            "selectPlaceholder": "Por favor seleccione proveedor",
-            "configUpdated": "Configuración del proveedor actualizada"
+            "selectPlaceholder": "Por favor seleccione proveedor"
           },
           "fields": {
             "instanceId": {
@@ -1522,7 +1608,8 @@
           "phoneIcon": "📱",
           "moreGroups": "+{count} grupos",
           "notInGroup": "Sin grupo",
-          "moreGroupsTooltip": "{count} grupos más: {names}"
+          "moreGroupsTooltip": "{count} grupos más: {names}",
+          "confirm": "Confirmar"
         },
         "pagination": {
           "showing": "Mostrando {start} - {end} de {total} registros",
@@ -1551,7 +1638,11 @@
             "active": "Activo",
             "suspended": "Suspendido",
             "pending": "Pendiente"
-          }
+          },
+          "roleChangeConfirm": "¿Cambiar el rol de {name} a {role}?",
+          "statusChangeConfirm": "¿Cambiar el estado de {name} a {status}?",
+          "batchRoleChangeConfirm": "¿Cambiar los roles de {count} usuarios a {role}?",
+          "batchStatusChangeConfirm": "¿Cambiar el estado de {count} usuarios a {status}?"
         }
       },
       "ssoProviders": {
@@ -2019,7 +2110,7 @@
                 "type": "button",
                 "props": {
                   "text": "Comenzar a Explorar",
-                  "variant": "primary",
+                  "variant": "solid",
                   "action": "link",
                   "url": "#",
                   "textAlign": "center"
@@ -2423,5 +2514,67 @@
         "conversationManagement": "Gestión de Conversaciones"
       }
     }
+  },
+  "filePreview": {
+    "loading": "Cargando contenido del archivo...",
+    "failed": "Error al cargar el archivo",
+    "retryButton": "Reintentar",
+    "dismissButton": "Cerrar",
+    "downloadButton": "Descargar archivo",
+    "noFileSelected": "No se seleccionó ningún archivo",
+    "previewNotSupported": "No se admite la vista previa de este tipo de archivo. Puedes descargarlo para ver el contenido.",
+    "textPreview": {
+      "title": "Vista previa de texto",
+      "copyButton": "Copiar",
+      "copiedButton": "¡Copiado!",
+      "downloadButton": "Descargar",
+      "charactersCount": "{count} caracteres"
+    },
+    "pdfPreview": {
+      "title": "Vista previa de PDF",
+      "openButton": "Abrir",
+      "downloadButton": "Descargar",
+      "fileSize": "{size} MB"
+    },
+    "imagePreview": {
+      "title": "Vista previa de imagen",
+      "downloadButton": "Descargar",
+      "loadError": "Error al cargar la imagen",
+      "downloadToView": "Descargar para ver",
+      "filename": "Nombre del archivo",
+      "fileSize": "Tamaño del archivo",
+      "fileType": "Tipo de archivo"
+    },
+    "audio": {
+      "title": "Vista previa de audio",
+      "duration": "Duración",
+      "loadError": "Error al cargar el archivo de audio",
+      "notSupported": "Su navegador no admite la reproducción de audio"
+    },
+    "video": {
+      "title": "Vista previa de video",
+      "duration": "Duración",
+      "resolution": "Resolución",
+      "loadError": "Error al cargar el archivo de video",
+      "notSupported": "Su navegador no admite la reproducción de video"
+    },
+    "markdownPreview": {
+      "title": "Vista previa de Markdown",
+      "renderedMode": "Renderizado",
+      "rawMode": "Sin formato",
+      "downloadButton": "Descargar",
+      "charactersCount": "{count} caracteres"
+    },
+    "errors": {
+      "noAppId": "ID de aplicación no disponible para vista previa del archivo",
+      "downloadNoAppId": "ID de aplicación no disponible para descarga del archivo"
+    },
+    "fileInfo": {
+      "title": "Información del archivo",
+      "name": "Nombre:",
+      "type": "Tipo:",
+      "size": "Tamaño:"
+    },
+    "closeButton": "Cerrar vista previa"
   }
 }
