@@ -169,8 +169,8 @@ export function AboutPreview({
                         delay: 0.2 + sectionIndex * 0.1 + componentIndex * 0.05,
                       }}
                     >
-                      <ComponentRenderer 
-                        component={component} 
+                      <ComponentRenderer
+                        component={component}
                         sectionCommonProps={section.commonProps}
                       />
                     </motion.div>
