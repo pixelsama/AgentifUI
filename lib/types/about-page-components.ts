@@ -52,7 +52,7 @@ export interface SectionCommonProps {
   // Border style
   borderStyle?: 'none' | 'solid' | 'dashed' | 'dotted';
   // Custom property extension
-  [key: string]: unknown;
+  customProps?: Record<string, unknown>;
 }
 
 // Page section interface
@@ -276,13 +276,21 @@ export function mergeComponentProps(
   componentProps: Record<string, unknown> = {},
   overrideProps: string[] = []
 ): Record<string, unknown> {
-  // Create a copy of section properties
-  const inherited = { ...sectionCommonProps };
+  // Extract known properties and customProps from sectionCommonProps
+  const { customProps, ...knownSectionProps } = sectionCommonProps;
 
-  // Remove the overridden properties
-  overrideProps.forEach(key => {
-    delete inherited[key];
-  });
+  // Create a copy of all section properties (known + custom)
+  const allSectionProps = {
+    ...knownSectionProps,
+    ...(customProps || {}),
+  };
+
+  // Create inherited properties by removing overridden ones
+  const inherited = Object.fromEntries(
+    Object.entries(allSectionProps).filter(
+      ([key]) => !overrideProps.includes(key)
+    )
+  );
 
   // Component-specific properties have higher priority
   return {
