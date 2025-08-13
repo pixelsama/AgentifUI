@@ -7,6 +7,7 @@ import {
   createDefaultSection,
   generateUniqueId,
 } from '@lib/types/about-page-components';
+import { clonePageContent } from '@lib/utils/performance';
 import { create } from 'zustand';
 
 /**
@@ -102,9 +103,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     if (!pageContent) return;
 
     // Create deep copy of page content
-    const newPageContent = JSON.parse(
-      JSON.stringify(pageContent)
-    ) as PageContent;
+    const newPageContent = clonePageContent(pageContent);
 
     // Find and update the component
     let updated = false;
@@ -143,9 +142,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     const state = get();
     if (!state.pageContent) return;
 
-    const newPageContent = JSON.parse(
-      JSON.stringify(state.pageContent)
-    ) as PageContent;
+    const newPageContent = clonePageContent(state.pageContent);
 
     const section = newPageContent.sections.find(s => s.id === sectionId);
     if (section && section.columns[columnIndex]) {
@@ -166,9 +163,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     const state = get();
     if (!state.pageContent) return;
 
-    const newPageContent = JSON.parse(
-      JSON.stringify(state.pageContent)
-    ) as PageContent;
+    const newPageContent = clonePageContent(state.pageContent);
     let deleted = false;
 
     // Find and remove the component

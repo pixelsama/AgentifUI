@@ -5,6 +5,7 @@
  * for better performance in dynamic component editing.
  */
 import React from 'react';
+import { PageContent } from '@lib/types/about-page-components';
 
 /**
  * Debounce function - delays execution until after delay period of inactivity
@@ -271,4 +272,30 @@ function deepEqual(a: any, b: any): boolean {
   }
 
   return true;
+}
+
+/**
+ * Optimized deep clone using structuredClone with fallback
+ */
+export function deepClone<T>(obj: T): T {
+  if (typeof structuredClone !== 'undefined') {
+    return structuredClone(obj);
+  }
+  
+  // Fallback for older browsers
+  return JSON.parse(JSON.stringify(obj));
+}
+
+/**
+ * Specialized clone function for PageContent with optimized structure copying
+ */
+export function clonePageContent(pageContent: PageContent): PageContent {
+  return {
+    ...pageContent,
+    sections: pageContent.sections.map(section => ({
+      ...section,
+      columns: section.columns.map(column => [...column.map(comp => ({ ...comp, props: { ...comp.props } }))])
+    })),
+    metadata: pageContent.metadata ? { ...pageContent.metadata } : undefined
+  };
 }
