@@ -4,13 +4,14 @@
  * Provides debouncing, throttling, and lazy loading utilities
  * for better performance in dynamic component editing.
  */
-import React from 'react';
 import { PageContent } from '@lib/types/about-page-components';
+
+import React from 'react';
 
 /**
  * Debounce function - delays execution until after delay period of inactivity
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number
 ): (...args: Parameters<T>) => void {
@@ -31,7 +32,7 @@ export function debounce<T extends (...args: any[]) => any>(
 /**
  * Throttle function - limits execution to at most once per delay period
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number
 ): (...args: Parameters<T>) => void {
@@ -60,6 +61,7 @@ export function throttle<T extends (...args: any[]) => any>(
 /**
  * Create a debounced callback using React hooks
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useDebouncedCallback<T extends (...args: any[]) => any>(
   callback: T,
   delay: number,
@@ -75,7 +77,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
   React.useEffect(() => {
     return () => {
       // Cancel any pending debounced calls
-      const debouncedFn = debouncedCallback as any;
+      const debouncedFn = debouncedCallback as { cancel?: () => void };
       if (debouncedFn.cancel) {
         debouncedFn.cancel();
       }
@@ -88,6 +90,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
 /**
  * Throttled callback hook
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useThrottledCallback<T extends (...args: any[]) => any>(
   callback: T,
   delay: number,
@@ -256,7 +259,7 @@ export function useDeepCompareMemoize<T>(value: T): T {
 /**
  * Simple deep equality check
  */
-function deepEqual(a: any, b: any): boolean {
+function deepEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (a == null || b == null) return a === b;
   if (typeof a !== typeof b) return false;
@@ -268,7 +271,13 @@ function deepEqual(a: any, b: any): boolean {
 
   for (const key of keysA) {
     if (!keysB.includes(key)) return false;
-    if (!deepEqual(a[key], b[key])) return false;
+    if (
+      !deepEqual(
+        (a as Record<string, unknown>)[key],
+        (b as Record<string, unknown>)[key]
+      )
+    )
+      return false;
   }
 
   return true;
@@ -281,7 +290,7 @@ export function deepClone<T>(obj: T): T {
   if (typeof structuredClone !== 'undefined') {
     return structuredClone(obj);
   }
-  
+
   // Fallback for older browsers
   return JSON.parse(JSON.stringify(obj));
 }
@@ -294,8 +303,10 @@ export function clonePageContent(pageContent: PageContent): PageContent {
     ...pageContent,
     sections: pageContent.sections.map(section => ({
       ...section,
-      columns: section.columns.map(column => [...column.map(comp => ({ ...comp, props: { ...comp.props } }))])
+      columns: section.columns.map(column =>
+        column.map(comp => ({ ...comp, props: { ...comp.props } }))
+      ),
     })),
-    metadata: pageContent.metadata ? { ...pageContent.metadata } : undefined
+    metadata: pageContent.metadata ? { ...pageContent.metadata } : undefined,
   };
 }

@@ -15,7 +15,7 @@ import {
 import { cn } from '@lib/utils';
 import { motion } from 'framer-motion';
 
-import React, { Suspense, lazy, memo, useMemo } from 'react';
+import React, { memo } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -136,7 +136,18 @@ export function DynamicAboutRenderer({
   const renderComponentInternal = (
     component: ComponentInstance,
     index: number,
-    colors: any
+    colors: {
+      titleGradient: string;
+      textColor: string;
+      headingColor: string;
+      paragraphColor: string;
+      cardBg: string;
+      cardBorder: string;
+      cardShadow: string;
+      cardHeadingColor: string;
+      cardTextColor: string;
+      buttonClass: string;
+    }
   ) => {
     const { type, props } = component;
 
