@@ -14,19 +14,21 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
+import { HomeDynamic } from './home-dynamic';
+
 export function Home() {
   const router = useRouter();
   const { isDark } = useTheme();
   const supabase = createClient();
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
+  const [useDynamicRender, setUseDynamicRender] = useState(false);
   const staticT = useTranslations('pages.home');
   const { t: dynamicT, isLoading } = useDynamicTranslations({
     sections: ['pages.home'],
   });
 
   // Enhanced translation function with dynamic/static fallback
-  const t = (key: string, params?: any) => {
+  const t = (key: string, params?: Record<string, string | number | Date>) => {
     const dynamicValue = dynamicT(key, 'pages.home', params);
     return dynamicValue || staticT(key, params);
   };
@@ -36,19 +38,34 @@ export function Home() {
     setMounted(true);
   }, []);
 
-  // Check current user authentication status
+  // Check if we should use dynamic rendering (if dynamic sections data is available)
   useEffect(() => {
-    const getCurrentUser = async () => {
-      // 🔒 Security fix: use getUser() for server-side verification
-      // Avoid relying on potentially tampered local session data
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setCurrentUser(user);
+    const checkForDynamicData = async () => {
+      try {
+        // Check if the translation data has sections (indicating dynamic format)
+        const homeData = dynamicT('', 'pages.home'); // Get full section data
+        if (
+          homeData &&
+          typeof homeData === 'object' &&
+          'sections' in homeData
+        ) {
+          setUseDynamicRender(true);
+        }
+      } catch {
+        console.log('Using static rendering as fallback');
+        setUseDynamicRender(false);
+      }
     };
 
-    getCurrentUser();
-  }, [supabase]);
+    if (mounted && !isLoading) {
+      checkForDynamicData();
+    }
+  }, [mounted, isLoading, dynamicT]);
+
+  // If dynamic rendering is available and enabled, use it
+  if (mounted && !isLoading && useDynamicRender) {
+    return <HomeDynamic />;
+  }
 
   const handleStartClick = async () => {
     try {
@@ -156,7 +173,12 @@ export function Home() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mb-16 grid grid-cols-1 gap-8 md:grid-cols-3"
           >
-            {(staticT.raw('features') as any[]).map((feature, index) => (
+            {(
+              staticT.raw('features') as Array<{
+                title: string;
+                description: string;
+              }>
+            ).map((feature, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
