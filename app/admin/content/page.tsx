@@ -10,7 +10,6 @@ import { ResizableSplitPane } from '@components/ui/resizable-split-pane';
 import type { SupportedLocale } from '@lib/config/language-config';
 import { getCurrentLocaleFromCookie } from '@lib/config/language-config';
 import { clearTranslationCache } from '@lib/hooks/use-dynamic-translations';
-import { useTheme } from '@lib/hooks/use-theme';
 import { TranslationService } from '@lib/services/admin/content/translation-service';
 import { useAboutEditorStore } from '@lib/stores/about-editor-store';
 import { useHomeEditorStore } from '@lib/stores/home-editor-store';
@@ -55,7 +54,6 @@ interface HomePageConfig {
 }
 
 export default function ContentManagementPage() {
-  const { isDark } = useTheme();
   const searchParams = useSearchParams();
   const router = useRouter();
   const t = useTranslations('pages.admin.content.page');
