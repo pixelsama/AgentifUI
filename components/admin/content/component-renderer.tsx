@@ -100,8 +100,21 @@ const Paragraph: React.FC<ParagraphProps> = ({ content, textAlign }) => {
  *
  * Renders a grid or list of cards with homepage-inspired shadows and stone color system
  */
-const Cards: React.FC<CardsProps> = ({ items, layout }) => {
-  const gridClass = layout === 'grid' ? 'md:grid-cols-2' : 'grid-cols-1';
+const Cards: React.FC<
+  CardsProps & { previewDevice?: 'desktop' | 'tablet' | 'mobile' }
+> = ({ items, layout, previewDevice = 'desktop' }) => {
+  // Determine grid layout based on layout prop and preview device
+  const getGridClass = () => {
+    if (layout !== 'grid') return 'grid-cols-1';
+
+    // For mobile preview, always use single column
+    if (previewDevice === 'mobile') return 'grid-cols-1';
+
+    // For desktop and tablet, use responsive two-column layout
+    return 'md:grid-cols-2';
+  };
+
+  const gridClass = getGridClass();
 
   return (
     <div className={cn('mb-6 grid grid-cols-1 gap-4 sm:gap-6', gridClass)}>
@@ -277,12 +290,14 @@ interface ComponentRendererProps {
   component: ComponentInstance;
   className?: string;
   sectionCommonProps?: SectionCommonProps;
+  previewDevice?: 'desktop' | 'tablet' | 'mobile';
 }
 
 const ComponentRenderer: React.FC<ComponentRendererProps> = ({
   component,
   className,
   sectionCommonProps,
+  previewDevice = 'desktop',
 }) => {
   const Component = componentMap[component.type];
 
@@ -309,9 +324,15 @@ const ComponentRenderer: React.FC<ComponentRendererProps> = ({
     sectionCommonProps
   );
 
+  // Add previewDevice to props if component supports it
+  const componentProps =
+    component.type === 'cards'
+      ? { ...resolvedProps, previewDevice }
+      : resolvedProps;
+
   return (
     <div className={className}>
-      <Component {...resolvedProps} />
+      <Component {...componentProps} />
     </div>
   );
 };

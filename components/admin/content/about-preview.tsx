@@ -172,6 +172,7 @@ export function AboutPreview({
                       <ComponentRenderer
                         component={component}
                         sectionCommonProps={section.commonProps}
+                        previewDevice={previewDevice}
                       />
                     </motion.div>
                   ))}

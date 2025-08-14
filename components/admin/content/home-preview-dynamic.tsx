@@ -172,6 +172,7 @@ export function HomePreviewDynamic({
                       <ComponentRenderer
                         component={component}
                         sectionCommonProps={section.commonProps}
+                        previewDevice={previewDevice}
                       />
                     </motion.div>
                   ))}
