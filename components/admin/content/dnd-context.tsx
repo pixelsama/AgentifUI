@@ -121,11 +121,15 @@ export function DndContextWrapper({
             <DragOverlay dropAnimation={dropWasSuccessful ? null : undefined}>
               {activeItem ? (
                 <div
-                  className={`rounded-lg border bg-white p-2 shadow-lg transition-all duration-200 dark:bg-gray-800 ${
+                  className={`rounded-lg border bg-white shadow-xl transition-all duration-200 dark:bg-gray-800 ${
                     isAnimatingOut
                       ? 'scale-95 transform opacity-0'
                       : 'scale-100 opacity-100'
                   }`}
+                  style={{
+                    maxWidth: '300px',
+                    maxHeight: '80px',
+                  }}
                 >
                   {activeItem.content}
                 </div>

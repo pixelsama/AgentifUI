@@ -36,6 +36,7 @@ import ComponentRenderer from './component-renderer';
 import { ContextMenu } from './context-menu';
 import { Droppable, Sortable, SortableContainer } from './dnd-components';
 import { DndContextWrapper } from './dnd-context';
+import { DragPreviewRenderer } from './drag-preview-renderer';
 
 interface AboutEditorProps {
   translations: Record<SupportedLocale, AboutTranslationData>;
@@ -543,22 +544,16 @@ export function AboutEditor({
                             )}
 
                             {column.map(component => {
-                              const componentPreview = (
-                                <div
-                                  className={cn(
-                                    'mb-3 cursor-pointer rounded-lg border p-3 transition-all',
-                                    'border-stone-200 bg-white dark:border-stone-600 dark:bg-stone-800'
-                                  )}
-                                >
-                                  <ComponentRenderer component={component} />
-                                </div>
+                              // Use simplified drag preview for better drag experience
+                              const dragPreview = (
+                                <DragPreviewRenderer component={component} />
                               );
 
                               return (
                                 <Sortable
                                   key={component.id}
                                   id={component.id}
-                                  preview={componentPreview}
+                                  preview={dragPreview}
                                   className={cn(
                                     'mb-3 cursor-pointer rounded-lg border p-3 transition-all',
                                     selectedComponentId === component.id
