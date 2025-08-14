@@ -65,6 +65,20 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     }
   }, [x, y]);
 
+  // Handle ESC key press to close the context menu
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [onClose]);
+
   const handleInputChange = (name: string, value: unknown) => {
     if (!component) return;
     onPropsChange({ ...component.props, [name]: value });
