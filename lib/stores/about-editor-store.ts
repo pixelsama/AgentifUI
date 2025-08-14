@@ -227,6 +227,85 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     console.log('Active data:', active.data.current);
     console.log('Over data:', over.data.current);
 
+    // Handle section reordering
+    if (activeId.startsWith('section-')) {
+      const activeSectionId = activeId.replace('section-', '');
+
+      // Find the active section
+      const activeSectionIndex = newPageContent.sections.findIndex(
+        section => section.id === activeSectionId
+      );
+
+      if (activeSectionIndex === -1) {
+        console.log('❌ Active section not found:', activeSectionId);
+        return false;
+      }
+
+      let targetIndex = -1;
+
+      // Handle dropping on section drop zones
+      if (overId.startsWith('section-drop-')) {
+        if (overId === 'section-drop-final') {
+          // Drop at the end
+          targetIndex = newPageContent.sections.length;
+        } else {
+          // Drop before a specific section
+          const dropIndex = parseInt(overId.replace('section-drop-', ''));
+          targetIndex = dropIndex;
+        }
+      } else {
+        console.log('❌ Invalid drop target for section:', overId);
+        return false;
+      }
+
+      // Ensure valid target index (allow insertion at the end)
+      if (targetIndex < 0 || targetIndex > newPageContent.sections.length) {
+        console.log(
+          '❌ Invalid target index for section reordering:',
+          targetIndex
+        );
+        return false;
+      }
+
+      // Adjust target index if moving forward
+      let finalTargetIndex = targetIndex;
+      if (activeSectionIndex < targetIndex) {
+        finalTargetIndex = targetIndex - 1;
+      }
+
+      // Don't move if dropping on the same position
+      if (activeSectionIndex === finalTargetIndex) {
+        console.log('✅ Section dropped on same position, no change needed');
+        return true;
+      }
+
+      console.log('🔄 SECTION REORDER:', {
+        activeSectionId,
+        activeSectionIndex,
+        targetIndex,
+        finalTargetIndex,
+        totalSections: newPageContent.sections.length,
+      });
+
+      // Remove the section from its current position
+      const [movedSection] = newPageContent.sections.splice(
+        activeSectionIndex,
+        1
+      );
+
+      // Insert the section at the new position
+      newPageContent.sections.splice(finalTargetIndex, 0, movedSection);
+
+      // Update the state
+      set({
+        pageContent: newPageContent,
+        isDirty: true,
+      });
+
+      console.log('✅ Section reordered successfully');
+      return true;
+    }
+
     // Handle dragging from component palette
     if (activeId.startsWith('palette-')) {
       const componentType = activeId.replace('palette-', '');

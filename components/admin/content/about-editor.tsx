@@ -25,7 +25,7 @@ import {
   useDebouncedCallback,
   useThrottledCallback,
 } from '@lib/utils/performance';
-import { Plus, Redo2, Trash2, Undo2 } from 'lucide-react';
+import { GripVertical, Plus, Redo2, Trash2, Undo2 } from 'lucide-react';
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
@@ -37,6 +37,7 @@ import { ContextMenu } from './context-menu';
 import { Droppable, Sortable, SortableContainer } from './dnd-components';
 import { DndContextWrapper } from './dnd-context';
 import { DragPreviewRenderer } from './drag-preview-renderer';
+import { SectionDragPreview } from './section-drag-preview';
 
 interface AboutEditorProps {
   translations: Record<SupportedLocale, AboutTranslationData>;
@@ -458,203 +459,233 @@ export function AboutEditor({
               className="space-y-6 p-6"
               onContextMenu={handleGlobalContextMenu}
             >
-              {pageContent.sections.map((section, sectionIndex) => (
-                <div key={section.id} className="space-y-4">
-                  {/* Section Drop Zone (before each section) */}
-                  {sectionIndex > 0 && (
-                    <Droppable
-                      id={`section-drop-${sectionIndex}`}
-                      className="h-2 rounded-lg border-2 border-dashed border-transparent transition-all duration-200 hover:h-16 hover:border-stone-400 hover:bg-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800"
-                    >
-                      {(isOver: boolean) => (
-                        <div
-                          className={cn(
-                            'flex h-full items-center justify-center text-sm font-medium text-stone-600 transition-opacity duration-200 dark:text-stone-400',
-                            isOver || undefined
-                              ? 'opacity-100'
-                              : 'opacity-0 hover:opacity-100'
-                          )}
-                        >
-                          Drop here to create new section
-                        </div>
-                      )}
-                    </Droppable>
-                  )}
+              {pageContent.sections.map((section, sectionIndex) => {
+                // Create drag preview for section
+                const sectionDragPreview = (
+                  <SectionDragPreview
+                    section={section}
+                    sectionIndex={sectionIndex}
+                  />
+                );
 
-                  {/* Section Content */}
-                  <div
-                    className={cn(
-                      'rounded-lg border p-4',
-                      'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800'
-                    )}
-                  >
-                    <div className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <h3
-                          className={cn(
-                            'text-sm font-medium',
-                            'text-stone-600 dark:text-stone-400'
-                          )}
-                        >
-                          Section {sectionIndex + 1} • {section.layout}
-                        </h3>
-                        <button
-                          onClick={() => {
-                            deleteSection(section.id);
-                          }}
-                          className={cn(
-                            'flex h-6 w-6 items-center justify-center rounded p-0 text-red-500 transition-colors',
-                            'hover:bg-red-100 dark:hover:bg-red-900/50'
-                          )}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      </div>
-                    </div>
-                    <div
-                      className={cn(
-                        'grid gap-4',
-                        section.layout === 'single-column' && 'grid-cols-1',
-                        section.layout === 'two-column' && 'grid-cols-2',
-                        section.layout === 'three-column' && 'grid-cols-3'
-                      )}
-                    >
-                      {section.columns.map((column, columnIndex) => {
-                        const columnItems = column.map(comp => comp.id);
-                        return (
-                          <SortableContainer
-                            key={`${section.id}-${columnIndex}`}
-                            id={`section-${section.id}-${columnIndex}`}
-                            items={columnItems}
+                return (
+                  <div key={section.id} className="space-y-4">
+                    {/* Section Drop Zone (before each section) */}
+                    {sectionIndex > 0 && (
+                      <Droppable
+                        id={`section-drop-${sectionIndex}`}
+                        className="h-2 rounded-lg border-2 border-dashed border-transparent transition-all duration-200 hover:h-16 hover:border-stone-400 hover:bg-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800"
+                      >
+                        {(isOver: boolean) => (
+                          <div
                             className={cn(
-                              'min-h-24 rounded-md border-2 border-dashed p-3 transition-all duration-200',
-                              'border-stone-300 bg-stone-50 hover:border-stone-400 hover:bg-stone-100',
-                              'dark:border-stone-600 dark:bg-stone-700/50 dark:hover:border-stone-500 dark:hover:bg-stone-600/50'
+                              'flex h-full items-center justify-center text-sm font-medium text-stone-600 transition-opacity duration-200 dark:text-stone-400',
+                              isOver || undefined
+                                ? 'opacity-100'
+                                : 'opacity-0 hover:opacity-100'
                             )}
                           >
-                            {column.length === 0 && (
-                              <div
-                                className={cn(
-                                  'flex h-16 items-center justify-center text-sm',
-                                  'text-stone-500 dark:text-stone-400'
-                                )}
-                              >
-                                Drop components here
-                              </div>
+                            Drop here to reorder sections
+                          </div>
+                        )}
+                      </Droppable>
+                    )}
+
+                    {/* Draggable Section Content */}
+                    <Sortable
+                      id={`section-${section.id}`}
+                      preview={sectionDragPreview}
+                      className={cn(
+                        'group cursor-grab rounded-lg border p-4 transition-all',
+                        'border-stone-200 bg-white hover:border-stone-300 hover:shadow-md',
+                        'dark:border-stone-700 dark:bg-stone-800 dark:hover:border-stone-600'
+                      )}
+                    >
+                      <div className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <GripVertical
+                              className={cn(
+                                'h-4 w-4 text-stone-400 opacity-0 transition-opacity group-hover:opacity-100',
+                                'dark:text-stone-500'
+                              )}
+                            />
+                            <h3
+                              className={cn(
+                                'text-sm font-medium',
+                                'text-stone-600 dark:text-stone-400'
+                              )}
+                            >
+                              Section {sectionIndex + 1} • {section.layout}
+                            </h3>
+                          </div>
+                          <button
+                            onClick={e => {
+                              e.stopPropagation();
+                              deleteSection(section.id);
+                            }}
+                            className={cn(
+                              'flex h-6 w-6 items-center justify-center rounded p-0 text-red-500 transition-colors',
+                              'hover:bg-red-100 dark:hover:bg-red-900/50'
                             )}
-
-                            {column.map(component => {
-                              // Use simplified drag preview for better drag experience
-                              const dragPreview = (
-                                <DragPreviewRenderer component={component} />
-                              );
-
-                              return (
-                                <Sortable
-                                  key={component.id}
-                                  id={component.id}
-                                  preview={dragPreview}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                      <div
+                        className={cn(
+                          'grid gap-4',
+                          section.layout === 'single-column' && 'grid-cols-1',
+                          section.layout === 'two-column' && 'grid-cols-2',
+                          section.layout === 'three-column' && 'grid-cols-3'
+                        )}
+                      >
+                        {section.columns.map((column, columnIndex) => {
+                          const columnItems = column.map(comp => comp.id);
+                          return (
+                            <SortableContainer
+                              key={`${section.id}-${columnIndex}`}
+                              id={`section-${section.id}-${columnIndex}`}
+                              items={columnItems}
+                              className={cn(
+                                'min-h-24 rounded-md border-2 border-dashed p-3 transition-all duration-200',
+                                'border-stone-300 bg-stone-50 hover:border-stone-400 hover:bg-stone-100',
+                                'dark:border-stone-600 dark:bg-stone-700/50 dark:hover:border-stone-500 dark:hover:bg-stone-600/50'
+                              )}
+                            >
+                              {column.length === 0 && (
+                                <div
                                   className={cn(
-                                    'mb-3 cursor-pointer rounded-lg border p-3 transition-all',
-                                    selectedComponentId === component.id
-                                      ? 'border-stone-500 bg-stone-100 dark:border-stone-400 dark:bg-stone-700'
-                                      : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:hover:border-stone-500 dark:hover:bg-stone-700'
+                                    'flex h-16 items-center justify-center text-sm',
+                                    'text-stone-500 dark:text-stone-400'
                                   )}
-                                  onClick={() =>
-                                    handleComponentClick(component.id)
-                                  }
-                                  onDoubleClick={() =>
-                                    handleDoubleClick(component.id)
-                                  }
-                                  onContextMenu={e =>
-                                    handleContextMenu(e, component.id)
-                                  }
-                                  data-component-id={component.id}
                                 >
-                                  {editingComponent?.componentId ===
-                                  component.id ? (
-                                    <div
-                                      className="space-y-2"
-                                      onClick={e => {
-                                        // Prevent event bubbling to parent Sortable component
-                                        e.stopPropagation();
-                                      }}
-                                      onMouseDown={e => {
-                                        // Prevent event bubbling to parent Sortable component
-                                        e.stopPropagation();
-                                      }}
-                                    >
-                                      <textarea
-                                        value={editingComponent.content}
-                                        onChange={e =>
-                                          handleEditInputChange(e.target.value)
-                                        }
+                                  Drop components here
+                                </div>
+                              )}
+
+                              {column.map(component => {
+                                // Use simplified drag preview for better drag experience
+                                const dragPreview = (
+                                  <DragPreviewRenderer component={component} />
+                                );
+
+                                return (
+                                  <Sortable
+                                    key={component.id}
+                                    id={component.id}
+                                    preview={dragPreview}
+                                    className={cn(
+                                      'mb-3 cursor-pointer rounded-lg border p-3 transition-all',
+                                      selectedComponentId === component.id
+                                        ? 'border-stone-500 bg-stone-100 dark:border-stone-400 dark:bg-stone-700'
+                                        : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:hover:border-stone-500 dark:hover:bg-stone-700'
+                                    )}
+                                    onClick={() =>
+                                      handleComponentClick(component.id)
+                                    }
+                                    onDoubleClick={() =>
+                                      handleDoubleClick(component.id)
+                                    }
+                                    onContextMenu={e =>
+                                      handleContextMenu(e, component.id)
+                                    }
+                                    data-component-id={component.id}
+                                  >
+                                    {editingComponent?.componentId ===
+                                    component.id ? (
+                                      <div
+                                        className="space-y-2"
                                         onClick={e => {
-                                          // Prevent event bubbling when clicking inside textarea
+                                          // Prevent event bubbling to parent Sortable component
                                           e.stopPropagation();
                                         }}
                                         onMouseDown={e => {
-                                          // Prevent event bubbling when mouse down in textarea
+                                          // Prevent event bubbling to parent Sortable component
                                           e.stopPropagation();
                                         }}
-                                        onKeyDown={e => {
-                                          if (e.key === 'Enter' && e.ctrlKey) {
-                                            e.preventDefault();
-                                            handleSaveEdit();
-                                          }
-                                          if (e.key === 'Escape') {
-                                            e.preventDefault();
-                                            setEditingComponent(null);
-                                          }
-                                          e.stopPropagation(); // Prevent parent keyboard handlers
-                                        }}
-                                        className="resize-vertical min-h-[60px] w-full rounded border p-2 text-sm focus:ring-2 focus:ring-stone-500 focus:outline-none"
-                                        placeholder="Enter content..."
-                                        autoFocus
-                                        onBlur={e => {
-                                          // Only auto-save if focus is truly leaving the editing area
-                                          // Check if focus is moving to another element outside the editing container
-                                          const relatedTarget =
-                                            e.relatedTarget as HTMLElement;
-                                          const editContainer =
-                                            e.currentTarget.closest(
-                                              '.space-y-2'
-                                            );
-
-                                          if (
-                                            !relatedTarget ||
-                                            !editContainer?.contains(
-                                              relatedTarget
+                                      >
+                                        <textarea
+                                          value={editingComponent.content}
+                                          onChange={e =>
+                                            handleEditInputChange(
+                                              e.target.value
                                             )
-                                          ) {
-                                            // Auto-save on blur if there are changes and focus truly left
-                                            setTimeout(() => {
-                                              if (editingComponent) {
-                                                handleSaveEdit();
-                                              }
-                                            }, 100);
                                           }
-                                        }}
-                                      />
-                                      <div className="text-muted-foreground flex gap-2 text-xs">
-                                        <span>
-                                          Ctrl+Enter to save • Escape to cancel
-                                        </span>
+                                          onClick={e => {
+                                            // Prevent event bubbling when clicking inside textarea
+                                            e.stopPropagation();
+                                          }}
+                                          onMouseDown={e => {
+                                            // Prevent event bubbling when mouse down in textarea
+                                            e.stopPropagation();
+                                          }}
+                                          onKeyDown={e => {
+                                            if (
+                                              e.key === 'Enter' &&
+                                              e.ctrlKey
+                                            ) {
+                                              e.preventDefault();
+                                              handleSaveEdit();
+                                            }
+                                            if (e.key === 'Escape') {
+                                              e.preventDefault();
+                                              setEditingComponent(null);
+                                            }
+                                            e.stopPropagation(); // Prevent parent keyboard handlers
+                                          }}
+                                          className="resize-vertical min-h-[60px] w-full rounded border p-2 text-sm focus:ring-2 focus:ring-stone-500 focus:outline-none"
+                                          placeholder="Enter content..."
+                                          autoFocus
+                                          onBlur={e => {
+                                            // Only auto-save if focus is truly leaving the editing area
+                                            // Check if focus is moving to another element outside the editing container
+                                            const relatedTarget =
+                                              e.relatedTarget as HTMLElement;
+                                            const editContainer =
+                                              e.currentTarget.closest(
+                                                '.space-y-2'
+                                              );
+
+                                            if (
+                                              !relatedTarget ||
+                                              !editContainer?.contains(
+                                                relatedTarget
+                                              )
+                                            ) {
+                                              // Auto-save on blur if there are changes and focus truly left
+                                              setTimeout(() => {
+                                                if (editingComponent) {
+                                                  handleSaveEdit();
+                                                }
+                                              }, 100);
+                                            }
+                                          }}
+                                        />
+                                        <div className="text-muted-foreground flex gap-2 text-xs">
+                                          <span>
+                                            Ctrl+Enter to save • Escape to
+                                            cancel
+                                          </span>
+                                        </div>
                                       </div>
-                                    </div>
-                                  ) : (
-                                    <ComponentRenderer component={component} />
-                                  )}
-                                </Sortable>
-                              );
-                            })}
-                          </SortableContainer>
-                        );
-                      })}
-                    </div>
+                                    ) : (
+                                      <ComponentRenderer
+                                        component={component}
+                                      />
+                                    )}
+                                  </Sortable>
+                                );
+                              })}
+                            </SortableContainer>
+                          );
+                        })}
+                      </div>
+                    </Sortable>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
               {/* Final Drop Zone */}
               <Droppable
