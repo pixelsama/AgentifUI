@@ -348,12 +348,12 @@ export function AboutEditor({
         {/* Header */}
         <div
           className={cn(
-            'space-y-4 border-b p-4',
+            'border-b p-4',
             'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800'
           )}
         >
-          {/* Language Selector */}
-          <div className="flex items-center justify-between">
+          {/* Language Selector and Action Buttons */}
+          <div className="flex items-end justify-between gap-4">
             <div className="space-y-1">
               <label className="text-sm font-medium">
                 {t('common.editLanguage')}
@@ -396,45 +396,45 @@ export function AboutEditor({
               </Select>
             </div>
 
-            {/* Status Badges */}
-            <div className="flex items-center gap-2">
-              {isDirty && <Badge variant="secondary">Unsaved</Badge>}
-              <Badge variant="outline">
-                {pageContent.sections.length} sections
-              </Badge>
-            </div>
-          </div>
+            <div className="flex items-center gap-4">
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={undo}
+                  disabled={undoStack.length === 0}
+                >
+                  <Undo2 className="mr-2 h-4 w-4" />
+                  Undo
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={redo}
+                  disabled={redoStack.length === 0}
+                >
+                  <Redo2 className="mr-2 h-4 w-4" />
+                  Redo
+                </Button>
+                <Separator orientation="vertical" className="h-8" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addSection('single-column')}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Section
+                </Button>
+              </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={undo}
-                disabled={undoStack.length === 0}
-              >
-                <Undo2 className="mr-2 h-4 w-4" />
-                Undo
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={redo}
-                disabled={redoStack.length === 0}
-              >
-                <Redo2 className="mr-2 h-4 w-4" />
-                Redo
-              </Button>
-              <Separator orientation="vertical" className="h-8" />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addSection('single-column')}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Section
-              </Button>
+              {/* Status Badges */}
+              <div className="flex items-center gap-2">
+                {isDirty && <Badge variant="secondary">Unsaved</Badge>}
+                <Badge variant="outline">
+                  {pageContent.sections.length} sections
+                </Badge>
+              </div>
             </div>
           </div>
         </div>
