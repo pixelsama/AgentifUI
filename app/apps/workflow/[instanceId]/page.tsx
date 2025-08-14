@@ -2,7 +2,6 @@
 
 import { WorkflowLayout } from '@components/workflow/workflow-layout';
 import { useCurrentApp } from '@lib/hooks/use-current-app';
-import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { useAppListStore } from '@lib/stores/app-list-store';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { cn } from '@lib/utils';
@@ -34,7 +33,6 @@ interface WorkflowPageProps {
 export default function WorkflowPage({ params }: WorkflowPageProps) {
   const { instanceId } = React.use(params);
   const router = useRouter();
-  const { colors, isDark } = useThemeColors();
   const t = useTranslations('pages.apps');
 
   // --- app related state ---
@@ -158,7 +156,7 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
       <div
         className={cn(
           'relative flex h-full w-full flex-col',
-          colors.mainBackground.tailwind,
+          'bg-stone-100 dark:bg-stone-800',
           'items-center justify-center'
         )}
       >
@@ -166,13 +164,13 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
           <Blocks
             className={cn(
               'mx-auto mb-4 h-16 w-16',
-              isDark ? 'text-stone-400' : 'text-stone-500'
+              'text-stone-500 dark:text-stone-400'
             )}
           />
           <h2
             className={cn(
               'mb-2 font-serif text-xl font-semibold',
-              isDark ? 'text-stone-300' : 'text-stone-700'
+              'text-stone-700 dark:text-stone-300'
             )}
           >
             {t('errors.appLoadFailed')}
@@ -180,7 +178,7 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
           <p
             className={cn(
               'mb-4 font-serif',
-              isDark ? 'text-stone-400' : 'text-stone-500'
+              'text-stone-500 dark:text-stone-400'
             )}
           >
             {initError}
@@ -189,9 +187,8 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
             onClick={() => router.push('/apps')}
             className={cn(
               'rounded-lg px-4 py-2 font-serif transition-colors',
-              isDark
-                ? 'bg-stone-700 text-stone-200 hover:bg-stone-600'
-                : 'bg-stone-200 text-stone-800 hover:bg-stone-300'
+              'bg-stone-200 text-stone-800 hover:bg-stone-300',
+              'dark:bg-stone-700 dark:text-stone-200 dark:hover:bg-stone-600'
             )}
           >
             {t('buttons.backToMarket')}
@@ -207,7 +204,7 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
       <div
         className={cn(
           'relative flex h-full w-full flex-col',
-          colors.mainBackground.tailwind,
+          'bg-stone-100 dark:bg-stone-800',
           'items-center justify-center'
         )}
       >
@@ -215,15 +212,10 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
           <Loader2
             className={cn(
               'mx-auto mb-4 h-8 w-8 animate-spin',
-              isDark ? 'text-stone-400' : 'text-stone-500'
+              'text-stone-500 dark:text-stone-400'
             )}
           />
-          <p
-            className={cn(
-              'font-serif',
-              isDark ? 'text-stone-400' : 'text-stone-500'
-            )}
-          >
+          <p className={cn('font-serif', 'text-stone-500 dark:text-stone-400')}>
             {isInitializing
               ? t('status.loadingApp')
               : isValidating
@@ -239,8 +231,8 @@ export default function WorkflowPage({ params }: WorkflowPageProps) {
     <div
       className={cn(
         'relative h-screen w-full overflow-hidden',
-        colors.mainBackground.tailwind,
-        colors.mainText.tailwind
+        'bg-stone-100 dark:bg-stone-800',
+        'text-stone-900 dark:text-gray-100'
       )}
     >
       <div className="h-full overflow-hidden pt-12">

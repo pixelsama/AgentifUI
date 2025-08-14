@@ -16,10 +16,8 @@ import {
 } from '@lib/hooks';
 import { useCurrentApp } from '@lib/hooks/use-current-app';
 import { useProfile } from '@lib/hooks/use-profile';
-import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import type { ChatUploadFile } from '@lib/services/dify/types';
 import { useAppListStore } from '@lib/stores/app-list-store';
-import { useChatInputStore } from '@lib/stores/chat-input-store';
 import { useChatLayoutStore } from '@lib/stores/chat-layout-store';
 import { useChatStore } from '@lib/stores/chat-store';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
@@ -32,7 +30,6 @@ import { useTranslations } from 'next-intl';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 
 export default function AppDetailPage() {
-  const { colors, isDark } = useThemeColors();
   const { widthClass, paddingClass } = useChatWidth();
   const router = useRouter();
   const params = useParams();
@@ -99,12 +96,6 @@ export default function AppDetailPage() {
 
   // get current app instance data
   const currentApp = apps.find(app => app.instance_id === instanceId);
-
-  // theme sync: ensure input box style follows theme change
-  const setDarkMode = useChatInputStore(state => state.setDarkMode);
-  useEffect(() => {
-    setDarkMode(isDark);
-  }, [isDark, setDarkMode]);
 
   const { clearConversationState } = useChatInterface();
 
@@ -274,7 +265,7 @@ export default function AppDetailPage() {
       <div
         className={cn(
           'relative flex h-full w-full flex-col',
-          colors.mainBackground.tailwind,
+          'bg-stone-100 dark:bg-stone-800',
           'items-center justify-center'
         )}
       >
@@ -282,13 +273,13 @@ export default function AppDetailPage() {
           <Blocks
             className={cn(
               'mx-auto mb-4 h-16 w-16',
-              isDark ? 'text-stone-400' : 'text-stone-500'
+              'text-stone-500 dark:text-stone-400'
             )}
           />
           <h2
             className={cn(
               'mb-2 font-serif text-xl font-semibold',
-              isDark ? 'text-stone-300' : 'text-stone-700'
+              'text-stone-700 dark:text-stone-300'
             )}
           >
             {t('errors.appLoadFailed')}
@@ -296,7 +287,7 @@ export default function AppDetailPage() {
           <p
             className={cn(
               'mb-4 font-serif',
-              isDark ? 'text-stone-400' : 'text-stone-500'
+              'text-stone-500 dark:text-stone-400'
             )}
           >
             {initError}
@@ -305,9 +296,8 @@ export default function AppDetailPage() {
             onClick={() => router.push('/apps')}
             className={cn(
               'rounded-lg px-4 py-2 font-serif transition-colors',
-              isDark
-                ? 'bg-stone-700 text-stone-200 hover:bg-stone-600'
-                : 'bg-stone-200 text-stone-800 hover:bg-stone-300'
+              'bg-stone-200 text-stone-800 hover:bg-stone-300',
+              'dark:bg-stone-700 dark:text-stone-200 dark:hover:bg-stone-600'
             )}
           >
             {t('buttons.backToMarket')}
@@ -328,7 +318,7 @@ export default function AppDetailPage() {
       <div
         className={cn(
           'relative flex h-full w-full flex-col',
-          colors.mainBackground.tailwind,
+          'bg-stone-100 dark:bg-stone-800',
           'items-center justify-center'
         )}
       >
@@ -336,15 +326,10 @@ export default function AppDetailPage() {
           <Loader2
             className={cn(
               'mx-auto mb-4 h-8 w-8 animate-spin',
-              isDark ? 'text-stone-400' : 'text-stone-500'
+              'text-stone-500 dark:text-stone-400'
             )}
           />
-          <p
-            className={cn(
-              'font-serif',
-              isDark ? 'text-stone-400' : 'text-stone-500'
-            )}
-          >
+          <p className={cn('font-serif', 'text-stone-500 dark:text-stone-400')}>
             {isInitializing
               ? t('status.loadingApp')
               : isValidating && !isValidatingForMessage
@@ -360,8 +345,8 @@ export default function AppDetailPage() {
     <div
       className={cn(
         'relative flex h-full w-full flex-col',
-        colors.mainBackground.tailwind,
-        colors.mainText.tailwind
+        'bg-stone-100 dark:bg-stone-800',
+        'text-stone-900 dark:text-gray-100'
       )}
     >
       {/* Main content area with simplified layout */}

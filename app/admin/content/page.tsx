@@ -374,20 +374,18 @@ export default function ContentManagementPage() {
   return (
     <div
       className={cn(
-        'flex h-[calc(100vh-3rem)] flex-col overflow-hidden',
-        isDark ? 'bg-stone-950' : 'bg-stone-100'
+        'flex h-screen flex-col overflow-hidden',
+        'bg-stone-100 dark:bg-stone-950'
       )}
     >
-      <div
-        className={cn('flex-shrink-0', isDark ? 'bg-stone-900' : 'bg-stone-50')}
-      >
+      <div className={cn('flex-shrink-0', 'bg-stone-50 dark:bg-stone-900')}>
         <div className="w-full px-4 py-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <h1
                 className={cn(
                   'text-xl font-semibold',
-                  isDark ? 'text-stone-100' : 'text-stone-900'
+                  'text-stone-900 dark:text-stone-100'
                 )}
               >
                 {t('title')}
@@ -395,7 +393,7 @@ export default function ContentManagementPage() {
               <p
                 className={cn(
                   'hidden text-sm md:block',
-                  isDark ? 'text-stone-400' : 'text-stone-600'
+                  'text-stone-600 dark:text-stone-400'
                 )}
               >
                 {t('subtitle')}
@@ -407,9 +405,8 @@ export default function ContentManagementPage() {
                   onClick={() => setShowPreview(true)}
                   className={cn(
                     'flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium shadow-sm transition-colors',
-                    isDark
-                      ? 'border border-stone-700 bg-stone-800 text-stone-300 hover:bg-stone-700'
-                      : 'border border-stone-200 bg-white text-stone-600 hover:bg-stone-100'
+                    'border border-stone-200 bg-white text-stone-600 hover:bg-stone-100',
+                    'dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700'
                   )}
                 >
                   <Eye className="h-4 w-4" />
@@ -436,7 +433,7 @@ export default function ContentManagementPage() {
               <div
                 className={cn(
                   'flex h-full flex-col',
-                  isDark ? 'bg-stone-900' : 'bg-white'
+                  'bg-white dark:bg-stone-900'
                 )}
               >
                 <div className="flex-1 overflow-auto px-6">
@@ -445,7 +442,7 @@ export default function ContentManagementPage() {
                 <div
                   className={cn(
                     'flex-shrink-0 p-4',
-                    isDark ? 'bg-stone-900' : 'bg-white'
+                    'bg-white dark:bg-stone-900'
                   )}
                 >
                   <div className="flex items-center justify-between">
@@ -454,7 +451,7 @@ export default function ContentManagementPage() {
                         <div
                           className={cn(
                             'flex items-center gap-2 text-sm',
-                            isDark ? 'text-stone-400' : 'text-stone-500'
+                            'text-stone-500 dark:text-stone-400'
                           )}
                         >
                           <div className="h-2 w-2 rounded-full bg-orange-500" />
@@ -469,9 +466,7 @@ export default function ContentManagementPage() {
                         className={cn(
                           'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                           hasChanges && !isSaving
-                            ? isDark
-                              ? 'text-stone-300 hover:bg-stone-800'
-                              : 'text-stone-600 hover:bg-stone-100'
+                            ? 'text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800'
                             : 'cursor-not-allowed text-stone-500'
                         )}
                       >
@@ -483,12 +478,8 @@ export default function ContentManagementPage() {
                         className={cn(
                           'rounded-lg px-6 py-2 text-sm font-medium shadow-sm transition-colors',
                           hasChanges && !isSaving
-                            ? isDark
-                              ? 'bg-stone-100 text-stone-900 hover:bg-white'
-                              : 'bg-stone-900 text-white hover:bg-stone-800'
-                            : isDark
-                              ? 'cursor-not-allowed bg-stone-700 text-stone-400'
-                              : 'cursor-not-allowed bg-stone-300 text-stone-500'
+                            ? 'bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white'
+                            : 'cursor-not-allowed bg-stone-300 text-stone-500 dark:bg-stone-700 dark:text-stone-400'
                         )}
                       >
                         {isSaving
@@ -517,13 +508,59 @@ export default function ContentManagementPage() {
             }
           />
         ) : (
-          <div
-            className={cn(
-              'relative flex-1 overflow-hidden',
-              isDark ? 'bg-stone-900' : 'bg-white'
-            )}
-          >
-            <div className="h-full overflow-auto px-6">{renderEditor()}</div>
+          <div className={cn('relative flex-1', 'bg-white dark:bg-stone-900')}>
+            <div className="h-full overflow-auto p-6">{renderEditor()}</div>
+            <div
+              className={cn(
+                'absolute right-0 bottom-0 left-0 p-4',
+                'bg-white/80 dark:bg-stone-900/80',
+                'backdrop-blur-sm'
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  {hasChanges && (
+                    <div
+                      className={cn(
+                        'flex items-center gap-2 text-sm',
+                        'text-stone-500 dark:text-stone-400'
+                      )}
+                    >
+                      <div className="h-2 w-2 rounded-full bg-orange-500" />
+                      <span>{t('saveActions.hasChanges')}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleReset}
+                    disabled={!hasChanges || isSaving}
+                    className={cn(
+                      'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                      !hasChanges || isSaving
+                        ? 'cursor-not-allowed text-stone-500'
+                        : 'text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800'
+                    )}
+                  >
+                    {t('saveActions.reset')}
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={!hasChanges || isSaving}
+                    className={cn(
+                      'rounded-lg px-6 py-2 text-sm font-medium shadow-sm transition-colors',
+                      !hasChanges || isSaving
+                        ? 'cursor-not-allowed bg-stone-300 text-stone-500 dark:bg-stone-700 dark:text-stone-400'
+                        : 'bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white'
+                    )}
+                  >
+                    {isSaving
+                      ? t('saveActions.saving_')
+                      : t('saveActions.save')}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -534,20 +571,20 @@ export default function ContentManagementPage() {
             <div
               className={cn(
                 'flex flex-shrink-0 items-center justify-between px-4 py-3',
-                isDark ? 'bg-stone-800/50' : 'bg-white/50'
+                'bg-white/50 dark:bg-stone-800/50'
               )}
             >
               <div className="flex items-center gap-3">
                 <div
                   className={cn(
                     'h-3 w-3 rounded-full',
-                    isDark ? 'bg-stone-600' : 'bg-stone-400'
+                    'bg-stone-400 dark:bg-stone-600'
                   )}
                 />
                 <span
                   className={cn(
                     'text-sm font-medium',
-                    isDark ? 'text-stone-300' : 'text-stone-700'
+                    'text-stone-700 dark:text-stone-300'
                   )}
                 >
                   {t('fullscreenPreview')} -
@@ -560,9 +597,8 @@ export default function ContentManagementPage() {
                 onClick={handleCloseFullscreenPreview}
                 className={cn(
                   'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
-                  isDark
-                    ? 'bg-stone-700 text-stone-300 hover:bg-stone-600'
-                    : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                  'bg-stone-100 text-stone-700 hover:bg-stone-200',
+                  'dark:bg-stone-700 dark:text-stone-300 dark:hover:bg-stone-600'
                 )}
               >
                 {t('closePreview')}
