@@ -8,16 +8,9 @@ import { useDynamicTranslations } from '@lib/hooks/use-dynamic-translations';
 import { useTheme } from '@lib/hooks/use-theme';
 import type { PageContent } from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
-import type { HomeTranslationData } from '@lib/utils/data-migration';
-import {
-  isHomeDynamicFormat,
-  migrateHomeTranslationData,
-} from '@lib/utils/data-migration';
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { useCallback, useEffect, useState } from 'react';
-
-import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 /**
  * Dynamic Home Page Component
@@ -28,19 +21,9 @@ import { useTranslations } from 'next-intl';
 export function HomeDynamic() {
   const { isDark } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const staticT = useTranslations('pages.home');
   const { t: dynamicT, isLoading } = useDynamicTranslations({
     sections: ['pages.home'],
   });
-
-  // Enhanced translation function with dynamic/static fallback
-  const t = useCallback(
-    (key: string, params?: Record<string, string | number | Date>) => {
-      const dynamicValue = dynamicT(key, 'pages.home', params);
-      return dynamicValue || staticT(key, params);
-    },
-    [dynamicT, staticT]
-  );
 
   // Ensure client-side rendering consistency
   useEffect(() => {
@@ -54,48 +37,37 @@ export function HomeDynamic() {
     // Convert translation data to PageContent
     const createPageContent = () => {
       try {
-        // Get the raw home translation data
-        const homeData: HomeTranslationData = {
-          title: t('title'),
-          subtitle: t('subtitle'),
-          getStarted: t('getStarted'),
-          learnMore: t('learnMore'),
-          features: staticT.raw('features') as Array<{
-            title: string;
-            description: string;
-          }>,
-          copyright: {
-            prefix: t('copyright.prefix'),
-            linkText: t('copyright.linkText'),
-            suffix: t('copyright.suffix'),
-          },
-        };
+        // Directly get sections array from the translation data
+        const sections = dynamicT('sections', 'pages.home');
 
-        // Migrate to dynamic format if needed
-        const dynamicData = isHomeDynamicFormat(homeData)
-          ? homeData
-          : migrateHomeTranslationData(homeData);
-
-        if (dynamicData.sections) {
+        if (sections && Array.isArray(sections) && sections.length > 0) {
+          // Direct dynamic format
           const content: PageContent = {
-            sections: dynamicData.sections,
-            metadata: dynamicData.metadata || {
+            sections: sections,
+            metadata: {
               version: '1.0.0',
               lastModified: new Date().toISOString(),
               author: 'system',
             },
           };
           setPageContent(content);
+          console.log(
+            'HomeDynamic: Page content created with',
+            sections.length,
+            'sections'
+          );
+        } else {
+          console.error('HomeDynamic: No valid dynamic home sections found');
         }
       } catch (error) {
-        console.error('Failed to create page content:', error);
+        console.error('HomeDynamic: Failed to create page content:', error);
       }
     };
 
     if (mounted && !isLoading) {
       createPageContent();
     }
-  }, [mounted, isLoading, t, staticT]);
+  }, [mounted, isLoading, dynamicT]);
 
   // Get colors based on theme
   const getColors = () => {
