@@ -1,6 +1,8 @@
 'use client';
 
 import { DynamicAboutRenderer } from '@components/about/dynamic-about-renderer';
+import { AdminButton } from '@components/admin/admin-button';
+import { LanguageSwitcher } from '@components/ui/language-switcher';
 import { PageLoader } from '@components/ui/page-loader';
 import { useDynamicTranslations } from '@lib/hooks/use-dynamic-translations';
 import { useTheme } from '@lib/hooks/use-theme';
@@ -32,53 +34,22 @@ export default function AboutPage() {
     setMounted(true);
   }, []);
 
-  // get colors based on theme
+  // get homepage-style colors based on theme
   const getColors = () => {
     if (isDark) {
       return {
-        titleGradient: 'from-stone-300 to-stone-500',
+        bgColor: '#1c1917',
         textColor: 'text-gray-300',
-        headingColor: 'text-gray-100',
-        paragraphColor: 'text-gray-400',
-        cardBg: 'bg-stone-700',
-        cardBorder: 'border-stone-600',
-        cardShadow: 'shadow-[0_4px_20px_rgba(0,0,0,0.3)]',
-        cardHeadingColor: 'text-stone-300',
-        cardTextColor: 'text-gray-400',
-        buttonClass:
-          'bg-stone-600 hover:bg-stone-500 text-gray-100 cursor-pointer hover:scale-105',
       };
     } else {
       return {
-        titleGradient: 'from-stone-700 to-stone-900',
+        bgColor: '#f5f5f4',
         textColor: 'text-stone-700',
-        headingColor: 'text-stone-800',
-        paragraphColor: 'text-stone-600',
-        cardBg: 'bg-stone-100',
-        cardBorder: 'border-stone-200',
-        cardShadow: 'shadow-[0_4px_20px_rgba(0,0,0,0.1)]',
-        cardHeadingColor: 'text-stone-700',
-        cardTextColor: 'text-stone-600',
-        buttonClass:
-          'bg-stone-800 hover:bg-stone-700 text-gray-100 cursor-pointer hover:scale-105',
       };
     }
   };
 
-  const colors = mounted
-    ? getColors()
-    : {
-        titleGradient: '',
-        textColor: '',
-        headingColor: '',
-        paragraphColor: '',
-        cardBg: '',
-        cardBorder: '',
-        cardShadow: '',
-        cardHeadingColor: '',
-        cardTextColor: '',
-        buttonClass: '',
-      };
+  const colors = getColors();
 
   // handle "start exploring" button click
   const handleExploreClick = async () => {
@@ -134,12 +105,22 @@ export default function AboutPage() {
   };
 
   return (
-    <main className="min-h-screen w-full overflow-x-hidden px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-      <DynamicAboutRenderer
-        translationData={translationData}
-        colors={colors}
-        onButtonClick={handleExploreClick}
-      />
-    </main>
+    <div
+      className="relative min-h-screen w-full px-4 py-12 sm:px-6 lg:px-8"
+      style={{ backgroundColor: colors.bgColor }}
+    >
+      {/* Top-right toolbar: Admin button (left) + Language switcher (right) */}
+      <div className="fixed top-4 right-4 z-50 hidden flex-col items-end gap-2 sm:flex sm:flex-row sm:items-center sm:gap-3 lg:top-6 lg:right-6">
+        <AdminButton />
+        <LanguageSwitcher variant="floating" />
+      </div>
+
+      <main className="mx-auto max-w-5xl">
+        <DynamicAboutRenderer
+          translationData={translationData}
+          onButtonClick={handleExploreClick}
+        />
+      </main>
+    </div>
   );
 }
