@@ -474,6 +474,91 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
         return false;
       }
     } else {
+      // Handle dropping existing components on section drop zones (creates new section)
+      if (overId.startsWith('section-drop-')) {
+        console.log('🔄 EXISTING COMPONENT DROP ON SECTION-DROP:', overId);
+
+        // Find the source component
+        let sourceLocation = null;
+        for (
+          let sectionIndex = 0;
+          sectionIndex < newPageContent.sections.length;
+          sectionIndex++
+        ) {
+          const section = newPageContent.sections[sectionIndex];
+          for (
+            let columnIndex = 0;
+            columnIndex < section.columns.length;
+            columnIndex++
+          ) {
+            const column = section.columns[columnIndex];
+            const componentIndex = column.findIndex(
+              comp => comp.id === activeId
+            );
+            if (componentIndex !== -1) {
+              sourceLocation = {
+                sectionIndex,
+                columnIndex,
+                componentIndex,
+                section,
+                column,
+                component: column[componentIndex],
+              };
+              break;
+            }
+          }
+          if (sourceLocation) break;
+        }
+
+        if (!sourceLocation) {
+          console.log('❌ SOURCE COMPONENT NOT FOUND:', activeId);
+          return false;
+        }
+
+        // Remove component from source
+        const [movedComponent] = sourceLocation.column.splice(
+          sourceLocation.componentIndex,
+          1
+        );
+
+        // Create a new section with the moved component
+        const newSection = createDefaultSection('single-column');
+        newSection.columns[0].push(movedComponent);
+
+        // Handle different drop zones
+        if (overId === 'section-drop-final') {
+          // Add to the end
+          newPageContent.sections.push(newSection);
+        } else {
+          // Parse the drop zone index to insert at the right position
+          const dropIndex = parseInt(overId.replace('section-drop-', ''));
+          newPageContent.sections.splice(dropIndex, 0, newSection);
+        }
+
+        console.log('✅ NEW SECTION CREATED WITH EXISTING COMPONENT:', {
+          componentId: movedComponent.id,
+          fromSection: sourceLocation.section.id,
+          fromColumn: sourceLocation.columnIndex,
+          newSectionId: newSection.id,
+        });
+
+        // Clean up empty sections
+        const cleanedSections = newPageContent.sections.filter(section =>
+          section.columns.some(column => column.length > 0)
+        );
+
+        // Save changes and return success
+        set(state => ({
+          pageContent: { ...newPageContent, sections: cleanedSections },
+          undoStack: [...state.undoStack, state.pageContent!].slice(-20),
+          redoStack: [],
+          isDirty: true,
+        }));
+
+        console.log('✅ EXISTING COMPONENT SECTION DROP SUCCESSFUL');
+        return true;
+      }
+
       // Handle moving existing components within or between containers
       const activeContainer = active.data.current?.sortable?.containerId;
       const overContainer = over.data.current?.sortable?.containerId || overId;
