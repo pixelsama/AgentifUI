@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@components/ui/button';
-import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -29,39 +28,23 @@ interface HomePreviewProps {
 }
 
 export function HomePreview({ config, previewDevice }: HomePreviewProps) {
-  const { isDark } = useTheme();
-
-  const getColors = () => {
-    if (isDark) {
-      return {
-        titleGradient: 'from-stone-300 to-stone-500',
-        textColor: 'text-gray-300',
-        cardBg: 'bg-stone-700',
-        cardBorder: 'border-stone-600',
-        cardShadow: 'shadow-[0_4px_20px_rgba(0,0,0,0.3)]',
-        primaryButton: 'bg-stone-600 hover:bg-stone-500 text-gray-100',
-        secondaryButton: 'border-stone-500 text-gray-200 hover:bg-stone-600',
-        featureIconBg: 'bg-stone-600',
-        featureTextColor: 'text-gray-300',
-        bgColor: '#1c1917',
-      };
-    } else {
-      return {
-        titleGradient: 'from-stone-700 to-stone-900',
-        textColor: 'text-stone-700',
-        cardBg: 'bg-stone-100',
-        cardBorder: 'border-stone-200',
-        cardShadow: 'shadow-[0_4px_20px_rgba(0,0,0,0.1)]',
-        primaryButton: 'bg-stone-800 hover:bg-stone-700 text-gray-100',
-        secondaryButton: 'border-stone-400 text-stone-800 hover:bg-stone-200',
-        featureIconBg: 'bg-stone-200',
-        featureTextColor: 'text-stone-700',
-        bgColor: '#f5f5f4',
-      };
-    }
+  // Tailwind classes for responsive dark mode
+  const colors = {
+    bgClass: 'bg-stone-100 dark:bg-stone-900',
+    titleGradient:
+      'from-stone-700 to-stone-900 dark:from-stone-300 dark:to-stone-500',
+    textColor: 'text-stone-700 dark:text-gray-300',
+    cardBg: 'bg-stone-100 dark:bg-stone-700',
+    cardBorder: 'border-stone-200 dark:border-stone-600',
+    cardShadow:
+      'shadow-[0_4px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)]',
+    primaryButton:
+      'bg-stone-800 hover:bg-stone-700 text-gray-100 dark:bg-stone-600 dark:hover:bg-stone-500',
+    secondaryButton:
+      'border-stone-400 text-stone-800 hover:bg-stone-200 dark:border-stone-500 dark:text-gray-200 dark:hover:bg-stone-600',
+    featureIconBg: 'bg-stone-200 dark:bg-stone-600',
+    featureTextColor: 'text-stone-700 dark:text-gray-300',
   };
-
-  const colors = getColors();
 
   const getDeviceStyles = () => {
     switch (previewDevice) {
@@ -121,10 +104,7 @@ export function HomePreview({ config, previewDevice }: HomePreviewProps) {
       )}
     >
       <div className={deviceStyles.container}>
-        <div
-          className={cn(deviceStyles.screen)}
-          style={{ backgroundColor: colors.bgColor }}
-        >
+        <div className={cn(deviceStyles.screen, colors.bgClass)}>
           <div className={deviceStyles.content}>
             <AnimatePresence>
               <main className={deviceStyles.mainClass}>

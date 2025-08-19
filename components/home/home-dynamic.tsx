@@ -5,7 +5,6 @@ import ComponentRenderer from '@components/admin/content/component-renderer';
 import { LanguageSwitcher } from '@components/ui/language-switcher';
 import { PageLoader } from '@components/ui/page-loader';
 import { useDynamicTranslations } from '@lib/hooks/use-dynamic-translations';
-import { useTheme } from '@lib/hooks/use-theme';
 import type { PageContent } from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -19,7 +18,6 @@ import { useEffect, useState } from 'react';
  * Supports both legacy static format and new dynamic sections format
  */
 export function HomeDynamic() {
-  const { isDark } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { t: dynamicT, isLoading } = useDynamicTranslations({
     sections: ['pages.home'],
@@ -69,22 +67,11 @@ export function HomeDynamic() {
     }
   }, [mounted, isLoading, dynamicT]);
 
-  // Get colors based on theme
-  const getColors = () => {
-    if (isDark) {
-      return {
-        bgColor: '#1c1917',
-        textColor: 'text-gray-300',
-      };
-    } else {
-      return {
-        bgColor: '#f5f5f4',
-        textColor: 'text-stone-700',
-      };
-    }
+  // Homepage-style colors using Tailwind classes
+  const colors = {
+    bgClass: 'bg-stone-100 dark:bg-stone-900',
+    textColor: 'text-stone-700 dark:text-gray-300',
   };
-
-  const colors = getColors();
 
   // Show loading state while mounting or dynamic translations load
   if (!mounted || isLoading || !pageContent) {
@@ -169,8 +156,7 @@ export function HomeDynamic() {
   return (
     <AnimatePresence>
       <div
-        className="relative w-full px-4 py-12 sm:px-6 lg:px-8"
-        style={{ backgroundColor: colors.bgColor }}
+        className={`relative w-full px-4 py-12 sm:px-6 lg:px-8 ${colors.bgClass}`}
       >
         {/* Top-right toolbar: Admin button (left) + Language switcher (right) */}
         {/* Uses absolute positioning with responsive design, hidden on mobile to avoid layout issues */}

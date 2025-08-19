@@ -5,7 +5,6 @@ import { AdminButton } from '@components/admin/admin-button';
 import { LanguageSwitcher } from '@components/ui/language-switcher';
 import { PageLoader } from '@components/ui/page-loader';
 import { useDynamicTranslations } from '@lib/hooks/use-dynamic-translations';
-import { useTheme } from '@lib/hooks/use-theme';
 import { createClient } from '@lib/supabase/client';
 import type { AboutTranslationData } from '@lib/types/about-page-components';
 
@@ -16,7 +15,6 @@ import { useRouter } from 'next/navigation';
 
 export default function AboutPage() {
   const router = useRouter();
-  const { isDark } = useTheme();
   const staticT = useTranslations('pages.about');
   const { t: dynamicT, isLoading } = useDynamicTranslations({
     sections: ['pages.about'],
@@ -34,22 +32,10 @@ export default function AboutPage() {
     setMounted(true);
   }, []);
 
-  // get homepage-style colors based on theme
-  const getColors = () => {
-    if (isDark) {
-      return {
-        bgColor: '#1c1917',
-        textColor: 'text-gray-300',
-      };
-    } else {
-      return {
-        bgColor: '#f5f5f4',
-        textColor: 'text-stone-700',
-      };
-    }
+  // Homepage-style colors using Tailwind classes
+  const colors = {
+    bgClass: 'bg-stone-100 dark:bg-stone-900',
   };
-
-  const colors = getColors();
 
   // handle "start exploring" button click
   const handleExploreClick = async () => {
@@ -106,8 +92,7 @@ export default function AboutPage() {
 
   return (
     <div
-      className="relative min-h-screen w-full px-4 py-12 sm:px-6 lg:px-8"
-      style={{ backgroundColor: colors.bgColor }}
+      className={`relative min-h-screen w-full px-4 py-12 sm:px-6 lg:px-8 ${colors.bgClass}`}
     >
       {/* Top-right toolbar: Admin button (left) + Language switcher (right) */}
       <div className="fixed top-4 right-4 z-50 hidden flex-col items-end gap-2 sm:flex sm:flex-row sm:items-center sm:gap-3 lg:top-6 lg:right-6">
