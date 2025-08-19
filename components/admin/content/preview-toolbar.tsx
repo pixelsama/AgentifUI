@@ -1,6 +1,5 @@
 'use client';
 
-import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { Fullscreen, Monitor, Smartphone, Tablet, X } from 'lucide-react';
 
@@ -22,7 +21,6 @@ export function PreviewToolbar({
   onPreviewToggle,
   onFullscreenPreview,
 }: PreviewToolbarProps) {
-  const { isDark } = useTheme();
   const t = useTranslations('pages.admin.content.previewToolbar');
 
   const deviceIcons = [
@@ -35,14 +33,14 @@ export function PreviewToolbar({
     <div
       className={cn(
         'flex h-14 flex-shrink-0 items-center justify-between border-b px-4',
-        isDark ? 'border-stone-600 bg-stone-800' : 'border-stone-200 bg-white'
+        'border-stone-200 bg-white dark:border-stone-600 dark:bg-stone-800'
       )}
     >
       <div className="flex items-center gap-2">
         <span
           className={cn(
             'text-sm font-medium',
-            isDark ? 'text-stone-300' : 'text-stone-700'
+            'text-stone-700 dark:text-stone-300'
           )}
         >
           {activeTab === 'about' ? t('aboutPreview') : t('homePreview')}
@@ -57,12 +55,8 @@ export function PreviewToolbar({
             className={cn(
               'rounded-md p-2 transition-colors',
               previewDevice === name
-                ? isDark
-                  ? 'bg-stone-600 text-stone-100'
-                  : 'bg-stone-200 text-stone-900'
-                : isDark
-                  ? 'text-stone-400 hover:bg-stone-700 hover:text-stone-200'
-                  : 'text-stone-500 hover:bg-stone-100 hover:text-stone-700'
+                ? 'bg-stone-200 text-stone-900 dark:bg-stone-600 dark:text-stone-100'
+                : 'text-stone-500 hover:bg-stone-100 hover:text-stone-700 dark:text-stone-400 dark:hover:bg-stone-700 dark:hover:text-stone-200'
             )}
           >
             <Icon className="h-5 w-5" />
@@ -75,9 +69,7 @@ export function PreviewToolbar({
           onClick={onFullscreenPreview}
           className={cn(
             'rounded-md p-2 transition-colors',
-            isDark
-              ? 'text-stone-400 hover:bg-stone-700 hover:text-stone-200'
-              : 'text-stone-500 hover:bg-stone-100 hover:text-stone-700'
+            'text-stone-500 hover:bg-stone-100 hover:text-stone-700 dark:text-stone-400 dark:hover:bg-stone-700 dark:hover:text-stone-200'
           )}
         >
           <Fullscreen className="h-5 w-5" />
@@ -87,9 +79,7 @@ export function PreviewToolbar({
           onClick={onPreviewToggle}
           className={cn(
             'rounded-md p-2 transition-colors',
-            isDark
-              ? 'text-stone-400 hover:bg-stone-700 hover:text-stone-200'
-              : 'text-stone-500 hover:bg-stone-100 hover:text-stone-700'
+            'text-stone-500 hover:bg-stone-100 hover:text-stone-700 dark:text-stone-400 dark:hover:bg-stone-700 dark:hover:text-stone-200'
           )}
         >
           <X className="h-5 w-5" />

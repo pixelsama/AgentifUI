@@ -1,6 +1,5 @@
 'use client';
 
-import { useTheme } from '@lib/hooks/use-theme';
 import { PageContent } from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
 import type { HomeTranslationData } from '@lib/utils/data-migration';
@@ -36,8 +35,6 @@ export function HomePreviewDynamic({
   translation,
   previewDevice,
 }: HomePreviewDynamicProps) {
-  const { isDark } = useTheme();
-
   // Ensure translation is in dynamic format
   const dynamicTranslation = React.useMemo(() => {
     if (!isHomeDynamicFormat(translation)) {
@@ -58,22 +55,11 @@ export function HomePreviewDynamic({
     };
   }, [dynamicTranslation]);
 
-  // Get homepage-style colors
-  const getColors = () => {
-    if (isDark) {
-      return {
-        bgColor: '#1c1917',
-        textColor: 'text-gray-300',
-      };
-    } else {
-      return {
-        bgColor: '#f5f5f4',
-        textColor: 'text-stone-700',
-      };
-    }
+  // Homepage-style colors using Tailwind classes that respond to dark mode
+  const colors = {
+    bgClass: 'bg-stone-100 dark:bg-stone-900',
+    textColor: 'text-stone-700 dark:text-gray-300',
   };
-
-  const colors = getColors();
 
   /**
    * Get device-specific container styles with homepage styling
@@ -193,10 +179,7 @@ export function HomePreviewDynamic({
       )}
     >
       <div className={deviceStyles.container}>
-        <div
-          className={cn(deviceStyles.screen)}
-          style={{ backgroundColor: colors.bgColor }}
-        >
+        <div className={cn(deviceStyles.screen, colors.bgClass)}>
           <div className={deviceStyles.content}>
             <AnimatePresence>
               <main className={deviceStyles.mainClass}>{renderSections()}</main>

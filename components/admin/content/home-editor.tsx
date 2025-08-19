@@ -9,7 +9,6 @@ import {
 } from '@components/ui/select';
 import type { SupportedLocale } from '@lib/config/language-config';
 import { getLanguageInfo } from '@lib/config/language-config';
-import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { Plus, Trash2 } from 'lucide-react';
 
@@ -52,7 +51,6 @@ export function HomeEditor({
   onTranslationsChange,
   onLocaleChange,
 }: HomeEditorProps) {
-  const { isDark } = useTheme();
   const t = useTranslations('pages.admin.content.editor');
   const currentTranslation = translations[currentLocale] || {};
 
@@ -62,13 +60,13 @@ export function HomeEditor({
       HomeTranslation
     >;
     const fieldParts = field.split('.');
-    let current = newTranslations[currentLocale] as any;
+    let current = newTranslations[currentLocale] as Record<string, unknown>;
 
     for (let i = 0; i < fieldParts.length - 1; i++) {
       if (!current[fieldParts[i]]) {
         current[fieldParts[i]] = {};
       }
-      current = current[fieldParts[i]];
+      current = current[fieldParts[i]] as Record<string, unknown>;
     }
 
     current[fieldParts[fieldParts.length - 1]] = value;
@@ -106,7 +104,7 @@ export function HomeEditor({
         <label
           className={cn(
             'mb-2 block text-sm font-medium',
-            isDark ? 'text-stone-300' : 'text-stone-700'
+            'text-stone-700 dark:text-stone-300'
           )}
         >
           {t('common.editLanguage')}
@@ -118,9 +116,7 @@ export function HomeEditor({
           <SelectTrigger
             className={cn(
               'w-full transition-all duration-200 focus:ring-2 focus:ring-offset-2',
-              isDark
-                ? 'border-stone-600 bg-stone-800 text-stone-100 hover:border-stone-500 hover:bg-stone-700 focus:ring-stone-400'
-                : 'border-stone-300 bg-white text-stone-900 hover:border-stone-400 hover:bg-stone-50 focus:ring-stone-500'
+              'border-stone-300 bg-white text-stone-900 hover:border-stone-400 hover:bg-stone-50 focus:ring-stone-500 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-700 dark:focus:ring-stone-400'
             )}
           >
             <SelectValue>
@@ -137,9 +133,7 @@ export function HomeEditor({
           <SelectContent
             className={cn(
               'border shadow-lg',
-              isDark
-                ? 'border-stone-600 bg-stone-800'
-                : 'border-stone-200 bg-white'
+              'border-stone-200 bg-white dark:border-stone-600 dark:bg-stone-800'
             )}
           >
             {supportedLocales.map(locale => {
@@ -150,9 +144,7 @@ export function HomeEditor({
                   value={locale}
                   className={cn(
                     'cursor-pointer transition-colors',
-                    isDark
-                      ? 'hover:bg-stone-700 focus:bg-stone-700'
-                      : 'hover:bg-stone-100 focus:bg-stone-100'
+                    'hover:bg-stone-100 focus:bg-stone-100 dark:hover:bg-stone-700 dark:focus:bg-stone-700'
                   )}
                 >
                   <div className="flex w-full items-center justify-between">
@@ -172,7 +164,7 @@ export function HomeEditor({
         <label
           className={cn(
             'mb-2 block text-sm font-medium',
-            isDark ? 'text-stone-300' : 'text-stone-700'
+            'text-stone-700 dark:text-stone-300'
           )}
         >
           {t('home.pageTitle')}
@@ -183,9 +175,7 @@ export function HomeEditor({
           onChange={e => handleFieldChange('title', e.target.value)}
           className={cn(
             'w-full rounded-lg border px-3 py-2 text-sm',
-            isDark
-              ? 'border-stone-600 bg-stone-700 text-stone-100'
-              : 'border-stone-300 bg-white text-stone-900'
+            'border-stone-300 bg-white text-stone-900 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-100'
           )}
         />
       </div>
@@ -194,7 +184,7 @@ export function HomeEditor({
         <label
           className={cn(
             'mb-2 block text-sm font-medium',
-            isDark ? 'text-stone-300' : 'text-stone-700'
+            'text-stone-700 dark:text-stone-300'
           )}
         >
           {t('home.subtitle')}
@@ -205,9 +195,7 @@ export function HomeEditor({
           rows={3}
           className={cn(
             'w-full resize-none rounded-lg border px-3 py-2 text-sm',
-            isDark
-              ? 'border-stone-600 bg-stone-700 text-stone-100'
-              : 'border-stone-300 bg-white text-stone-900'
+            'border-stone-300 bg-white text-stone-900 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-100'
           )}
         />
       </div>
@@ -217,7 +205,7 @@ export function HomeEditor({
           <label
             className={cn(
               'block text-sm font-medium',
-              isDark ? 'text-stone-300' : 'text-stone-700'
+              'text-stone-700 dark:text-stone-300'
             )}
           >
             {t('home.features')}
@@ -226,9 +214,7 @@ export function HomeEditor({
             onClick={addFeatureCard}
             className={cn(
               'rounded p-1 transition-colors',
-              isDark
-                ? 'bg-stone-700 text-stone-300 hover:bg-stone-600'
-                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+              'bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-stone-700 dark:text-stone-300 dark:hover:bg-stone-600'
             )}
           >
             <Plus className="h-4 w-4" />
@@ -242,14 +228,14 @@ export function HomeEditor({
                 key={index}
                 className={cn(
                   'rounded-lg border p-4',
-                  isDark ? 'border-stone-600' : 'border-stone-200'
+                  'border-stone-200 dark:border-stone-600'
                 )}
               >
                 <div className="flex items-center justify-between">
                   <p
                     className={cn(
                       'text-sm font-medium',
-                      isDark ? 'text-stone-300' : 'text-stone-700'
+                      'text-stone-700 dark:text-stone-300'
                     )}
                   >
                     {t('common.cardNumber', { number: index + 1 })}
@@ -258,7 +244,7 @@ export function HomeEditor({
                     onClick={() => removeFeatureCard(index)}
                     className={cn(
                       'rounded p-1 text-red-500 transition-colors',
-                      isDark ? 'hover:bg-red-900/50' : 'hover:bg-red-100'
+                      'hover:bg-red-100 dark:hover:bg-red-900/50'
                     )}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -275,9 +261,7 @@ export function HomeEditor({
                     }
                     className={cn(
                       'w-full rounded-md border px-3 py-1.5 text-sm',
-                      isDark
-                        ? 'border-stone-500 bg-stone-600 text-stone-100'
-                        : 'border-stone-300 bg-white text-stone-900'
+                      'border-stone-300 bg-white text-stone-900 dark:border-stone-500 dark:bg-stone-600 dark:text-stone-100'
                     )}
                   />
                   <textarea
@@ -293,9 +277,7 @@ export function HomeEditor({
                     rows={3}
                     className={cn(
                       'w-full resize-none rounded-md border px-3 py-1.5 text-sm',
-                      isDark
-                        ? 'border-stone-500 bg-stone-600 text-stone-100'
-                        : 'border-stone-300 bg-white text-stone-900'
+                      'border-stone-300 bg-white text-stone-900 dark:border-stone-500 dark:bg-stone-600 dark:text-stone-100'
                     )}
                   />
                 </div>
@@ -310,7 +292,7 @@ export function HomeEditor({
           <label
             className={cn(
               'mb-2 block text-sm font-medium',
-              isDark ? 'text-stone-300' : 'text-stone-700'
+              'text-stone-700 dark:text-stone-300'
             )}
           >
             {t('home.getStarted')}
@@ -321,9 +303,7 @@ export function HomeEditor({
             onChange={e => handleFieldChange('getStarted', e.target.value)}
             className={cn(
               'w-full rounded-lg border px-3 py-2 text-sm',
-              isDark
-                ? 'border-stone-600 bg-stone-700 text-stone-100'
-                : 'border-stone-300 bg-white text-stone-900'
+              'border-stone-300 bg-white text-stone-900 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-100'
             )}
           />
         </div>
@@ -331,7 +311,7 @@ export function HomeEditor({
           <label
             className={cn(
               'mb-2 block text-sm font-medium',
-              isDark ? 'text-stone-300' : 'text-stone-700'
+              'text-stone-700 dark:text-stone-300'
             )}
           >
             {t('home.learnMore')}
@@ -342,9 +322,7 @@ export function HomeEditor({
             onChange={e => handleFieldChange('learnMore', e.target.value)}
             className={cn(
               'w-full rounded-lg border px-3 py-2 text-sm',
-              isDark
-                ? 'border-stone-600 bg-stone-700 text-stone-100'
-                : 'border-stone-300 bg-white text-stone-900'
+              'border-stone-300 bg-white text-stone-900 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-100'
             )}
           />
         </div>
@@ -354,7 +332,7 @@ export function HomeEditor({
         <label
           className={cn(
             'mb-2 block text-sm font-medium',
-            isDark ? 'text-stone-300' : 'text-stone-700'
+            'text-stone-700 dark:text-stone-300'
           )}
         >
           {t('home.copyright')}
@@ -369,9 +347,7 @@ export function HomeEditor({
             }
             className={cn(
               'w-full rounded-lg border px-3 py-2 text-sm',
-              isDark
-                ? 'border-stone-600 bg-stone-700 text-stone-100'
-                : 'border-stone-300 bg-white text-stone-900'
+              'border-stone-300 bg-white text-stone-900 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-100'
             )}
           />
           <input
@@ -383,9 +359,7 @@ export function HomeEditor({
             }
             className={cn(
               'w-full rounded-lg border px-3 py-2 text-sm',
-              isDark
-                ? 'border-stone-600 bg-stone-700 text-stone-100'
-                : 'border-stone-300 bg-white text-stone-900'
+              'border-stone-300 bg-white text-stone-900 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-100'
             )}
           />
           <input
@@ -397,9 +371,7 @@ export function HomeEditor({
             }
             className={cn(
               'w-full rounded-lg border px-3 py-2 text-sm',
-              isDark
-                ? 'border-stone-600 bg-stone-700 text-stone-100'
-                : 'border-stone-300 bg-white text-stone-900'
+              'border-stone-300 bg-white text-stone-900 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-100'
             )}
           />
         </div>
