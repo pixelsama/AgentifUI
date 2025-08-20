@@ -12,8 +12,6 @@ interface AvatarPreviewProps {
   userName: string;
   isUploading?: boolean;
   progress?: number;
-  isDark?: boolean;
-  colors: any;
   size?: 'sm' | 'md' | 'lg';
 }
 
@@ -22,8 +20,6 @@ export function AvatarPreview({
   userName,
   isUploading = false,
   progress = 0,
-  isDark = false,
-  colors,
   size = 'md',
 }: AvatarPreviewProps) {
   const t = useTranslations('pages.settings.avatarModal');
@@ -43,7 +39,7 @@ export function AvatarPreview({
           size={size}
           className={cn(
             'ring-2',
-            isDark ? 'ring-stone-700' : 'ring-stone-200',
+            'ring-stone-200 dark:ring-stone-700',
             isUploading && 'opacity-75'
           )}
           alt={t('currentAvatar')}
@@ -64,7 +60,7 @@ export function AvatarPreview({
         <h3
           className={cn(
             'font-serif text-sm font-medium',
-            colors.textColor.tailwind
+            'text-stone-900 dark:text-stone-100'
           )}
         >
           {userName}
@@ -72,7 +68,7 @@ export function AvatarPreview({
         <p
           className={cn(
             'font-serif text-xs',
-            colors.secondaryTextColor.tailwind
+            'text-stone-600 dark:text-stone-400'
           )}
         >
           {t('supportedFormats')}
