@@ -11,6 +11,11 @@ import { clonePageContent } from '@lib/utils/performance';
 import { create } from 'zustand';
 
 /**
+ * Maximum number of undo/redo states to keep in memory
+ */
+const MAX_UNDO_STEPS = 20;
+
+/**
  * About Editor State Interface
  *
  * Manages the state of the dynamic about page editor
@@ -126,7 +131,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
       // Save current state to undo stack before updating
       set(state => ({
         pageContent: newPageContent,
-        undoStack: [...state.undoStack, pageContent].slice(-20), // Keep last 20 states
+        undoStack: [...state.undoStack, pageContent].slice(-MAX_UNDO_STEPS), // Keep last MAX_UNDO_STEPS states
         redoStack: [], // Clear redo stack on new change
         isDirty: true,
       }));
@@ -151,7 +156,9 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
       // Save to undo stack
       set(state => ({
         pageContent: newPageContent,
-        undoStack: [...state.undoStack, state.pageContent!].slice(-20),
+        undoStack: [...state.undoStack, state.pageContent!].slice(
+          -MAX_UNDO_STEPS
+        ),
         redoStack: [],
         isDirty: true,
       }));
@@ -187,7 +194,9 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     if (deleted) {
       set(state => ({
         pageContent: { ...newPageContent, sections: cleanedSections },
-        undoStack: [...state.undoStack, state.pageContent!].slice(-20),
+        undoStack: [...state.undoStack, state.pageContent!].slice(
+          -MAX_UNDO_STEPS
+        ),
         redoStack: [],
         selectedComponentId:
           state.selectedComponentId === id ? null : state.selectedComponentId,
@@ -357,7 +366,9 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
         // Save changes and return success
         set(state => ({
           pageContent: newPageContent,
-          undoStack: [...state.undoStack, state.pageContent!].slice(-20),
+          undoStack: [...state.undoStack, state.pageContent!].slice(
+            -MAX_UNDO_STEPS
+          ),
           redoStack: [],
           isDirty: true,
         }));
@@ -451,7 +462,9 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
 
           set(state => ({
             pageContent: { ...newPageContent, sections: cleanedSections },
-            undoStack: [...state.undoStack, state.pageContent!].slice(-20),
+            undoStack: [...state.undoStack, state.pageContent!].slice(
+              -MAX_UNDO_STEPS
+            ),
             redoStack: [],
             isDirty: true,
           }));
@@ -550,7 +563,9 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
         // Save changes and return success
         set(state => ({
           pageContent: { ...newPageContent, sections: cleanedSections },
-          undoStack: [...state.undoStack, state.pageContent!].slice(-20),
+          undoStack: [...state.undoStack, state.pageContent!].slice(
+            -MAX_UNDO_STEPS
+          ),
           redoStack: [],
           isDirty: true,
         }));
@@ -833,7 +848,9 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
                   ...newPageContent,
                   sections: cleanedSections,
                 },
-                undoStack: [...state.undoStack, state.pageContent!].slice(-20),
+                undoStack: [...state.undoStack, state.pageContent!].slice(
+                  -MAX_UNDO_STEPS
+                ),
                 redoStack: [],
                 isDirty: true,
               }));
@@ -872,7 +889,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
 
     set(state => ({
       pageContent: newPageContent,
-      undoStack: [...state.undoStack, pageContent].slice(-20),
+      undoStack: [...state.undoStack, pageContent].slice(-MAX_UNDO_STEPS),
       redoStack: [],
       isDirty: true,
     }));
@@ -888,7 +905,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
 
     set(state => ({
       pageContent: newPageContent,
-      undoStack: [...state.undoStack, pageContent].slice(-20),
+      undoStack: [...state.undoStack, pageContent].slice(-MAX_UNDO_STEPS),
       redoStack: [],
       isDirty: true,
     }));
@@ -905,7 +922,10 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
     set({
       pageContent: previousState,
       undoStack: newUndoStack,
-      redoStack: [state.pageContent, ...state.redoStack].slice(0, 20),
+      redoStack: [state.pageContent, ...state.redoStack].slice(
+        0,
+        MAX_UNDO_STEPS
+      ),
       selectedComponentId: null,
     });
   },
@@ -920,7 +940,7 @@ export const useAboutEditorStore = create<AboutEditorState>((set, get) => ({
 
     set({
       pageContent: nextState,
-      undoStack: [...state.undoStack, state.pageContent].slice(-20),
+      undoStack: [...state.undoStack, state.pageContent].slice(-MAX_UNDO_STEPS),
       redoStack: newRedoStack,
       selectedComponentId: null,
     });
