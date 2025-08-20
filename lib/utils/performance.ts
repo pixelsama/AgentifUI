@@ -66,7 +66,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
   callback: T,
   delay: number,
   deps: React.DependencyList
-): T {
+): (...args: Parameters<T>) => void {
   const debouncedCallback = React.useMemo(
     () => debounce(callback, delay),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,7 +84,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
     };
   }, [debouncedCallback]);
 
-  return debouncedCallback as T;
+  return debouncedCallback;
 }
 
 /**
@@ -95,14 +95,14 @@ export function useThrottledCallback<T extends (...args: any[]) => any>(
   callback: T,
   delay: number,
   deps: React.DependencyList
-): T {
+): (...args: Parameters<T>) => void {
   const throttledCallback = React.useMemo(
     () => throttle(callback, delay),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     deps
   );
 
-  return throttledCallback as T;
+  return throttledCallback;
 }
 
 /**
