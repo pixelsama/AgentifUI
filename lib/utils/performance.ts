@@ -99,7 +99,7 @@ export function useThrottledCallback<T extends (...args: any[]) => any>(
   const throttledCallback = React.useMemo(
     () => throttle(callback, delay),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    deps
+    [callback, delay, ...deps]
   );
 
   return throttledCallback;
