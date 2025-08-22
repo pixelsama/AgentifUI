@@ -12,6 +12,7 @@ import {
   getResolvedComponentProps,
 } from '@lib/types/about-page-components';
 import { cn } from '@lib/utils';
+import { processTextPlaceholders } from '@lib/utils/text-processing';
 
 import React from 'react';
 
@@ -82,6 +83,9 @@ const Paragraph: React.FC<ParagraphProps> = ({ content, textAlign }) => {
     right: 'text-right',
   };
 
+  // Process text placeholders like {year}
+  const processedContent = processTextPlaceholders(content);
+
   return (
     <p
       className={cn(
@@ -90,7 +94,7 @@ const Paragraph: React.FC<ParagraphProps> = ({ content, textAlign }) => {
         textAlignClasses[textAlign]
       )}
     >
-      {content}
+      {processedContent}
     </p>
   );
 };

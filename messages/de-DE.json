@@ -2128,7 +2128,7 @@
                 "id": "comp-1754655785523-yqfx2g011",
                 "type": "paragraph",
                 "props": {
-                  "content": "© 2025 AgentifUI. Die Zukunft großer Modellanwendungen erkunden.",
+                  "content": "© {year} AgentifUI. Die Zukunft großer Modellanwendungen erkunden.",
                   "textAlign": "center"
                 }
               }

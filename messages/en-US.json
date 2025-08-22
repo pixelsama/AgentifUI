@@ -2129,7 +2129,7 @@
                 "id": "comp-1754655785510-8fd66745a",
                 "type": "paragraph",
                 "props": {
-                  "content": "© 2025 AgentifUI. Explore the future of large model applications.",
+                  "content": "© {year} AgentifUI. Explore the future of large model applications.",
                   "textAlign": "center"
                 }
               }

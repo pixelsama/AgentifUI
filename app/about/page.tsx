@@ -84,7 +84,7 @@ export default function AboutPage() {
     },
     buttonText: t('buttonText'),
     copyright: {
-      prefix: t('copyright.prefix', { year: new Date().getFullYear() }),
+      prefix: t('copyright.prefix'),
       linkText: t('copyright.linkText'),
       suffix: t('copyright.suffix'),
     },

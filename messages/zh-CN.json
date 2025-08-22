@@ -2129,7 +2129,7 @@
                 "id": "comp-1754655785513-ip1qbopuu",
                 "type": "paragraph",
                 "props": {
-                  "content": "© 2025 AgentifUI. 探索大模型应用的未来。",
+                  "content": "© {year} AgentifUI. 探索大模型应用的未来。",
                   "textAlign": "center"
                 }
               }

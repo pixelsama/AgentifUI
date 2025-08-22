@@ -2129,7 +2129,7 @@
                 "id": "comp-1754655785520-sukotrhas",
                 "type": "paragraph",
                 "props": {
-                  "content": "© 2025 AgentifUI。大規模モデルアプリケーションの未来を探求。",
+                  "content": "© {year} AgentifUI。大規模モデルアプリケーションの未来を探求。",
                   "textAlign": "center"
                 }
               }
