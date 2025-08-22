@@ -5,8 +5,6 @@ import { useAllConversations } from '@lib/hooks/use-all-conversations';
 import { useChatInterface } from '@lib/hooks/use-chat-interface';
 import { useChatWidth } from '@lib/hooks/use-chat-width';
 import { conversationEvents } from '@lib/hooks/use-combined-conversations';
-import { useTheme } from '@lib/hooks/use-theme';
-import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { useChatInputStore } from '@lib/stores/chat-input-store';
 import { useChatStore } from '@lib/stores/chat-store';
 import { useChatTransitionStore } from '@lib/stores/chat-transition-store';
@@ -25,8 +23,6 @@ import { HistorySelectionBar } from './history-selection-bar';
 // History conversation page component
 // Display all history conversations, support search function and multi-select delete function
 export function History() {
-  const { isDark } = useTheme();
-  const { colors } = useThemeColors();
   const t = useTranslations('history');
   const [searchQuery, setSearchQuery] = React.useState('');
   const router = useRouter();
@@ -236,7 +232,7 @@ export function History() {
     <div
       className={cn(
         'flex h-full w-full flex-col overflow-hidden',
-        colors.mainBackground.tailwind
+        'bg-white dark:bg-stone-800'
       )}
     >
       {/* Fixed header area - does not scroll */}
@@ -250,7 +246,7 @@ export function History() {
               <h1
                 className={cn(
                   'font-serif text-2xl font-bold',
-                  isDark ? 'text-stone-100' : 'text-stone-800'
+                  'text-stone-800 dark:text-stone-100'
                 )}
               >
                 {t('title')}
@@ -260,7 +256,7 @@ export function History() {
               <div
                 className={cn(
                   'mt-1 text-sm',
-                  isDark ? 'text-stone-400' : 'text-stone-600'
+                  'text-stone-600 dark:text-stone-400'
                 )}
               >
                 {total > 0 ? t('totalCount', { total }) : t('noRecords')}
@@ -277,12 +273,8 @@ export function History() {
                     'transition-all duration-200 ease-in-out',
                     'cursor-pointer hover:-translate-y-0.5 hover:shadow-md',
                     isSelectionMode
-                      ? isDark
-                        ? 'border border-stone-500 bg-stone-600 text-white shadow-md hover:bg-stone-500'
-                        : 'border border-stone-400 bg-stone-200 text-stone-800 shadow-md hover:bg-stone-300'
-                      : isDark
-                        ? 'border border-stone-600 bg-stone-700 text-white hover:bg-stone-600'
-                        : 'border border-stone-300 bg-stone-100 text-stone-700 hover:bg-stone-200'
+                      ? 'border border-stone-400 bg-stone-200 text-stone-800 shadow-md hover:bg-stone-300 dark:border-stone-500 dark:bg-stone-600 dark:text-white dark:hover:bg-stone-500'
+                      : 'border border-stone-300 bg-stone-100 text-stone-700 hover:bg-stone-200 dark:border-stone-600 dark:bg-stone-700 dark:text-white dark:hover:bg-stone-600'
                   )}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
@@ -297,9 +289,8 @@ export function History() {
                   'flex items-center rounded-lg px-3 py-2 font-serif text-sm font-medium',
                   'transition-all duration-200 ease-in-out',
                   'cursor-pointer hover:-translate-y-0.5 hover:shadow-md',
-                  isDark
-                    ? 'border border-stone-600 bg-stone-700 text-white hover:bg-stone-600'
-                    : 'border border-stone-300 bg-stone-100 text-stone-700 hover:bg-stone-200'
+                  'border border-stone-300 bg-stone-100 text-stone-700 hover:bg-stone-200',
+                  'dark:border-stone-600 dark:bg-stone-700 dark:text-white dark:hover:bg-stone-600'
                 )}
               >
                 <Edit className="mr-2 h-4 w-4" />
@@ -319,9 +310,8 @@ export function History() {
             containerClassName="w-full"
             className={cn(
               'py-2', // History specific: py-2 instead of py-2.5
-              isDark
-                ? 'border-stone-700 bg-stone-800 text-stone-200 focus:ring-stone-600 focus:ring-offset-stone-900'
-                : 'border-stone-300 bg-white text-stone-800 focus:ring-stone-400 focus:ring-offset-stone-50'
+              'border-stone-300 bg-white text-stone-800 focus:ring-stone-400 focus:ring-offset-stone-50',
+              'dark:border-stone-700 dark:bg-stone-800 dark:text-stone-200 dark:focus:ring-stone-600 dark:focus:ring-offset-stone-900'
             )}
           />
         </div>

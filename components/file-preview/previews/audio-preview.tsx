@@ -1,6 +1,5 @@
 'use client';
 
-import { useTheme } from '@lib/hooks';
 import { cn, formatBytes } from '@lib/utils';
 import { DownloadIcon, MusicIcon } from 'lucide-react';
 
@@ -19,7 +18,6 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
   filename,
   onDownload,
 }) => {
-  const { isDark } = useTheme();
   const t = useTranslations('filePreview');
   const audioRef = useRef<HTMLAudioElement>(null);
   const [audioUrl, setAudioUrl] = useState<string>('');
@@ -64,9 +62,7 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
           onClick={onDownload}
           className={cn(
             'inline-flex items-center space-x-2 rounded-md px-4 py-2 text-sm font-medium transition-colors',
-            isDark
-              ? 'bg-stone-700 text-stone-200 hover:bg-stone-600'
-              : 'bg-stone-200 text-stone-800 hover:bg-stone-300'
+            'bg-stone-200 text-stone-800 hover:bg-stone-300 dark:bg-stone-700 dark:text-stone-200 dark:hover:bg-stone-600'
           )}
         >
           <DownloadIcon className="h-4 w-4" />
@@ -78,24 +74,19 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
       <div
         className={cn(
           'rounded-lg border p-6',
-          isDark
-            ? 'border-stone-700 bg-stone-800'
-            : 'border-stone-200 bg-stone-50'
+          'border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-800'
         )}
       >
         {/* Filename Display */}
         <div className="mb-4 flex items-center space-x-3">
           <MusicIcon
-            className={cn(
-              'h-8 w-8',
-              isDark ? 'text-stone-400' : 'text-stone-500'
-            )}
+            className={cn('h-8 w-8', 'text-stone-500 dark:text-stone-400')}
           />
           <div>
             <p
               className={cn(
                 'truncate font-medium',
-                isDark ? 'text-stone-200' : 'text-stone-800'
+                'text-stone-800 dark:text-stone-200'
               )}
               title={filename}
             >
@@ -103,10 +94,7 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
             </p>
             {duration > 0 && (
               <p
-                className={cn(
-                  'text-sm',
-                  isDark ? 'text-stone-400' : 'text-stone-500'
-                )}
+                className={cn('text-sm', 'text-stone-500 dark:text-stone-400')}
               >
                 {formatTime(duration)}
               </p>
@@ -120,10 +108,7 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
             <div className="flex items-center space-x-2">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
               <span
-                className={cn(
-                  'text-sm',
-                  isDark ? 'text-stone-400' : 'text-stone-500'
-                )}
+                className={cn('text-sm', 'text-stone-500 dark:text-stone-400')}
               >
                 {t('loading')}
               </span>
@@ -134,12 +119,7 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
         {/* Error State */}
         {hasError && (
           <div className="flex items-center justify-center py-8">
-            <p
-              className={cn(
-                'text-sm',
-                isDark ? 'text-red-400' : 'text-red-600'
-              )}
-            >
+            <p className={cn('text-sm', 'text-red-600 dark:text-red-400')}>
               {t('audio.loadError')}
             </p>
           </div>
@@ -165,9 +145,7 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
       <div
         className={cn(
           'rounded-md border p-4 text-sm',
-          isDark
-            ? 'border-stone-700 bg-stone-800'
-            : 'border-stone-200 bg-stone-50'
+          'border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-800'
         )}
       >
         <div className="space-y-1">
