@@ -10,6 +10,12 @@ import React from 'react';
 
 import { usePathname } from 'next/navigation';
 
+import {
+  useNotificationCenter,
+  useUnreadCount,
+} from '../../lib/stores/notification';
+import { NotificationBell } from '../notification-center/notification-bell';
+import { NotificationCenter } from '../notification-center/notification-center';
 import { ConversationTitleButton } from './conversation-title-button';
 import { DesktopUserAvatar } from './desktop-user-avatar';
 import { WorkflowHistoryButton } from './workflow-history-button';
@@ -30,6 +36,10 @@ export function NavBar() {
   const { colors: themeColors } = useThemeColors();
   const { colors: settingsColors } = useSettingsColors();
   const { isExpanded } = useSidebarStore();
+
+  // Notification center state
+  const unreadCount = useUnreadCount();
+  const { openCenter } = useNotificationCenter();
 
   if (isMobile) {
     return null;
@@ -70,10 +80,20 @@ export function NavBar() {
           {/* Workflow history button (only shows on workflow and text generation pages) */}
           <WorkflowHistoryButton />
 
+          {/* Notification bell */}
+          <NotificationBell
+            unreadCount={unreadCount.total}
+            onClick={openCenter}
+            size="md"
+          />
+
           {/* User avatar button */}
           <DesktopUserAvatar />
         </div>
       </header>
+
+      {/* Notification center modal */}
+      <NotificationCenter />
     </>
   );
 }
