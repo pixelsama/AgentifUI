@@ -2399,6 +2399,51 @@
     }
   },
   "notificationCenter": {
+    "title": "Notifications",
+    "close": "Close notification center",
+    "tabs": {
+      "all": "All",
+      "changelog": "Updates",
+      "messages": "Messages"
+    },
+    "empty": {
+      "all": "No notifications",
+      "changelog": "No updates available",
+      "messages": "No messages"
+    },
+    "actions": {
+      "markAllRead": "Mark all as read",
+      "viewAll": "View all",
+      "loadMore": "Load more"
+    },
+    "loading": {
+      "more": "Loading more..."
+    },
+    "performance": {
+      "virtual": {
+        "loading": "Loading notifications...",
+        "empty": "No notifications to display",
+        "loadMore": "Load more notifications",
+        "prefetching": "Prefetching next page..."
+      },
+      "cache": {
+        "hits": "Cache Hits",
+        "misses": "Cache Misses",
+        "hitRate": "Hit Rate",
+        "size": "Cache Size",
+        "memory": "Memory Usage",
+        "cleared": "Cache cleared successfully",
+        "enabled": "Cache enabled",
+        "disabled": "Cache disabled"
+      },
+      "metrics": {
+        "totalRequests": "Total Requests",
+        "avgResponseTime": "Average Response Time",
+        "lastFetch": "Last Fetch",
+        "itemsPerPage": "Items Per Page",
+        "prefetchThreshold": "Prefetch Threshold"
+      }
+    },
     "realtime": {
       "connection": {
         "connected": "Connected",

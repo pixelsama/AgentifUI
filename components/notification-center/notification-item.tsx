@@ -31,6 +31,7 @@ interface NotificationItemProps {
   onMarkAsRead?: (id: string) => void;
   onAction?: (notification: NotificationWithReadStatus) => void;
   compact?: boolean;
+  style?: React.CSSProperties;
 }
 
 // Category icons mapping
@@ -72,6 +73,7 @@ export function NotificationItem({
   onMarkAsRead,
   onAction,
   compact = false,
+  style,
 }: NotificationItemProps) {
   const t = useTranslations('components.notificationCenter');
 
@@ -121,11 +123,12 @@ export function NotificationItem({
           : cn('border-2', priorityColors[priority]),
         compact ? 'p-3' : 'p-4'
       )}
+      style={style}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
-      aria-label={t('item.clickToView', { title })}
+      aria-label={`Click to view: ${title}`}
     >
       {/* Priority indicator */}
       {!is_read && (
