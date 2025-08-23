@@ -1,9 +1,13 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-import { NotificationCenterService } from '../services/notification-center-service';
+import {
+  NotificationAdminService,
+  NotificationCenterService,
+} from '../services/notification-center-service';
 import { createClient } from '../supabase/client';
 import type {
+  CreateNotificationData,
   Notification,
   NotificationType,
   NotificationWithReadStatus,
@@ -40,6 +44,9 @@ interface NotificationCenterState {
   markAllAsRead: (type?: NotificationType) => Promise<void>;
   refreshUnreadCount: () => Promise<void>;
   loadMore: () => Promise<void>;
+  createNotification: (
+    data: Partial<CreateNotificationData>
+  ) => Promise<Notification | null>;
 
   // Internal methods
   _updateNotification: (
@@ -230,6 +237,53 @@ export const useNotificationCenter = create<NotificationCenterState>()(
             ? undefined
             : (state.activeTab as NotificationType);
         await state.fetchNotifications(type, false);
+      },
+
+      createNotification: async (data: Partial<CreateNotificationData>) => {
+        try {
+          const supabase = createClient();
+          const {
+            data: { user },
+            error,
+          } = await supabase.auth.getUser();
+          if (error || !user?.id) {
+            throw new Error('User not authenticated');
+          }
+
+          // Convert partial data to CreateNotificationData format
+          const createData: CreateNotificationData = {
+            type: (data.type || 'message') as NotificationType,
+            category: data.category,
+            title: data.title || '',
+            content: data.content || '',
+            priority: data.priority || 'medium',
+            target_roles: data.target_roles || [],
+            target_users: data.target_users || [],
+            published: data.published ?? true,
+            metadata: data.metadata || {},
+          };
+
+          const newNotification =
+            await NotificationAdminService.createNotification(
+              createData,
+              user.id
+            );
+
+          // Add to local state if successful
+          if (newNotification) {
+            const notificationWithReadStatus: NotificationWithReadStatus = {
+              ...newNotification,
+              is_read: false, // New notifications are unread by default
+              read_at: null, // New notifications don't have a read timestamp yet
+            };
+            get()._addNotification(notificationWithReadStatus);
+          }
+
+          return newNotification;
+        } catch (error) {
+          console.error('Failed to create notification:', error);
+          return null;
+        }
       },
 
       // Internal methods

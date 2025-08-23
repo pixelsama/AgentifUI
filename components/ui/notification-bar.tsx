@@ -30,7 +30,8 @@ const colorMap = {
 
 export const NotificationBar: React.FC = () => {
   const t = useTranslations('components.ui.notificationBar');
-  const { message, type, isVisible, hideNotification } = useNotificationStore();
+  const { message, type, isVisible, action, hideNotification } =
+    useNotificationStore();
 
   // If not visible or no message, do not render anything
   if (!isVisible || !message) {
@@ -39,6 +40,13 @@ export const NotificationBar: React.FC = () => {
 
   const IconComponent = iconMap[type] || InfoIcon; // Default use InfoIcon
   const colors = colorMap[type] || colorMap.info; // Default use info color
+
+  const handleActionClick = () => {
+    if (action?.handler) {
+      action.handler();
+      hideNotification(); // Hide notification after action is clicked
+    }
+  };
 
   return (
     <div
@@ -54,6 +62,23 @@ export const NotificationBar: React.FC = () => {
     >
       <IconComponent className="h-5 w-5 flex-shrink-0" />
       <span className="flex-grow text-sm font-medium">{message}</span>
+
+      {/* Action button */}
+      {action && (
+        <button
+          onClick={handleActionClick}
+          className={cn(
+            'flex-shrink-0 rounded px-2 py-1 text-xs font-medium transition-colors',
+            action.variant === 'primary'
+              ? 'bg-white/20 hover:bg-white/30'
+              : 'bg-white/10 hover:bg-white/20'
+          )}
+          aria-label={action.text}
+        >
+          {action.text}
+        </button>
+      )}
+
       <button
         onClick={hideNotification}
         className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-white/20"
