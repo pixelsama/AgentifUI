@@ -932,6 +932,10 @@
           "permissions": {
             "text": "App Permission Management",
             "description": "Manage application visibility and group permissions"
+          },
+          "notifications": {
+            "text": "Notification Management",
+            "description": "Manage system notifications and announcements"
           }
         },
         "actions": {
@@ -2180,7 +2184,8 @@
       "apiConfig": "API Configuration",
       "security": "Security Settings",
       "analytics": "Data Analytics",
-      "content": "Content Management"
+      "content": "Content Management",
+      "notifications": "Notification Management"
     },
     "auth": {
       "login": "Login",

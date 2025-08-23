@@ -1,0 +1,515 @@
+'use client';
+
+import { Button } from '@components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
+import { Input } from '@components/ui/input';
+import type { NotificationCategory } from '@lib/types/notification-center';
+import { cn } from '@lib/utils';
+import { formatDistanceToNow } from 'date-fns';
+import {
+  Bell,
+  Calendar,
+  ChevronDown,
+  ChevronRight,
+  Edit,
+  Eye,
+  Filter,
+  Plus,
+  Search,
+  Trash,
+  Users,
+} from 'lucide-react';
+
+import { useEffect, useState } from 'react';
+
+import Link from 'next/link';
+
+interface Notification {
+  id: string;
+  type: 'changelog' | 'message';
+  category: NotificationCategory;
+  title: string;
+  content: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  published: boolean;
+  published_at: string | null;
+  created_at: string;
+  created_by: string;
+  target_roles: string[];
+  target_users: string[];
+  metadata: Record<string, unknown>;
+}
+
+const CATEGORY_OPTIONS: Record<
+  NotificationCategory,
+  { label: string; color: string }
+> = {
+  admin_announcement: {
+    label: '管理员公告',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  },
+  agent_result: {
+    label: 'Agent结果',
+    color:
+      'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+  },
+  token_usage: {
+    label: 'Token使用',
+    color:
+      'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+  },
+  system_maintenance: {
+    label: '系统维护',
+    color:
+      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+  },
+  security_alert: {
+    label: '安全警告',
+    color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+  },
+  feature_tip: {
+    label: '功能提示',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+  },
+  feature: {
+    label: '新功能',
+    color:
+      'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300',
+  },
+  improvement: {
+    label: '改进',
+    color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300',
+  },
+  bugfix: {
+    label: '修复',
+    color: 'bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-300',
+  },
+  security: {
+    label: '安全更新',
+    color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+  },
+  api_change: {
+    label: 'API变更',
+    color:
+      'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300',
+  },
+};
+
+const PRIORITY_OPTIONS = {
+  low: {
+    label: '低',
+    color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+  },
+  medium: {
+    label: '中',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  },
+  high: {
+    label: '高',
+    color:
+      'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+  },
+  critical: {
+    label: '紧急',
+    color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+  },
+};
+
+export default function NotificationsAdminPage() {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState<
+    'all' | 'changelog' | 'message'
+  >('all');
+  const [selectedCategory, setSelectedCategory] = useState<
+    NotificationCategory | 'all'
+  >('all');
+  const [selectedPriority, setSelectedPriority] = useState<
+    'all' | 'low' | 'medium' | 'high' | 'critical'
+  >('all');
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Mock data for demonstration
+  useEffect(() => {
+    // Simulate API call
+    setTimeout(() => {
+      const mockNotifications: Notification[] = [
+        {
+          id: '1',
+          type: 'message',
+          category: 'security_alert',
+          title: '检测到异常登录活动',
+          content: '系统检测到您的账户在异地登录，如非本人操作请立即修改密码。',
+          priority: 'critical',
+          published: true,
+          published_at: '2024-01-20T14:30:00Z',
+          created_at: '2024-01-20T14:25:00Z',
+          created_by: 'admin',
+          target_roles: ['user'],
+          target_users: [],
+          metadata: {},
+        },
+        {
+          id: '2',
+          type: 'changelog',
+          category: 'feature',
+          title: 'AI助手功能升级',
+          content: '新增代码生成功能，支持多种编程语言，提升开发效率。',
+          priority: 'medium',
+          published: true,
+          published_at: '2024-01-19T10:00:00Z',
+          created_at: '2024-01-19T09:45:00Z',
+          created_by: 'admin',
+          target_roles: ['user', 'admin'],
+          target_users: [],
+          metadata: {},
+        },
+        {
+          id: '3',
+          type: 'message',
+          category: 'system_maintenance',
+          title: '系统维护通知',
+          content:
+            '系统将于今晚23:00-01:00进行例行维护，期间服务可能暂时中断。',
+          priority: 'high',
+          published: false,
+          published_at: null,
+          created_at: '2024-01-18T16:00:00Z',
+          created_by: 'admin',
+          target_roles: ['user'],
+          target_users: [],
+          metadata: {},
+        },
+      ];
+      setNotifications(mockNotifications);
+      setLoading(false);
+    }, 1000);
+  }, []);
+
+  const filteredNotifications = notifications.filter(notification => {
+    if (
+      searchQuery &&
+      !notification.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !notification.content.toLowerCase().includes(searchQuery.toLowerCase())
+    ) {
+      return false;
+    }
+    if (selectedType !== 'all' && notification.type !== selectedType) {
+      return false;
+    }
+    if (
+      selectedCategory !== 'all' &&
+      notification.category !== selectedCategory
+    ) {
+      return false;
+    }
+    if (
+      selectedPriority !== 'all' &&
+      notification.priority !== selectedPriority
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  const handleDeleteNotification = (id: string) => {
+    if (window.confirm('确定要删除这条通知吗？')) {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }
+  };
+
+  const handleTogglePublish = (id: string) => {
+    setNotifications(prev =>
+      prev.map(n =>
+        n.id === id
+          ? {
+              ...n,
+              published: !n.published,
+              published_at: !n.published ? new Date().toISOString() : null,
+            }
+          : n
+      )
+    );
+  };
+
+  return (
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-stone-900 dark:text-gray-100">
+            通知管理
+          </h1>
+          <p className="text-sm text-stone-600 dark:text-stone-400">
+            管理系统通知和更新日志
+          </p>
+        </div>
+        <Link href="/admin/notifications/create">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            创建通知
+          </Button>
+        </Link>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">筛选和搜索</CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="mr-2 h-4 w-4" />
+              筛选器
+              {showFilters ? (
+                <ChevronDown className="ml-2 h-4 w-4" />
+              ) : (
+                <ChevronRight className="ml-2 h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-stone-400" />
+            <Input
+              placeholder="搜索通知标题或内容..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Filter Options */}
+          {showFilters && (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div>
+                <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
+                  类型
+                </label>
+                <select
+                  value={selectedType}
+                  onChange={e =>
+                    setSelectedType(
+                      e.target.value as 'all' | 'changelog' | 'message'
+                    )
+                  }
+                  className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm dark:border-stone-600 dark:bg-stone-800"
+                >
+                  <option value="all">全部类型</option>
+                  <option value="message">消息</option>
+                  <option value="changelog">更新日志</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
+                  分类
+                </label>
+                <select
+                  value={selectedCategory}
+                  onChange={e =>
+                    setSelectedCategory(
+                      e.target.value as NotificationCategory | 'all'
+                    )
+                  }
+                  className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm dark:border-stone-600 dark:bg-stone-800"
+                >
+                  <option value="all">全部分类</option>
+                  {Object.entries(CATEGORY_OPTIONS).map(
+                    ([value, { label }]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    )
+                  )}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
+                  优先级
+                </label>
+                <select
+                  value={selectedPriority}
+                  onChange={e =>
+                    setSelectedPriority(
+                      e.target.value as
+                        | 'all'
+                        | 'low'
+                        | 'medium'
+                        | 'high'
+                        | 'critical'
+                    )
+                  }
+                  className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm dark:border-stone-600 dark:bg-stone-800"
+                >
+                  <option value="all">全部优先级</option>
+                  {Object.entries(PRIORITY_OPTIONS).map(
+                    ([value, { label }]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    )
+                  )}
+                </select>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Notifications List */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Bell className="mr-2 h-5 w-5" />
+            通知列表 ({filteredNotifications.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-stone-600"></div>
+            </div>
+          ) : filteredNotifications.length === 0 ? (
+            <div className="py-8 text-center text-stone-500">
+              {searchQuery ||
+              selectedType !== 'all' ||
+              selectedCategory !== 'all' ||
+              selectedPriority !== 'all'
+                ? '没有找到匹配的通知'
+                : '暂无通知'}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredNotifications.map(notification => (
+                <div
+                  key={notification.id}
+                  className={cn(
+                    'rounded-lg border p-4 transition-colors',
+                    notification.published
+                      ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
+                      : 'border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20'
+                  )}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-2 flex items-center gap-2">
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                            CATEGORY_OPTIONS[notification.category].color
+                          )}
+                        >
+                          {CATEGORY_OPTIONS[notification.category].label}
+                        </span>
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                            PRIORITY_OPTIONS[notification.priority].color
+                          )}
+                        >
+                          {PRIORITY_OPTIONS[notification.priority].label}
+                        </span>
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                            notification.type === 'changelog'
+                              ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
+                              : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                          )}
+                        >
+                          {notification.type === 'changelog'
+                            ? '更新日志'
+                            : '消息'}
+                        </span>
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                            notification.published
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+                          )}
+                        >
+                          {notification.published ? '已发布' : '草稿'}
+                        </span>
+                      </div>
+
+                      <h3 className="mb-2 text-lg font-medium text-stone-900 dark:text-gray-100">
+                        {notification.title}
+                      </h3>
+
+                      <p className="mb-3 line-clamp-2 text-sm text-stone-600 dark:text-stone-400">
+                        {notification.content}
+                      </p>
+
+                      <div className="flex items-center gap-4 text-xs text-stone-500 dark:text-stone-400">
+                        <div className="flex items-center">
+                          <Calendar className="mr-1 h-3 w-3" />
+                          创建于{' '}
+                          {formatDistanceToNow(
+                            new Date(notification.created_at),
+                            { addSuffix: true }
+                          )}
+                        </div>
+                        {notification.published_at && (
+                          <div className="flex items-center">
+                            <Eye className="mr-1 h-3 w-3" />
+                            发布于{' '}
+                            {formatDistanceToNow(
+                              new Date(notification.published_at),
+                              { addSuffix: true }
+                            )}
+                          </div>
+                        )}
+                        <div className="flex items-center">
+                          <Users className="mr-1 h-3 w-3" />
+                          目标:{' '}
+                          {notification.target_roles.length > 0
+                            ? notification.target_roles.join(', ')
+                            : '无'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="ml-4 flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleTogglePublish(notification.id)}
+                      >
+                        {notification.published ? '取消发布' : '发布'}
+                      </Button>
+                      <Link
+                        href={`/admin/notifications/${notification.id}/edit`}
+                      >
+                        <Button variant="outline" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleDeleteNotification(notification.id)
+                        }
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
