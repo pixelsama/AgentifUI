@@ -11,6 +11,8 @@ import { Button } from '../ui/button';
 interface NotificationBellProps {
   unreadCount: number;
   onClick: () => void;
+  onHover?: () => void;
+  onLeave?: () => void;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -18,6 +20,8 @@ interface NotificationBellProps {
 export function NotificationBell({
   unreadCount,
   onClick,
+  onHover,
+  onLeave,
   className,
   size = 'md',
 }: NotificationBellProps) {
@@ -51,6 +55,8 @@ export function NotificationBell({
       variant="ghost"
       size="icon"
       onClick={onClick}
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
       className={cn(
         'hover:bg-accent/50 focus-visible:ring-ring relative rounded-full focus-visible:ring-2 focus-visible:ring-offset-2',
         variant.button,

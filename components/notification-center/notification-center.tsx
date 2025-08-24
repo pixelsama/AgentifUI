@@ -50,7 +50,19 @@ export function NotificationCenter({
     markAsRead,
     markAllAsRead,
     loadMore,
+    cancelTimeouts,
   } = useNotificationCenter();
+
+  // Handle mouse events to keep popup open when hovering
+  const handleMouseEnter = () => {
+    // Cancel any pending timeouts when entering the modal
+    cancelTimeouts();
+  };
+
+  const handleMouseLeave = () => {
+    // Close immediately when leaving the modal area
+    closeCenter();
+  };
 
   // Set up real-time updates
   useNotificationRealtime({
@@ -100,125 +112,139 @@ export function NotificationCenter({
         aria-hidden="true"
       />
 
-      {/* Modal */}
+      {/* Combined hover area: includes bridge + modal */}
       <div
-        className={cn(
-          'bg-background fixed top-16 right-4 z-50 w-96 rounded-lg border shadow-xl',
-          'animate-in slide-in-from-right-2 duration-200',
-          className
-        )}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="notification-center-title"
+        className="fixed top-0 right-4 w-96"
+        style={{ height: `${maxHeight + 64}px`, zIndex: 45 }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        aria-hidden="true"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b px-4 py-3">
-          <h2 id="notification-center-title" className="text-lg font-semibold">
-            {t('title')}
-          </h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={closeCenter}
-            className="h-8 w-8"
-            aria-label={t('close')}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Tabs */}
-        <Tabs
-          value={activeTab}
-          onValueChange={handleTabChange}
-          className="w-full"
+        {/* Modal positioned within the hover area */}
+        <div
+          className={cn(
+            'bg-background absolute top-16 z-50 w-96 rounded-lg border shadow-xl',
+            'animate-in slide-in-from-right-2 duration-200',
+            className
+          )}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="notification-center-title"
         >
-          <div className="border-b px-4">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="all" className="relative">
-                {t('tabs.all')}
-                {unreadCount.total > 0 && (
-                  <span className="bg-destructive text-destructive-foreground ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold">
-                    {unreadCount.total > 99 ? '99+' : unreadCount.total}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="changelog" className="relative">
-                {t('tabs.changelog')}
-                {unreadCount.changelog > 0 && (
-                  <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-500 px-1 text-[10px] font-semibold text-white">
-                    {unreadCount.changelog > 99 ? '99+' : unreadCount.changelog}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="message" className="relative">
-                {t('tabs.messages')}
-                {unreadCount.message > 0 && (
-                  <span className="bg-destructive text-destructive-foreground ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold">
-                    {unreadCount.message > 99 ? '99+' : unreadCount.message}
-                  </span>
-                )}
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          {/* Tab Contents */}
-          <div style={{ maxHeight: maxHeight - 120 }}>
-            <TabsContent value="all" className="m-0">
-              <NotificationTabContent
-                notifications={filteredNotifications}
-                loading={loading}
-                onMarkAsRead={handleMarkAsRead}
-                onMarkAllRead={handleMarkAllRead}
-                onLoadMore={handleLoadMore}
-                emptyMessage={t('empty.all')}
-              />
-            </TabsContent>
-
-            <TabsContent value="changelog" className="m-0">
-              <NotificationTabContent
-                notifications={filteredNotifications}
-                loading={loading}
-                onMarkAsRead={handleMarkAsRead}
-                onMarkAllRead={handleMarkAllRead}
-                onLoadMore={handleLoadMore}
-                emptyMessage={t('empty.changelog')}
-              />
-            </TabsContent>
-
-            <TabsContent value="message" className="m-0">
-              <NotificationTabContent
-                notifications={filteredNotifications}
-                loading={loading}
-                onMarkAsRead={handleMarkAsRead}
-                onMarkAllRead={handleMarkAllRead}
-                onLoadMore={handleLoadMore}
-                emptyMessage={t('empty.messages')}
-              />
-            </TabsContent>
-          </div>
-        </Tabs>
-
-        {/* Footer */}
-        <div className="border-t p-3">
-          <div className="flex items-center justify-between">
-            {filteredNotifications.some(n => !n.is_read) && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleMarkAllRead}
-                className="text-xs"
-              >
-                {t('actions.markAllRead')}
-              </Button>
-            )}
-            <div className="flex-1" />
-            <Button variant="ghost" size="sm" className="text-xs" asChild>
-              <Link href="/notifications">
-                {t('actions.viewAll')}
-                <ExternalLink className="ml-1 h-3 w-3" />
-              </Link>
+          {/* Header */}
+          <div className="flex items-center justify-between border-b px-4 py-3">
+            <h2
+              id="notification-center-title"
+              className="text-lg font-semibold"
+            >
+              {t('title')}
+            </h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={closeCenter}
+              className="h-8 w-8"
+              aria-label={t('close')}
+            >
+              <X className="h-4 w-4" />
             </Button>
+          </div>
+
+          {/* Tabs */}
+          <Tabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="w-full"
+          >
+            <div className="border-b px-4">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="all" className="relative">
+                  {t('tabs.all')}
+                  {unreadCount.total > 0 && (
+                    <span className="bg-destructive text-destructive-foreground ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold">
+                      {unreadCount.total > 99 ? '99+' : unreadCount.total}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="changelog" className="relative">
+                  {t('tabs.changelog')}
+                  {unreadCount.changelog > 0 && (
+                    <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-500 px-1 text-[10px] font-semibold text-white">
+                      {unreadCount.changelog > 99
+                        ? '99+'
+                        : unreadCount.changelog}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="message" className="relative">
+                  {t('tabs.messages')}
+                  {unreadCount.message > 0 && (
+                    <span className="bg-destructive text-destructive-foreground ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold">
+                      {unreadCount.message > 99 ? '99+' : unreadCount.message}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            {/* Tab Contents */}
+            <div style={{ maxHeight: maxHeight - 120 }}>
+              <TabsContent value="all" className="m-0">
+                <NotificationTabContent
+                  notifications={filteredNotifications}
+                  loading={loading}
+                  onMarkAsRead={handleMarkAsRead}
+                  onMarkAllRead={handleMarkAllRead}
+                  onLoadMore={handleLoadMore}
+                  emptyMessage={t('empty.all')}
+                />
+              </TabsContent>
+
+              <TabsContent value="changelog" className="m-0">
+                <NotificationTabContent
+                  notifications={filteredNotifications}
+                  loading={loading}
+                  onMarkAsRead={handleMarkAsRead}
+                  onMarkAllRead={handleMarkAllRead}
+                  onLoadMore={handleLoadMore}
+                  emptyMessage={t('empty.changelog')}
+                />
+              </TabsContent>
+
+              <TabsContent value="message" className="m-0">
+                <NotificationTabContent
+                  notifications={filteredNotifications}
+                  loading={loading}
+                  onMarkAsRead={handleMarkAsRead}
+                  onMarkAllRead={handleMarkAllRead}
+                  onLoadMore={handleLoadMore}
+                  emptyMessage={t('empty.messages')}
+                />
+              </TabsContent>
+            </div>
+          </Tabs>
+
+          {/* Footer */}
+          <div className="border-t p-3">
+            <div className="flex items-center justify-between">
+              {filteredNotifications.some(n => !n.is_read) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleMarkAllRead}
+                  className="text-xs"
+                >
+                  {t('actions.markAllRead')}
+                </Button>
+              )}
+              <div className="flex-1" />
+              <Button variant="ghost" size="sm" className="text-xs" asChild>
+                <Link href="/notifications">
+                  {t('actions.viewAll')}
+                  <ExternalLink className="ml-1 h-3 w-3" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

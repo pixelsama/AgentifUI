@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
+// TODO: Remove when database is implemented
+import {
+  MockNotificationCenterService,
+  getMockUnreadCount,
+} from '../services/mock-notification-service';
 import {
   NotificationAdminService,
   NotificationCenterService,
@@ -32,9 +37,18 @@ interface NotificationCenterState {
   lastFetchTime: number;
   cacheValidTime: number; // 5 minutes
 
+  // Timeout State for hover behavior
+  hoverTimeouts: {
+    show?: ReturnType<typeof setTimeout>;
+    hide?: ReturnType<typeof setTimeout>;
+  };
+
   // Actions
   openCenter: () => void;
   closeCenter: () => void;
+  openCenterWithDelay: (delay?: number) => void;
+  closeCenterWithDelay: (delay?: number) => void;
+  cancelTimeouts: () => void;
   setActiveTab: (tab: ActiveTab) => void;
   fetchNotifications: (
     type?: NotificationType,
@@ -62,12 +76,14 @@ const initialState = {
   isOpen: false,
   activeTab: 'all' as ActiveTab,
   notifications: [],
-  unreadCount: { changelog: 0, message: 0, total: 0 },
+  // TODO: Replace with { changelog: 0, message: 0, total: 0 } when database is ready
+  unreadCount: getMockUnreadCount(),
   loading: false,
   hasMore: true,
   currentPage: 1,
   lastFetchTime: 0,
   cacheValidTime: 5 * 60 * 1000, // 5 minutes
+  hoverTimeouts: {},
 };
 
 export const useNotificationCenter = create<NotificationCenterState>()(
@@ -78,6 +94,69 @@ export const useNotificationCenter = create<NotificationCenterState>()(
       openCenter: () => set({ isOpen: true }, false, 'openCenter'),
 
       closeCenter: () => set({ isOpen: false }, false, 'closeCenter'),
+
+      openCenterWithDelay: (delay = 500) => {
+        const state = get();
+
+        // Clear existing timeouts
+        if (state.hoverTimeouts.show) clearTimeout(state.hoverTimeouts.show);
+        if (state.hoverTimeouts.hide) clearTimeout(state.hoverTimeouts.hide);
+
+        const showTimeout = setTimeout(() => {
+          set({ isOpen: true }, false, 'openCenterWithDelay');
+        }, delay);
+
+        set(
+          {
+            hoverTimeouts: {
+              ...state.hoverTimeouts,
+              show: showTimeout,
+              hide: undefined,
+            },
+          },
+          false,
+          'openCenterWithDelay:setTimeout'
+        );
+      },
+
+      closeCenterWithDelay: (delay = 150) => {
+        const state = get();
+
+        // Clear show timeout if pending
+        if (state.hoverTimeouts.show) {
+          clearTimeout(state.hoverTimeouts.show);
+        }
+
+        const hideTimeout = setTimeout(() => {
+          set({ isOpen: false }, false, 'closeCenterWithDelay');
+        }, delay);
+
+        set(
+          {
+            hoverTimeouts: {
+              ...state.hoverTimeouts,
+              show: undefined,
+              hide: hideTimeout,
+            },
+          },
+          false,
+          'closeCenterWithDelay:setTimeout'
+        );
+      },
+
+      cancelTimeouts: () => {
+        const state = get();
+        if (state.hoverTimeouts.show) clearTimeout(state.hoverTimeouts.show);
+        if (state.hoverTimeouts.hide) clearTimeout(state.hoverTimeouts.hide);
+
+        set(
+          {
+            hoverTimeouts: {},
+          },
+          false,
+          'cancelTimeouts'
+        );
+      },
 
       setActiveTab: (tab: ActiveTab) => {
         set({ activeTab: tab }, false, 'setActiveTab');
@@ -102,24 +181,15 @@ export const useNotificationCenter = create<NotificationCenterState>()(
         set({ loading: true }, false, 'fetchNotifications:start');
 
         try {
-          // Get current user from Supabase
-          const supabase = createClient();
-          const {
-            data: { user },
-            error,
-          } = await supabase.auth.getUser();
-          if (error || !user?.id) {
-            throw new Error('User not authenticated');
-          }
-
+          // TODO: Replace with real service when database is ready
           const params = {
             type,
             offset: reset ? 0 : (state.currentPage - 1) * 20,
             limit: 20,
           };
 
-          const result = await NotificationCenterService.getNotifications(
-            user.id,
+          const result = await MockNotificationCenterService.getNotifications(
+            'mock-user-id',
             params
           );
 
@@ -179,16 +249,11 @@ export const useNotificationCenter = create<NotificationCenterState>()(
         );
 
         try {
-          const supabase = createClient();
-          const {
-            data: { user },
-            error,
-          } = await supabase.auth.getUser();
-          if (error || !user?.id) {
-            throw new Error('User not authenticated');
-          }
-
-          await NotificationCenterService.markMultipleAsRead(ids, user.id);
+          // TODO: Replace with real service when database is ready
+          await MockNotificationCenterService.markMultipleAsRead(
+            ids,
+            'mock-user-id'
+          );
         } catch (error) {
           console.error('Failed to mark notifications as read:', error);
           // Revert optimistic update on error
@@ -210,18 +275,9 @@ export const useNotificationCenter = create<NotificationCenterState>()(
 
       refreshUnreadCount: async () => {
         try {
-          const supabase = createClient();
-          const {
-            data: { user },
-            error,
-          } = await supabase.auth.getUser();
-          if (error || !user?.id) {
-            throw new Error('User not authenticated');
-          }
-
-          const unreadCount = await NotificationCenterService.getUnreadCount(
-            user.id
-          );
+          // TODO: Replace with real service when database is ready
+          const unreadCount =
+            await MockNotificationCenterService.getUnreadCount('mock-user-id');
           set({ unreadCount }, false, 'refreshUnreadCount');
         } catch (error) {
           console.error('Failed to refresh unread count:', error);

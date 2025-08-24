@@ -17,8 +17,11 @@ interface RealtimeConfig {
 /**
  * Hook for real-time notification updates via Supabase
  * Integrates with notification center and bridge stores
+ * TODO: Currently disabled until database is implemented
  */
 export function useNotificationRealtime(config: RealtimeConfig = {}) {
+  // Temporarily disable real-time updates to prevent loops without database
+  return;
   const {
     enableAutoShow = true,
     enableSound = false,
