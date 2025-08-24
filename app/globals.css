@@ -758,3 +758,27 @@ body.default-page {
 .dark .loop-node:hover::after {
   background: #78716c; /* stone-500 */
 }
+
+/* Sidebar-aware layout utilities */
+.sidebar-aware-layout {
+  transition: margin-left 150ms ease-in-out;
+}
+
+/* Desktop sidebar states */
+@media (min-width: 768px) {
+  .sidebar-aware-layout.sidebar-collapsed {
+    margin-left: 4rem; /* 64px - collapsed sidebar width */
+  }
+
+  .sidebar-aware-layout.sidebar-expanded {
+    margin-left: 16rem; /* 256px - expanded sidebar width */
+  }
+}
+
+/* Mobile: no margin adjustments, sidebar uses overlay */
+@media (max-width: 767px) {
+  .sidebar-aware-layout.sidebar-collapsed,
+  .sidebar-aware-layout.sidebar-expanded {
+    margin-left: 0;
+  }
+}
