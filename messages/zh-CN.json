@@ -2018,6 +2018,11 @@
     "notificationCenter": {
       "title": "通知中心",
       "close": "关闭通知中心",
+      "bell": {
+        "ariaLabel": "打开通知",
+        "ariaLabelWithCount": "打开通知 ({count} 条未读)",
+        "badgeLabel": "{count} 条未读通知"
+      },
       "tabs": {
         "all": "全部",
         "changelog": "更新日志",
@@ -2068,19 +2073,71 @@
         }
       },
       "performance": {
+        "virtual": {
+          "loading": "正在加载通知...",
+          "empty": "暂无通知显示",
+          "loadMore": "加载更多通知",
+          "prefetching": "正在预加载下一页..."
+        },
         "cache": {
           "hits": "缓存命中",
           "misses": "缓存未命中",
           "hitRate": "命中率",
           "size": "缓存大小",
           "memory": "内存使用",
-          "enabled": "已启用",
-          "disabled": "已禁用"
+          "cleared": "缓存已清理",
+          "enabled": "缓存已启用",
+          "disabled": "缓存已禁用"
         },
         "metrics": {
           "totalRequests": "总请求数",
+          "avgResponseTime": "平均响应时间",
           "lastFetch": "上次获取",
-          "itemsPerPage": "每页项目数"
+          "itemsPerPage": "每页项目数",
+          "prefetchThreshold": "预取阈值"
+        }
+      },
+      "realtime": {
+        "connection": {
+          "connected": "已连接",
+          "disconnected": "已断开",
+          "healthy": "健康",
+          "unhealthy": "不健康",
+          "reconnecting": "重新连接中...",
+          "failed": "连接失败"
+        },
+        "stats": {
+          "totalNotifications": "总通知数",
+          "pendingBatch": "待处理批次",
+          "errors": "错误",
+          "lastUpdate": "最后更新",
+          "connectionAttempts": "连接尝试次数"
+        },
+        "actions": {
+          "forceRefresh": "强制刷新",
+          "reconnect": "重新连接",
+          "viewDetails": "查看详情"
+        },
+        "notifications": {
+          "emergencyAlert": "紧急警报",
+          "tokenWarning": "Token 使用警告",
+          "agentComplete": "代理执行完成",
+          "agentFailed": "代理执行失败",
+          "maintenanceNotice": "系统维护通知",
+          "connectionRecovered": "通知连接已恢复",
+          "systemError": "通知系统错误"
+        },
+        "priorities": {
+          "critical": "严重",
+          "high": "高",
+          "medium": "中",
+          "low": "低"
+        },
+        "performance": {
+          "processing": "正在处理通知...",
+          "batchProcessing": "正在处理通知批次",
+          "optimizing": "正在优化性能",
+          "throttling": "正在限制更新"
         }
       }
     }
@@ -2460,96 +2517,6 @@
       "name": "名称：",
       "type": "类型：",
       "size": "大小："
-    }
-  },
-  "notificationCenter": {
-    "title": "通知",
-    "close": "关闭通知中心",
-    "tabs": {
-      "all": "全部",
-      "changelog": "更新日志",
-      "messages": "消息"
-    },
-    "empty": {
-      "all": "暂无通知",
-      "changelog": "暂无更新",
-      "messages": "暂无消息"
-    },
-    "actions": {
-      "markAllRead": "全部标为已读",
-      "viewAll": "查看全部",
-      "loadMore": "加载更多"
-    },
-    "loading": {
-      "more": "正在加载更多..."
-    },
-    "performance": {
-      "virtual": {
-        "loading": "正在加载通知...",
-        "empty": "暂无通知显示",
-        "loadMore": "加载更多通知",
-        "prefetching": "正在预加载下一页..."
-      },
-      "cache": {
-        "hits": "缓存命中",
-        "misses": "缓存未命中",
-        "hitRate": "命中率",
-        "size": "缓存大小",
-        "memory": "内存使用",
-        "cleared": "缓存已清理",
-        "enabled": "缓存已启用",
-        "disabled": "缓存已禁用"
-      },
-      "metrics": {
-        "totalRequests": "总请求数",
-        "avgResponseTime": "平均响应时间",
-        "lastFetch": "上次获取",
-        "itemsPerPage": "每页项目数",
-        "prefetchThreshold": "预取阈值"
-      }
-    },
-    "realtime": {
-      "connection": {
-        "connected": "已连接",
-        "disconnected": "已断开",
-        "healthy": "健康",
-        "unhealthy": "不健康",
-        "reconnecting": "重新连接中...",
-        "failed": "连接失败"
-      },
-      "stats": {
-        "totalNotifications": "总通知数",
-        "pendingBatch": "待处理批次",
-        "errors": "错误",
-        "lastUpdate": "最后更新",
-        "connectionAttempts": "连接尝试次数"
-      },
-      "actions": {
-        "forceRefresh": "强制刷新",
-        "reconnect": "重新连接",
-        "viewDetails": "查看详情"
-      },
-      "notifications": {
-        "emergencyAlert": "紧急警报",
-        "tokenWarning": "Token 使用警告",
-        "agentComplete": "代理执行完成",
-        "agentFailed": "代理执行失败",
-        "maintenanceNotice": "系统维护通知",
-        "connectionRecovered": "通知连接已恢复",
-        "systemError": "通知系统错误"
-      },
-      "priorities": {
-        "critical": "严重",
-        "high": "高",
-        "medium": "中",
-        "low": "低"
-      },
-      "performance": {
-        "processing": "正在处理通知...",
-        "batchProcessing": "正在处理通知批次",
-        "optimizing": "正在优化性能",
-        "throttling": "正在限制更新"
-      }
     }
   }
 }

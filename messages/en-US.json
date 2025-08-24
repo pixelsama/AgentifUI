@@ -2022,6 +2022,11 @@
     "notificationCenter": {
       "title": "Notification Center",
       "close": "Close notification center",
+      "bell": {
+        "ariaLabel": "Open notifications",
+        "ariaLabelWithCount": "Open notifications ({count} unread)",
+        "badgeLabel": "{count} unread notifications"
+      },
       "tabs": {
         "all": "All",
         "changelog": "Updates",
@@ -2072,19 +2077,71 @@
         }
       },
       "performance": {
+        "virtual": {
+          "loading": "Loading notifications...",
+          "empty": "No notifications to display",
+          "loadMore": "Load more notifications",
+          "prefetching": "Prefetching next page..."
+        },
         "cache": {
           "hits": "Cache Hits",
           "misses": "Cache Misses",
           "hitRate": "Hit Rate",
           "size": "Cache Size",
           "memory": "Memory Usage",
-          "enabled": "Enabled",
-          "disabled": "Disabled"
+          "cleared": "Cache cleared successfully",
+          "enabled": "Cache enabled",
+          "disabled": "Cache disabled"
         },
         "metrics": {
           "totalRequests": "Total Requests",
+          "avgResponseTime": "Average Response Time",
           "lastFetch": "Last Fetch",
-          "itemsPerPage": "Items Per Page"
+          "itemsPerPage": "Items Per Page",
+          "prefetchThreshold": "Prefetch Threshold"
+        }
+      },
+      "realtime": {
+        "connection": {
+          "connected": "Connected",
+          "disconnected": "Disconnected",
+          "healthy": "Healthy",
+          "unhealthy": "Unhealthy",
+          "reconnecting": "Reconnecting...",
+          "failed": "Connection Failed"
+        },
+        "stats": {
+          "totalNotifications": "Total Notifications",
+          "pendingBatch": "Pending Batch",
+          "errors": "Errors",
+          "lastUpdate": "Last Update",
+          "connectionAttempts": "Connection Attempts"
+        },
+        "actions": {
+          "forceRefresh": "Force Refresh",
+          "reconnect": "Reconnect",
+          "viewDetails": "View Details"
+        },
+        "notifications": {
+          "emergencyAlert": "Emergency Alert",
+          "tokenWarning": "Token Usage Warning",
+          "agentComplete": "Agent Execution Complete",
+          "agentFailed": "Agent Execution Failed",
+          "maintenanceNotice": "System Maintenance Notice",
+          "connectionRecovered": "Notification connection restored",
+          "systemError": "Notification system error"
+        },
+        "priorities": {
+          "critical": "Critical",
+          "high": "High",
+          "medium": "Medium",
+          "low": "Low"
+        },
+        "performance": {
+          "processing": "Processing notifications...",
+          "batchProcessing": "Processing notification batch",
+          "optimizing": "Optimizing performance",
+          "throttling": "Throttling updates"
         }
       }
     }
@@ -2465,96 +2522,6 @@
       "name": "Name:",
       "type": "Type:",
       "size": "Size:"
-    }
-  },
-  "notificationCenter": {
-    "title": "Notifications",
-    "close": "Close notification center",
-    "tabs": {
-      "all": "All",
-      "changelog": "Updates",
-      "messages": "Messages"
-    },
-    "empty": {
-      "all": "No notifications",
-      "changelog": "No updates available",
-      "messages": "No messages"
-    },
-    "actions": {
-      "markAllRead": "Mark all as read",
-      "viewAll": "View all",
-      "loadMore": "Load more"
-    },
-    "loading": {
-      "more": "Loading more..."
-    },
-    "performance": {
-      "virtual": {
-        "loading": "Loading notifications...",
-        "empty": "No notifications to display",
-        "loadMore": "Load more notifications",
-        "prefetching": "Prefetching next page..."
-      },
-      "cache": {
-        "hits": "Cache Hits",
-        "misses": "Cache Misses",
-        "hitRate": "Hit Rate",
-        "size": "Cache Size",
-        "memory": "Memory Usage",
-        "cleared": "Cache cleared successfully",
-        "enabled": "Cache enabled",
-        "disabled": "Cache disabled"
-      },
-      "metrics": {
-        "totalRequests": "Total Requests",
-        "avgResponseTime": "Average Response Time",
-        "lastFetch": "Last Fetch",
-        "itemsPerPage": "Items Per Page",
-        "prefetchThreshold": "Prefetch Threshold"
-      }
-    },
-    "realtime": {
-      "connection": {
-        "connected": "Connected",
-        "disconnected": "Disconnected",
-        "healthy": "Healthy",
-        "unhealthy": "Unhealthy",
-        "reconnecting": "Reconnecting...",
-        "failed": "Connection Failed"
-      },
-      "stats": {
-        "totalNotifications": "Total Notifications",
-        "pendingBatch": "Pending Batch",
-        "errors": "Errors",
-        "lastUpdate": "Last Update",
-        "connectionAttempts": "Connection Attempts"
-      },
-      "actions": {
-        "forceRefresh": "Force Refresh",
-        "reconnect": "Reconnect",
-        "viewDetails": "View Details"
-      },
-      "notifications": {
-        "emergencyAlert": "Emergency Alert",
-        "tokenWarning": "Token Usage Warning",
-        "agentComplete": "Agent Execution Complete",
-        "agentFailed": "Agent Execution Failed",
-        "maintenanceNotice": "System Maintenance Notice",
-        "connectionRecovered": "Notification connection restored",
-        "systemError": "Notification system error"
-      },
-      "priorities": {
-        "critical": "Critical",
-        "high": "High",
-        "medium": "Medium",
-        "low": "Low"
-      },
-      "performance": {
-        "processing": "Processing notifications...",
-        "batchProcessing": "Processing notification batch",
-        "optimizing": "Optimizing performance",
-        "throttling": "Throttling updates"
-      }
     }
   }
 }
