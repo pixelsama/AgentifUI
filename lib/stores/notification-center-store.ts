@@ -6,10 +6,7 @@ import {
   MockNotificationCenterService,
   getMockUnreadCount,
 } from '../services/mock-notification-service';
-import {
-  NotificationAdminService,
-  NotificationCenterService,
-} from '../services/notification-center-service';
+import { NotificationAdminService } from '../services/notification-center-service';
 import { createClient } from '../supabase/client';
 import type {
   CreateNotificationData,
@@ -24,6 +21,7 @@ export type ActiveTab = 'all' | 'changelog' | 'message';
 interface NotificationCenterState {
   // UI State
   isOpen: boolean;
+  isOverlayOpen: boolean;
   activeTab: ActiveTab;
 
   // Data State
@@ -49,6 +47,8 @@ interface NotificationCenterState {
   openCenterWithDelay: (delay?: number) => void;
   closeCenterWithDelay: (delay?: number) => void;
   cancelTimeouts: () => void;
+  openOverlay: () => void;
+  closeOverlay: () => void;
   setActiveTab: (tab: ActiveTab) => void;
   fetchNotifications: (
     type?: NotificationType,
@@ -74,6 +74,7 @@ interface NotificationCenterState {
 
 const initialState = {
   isOpen: false,
+  isOverlayOpen: false,
   activeTab: 'all' as ActiveTab,
   notifications: [],
   // TODO: Replace with { changelog: 0, message: 0, total: 0 } when database is ready
@@ -94,6 +95,10 @@ export const useNotificationCenter = create<NotificationCenterState>()(
       openCenter: () => set({ isOpen: true }, false, 'openCenter'),
 
       closeCenter: () => set({ isOpen: false }, false, 'closeCenter'),
+
+      openOverlay: () => set({ isOverlayOpen: true }, false, 'openOverlay'),
+
+      closeOverlay: () => set({ isOverlayOpen: false }, false, 'closeOverlay'),
 
       openCenterWithDelay: (delay = 500) => {
         const state = get();
@@ -426,3 +431,5 @@ export const useUnreadCount = () =>
   useNotificationCenter(state => state.unreadCount);
 export const useNotificationLoading = () =>
   useNotificationCenter(state => state.loading);
+export const useNotificationOverlayOpen = () =>
+  useNotificationCenter(state => state.isOverlayOpen);

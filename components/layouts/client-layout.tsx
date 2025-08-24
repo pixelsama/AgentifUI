@@ -7,6 +7,12 @@ import React, { useEffect, useState } from 'react';
 
 import { usePathname } from 'next/navigation';
 
+import {
+  useNotificationCenter,
+  useNotificationOverlayOpen,
+} from '../../lib/stores/notification-center-store';
+import { NotificationOverlay } from '../notification-center/notification-overlay';
+
 interface ClientLayoutProps {
   children: React.ReactNode;
   fontClasses: string;
@@ -22,6 +28,10 @@ export function ClientLayout({ children, fontClasses }: ClientLayoutProps) {
   const pathname = usePathname();
   const isChatPage = pathname?.startsWith('/chat');
 
+  // Notification overlay state
+  const isOverlayOpen = useNotificationOverlayOpen();
+  const { closeOverlay } = useNotificationCenter();
+
   // 🎯 Enable smart shortcuts: navigation shortcuts are also available in input fields
   // Cmd+K new conversation, Cmd+Shift+A application market, Cmd+\ switch sidebar
   useSmartShortcuts({
@@ -35,6 +45,7 @@ export function ClientLayout({ children, fontClasses }: ClientLayoutProps) {
 
     // 🎯 Global setting sidebar mount state to avoid flickering caused by repeated calls to each layout
     const { setMounted: setSidebarMounted } =
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('@lib/stores/sidebar-store').useSidebarStore.getState();
     setSidebarMounted();
 
@@ -64,5 +75,10 @@ export function ClientLayout({ children, fontClasses }: ClientLayoutProps) {
     ? cn(fontClasses, 'antialiased', isChatPage ? 'h-full' : 'min-h-screen')
     : cn(fontClasses, 'antialiased');
 
-  return <div className={layoutClass}>{children}</div>;
+  return (
+    <div className={layoutClass}>
+      {children}
+      <NotificationOverlay isOpen={isOverlayOpen} onClose={closeOverlay} />
+    </div>
+  );
 }

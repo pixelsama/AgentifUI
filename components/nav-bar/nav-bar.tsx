@@ -6,14 +6,14 @@ import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
 import { cn } from '@lib/utils';
 
-import React, { useRef } from 'react';
+import React from 'react';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 import {
   useNotificationCenter,
   useUnreadCount,
-} from '../../lib/stores/notification';
+} from '../../lib/stores/notification-center-store';
 import { NotificationBell } from '../notification-center/notification-bell';
 import { NotificationCenter } from '../notification-center/notification-center';
 import { ConversationTitleButton } from './conversation-title-button';
@@ -33,14 +33,13 @@ import { WorkflowHistoryButton } from './workflow-history-button';
 export function NavBar() {
   const isMobile = useMobile();
   const pathname = usePathname();
-  const router = useRouter();
   const { colors: themeColors } = useThemeColors();
   const { colors: settingsColors } = useSettingsColors();
   const { isExpanded } = useSidebarStore();
 
   // Notification center state
   const unreadCount = useUnreadCount();
-  const { openCenterWithDelay, closeCenterWithDelay, cancelTimeouts } =
+  const { openCenterWithDelay, closeCenterWithDelay, openOverlay } =
     useNotificationCenter();
 
   const handleBellHover = () => {
@@ -95,7 +94,7 @@ export function NavBar() {
           {/* Notification bell */}
           <NotificationBell
             unreadCount={unreadCount.total}
-            onClick={() => router.push('/notifications')}
+            onClick={openOverlay}
             onHover={handleBellHover}
             onLeave={handleBellLeave}
             size="md"

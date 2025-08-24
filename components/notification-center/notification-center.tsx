@@ -6,7 +6,6 @@ import { ExternalLink, X } from 'lucide-react';
 import { useEffect } from 'react';
 
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 
 import {
   type ActiveTab,
@@ -51,6 +50,7 @@ export function NotificationCenter({
     markAllAsRead,
     loadMore,
     cancelTimeouts,
+    openOverlay,
   } = useNotificationCenter();
 
   // Handle mouse events to keep popup open when hovering
@@ -238,11 +238,17 @@ export function NotificationCenter({
                 </Button>
               )}
               <div className="flex-1" />
-              <Button variant="ghost" size="sm" className="text-xs" asChild>
-                <Link href="/notifications">
-                  {t('actions.viewAll')}
-                  <ExternalLink className="ml-1 h-3 w-3" />
-                </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  closeCenter();
+                  openOverlay();
+                }}
+              >
+                {t('actions.viewAll')}
+                <ExternalLink className="ml-1 h-3 w-3" />
               </Button>
             </div>
           </div>

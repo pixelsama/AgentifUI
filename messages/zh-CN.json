@@ -2041,6 +2041,23 @@
       "loading": {
         "more": "正在加载更多..."
       },
+      "types": {
+        "message": "消息",
+        "changelog": "更新日志"
+      },
+      "categories": {
+        "admin_announcement": "管理员公告",
+        "agent_result": "代理结果",
+        "token_usage": "Token使用",
+        "system_maintenance": "系统维护",
+        "security_alert": "安全警报",
+        "feature_tip": "功能提示",
+        "feature": "新功能",
+        "improvement": "改进",
+        "bugfix": "修复",
+        "security": "安全更新",
+        "api_change": "API变更"
+      },
       "item": {
         "readAt": "已读于",
         "unread": "未读",
@@ -2049,19 +2066,6 @@
           "high": "高",
           "medium": "中",
           "low": "低"
-        },
-        "category": {
-          "admin_announcement": "管理员公告",
-          "agent_result": "代理结果",
-          "token_usage": "Token使用",
-          "system_maintenance": "系统维护",
-          "security_alert": "安全警报",
-          "feature_tip": "功能提示",
-          "feature": "新功能",
-          "improvement": "改进",
-          "bugfix": "修复",
-          "security": "安全更新",
-          "api_change": "API变更"
         },
         "timeAgo": {
           "justNow": "刚刚",
