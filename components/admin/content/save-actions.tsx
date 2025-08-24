@@ -1,6 +1,5 @@
 'use client';
 
-import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 import { Loader2, RotateCcw, Save } from 'lucide-react';
 
@@ -21,16 +20,13 @@ export function SaveActions({
   onSave,
   onReset,
 }: SaveActionsProps) {
-  const { isDark } = useTheme();
   const t = useTranslations('pages.admin.content.saveActions');
 
   return (
     <div
       className={cn(
         'flex items-center justify-between border-t bg-gradient-to-r p-4',
-        isDark
-          ? 'to-stone-750 border-stone-600 from-stone-800'
-          : 'border-stone-200 from-stone-50 to-white'
+        'dark:to-stone-750 border-stone-200 from-stone-50 to-white dark:border-stone-600 dark:from-stone-800'
       )}
     >
       {/* Status indicator */}
@@ -39,10 +35,7 @@ export function SaveActions({
           <>
             <div className="h-2 w-2 rounded-full bg-orange-500" />
             <span
-              className={cn(
-                'text-sm',
-                isDark ? 'text-stone-300' : 'text-stone-600'
-              )}
+              className={cn('text-sm', 'text-stone-600 dark:text-stone-300')}
             >
               {t('hasChanges')}
             </span>
@@ -52,22 +45,14 @@ export function SaveActions({
           <>
             <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
             <span
-              className={cn(
-                'text-sm',
-                isDark ? 'text-stone-300' : 'text-stone-600'
-              )}
+              className={cn('text-sm', 'text-stone-600 dark:text-stone-300')}
             >
               {t('saving')}
             </span>
           </>
         )}
         {!hasChanges && !isSaving && (
-          <span
-            className={cn(
-              'text-sm',
-              isDark ? 'text-stone-400' : 'text-stone-500'
-            )}
-          >
+          <span className={cn('text-sm', 'text-stone-500 dark:text-stone-400')}>
             {t('allSaved')}
           </span>
         )}
@@ -81,11 +66,8 @@ export function SaveActions({
           className={cn(
             'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
             hasChanges && !isSaving
-              ? isDark
-                ? 'bg-stone-700 text-stone-100 hover:bg-stone-600'
-                : 'bg-stone-200 text-stone-700 hover:bg-stone-300'
-              : 'cursor-not-allowed opacity-50',
-            isDark ? 'text-stone-400' : 'text-stone-500'
+              ? 'bg-stone-200 text-stone-700 hover:bg-stone-300 dark:bg-stone-700 dark:text-stone-100 dark:hover:bg-stone-600'
+              : 'cursor-not-allowed text-stone-500 opacity-50 dark:text-stone-400'
           )}
         >
           <RotateCcw className="h-4 w-4" />
@@ -98,16 +80,8 @@ export function SaveActions({
           className={cn(
             'flex items-center gap-2 rounded-lg px-6 py-2 text-sm font-medium transition-colors',
             hasChanges && !isSaving
-              ? isDark
-                ? 'bg-stone-100 text-stone-900 hover:bg-white'
-                : 'bg-stone-900 text-white hover:bg-stone-800'
-              : 'cursor-not-allowed opacity-50',
-            isDark && (!hasChanges || isSaving)
-              ? 'bg-stone-600 text-stone-400'
-              : '',
-            !isDark && (!hasChanges || isSaving)
-              ? 'bg-stone-300 text-stone-500'
-              : ''
+              ? 'bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white'
+              : 'cursor-not-allowed bg-stone-300 text-stone-500 opacity-50 dark:bg-stone-600 dark:text-stone-400'
           )}
         >
           {isSaving ? (

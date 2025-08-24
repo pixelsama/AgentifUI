@@ -1,6 +1,5 @@
 'use client';
 
-import { useTheme } from '@lib/hooks/use-theme';
 import { cn } from '@lib/utils';
 
 import { useTranslations } from 'next-intl';
@@ -11,7 +10,6 @@ interface ContentTabsProps {
 }
 
 export function ContentTabs({ activeTab, onTabChange }: ContentTabsProps) {
-  const { isDark } = useTheme();
   const t = useTranslations('pages.admin.content.tabs');
 
   const tabs = [
@@ -23,7 +21,7 @@ export function ContentTabs({ activeTab, onTabChange }: ContentTabsProps) {
     <div
       className={cn(
         'flex items-center space-x-2 rounded-lg p-1',
-        isDark ? 'bg-stone-700' : 'bg-stone-200'
+        'bg-stone-200 dark:bg-stone-700'
       )}
     >
       {tabs.map(tab => (
@@ -33,12 +31,8 @@ export function ContentTabs({ activeTab, onTabChange }: ContentTabsProps) {
           className={cn(
             'rounded-md px-4 py-1.5 text-sm font-medium transition-colors',
             activeTab === tab.id
-              ? isDark
-                ? 'bg-stone-500 text-white shadow-sm'
-                : 'bg-white text-stone-900 shadow-sm'
-              : isDark
-                ? 'text-stone-300 hover:bg-stone-600'
-                : 'text-stone-600 hover:bg-stone-100'
+              ? 'bg-white text-stone-900 shadow-sm dark:bg-stone-500 dark:text-white'
+              : 'text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-600'
           )}
         >
           {tab.label}
