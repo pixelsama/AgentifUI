@@ -2139,6 +2139,11 @@
           "optimizing": "正在优化性能",
           "throttling": "正在限制更新"
         }
+      },
+      "page": {
+        "title": "通知中心",
+        "description": "在一个地方管理您的所有通知",
+        "searchPlaceholder": "搜索通知..."
       }
     }
   },

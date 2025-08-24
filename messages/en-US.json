@@ -2143,6 +2143,11 @@
           "optimizing": "Optimizing performance",
           "throttling": "Throttling updates"
         }
+      },
+      "page": {
+        "title": "Notification Center",
+        "description": "Manage all your notifications in one place",
+        "searchPlaceholder": "Search notifications..."
       }
     }
   },
