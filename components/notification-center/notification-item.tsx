@@ -116,12 +116,13 @@ export function NotificationItem({
   return (
     <div
       className={cn(
-        'group relative cursor-pointer rounded-lg border transition-all duration-200',
-        'focus-within:ring-ring focus-within:ring-2 focus-within:ring-offset-1 hover:shadow-sm',
+        'group bg-card relative cursor-pointer rounded-xl border transition-all duration-200',
+        'focus-within:ring-ring focus-within:ring-2 focus-within:ring-offset-1',
+        'hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20',
         is_read
-          ? 'bg-background border-border'
-          : cn('border-2', priorityColors[priority]),
-        compact ? 'p-3' : 'p-4'
+          ? 'border-border/50'
+          : cn('border-2 shadow-sm', priorityColors[priority]),
+        compact ? 'p-4' : 'p-6'
       )}
       style={style}
       onClick={handleClick}
@@ -134,26 +135,26 @@ export function NotificationItem({
       {!is_read && (
         <div
           className={cn(
-            'absolute top-0 left-0 h-full w-1 rounded-l-lg',
+            'absolute top-0 left-0 h-full w-1 rounded-l-xl',
             priorityIndicators[priority]
           )}
           aria-hidden="true"
         />
       )}
 
-      <div className="flex gap-3">
+      <div className="flex gap-4">
         {/* Icon */}
         <div
           className={cn(
-            'flex-shrink-0 rounded-full p-2',
+            'flex-shrink-0 rounded-full p-3',
             type === 'changelog'
-              ? 'bg-blue-100 dark:bg-blue-900/20'
-              : 'bg-gray-100 dark:bg-gray-800'
+              ? 'bg-blue-100 dark:bg-blue-900/30'
+              : 'bg-gray-100 dark:bg-gray-800/50'
           )}
         >
           <CategoryIcon
             className={cn(
-              compact ? 'h-4 w-4' : 'h-5 w-5',
+              compact ? 'h-5 w-5' : 'h-6 w-6',
               type === 'changelog'
                 ? 'text-blue-600 dark:text-blue-400'
                 : 'text-gray-600 dark:text-gray-400'
@@ -163,36 +164,38 @@ export function NotificationItem({
 
         {/* Content */}
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               {/* Title */}
               <h3
                 className={cn(
-                  'text-foreground line-clamp-2 font-medium',
-                  compact ? 'text-sm' : 'text-base'
+                  'text-foreground leading-snug font-semibold',
+                  compact ? 'text-base' : 'text-lg'
                 )}
               >
                 {title}
               </h3>
 
-              {/* Content preview */}
+              {/* Content */}
               {!compact && content && (
-                <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-                  {content}
-                </p>
+                <div className="mt-3">
+                  <p className="text-muted-foreground leading-relaxed">
+                    {content}
+                  </p>
+                </div>
               )}
             </div>
 
             {/* Read status */}
             {is_read && (
-              <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-500" />
+              <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-500" />
             )}
           </div>
 
           {/* Footer */}
-          <div className="mt-2 flex items-center justify-between gap-2">
-            <div className="text-muted-foreground flex items-center gap-2 text-xs">
-              <Clock className="h-3 w-3" />
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
+              <Clock className="h-4 w-4" />
               <time dateTime={displayTime}>
                 {formatDistanceToNow(new Date(displayTime), {
                   addSuffix: true,
@@ -201,8 +204,8 @@ export function NotificationItem({
             </div>
 
             {/* Type and category badges */}
-            <div className="flex items-center gap-1">
-              <Badge variant="secondary" className="text-xs">
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="text-xs font-medium">
                 {t(`types.${type}`)}
               </Badge>
               {category && (

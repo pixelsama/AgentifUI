@@ -36,20 +36,20 @@ export default function NotificationsRoute() {
     >
       {/* Header */}
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
-        <div className="flex h-16 items-center px-4">
+        <div className="flex h-20 items-center px-6">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.back()}
-            className="mr-4"
+            className="mr-4 h-10 w-10 rounded-full p-0"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5" />
           </Button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto max-w-6xl px-4 py-6">
+      <div className="container mx-auto max-w-5xl px-6 py-8">
         <NotificationPage />
       </div>
     </div>

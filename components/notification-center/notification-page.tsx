@@ -21,6 +21,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Skeleton } from '../ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { DateGroupHeader } from './date-group-header';
 import { NotificationItem } from './notification-item';
 
 interface NotificationPageProps {
@@ -103,20 +104,24 @@ export function NotificationPage({ className }: NotificationPageProps) {
   };
 
   return (
-    <div className={cn('space-y-6', className)}>
+    <div className={cn('space-y-8', className)}>
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{t('page.title')}</h1>
-          <p className="text-muted-foreground">{t('page.description')}</p>
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">
+            {t('page.title')}
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            {t('page.description')}
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button
             variant="outline"
-            size="sm"
+            size="default"
             onClick={handleMarkAllRead}
-            className="gap-2"
+            className="gap-2 px-4"
           >
             <CheckCircle2 className="h-4 w-4" />
             {t('actions.markAllRead')}
@@ -126,15 +131,15 @@ export function NotificationPage({ className }: NotificationPageProps) {
 
       {/* Search */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+        <div className="relative max-w-md flex-1">
+          <Search className="text-muted-foreground absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2" />
           <Input
             placeholder={t('page.searchPlaceholder')}
             value={filters.search}
             onChange={e =>
               setFilters(prev => ({ ...prev, search: e.target.value }))
             }
-            className="pl-10"
+            className="border-border/50 h-12 rounded-xl pl-12 text-base"
           />
         </div>
       </div>
@@ -145,32 +150,41 @@ export function NotificationPage({ className }: NotificationPageProps) {
         onValueChange={handleTabChange}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-3 sm:w-96">
-          <TabsTrigger value="all" className="relative">
+        <TabsList className="bg-muted/30 grid h-12 w-full grid-cols-3 rounded-xl p-1 sm:w-96">
+          <TabsTrigger
+            value="all"
+            className="relative rounded-lg text-base font-medium"
+          >
             {t('tabs.all')}
             {unreadCount.total > 0 && (
               <Badge
                 variant="destructive"
-                className="ml-2 h-4 min-w-4 px-1 text-[10px]"
+                className="ml-2 h-5 min-w-5 px-2 text-xs"
               >
                 {unreadCount.total}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="changelog" className="relative">
+          <TabsTrigger
+            value="changelog"
+            className="relative rounded-lg text-base font-medium"
+          >
             {t('tabs.changelog')}
             {unreadCount.changelog > 0 && (
-              <Badge className="ml-2 h-4 min-w-4 bg-blue-500 px-1 text-[10px]">
+              <Badge className="ml-2 h-5 min-w-5 bg-blue-500 px-2 text-xs">
                 {unreadCount.changelog}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="message" className="relative">
+          <TabsTrigger
+            value="message"
+            className="relative rounded-lg text-base font-medium"
+          >
             {t('tabs.messages')}
             {unreadCount.message > 0 && (
               <Badge
                 variant="destructive"
-                className="ml-2 h-4 min-w-4 px-1 text-[10px]"
+                className="ml-2 h-5 min-w-5 px-2 text-xs"
               >
                 {unreadCount.message}
               </Badge>
@@ -179,7 +193,7 @@ export function NotificationPage({ className }: NotificationPageProps) {
         </TabsList>
 
         {/* Tab Content */}
-        <div className="mt-6">
+        <div className="mt-8">
           <TabsContent value={activeTab} className="m-0">
             <NotificationPageContent
               notifications={filteredNotifications}
@@ -217,17 +231,51 @@ function NotificationPageContent({
   onLoadMore,
   emptyMessage,
 }: NotificationPageContentProps) {
+  // Group notifications by date
+  const groupNotificationsByDate = (
+    notifications: NotificationWithReadStatus[]
+  ) => {
+    const grouped: Record<string, NotificationWithReadStatus[]> = {};
+
+    notifications.forEach(notification => {
+      const date = new Date(
+        notification.published_at || notification.created_at
+      );
+      const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(notification);
+    });
+
+    // Sort dates in descending order (newest first)
+    const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+
+    return sortedDates.map(date => ({
+      date,
+      notifications: grouped[date],
+    }));
+  };
+
   if (loading && notifications.length === 0) {
     return (
-      <div className="space-y-4">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex gap-4 rounded-lg border p-4">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-5 w-3/4" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-3 w-1/2" />
-            </div>
+      <div className="space-y-6">
+        {Array.from({ length: 3 }).map((_, groupIndex) => (
+          <div key={groupIndex} className="space-y-4">
+            <Skeleton className="h-6 w-32" />
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="bg-card rounded-xl border p-6 shadow-sm">
+                <div className="flex gap-4">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <div className="flex-1 space-y-3">
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ))}
       </div>
@@ -236,38 +284,47 @@ function NotificationPageContent({
 
   if (notifications.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
+      <div className="flex flex-col items-center justify-center py-20">
         <div className="text-center">
-          <p className="text-muted-foreground">{emptyMessage}</p>
+          <p className="text-muted-foreground text-lg">{emptyMessage}</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-4">
-      {/* Notifications list */}
-      <div className="space-y-3">
-        {notifications.map(notification => (
-          <NotificationItem
-            key={notification.id}
-            notification={notification}
-            onMarkAsRead={onMarkAsRead}
-            compact={false}
-          />
-        ))}
+  const groupedNotifications = groupNotificationsByDate(notifications);
 
-        {/* Load more button */}
-        <div className="pt-4 text-center">
-          <Button
-            variant="outline"
-            onClick={onLoadMore}
-            disabled={loading}
-            className="min-w-32"
-          >
-            {loading ? '加载中...' : '加载更多'}
-          </Button>
-        </div>
+  return (
+    <div className="space-y-8">
+      {/* Grouped notifications */}
+      {groupedNotifications.map(
+        ({ date, notifications: groupNotifications }) => (
+          <div key={date} className="space-y-4">
+            <DateGroupHeader date={date} />
+            <div className="space-y-4">
+              {groupNotifications.map(notification => (
+                <NotificationItem
+                  key={notification.id}
+                  notification={notification}
+                  onMarkAsRead={onMarkAsRead}
+                  compact={false}
+                />
+              ))}
+            </div>
+          </div>
+        )
+      )}
+
+      {/* Load more button */}
+      <div className="pt-6 text-center">
+        <Button
+          variant="outline"
+          onClick={onLoadMore}
+          disabled={loading}
+          className="min-w-32"
+        >
+          {loading ? '加载中...' : '加载更多'}
+        </Button>
       </div>
     </div>
   );
