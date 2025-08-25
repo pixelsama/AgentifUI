@@ -1,12 +1,13 @@
 'use client';
 
 import { cn } from '@lib/utils';
-import { CheckCircle2, Search } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
+import { useChatWidth } from '../../lib/hooks/use-chat-width';
 import {
   type ActiveTab,
   type NotificationWithReadStatus,
@@ -18,7 +19,7 @@ import {
 } from '../../lib/stores/notification';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
+import { SearchInput } from '../ui/search-input';
 import { Skeleton } from '../ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { DateGroupHeader } from './date-group-header';
@@ -34,6 +35,7 @@ interface NotificationFilters {
 
 export function NotificationPage({ className }: NotificationPageProps) {
   const t = useTranslations('components.notificationCenter');
+  const { widthClass, paddingClass } = useChatWidth();
 
   // State
   const [activeTab, setActiveTab] = useState<ActiveTab>('all');
@@ -104,111 +106,163 @@ export function NotificationPage({ className }: NotificationPageProps) {
   };
 
   return (
-    <div className={cn('space-y-8', className)}>
-      {/* Centered Title */}
-      <div className="text-center">
-        <h1
-          id="notification-overlay-title"
-          className="text-3xl font-bold tracking-tight"
+    <div
+      className={cn('flex h-full w-full flex-col overflow-hidden', className)}
+    >
+      {/* Fixed header area - does not scroll */}
+      <div className="flex-shrink-0">
+        {/* Title - centered display */}
+        <div
+          className={cn('mx-auto mb-6 w-full pt-4', widthClass, paddingClass)}
         >
-          {t('page.title')}
-        </h1>
-      </div>
+          <div className="text-center">
+            <h1
+              id="notification-overlay-title"
+              className={cn(
+                'font-serif text-2xl font-bold',
+                'text-stone-800 dark:text-stone-100'
+              )}
+            >
+              {t('page.title')}
+            </h1>
+          </div>
+        </div>
 
-      {/* Centered Search */}
-      <div className="flex justify-center">
-        <div className="relative w-full max-w-md">
-          <Search className="text-muted-foreground absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2" />
-          <Input
-            placeholder={t('page.searchPlaceholder')}
+        {/* Search box - centered display */}
+        <div className={cn('mx-auto mb-4 w-full', widthClass, paddingClass)}>
+          <SearchInput
             value={filters.search}
-            onChange={e =>
-              setFilters(prev => ({ ...prev, search: e.target.value }))
+            onValueChange={value =>
+              setFilters(prev => ({ ...prev, search: value }))
             }
-            className="border-border/50 h-12 rounded-xl pl-12 text-base"
+            placeholder={t('page.searchPlaceholder')}
+            containerClassName="w-full max-w-md mx-auto"
+            className={cn(
+              'py-2', // History specific: py-2 instead of py-2.5
+              'border-stone-300 bg-white text-stone-800 focus:ring-stone-400 focus:ring-offset-stone-50',
+              'dark:border-stone-700 dark:bg-stone-800 dark:text-stone-200 dark:focus:ring-stone-600 dark:focus:ring-offset-stone-900'
+            )}
           />
         </div>
+
+        {/* Tabs with Mark All Read Button */}
+        <div className={cn('mx-auto w-full', widthClass, paddingClass)}>
+          <Tabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="w-full"
+          >
+            <div className="flex items-center justify-between">
+              <TabsList
+                className={cn(
+                  'grid h-12 grid-cols-3 rounded-xl bg-stone-200/50 p-1',
+                  'dark:bg-stone-700/50'
+                )}
+              >
+                <TabsTrigger
+                  value="all"
+                  className={cn(
+                    'relative rounded-lg font-serif text-sm font-medium',
+                    'text-stone-700 data-[state=active]:bg-white data-[state=active]:text-stone-900',
+                    'dark:text-stone-300 dark:data-[state=active]:bg-stone-600 dark:data-[state=active]:text-stone-100'
+                  )}
+                >
+                  {t('tabs.all')}
+                  {unreadCount.total > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="ml-2 h-5 min-w-5 px-2 text-xs"
+                    >
+                      {unreadCount.total}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="changelog"
+                  className={cn(
+                    'relative rounded-lg font-serif text-sm font-medium',
+                    'text-stone-700 data-[state=active]:bg-white data-[state=active]:text-stone-900',
+                    'dark:text-stone-300 dark:data-[state=active]:bg-stone-600 dark:data-[state=active]:text-stone-100'
+                  )}
+                >
+                  {t('tabs.changelog')}
+                  {unreadCount.changelog > 0 && (
+                    <Badge className="ml-2 h-5 min-w-5 bg-blue-500 px-2 text-xs">
+                      {unreadCount.changelog}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="message"
+                  className={cn(
+                    'relative rounded-lg font-serif text-sm font-medium',
+                    'text-stone-700 data-[state=active]:bg-white data-[state=active]:text-stone-900',
+                    'dark:text-stone-300 dark:data-[state=active]:bg-stone-600 dark:data-[state=active]:text-stone-100'
+                  )}
+                >
+                  {t('tabs.messages')}
+                  {unreadCount.message > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="ml-2 h-5 min-w-5 px-2 text-xs"
+                    >
+                      {unreadCount.message}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+
+              <Button
+                variant="outline"
+                size="default"
+                onClick={handleMarkAllRead}
+                className={cn(
+                  'gap-2 px-4 font-serif text-sm font-medium',
+                  'border-stone-300 bg-stone-100 text-stone-700 hover:bg-stone-200',
+                  'dark:border-stone-600 dark:bg-stone-700 dark:text-white dark:hover:bg-stone-600'
+                )}
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                {t('actions.markAllRead')}
+              </Button>
+            </div>
+          </Tabs>
+        </div>
       </div>
 
-      {/* Tabs with Mark All Read Button */}
-      <Tabs
-        value={activeTab}
-        onValueChange={handleTabChange}
-        className="w-full"
-      >
-        <div className="flex items-center justify-between">
-          <TabsList className="bg-muted/30 grid h-12 grid-cols-3 rounded-xl p-1">
-            <TabsTrigger
-              value="all"
-              className="relative rounded-lg text-base font-medium"
-            >
-              {t('tabs.all')}
-              {unreadCount.total > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="ml-2 h-5 min-w-5 px-2 text-xs"
-                >
-                  {unreadCount.total}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger
-              value="changelog"
-              className="relative rounded-lg text-base font-medium"
-            >
-              {t('tabs.changelog')}
-              {unreadCount.changelog > 0 && (
-                <Badge className="ml-2 h-5 min-w-5 bg-blue-500 px-2 text-xs">
-                  {unreadCount.changelog}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger
-              value="message"
-              className="relative rounded-lg text-base font-medium"
-            >
-              {t('tabs.messages')}
-              {unreadCount.message > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="ml-2 h-5 min-w-5 px-2 text-xs"
-                >
-                  {unreadCount.message}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-
-          <Button
-            variant="outline"
-            size="default"
-            onClick={handleMarkAllRead}
-            className="gap-2 px-4"
+      {/* Scrollable content area - independent scrolling */}
+      <div className="flex-1 overflow-hidden">
+        <div
+          className={cn(
+            'h-full overflow-y-auto',
+            widthClass,
+            'mx-auto',
+            paddingClass
+          )}
+        >
+          <Tabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="w-full"
           >
-            <CheckCircle2 className="h-4 w-4" />
-            {t('actions.markAllRead')}
-          </Button>
+            <TabsContent value={activeTab} className="m-0 mt-6">
+              <NotificationPageContent
+                notifications={filteredNotifications}
+                loading={loading}
+                onMarkAsRead={handleMarkAsRead}
+                onLoadMore={handleLoadMore}
+                emptyMessage={
+                  activeTab === 'all'
+                    ? t('empty.all')
+                    : activeTab === 'changelog'
+                      ? t('empty.changelog')
+                      : t('empty.messages')
+                }
+              />
+            </TabsContent>
+          </Tabs>
         </div>
-
-        {/* Tab Content */}
-        <div className="mt-8">
-          <TabsContent value={activeTab} className="m-0">
-            <NotificationPageContent
-              notifications={filteredNotifications}
-              loading={loading}
-              onMarkAsRead={handleMarkAsRead}
-              onLoadMore={handleLoadMore}
-              emptyMessage={
-                activeTab === 'all'
-                  ? t('empty.all')
-                  : activeTab === 'changelog'
-                    ? t('empty.changelog')
-                    : t('empty.messages')
-              }
-            />
-          </TabsContent>
-        </div>
-      </Tabs>
+      </div>
     </div>
   );
 }
@@ -319,7 +373,11 @@ function NotificationPageContent({
           variant="outline"
           onClick={onLoadMore}
           disabled={loading}
-          className="min-w-32"
+          className={cn(
+            'min-w-32 font-serif text-sm font-medium',
+            'border-stone-300 bg-stone-100 text-stone-700 hover:bg-stone-200',
+            'dark:border-stone-600 dark:bg-stone-700 dark:text-white dark:hover:bg-stone-600'
+          )}
         >
           {loading ? '加载中...' : '加载更多'}
         </Button>

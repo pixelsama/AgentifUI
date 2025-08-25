@@ -88,10 +88,8 @@ export function NotificationOverlay({
         }}
       >
         {/* Notification content - no header needed */}
-        <div className="h-full overflow-y-auto">
-          <div className="container mx-auto max-w-5xl px-6 py-8">
-            <NotificationPage />
-          </div>
+        <div className="h-full overflow-hidden pt-12">
+          <NotificationPage />
         </div>
       </div>
     </>
