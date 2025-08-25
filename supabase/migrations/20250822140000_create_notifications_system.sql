@@ -82,7 +82,7 @@ FOR SELECT USING (
     -- Public notifications (no specific targeting)
     (target_roles = '{}' AND target_users = '{}') OR
     -- Role-based targeting
-    (target_roles && ARRAY[(SELECT role FROM public.profiles WHERE id = auth.uid())]) OR
+    ((SELECT role::text FROM public.profiles WHERE id = auth.uid()) = ANY(target_roles)) OR
     -- User-specific targeting  
     (auth.uid() = ANY(target_users))
   )
@@ -197,7 +197,7 @@ BEGIN
       -- Public notifications (no specific targeting)
       (n.target_roles = '{}' AND n.target_users = '{}') OR
       -- Role-based targeting
-      (n.target_roles && ARRAY[(SELECT role FROM public.profiles WHERE id = user_uuid)]) OR
+      ((SELECT role::text FROM public.profiles WHERE id = user_uuid) = ANY(n.target_roles)) OR
       -- User-specific targeting  
       (user_uuid = ANY(n.target_users))
     )

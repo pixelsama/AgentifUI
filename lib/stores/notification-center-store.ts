@@ -1,12 +1,10 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-// TODO: Remove when database is implemented
 import {
-  MockNotificationCenterService,
-  getMockUnreadCount,
-} from '../services/mock-notification-service';
-import { NotificationAdminService } from '../services/notification-center-service';
+  NotificationAdminService,
+  NotificationCenterService,
+} from '../services/notification-center-service';
 import { createClient } from '../supabase/client';
 import type {
   CreateNotificationData,
@@ -77,8 +75,7 @@ const initialState = {
   isOverlayOpen: false,
   activeTab: 'all' as ActiveTab,
   notifications: [],
-  // TODO: Replace with { changelog: 0, message: 0, total: 0 } when database is ready
-  unreadCount: getMockUnreadCount(),
+  unreadCount: { changelog: 0, message: 0, total: 0 },
   loading: false,
   hasMore: true,
   currentPage: 1,
@@ -186,15 +183,24 @@ export const useNotificationCenter = create<NotificationCenterState>()(
         set({ loading: true }, false, 'fetchNotifications:start');
 
         try {
-          // TODO: Replace with real service when database is ready
+          const supabase = createClient();
+          const {
+            data: { user },
+            error: authError,
+          } = await supabase.auth.getUser();
+
+          if (authError || !user?.id) {
+            throw new Error('User not authenticated');
+          }
+
           const params = {
             type,
             offset: reset ? 0 : (state.currentPage - 1) * 20,
             limit: 20,
           };
 
-          const result = await MockNotificationCenterService.getNotifications(
-            'mock-user-id',
+          const result = await NotificationCenterService.getNotifications(
+            user.id,
             params
           );
 
@@ -204,6 +210,7 @@ export const useNotificationCenter = create<NotificationCenterState>()(
                 ? result.notifications
                 : [...state.notifications, ...result.notifications],
               hasMore: result.has_more,
+              unreadCount: result.unread_count,
               currentPage: reset ? 2 : state.currentPage + 1,
               loading: false,
               lastFetchTime: Date.now(),
@@ -254,11 +261,17 @@ export const useNotificationCenter = create<NotificationCenterState>()(
         );
 
         try {
-          // TODO: Replace with real service when database is ready
-          await MockNotificationCenterService.markMultipleAsRead(
-            ids,
-            'mock-user-id'
-          );
+          const supabase = createClient();
+          const {
+            data: { user },
+            error: authError,
+          } = await supabase.auth.getUser();
+
+          if (authError || !user?.id) {
+            throw new Error('User not authenticated');
+          }
+
+          await NotificationCenterService.markMultipleAsRead(ids, user.id);
         } catch (error) {
           console.error('Failed to mark notifications as read:', error);
           // Revert optimistic update on error
@@ -280,9 +293,19 @@ export const useNotificationCenter = create<NotificationCenterState>()(
 
       refreshUnreadCount: async () => {
         try {
-          // TODO: Replace with real service when database is ready
-          const unreadCount =
-            await MockNotificationCenterService.getUnreadCount('mock-user-id');
+          const supabase = createClient();
+          const {
+            data: { user },
+            error: authError,
+          } = await supabase.auth.getUser();
+
+          if (authError || !user?.id) {
+            throw new Error('User not authenticated');
+          }
+
+          const unreadCount = await NotificationCenterService.getUnreadCount(
+            user.id
+          );
           set({ unreadCount }, false, 'refreshUnreadCount');
         } catch (error) {
           console.error('Failed to refresh unread count:', error);
