@@ -57,6 +57,17 @@ export function NotificationOverlay({
 
   return (
     <>
+      {/* Fixed close button - always visible in top right */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onClose}
+        className="fixed top-4 right-4 z-60 h-10 w-10 rounded-full p-0"
+        aria-label={t('close')}
+      >
+        <X className="h-5 w-5" />
+      </Button>
+
       {/* Main overlay content - no background blur for full overlay */}
       <div
         className={cn(
@@ -76,32 +87,8 @@ export function NotificationOverlay({
           }
         }}
       >
-        {/* Header with close button */}
-        <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10 border-b backdrop-blur">
-          <div className="flex h-20 items-center justify-between px-6">
-            {/* Title */}
-            <h1
-              id="notification-overlay-title"
-              className="text-3xl font-bold tracking-tight"
-            >
-              {t('page.title')}
-            </h1>
-
-            {/* Close button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-10 w-10 rounded-full p-0"
-              aria-label={t('close')}
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Notification content */}
-        <div className="h-full overflow-y-auto pb-20">
+        {/* Notification content - no header needed */}
+        <div className="h-full overflow-y-auto">
           <div className="container mx-auto max-w-5xl px-6 py-8">
             <NotificationPage />
           </div>

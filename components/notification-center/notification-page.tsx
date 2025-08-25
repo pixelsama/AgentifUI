@@ -105,33 +105,19 @@ export function NotificationPage({ className }: NotificationPageProps) {
 
   return (
     <div className={cn('space-y-8', className)}>
-      {/* Header */}
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">
-            {t('page.title')}
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            {t('page.description')}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="default"
-            onClick={handleMarkAllRead}
-            className="gap-2 px-4"
-          >
-            <CheckCircle2 className="h-4 w-4" />
-            {t('actions.markAllRead')}
-          </Button>
-        </div>
+      {/* Centered Title */}
+      <div className="text-center">
+        <h1
+          id="notification-overlay-title"
+          className="text-3xl font-bold tracking-tight"
+        >
+          {t('page.title')}
+        </h1>
       </div>
 
-      {/* Search */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="relative max-w-md flex-1">
+      {/* Centered Search */}
+      <div className="flex justify-center">
+        <div className="relative w-full max-w-md">
           <Search className="text-muted-foreground absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2" />
           <Input
             placeholder={t('page.searchPlaceholder')}
@@ -144,53 +130,65 @@ export function NotificationPage({ className }: NotificationPageProps) {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs with Mark All Read Button */}
       <Tabs
         value={activeTab}
         onValueChange={handleTabChange}
         className="w-full"
       >
-        <TabsList className="bg-muted/30 grid h-12 w-full grid-cols-3 rounded-xl p-1 sm:w-96">
-          <TabsTrigger
-            value="all"
-            className="relative rounded-lg text-base font-medium"
+        <div className="flex items-center justify-between">
+          <TabsList className="bg-muted/30 grid h-12 grid-cols-3 rounded-xl p-1">
+            <TabsTrigger
+              value="all"
+              className="relative rounded-lg text-base font-medium"
+            >
+              {t('tabs.all')}
+              {unreadCount.total > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="ml-2 h-5 min-w-5 px-2 text-xs"
+                >
+                  {unreadCount.total}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="changelog"
+              className="relative rounded-lg text-base font-medium"
+            >
+              {t('tabs.changelog')}
+              {unreadCount.changelog > 0 && (
+                <Badge className="ml-2 h-5 min-w-5 bg-blue-500 px-2 text-xs">
+                  {unreadCount.changelog}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="message"
+              className="relative rounded-lg text-base font-medium"
+            >
+              {t('tabs.messages')}
+              {unreadCount.message > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="ml-2 h-5 min-w-5 px-2 text-xs"
+                >
+                  {unreadCount.message}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          <Button
+            variant="outline"
+            size="default"
+            onClick={handleMarkAllRead}
+            className="gap-2 px-4"
           >
-            {t('tabs.all')}
-            {unreadCount.total > 0 && (
-              <Badge
-                variant="destructive"
-                className="ml-2 h-5 min-w-5 px-2 text-xs"
-              >
-                {unreadCount.total}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger
-            value="changelog"
-            className="relative rounded-lg text-base font-medium"
-          >
-            {t('tabs.changelog')}
-            {unreadCount.changelog > 0 && (
-              <Badge className="ml-2 h-5 min-w-5 bg-blue-500 px-2 text-xs">
-                {unreadCount.changelog}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger
-            value="message"
-            className="relative rounded-lg text-base font-medium"
-          >
-            {t('tabs.messages')}
-            {unreadCount.message > 0 && (
-              <Badge
-                variant="destructive"
-                className="ml-2 h-5 min-w-5 px-2 text-xs"
-              >
-                {unreadCount.message}
-              </Badge>
-            )}
-          </TabsTrigger>
-        </TabsList>
+            <CheckCircle2 className="h-4 w-4" />
+            {t('actions.markAllRead')}
+          </Button>
+        </div>
 
         {/* Tab Content */}
         <div className="mt-8">

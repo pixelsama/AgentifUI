@@ -2149,7 +2149,7 @@
         }
       },
       "page": {
-        "title": "Notification Center",
+        "title": "Notifications",
         "description": "Manage all your notifications in one place",
         "searchPlaceholder": "Search notifications..."
       }

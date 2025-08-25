@@ -2145,7 +2145,7 @@
         }
       },
       "page": {
-        "title": "通知中心",
+        "title": "通知",
         "description": "在一个地方管理您的所有通知",
         "searchPlaceholder": "搜索通知..."
       }
