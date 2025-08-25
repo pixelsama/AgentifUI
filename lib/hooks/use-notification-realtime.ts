@@ -28,8 +28,18 @@ export function useNotificationRealtime(config: RealtimeConfig = {}) {
   const supabase = createClient();
   const channelRef = useRef<RealtimeChannel | null>(null);
   const { user } = useSupabaseAuth();
-  const notificationCenter = useNotificationCenter();
-  const notificationBridge = useNotificationBridge();
+
+  // Use refs to maintain stable references to store methods
+  const notificationCenterRef = useRef(useNotificationCenter.getState());
+  const notificationBridgeRef = useRef(useNotificationBridge.getState());
+  const userIdRef = useRef(user?.id);
+
+  // Update refs when values change
+  useEffect(() => {
+    notificationCenterRef.current = useNotificationCenter.getState();
+    notificationBridgeRef.current = useNotificationBridge.getState();
+    userIdRef.current = user?.id;
+  });
 
   const handleInsert = useCallback(
     (payload: { new: NotificationWithReadStatus }) => {
@@ -38,7 +48,10 @@ export function useNotificationRealtime(config: RealtimeConfig = {}) {
       console.log('New notification received:', notification);
 
       // Route through bridge for intelligent handling
-      notificationBridge.routeNotification(notification, enableAutoShow);
+      notificationBridgeRef.current.routeNotification(
+        notification,
+        enableAutoShow
+      );
 
       // Optional: Browser notifications for high priority
       if (
@@ -63,12 +76,7 @@ export function useNotificationRealtime(config: RealtimeConfig = {}) {
         console.info('Would play critical notification sound');
       }
     },
-    [
-      notificationBridge,
-      enableAutoShow,
-      enableDesktopNotifications,
-      enableSound,
-    ]
+    [enableAutoShow, enableDesktopNotifications, enableSound]
   );
 
   const handleUpdate = useCallback(
@@ -78,12 +86,12 @@ export function useNotificationRealtime(config: RealtimeConfig = {}) {
       console.log('Notification updated:', updatedNotification);
 
       // Update in store
-      notificationCenter._updateNotification(
+      notificationCenterRef.current._updateNotification(
         updatedNotification.id,
         updatedNotification
       );
     },
-    [notificationCenter]
+    []
   );
 
   const handleDelete = useCallback(
@@ -93,9 +101,9 @@ export function useNotificationRealtime(config: RealtimeConfig = {}) {
       console.log('Notification deleted:', deletedNotification.id);
 
       // Remove from store
-      notificationCenter._removeNotification(deletedNotification.id);
+      notificationCenterRef.current._removeNotification(deletedNotification.id);
     },
-    [notificationCenter]
+    []
   );
 
   const handleReadStatusChange = useCallback(
@@ -106,18 +114,18 @@ export function useNotificationRealtime(config: RealtimeConfig = {}) {
       const { notification_id, user_id } = readRecord;
 
       // Only update if it's for current user
-      if (user?.id === user_id) {
+      if (userIdRef.current === user_id) {
         console.log('Notification marked as read:', notification_id);
 
-        notificationCenter._updateNotification(notification_id, {
+        notificationCenterRef.current._updateNotification(notification_id, {
           read_at: readRecord.read_at,
         });
 
         // Refresh unread count
-        notificationCenter.refreshUnreadCount();
+        notificationCenterRef.current.refreshUnreadCount();
       }
     },
-    [notificationCenter, user?.id]
+    []
   );
 
   useEffect(() => {
@@ -138,7 +146,7 @@ export function useNotificationRealtime(config: RealtimeConfig = {}) {
     // Create channel for notifications
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const channel = supabase
-      .channel('user-notifications')
+      .channel(`user-notifications-${user.id}`) // Make channel name unique per user
       .on(
         'postgres_changes' as any, // Temporary type cast to avoid TypeScript type error
         {
@@ -194,31 +202,25 @@ export function useNotificationRealtime(config: RealtimeConfig = {}) {
         channelRef.current = null;
       }
     };
-  }, [
-    user?.id,
-    handleInsert,
-    handleUpdate,
-    handleDelete,
-    handleReadStatusChange,
-    supabase,
-  ]);
+  }, [user?.id]); // Only depend on user ID - callbacks are now stable
 
   // Initial data fetch when user changes
   useEffect(() => {
     if (user?.id) {
       console.log('Fetching initial notification data');
-      notificationCenter.refreshUnreadCount();
+      const currentCenter = notificationCenterRef.current;
+      currentCenter.refreshUnreadCount();
 
       // Auto-fetch notifications if center is open
-      if (notificationCenter.isOpen) {
+      if (currentCenter.isOpen) {
         const type =
-          notificationCenter.activeTab === 'all'
+          currentCenter.activeTab === 'all'
             ? undefined
-            : (notificationCenter.activeTab as 'changelog' | 'message');
-        notificationCenter.fetchNotifications(type, true);
+            : (currentCenter.activeTab as 'changelog' | 'message');
+        currentCenter.fetchNotifications(type, true);
       }
     }
-  }, [user?.id, notificationCenter]);
+  }, [user?.id]); // Only depend on user ID
 
   return {
     isConnected: channelRef.current !== null,

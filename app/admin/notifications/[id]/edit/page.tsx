@@ -81,27 +81,30 @@ export default function EditNotificationPage() {
   useEffect(() => {
     const loadNotification = async () => {
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const response = await fetch(`/api/admin/notifications/${params.id}`);
 
-        // Mock data - in real app, fetch from API
-        const mockNotification: NotificationForm = {
-          id: params.id as string,
-          type: 'message',
-          category: 'security_alert',
-          title: '检测到异常登录活动',
-          content:
-            '系统检测到您的账户在异地登录，如非本人操作请立即修改密码。\n\n登录详情：\n- 登录时间：{time}\n- 登录位置：{location}\n- 设备信息：{device}\n\n如有疑问，请立即联系管理员。',
-          priority: 'critical',
-          target_roles: ['user'],
-          target_users: [],
-          scheduled_time: '',
-          published: true,
-          published_at: '2024-01-20T14:30:00Z',
+        if (!response.ok) {
+          throw new Error('Failed to fetch notification');
+        }
+
+        const notification = await response.json();
+
+        const formData: NotificationForm = {
+          id: notification.id,
+          type: notification.type,
+          category: notification.category,
+          title: notification.title,
+          content: notification.content,
+          priority: notification.priority,
+          target_roles: notification.target_roles || [],
+          target_users: notification.target_users || [],
+          scheduled_time: '', // Scheduled time is not currently supported
+          published: notification.published,
+          published_at: notification.published_at,
         };
 
-        setForm(mockNotification);
-        setOriginalForm(mockNotification);
+        setForm(formData);
+        setOriginalForm(formData);
       } catch (error) {
         console.error('Failed to load notification:', error);
         router.push('/admin/notifications');
@@ -160,33 +163,52 @@ export default function EditNotificationPage() {
   };
 
   const handleSave = async (publish?: boolean) => {
-    if (!form) return;
+    if (!form || !isFormValid) return;
 
     setSaving(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
       const updateData = {
-        ...form,
+        type: form.type,
+        category: form.category,
+        title: form.title,
+        content: form.content,
+        priority: form.priority,
+        target_roles: form.target_roles,
+        target_users: form.target_users,
         published: publish !== undefined ? publish : form.published,
-        published_at: publish
-          ? new Date().toISOString()
-          : publish === false
-            ? null
-            : form.published_at,
       };
 
-      console.log('Updating notification:', updateData);
+      const response = await fetch(`/api/admin/notifications/${form.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
 
-      // Update original form to reflect saved state
-      setOriginalForm(updateData);
-      setForm(updateData);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save notification');
+      }
+
+      const updatedNotification = await response.json();
+
+      // Update form state with server response
+      const updatedForm: NotificationForm = {
+        ...form,
+        ...updatedNotification,
+      };
+
+      setOriginalForm(updatedForm);
+      setForm(updatedForm);
 
       // Redirect back to notifications list
       router.push('/admin/notifications');
     } catch (error) {
       console.error('Failed to save notification:', error);
+      alert(
+        '保存失败：' + (error instanceof Error ? error.message : '未知错误')
+      );
     } finally {
       setSaving(false);
     }
@@ -197,14 +219,21 @@ export default function EditNotificationPage() {
 
     if (window.confirm('确定要删除这条通知吗？此操作无法撤销。')) {
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
+        const response = await fetch(`/api/admin/notifications/${form.id}`, {
+          method: 'DELETE',
+        });
 
-        console.log('Deleting notification:', form.id);
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to delete notification');
+        }
 
         router.push('/admin/notifications');
       } catch (error) {
         console.error('Failed to delete notification:', error);
+        alert(
+          '删除失败：' + (error instanceof Error ? error.message : '未知错误')
+        );
       }
     }
   };

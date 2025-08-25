@@ -169,17 +169,36 @@ export default function CreateNotificationPage() {
   };
 
   const handleSave = async (publish: boolean = false) => {
+    if (!isFormValid) return;
+
     setSaving(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('/api/admin/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...form,
+          published: publish,
+        }),
+      });
 
-      console.log('Saving notification:', { ...form, published: publish });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save notification');
+      }
+
+      const notification = await response.json();
+      console.log('Notification created:', notification);
 
       // Redirect back to notifications list
       router.push('/admin/notifications');
     } catch (error) {
       console.error('Failed to save notification:', error);
+      alert(
+        '保存失败：' + (error instanceof Error ? error.message : '未知错误')
+      );
     } finally {
       setSaving(false);
     }

@@ -130,62 +130,42 @@ export default function NotificationsAdminPage() {
   >('all');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Mock data for demonstration
+  // Fetch notifications from API
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const mockNotifications: Notification[] = [
-        {
-          id: '1',
-          type: 'message',
-          category: 'security_alert',
-          title: '检测到异常登录活动',
-          content: '系统检测到您的账户在异地登录，如非本人操作请立即修改密码。',
-          priority: 'critical',
-          published: true,
-          published_at: '2024-01-20T14:30:00Z',
-          created_at: '2024-01-20T14:25:00Z',
-          created_by: 'admin',
-          target_roles: ['user'],
-          target_users: [],
-          metadata: {},
-        },
-        {
-          id: '2',
-          type: 'changelog',
-          category: 'feature',
-          title: 'AI助手功能升级',
-          content: '新增代码生成功能，支持多种编程语言，提升开发效率。',
-          priority: 'medium',
-          published: true,
-          published_at: '2024-01-19T10:00:00Z',
-          created_at: '2024-01-19T09:45:00Z',
-          created_by: 'admin',
-          target_roles: ['user', 'admin'],
-          target_users: [],
-          metadata: {},
-        },
-        {
-          id: '3',
-          type: 'message',
-          category: 'system_maintenance',
-          title: '系统维护通知',
-          content:
-            '系统将于今晚23:00-01:00进行例行维护，期间服务可能暂时中断。',
-          priority: 'high',
-          published: false,
-          published_at: null,
-          created_at: '2024-01-18T16:00:00Z',
-          created_by: 'admin',
-          target_roles: ['user'],
-          target_users: [],
-          metadata: {},
-        },
-      ];
-      setNotifications(mockNotifications);
-      setLoading(false);
-    }, 1000);
-  }, []);
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true);
+
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (selectedType !== 'all') {
+          params.append('type', selectedType);
+        }
+        if (selectedCategory !== 'all') {
+          params.append('category', selectedCategory);
+        }
+        if (selectedPriority !== 'all') {
+          params.append('priority', selectedPriority);
+        }
+        params.append('limit', '100'); // Get more notifications for admin view
+
+        const response = await fetch(`/api/admin/notifications?${params}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch notifications');
+        }
+
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+        setNotifications([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, [selectedType, selectedCategory, selectedPriority]);
 
   const filteredNotifications = notifications.filter(notification => {
     if (
@@ -213,24 +193,55 @@ export default function NotificationsAdminPage() {
     return true;
   });
 
-  const handleDeleteNotification = (id: string) => {
+  const handleDeleteNotification = async (id: string) => {
     if (window.confirm('确定要删除这条通知吗？')) {
-      setNotifications(prev => prev.filter(n => n.id !== id));
+      try {
+        const response = await fetch(`/api/admin/notifications/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete notification');
+        }
+
+        // Remove from local state
+        setNotifications(prev => prev.filter(n => n.id !== id));
+      } catch (error) {
+        console.error('Failed to delete notification:', error);
+        alert('删除失败，请重试');
+      }
     }
   };
 
-  const handleTogglePublish = (id: string) => {
-    setNotifications(prev =>
-      prev.map(n =>
-        n.id === id
-          ? {
-              ...n,
-              published: !n.published,
-              published_at: !n.published ? new Date().toISOString() : null,
-            }
-          : n
-      )
-    );
+  const handleTogglePublish = async (id: string) => {
+    const notification = notifications.find(n => n.id === id);
+    if (!notification) return;
+
+    try {
+      const response = await fetch(`/api/admin/notifications/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          published: !notification.published,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update notification');
+      }
+
+      const updatedNotification = await response.json();
+
+      // Update local state
+      setNotifications(prev =>
+        prev.map(n => (n.id === id ? updatedNotification : n))
+      );
+    } catch (error) {
+      console.error('Failed to toggle publish status:', error);
+      alert('更新失败，请重试');
+    }
   };
 
   return (
@@ -245,12 +256,12 @@ export default function NotificationsAdminPage() {
             管理系统通知和更新日志
           </p>
         </div>
-        <Link href="/admin/notifications/create">
-          <Button>
+        <Button asChild>
+          <Link href="/admin/notifications/create">
             <Plus className="mr-2 h-4 w-4" />
             创建通知
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       {/* Filters */}
