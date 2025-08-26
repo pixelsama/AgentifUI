@@ -64,7 +64,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const hasAccess = await canUserAccessNotification(
       user.id,
       profile.role,
-      id
+      id,
+      supabase
     );
     if (!hasAccess) {
       return NextResponse.json(
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Fetch the notification
-    const notification = await getNotificationById(id);
+    const notification = await getNotificationById(id, supabase);
     if (!notification) {
       return NextResponse.json(
         { error: 'Notification not found' },
@@ -130,7 +131,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     // Check if notification exists
-    const existingNotification = await getNotificationById(id);
+    const existingNotification = await getNotificationById(id, supabase);
     if (!existingNotification) {
       return NextResponse.json(
         { error: 'Notification not found' },
@@ -184,7 +185,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     };
 
     // Update the notification
-    const updatedNotification = await updateNotification(updateData);
+    const updatedNotification = await updateNotification(updateData, supabase);
 
     return NextResponse.json(updatedNotification);
   } catch (error) {
@@ -234,7 +235,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Check if notification exists
-    const existingNotification = await getNotificationById(id);
+    const existingNotification = await getNotificationById(id, supabase);
     if (!existingNotification) {
       return NextResponse.json(
         { error: 'Notification not found' },
@@ -243,7 +244,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Delete the notification
-    await deleteNotification(id);
+    await deleteNotification(id, supabase);
 
     return NextResponse.json(
       { message: 'Notification deleted successfully' },

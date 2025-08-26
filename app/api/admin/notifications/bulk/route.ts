@@ -8,7 +8,6 @@ import {
   getNotificationById,
   updateNotification,
 } from '@lib/db/notification-center';
-import { getUserProfileByIdLegacy as getProfile } from '@lib/db/profiles';
 import { createAPIClient } from '@lib/supabase/api-client';
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -38,9 +37,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check admin permissions
-    const profile = await getProfile(user.id);
-    if (!profile || profile.role !== 'admin') {
+    // Check admin permissions (using direct query like middleware)
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile || profile.role !== 'admin') {
       return NextResponse.json(
         { error: 'Insufficient permissions. Admin role required.' },
         { status: 403 }
@@ -100,7 +104,7 @@ export async function POST(request: NextRequest) {
 
     // Check that all notifications exist
     const notificationChecks = await Promise.all(
-      body.notification_ids.map(id => getNotificationById(id))
+      body.notification_ids.map(id => getNotificationById(id, supabase))
     );
 
     const missingIds = body.notification_ids.filter(
@@ -126,23 +130,29 @@ export async function POST(request: NextRequest) {
       try {
         switch (body.action) {
           case 'publish':
-            await updateNotification({
-              id: notificationId,
-              published: true,
-            });
+            await updateNotification(
+              {
+                id: notificationId,
+                published: true,
+              },
+              supabase
+            );
             results.success.push(notificationId);
             break;
 
           case 'unpublish':
-            await updateNotification({
-              id: notificationId,
-              published: false,
-            });
+            await updateNotification(
+              {
+                id: notificationId,
+                published: false,
+              },
+              supabase
+            );
             results.success.push(notificationId);
             break;
 
           case 'delete':
-            await deleteNotification(notificationId);
+            await deleteNotification(notificationId, supabase);
             results.success.push(notificationId);
             break;
         }

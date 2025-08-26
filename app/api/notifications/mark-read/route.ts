@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     // Verify user has access to all notifications before marking any as read
     const accessChecks = await Promise.all(
       body.notification_ids.map(id =>
-        canUserAccessNotification(user.id, profile.role, id)
+        canUserAccessNotification(user.id, profile.role, id, supabase)
       )
     );
 
@@ -98,18 +98,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Mark notifications as read
+    // Mark notifications as read with authenticated client
     let markedCount: number;
 
     if (body.notification_ids.length === 1) {
       // Single notification - use individual method
-      await markNotificationAsRead(body.notification_ids[0], user.id);
+      await markNotificationAsRead(body.notification_ids[0], user.id, supabase);
       markedCount = 1;
     } else {
       // Multiple notifications - use batch method
       markedCount = await markNotificationsAsRead(
         body.notification_ids,
-        user.id
+        user.id,
+        supabase
       );
     }
 

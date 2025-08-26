@@ -48,10 +48,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get unread count
+    // Get unread count with authenticated client
     const unreadCount: UnreadCount = await getUserUnreadCount(
       user.id,
-      typeFilter || undefined
+      typeFilter || undefined,
+      supabase
     );
 
     // Prepare response
@@ -67,7 +68,10 @@ export async function GET(request: NextRequest) {
     // Include category breakdown if requested
     if (includeCategoryBreakdown) {
       try {
-        const categoryBreakdown = await getUserUnreadCountByCategory(user.id);
+        const categoryBreakdown = await getUserUnreadCountByCategory(
+          user.id,
+          supabase
+        );
         response.category_breakdown = categoryBreakdown;
       } catch (error) {
         console.warn('Failed to get category breakdown:', error);

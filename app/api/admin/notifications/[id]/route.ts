@@ -10,20 +10,22 @@ import {
   getAllNotificationsForAdmin,
   updateNotification,
 } from '@lib/db/notification-center';
-import { getUserProfileByIdLegacy as getProfile } from '@lib/db/profiles';
 import { createAPIClient } from '@lib/supabase/api-client';
 import type { UpdateNotificationData } from '@lib/types/notification-center';
 
 import { NextRequest, NextResponse } from 'next/server';
 
+interface RouteParams {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
 /**
  * GET /api/admin/notifications/[id]
  * Get single notification by ID for admin
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const supabase = await createAPIClient();
     const {
@@ -35,9 +37,14 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check admin permissions
-    const profile = await getProfile(user.id);
-    if (!profile || profile.role !== 'admin') {
+    // Check admin permissions (using direct query like middleware)
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile || profile.role !== 'admin') {
       return NextResponse.json(
         { error: 'Insufficient permissions. Admin role required.' },
         { status: 403 }
@@ -50,7 +57,8 @@ export async function GET(
       offset: 0,
     });
 
-    const notification = notifications.find(n => n.id === params.id);
+    const { id } = await params;
+    const notification = notifications.find(n => n.id === id);
 
     if (!notification) {
       return NextResponse.json(
@@ -73,10 +81,7 @@ export async function GET(
  * PUT /api/admin/notifications/[id]
  * Update notification
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const supabase = await createAPIClient();
     const {
@@ -88,9 +93,14 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check admin permissions
-    const profile = await getProfile(user.id);
-    if (!profile || profile.role !== 'admin') {
+    // Check admin permissions (using direct query like middleware)
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile || profile.role !== 'admin') {
       return NextResponse.json(
         { error: 'Insufficient permissions. Admin role required.' },
         { status: 403 }
@@ -137,13 +147,14 @@ export async function PUT(
       }
     }
 
+    const { id } = await params;
     const updateData: UpdateNotificationData = {
-      id: params.id,
+      id,
       ...body,
     };
 
-    // Update the notification
-    const updatedNotification = await updateNotification(updateData);
+    // Update the notification with authenticated client
+    const updatedNotification = await updateNotification(updateData, supabase);
 
     return NextResponse.json(updatedNotification);
   } catch (error) {
@@ -159,10 +170,7 @@ export async function PUT(
  * DELETE /api/admin/notifications/[id]
  * Delete notification
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const supabase = await createAPIClient();
     const {
@@ -174,17 +182,24 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check admin permissions
-    const profile = await getProfile(user.id);
-    if (!profile || profile.role !== 'admin') {
+    // Check admin permissions (using direct query like middleware)
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile || profile.role !== 'admin') {
       return NextResponse.json(
         { error: 'Insufficient permissions. Admin role required.' },
         { status: 403 }
       );
     }
 
-    // Delete the notification
-    await deleteNotification(params.id);
+    const { id } = await params;
+
+    // Delete the notification with authenticated client
+    await deleteNotification(id, supabase);
 
     return NextResponse.json({ success: true });
   } catch (error) {

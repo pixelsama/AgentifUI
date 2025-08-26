@@ -8,7 +8,6 @@ import {
   createNotification,
   getAllNotificationsForAdmin,
 } from '@lib/db/notification-center';
-import { getUserProfileByIdLegacy as getProfile } from '@lib/db/profiles';
 import { createAPIClient } from '@lib/supabase/api-client';
 import type {
   CreateNotificationData,
@@ -33,9 +32,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check admin permissions
-    const profile = await getProfile(user.id);
-    if (!profile || profile.role !== 'admin') {
+    // Check admin permissions (using direct query like middleware)
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile || profile.role !== 'admin') {
       return NextResponse.json(
         { error: 'Insufficient permissions. Admin role required.' },
         { status: 403 }
@@ -117,9 +121,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch all notifications for admin view
-    const { notifications, total_count } =
-      await getAllNotificationsForAdmin(params);
+    // Fetch all notifications for admin view with authenticated client
+    const { notifications, total_count } = await getAllNotificationsForAdmin(
+      params,
+      supabase
+    );
 
     const response = {
       notifications,
@@ -153,9 +159,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check admin permissions
-    const profile = await getProfile(user.id);
-    if (!profile || profile.role !== 'admin') {
+    // Check admin permissions (using direct query like middleware)
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile || profile.role !== 'admin') {
       return NextResponse.json(
         { error: 'Insufficient permissions. Admin role required.' },
         { status: 403 }
@@ -238,14 +249,18 @@ export async function POST(request: NextRequest) {
       metadata: body.metadata || {},
     };
 
-    // Create the notification
-    const notification = await createNotification(notificationData);
+    // Create the notification with authenticated supabase client
+    const notification = await createNotification(notificationData, supabase);
 
     return NextResponse.json(notification, { status: 201 });
   } catch (error) {
     console.error('Error creating admin notification:', error);
     return NextResponse.json(
-      { error: 'Failed to create notification' },
+      {
+        error: 'Failed to create notification',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        debug: process.env.NODE_ENV === 'development' ? error : undefined,
+      },
       { status: 500 }
     );
   }

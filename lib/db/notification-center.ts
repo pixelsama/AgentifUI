@@ -5,6 +5,7 @@
  * Handles direct interactions with Supabase for notifications and notification reads.
  */
 import { createClient } from '@lib/supabase/client';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type {
   CreateNotificationData,
   GetNotificationsParams,
@@ -27,9 +28,11 @@ const supabase = createClient();
  * Create a new notification in the database
  */
 export async function createNotification(
-  data: CreateNotificationData
+  data: CreateNotificationData,
+  customSupabase?: SupabaseClient
 ): Promise<Notification> {
-  const { data: notification, error } = await supabase
+  const clientToUse = customSupabase || supabase;
+  const { data: notification, error } = await clientToUse
     .from('notifications')
     .insert({
       type: data.type,
@@ -56,9 +59,11 @@ export async function createNotification(
  * Get a single notification by ID
  */
 export async function getNotificationById(
-  id: string
+  id: string,
+  customSupabase?: SupabaseClient
 ): Promise<Notification | null> {
-  const { data, error } = await supabase
+  const clientToUse = customSupabase || supabase;
+  const { data, error } = await clientToUse
     .from('notifications')
     .select('*')
     .eq('id', id)
@@ -76,11 +81,13 @@ export async function getNotificationById(
  * Update an existing notification
  */
 export async function updateNotification(
-  data: UpdateNotificationData
+  data: UpdateNotificationData,
+  customSupabase?: SupabaseClient
 ): Promise<Notification> {
   const { id, ...updates } = data;
+  const clientToUse = customSupabase || supabase;
 
-  const { data: notification, error } = await supabase
+  const { data: notification, error } = await clientToUse
     .from('notifications')
     .update(updates)
     .eq('id', id)
@@ -97,8 +104,15 @@ export async function updateNotification(
 /**
  * Delete a notification by ID
  */
-export async function deleteNotification(id: string): Promise<void> {
-  const { error } = await supabase.from('notifications').delete().eq('id', id);
+export async function deleteNotification(
+  id: string,
+  customSupabase?: SupabaseClient
+): Promise<void> {
+  const clientToUse = customSupabase || supabase;
+  const { error } = await clientToUse
+    .from('notifications')
+    .delete()
+    .eq('id', id);
 
   if (error) {
     throw new Error(`Failed to delete notification: ${error.message}`);
@@ -114,12 +128,14 @@ export async function deleteNotification(id: string): Promise<void> {
  */
 export async function getNotificationsWithReadStatus(
   userId: string,
-  params: GetNotificationsParams = {}
+  params: GetNotificationsParams = {},
+  customSupabase?: SupabaseClient
 ): Promise<{
   notifications: NotificationWithReadStatus[];
   total_count: number;
 }> {
-  let query = supabase
+  const clientToUse = customSupabase || supabase;
+  let query = clientToUse
     .from('notifications')
     .select(
       `
@@ -166,7 +182,7 @@ export async function getNotificationsWithReadStatus(
 
   // Transform data to include read status
   const notifications: NotificationWithReadStatus[] =
-    data?.map(notification => ({
+    data?.map((notification: Notification & { notification_reads?: any[] }) => ({
       ...notification,
       is_read:
         notification.notification_reads?.some(
@@ -194,12 +210,14 @@ export async function getNotificationsWithReadStatus(
  * Get all notifications for admin management (without RLS filtering)
  */
 export async function getAllNotificationsForAdmin(
-  params: GetNotificationsParams = {}
+  params: GetNotificationsParams = {},
+  customSupabase?: SupabaseClient
 ): Promise<{
   notifications: Notification[];
   total_count: number;
 }> {
-  let query = supabase
+  const clientToUse = customSupabase || supabase;
+  let query = clientToUse
     .from('notifications')
     .select('*', { count: 'exact' })
     .order(params.sort_by || 'created_at', {
@@ -252,9 +270,11 @@ export async function getAllNotificationsForAdmin(
  */
 export async function markNotificationAsRead(
   notificationId: string,
-  userId: string
+  userId: string,
+  customSupabase?: SupabaseClient
 ): Promise<NotificationRead> {
-  const { data, error } = await supabase
+  const clientToUse = customSupabase || supabase;
+  const { data, error } = await clientToUse
     .from('notification_reads')
     .upsert({
       notification_id: notificationId,
@@ -276,9 +296,11 @@ export async function markNotificationAsRead(
  */
 export async function markNotificationsAsRead(
   notificationIds: string[],
-  userId: string
+  userId: string,
+  customSupabase?: SupabaseClient
 ): Promise<number> {
-  const { data, error } = await supabase.rpc('mark_notifications_read', {
+  const clientToUse = customSupabase || supabase;
+  const { data, error } = await clientToUse.rpc('mark_notifications_read', {
     notification_ids: notificationIds,
     user_uuid: userId,
   });
@@ -295,9 +317,11 @@ export async function markNotificationsAsRead(
  */
 export async function getNotificationReadStatus(
   notificationId: string,
-  userId: string
+  userId: string,
+  customSupabase?: SupabaseClient
 ): Promise<NotificationRead | null> {
-  const { data, error } = await supabase
+  const clientToUse = customSupabase || supabase;
+  const { data, error } = await clientToUse
     .from('notification_reads')
     .select('*')
     .eq('notification_id', notificationId)
@@ -321,9 +345,11 @@ export async function getNotificationReadStatus(
  */
 export async function getUserUnreadCount(
   userId: string,
-  type?: NotificationType
+  type?: NotificationType,
+  customSupabase?: SupabaseClient
 ): Promise<UnreadCount> {
-  const { data, error } = await supabase.rpc('get_user_unread_count', {
+  const clientToUse = customSupabase || supabase;
+  const { data, error } = await clientToUse.rpc('get_user_unread_count', {
     user_uuid: userId,
     notification_type: type || null,
   });
@@ -349,10 +375,14 @@ export async function getUserUnreadCount(
 /**
  * Get detailed unread counts by category for a user
  */
-export async function getUserUnreadCountByCategory(userId: string): Promise<{
+export async function getUserUnreadCountByCategory(
+  userId: string,
+  customSupabase?: SupabaseClient
+): Promise<{
   [category: string]: number;
 }> {
-  const { data, error } = await supabase
+  const clientToUse = customSupabase || supabase;
+  const { data, error } = await clientToUse
     .from('notifications')
     .select('category')
     .eq('published', true)
@@ -372,7 +402,7 @@ export async function getUserUnreadCountByCategory(userId: string): Promise<{
 
   const categoryCounts: { [category: string]: number } = {};
 
-  data?.forEach(notification => {
+  data?.forEach((notification: Notification) => {
     const category = notification.category || 'uncategorized';
     categoryCounts[category] = (categoryCounts[category] || 0) + 1;
   });
@@ -390,11 +420,13 @@ export async function getUserUnreadCountByCategory(userId: string): Promise<{
 export async function getTargetedNotifications(
   userId: string,
   userRole: UserRole,
-  params: GetNotificationsParams = {}
+  params: GetNotificationsParams = {},
+  customSupabase?: SupabaseClient
 ): Promise<NotificationWithReadStatus[]> {
   const { notifications } = await getNotificationsWithReadStatus(
     userId,
-    params
+    params,
+    customSupabase
   );
 
   return notifications.filter(notification => {
@@ -426,9 +458,13 @@ export async function getTargetedNotifications(
 export async function canUserAccessNotification(
   userId: string,
   userRole: UserRole,
-  notificationId: string
+  notificationId: string,
+  customSupabase?: SupabaseClient
 ): Promise<boolean> {
-  const notification = await getNotificationById(notificationId);
+  const notification = await getNotificationById(
+    notificationId,
+    customSupabase
+  );
 
   if (!notification || !notification.published) {
     return false;

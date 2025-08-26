@@ -189,9 +189,6 @@ export default function CreateNotificationPage() {
         throw new Error(error.error || 'Failed to save notification');
       }
 
-      const notification = await response.json();
-      console.log('Notification created:', notification);
-
       // Redirect back to notifications list
       router.push('/admin/notifications');
     } catch (error) {

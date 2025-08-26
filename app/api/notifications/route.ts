@@ -120,14 +120,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch notifications with read status
+    // Fetch notifications with read status using authenticated client
     const { notifications, total_count } = await getNotificationsWithReadStatus(
       user.id,
-      params
+      params,
+      supabase
     );
 
-    // Get unread count
-    const unreadCount = await getUserUnreadCount(user.id, params.type);
+    // Get unread count with authenticated client
+    const unreadCount = await getUserUnreadCount(
+      user.id,
+      params.type,
+      supabase
+    );
 
     const response: NotificationListResponse = {
       notifications,
@@ -232,8 +237,8 @@ export async function POST(request: NextRequest) {
       metadata: body.metadata || {},
     };
 
-    // Create the notification
-    const notification = await createNotification(notificationData);
+    // Create the notification with authenticated client
+    const notification = await createNotification(notificationData, supabase);
 
     return NextResponse.json(notification, { status: 201 });
   } catch (error) {
