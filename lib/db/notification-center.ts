@@ -5,7 +5,6 @@
  * Handles direct interactions with Supabase for notifications and notification reads.
  */
 import { createClient } from '@lib/supabase/client';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type {
   CreateNotificationData,
   GetNotificationsParams,
@@ -17,6 +16,8 @@ import type {
   UpdateNotificationData,
   UserRole,
 } from '@lib/types/notification-center';
+
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 const supabase = createClient();
 
@@ -182,17 +183,19 @@ export async function getNotificationsWithReadStatus(
 
   // Transform data to include read status
   const notifications: NotificationWithReadStatus[] =
-    data?.map((notification: Notification & { notification_reads?: any[] }) => ({
-      ...notification,
-      is_read:
-        notification.notification_reads?.some(
-          (read: { read_at: string | null }) => read.read_at !== null
-        ) || false,
-      read_at:
-        notification.notification_reads?.find(
-          (read: { read_at: string | null }) => read.read_at !== null
-        )?.read_at || null,
-    })) || [];
+    data?.map(
+      (notification: Notification & { notification_reads?: any[] }) => ({
+        ...notification,
+        is_read:
+          notification.notification_reads?.some(
+            (read: { read_at: string | null }) => read.read_at !== null
+          ) || false,
+        read_at:
+          notification.notification_reads?.find(
+            (read: { read_at: string | null }) => read.read_at !== null
+          )?.read_at || null,
+      })
+    ) || [];
 
   // Filter by read status if specified
   let filteredNotifications = notifications;
@@ -402,8 +405,8 @@ export async function getUserUnreadCountByCategory(
 
   const categoryCounts: { [category: string]: number } = {};
 
-  data?.forEach((notification: Notification) => {
-    const category = notification.category || 'uncategorized';
+  data?.forEach((item: { category: string }) => {
+    const category = item.category || 'uncategorized';
     categoryCounts[category] = (categoryCounts[category] || 0) + 1;
   });
 
