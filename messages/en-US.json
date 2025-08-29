@@ -1927,6 +1927,249 @@
           "updateVisibilityError": "Failed to update application visibility",
           "updateGroupPermissionError": "Failed to update group permissions"
         }
+      },
+      "notifications": {
+        "title": "Notification Management",
+        "subtitle": "Manage system notifications and announcements",
+        "create": {
+          "title": "Create Notification",
+          "subtitle": "Create new system notification or announcement",
+          "backButton": "Back",
+          "previewButton": "Preview",
+          "editButton": "Edit",
+          "saveButton": "Save",
+          "saveDraftButton": "Save Draft",
+          "publishButton": "Publish",
+          "savingButton": "Saving...",
+          "publishingButton": "Publishing...",
+          "basicInfo": {
+            "title": "Basic Information",
+            "type": {
+              "label": "Type",
+              "message": "Message",
+              "changelog": "Changelog"
+            },
+            "category": {
+              "label": "Category"
+            },
+            "title": {
+              "label": "Title",
+              "placeholder": "Enter notification title..."
+            },
+            "priority": {
+              "label": "Priority"
+            }
+          },
+          "content": {
+            "title": "Notification Content",
+            "label": "Content",
+            "placeholder": "Enter notification content...",
+            "variableHint": "Supports variable replacement, such as {username}, {time}, etc.",
+            "variableInsert": {
+              "title": "Quick Insert Variables"
+            }
+          },
+          "targeting": {
+            "title": "Send Target",
+            "roles": {
+              "label": "Target Roles",
+              "user": "Regular User",
+              "admin": "Administrator",
+              "developer": "Developer",
+              "tester": "Tester"
+            },
+            "scheduling": {
+              "label": "Scheduled Publishing",
+              "placeholder": "Leave empty for immediate publishing"
+            }
+          },
+          "preview": {
+            "title": "Notification Preview",
+            "targetRoles": "Target Roles",
+            "scheduledTime": "Scheduled Time",
+            "publishTime": "Publish Time"
+          },
+          "templates": {
+            "title": "Common Templates",
+            "tokenWarning": {
+              "name": "Token Usage Warning",
+              "title": "Token Usage Warning",
+              "content": "Your token usage has reached {percentage}%. Please control usage to avoid service interruption.\n\nCurrent usage: {currentUsage}\nTotal quota: {limit}\n\nPlease plan your usage accordingly.",
+              "description": "Warning notification when user token usage exceeds threshold"
+            },
+            "maintenance": {
+              "name": "System Maintenance",
+              "title": "System Maintenance Notice",
+              "content": "The system will undergo routine maintenance at {time}, expected duration: {duration}.\n\nPossible impacts during maintenance:\n- Temporary service interruption\n- Data sync delays\n\nPlease save your work in advance. Thank you for your understanding.",
+              "description": "Notification template for system maintenance periods"
+            },
+            "agentResult": {
+              "name": "Agent Execution Result",
+              "title": "Agent Execution Completed",
+              "content": "Agent \"{agentName}\" has completed execution successfully.\n\nExecution result: {result}\nDuration: {duration}\n\nPlease check the execution logs for detailed results.",
+              "description": "Notification after agent task execution completion"
+            },
+            "securityAlert": {
+              "name": "Security Alert",
+              "title": "Security Alert",
+              "content": "Suspicious activity detected on your account.\n\nDetails: {details}\nDetection time: {time}\nSource IP: {ip}\n\nIf this was not you, please change your password immediately and contact the administrator.",
+              "description": "Emergency security-related alerts"
+            },
+            "newFeature": {
+              "name": "New Feature Release",
+              "title": "New Feature Release",
+              "content": "We're excited to announce a new feature: {featureName}\n\nKey features:\n{features}\n\nExperience these powerful new features now!",
+              "description": "New feature launch announcement"
+            }
+          },
+          "validation": {
+            "titleRequired": "Please enter notification title",
+            "contentRequired": "Please enter notification content",
+            "rolesRequired": "Please select at least one target role"
+          },
+          "messages": {
+            "saveSuccess": "Notification saved successfully",
+            "saveFailed": "Save failed",
+            "publishSuccess": "Notification published successfully",
+            "publishFailed": "Publish failed"
+          },
+          "tips": {
+            "title": "Writing Tips",
+            "priorityAdvice": "Priority Recommendations:",
+            "contentAdvice": "Content Recommendations:",
+            "priorityItems": [
+              "Critical: Security issues, system failures",
+              "High: Maintenance notices, important updates",
+              "Medium: Feature releases, general announcements",
+              "Low: Tips, usage guidance"
+            ],
+            "contentItems": [
+              "Keep titles concise and clear",
+              "Structure content clearly",
+              "Use variables for reusability",
+              "Include necessary action guidance"
+            ]
+          }
+        },
+        "edit": {
+          "title": "Edit Notification",
+          "subtitle": "Edit existing notification content and settings",
+          "backButton": "Back",
+          "previewButton": "Preview",
+          "editButton": "Edit",
+          "saveButton": "Save",
+          "publishButton": "Publish",
+          "unpublishButton": "Unpublish",
+          "deleteButton": "Delete",
+          "savingButton": "Saving...",
+          "status": {
+            "published": {
+              "title": "Notification Published",
+              "description": "This notification was published to target users at {time}"
+            },
+            "unsavedChanges": {
+              "title": "Unsaved Changes",
+              "description": "You have unsaved changes, please remember to save or publish updates"
+            }
+          },
+          "statistics": {
+            "title": "Notification Statistics",
+            "status": "Status",
+            "published": "Published",
+            "draft": "Draft",
+            "publishTime": "Publish Time",
+            "targetUsers": "Target Users",
+            "priority": "Priority"
+          },
+          "tips": {
+            "title": "Edit Tips",
+            "notice": "Notice",
+            "items": [
+              "Published notifications need to be republished after modification",
+              "Changing priority may affect push strategy",
+              "Variables will be replaced with actual values when sent",
+              "Delete operation cannot be undone, please operate carefully"
+            ]
+          },
+          "notFound": {
+            "title": "Notification Not Found",
+            "description": "The requested notification does not exist or has been deleted.",
+            "backButton": "Return to Notification List"
+          },
+          "messages": {
+            "saveSuccess": "Saved successfully",
+            "saveFailed": "Save failed",
+            "publishSuccess": "Published successfully",
+            "publishFailed": "Publish failed",
+            "deleteConfirm": "Are you sure you want to delete this notification? This action cannot be undone.",
+            "deleteSuccess": "Deleted successfully",
+            "deleteFailed": "Delete failed"
+          }
+        },
+        "categories": {
+          "admin_announcement": {
+            "label": "Admin Announcement",
+            "description": "Important announcements from administrators"
+          },
+          "agent_result": {
+            "label": "Agent Result",
+            "description": "AI Agent execution result notifications"
+          },
+          "token_usage": {
+            "label": "Token Usage",
+            "description": "Token consumption and quota reminders"
+          },
+          "system_maintenance": {
+            "label": "System Maintenance",
+            "description": "System maintenance and downtime notifications"
+          },
+          "security_alert": {
+            "label": "Security Alert",
+            "description": "Important security-related warnings"
+          },
+          "feature_tip": {
+            "label": "Feature Tip",
+            "description": "New feature usage tips"
+          },
+          "feature": {
+            "label": "New Feature",
+            "description": "New feature release announcements"
+          },
+          "improvement": {
+            "label": "Improvement",
+            "description": "Feature improvements and optimizations"
+          },
+          "bugfix": {
+            "label": "Bug Fix",
+            "description": "Bug fix announcements"
+          },
+          "security": {
+            "label": "Security Update",
+            "description": "Security-related updates"
+          },
+          "api_change": {
+            "label": "API Change",
+            "description": "API interface change notifications"
+          }
+        },
+        "priorities": {
+          "low": {
+            "label": "Low",
+            "description": "General information, user views actively"
+          },
+          "medium": {
+            "label": "Medium",
+            "description": "Important information, shows notification badge"
+          },
+          "high": {
+            "label": "High",
+            "description": "Urgent information, shows instant notification"
+          },
+          "critical": {
+            "label": "Critical",
+            "description": "Serious issues, forced display and automatically open notification center"
+          }
+        }
       }
     },
     "about": {

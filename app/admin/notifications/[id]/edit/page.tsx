@@ -10,6 +10,7 @@ import { ArrowLeft, Eye, Save, Send, Trash } from 'lucide-react';
 
 import { useEffect, useRef, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 
@@ -27,47 +28,13 @@ interface NotificationForm {
   published_at: string | null;
 }
 
-const CATEGORY_OPTIONS: Record<
-  NotificationCategory,
-  { label: string; description: string }
-> = {
-  admin_announcement: {
-    label: '管理员公告',
-    description: '管理员发布的重要公告',
-  },
-  agent_result: { label: 'Agent结果', description: 'AI Agent执行结果通知' },
-  token_usage: { label: 'Token使用', description: 'Token消耗和额度提醒' },
-  system_maintenance: { label: '系统维护', description: '系统维护和停机通知' },
-  security_alert: { label: '安全警告', description: '安全相关的重要警告' },
-  feature_tip: { label: '功能提示', description: '新功能使用提示' },
-  feature: { label: '新功能', description: '新功能发布公告' },
-  improvement: { label: '改进', description: '功能改进和优化' },
-  bugfix: { label: '修复', description: 'Bug修复公告' },
-  security: { label: '安全更新', description: '安全相关更新' },
-  api_change: { label: 'API变更', description: 'API接口变更通知' },
-};
-
-const PRIORITY_OPTIONS = {
-  low: { label: '低', description: '一般信息，用户主动查看' },
-  medium: { label: '中', description: '重要信息，显示通知徽章' },
-  high: { label: '高', description: '紧急信息，显示即时通知' },
-  critical: {
-    label: '紧急',
-    description: '严重问题，强制显示并自动打开通知中心',
-  },
-};
-
-const ROLE_OPTIONS = [
-  { value: 'user', label: '普通用户' },
-  { value: 'admin', label: '管理员' },
-  { value: 'developer', label: '开发者' },
-  { value: 'tester', label: '测试人员' },
-];
+// These constants will be replaced with translation functions in the component
 
 export default function EditNotificationPage() {
   const params = useParams();
   const router = useRouter();
   const contentRef = useRef<HTMLTextAreaElement>(null);
+  const t = useTranslations('pages.admin.notifications');
 
   const [form, setForm] = useState<NotificationForm | null>(null);
   const [originalForm, setOriginalForm] = useState<NotificationForm | null>(
@@ -76,6 +43,83 @@ export default function EditNotificationPage() {
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Dynamic options using translations
+  const CATEGORY_OPTIONS: Record<
+    NotificationCategory,
+    { label: string; description: string }
+  > = {
+    admin_announcement: {
+      label: t('categories.admin_announcement.label'),
+      description: t('categories.admin_announcement.description'),
+    },
+    agent_result: {
+      label: t('categories.agent_result.label'),
+      description: t('categories.agent_result.description'),
+    },
+    token_usage: {
+      label: t('categories.token_usage.label'),
+      description: t('categories.token_usage.description'),
+    },
+    system_maintenance: {
+      label: t('categories.system_maintenance.label'),
+      description: t('categories.system_maintenance.description'),
+    },
+    security_alert: {
+      label: t('categories.security_alert.label'),
+      description: t('categories.security_alert.description'),
+    },
+    feature_tip: {
+      label: t('categories.feature_tip.label'),
+      description: t('categories.feature_tip.description'),
+    },
+    feature: {
+      label: t('categories.feature.label'),
+      description: t('categories.feature.description'),
+    },
+    improvement: {
+      label: t('categories.improvement.label'),
+      description: t('categories.improvement.description'),
+    },
+    bugfix: {
+      label: t('categories.bugfix.label'),
+      description: t('categories.bugfix.description'),
+    },
+    security: {
+      label: t('categories.security.label'),
+      description: t('categories.security.description'),
+    },
+    api_change: {
+      label: t('categories.api_change.label'),
+      description: t('categories.api_change.description'),
+    },
+  };
+
+  const PRIORITY_OPTIONS = {
+    low: {
+      label: t('priorities.low.label'),
+      description: t('priorities.low.description'),
+    },
+    medium: {
+      label: t('priorities.medium.label'),
+      description: t('priorities.medium.description'),
+    },
+    high: {
+      label: t('priorities.high.label'),
+      description: t('priorities.high.description'),
+    },
+    critical: {
+      label: t('priorities.critical.label'),
+      description: t('priorities.critical.description'),
+    },
+  };
+
+  const ROLE_OPTIONS = [
+    { value: 'user', label: t('edit.targeting.roles.user') },
+    { value: 'admin', label: t('edit.targeting.roles.admin') },
+    { value: 'developer', label: t('edit.targeting.roles.developer') },
+    { value: 'tester', label: t('edit.targeting.roles.tester') },
+  ];
 
   // Load notification data
   useEffect(() => {
@@ -207,7 +251,9 @@ export default function EditNotificationPage() {
     } catch (error) {
       console.error('Failed to save notification:', error);
       alert(
-        '保存失败：' + (error instanceof Error ? error.message : '未知错误')
+        t('edit.messages.saveFailed') +
+          ': ' +
+          (error instanceof Error ? error.message : t('common.ui.error'))
       );
     } finally {
       setSaving(false);
@@ -217,7 +263,7 @@ export default function EditNotificationPage() {
   const handleDelete = async () => {
     if (!form) return;
 
-    if (window.confirm('确定要删除这条通知吗？此操作无法撤销。')) {
+    if (window.confirm(t('edit.messages.deleteConfirm'))) {
       try {
         const response = await fetch(`/api/admin/notifications/${form.id}`, {
           method: 'DELETE',
@@ -232,7 +278,9 @@ export default function EditNotificationPage() {
       } catch (error) {
         console.error('Failed to delete notification:', error);
         alert(
-          '删除失败：' + (error instanceof Error ? error.message : '未知错误')
+          t('edit.messages.deleteFailed') +
+            ': ' +
+            (error instanceof Error ? error.message : t('common.ui.error'))
         );
       }
     }
@@ -261,13 +309,13 @@ export default function EditNotificationPage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <h2 className="mb-2 text-xl font-semibold text-stone-900 dark:text-gray-100">
-            通知未找到
+            {t('edit.notFound.title')}
           </h2>
           <p className="mb-4 text-stone-600 dark:text-stone-400">
-            请求的通知不存在或已被删除。
+            {t('edit.notFound.description')}
           </p>
           <Link href="/admin/notifications">
-            <Button>返回通知列表</Button>
+            <Button>{t('edit.notFound.backButton')}</Button>
           </Link>
         </div>
       </div>
@@ -282,15 +330,15 @@ export default function EditNotificationPage() {
           <Link href="/admin/notifications">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              返回
+              {t('edit.backButton')}
             </Button>
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-stone-900 dark:text-gray-100">
-              编辑通知
+              {t('edit.title')}
             </h1>
             <p className="text-sm text-stone-600 dark:text-stone-400">
-              编辑现有通知内容和设置
+              {t('edit.subtitle')}
             </p>
           </div>
         </div>
@@ -298,7 +346,7 @@ export default function EditNotificationPage() {
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setPreview(!preview)}>
             <Eye className="mr-2 h-4 w-4" />
-            {preview ? '编辑' : '预览'}
+            {preview ? t('edit.editButton') : t('edit.previewButton')}
           </Button>
 
           {form.published ? (
@@ -307,7 +355,7 @@ export default function EditNotificationPage() {
               onClick={() => handleSave(false)}
               disabled={saving}
             >
-              取消发布
+              {t('edit.unpublishButton')}
             </Button>
           ) : (
             <Button
@@ -315,7 +363,7 @@ export default function EditNotificationPage() {
               disabled={!isFormValid || saving}
             >
               <Send className="mr-2 h-4 w-4" />
-              发布
+              {t('edit.publishButton')}
             </Button>
           )}
 
@@ -325,7 +373,7 @@ export default function EditNotificationPage() {
             disabled={!hasChanges || !isFormValid || saving}
           >
             <Save className="mr-2 h-4 w-4" />
-            保存
+            {saving ? t('edit.savingButton') : t('edit.saveButton')}
           </Button>
 
           <Button
@@ -334,7 +382,7 @@ export default function EditNotificationPage() {
             className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
           >
             <Trash className="mr-2 h-4 w-4" />
-            删除
+            {t('edit.deleteButton')}
           </Button>
         </div>
       </div>
@@ -345,11 +393,12 @@ export default function EditNotificationPage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-medium text-green-800 dark:text-green-200">
-                通知已发布
+                {t('edit.status.published.title')}
               </h3>
               <p className="text-sm text-green-600 dark:text-green-400">
-                这条通知已于 {new Date(form.published_at!).toLocaleString()}{' '}
-                发布给目标用户
+                {t('edit.status.published.description', {
+                  time: new Date(form.published_at!).toLocaleString(),
+                })}
               </p>
             </div>
           </div>
@@ -361,10 +410,10 @@ export default function EditNotificationPage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                未保存的更改
+                {t('edit.status.unsavedChanges.title')}
               </h3>
               <p className="text-sm text-yellow-600 dark:text-yellow-400">
-                您有未保存的更改，请记得保存或发布更新
+                {t('edit.status.unsavedChanges.description')}
               </p>
             </div>
           </div>
@@ -379,13 +428,13 @@ export default function EditNotificationPage() {
               {/* Basic Info */}
               <Card>
                 <CardHeader>
-                  <CardTitle>基本信息</CardTitle>
+                  <CardTitle>{t('edit.basicInfo.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                        类型 *
+                        {t('edit.basicInfo.type.label')} *
                       </label>
                       <select
                         value={form.type}
@@ -394,14 +443,18 @@ export default function EditNotificationPage() {
                         }
                         className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm dark:border-stone-600 dark:bg-stone-800"
                       >
-                        <option value="message">消息</option>
-                        <option value="changelog">更新日志</option>
+                        <option value="message">
+                          {t('create.basicInfo.type.message')}
+                        </option>
+                        <option value="changelog">
+                          {t('create.basicInfo.type.changelog')}
+                        </option>
                       </select>
                     </div>
 
                     <div>
                       <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                        分类 *
+                        {t('create.basicInfo.category.label')} *
                       </label>
                       <select
                         value={form.category}
@@ -426,19 +479,19 @@ export default function EditNotificationPage() {
 
                   <div>
                     <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                      标题 *
+                      {t('create.basicInfo.title.label')} *
                     </label>
                     <Input
                       value={form.title}
                       onChange={e => handleFieldChange('title', e.target.value)}
-                      placeholder="输入通知标题..."
+                      placeholder={t('create.basicInfo.title.placeholder')}
                       className="mt-1"
                     />
                   </div>
 
                   <div>
                     <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                      优先级 *
+                      {t('create.basicInfo.priority.label')} *
                     </label>
                     <select
                       value={form.priority}
@@ -465,12 +518,12 @@ export default function EditNotificationPage() {
               {/* Content */}
               <Card>
                 <CardHeader>
-                  <CardTitle>通知内容</CardTitle>
+                  <CardTitle>{t('create.content.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                      内容 *
+                      {t('create.content.label')} *
                     </label>
                     <Textarea
                       ref={contentRef}
@@ -478,19 +531,19 @@ export default function EditNotificationPage() {
                       onChange={e =>
                         handleFieldChange('content', e.target.value)
                       }
-                      placeholder="输入通知内容..."
+                      placeholder={t('create.content.placeholder')}
                       rows={8}
                       className="mt-1"
                     />
                     <p className="mt-1 text-xs text-stone-500">
-                      支持变量替换，如 {'{username}'}, {'{time}'} 等
+                      {t('create.content.variableHint')}
                     </p>
                   </div>
 
                   {/* Variable Insertion */}
                   <div>
                     <label className="mb-2 block text-sm font-medium text-stone-700 dark:text-stone-300">
-                      快速插入变量
+                      {t('create.content.variableInsert.title')}
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {[
@@ -525,12 +578,12 @@ export default function EditNotificationPage() {
               {/* Target Settings */}
               <Card>
                 <CardHeader>
-                  <CardTitle>发送目标</CardTitle>
+                  <CardTitle>{t('create.targeting.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                      目标角色 *
+                      {t('create.targeting.roles.label')} *
                     </label>
                     <div className="mt-2 space-y-2">
                       {ROLE_OPTIONS.map(role => (
@@ -549,7 +602,7 @@ export default function EditNotificationPage() {
 
                   <div>
                     <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                      定时发布
+                      {t('create.targeting.scheduling.label')}
                     </label>
                     <Input
                       type="datetime-local"
@@ -560,7 +613,7 @@ export default function EditNotificationPage() {
                       className="mt-1"
                     />
                     <p className="mt-1 text-xs text-stone-500">
-                      留空表示立即发布
+                      {t('create.targeting.scheduling.placeholder')}
                     </p>
                   </div>
                 </CardContent>
@@ -570,7 +623,7 @@ export default function EditNotificationPage() {
             /* Preview */
             <Card>
               <CardHeader>
-                <CardTitle>通知预览</CardTitle>
+                <CardTitle>{t('create.preview.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="rounded-lg border bg-gray-50 p-4 dark:bg-gray-900">
@@ -605,7 +658,9 @@ export default function EditNotificationPage() {
                           : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                       )}
                     >
-                      {form.type === 'changelog' ? '更新日志' : '消息'}
+                      {form.type === 'changelog'
+                        ? t('create.basicInfo.type.changelog')
+                        : t('create.basicInfo.type.message')}
                     </span>
                     <span
                       className={cn(
@@ -615,7 +670,9 @@ export default function EditNotificationPage() {
                           : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
                       )}
                     >
-                      {form.published ? '已发布' : '草稿'}
+                      {form.published
+                        ? t('edit.statistics.published')
+                        : t('edit.statistics.draft')}
                     </span>
                   </div>
 
@@ -629,17 +686,19 @@ export default function EditNotificationPage() {
 
                   <div className="mt-4 border-t border-gray-200 pt-3 dark:border-gray-700">
                     <div className="text-xs text-stone-500">
-                      目标角色: {form.target_roles.join(', ')}
+                      {t('create.preview.targetRoles')}:{' '}
+                      {form.target_roles.join(', ')}
                     </div>
                     {form.scheduled_time && (
                       <div className="mt-1 text-xs text-stone-500">
-                        定时发布:{' '}
+                        {t('create.preview.scheduledTime')}:{' '}
                         {new Date(form.scheduled_time).toLocaleString()}
                       </div>
                     )}
                     {form.published_at && (
                       <div className="mt-1 text-xs text-stone-500">
-                        发布时间: {new Date(form.published_at).toLocaleString()}
+                        {t('create.preview.publishTime')}:{' '}
+                        {new Date(form.published_at).toLocaleString()}
                       </div>
                     )}
                   </div>
@@ -654,12 +713,12 @@ export default function EditNotificationPage() {
           {/* Statistics */}
           <Card>
             <CardHeader>
-              <CardTitle>通知统计</CardTitle>
+              <CardTitle>{t('edit.statistics.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-stone-600 dark:text-stone-400">
-                  状态:
+                  {t('edit.statistics.status')}:
                 </span>
                 <span
                   className={cn(
@@ -669,13 +728,15 @@ export default function EditNotificationPage() {
                       : 'text-yellow-600 dark:text-yellow-400'
                   )}
                 >
-                  {form.published ? '已发布' : '草稿'}
+                  {form.published
+                    ? t('edit.statistics.published')
+                    : t('edit.statistics.draft')}
                 </span>
               </div>
               {form.published_at && (
                 <div className="flex justify-between">
                   <span className="text-stone-600 dark:text-stone-400">
-                    发布时间:
+                    {t('edit.statistics.publishTime')}:
                   </span>
                   <span>
                     {new Date(form.published_at).toLocaleDateString()}
@@ -684,13 +745,13 @@ export default function EditNotificationPage() {
               )}
               <div className="flex justify-between">
                 <span className="text-stone-600 dark:text-stone-400">
-                  目标用户:
+                  {t('edit.statistics.targetUsers')}:
                 </span>
                 <span>{form.target_roles.join(', ')}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-stone-600 dark:text-stone-400">
-                  优先级:
+                  {t('edit.statistics.priority')}:
                 </span>
                 <span>{PRIORITY_OPTIONS[form.priority].label}</span>
               </div>
@@ -700,16 +761,17 @@ export default function EditNotificationPage() {
           {/* Tips */}
           <Card>
             <CardHeader>
-              <CardTitle>编辑提示</CardTitle>
+              <CardTitle>{t('edit.tips.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-stone-600 dark:text-stone-400">
               <div>
-                <strong>注意事项：</strong>
+                <strong>{t('edit.tips.notice')}：</strong>
                 <ul className="mt-1 list-inside list-disc space-y-1">
-                  <li>已发布的通知修改后需要重新发布</li>
-                  <li>修改优先级可能影响推送策略</li>
-                  <li>变量在发送时会被实际值替换</li>
-                  <li>删除操作无法撤销，请谨慎操作</li>
+                  {(t('edit.tips.items') as unknown as string[]).map(
+                    (item: string, index: number) => (
+                      <li key={index}>{item}</li>
+                    )
+                  )}
                 </ul>
               </div>
             </CardContent>

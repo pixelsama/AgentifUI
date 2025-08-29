@@ -932,6 +932,10 @@
           "permissions": {
             "text": "应用权限管理",
             "description": "管理应用可见性和群组权限"
+          },
+          "notifications": {
+            "text": "通知管理",
+            "description": "管理系统通知和公告"
           }
         },
         "actions": {
@@ -1922,6 +1926,249 @@
           "loadGroupsError": "加载群组列表失败",
           "updateVisibilityError": "更新应用可见性失败",
           "updateGroupPermissionError": "更新群组权限失败"
+        }
+      },
+      "notifications": {
+        "title": "通知管理",
+        "subtitle": "管理系统通知和公告",
+        "create": {
+          "title": "创建通知",
+          "subtitle": "创建新的系统通知或公告",
+          "backButton": "返回",
+          "previewButton": "预览",
+          "editButton": "编辑",
+          "saveButton": "保存",
+          "saveDraftButton": "保存草稿",
+          "publishButton": "发布",
+          "savingButton": "保存中...",
+          "publishingButton": "发布中...",
+          "basicInfo": {
+            "title": "基本信息",
+            "type": {
+              "label": "类型",
+              "message": "消息",
+              "changelog": "更新日志"
+            },
+            "category": {
+              "label": "分类"
+            },
+            "title": {
+              "label": "标题",
+              "placeholder": "输入通知标题..."
+            },
+            "priority": {
+              "label": "优先级"
+            }
+          },
+          "content": {
+            "title": "通知内容",
+            "label": "内容",
+            "placeholder": "输入通知内容...",
+            "variableHint": "支持变量替换，如 {username}, {time} 等",
+            "variableInsert": {
+              "title": "快速插入变量"
+            }
+          },
+          "targeting": {
+            "title": "发送目标",
+            "roles": {
+              "label": "目标角色",
+              "user": "普通用户",
+              "admin": "管理员",
+              "developer": "开发者",
+              "tester": "测试人员"
+            },
+            "scheduling": {
+              "label": "定时发布",
+              "placeholder": "留空表示立即发布"
+            }
+          },
+          "preview": {
+            "title": "通知预览",
+            "targetRoles": "目标角色",
+            "scheduledTime": "定时发布",
+            "publishTime": "发布时间"
+          },
+          "templates": {
+            "title": "常用模板",
+            "tokenWarning": {
+              "name": "Token使用量警告",
+              "title": "Token使用量警告",
+              "content": "您的Token使用量已达到{percentage}%，请注意控制使用量以避免服务中断。\n\n当前使用量：{currentUsage}\n总额度：{limit}\n\n请合理安排使用计划。",
+              "description": "用户Token使用量超出阈值时的警告通知"
+            },
+            "maintenance": {
+              "name": "系统维护",
+              "title": "系统维护通知",
+              "content": "系统将于{time}进行例行维护，预计持续{duration}。\n\n维护期间可能出现的影响：\n- 服务暂时中断\n- 数据同步延迟\n\n请提前保存您的工作，感谢您的理解。",
+              "description": "系统维护期间的通知模板"
+            },
+            "agentResult": {
+              "name": "Agent执行结果",
+              "title": "Agent执行完成",
+              "content": "Agent \"{agentName}\" 已成功执行完成。\n\n执行结果：{result}\n耗时：{duration}\n\n详细结果请查看执行日志。",
+              "description": "Agent任务执行完成后的通知"
+            },
+            "securityAlert": {
+              "name": "安全警告",
+              "title": "安全警告",
+              "content": "检测到您的账户存在异常活动。\n\n异常详情：{details}\n检测时间：{time}\n来源IP：{ip}\n\n如非本人操作，请立即修改密码并联系管理员。",
+              "description": "安全相关的紧急警告"
+            },
+            "newFeature": {
+              "name": "新功能发布",
+              "title": "新功能发布",
+              "content": "我们很高兴地宣布推出新功能：{featureName}\n\n主要特性：\n{features}\n\n立即体验这些强大的新功能！",
+              "description": "新功能上线公告"
+            }
+          },
+          "validation": {
+            "titleRequired": "请输入通知标题",
+            "contentRequired": "请输入通知内容",
+            "rolesRequired": "请至少选择一个目标角色"
+          },
+          "messages": {
+            "saveSuccess": "通知保存成功",
+            "saveFailed": "保存失败",
+            "publishSuccess": "通知发布成功",
+            "publishFailed": "发布失败"
+          },
+          "tips": {
+            "title": "编写提示",
+            "priorityAdvice": "优先级建议：",
+            "contentAdvice": "内容建议：",
+            "priorityItems": [
+              "紧急：安全问题、系统故障",
+              "高：维护通知、重要更新",
+              "中：功能发布、一般公告",
+              "低：提示信息、使用技巧"
+            ],
+            "contentItems": [
+              "标题简洁明了",
+              "内容结构清晰",
+              "使用变量提高复用性",
+              "包含必要的行动指导"
+            ]
+          }
+        },
+        "edit": {
+          "title": "编辑通知",
+          "subtitle": "编辑现有通知内容和设置",
+          "backButton": "返回",
+          "previewButton": "预览",
+          "editButton": "编辑",
+          "saveButton": "保存",
+          "publishButton": "发布",
+          "unpublishButton": "取消发布",
+          "deleteButton": "删除",
+          "savingButton": "保存中...",
+          "status": {
+            "published": {
+              "title": "通知已发布",
+              "description": "这条通知已于 {time} 发布给目标用户"
+            },
+            "unsavedChanges": {
+              "title": "未保存的更改",
+              "description": "您有未保存的更改，请记得保存或发布更新"
+            }
+          },
+          "statistics": {
+            "title": "通知统计",
+            "status": "状态",
+            "published": "已发布",
+            "draft": "草稿",
+            "publishTime": "发布时间",
+            "targetUsers": "目标用户",
+            "priority": "优先级"
+          },
+          "tips": {
+            "title": "编辑提示",
+            "notice": "注意事项",
+            "items": [
+              "已发布的通知修改后需要重新发布",
+              "修改优先级可能影响推送策略",
+              "变量在发送时会被实际值替换",
+              "删除操作无法撤销，请谨慎操作"
+            ]
+          },
+          "notFound": {
+            "title": "通知未找到",
+            "description": "请求的通知不存在或已被删除。",
+            "backButton": "返回通知列表"
+          },
+          "messages": {
+            "saveSuccess": "保存成功",
+            "saveFailed": "保存失败",
+            "publishSuccess": "发布成功",
+            "publishFailed": "发布失败",
+            "deleteConfirm": "确定要删除这条通知吗？此操作无法撤销。",
+            "deleteSuccess": "删除成功",
+            "deleteFailed": "删除失败"
+          }
+        },
+        "categories": {
+          "admin_announcement": {
+            "label": "管理员公告",
+            "description": "管理员发布的重要公告"
+          },
+          "agent_result": {
+            "label": "Agent结果",
+            "description": "AI Agent执行结果通知"
+          },
+          "token_usage": {
+            "label": "Token使用",
+            "description": "Token消耗和额度提醒"
+          },
+          "system_maintenance": {
+            "label": "系统维护",
+            "description": "系统维护和停机通知"
+          },
+          "security_alert": {
+            "label": "安全警告",
+            "description": "安全相关的重要警告"
+          },
+          "feature_tip": {
+            "label": "功能提示",
+            "description": "新功能使用提示"
+          },
+          "feature": {
+            "label": "新功能",
+            "description": "新功能发布公告"
+          },
+          "improvement": {
+            "label": "改进",
+            "description": "功能改进和优化"
+          },
+          "bugfix": {
+            "label": "修复",
+            "description": "Bug修复公告"
+          },
+          "security": {
+            "label": "安全更新",
+            "description": "安全相关更新"
+          },
+          "api_change": {
+            "label": "API变更",
+            "description": "API接口变更通知"
+          }
+        },
+        "priorities": {
+          "low": {
+            "label": "低",
+            "description": "一般信息，用户主动查看"
+          },
+          "medium": {
+            "label": "中",
+            "description": "重要信息，显示通知徽章"
+          },
+          "high": {
+            "label": "高",
+            "description": "紧急信息，显示即时通知"
+          },
+          "critical": {
+            "label": "紧急",
+            "description": "严重问题，强制显示并自动打开通知中心"
+          }
         }
       }
     },

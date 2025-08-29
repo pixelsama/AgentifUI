@@ -10,6 +10,7 @@ import { ArrowLeft, Eye, Save, Send } from 'lucide-react';
 
 import { useRef, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -24,84 +25,10 @@ interface NotificationForm {
   scheduled_time?: string;
 }
 
-const CATEGORY_OPTIONS: Record<
-  NotificationCategory,
-  { label: string; description: string }
-> = {
-  admin_announcement: {
-    label: '管理员公告',
-    description: '管理员发布的重要公告',
-  },
-  agent_result: { label: 'Agent结果', description: 'AI Agent执行结果通知' },
-  token_usage: { label: 'Token使用', description: 'Token消耗和额度提醒' },
-  system_maintenance: { label: '系统维护', description: '系统维护和停机通知' },
-  security_alert: { label: '安全警告', description: '安全相关的重要警告' },
-  feature_tip: { label: '功能提示', description: '新功能使用提示' },
-  feature: { label: '新功能', description: '新功能发布公告' },
-  improvement: { label: '改进', description: '功能改进和优化' },
-  bugfix: { label: '修复', description: 'Bug修复公告' },
-  security: { label: '安全更新', description: '安全相关更新' },
-  api_change: { label: 'API变更', description: 'API接口变更通知' },
-};
-
-const PRIORITY_OPTIONS = {
-  low: { label: '低', description: '一般信息，用户主动查看' },
-  medium: { label: '中', description: '重要信息，显示通知徽章' },
-  high: { label: '高', description: '紧急信息，显示即时通知' },
-  critical: {
-    label: '紧急',
-    description: '严重问题，强制显示并自动打开通知中心',
-  },
-};
-
-const ROLE_OPTIONS = [
-  { value: 'user', label: '普通用户' },
-  { value: 'admin', label: '管理员' },
-  { value: 'developer', label: '开发者' },
-  { value: 'tester', label: '测试人员' },
-];
-
-const NOTIFICATION_TEMPLATES = {
-  token_warning: {
-    title: 'Token使用量警告',
-    content:
-      '您的Token使用量已达到{percentage}%，请注意控制使用量以避免服务中断。\n\n当前使用量：{currentUsage}\n总额度：{limit}\n\n请合理安排使用计划。',
-    category: 'token_usage' as NotificationCategory,
-    priority: 'medium' as const,
-  },
-  agent_completed: {
-    title: 'Agent执行完成',
-    content:
-      'Agent "{agentName}" 已成功执行完成。\n\n执行结果：{result}\n耗时：{duration}\n\n详细结果请查看执行日志。',
-    category: 'agent_result' as NotificationCategory,
-    priority: 'low' as const,
-  },
-  maintenance_notice: {
-    title: '系统维护通知',
-    content:
-      '系统将于{time}进行例行维护，预计持续{duration}。\n\n维护期间可能出现的影响：\n- 服务暂时中断\n- 数据同步延迟\n\n请提前保存您的工作，感谢您的理解。',
-    category: 'system_maintenance' as NotificationCategory,
-    priority: 'high' as const,
-  },
-  security_alert: {
-    title: '安全警告',
-    content:
-      '检测到您的账户存在异常活动。\n\n异常详情：{details}\n检测时间：{time}\n来源IP：{ip}\n\n如非本人操作，请立即修改密码并联系管理员。',
-    category: 'security_alert' as NotificationCategory,
-    priority: 'critical' as const,
-  },
-  feature_announcement: {
-    title: '新功能发布',
-    content:
-      '我们很高兴地宣布推出新功能：{featureName}\n\n主要特性：\n{features}\n\n立即体验这些强大的新功能！',
-    category: 'feature' as NotificationCategory,
-    priority: 'medium' as const,
-  },
-};
-
 export default function CreateNotificationPage() {
   const router = useRouter();
   const contentRef = useRef<HTMLTextAreaElement>(null);
+  const t = useTranslations('pages.admin.notifications');
 
   const [form, setForm] = useState<NotificationForm>({
     type: 'message',
@@ -116,6 +43,117 @@ export default function CreateNotificationPage() {
 
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Dynamic options using translations
+  const CATEGORY_OPTIONS: Record<
+    NotificationCategory,
+    { label: string; description: string }
+  > = {
+    admin_announcement: {
+      label: t('categories.admin_announcement.label'),
+      description: t('categories.admin_announcement.description'),
+    },
+    agent_result: {
+      label: t('categories.agent_result.label'),
+      description: t('categories.agent_result.description'),
+    },
+    token_usage: {
+      label: t('categories.token_usage.label'),
+      description: t('categories.token_usage.description'),
+    },
+    system_maintenance: {
+      label: t('categories.system_maintenance.label'),
+      description: t('categories.system_maintenance.description'),
+    },
+    security_alert: {
+      label: t('categories.security_alert.label'),
+      description: t('categories.security_alert.description'),
+    },
+    feature_tip: {
+      label: t('categories.feature_tip.label'),
+      description: t('categories.feature_tip.description'),
+    },
+    feature: {
+      label: t('categories.feature.label'),
+      description: t('categories.feature.description'),
+    },
+    improvement: {
+      label: t('categories.improvement.label'),
+      description: t('categories.improvement.description'),
+    },
+    bugfix: {
+      label: t('categories.bugfix.label'),
+      description: t('categories.bugfix.description'),
+    },
+    security: {
+      label: t('categories.security.label'),
+      description: t('categories.security.description'),
+    },
+    api_change: {
+      label: t('categories.api_change.label'),
+      description: t('categories.api_change.description'),
+    },
+  };
+
+  const PRIORITY_OPTIONS = {
+    low: {
+      label: t('priorities.low.label'),
+      description: t('priorities.low.description'),
+    },
+    medium: {
+      label: t('priorities.medium.label'),
+      description: t('priorities.medium.description'),
+    },
+    high: {
+      label: t('priorities.high.label'),
+      description: t('priorities.high.description'),
+    },
+    critical: {
+      label: t('priorities.critical.label'),
+      description: t('priorities.critical.description'),
+    },
+  };
+
+  const ROLE_OPTIONS = [
+    { value: 'user', label: t('create.targeting.roles.user') },
+    { value: 'admin', label: t('create.targeting.roles.admin') },
+    { value: 'developer', label: t('create.targeting.roles.developer') },
+    { value: 'tester', label: t('create.targeting.roles.tester') },
+  ];
+
+  // Dynamic notification templates using translations
+  const NOTIFICATION_TEMPLATES = {
+    token_warning: {
+      title: t('create.templates.tokenWarning.title'),
+      content: t('create.templates.tokenWarning.content'),
+      category: 'token_usage' as NotificationCategory,
+      priority: 'medium' as const,
+    },
+    agent_completed: {
+      title: t('create.templates.agentResult.title'),
+      content: t('create.templates.agentResult.content'),
+      category: 'agent_result' as NotificationCategory,
+      priority: 'low' as const,
+    },
+    maintenance_notice: {
+      title: t('create.templates.maintenance.title'),
+      content: t('create.templates.maintenance.content'),
+      category: 'system_maintenance' as NotificationCategory,
+      priority: 'high' as const,
+    },
+    security_alert: {
+      title: t('create.templates.securityAlert.title'),
+      content: t('create.templates.securityAlert.content'),
+      category: 'security_alert' as NotificationCategory,
+      priority: 'critical' as const,
+    },
+    feature_announcement: {
+      title: t('create.templates.newFeature.title'),
+      content: t('create.templates.newFeature.content'),
+      category: 'feature' as NotificationCategory,
+      priority: 'medium' as const,
+    },
+  };
 
   const handleFieldChange = (
     field: keyof NotificationForm,
@@ -194,7 +232,9 @@ export default function CreateNotificationPage() {
     } catch (error) {
       console.error('Failed to save notification:', error);
       alert(
-        '保存失败：' + (error instanceof Error ? error.message : '未知错误')
+        t('create.messages.saveFailed') +
+          ': ' +
+          (error instanceof Error ? error.message : t('common.ui.error'))
       );
     } finally {
       setSaving(false);
@@ -212,15 +252,15 @@ export default function CreateNotificationPage() {
           <Link href="/admin/notifications">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              返回
+              {t('create.backButton')}
             </Button>
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-stone-900 dark:text-gray-100">
-              创建通知
+              {t('create.title')}
             </h1>
             <p className="text-sm text-stone-600 dark:text-stone-400">
-              创建新的系统通知或更新日志
+              {t('create.subtitle')}
             </p>
           </div>
         </div>
@@ -228,7 +268,7 @@ export default function CreateNotificationPage() {
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setPreview(!preview)}>
             <Eye className="mr-2 h-4 w-4" />
-            {preview ? '编辑' : '预览'}
+            {preview ? t('create.editButton') : t('create.previewButton')}
           </Button>
           <Button
             variant="outline"
@@ -236,14 +276,14 @@ export default function CreateNotificationPage() {
             disabled={!isFormValid || saving}
           >
             <Save className="mr-2 h-4 w-4" />
-            保存草稿
+            {saving ? t('create.savingButton') : t('create.saveDraftButton')}
           </Button>
           <Button
             onClick={() => handleSave(true)}
             disabled={!isFormValid || saving}
           >
             <Send className="mr-2 h-4 w-4" />
-            发布
+            {saving ? t('create.publishingButton') : t('create.publishButton')}
           </Button>
         </div>
       </div>
@@ -256,13 +296,13 @@ export default function CreateNotificationPage() {
               {/* Basic Info */}
               <Card>
                 <CardHeader>
-                  <CardTitle>基本信息</CardTitle>
+                  <CardTitle>{t('create.basicInfo.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                        类型 *
+                        {t('create.basicInfo.type.label')} *
                       </label>
                       <select
                         value={form.type}
@@ -271,14 +311,18 @@ export default function CreateNotificationPage() {
                         }
                         className="mt-1 block w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm dark:border-stone-600 dark:bg-stone-800"
                       >
-                        <option value="message">消息</option>
-                        <option value="changelog">更新日志</option>
+                        <option value="message">
+                          {t('create.basicInfo.type.message')}
+                        </option>
+                        <option value="changelog">
+                          {t('create.basicInfo.type.changelog')}
+                        </option>
                       </select>
                     </div>
 
                     <div>
                       <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                        分类 *
+                        {t('create.basicInfo.category.label')} *
                       </label>
                       <select
                         value={form.category}
@@ -303,19 +347,19 @@ export default function CreateNotificationPage() {
 
                   <div>
                     <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                      标题 *
+                      {t('create.basicInfo.title.label')} *
                     </label>
                     <Input
                       value={form.title}
                       onChange={e => handleFieldChange('title', e.target.value)}
-                      placeholder="输入通知标题..."
+                      placeholder={t('create.basicInfo.title.placeholder')}
                       className="mt-1"
                     />
                   </div>
 
                   <div>
                     <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                      优先级 *
+                      {t('create.basicInfo.priority.label')} *
                     </label>
                     <select
                       value={form.priority}
@@ -342,12 +386,12 @@ export default function CreateNotificationPage() {
               {/* Content */}
               <Card>
                 <CardHeader>
-                  <CardTitle>通知内容</CardTitle>
+                  <CardTitle>{t('create.content.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                      内容 *
+                      {t('create.content.label')} *
                     </label>
                     <Textarea
                       ref={contentRef}
@@ -355,19 +399,19 @@ export default function CreateNotificationPage() {
                       onChange={e =>
                         handleFieldChange('content', e.target.value)
                       }
-                      placeholder="输入通知内容..."
+                      placeholder={t('create.content.placeholder')}
                       rows={8}
                       className="mt-1"
                     />
                     <p className="mt-1 text-xs text-stone-500">
-                      支持变量替换，如 {'{username}'}, {'{time}'} 等
+                      {t('create.content.variableHint')}
                     </p>
                   </div>
 
                   {/* Variable Insertion */}
                   <div>
                     <label className="mb-2 block text-sm font-medium text-stone-700 dark:text-stone-300">
-                      快速插入变量
+                      {t('create.content.variableInsert.title')}
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {[
@@ -403,12 +447,12 @@ export default function CreateNotificationPage() {
               {/* Target Settings */}
               <Card>
                 <CardHeader>
-                  <CardTitle>发送目标</CardTitle>
+                  <CardTitle>{t('create.targeting.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                      目标角色 *
+                      {t('create.targeting.roles.label')} *
                     </label>
                     <div className="mt-2 space-y-2">
                       {ROLE_OPTIONS.map(role => (
@@ -427,7 +471,7 @@ export default function CreateNotificationPage() {
 
                   <div>
                     <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                      定时发布
+                      {t('create.targeting.scheduling.label')}
                     </label>
                     <Input
                       type="datetime-local"
@@ -438,7 +482,7 @@ export default function CreateNotificationPage() {
                       className="mt-1"
                     />
                     <p className="mt-1 text-xs text-stone-500">
-                      留空表示立即发布
+                      {t('create.targeting.scheduling.placeholder')}
                     </p>
                   </div>
                 </CardContent>
@@ -448,7 +492,7 @@ export default function CreateNotificationPage() {
             /* Preview */
             <Card>
               <CardHeader>
-                <CardTitle>通知预览</CardTitle>
+                <CardTitle>{t('create.preview.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="rounded-lg border bg-gray-50 p-4 dark:bg-gray-900">
@@ -483,25 +527,28 @@ export default function CreateNotificationPage() {
                           : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                       )}
                     >
-                      {form.type === 'changelog' ? '更新日志' : '消息'}
+                      {form.type === 'changelog'
+                        ? t('create.basicInfo.type.changelog')
+                        : t('create.basicInfo.type.message')}
                     </span>
                   </div>
 
                   <h3 className="mb-2 text-lg font-medium text-stone-900 dark:text-gray-100">
-                    {form.title || '通知标题'}
+                    {form.title || t('create.basicInfo.title.placeholder')}
                   </h3>
 
                   <div className="text-sm whitespace-pre-wrap text-stone-600 dark:text-stone-400">
-                    {form.content || '通知内容'}
+                    {form.content || t('create.content.placeholder')}
                   </div>
 
                   <div className="mt-4 border-t border-gray-200 pt-3 dark:border-gray-700">
                     <div className="text-xs text-stone-500">
-                      目标角色: {form.target_roles.join(', ')}
+                      {t('create.preview.targetRoles')}:{' '}
+                      {form.target_roles.join(', ')}
                     </div>
                     {form.scheduled_time && (
                       <div className="mt-1 text-xs text-stone-500">
-                        定时发布:{' '}
+                        {t('create.preview.scheduledTime')}:{' '}
                         {new Date(form.scheduled_time).toLocaleString()}
                       </div>
                     )}
@@ -517,7 +564,7 @@ export default function CreateNotificationPage() {
           {/* Templates */}
           <Card>
             <CardHeader>
-              <CardTitle>通知模板</CardTitle>
+              <CardTitle>{t('create.templates.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {Object.entries(NOTIFICATION_TEMPLATES).map(([key, template]) => (
@@ -546,26 +593,28 @@ export default function CreateNotificationPage() {
           {/* Tips */}
           <Card>
             <CardHeader>
-              <CardTitle>编写提示</CardTitle>
+              <CardTitle>{t('create.tips.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-stone-600 dark:text-stone-400">
               <div>
-                <strong>优先级建议：</strong>
+                <strong>{t('create.tips.priorityAdvice')}</strong>
                 <ul className="mt-1 list-inside list-disc space-y-1">
-                  <li>紧急：安全问题、系统故障</li>
-                  <li>高：维护通知、重要更新</li>
-                  <li>中：功能发布、一般公告</li>
-                  <li>低：提示信息、使用技巧</li>
+                  {(t('create.tips.priorityItems') as unknown as string[]).map(
+                    (item: string, index: number) => (
+                      <li key={index}>{item}</li>
+                    )
+                  )}
                 </ul>
               </div>
 
               <div>
-                <strong>内容建议：</strong>
+                <strong>{t('create.tips.contentAdvice')}</strong>
                 <ul className="mt-1 list-inside list-disc space-y-1">
-                  <li>标题简洁明了</li>
-                  <li>内容结构清晰</li>
-                  <li>使用变量提高复用性</li>
-                  <li>包含必要的行动指导</li>
+                  {(t('create.tips.contentItems') as unknown as string[]).map(
+                    (item: string, index: number) => (
+                      <li key={index}>{item}</li>
+                    )
+                  )}
                 </ul>
               </div>
             </CardContent>
