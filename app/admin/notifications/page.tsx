@@ -3,6 +3,7 @@
 import { Button } from '@components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { Input } from '@components/ui/input';
+import { useNotificationStore } from '@lib/stores/ui/notification-store';
 import type { NotificationCategory } from '@lib/types/notification-center';
 import { cn } from '@lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -116,6 +117,7 @@ const PRIORITY_OPTIONS = {
 };
 
 export default function NotificationsAdminPage() {
+  const { showNotification } = useNotificationStore();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -208,7 +210,7 @@ export default function NotificationsAdminPage() {
         setNotifications(prev => prev.filter(n => n.id !== id));
       } catch (error) {
         console.error('Failed to delete notification:', error);
-        alert('删除失败，请重试');
+        showNotification('删除失败，请重试', 'error', 5000);
       }
     }
   };
@@ -240,7 +242,7 @@ export default function NotificationsAdminPage() {
       );
     } catch (error) {
       console.error('Failed to toggle publish status:', error);
-      alert('更新失败，请重试');
+      showNotification('更新失败，请重试', 'error', 5000);
     }
   };
 

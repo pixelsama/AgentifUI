@@ -4,6 +4,7 @@ import { Button } from '@components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { Input } from '@components/ui/input';
 import { Textarea } from '@components/ui/textarea';
+import { useNotificationStore } from '@lib/stores/ui/notification-store';
 import type { NotificationCategory } from '@lib/types/notification-center';
 import { cn } from '@lib/utils';
 import { ArrowLeft, Eye, Save, Send, Trash } from 'lucide-react';
@@ -35,6 +36,7 @@ export default function EditNotificationPage() {
   const router = useRouter();
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const t = useTranslations('pages.admin.notifications');
+  const { showNotification } = useNotificationStore();
 
   const [form, setForm] = useState<NotificationForm | null>(null);
   const [originalForm, setOriginalForm] = useState<NotificationForm | null>(
@@ -246,14 +248,15 @@ export default function EditNotificationPage() {
       setOriginalForm(updatedForm);
       setForm(updatedForm);
 
-      // Redirect back to notifications list
+      // Show success notification and redirect
+      showNotification(t('edit.messages.saveSuccess'), 'success', 3000);
       router.push('/admin/notifications');
     } catch (error) {
       console.error('Failed to save notification:', error);
-      alert(
-        t('edit.messages.saveFailed') +
-          ': ' +
-          (error instanceof Error ? error.message : t('common.ui.error'))
+      showNotification(
+        `${t('edit.messages.saveFailed')}: ${error instanceof Error ? error.message : t('common.ui.error')}`,
+        'error',
+        5000
       );
     } finally {
       setSaving(false);
@@ -274,13 +277,14 @@ export default function EditNotificationPage() {
           throw new Error(error.error || 'Failed to delete notification');
         }
 
+        showNotification(t('edit.messages.deleteSuccess'), 'success', 3000);
         router.push('/admin/notifications');
       } catch (error) {
         console.error('Failed to delete notification:', error);
-        alert(
-          t('edit.messages.deleteFailed') +
-            ': ' +
-            (error instanceof Error ? error.message : t('common.ui.error'))
+        showNotification(
+          `${t('edit.messages.deleteFailed')}: ${error instanceof Error ? error.message : t('common.ui.error')}`,
+          'error',
+          5000
         );
       }
     }
