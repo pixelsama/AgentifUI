@@ -386,44 +386,37 @@ export class NotificationAdminService {
 
 export class NotificationTemplateService {
   /**
-   * Common notification templates
+   * Template configuration without hardcoded text
    */
-  private static templates: Record<string, NotificationTemplate> = {
+  private static templateConfigs: Record<
+    string,
+    {
+      category: NotificationTemplate['category'];
+      priority: NotificationTemplate['priority'];
+      metadata: NotificationTemplate['metadata'];
+    }
+  > = {
     token_warning: {
-      title: 'Token使用量警告',
-      content:
-        '您的Token使用量已达到{percentage}%，请注意控制使用量以避免超出限制。',
       category: 'token_usage',
       priority: 'medium',
       metadata: { template: 'token_warning' },
     },
     agent_completed: {
-      title: 'Agent执行完成',
-      content:
-        'Agent "{agentName}" 已成功执行完成，耗时{duration}。结果已保存到您的工作区。',
       category: 'agent_result',
       priority: 'low',
       metadata: { template: 'agent_completed' },
     },
     maintenance_notice: {
-      title: '系统维护通知',
-      content:
-        '系统将于{startTime}进行维护，预计持续{duration}。维护期间服务可能暂时不可用，请提前保存您的工作。',
       category: 'system_maintenance',
       priority: 'high',
       metadata: { template: 'maintenance_notice' },
     },
     security_alert: {
-      title: '安全提醒',
-      content:
-        '检测到异常登录行为。如果这不是您的操作，请立即修改密码并联系管理员。',
       category: 'security_alert',
       priority: 'critical',
       metadata: { template: 'security_alert' },
     },
     feature_announcement: {
-      title: '新功能发布',
-      content: '我们很高兴地宣布新功能 "{featureName}" 现已上线！{description}',
       category: 'feature',
       priority: 'medium',
       metadata: { template: 'feature_announcement' },
@@ -431,7 +424,7 @@ export class NotificationTemplateService {
   };
 
   /**
-   * Create notification from template
+   * Create notification from template with i18n support
    */
   static async createFromTemplate(
     templateName: string,
@@ -441,34 +434,35 @@ export class NotificationTemplateService {
       targetUsers?: string[];
       published?: boolean;
     },
-    createdBy: string
+    createdBy: string,
+    t: (key: string, params?: Record<string, string | number>) => string
   ): Promise<Notification> {
-    const template = this.templates[templateName];
-    if (!template) {
+    const templateConfig = this.templateConfigs[templateName];
+    if (!templateConfig) {
       throw new Error(`Template not found: ${templateName}`);
     }
 
-    // Replace variables in template
-    let title = template.title;
-    let content = template.content;
-
-    Object.entries(variables).forEach(([key, value]) => {
-      const placeholder = `{${key}}`;
-      title = title.replace(new RegExp(placeholder, 'g'), value);
-      content = content.replace(new RegExp(placeholder, 'g'), value);
-    });
+    // Get localized template content
+    const title = t(
+      `services.notificationTemplates.${templateName}.title`,
+      variables
+    );
+    const content = t(
+      `services.notificationTemplates.${templateName}.content`,
+      variables
+    );
 
     const notificationData: CreateNotificationData = {
       type: 'message', // Templates are typically for messages
-      category: template.category,
+      category: templateConfig.category,
       title,
       content,
-      priority: template.priority,
+      priority: templateConfig.priority,
       target_roles: options.targetRoles || [],
       target_users: options.targetUsers || [],
       published: options.published !== undefined ? options.published : true,
       metadata: {
-        ...template.metadata,
+        ...templateConfig.metadata,
         template_variables: variables,
       },
     };
@@ -480,16 +474,51 @@ export class NotificationTemplateService {
   }
 
   /**
-   * Get available templates
+   * Get available template names and configurations
    */
-  static getAvailableTemplates(): Record<string, NotificationTemplate> {
-    return { ...this.templates };
+  static getAvailableTemplates(): Record<
+    string,
+    {
+      category: NotificationTemplate['category'];
+      priority: NotificationTemplate['priority'];
+      metadata: NotificationTemplate['metadata'];
+    }
+  > {
+    return { ...this.templateConfigs };
   }
 
   /**
-   * Add custom template
+   * Get template with localized content
    */
-  static addTemplate(name: string, template: NotificationTemplate): void {
-    this.templates[name] = template;
+  static getTemplate(
+    templateName: string,
+    t: (key: string) => string
+  ): NotificationTemplate | null {
+    const config = this.templateConfigs[templateName];
+    if (!config) {
+      return null;
+    }
+
+    return {
+      title: t(`services.notificationTemplates.${templateName}.title`),
+      content: t(`services.notificationTemplates.${templateName}.content`),
+      category: config.category,
+      priority: config.priority,
+      metadata: config.metadata,
+    };
+  }
+
+  /**
+   * Add custom template configuration
+   */
+  static addTemplateConfig(
+    name: string,
+    config: {
+      category: NotificationTemplate['category'];
+      priority: NotificationTemplate['priority'];
+      metadata: NotificationTemplate['metadata'];
+    }
+  ): void {
+    this.templateConfigs[name] = config;
   }
 }

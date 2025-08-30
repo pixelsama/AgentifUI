@@ -2775,5 +2775,29 @@
       "type": "Type:",
       "size": "Size:"
     }
+  },
+  "services": {
+    "notificationTemplates": {
+      "token_warning": {
+        "title": "Token Usage Warning",
+        "content": "Your token usage has reached {percentage}%. Please monitor your usage to avoid exceeding the limit."
+      },
+      "agent_completed": {
+        "title": "Agent Execution Completed",
+        "content": "Agent \"{agentName}\" has successfully completed execution in {duration}. Results have been saved to your workspace."
+      },
+      "maintenance_notice": {
+        "title": "System Maintenance Notice",
+        "content": "System maintenance will begin at {startTime} and is expected to last {duration}. Services may be temporarily unavailable during this time. Please save your work in advance."
+      },
+      "security_alert": {
+        "title": "Security Alert",
+        "content": "Unusual login activity detected. If this was not you, please change your password immediately and contact an administrator."
+      },
+      "feature_announcement": {
+        "title": "New Feature Release",
+        "content": "We are excited to announce that the new feature \"{featureName}\" is now live! {description}"
+      }
+    }
   }
 }
