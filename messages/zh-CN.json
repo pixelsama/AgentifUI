@@ -2113,7 +2113,7 @@
                   "text": "开始探索",
                   "variant": "solid",
                   "action": "link",
-                  "url": "#",
+                  "url": "/chat",
                   "textAlign": "center"
                 }
               }

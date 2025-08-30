@@ -2113,7 +2113,7 @@
                   "text": "Inizia a Esplorare",
                   "variant": "solid",
                   "action": "link",
-                  "url": "#",
+                  "url": "/chat",
                   "textAlign": "center"
                 }
               }
