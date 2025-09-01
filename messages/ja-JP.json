@@ -2113,7 +2113,7 @@
                   "text": "探索を始める",
                   "variant": "solid",
                   "action": "link",
-                  "url": "#",
+                  "url": "/chat",
                   "textAlign": "center"
                 }
               }
