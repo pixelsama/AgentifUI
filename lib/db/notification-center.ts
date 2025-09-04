@@ -126,7 +126,7 @@ export async function getNotificationsWithReadStatus(
       *,
       notification_reads!left(read_at)
     `,
-      { count: 'exact' }
+      { count: 'estimated' }
     )
     .eq('published', true)
     .order(params.sort_by || 'created_at', {
@@ -166,17 +166,18 @@ export async function getNotificationsWithReadStatus(
 
   // Transform data to include read status
   const notifications: NotificationWithReadStatus[] =
-    data?.map(notification => ({
-      ...notification,
-      is_read:
-        notification.notification_reads?.some(
-          (read: { read_at: string | null }) => read.read_at !== null
-        ) || false,
-      read_at:
+    data?.map(notification => {
+      const readRecord =
         notification.notification_reads?.find(
           (read: { read_at: string | null }) => read.read_at !== null
-        )?.read_at || null,
-    })) || [];
+        ) || null;
+
+      return {
+        ...notification,
+        is_read: !!readRecord,
+        read_at: readRecord?.read_at || null,
+      };
+    }) || [];
 
   // Filter by read status if specified
   let filteredNotifications = notifications;
@@ -201,7 +202,7 @@ export async function getAllNotificationsForAdmin(
 }> {
   let query = supabase
     .from('notifications')
-    .select('*', { count: 'exact' })
+    .select('*', { count: 'estimated' })
     .order(params.sort_by || 'created_at', {
       ascending: params.sort_order === 'asc',
     });
@@ -354,17 +355,10 @@ export async function getUserUnreadCountByCategory(userId: string): Promise<{
 }> {
   const { data, error } = await supabase
     .from('notifications')
-    .select('category')
+    .select('category, notification_reads!left(id)')
     .eq('published', true)
-    .not(
-      'id',
-      'in',
-      `(
-      SELECT notification_id 
-      FROM notification_reads 
-      WHERE user_id = '${userId}'
-    )`
-    );
+    .eq('notification_reads.user_id', userId)
+    .is('notification_reads.id', null);
 
   if (error) {
     throw new Error(`Failed to get unread count by category: ${error.message}`);
@@ -456,18 +450,66 @@ export async function canUserAccessNotification(
 }
 
 // ============================================================================
+// Data Validation Helpers for Subscriptions
+// ============================================================================
+
+/**
+ * Validate if an object is a valid Notification
+ */
+function isValidNotification(data: unknown): data is Notification {
+  return (
+    data !== null &&
+    typeof data === 'object' &&
+    typeof (data as Record<string, unknown>).id === 'string' &&
+    typeof (data as Record<string, unknown>).title === 'string' &&
+    typeof (data as Record<string, unknown>).content === 'string' &&
+    ['changelog', 'message'].includes(
+      (data as Record<string, unknown>).type as string
+    ) &&
+    typeof (data as Record<string, unknown>).published === 'boolean'
+  );
+}
+
+/**
+ * Validate if an object is a valid NotificationRead
+ */
+function isValidNotificationRead(data: unknown): data is NotificationRead {
+  return (
+    data !== null &&
+    typeof data === 'object' &&
+    typeof (data as Record<string, unknown>).id === 'string' &&
+    typeof (data as Record<string, unknown>).user_id === 'string' &&
+    typeof (data as Record<string, unknown>).notification_id === 'string' &&
+    (data as Record<string, unknown>).read_at !== null
+  );
+}
+
+// ============================================================================
 // Real-time Subscriptions
 // ============================================================================
 
 /**
- * Subscribe to real-time notification changes
+ * Subscribe to real-time notification changes with error boundaries
  */
 export function subscribeToNotifications(
   userId: string,
-  onInsert?: (notification: Notification) => void,
-  onUpdate?: (notification: Notification) => void,
-  onDelete?: (notification: Notification) => void
+  callbacks: {
+    onInsert?: (notification: Notification) => void;
+    onUpdate?: (notification: Notification) => void;
+    onDelete?: (notification: Notification) => void;
+    onError?: (error: Error) => void;
+  } = {}
 ) {
+  const { onInsert, onUpdate, onDelete, onError } = callbacks;
+
+  const handleError = (error: unknown, context: string) => {
+    const errorMessage = `Notification subscription error in ${context}: ${
+      error instanceof Error ? error.message : 'Unknown error'
+    }`;
+    console.error(errorMessage, error);
+    onError?.(new Error(errorMessage));
+  };
+
   const channel = supabase
     .channel('notifications')
     .on(
@@ -479,8 +521,17 @@ export function subscribeToNotifications(
         filter: `published=eq.true`,
       },
       payload => {
-        if (onInsert && payload.new) {
-          onInsert(payload.new as Notification);
+        try {
+          if (onInsert && payload.new && isValidNotification(payload.new)) {
+            onInsert(payload.new as Notification);
+          } else if (payload.new && !isValidNotification(payload.new)) {
+            handleError(
+              new Error('Invalid notification data received'),
+              'INSERT handler'
+            );
+          }
+        } catch (error) {
+          handleError(error, 'INSERT callback');
         }
       }
     )
@@ -492,8 +543,17 @@ export function subscribeToNotifications(
         table: 'notifications',
       },
       payload => {
-        if (onUpdate && payload.new) {
-          onUpdate(payload.new as Notification);
+        try {
+          if (onUpdate && payload.new && isValidNotification(payload.new)) {
+            onUpdate(payload.new as Notification);
+          } else if (payload.new && !isValidNotification(payload.new)) {
+            handleError(
+              new Error('Invalid notification data received'),
+              'UPDATE handler'
+            );
+          }
+        } catch (error) {
+          handleError(error, 'UPDATE callback');
         }
       }
     )
@@ -505,44 +565,132 @@ export function subscribeToNotifications(
         table: 'notifications',
       },
       payload => {
-        if (onDelete && payload.old) {
-          onDelete(payload.old as Notification);
+        try {
+          if (onDelete && payload.old && isValidNotification(payload.old)) {
+            onDelete(payload.old as Notification);
+          } else if (payload.old && !isValidNotification(payload.old)) {
+            handleError(
+              new Error('Invalid notification data received'),
+              'DELETE handler'
+            );
+          }
+        } catch (error) {
+          handleError(error, 'DELETE callback');
         }
       }
-    );
+    )
+    .on('system', { event: '*' }, payload => {
+      if (payload.type === 'error') {
+        handleError(
+          new Error('System subscription error'),
+          'system event handler'
+        );
+      }
+    });
 
-  channel.subscribe();
+  channel.subscribe(status => {
+    if (status === 'CHANNEL_ERROR') {
+      handleError(
+        new Error('Failed to establish subscription'),
+        'subscription setup'
+      );
+    } else if (status === 'TIMED_OUT') {
+      handleError(new Error('Subscription timed out'), 'subscription timeout');
+    } else if (status === 'CLOSED') {
+      handleError(
+        new Error('Subscription connection closed'),
+        'subscription connection'
+      );
+    }
+  });
 
   return () => {
-    supabase.removeChannel(channel);
+    try {
+      supabase.removeChannel(channel);
+    } catch (error) {
+      handleError(error, 'cleanup');
+    }
   };
 }
 
 /**
- * Subscribe to real-time read status changes for a user
+ * Subscribe to real-time read status changes for a user with error boundaries
  */
 export function subscribeToReadStatus(
   userId: string,
-  onRead?: (read: NotificationRead) => void
+  callbacks: {
+    onRead?: (read: NotificationRead) => void;
+    onError?: (error: Error) => void;
+  } = {}
 ) {
-  const channel = supabase.channel('notification_reads').on(
-    'postgres_changes',
-    {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'notification_reads',
-      filter: `user_id=eq.${userId}`,
-    },
-    payload => {
-      if (onRead && payload.new) {
-        onRead(payload.new as NotificationRead);
-      }
-    }
-  );
+  const { onRead, onError } = callbacks;
 
-  channel.subscribe();
+  const handleError = (error: unknown, context: string) => {
+    const errorMessage = `Read status subscription error in ${context}: ${
+      error instanceof Error ? error.message : 'Unknown error'
+    }`;
+    console.error(errorMessage, error);
+    onError?.(new Error(errorMessage));
+  };
+
+  const channel = supabase
+    .channel('notification_reads')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notification_reads',
+        filter: `user_id=eq.${userId}`,
+      },
+      payload => {
+        try {
+          if (onRead && payload.new && isValidNotificationRead(payload.new)) {
+            onRead(payload.new as NotificationRead);
+          } else if (payload.new && !isValidNotificationRead(payload.new)) {
+            handleError(
+              new Error('Invalid notification read data received'),
+              'INSERT handler'
+            );
+          }
+        } catch (error) {
+          handleError(error, 'READ callback');
+        }
+      }
+    )
+    .on('system', { event: '*' }, payload => {
+      if (payload.type === 'error') {
+        handleError(
+          new Error('System subscription error'),
+          'system event handler'
+        );
+      }
+    });
+
+  channel.subscribe(status => {
+    if (status === 'CHANNEL_ERROR') {
+      handleError(
+        new Error('Failed to establish read status subscription'),
+        'subscription setup'
+      );
+    } else if (status === 'TIMED_OUT') {
+      handleError(
+        new Error('Read status subscription timed out'),
+        'subscription timeout'
+      );
+    } else if (status === 'CLOSED') {
+      handleError(
+        new Error('Read status subscription connection closed'),
+        'subscription connection'
+      );
+    }
+  });
 
   return () => {
-    supabase.removeChannel(channel);
+    try {
+      supabase.removeChannel(channel);
+    } catch (error) {
+      handleError(error, 'cleanup');
+    }
   };
 }

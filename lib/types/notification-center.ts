@@ -4,6 +4,10 @@
  * TypeScript types for the unified notification system including
  * both changelog and message notifications with read status tracking.
  */
+import type { UserRole } from '@lib/types/database';
+
+// Re-export UserRole for convenience
+export type { UserRole };
 
 // ============================================================================
 // Base Notification Types
@@ -20,9 +24,8 @@ export type NotificationType = 'changelog' | 'message';
 export type NotificationPriority = 'low' | 'medium' | 'high' | 'critical';
 
 /**
- * User roles for notification targeting
+ * User roles for notification targeting - imported from database types to avoid duplication
  */
-export type UserRole = 'admin' | 'manager' | 'user';
 
 // ============================================================================
 // Category Definitions
