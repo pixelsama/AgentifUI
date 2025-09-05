@@ -14,6 +14,7 @@ import { createAPIClient } from '@lib/supabase/api-client';
 import type {
   CreateNotificationData,
   GetNotificationsParams,
+  NotificationCategory,
   NotificationListResponse,
 } from '@lib/types/notification-center';
 
@@ -52,19 +53,22 @@ export async function GET(request: NextRequest) {
     const sortByParam = searchParams.get('sort_by');
     const sortOrderParam = searchParams.get('sort_order');
 
-    const validCategories = [
+    // Get all valid notification categories from type definition
+    const validCategories: readonly NotificationCategory[] = [
+      // Message categories
       'admin_announcement',
       'agent_result',
       'token_usage',
       'system_maintenance',
       'security_alert',
       'feature_tip',
+      // Changelog categories
       'feature',
       'improvement',
       'bugfix',
       'security',
       'api_change',
-    ];
+    ] as const;
 
     const params: GetNotificationsParams = {
       type:
@@ -72,19 +76,9 @@ export async function GET(request: NextRequest) {
           ? typeParam
           : undefined,
       category:
-        categoryParam && validCategories.includes(categoryParam)
-          ? (categoryParam as
-              | 'admin_announcement'
-              | 'agent_result'
-              | 'token_usage'
-              | 'system_maintenance'
-              | 'security_alert'
-              | 'feature_tip'
-              | 'feature'
-              | 'improvement'
-              | 'bugfix'
-              | 'security'
-              | 'api_change')
+        categoryParam &&
+        validCategories.includes(categoryParam as NotificationCategory)
+          ? (categoryParam as NotificationCategory)
           : undefined,
       limit: parseInt(searchParams.get('limit') || '20'),
       offset: parseInt(searchParams.get('offset') || '0'),
