@@ -124,7 +124,7 @@ export async function getNotificationsWithReadStatus(
     .select(
       `
       *,
-      notification_reads!left(read_at)
+      notification_reads!left(user_id,read_at)
     `,
       { count: 'estimated' }
     )
@@ -158,6 +158,9 @@ export async function getNotificationsWithReadStatus(
     );
   }
 
+  // Filter notification_reads by user_id
+  query = query.eq('notification_reads.user_id', userId);
+
   const { data, error, count } = await query;
 
   if (error) {
@@ -168,9 +171,10 @@ export async function getNotificationsWithReadStatus(
   const notifications: NotificationWithReadStatus[] =
     data?.map(notification => {
       const readRecord =
-        notification.notification_reads?.find(
-          (read: { read_at: string | null }) => read.read_at !== null
-        ) || null;
+        notification.notification_reads &&
+        notification.notification_reads.length > 0
+          ? notification.notification_reads[0]
+          : null;
 
       return {
         ...notification,
@@ -353,12 +357,19 @@ export async function getUserUnreadCount(
 export async function getUserUnreadCountByCategory(userId: string): Promise<{
   [category: string]: number;
 }> {
+  // Use NOT EXISTS subquery for better LEFT JOIN handling
   const { data, error } = await supabase
     .from('notifications')
-    .select('category, notification_reads!left(id)')
+    .select('category')
     .eq('published', true)
-    .eq('notification_reads.user_id', userId)
-    .is('notification_reads.id', null);
+    .not(
+      'id',
+      'in',
+      supabase
+        .from('notification_reads')
+        .select('notification_id')
+        .eq('user_id', userId)
+    );
 
   if (error) {
     throw new Error(`Failed to get unread count by category: ${error.message}`);
