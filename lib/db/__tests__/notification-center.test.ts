@@ -22,39 +22,24 @@ let mockQueryResult: { data: any; count?: number | null; error: any } = {
 // Mock Supabase client before importing the module
 jest.mock('@lib/supabase/client', () => {
   const createMockQuery = () => {
-    // Create the base query object
-    const queryObj = {
-      from: jest.fn().mockReturnThis(),
-      insert: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      single: jest.fn(() => Promise.resolve(mockQueryResult)),
-      eq: jest.fn().mockReturnThis(),
-      update: jest.fn().mockReturnThis(),
-      delete: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      range: jest.fn().mockReturnThis(),
-    };
+    // Create a Promise that extends the query object methods
+    const queryPromise = Promise.resolve(mockQueryResult);
 
-    // Make the query object itself awaitable by creating a Promise that resolves to mockQueryResult
-    const awaitableQuery = new Proxy(Promise.resolve(), {
-      get(target, prop) {
-        if (prop === 'then') {
-          return (
-            onResolve?: (value: any) => any,
-            onReject?: (reason: any) => any
-          ) => {
-            return Promise.resolve(mockQueryResult).then(onResolve, onReject);
-          };
-        }
-        if (prop in queryObj) {
-          return queryObj[prop as keyof typeof queryObj];
-        }
-        return target[prop as keyof Promise<any>];
-      },
+    // Add query methods to the Promise
+    Object.assign(queryPromise, {
+      from: jest.fn().mockReturnValue(queryPromise),
+      insert: jest.fn().mockReturnValue(queryPromise),
+      select: jest.fn().mockReturnValue(queryPromise),
+      single: jest.fn().mockReturnValue(queryPromise),
+      eq: jest.fn().mockReturnValue(queryPromise),
+      update: jest.fn().mockReturnValue(queryPromise),
+      delete: jest.fn().mockReturnValue(queryPromise),
+      order: jest.fn().mockReturnValue(queryPromise),
+      limit: jest.fn().mockReturnValue(queryPromise),
+      range: jest.fn().mockReturnValue(queryPromise),
     });
 
-    return awaitableQuery;
+    return queryPromise;
   };
 
   return {

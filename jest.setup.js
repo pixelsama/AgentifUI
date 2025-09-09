@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import { URL as NodeURL, URLSearchParams as NodeURLSearchParams } from 'url';
 
 // Mock next/router
 jest.mock('next/router', () => ({
@@ -161,8 +162,7 @@ global.Headers = class MockHeaders {
 global.URL = class MockURL {
   constructor(url, base) {
     const fullUrl = base ? new URL(url, base).href : url;
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const parsed = new (require('url').URL)(fullUrl);
+    const parsed = new NodeURL(fullUrl);
     this.href = parsed.href;
     this.origin = parsed.origin;
     this.protocol = parsed.protocol;
@@ -180,8 +180,7 @@ global.URLSearchParams = class MockURLSearchParams {
   constructor(init = '') {
     this._params = new Map();
     if (typeof init === 'string') {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const params = new (require('url').URLSearchParams)(init);
+      const params = new NodeURLSearchParams(init);
       for (const [key, value] of params.entries()) {
         this._params.set(key, value);
       }
