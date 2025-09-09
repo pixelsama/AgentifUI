@@ -158,8 +158,8 @@ export async function getNotificationsWithReadStatus(
     );
   }
 
-  // Filter notification_reads by user_id
-  query = query.eq('notification_reads.user_id', userId);
+  // Note: We don't filter notification_reads.user_id here because we want ALL notifications
+  // The read status filtering happens in the data transformation below
 
   const { data, error, count } = await query;
 
@@ -172,9 +172,10 @@ export async function getNotificationsWithReadStatus(
     data?.map(notification => {
       const readRecord =
         notification.notification_reads &&
-        notification.notification_reads.length > 0
-          ? notification.notification_reads[0]
-          : null;
+        notification.notification_reads.find(
+          (read: { user_id: string; read_at: string }) =>
+            read.user_id === userId
+        );
 
       return {
         ...notification,
