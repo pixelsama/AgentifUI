@@ -1,12 +1,14 @@
 import type { NotificationCategory } from './notification-center';
 
+export type NotificationPriority = 'low' | 'medium' | 'high' | 'critical';
+
 export interface NotificationForm {
   id?: string;
   type: 'changelog' | 'message';
   category: NotificationCategory;
   title: string;
   content: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: NotificationPriority;
   target_roles: string[];
   target_users: string[];
   scheduled_time?: string;
@@ -18,7 +20,7 @@ export interface NotificationTemplate {
   title: string;
   content: string;
   category: NotificationCategory;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: NotificationPriority;
 }
 
 export interface CategoryOption {
