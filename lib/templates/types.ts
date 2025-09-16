@@ -3,6 +3,7 @@
  *
  * Core interfaces and types for the notification template system
  */
+import type { NotificationPriority } from '@lib/types/notification-admin';
 import type { NotificationCategory } from '@lib/types/notification-center';
 
 export interface NotificationTemplate {
@@ -15,7 +16,7 @@ export interface NotificationTemplate {
   /** Notification category */
   category: NotificationCategory;
   /** Default priority */
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: NotificationPriority;
   /** Default notification type */
   type: 'changelog' | 'message';
   /** Title template with variables */
