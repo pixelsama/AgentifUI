@@ -18,26 +18,57 @@ export async function getUserUnreadCount(
   userId: string,
   type?: NotificationType
 ): Promise<UnreadCount> {
-  const { data, error } = await supabase.rpc('get_user_unread_count', {
-    user_uuid: userId,
-    notification_type: type || null,
-  });
+  // Use the existing get_user_unread_count_by_category function
+  const { data, error } = await supabase.rpc(
+    'get_user_unread_count_by_category',
+    {
+      user_uuid: userId,
+    }
+  );
 
   if (error) {
     throw new Error(`Failed to get unread count: ${error.message}`);
   }
 
-  // The function returns an array with one object
-  const result = data?.[0] || {
-    changelog_count: 0,
-    message_count: 0,
-    total_count: 0,
-  };
+  // Transform the category-based result to match the UnreadCount shape
+  let changelog = 0;
+  let message = 0;
+  let total = 0;
+
+  if (Array.isArray(data)) {
+    data.forEach((row: { category: string; count: number }) => {
+      const count = Number(row.count) || 0;
+
+      // Map categories to notification types
+      if (
+        row.category === 'changelog' ||
+        row.category === 'feature' ||
+        row.category === 'improvement' ||
+        row.category === 'bugfix' ||
+        row.category === 'security' ||
+        row.category === 'api_change'
+      ) {
+        changelog += count;
+      } else {
+        // All other categories are considered message type
+        message += count;
+      }
+
+      total += count;
+    });
+  }
+
+  // If a specific type is requested, filter the results
+  if (type === 'changelog') {
+    return { changelog, message: 0, total: changelog };
+  } else if (type === 'message') {
+    return { changelog: 0, message, total: message };
+  }
 
   return {
-    changelog: Number(result.changelog_count) || 0,
-    message: Number(result.message_count) || 0,
-    total: Number(result.total_count) || 0,
+    changelog,
+    message,
+    total,
   };
 }
 
