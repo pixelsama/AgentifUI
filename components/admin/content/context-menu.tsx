@@ -88,11 +88,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     if (typeof value === 'number') return true;
     if (typeof value !== 'string') return false;
 
-    const trimmed = value.trim();
-    if (trimmed === 'auto') return true;
-
-    // Match: numbers (pure or with units), percentages
-    return /^(\d+(\.\d+)?(px|em|rem|%|vh|vw)?|auto)$/.test(trimmed);
+    // Match: numbers (integers or floats, pure or with units), percentages, or 'auto'
+    return /^(\d+(\.\d+)?(px|em|rem|%|vh|vw)?|auto)$/.test(value.trim());
   };
 
   const handleInputChange = (name: string, value: unknown) => {
@@ -473,8 +470,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 
               const trimmedValue = inputValue.trim();
 
-              // Convert pure numeric strings to numbers for proper rendering
-              if (/^\d+$/.test(trimmedValue)) {
+              // Convert pure numeric strings (integers or floats) to numbers for proper rendering
+              if (/^\d+(\.\d+)?$/.test(trimmedValue)) {
                 handleInputChange(key, Number(trimmedValue));
               } else {
                 // Keep CSS values as strings (auto, 100%, 100px, etc.)
