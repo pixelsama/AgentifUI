@@ -79,6 +79,19 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     };
   }, [onClose]);
 
+  /**
+   * Validate if a value is a valid CSS dimension
+   *
+   * Accepts: numbers, 'auto', percentages (e.g., '50%'), and CSS units (e.g., '100px')
+   */
+  const isValidCssDimension = (value: string | number): boolean => {
+    if (typeof value === 'number') return true;
+    if (typeof value !== 'string') return false;
+
+    // Match: numbers (integers or floats, pure or with units), percentages, or 'auto'
+    return /^(\d+(\.\d+)?(px|em|rem|%|vh|vw)?|auto)$/.test(value.trim());
+  };
+
   const handleInputChange = (name: string, value: unknown) => {
     if (!component) return;
     onPropsChange({ ...component.props, [name]: value });
@@ -431,6 +444,55 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             placeholder={`Enter ${key}`}
             className="min-h-[60px] text-sm"
           />
+        </div>
+      );
+    }
+
+    // Smart dimension fields (width/height for image component)
+    if ((key === 'width' || key === 'height') && component.type === 'image') {
+      return (
+        <div key={key} className="space-y-2">
+          <Label htmlFor={fieldId} className="text-sm capitalize">
+            {key}
+          </Label>
+          <Input
+            id={fieldId}
+            type="text"
+            value={String(value || '')}
+            onChange={e => {
+              const inputValue = e.target.value;
+
+              // Allow empty value during editing (don't auto-fill immediately)
+              if (inputValue === '') {
+                handleInputChange(key, '');
+                return;
+              }
+
+              const trimmedValue = inputValue.trim();
+
+              // Convert pure numeric strings (integers or floats) to numbers for proper rendering
+              if (/^\d+(\.\d+)?$/.test(trimmedValue)) {
+                handleInputChange(key, Number(trimmedValue));
+              } else {
+                // Keep CSS values as strings (auto, 100%, 100px, etc.)
+                // Allow any input during typing, validation happens on blur
+                handleInputChange(key, trimmedValue);
+              }
+            }}
+            onBlur={e => {
+              const inputValue = e.target.value.trim();
+
+              // If empty or invalid, default to 'auto'
+              if (inputValue === '' || !isValidCssDimension(inputValue)) {
+                handleInputChange(key, 'auto');
+              }
+            }}
+            placeholder="e.g., 100, auto, 50%"
+            className="h-8 text-sm"
+          />
+          <p className="text-xs text-stone-500 dark:text-stone-400">
+            Enter number (e.g., 100), auto, or CSS value (e.g., 50%, 100px)
+          </p>
         </div>
       );
     }
