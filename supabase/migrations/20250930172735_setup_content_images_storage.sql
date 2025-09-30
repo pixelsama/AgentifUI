@@ -14,9 +14,9 @@ VALUES (
   ARRAY['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
 )
 ON CONFLICT (id) DO UPDATE SET
-  public = true,
-  file_size_limit = 10485760,
-  allowed_mime_types = ARRAY['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+  public = EXCLUDED.public,
+  file_size_limit = EXCLUDED.file_size_limit,
+  allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 -- --- BEGIN COMMENT ---
 -- 2. Create RLS policies for Storage Objects
@@ -47,16 +47,14 @@ FOR SELECT USING (
 CREATE POLICY "content_images_update_policy" ON storage.objects
 FOR UPDATE USING (
   bucket_id = 'content-images'
-  AND auth.uid() IS NOT NULL
-  AND (storage.foldername(name))[1] = CONCAT('user-', auth.uid()::text)
+  AND auth.uid() = owner
 );
 
 -- Delete policy: users can only delete their own content images
 CREATE POLICY "content_images_delete_policy" ON storage.objects
 FOR DELETE USING (
   bucket_id = 'content-images'
-  AND auth.uid() IS NOT NULL
-  AND (storage.foldername(name))[1] = CONCAT('user-', auth.uid()::text)
+  AND auth.uid() = owner
 );
 
 -- --- BEGIN COMMENT ---
