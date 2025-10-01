@@ -29,6 +29,17 @@ const ALLOWED_IMAGE_TYPES = [
 ] as const;
 
 /**
+ * MIME type to file extension mapping
+ */
+const MIME_TO_EXTENSION: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+};
+
+/**
  * Maximum file size in bytes (10MB)
  */
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -74,16 +85,19 @@ export function validateImageFile(file: File): ValidationResult {
  * Format: user-{userId}/{timestamp}-{uuid}.{ext}
  *
  * @param userId - User ID
- * @param fileName - Original file name
+ * @param fileName - Original file name (used for fallback only)
+ * @param fileType - MIME type of the file
  * @returns Generated file path
  */
 export function generateContentImagePath(
   userId: string,
-  fileName: string
+  fileName: string,
+  fileType: string
 ): string {
   const uuid = uuidv4();
   const timestamp = Date.now();
-  const extension = fileName.split('.').pop() || 'jpg';
+  const extension =
+    MIME_TO_EXTENSION[fileType] || fileName.split('.').pop() || 'jpg';
   const safeFileName = `${timestamp}-${uuid}.${extension}`;
   return `user-${userId}/${safeFileName}`;
 }
@@ -129,7 +143,7 @@ export async function uploadContentImage(
   const supabase = createClient();
 
   // Generate file path
-  const filePath = generateContentImagePath(userId, file.name);
+  const filePath = generateContentImagePath(userId, file.name, file.type);
 
   // Upload to Supabase Storage
   const { error: uploadError } = await supabase.storage

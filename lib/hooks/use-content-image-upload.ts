@@ -58,12 +58,6 @@ export function useContentImageUpload() {
    */
   const uploadImage = useCallback(
     async (file: File, userId: string): Promise<ContentImageUploadResult> => {
-      // Validate file first
-      const validation = validateFile(file);
-      if (!validation.valid) {
-        throw new Error(validation.error);
-      }
-
       setState(prev => ({
         ...prev,
         isUploading: true,
@@ -73,7 +67,7 @@ export function useContentImageUpload() {
       }));
 
       try {
-        // Upload image using service layer
+        // Upload image using service layer (validation happens there)
         const result = await uploadContentImage(file, userId);
 
         setState(prev => ({
@@ -98,7 +92,7 @@ export function useContentImageUpload() {
         throw error;
       }
     },
-    [validateFile]
+    []
   );
 
   /**
