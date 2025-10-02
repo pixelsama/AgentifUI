@@ -1475,6 +1475,19 @@
             "saving_": "保存中..."
           }
         },
+        "imageUpload": {
+          "title": "上传图片",
+          "dropzone": {
+            "title": "拖放图片到此处或点击选择",
+            "subtitle": "拖放图片文件到此处",
+            "formats": "支持格式：JPG、PNG、WEBP、GIF（最大 10MB）"
+          },
+          "upload": "上传",
+          "uploading": "上传中...",
+          "cancel": "取消",
+          "success": "图片上传成功！",
+          "preview": "预览"
+        },
         "tabs": {
           "about": "关于页面",
           "home": "主页"
