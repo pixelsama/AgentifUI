@@ -38,16 +38,20 @@ export function ImageUploadDialog({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   /**
    * Handle file selection
    */
   const handleFileSelect = useCallback(
     (file: File) => {
+      // Clear previous validation error
+      setValidationError(null);
+
       // Validate file
       const validation = validateFile(file);
       if (!validation.valid) {
-        alert(validation.error);
+        setValidationError(validation.error || 'Invalid file');
         return;
       }
 
@@ -145,12 +149,15 @@ export function ImageUploadDialog({
         'animate-in fade-in duration-200'
       )}
       onClick={e => {
-        if (e.target === e.currentTarget) {
+        if (e.target === e.currentTarget && !state.isUploading) {
           handleClose();
         }
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="image-upload-dialog-title"
         className={cn(
           'mx-auto w-full max-w-lg rounded-xl bg-white shadow-2xl',
           'border border-stone-200 dark:border-stone-700 dark:bg-stone-900',
@@ -168,7 +175,10 @@ export function ImageUploadDialog({
             >
               <Upload className="h-5 w-5" />
             </div>
-            <h2 className="font-serif text-lg font-semibold text-stone-900 dark:text-stone-100">
+            <h2
+              id="image-upload-dialog-title"
+              className="font-serif text-lg font-semibold text-stone-900 dark:text-stone-100"
+            >
               {t('title')}
             </h2>
           </div>
@@ -191,36 +201,56 @@ export function ImageUploadDialog({
         <div className="p-6">
           {/* File picker / Drop zone */}
           {!selectedFile && (
-            <div
-              onClick={handlePickerClick}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={cn(
-                'cursor-pointer rounded-lg border-2 border-dashed p-12 text-center transition-all',
-                isDragging
-                  ? 'border-stone-400 bg-stone-50 dark:border-stone-500 dark:bg-stone-800'
-                  : 'border-stone-300 bg-stone-50/50 hover:border-stone-400 hover:bg-stone-100 dark:border-stone-600 dark:bg-stone-800/50 dark:hover:border-stone-500 dark:hover:bg-stone-800'
+            <>
+              <div
+                onClick={handlePickerClick}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handlePickerClick();
+                  }
+                }}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                role="button"
+                tabIndex={0}
+                aria-label={t('dropzone.title')}
+                className={cn(
+                  'cursor-pointer rounded-lg border-2 border-dashed p-12 text-center transition-all',
+                  isDragging
+                    ? 'border-stone-400 bg-stone-50 dark:border-stone-500 dark:bg-stone-800'
+                    : 'border-stone-300 bg-stone-50/50 hover:border-stone-400 hover:bg-stone-100 dark:border-stone-600 dark:bg-stone-800/50 dark:hover:border-stone-500 dark:hover:bg-stone-800'
+                )}
+              >
+                <ImageIcon className="mx-auto mb-4 h-12 w-12 text-stone-400 dark:text-stone-500" />
+                <p className="mb-2 font-serif text-sm font-medium text-stone-700 dark:text-stone-300">
+                  {t('dropzone.title')}
+                </p>
+                <p className="mb-4 font-serif text-xs text-stone-500 dark:text-stone-400">
+                  {t('dropzone.subtitle')}
+                </p>
+                <p className="font-serif text-xs text-stone-400 dark:text-stone-500">
+                  {t('dropzone.formats')}
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                  onChange={handleFileInputChange}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Validation error message */}
+              {validationError && (
+                <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 dark:bg-red-900/20">
+                  <p className="font-serif text-sm text-red-700 dark:text-red-300">
+                    {validationError}
+                  </p>
+                </div>
               )}
-            >
-              <ImageIcon className="mx-auto mb-4 h-12 w-12 text-stone-400 dark:text-stone-500" />
-              <p className="mb-2 font-serif text-sm font-medium text-stone-700 dark:text-stone-300">
-                {t('dropzone.title')}
-              </p>
-              <p className="mb-4 font-serif text-xs text-stone-500 dark:text-stone-400">
-                {t('dropzone.subtitle')}
-              </p>
-              <p className="font-serif text-xs text-stone-400 dark:text-stone-500">
-                {t('dropzone.formats')}
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                onChange={handleFileInputChange}
-                className="hidden"
-              />
-            </div>
+            </>
           )}
 
           {/* Preview */}
