@@ -1,7 +1,8 @@
 'use client';
 
 import { useContentImageUpload } from '@lib/hooks/use-content-image-upload';
-import { cn } from '@lib/utils';
+import { ALLOWED_IMAGE_TYPES } from '@lib/services/content-image-upload-service';
+import { cn, formatBytes } from '@lib/utils';
 import { CheckCircle2, Image as ImageIcon, Upload, X } from 'lucide-react';
 
 import React, { useCallback, useRef, useState } from 'react';
@@ -107,6 +108,16 @@ export function ImageUploadDialog({
   );
 
   /**
+   * Handle dialog close
+   */
+  const handleClose = useCallback(() => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    resetState();
+    onClose();
+  }, [onClose, resetState]);
+
+  /**
    * Handle upload button click
    */
   const handleUpload = useCallback(async () => {
@@ -120,23 +131,34 @@ export function ImageUploadDialog({
       // Error is already in state
       console.error('Upload failed:', error);
     }
-  }, [selectedFile, uploadImage, userId, onUploadSuccess]);
-
-  /**
-   * Handle dialog close
-   */
-  const handleClose = useCallback(() => {
-    setSelectedFile(null);
-    setPreviewUrl(null);
-    resetState();
-    onClose();
-  }, [onClose, resetState]);
+  }, [selectedFile, uploadImage, userId, onUploadSuccess, handleClose]);
 
   /**
    * Handle click on file picker area
    */
   const handlePickerClick = useCallback(() => {
     fileInputRef.current?.click();
+  }, []);
+
+  /**
+   * Handle keyboard interaction on file picker area
+   */
+  const handlePickerKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handlePickerClick();
+      }
+    },
+    [handlePickerClick]
+  );
+
+  /**
+   * Handle remove selected file
+   */
+  const handleRemoveFile = useCallback(() => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
   }, []);
 
   if (!isOpen) return null;
@@ -204,12 +226,7 @@ export function ImageUploadDialog({
             <>
               <div
                 onClick={handlePickerClick}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handlePickerClick();
-                  }
-                }}
+                onKeyDown={handlePickerKeyDown}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
@@ -236,7 +253,7 @@ export function ImageUploadDialog({
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                  accept={ALLOWED_IMAGE_TYPES.join(',') as string}
                   onChange={handleFileInputChange}
                   className="hidden"
                 />
@@ -259,7 +276,7 @@ export function ImageUploadDialog({
               <div className="relative overflow-hidden rounded-lg border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-800">
                 <img
                   src={previewUrl}
-                  alt="Preview"
+                  alt={`Preview of ${selectedFile.name}`}
                   className="h-64 w-full object-contain"
                 />
               </div>
@@ -272,16 +289,13 @@ export function ImageUploadDialog({
                       {selectedFile.name}
                     </p>
                     <p className="font-serif text-xs text-stone-500 dark:text-stone-400">
-                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                      {formatBytes(selectedFile.size)}
                     </p>
                   </div>
                 </div>
                 {!state.isUploading && (
                   <button
-                    onClick={() => {
-                      setSelectedFile(null);
-                      setPreviewUrl(null);
-                    }}
+                    onClick={handleRemoveFile}
                     className="text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-300"
                   >
                     <X className="h-4 w-4" />
