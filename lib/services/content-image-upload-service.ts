@@ -1,4 +1,5 @@
 import { createClient } from '@lib/supabase/client';
+import { PageSection } from '@lib/types/about-page-components';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -209,4 +210,65 @@ export async function listUserContentImages(userId: string): Promise<string[]> {
   }
 
   return data.map(file => `user-${userId}/${file.name}`);
+}
+
+/**
+ * Extract all image paths from page sections
+ *
+ * @param sections - Page sections array
+ * @returns Array of image paths used in the page
+ */
+export function extractImagePathsFromSections(
+  sections: PageSection[]
+): string[] {
+  return sections.flatMap(section =>
+    section.columns.flatMap(column =>
+      column
+        .filter(
+          component => component.type === 'image' && component.props._imagePath
+        )
+        .map(component => component.props._imagePath as string)
+    )
+  );
+}
+
+/**
+ * Clean up unused content images for a specific user
+ *
+ * Compares images currently used in page sections with all images in storage,
+ * and deletes any images that are no longer referenced.
+ *
+ * @param sections - Current page sections
+ * @param userId - User ID
+ * @returns Number of images deleted
+ * @throws Error if cleanup operation fails
+ */
+export async function cleanupUnusedImages(
+  sections: PageSection[],
+  userId: string
+): Promise<number> {
+  // Extract image paths currently used in the page into a Set for efficient lookup
+  const usedImagePaths = new Set(extractImagePathsFromSections(sections));
+
+  // Get all images from storage
+  const allImagePaths = await listUserContentImages(userId);
+
+  // Find unused images by filtering against the Set
+  const unusedImagePaths = allImagePaths.filter(
+    path => !usedImagePaths.has(path)
+  );
+
+  // Delete unused images
+  if (unusedImagePaths.length > 0) {
+    const supabase = createClient();
+    const { error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .remove(unusedImagePaths);
+
+    if (error) {
+      throw new Error(`Failed to cleanup images: ${error.message}`);
+    }
+  }
+
+  return unusedImagePaths.length;
 }
