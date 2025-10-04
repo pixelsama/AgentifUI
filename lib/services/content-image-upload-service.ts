@@ -210,3 +210,82 @@ export async function listUserContentImages(userId: string): Promise<string[]> {
 
   return data.map(file => `user-${userId}/${file.name}`);
 }
+
+/**
+ * Extract all image paths from page sections
+ *
+ * @param sections - Page sections array
+ * @returns Array of image paths used in the page
+ */
+export function extractImagePathsFromSections(
+  sections: Array<{
+    columns: Array<
+      Array<{
+        type: string;
+        props: Record<string, unknown>;
+      }>
+    >;
+  }>
+): string[] {
+  const imagePaths: string[] = [];
+
+  for (const section of sections) {
+    for (const column of section.columns) {
+      for (const component of column) {
+        if (component.type === 'image' && component.props._imagePath) {
+          imagePaths.push(component.props._imagePath as string);
+        }
+      }
+    }
+  }
+
+  return imagePaths;
+}
+
+/**
+ * Clean up unused content images for a specific user
+ *
+ * Compares images currently used in page sections with all images in storage,
+ * and deletes any images that are no longer referenced.
+ *
+ * @param sections - Current page sections
+ * @param userId - User ID
+ * @returns Number of images deleted
+ * @throws Error if cleanup operation fails
+ */
+export async function cleanupUnusedImages(
+  sections: Array<{
+    columns: Array<
+      Array<{
+        type: string;
+        props: Record<string, unknown>;
+      }>
+    >;
+  }>,
+  userId: string
+): Promise<number> {
+  // Extract image paths currently used in the page
+  const usedImagePaths = extractImagePathsFromSections(sections);
+
+  // Get all images from storage
+  const allImagePaths = await listUserContentImages(userId);
+
+  // Find unused images
+  const unusedImagePaths = allImagePaths.filter(
+    path => !usedImagePaths.includes(path)
+  );
+
+  // Delete unused images
+  if (unusedImagePaths.length > 0) {
+    const supabase = createClient();
+    const { error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .remove(unusedImagePaths);
+
+    if (error) {
+      throw new Error(`Failed to cleanup images: ${error.message}`);
+    }
+  }
+
+  return unusedImagePaths.length;
+}
