@@ -1475,6 +1475,19 @@
             "saving_": "Saving..."
           }
         },
+        "imageUpload": {
+          "title": "Upload Image",
+          "dropzone": {
+            "title": "Drop image here or click to select",
+            "subtitle": "Drag and drop an image file here",
+            "formats": "Supported formats: JPG, PNG, WEBP, GIF (Max 10MB)"
+          },
+          "upload": "Upload",
+          "uploading": "Uploading...",
+          "cancel": "Cancel",
+          "success": "Image uploaded successfully!",
+          "preview": "Preview"
+        },
         "tabs": {
           "about": "About Page",
           "home": "Home Page"

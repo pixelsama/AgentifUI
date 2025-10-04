@@ -20,7 +20,7 @@ export interface ValidationResult {
 /**
  * Allowed image MIME types for content images
  */
-const ALLOWED_IMAGE_TYPES = [
+export const ALLOWED_IMAGE_TYPES = [
   'image/jpeg',
   'image/jpg',
   'image/png',
