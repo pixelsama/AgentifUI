@@ -126,7 +126,11 @@ export function ImageUploadDialog({
     try {
       const result = await uploadImage(selectedFile, userId);
       onUploadSuccess(result.url, result.path);
-      handleClose();
+
+      // Wait 1.2 seconds to show success state before closing
+      setTimeout(() => {
+        handleClose();
+      }, 1200);
     } catch (error) {
       // Error is already in state
       console.error('Upload failed:', error);

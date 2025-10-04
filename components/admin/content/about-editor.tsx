@@ -12,9 +12,9 @@ import {
 import { Separator } from '@components/ui/separator';
 import type { SupportedLocale } from '@lib/config/language-config';
 import { getLanguageInfo } from '@lib/config/language-config';
-import { cleanupUnusedImages } from '@lib/services/content-image-upload-service';
+// import { cleanupUnusedImages } from '@lib/services/content-image-upload-service';
 import { useAboutEditorStore } from '@lib/stores/about-editor-store';
-import { createClient } from '@lib/supabase/client';
+// import { createClient } from '@lib/supabase/client';
 import {
   AboutTranslationData,
   ComponentInstance,
@@ -29,7 +29,7 @@ import {
 } from '@lib/utils/performance';
 import { GripVertical, Plus, Redo2, Trash2, Undo2 } from 'lucide-react';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { useTranslations } from 'next-intl';
 
@@ -60,8 +60,8 @@ export function AboutEditor({
 }: AboutEditorProps) {
   const t = useTranslations('pages.admin.content.editor');
 
-  // User ID state for image cleanup
-  const [userId, setUserId] = useState<string | null>(null);
+  // User ID state for image cleanup (disabled temporarily)
+  // const [userId, setUserId] = useState<string | null>(null);
 
   // Context menu state
   const [contextMenu, setContextMenu] = React.useState<{
@@ -136,20 +136,20 @@ export function AboutEditor({
     return null;
   }, [pageContent, contextMenu?.componentId]);
 
-  // Fetch current user ID on mount
-  useEffect(() => {
-    const fetchUserId = async () => {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
-      }
-    };
+  // Fetch current user ID on mount (disabled temporarily - cleanup disabled)
+  // useEffect(() => {
+  //   const fetchUserId = async () => {
+  //     const supabase = createClient();
+  //     const {
+  //       data: { user },
+  //     } = await supabase.auth.getUser();
+  //     if (user) {
+  //       setUserId(user.id);
+  //     }
+  //   };
 
-    fetchUserId();
-  }, []);
+  //   fetchUserId();
+  // }, []);
 
   // Initial load and locale change handling
   useEffect(() => {
@@ -173,15 +173,16 @@ export function AboutEditor({
     useCallback(async () => {
       if (!pageContent) return;
 
+      // TODO: Auto-cleanup disabled temporarily - causes race condition with image upload
       // Clean up unused images before saving (only if userId is available)
-      if (userId && pageContent.sections) {
-        try {
-          await cleanupUnusedImages(pageContent.sections, userId);
-        } catch (error) {
-          console.error('Failed to cleanup unused images:', error);
-          // Continue with save even if cleanup fails
-        }
-      }
+      // if (userId && pageContent.sections) {
+      //   try {
+      //     await cleanupUnusedImages(pageContent.sections, userId);
+      //   } catch (error) {
+      //     console.error('Failed to cleanup unused images:', error);
+      //     // Continue with save even if cleanup fails
+      //   }
+      // }
 
       const updatedTranslation: AboutTranslationData = {
         sections: pageContent.sections,
@@ -197,15 +198,9 @@ export function AboutEditor({
       };
 
       onTranslationsChange(newTranslations);
-    }, [
-      pageContent,
-      translations,
-      currentLocale,
-      onTranslationsChange,
-      userId,
-    ]),
+    }, [pageContent, translations, currentLocale, onTranslationsChange]),
     100, // 100ms delay for near real-time sync
-    [pageContent, translations, currentLocale, userId]
+    [pageContent, translations, currentLocale]
   );
 
   // Auto-save when pageContent changes
