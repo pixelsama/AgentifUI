@@ -1,4 +1,5 @@
 import { createClient } from '@lib/supabase/client';
+import { PageSection } from '@lib/types/about-page-components';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -218,28 +219,17 @@ export async function listUserContentImages(userId: string): Promise<string[]> {
  * @returns Array of image paths used in the page
  */
 export function extractImagePathsFromSections(
-  sections: Array<{
-    columns: Array<
-      Array<{
-        type: string;
-        props: Record<string, unknown>;
-      }>
-    >;
-  }>
+  sections: PageSection[]
 ): string[] {
-  const imagePaths: string[] = [];
-
-  for (const section of sections) {
-    for (const column of section.columns) {
-      for (const component of column) {
-        if (component.type === 'image' && component.props._imagePath) {
-          imagePaths.push(component.props._imagePath as string);
-        }
-      }
-    }
-  }
-
-  return imagePaths;
+  return sections.flatMap(section =>
+    section.columns.flatMap(column =>
+      column
+        .filter(
+          component => component.type === 'image' && component.props._imagePath
+        )
+        .map(component => component.props._imagePath as string)
+    )
+  );
 }
 
 /**
@@ -254,25 +244,18 @@ export function extractImagePathsFromSections(
  * @throws Error if cleanup operation fails
  */
 export async function cleanupUnusedImages(
-  sections: Array<{
-    columns: Array<
-      Array<{
-        type: string;
-        props: Record<string, unknown>;
-      }>
-    >;
-  }>,
+  sections: PageSection[],
   userId: string
 ): Promise<number> {
-  // Extract image paths currently used in the page
-  const usedImagePaths = extractImagePathsFromSections(sections);
+  // Extract image paths currently used in the page into a Set for efficient lookup
+  const usedImagePaths = new Set(extractImagePathsFromSections(sections));
 
   // Get all images from storage
   const allImagePaths = await listUserContentImages(userId);
 
-  // Find unused images
+  // Find unused images by filtering against the Set
   const unusedImagePaths = allImagePaths.filter(
-    path => !usedImagePaths.includes(path)
+    path => !usedImagePaths.has(path)
   );
 
   // Delete unused images
