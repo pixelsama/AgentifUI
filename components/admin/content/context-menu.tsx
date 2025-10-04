@@ -85,17 +85,23 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 
   // Fetch current user ID on mount
   useEffect(() => {
+    let isMounted = true;
+
     const fetchUserId = async () => {
       const supabase = createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (user) {
+      if (isMounted && user) {
         setUserId(user.id);
       }
     };
 
     fetchUserId();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   /**
@@ -558,10 +564,12 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             <button
               type="button"
               onClick={() => setIsUploadDialogOpen(true)}
+              disabled={!userId}
               className={cn(
                 'flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-colors',
                 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50',
-                'dark:border-stone-600 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700'
+                'dark:border-stone-600 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700',
+                'disabled:cursor-not-allowed disabled:opacity-50'
               )}
               title="Upload local image"
             >
@@ -657,7 +665,6 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           onUploadSuccess={url => {
             // Auto-fill the uploaded image URL to src field
             handleInputChange('src', url);
-            setIsUploadDialogOpen(false);
           }}
           userId={userId}
         />
