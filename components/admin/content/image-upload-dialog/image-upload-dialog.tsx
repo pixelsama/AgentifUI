@@ -8,8 +8,9 @@ import { CheckCircle2, Image as ImageIcon, Upload, X } from 'lucide-react';
 import React, { useCallback, useRef, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
-interface ImageUploadDialogProps {
+export interface ImageUploadDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onUploadSuccess: (url: string, path: string) => void;
@@ -277,11 +278,12 @@ export function ImageUploadDialog({
           {/* Preview */}
           {selectedFile && previewUrl && (
             <div className="space-y-4">
-              <div className="relative overflow-hidden rounded-lg border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-800">
-                <img
+              <div className="relative h-64 overflow-hidden rounded-lg border border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-800">
+                <Image
                   src={previewUrl}
                   alt={`Preview of ${selectedFile.name}`}
-                  className="h-64 w-full object-contain"
+                  fill
+                  className="object-contain"
                 />
               </div>
 

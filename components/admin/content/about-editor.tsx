@@ -12,9 +12,7 @@ import {
 import { Separator } from '@components/ui/separator';
 import type { SupportedLocale } from '@lib/config/language-config';
 import { getLanguageInfo } from '@lib/config/language-config';
-// import { cleanupUnusedImages } from '@lib/services/content-image-upload-service';
 import { useAboutEditorStore } from '@lib/stores/about-editor-store';
-// import { createClient } from '@lib/supabase/client';
 import {
   AboutTranslationData,
   ComponentInstance,
@@ -59,9 +57,6 @@ export function AboutEditor({
   onLocaleChange,
 }: AboutEditorProps) {
   const t = useTranslations('pages.admin.content.editor');
-
-  // User ID state for image cleanup (disabled temporarily)
-  // const [userId, setUserId] = useState<string | null>(null);
 
   // Context menu state
   const [contextMenu, setContextMenu] = React.useState<{
@@ -136,21 +131,6 @@ export function AboutEditor({
     return null;
   }, [pageContent, contextMenu?.componentId]);
 
-  // Fetch current user ID on mount (disabled temporarily - cleanup disabled)
-  // useEffect(() => {
-  //   const fetchUserId = async () => {
-  //     const supabase = createClient();
-  //     const {
-  //       data: { user },
-  //     } = await supabase.auth.getUser();
-  //     if (user) {
-  //       setUserId(user.id);
-  //     }
-  //   };
-
-  //   fetchUserId();
-  // }, []);
-
   // Initial load and locale change handling
   useEffect(() => {
     if (currentTranslation.sections) {
@@ -172,17 +152,6 @@ export function AboutEditor({
   const debouncedSave = useDebouncedCallback(
     useCallback(async () => {
       if (!pageContent) return;
-
-      // TODO: Auto-cleanup disabled temporarily - causes race condition with image upload
-      // Clean up unused images before saving (only if userId is available)
-      // if (userId && pageContent.sections) {
-      //   try {
-      //     await cleanupUnusedImages(pageContent.sections, userId);
-      //   } catch (error) {
-      //     console.error('Failed to cleanup unused images:', error);
-      //     // Continue with save even if cleanup fails
-      //   }
-      // }
 
       const updatedTranslation: AboutTranslationData = {
         sections: pageContent.sections,
