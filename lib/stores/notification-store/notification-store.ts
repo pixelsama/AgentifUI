@@ -77,6 +77,11 @@ interface NotificationState {
   loadMore: () => Promise<void>;
 }
 
+/**
+ * Default pagination limit for fetching notifications
+ */
+const DEFAULT_NOTIFICATIONS_LIMIT = 20;
+
 const INITIAL_STATE = {
   notifications: [],
   unreadCount: { changelog: 0, message: 0, total: 0 },
@@ -103,7 +108,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       const queryParams: GetNotificationsParams = {
         ...params,
         offset: append ? currentOffset : 0,
-        limit: params.limit || 20,
+        limit: params.limit || DEFAULT_NOTIFICATIONS_LIMIT,
       };
 
       // Filter by type if not on 'all' tab
@@ -149,6 +154,21 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   },
 
   markAsRead: async notificationIds => {
+    const originalNotifications = get().notifications;
+
+    // Update local state optimistically
+    set(state => ({
+      notifications: state.notifications.map(notification =>
+        notificationIds.includes(notification.id)
+          ? {
+              ...notification,
+              is_read: true,
+              read_at: new Date().toISOString(),
+            }
+          : notification
+      ),
+    }));
+
     try {
       const response = await fetch('/api/notifications/mark-read', {
         method: 'POST',
@@ -160,23 +180,12 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         throw new Error('Failed to mark notifications as read');
       }
 
-      // Update local state optimistically
-      set(state => ({
-        notifications: state.notifications.map(notification =>
-          notificationIds.includes(notification.id)
-            ? {
-                ...notification,
-                is_read: true,
-                read_at: new Date().toISOString(),
-              }
-            : notification
-        ),
-      }));
-
-      // Refresh unread count
+      // Refresh unread count on success
       await get().updateUnreadCount();
     } catch (error) {
+      // Revert optimistic update on failure and set error
       set({
+        notifications: originalNotifications,
         error:
           error instanceof Error ? error.message : 'Failed to mark as read',
       });
@@ -209,6 +218,12 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       const data = await response.json();
       set({ unreadCount: data.unread_count });
     } catch (error) {
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to fetch unread count',
+      });
       console.error('Failed to update unread count:', error);
     }
   },
