@@ -30,39 +30,21 @@ import { NotificationItem } from './notification-item';
  * infinite scroll support, and loading states.
  */
 
-/**
- * NotificationList Component
- *
- * Container for displaying a list of notifications with optional date grouping,
- * infinite scroll support, and loading states.
- */
-
-/**
- * NotificationList Component
- *
- * Container for displaying a list of notifications with optional date grouping,
- * infinite scroll support, and loading states.
- */
-
-/**
- * NotificationList Component
- *
- * Container for displaying a list of notifications with optional date grouping,
- * infinite scroll support, and loading states.
- */
-
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface NotificationListProps {
   notifications: NotificationWithReadStatus[];
+  /** Callback to mark notification as read. Should be memoized with useCallback to prevent observer re-initialization. */
   onMarkAsRead?: (id: string) => void;
+  /** Callback when notification is clicked. Should be memoized with useCallback to prevent observer re-initialization. */
   onAction?: (notification: NotificationWithReadStatus) => void;
   compact?: boolean;
   groupByDate?: boolean;
   isLoading?: boolean;
   hasMore?: boolean;
+  /** Callback to load more notifications. Should be memoized with useCallback to prevent observer re-initialization. */
   onLoadMore?: () => void;
 }
 
@@ -92,10 +74,15 @@ export function getDateGroupLabel(date: Date): string {
 export function groupNotificationsByDate(
   notifications: NotificationWithReadStatus[]
 ): DateGroup[] {
+  // Sort notifications by date (newest first) to ensure correct grouping order
+  const sortedNotifications = [...notifications].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
   const groups = new Map<string, NotificationWithReadStatus[]>();
 
   // Group notifications
-  notifications.forEach(notification => {
+  sortedNotifications.forEach(notification => {
     const date = new Date(notification.created_at);
     const label = getDateGroupLabel(date);
 

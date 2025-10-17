@@ -26,27 +26,6 @@ import { useTranslations } from 'next-intl';
  * and category label. Supports compact and full display modes.
  */
 
-/**
- * NotificationItem Component
- *
- * Displays a single notification with read/unread status, priority badge,
- * and category label. Supports compact and full display modes.
- */
-
-/**
- * NotificationItem Component
- *
- * Displays a single notification with read/unread status, priority badge,
- * and category label. Supports compact and full display modes.
- */
-
-/**
- * NotificationItem Component
- *
- * Displays a single notification with read/unread status, priority badge,
- * and category label. Supports compact and full display modes.
- */
-
 // ============================================================================
 // Types
 // ============================================================================
@@ -87,28 +66,20 @@ export function getPriorityVariant(
 export function getCategoryColor(category?: NotificationCategory): string {
   if (!category) return 'text-muted-foreground';
 
-  // Changelog categories
-  if (
-    ['feature', 'improvement', 'bugfix', 'security', 'api_change'].includes(
-      category
-    )
-  ) {
-    switch (category) {
-      case 'feature':
-        return 'text-blue-600 dark:text-blue-400';
-      case 'improvement':
-        return 'text-green-600 dark:text-green-400';
-      case 'bugfix':
-        return 'text-orange-600 dark:text-orange-400';
-      case 'security':
-        return 'text-red-600 dark:text-red-400';
-      case 'api_change':
-        return 'text-purple-600 dark:text-purple-400';
-    }
-  }
-
-  // Message categories
   switch (category) {
+    // Changelog categories
+    case 'feature':
+      return 'text-blue-600 dark:text-blue-400';
+    case 'improvement':
+      return 'text-green-600 dark:text-green-400';
+    case 'bugfix':
+      return 'text-orange-600 dark:text-orange-400';
+    case 'security':
+      return 'text-red-600 dark:text-red-400';
+    case 'api_change':
+      return 'text-purple-600 dark:text-purple-400';
+
+    // Message categories
     case 'admin_announcement':
       return 'text-indigo-600 dark:text-indigo-400';
     case 'agent_result':
@@ -121,6 +92,7 @@ export function getCategoryColor(category?: NotificationCategory): string {
       return 'text-red-600 dark:text-red-400';
     case 'feature_tip':
       return 'text-emerald-600 dark:text-emerald-400';
+
     default:
       return 'text-muted-foreground';
   }
