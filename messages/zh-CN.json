@@ -2488,6 +2488,49 @@
         "message": "消息",
         "changelog": "更新日志"
       }
+    },
+    "notificationItem": {
+      "markAsRead": "标记为已读",
+      "priority": {
+        "low": "低",
+        "medium": "中",
+        "high": "高",
+        "critical": "紧急"
+      },
+      "type": {
+        "changelog": "更新",
+        "message": "消息"
+      },
+      "category": {
+        "changelog": {
+          "feature": "新功能",
+          "improvement": "功能改进",
+          "bugfix": "问题修复",
+          "security": "安全更新",
+          "api_change": "API变更"
+        },
+        "message": {
+          "admin_announcement": "公告",
+          "agent_result": "智能体结果",
+          "token_usage": "Token用量",
+          "system_maintenance": "系统维护",
+          "security_alert": "安全警报",
+          "feature_tip": "功能提示"
+        }
+      }
+    },
+    "notificationList": {
+      "empty": {
+        "title": "暂无通知",
+        "description": "您已查看了所有通知！"
+      },
+      "loadMore": "加载更多",
+      "dateGroup": {
+        "today": "今天",
+        "yesterday": "昨天",
+        "thisWeek": "本周",
+        "thisMonth": "本月"
+      }
     }
   },
   "debug": {
