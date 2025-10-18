@@ -12,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import type { NotificationWithReadStatus } from '@lib/types/notification-center';
 import { Check, Settings } from 'lucide-react';
 
+import { useMemo } from 'react';
+
 import { useTranslations } from 'next-intl';
 
 import { NotificationList } from './notification-list';
@@ -53,32 +55,6 @@ export interface NotificationCenterProps {
 }
 
 // ============================================================================
-// Utils
-// ============================================================================
-
-/**
- * Filter notifications by type
- */
-function filterNotificationsByType(
-  notifications: NotificationWithReadStatus[],
-  type: 'all' | 'changelog' | 'message'
-): NotificationWithReadStatus[] {
-  if (type === 'all') return notifications;
-  return notifications.filter(n => n.type === type);
-}
-
-/**
- * Get unread count for specific type
- */
-function getUnreadCount(
-  notifications: NotificationWithReadStatus[],
-  type: 'all' | 'changelog' | 'message'
-): number {
-  const filtered = filterNotificationsByType(notifications, type);
-  return filtered.filter(n => !n.is_read).length;
-}
-
-// ============================================================================
 // Component
 // ============================================================================
 
@@ -97,9 +73,67 @@ export function NotificationCenter({
 }: NotificationCenterProps) {
   const t = useTranslations('notificationCenter');
 
-  const unreadCount = getUnreadCount(notifications, 'all');
-  const changelogUnreadCount = getUnreadCount(notifications, 'changelog');
-  const messageUnreadCount = getUnreadCount(notifications, 'message');
+  // Memoize notification filtering and counting in a single pass for performance
+  const {
+    unreadCount,
+    changelogUnreadCount,
+    messageUnreadCount,
+    changelogNotifications,
+    messageNotifications,
+  } = useMemo(() => {
+    return notifications.reduce(
+      (acc, notification) => {
+        const isUnread = !notification.is_read;
+
+        if (isUnread) {
+          acc.unreadCount++;
+        }
+
+        if (notification.type === 'changelog') {
+          acc.changelogNotifications.push(notification);
+          if (isUnread) {
+            acc.changelogUnreadCount++;
+          }
+        } else if (notification.type === 'message') {
+          acc.messageNotifications.push(notification);
+          if (isUnread) {
+            acc.messageUnreadCount++;
+          }
+        }
+
+        return acc;
+      },
+      {
+        unreadCount: 0,
+        changelogUnreadCount: 0,
+        messageUnreadCount: 0,
+        changelogNotifications: [] as NotificationWithReadStatus[],
+        messageNotifications: [] as NotificationWithReadStatus[],
+      }
+    );
+  }, [notifications]);
+
+  // Tab configuration for data-driven rendering
+  const tabs = [
+    {
+      value: 'all',
+      labelKey: 'tabs.all' as const,
+      count: unreadCount,
+      notifications: notifications,
+    },
+    {
+      value: 'changelog',
+      labelKey: 'tabs.changelog' as const,
+      count: changelogUnreadCount,
+      notifications: changelogNotifications,
+    },
+    {
+      value: 'message',
+      labelKey: 'tabs.messages' as const,
+      count: messageUnreadCount,
+      notifications: messageNotifications,
+    },
+  ];
 
   return (
     <Popover
@@ -148,86 +182,37 @@ export function NotificationCenter({
       {/* Tabs */}
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
-          <TabsTrigger
-            value="all"
-            className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent data-[state=active]:bg-transparent"
-          >
-            {t('tabs.all')}
-            {unreadCount > 0 && (
-              <span className="bg-primary text-primary-foreground ml-2 rounded-full px-2 py-0.5 text-xs font-semibold">
-                {unreadCount}
-              </span>
-            )}
-          </TabsTrigger>
-
-          <TabsTrigger
-            value="changelog"
-            className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent data-[state=active]:bg-transparent"
-          >
-            {t('tabs.changelog')}
-            {changelogUnreadCount > 0 && (
-              <span className="bg-primary text-primary-foreground ml-2 rounded-full px-2 py-0.5 text-xs font-semibold">
-                {changelogUnreadCount}
-              </span>
-            )}
-          </TabsTrigger>
-
-          <TabsTrigger
-            value="message"
-            className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent data-[state=active]:bg-transparent"
-          >
-            {t('tabs.messages')}
-            {messageUnreadCount > 0 && (
-              <span className="bg-primary text-primary-foreground ml-2 rounded-full px-2 py-0.5 text-xs font-semibold">
-                {messageUnreadCount}
-              </span>
-            )}
-          </TabsTrigger>
+          {tabs.map(tab => (
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent data-[state=active]:bg-transparent"
+            >
+              {t(tab.labelKey)}
+              {tab.count > 0 && (
+                <span className="bg-primary text-primary-foreground ml-2 rounded-full px-2 py-0.5 text-xs font-semibold">
+                  {tab.count}
+                </span>
+              )}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         {/* Tab content */}
         <div className="max-h-[600px] overflow-y-auto">
-          <TabsContent value="all" className="m-0 p-4">
-            <NotificationList
-              notifications={notifications}
-              onMarkAsRead={onMarkAsRead}
-              onAction={onAction}
-              groupByDate
-              isLoading={isLoading}
-              hasMore={hasMore}
-              onLoadMore={onLoadMore}
-            />
-          </TabsContent>
-
-          <TabsContent value="changelog" className="m-0 p-4">
-            <NotificationList
-              notifications={filterNotificationsByType(
-                notifications,
-                'changelog'
-              )}
-              onMarkAsRead={onMarkAsRead}
-              onAction={onAction}
-              groupByDate
-              isLoading={isLoading}
-              hasMore={hasMore}
-              onLoadMore={onLoadMore}
-            />
-          </TabsContent>
-
-          <TabsContent value="message" className="m-0 p-4">
-            <NotificationList
-              notifications={filterNotificationsByType(
-                notifications,
-                'message'
-              )}
-              onMarkAsRead={onMarkAsRead}
-              onAction={onAction}
-              groupByDate
-              isLoading={isLoading}
-              hasMore={hasMore}
-              onLoadMore={onLoadMore}
-            />
-          </TabsContent>
+          {tabs.map(tab => (
+            <TabsContent key={tab.value} value={tab.value} className="m-0 p-4">
+              <NotificationList
+                notifications={tab.notifications}
+                onMarkAsRead={onMarkAsRead}
+                onAction={onAction}
+                groupByDate
+                isLoading={isLoading}
+                hasMore={hasMore}
+                onLoadMore={onLoadMore}
+              />
+            </TabsContent>
+          ))}
         </div>
       </Tabs>
     </Popover>
