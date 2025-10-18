@@ -2508,6 +2508,16 @@
         "thisWeek": "This Week",
         "thisMonth": "This Month"
       }
+    },
+    "notificationCenter": {
+      "title": "Notifications",
+      "markAllAsRead": "Mark all as read",
+      "settings": "Notification settings",
+      "tabs": {
+        "all": "All",
+        "changelog": "Updates",
+        "messages": "Messages"
+      }
     }
   },
   "debug": {
