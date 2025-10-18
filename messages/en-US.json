@@ -2465,6 +2465,49 @@
         "message": "Message",
         "changelog": "Changelog"
       }
+    },
+    "notificationItem": {
+      "markAsRead": "Mark as read",
+      "priority": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
+      },
+      "type": {
+        "changelog": "Update",
+        "message": "Message"
+      },
+      "category": {
+        "changelog": {
+          "feature": "New Feature",
+          "improvement": "Improvement",
+          "bugfix": "Bug Fix",
+          "security": "Security",
+          "api_change": "API Change"
+        },
+        "message": {
+          "admin_announcement": "Announcement",
+          "agent_result": "Agent Result",
+          "token_usage": "Token Usage",
+          "system_maintenance": "Maintenance",
+          "security_alert": "Security Alert",
+          "feature_tip": "Tip"
+        }
+      }
+    },
+    "notificationList": {
+      "empty": {
+        "title": "No notifications",
+        "description": "You're all caught up!"
+      },
+      "loadMore": "Load more",
+      "dateGroup": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "thisWeek": "This Week",
+        "thisMonth": "This Month"
+      }
     }
   },
   "debug": {
