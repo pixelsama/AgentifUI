@@ -1,14 +1,18 @@
 'use client';
 
+import { NotificationBell, NotificationCenter } from '@components/notification';
 import { useMobile } from '@lib/hooks';
+import { useNotificationRealtime } from '@lib/hooks/use-notification-realtime';
 import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
+import { useNotificationStore } from '@lib/stores/notification-store';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
+import type { NotificationWithReadStatus } from '@lib/types/notification-center';
 import { cn } from '@lib/utils';
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 import { ConversationTitleButton } from './conversation-title-button';
 import { DesktopUserAvatar } from './desktop-user-avatar';
@@ -27,9 +31,83 @@ import { WorkflowHistoryButton } from './workflow-history-button';
 export function NavBar() {
   const isMobile = useMobile();
   const pathname = usePathname();
+  const router = useRouter();
   const { colors: themeColors } = useThemeColors();
   const { colors: settingsColors } = useSettingsColors();
   const { isExpanded } = useSidebarStore();
+
+  // Notification state
+  const [notificationCenterOpen, setNotificationCenterOpen] = useState(false);
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    hasMore,
+    fetchNotifications,
+    updateUnreadCount,
+    markAsRead,
+    markAllAsRead,
+    loadMore,
+  } = useNotificationStore();
+
+  // Enable real-time notification updates
+  useNotificationRealtime({
+    enabled: true,
+  });
+
+  // Fetch initial notifications and unread count on mount
+  useEffect(() => {
+    fetchNotifications();
+    updateUnreadCount();
+  }, [fetchNotifications, updateUnreadCount]);
+
+  // Memoize callbacks to prevent observer re-initialization
+  const handleMarkAsRead = useCallback(
+    (id: string) => {
+      markAsRead([id]);
+    },
+    [markAsRead]
+  );
+
+  const handleMarkAllAsRead = useCallback(() => {
+    markAllAsRead();
+  }, [markAllAsRead]);
+
+  const handleLoadMore = useCallback(() => {
+    loadMore();
+  }, [loadMore]);
+
+  const handleNotificationAction = useCallback(
+    (notification: NotificationWithReadStatus) => {
+      if (!notification) return;
+
+      const metadata = notification.metadata as
+        | Record<string, unknown>
+        | undefined;
+      const candidateKeys = ['href', 'url', 'link', 'path'] as const;
+
+      const actionTarget = candidateKeys
+        .map(key => metadata?.[key])
+        .find(value => typeof value === 'string' && value.trim().length > 0) as
+        | string
+        | undefined;
+
+      if (!actionTarget) {
+        return;
+      }
+
+      const trimmedTarget = actionTarget.trim();
+
+      if (/^https?:\/\//i.test(trimmedTarget)) {
+        window.open(trimmedTarget, '_blank', 'noopener,noreferrer');
+      } else {
+        router.push(trimmedTarget);
+      }
+
+      setNotificationCenterOpen(false);
+    },
+    [router, setNotificationCenterOpen]
+  );
 
   if (isMobile) {
     return null;
@@ -69,6 +147,25 @@ export function NavBar() {
         <div className="flex items-center space-x-2">
           {/* Workflow history button (only shows on workflow and text generation pages) */}
           <WorkflowHistoryButton />
+
+          {/* Notification bell with popover */}
+          <NotificationCenter
+            notifications={notifications}
+            onMarkAsRead={handleMarkAsRead}
+            onMarkAllAsRead={handleMarkAllAsRead}
+            onAction={handleNotificationAction}
+            open={notificationCenterOpen}
+            onOpenChange={setNotificationCenterOpen}
+            isLoading={isLoading}
+            hasMore={hasMore}
+            onLoadMore={handleLoadMore}
+          >
+            <NotificationBell
+              unreadCount={unreadCount.total}
+              onClick={() => setNotificationCenterOpen(!notificationCenterOpen)}
+              isOpen={notificationCenterOpen}
+            />
+          </NotificationCenter>
 
           {/* User avatar button */}
           <DesktopUserAvatar />
