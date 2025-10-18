@@ -23,55 +23,6 @@ import { useTranslations } from 'next-intl';
 
 import { NotificationItem } from './notification-item';
 
-/**
- * NotificationList Component
- *
- * Container for displaying a list of notifications with optional date grouping,
- * infinite scroll support, and loading states.
- */
-
-/**
- * NotificationList Component
- *
- * Container for displaying a list of notifications with optional date grouping,
- * infinite scroll support, and loading states.
- */
-
-/**
- * NotificationList Component
- *
- * Container for displaying a list of notifications with optional date grouping,
- * infinite scroll support, and loading states.
- */
-
-/**
- * NotificationList Component
- *
- * Container for displaying a list of notifications with optional date grouping,
- * infinite scroll support, and loading states.
- */
-
-/**
- * NotificationList Component
- *
- * Container for displaying a list of notifications with optional date grouping,
- * infinite scroll support, and loading states.
- */
-
-/**
- * NotificationList Component
- *
- * Container for displaying a list of notifications with optional date grouping,
- * infinite scroll support, and loading states.
- */
-
-/**
- * NotificationList Component
- *
- * Container for displaying a list of notifications with optional date grouping,
- * infinite scroll support, and loading states.
- */
-
 // ============================================================================
 // Types
 // ============================================================================
@@ -171,7 +122,7 @@ export function NotificationList({
   hasMore = false,
   onLoadMore,
 }: NotificationListProps) {
-  const t = useTranslations('notificationList');
+  const t = useTranslations('components.notificationList');
   const observerTarget = useRef<HTMLDivElement>(null);
 
   // Infinite scroll observer
