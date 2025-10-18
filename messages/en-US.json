@@ -152,6 +152,86 @@
         "locale": "en-US"
       }
     },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Review product updates, announcements, and alerts without leaving this page.",
+      "searchPlaceholder": "Search by title or content",
+      "sort": {
+        "label": "Sort by",
+        "options": {
+          "created_at": "Date",
+          "priority": "Priority",
+          "title": "Title"
+        },
+        "order": {
+          "desc": "Desc",
+          "asc": "Asc",
+          "label": "Order"
+        }
+      },
+      "typeOptions": {
+        "all": "All types",
+        "changelog": "Changelog",
+        "message": "Messages"
+      },
+      "priorityOptions": {
+        "all": "All priorities"
+      },
+      "statusOptions": {
+        "all": "All statuses",
+        "read": "Read",
+        "unread": "Unread"
+      },
+      "filters": {
+        "type": "Type",
+        "typePlaceholder": "Select type",
+        "categories": "Categories",
+        "priority": "Priority",
+        "priorityPlaceholder": "Select priority",
+        "status": "Status",
+        "statusPlaceholder": "Select status",
+        "dateRange": "Date range",
+        "reset": "Reset filters",
+        "appliedHint": "Filters applied. Reset to show all notifications."
+      },
+      "bulkActions": {
+        "selectionSummary": "{selected} selected of {total}",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all",
+        "clear": "Clear selection",
+        "markRead": "Mark selected read",
+        "export": "Export CSV"
+      },
+      "empty": {
+        "title": "No notifications found",
+        "description": "Adjust the filters or clear them to view every notification.",
+        "reset": "Reset filters"
+      },
+      "categories": {
+        "feature": "Feature updates",
+        "improvement": "Improvements",
+        "bugfix": "Bug fixes",
+        "security": "Security",
+        "api_change": "API changes",
+        "admin_announcement": "Admin announcements",
+        "agent_result": "Agent results",
+        "token_usage": "Token usage",
+        "system_maintenance": "System maintenance",
+        "security_alert": "Security alerts",
+        "feature_tip": "Feature tips"
+      },
+      "csv": {
+        "headers": {
+          "title": "Title",
+          "content": "Content",
+          "type": "Type",
+          "category": "Category",
+          "priority": "Priority",
+          "status": "Status",
+          "createdAt": "Created At"
+        }
+      }
+    },
     "chat": {
       "newChat": "New Chat",
       "sendMessage": "Send",
