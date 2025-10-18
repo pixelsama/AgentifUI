@@ -19,55 +19,6 @@ import { Check, Circle } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
 
-/**
- * NotificationItem Component
- *
- * Displays a single notification with read/unread status, priority badge,
- * and category label. Supports compact and full display modes.
- */
-
-/**
- * NotificationItem Component
- *
- * Displays a single notification with read/unread status, priority badge,
- * and category label. Supports compact and full display modes.
- */
-
-/**
- * NotificationItem Component
- *
- * Displays a single notification with read/unread status, priority badge,
- * and category label. Supports compact and full display modes.
- */
-
-/**
- * NotificationItem Component
- *
- * Displays a single notification with read/unread status, priority badge,
- * and category label. Supports compact and full display modes.
- */
-
-/**
- * NotificationItem Component
- *
- * Displays a single notification with read/unread status, priority badge,
- * and category label. Supports compact and full display modes.
- */
-
-/**
- * NotificationItem Component
- *
- * Displays a single notification with read/unread status, priority badge,
- * and category label. Supports compact and full display modes.
- */
-
-/**
- * NotificationItem Component
- *
- * Displays a single notification with read/unread status, priority badge,
- * and category label. Supports compact and full display modes.
- */
-
 // ============================================================================
 // Types
 // ============================================================================
@@ -150,7 +101,7 @@ export function NotificationItem({
   onAction,
   compact = false,
 }: NotificationItemProps) {
-  const t = useTranslations('notificationItem');
+  const t = useTranslations('components.notificationItem');
 
   const handleClick = () => {
     if (onAction) {
