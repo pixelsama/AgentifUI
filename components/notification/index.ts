@@ -17,3 +17,11 @@ export {
   getDateGroupLabel,
 } from './notification-list';
 export type { NotificationListProps, DateGroup } from './notification-list';
+
+// NotificationBell
+export { NotificationBell } from './notification-bell';
+export type { NotificationBellProps } from './notification-bell';
+
+// NotificationCenter
+export { NotificationCenter } from './notification-center';
+export type { NotificationCenterProps } from './notification-center';

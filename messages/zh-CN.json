@@ -2531,6 +2531,16 @@
         "thisWeek": "本周",
         "thisMonth": "本月"
       }
+    },
+    "notificationCenter": {
+      "title": "通知中心",
+      "markAllAsRead": "全部标为已读",
+      "settings": "通知设置",
+      "tabs": {
+        "all": "全部",
+        "changelog": "更新日志",
+        "messages": "消息"
+      }
     }
   },
   "debug": {
