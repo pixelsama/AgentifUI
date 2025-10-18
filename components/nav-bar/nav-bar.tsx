@@ -7,11 +7,12 @@ import { useSettingsColors } from '@lib/hooks/use-settings-colors';
 import { useThemeColors } from '@lib/hooks/use-theme-colors';
 import { useNotificationStore } from '@lib/stores/notification-store';
 import { useSidebarStore } from '@lib/stores/sidebar-store';
+import type { NotificationWithReadStatus } from '@lib/types/notification-center';
 import { cn } from '@lib/utils';
 
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 import { ConversationTitleButton } from './conversation-title-button';
 import { DesktopUserAvatar } from './desktop-user-avatar';
@@ -30,6 +31,7 @@ import { WorkflowHistoryButton } from './workflow-history-button';
 export function NavBar() {
   const isMobile = useMobile();
   const pathname = usePathname();
+  const router = useRouter();
   const { colors: themeColors } = useThemeColors();
   const { colors: settingsColors } = useSettingsColors();
   const { isExpanded } = useSidebarStore();
@@ -75,6 +77,38 @@ export function NavBar() {
     loadMore();
   }, [loadMore]);
 
+  const handleNotificationAction = useCallback(
+    (notification: NotificationWithReadStatus) => {
+      if (!notification) return;
+
+      const metadata = notification.metadata as
+        | Record<string, unknown>
+        | undefined;
+      const candidateKeys = ['href', 'url', 'link', 'path'] as const;
+
+      const actionTarget = candidateKeys
+        .map(key => metadata?.[key])
+        .find(value => typeof value === 'string' && value.trim().length > 0) as
+        | string
+        | undefined;
+
+      if (!actionTarget) {
+        return;
+      }
+
+      const trimmedTarget = actionTarget.trim();
+
+      if (/^https?:\/\//i.test(trimmedTarget)) {
+        window.open(trimmedTarget, '_blank', 'noopener,noreferrer');
+      } else {
+        router.push(trimmedTarget);
+      }
+
+      setNotificationCenterOpen(false);
+    },
+    [router, setNotificationCenterOpen]
+  );
+
   if (isMobile) {
     return null;
   }
@@ -119,7 +153,7 @@ export function NavBar() {
             notifications={notifications}
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
-            onAction={() => {}}
+            onAction={handleNotificationAction}
             open={notificationCenterOpen}
             onOpenChange={setNotificationCenterOpen}
             isLoading={isLoading}

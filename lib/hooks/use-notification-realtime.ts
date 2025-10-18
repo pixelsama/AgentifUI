@@ -25,71 +25,74 @@ export function useNotificationRealtime(options?: {
   onNewNotification?: (notification: unknown) => void;
 }) {
   const { enabled = true, onNewNotification } = options ?? {};
-  const { fetchNotifications, updateUnreadCount } = useNotificationStore();
+  const { fetchNotifications } = useNotificationStore();
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     if (!enabled) return;
 
     const setupRealtime = async () => {
-      // Get current user
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session?.user) return;
+      try {
+        // Get current user
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
 
-      const userId = session.user.id;
+        if (error) {
+          console.error(
+            '[Notification realtime] Failed to resolve session:',
+            error
+          );
+          return;
+        }
 
-      // Create a channel for notifications
-      const channel = supabase
-        .channel(`notifications:${userId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'notifications',
-          },
-          payload => {
-            console.log(
-              '[Notification realtime] Notification changed:',
-              payload
-            );
+        if (!session?.user) return;
 
-            // Call callback for new notifications
-            if (payload.eventType === 'INSERT' && onNewNotification) {
-              onNewNotification(payload.new);
+        const userId = session.user.id;
+
+        // Create a channel for notifications
+        const channel = supabase
+          .channel(`notifications:${userId}`)
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'notifications',
+            },
+            payload => {
+              // Call callback for new notifications
+              if (payload.eventType === 'INSERT' && onNewNotification) {
+                onNewNotification(payload.new);
+              }
+
+              // Refresh notifications. Response also refreshes unread counts.
+              fetchNotifications();
             }
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'notification_reads',
+              filter: `user_id=eq.${userId}`,
+            },
+            () => {
+              // Refresh notifications to update read status/unread counts.
+              fetchNotifications();
+            }
+          )
+          .subscribe();
 
-            // Refresh notifications and unread count
-            updateUnreadCount();
-            fetchNotifications();
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'notification_reads',
-            filter: `user_id=eq.${userId}`,
-          },
-          payload => {
-            console.log(
-              '[Notification realtime] Read status changed:',
-              payload
-            );
-
-            // Refresh notifications to update read status
-            updateUnreadCount();
-            fetchNotifications();
-          }
-        )
-        .subscribe(status => {
-          console.log('[Notification realtime] Subscription status:', status);
-        });
-
-      channelRef.current = channel;
+        channelRef.current = channel;
+      } catch (error) {
+        console.error(
+          '[Notification realtime] Failed to setup realtime channel:',
+          error
+        );
+      }
     };
 
     setupRealtime();
@@ -97,12 +100,11 @@ export function useNotificationRealtime(options?: {
     // Cleanup: unsubscribe when component unmounts
     return () => {
       if (channelRef.current) {
-        console.log('[Notification realtime] Unsubscribing...');
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
     };
-  }, [enabled, fetchNotifications, updateUnreadCount, onNewNotification]);
+  }, [enabled, fetchNotifications, onNewNotification]);
 
   return {
     isConnected: channelRef.current !== null,
