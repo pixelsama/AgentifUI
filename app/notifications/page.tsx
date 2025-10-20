@@ -81,12 +81,12 @@ export default function NotificationsPage() {
         </header>
 
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="bg-muted/50 h-10 gap-2 rounded-full px-1 py-1">
+          <TabsList className="inline-flex h-10 items-center space-x-2 rounded-lg bg-stone-200 p-1 dark:bg-stone-700">
             {TAB_ITEMS.map(tab => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="rounded-full px-4 py-1 text-sm"
+                className="rounded-md px-4 py-1.5 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-100 data-[state=active]:text-stone-900 dark:text-stone-300 dark:hover:bg-stone-600 dark:data-[state=active]:bg-stone-500 dark:data-[state=active]:text-white"
               >
                 {tTabs(tab.labelKey)}
               </TabsTrigger>
