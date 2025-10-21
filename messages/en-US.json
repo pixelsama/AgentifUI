@@ -152,6 +152,13 @@
         "locale": "en-US"
       }
     },
+    "notifications": {
+      "title": "Notifications",
+      "empty": {
+        "title": "No notifications",
+        "description": "You're all caught up!"
+      }
+    },
     "chat": {
       "newChat": "New Chat",
       "sendMessage": "Send",

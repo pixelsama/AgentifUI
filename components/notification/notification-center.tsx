@@ -18,6 +18,27 @@ import { useTranslations } from 'next-intl';
 
 import { NotificationList } from './notification-list';
 
+/**
+ * NotificationCenter Component
+ *
+ * Modal popup displaying notifications with tab navigation and actions.
+ * Provides filtering by type (All/Changelog/Messages) and batch operations.
+ */
+
+/**
+ * NotificationCenter Component
+ *
+ * Modal popup displaying notifications with tab navigation and actions.
+ * Provides filtering by type (All/Changelog/Messages) and batch operations.
+ */
+
+/**
+ * NotificationCenter Component
+ *
+ * Modal popup displaying notifications with tab navigation and actions.
+ * Provides filtering by type (All/Changelog/Messages) and batch operations.
+ */
+
 // ============================================================================
 // Types
 // ============================================================================

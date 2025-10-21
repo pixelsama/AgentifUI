@@ -152,6 +152,13 @@
         "locale": "zh-CN"
       }
     },
+    "notifications": {
+      "title": "通知",
+      "empty": {
+        "title": "暂无通知",
+        "description": "暂时没有新的提醒。"
+      }
+    },
     "chat": {
       "newChat": "新对话",
       "sendMessage": "发送",
