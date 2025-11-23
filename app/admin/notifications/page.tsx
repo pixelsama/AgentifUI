@@ -16,6 +16,7 @@ import { Loader2, Plus, RefreshCw, Trash2 } from 'lucide-react';
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -23,6 +24,10 @@ type AdminNotification = Notification;
 
 export default function AdminNotificationsPage() {
   const router = useRouter();
+  const t = useTranslations('pages.admin.notifications');
+  const tFilters = useTranslations('pages.admin.notifications.filters');
+  const tTable = useTranslations('pages.admin.notifications.table');
+  const tActions = useTranslations('pages.admin.notifications.actions');
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -135,10 +140,8 @@ export default function AdminNotificationsPage() {
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Notifications (Admin)</h1>
-          <p className="text-muted-foreground text-sm">
-            Manage notifications, publish status, and bulk operations.
-          </p>
+          <h1 className="text-2xl font-semibold">{t('title')}</h1>
+          <p className="text-muted-foreground text-sm">{t('subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -148,12 +151,12 @@ export default function AdminNotificationsPage() {
             disabled={isLoading}
           >
             <RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
-            Refresh
+            {tActions('refresh')}
           </Button>
           <Link href="/admin/notifications/new">
             <Button size="sm">
               <Plus className="mr-2 h-4 w-4" />
-              New
+              {tActions('new')}
             </Button>
           </Link>
         </div>
@@ -163,7 +166,7 @@ export default function AdminNotificationsPage() {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-1 items-center gap-3">
             <Input
-              placeholder="Search title or content"
+              placeholder={tFilters('searchPlaceholder')}
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="md:max-w-sm"
@@ -180,18 +183,26 @@ export default function AdminNotificationsPage() {
               }}
             >
               <SelectTrigger className="w-44">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder={tFilters('sort.label')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="created_at:desc">Newest first</SelectItem>
-                <SelectItem value="created_at:asc">Oldest first</SelectItem>
-                <SelectItem value="priority:desc">Priority high→low</SelectItem>
-                <SelectItem value="priority:asc">Priority low→high</SelectItem>
+                <SelectItem value="created_at:desc">
+                  {tFilters('sort.newest')}
+                </SelectItem>
+                <SelectItem value="created_at:asc">
+                  {tFilters('sort.oldest')}
+                </SelectItem>
+                <SelectItem value="priority:desc">
+                  {tFilters('sort.priorityHigh')}
+                </SelectItem>
+                <SelectItem value="priority:asc">
+                  {tFilters('sort.priorityLow')}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
-            <span>Show drafts</span>
+            <span>{tFilters('showDrafts')}</span>
             <Switch
               checked={includeDrafts}
               onCheckedChange={setIncludeDrafts}
@@ -221,13 +232,13 @@ export default function AdminNotificationsPage() {
                     aria-label="Select all"
                   />
                 </th>
-                <th className="px-2 py-2">Title</th>
-                <th className="px-2 py-2">Type</th>
-                <th className="px-2 py-2">Category</th>
-                <th className="px-2 py-2">Priority</th>
-                <th className="px-2 py-2">Published</th>
-                <th className="px-2 py-2">Created</th>
-                <th className="px-2 py-2 text-right">Actions</th>
+                <th className="px-2 py-2">{tTable('title')}</th>
+                <th className="px-2 py-2">{tTable('type')}</th>
+                <th className="px-2 py-2">{tTable('category')}</th>
+                <th className="px-2 py-2">{tTable('priority')}</th>
+                <th className="px-2 py-2">{tTable('published')}</th>
+                <th className="px-2 py-2">{tTable('created')}</th>
+                <th className="px-2 py-2 text-right">{tTable('actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -265,11 +276,11 @@ export default function AdminNotificationsPage() {
                     <td className="px-2 py-2">
                       {notification.published ? (
                         <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-                          Published
+                          {tTable('publishedBadge')}
                         </span>
                       ) : (
                         <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-700">
-                          Draft
+                          {tTable('draftBadge')}
                         </span>
                       )}
                     </td>
@@ -287,7 +298,7 @@ export default function AdminNotificationsPage() {
                             )
                           }
                         >
-                          Edit
+                          {tActions('edit')}
                         </Button>
                       </div>
                     </td>
@@ -300,7 +311,7 @@ export default function AdminNotificationsPage() {
                     colSpan={8}
                     className="px-4 py-6 text-center text-stone-500"
                   >
-                    No notifications found.
+                    {tTable('empty')}
                   </td>
                 </tr>
               )}
@@ -310,7 +321,7 @@ export default function AdminNotificationsPage() {
 
         <div className="flex items-center justify-between gap-3">
           <div className="text-sm text-stone-500">
-            {sortedNotifications.length} items
+            {t('count', { count: sortedNotifications.length })}
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -324,7 +335,7 @@ export default function AdminNotificationsPage() {
               ) : (
                 <Trash2 className="mr-2 h-4 w-4" />
               )}
-              Delete selected
+              {tActions('deleteSelected')}
             </Button>
           </div>
         </div>
