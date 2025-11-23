@@ -2088,6 +2088,41 @@
           "new": "New",
           "edit": "Edit",
           "deleteSelected": "Delete selected"
+        },
+        "form": {
+          "title": {
+            "new": "New Notification",
+            "edit": "Edit Notification"
+          },
+          "subtitle": {
+            "new": "Create and publish a notification to users.",
+            "edit": "Update notification content, priority, or publish status."
+          },
+          "type": {
+            "label": "Type",
+            "placeholder": "Type"
+          },
+          "category": {
+            "label": "Category",
+            "placeholder": "e.g. feature, admin_announcement"
+          },
+          "priority": {
+            "label": "Priority",
+            "placeholder": "Priority"
+          },
+          "published": {
+            "label": "Published",
+            "on": "Published",
+            "off": "Draft"
+          },
+          "titleField": {
+            "label": "Title",
+            "placeholder": "Title"
+          },
+          "content": {
+            "label": "Content",
+            "placeholder": "Content"
+          }
         }
       }
     },

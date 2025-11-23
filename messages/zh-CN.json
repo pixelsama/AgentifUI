@@ -2088,6 +2088,41 @@
           "new": "新建",
           "edit": "编辑",
           "deleteSelected": "删除所选"
+        },
+        "form": {
+          "title": {
+            "new": "新建通知",
+            "edit": "编辑通知"
+          },
+          "subtitle": {
+            "new": "创建并发布通知给用户。",
+            "edit": "更新通知内容、优先级或发布状态。"
+          },
+          "type": {
+            "label": "类型",
+            "placeholder": "类型"
+          },
+          "category": {
+            "label": "分类",
+            "placeholder": "例如：feature, admin_announcement"
+          },
+          "priority": {
+            "label": "优先级",
+            "placeholder": "优先级"
+          },
+          "published": {
+            "label": "发布状态",
+            "on": "已发布",
+            "off": "草稿"
+          },
+          "titleField": {
+            "label": "标题",
+            "placeholder": "标题"
+          },
+          "content": {
+            "label": "内容",
+            "placeholder": "内容"
+          }
         }
       }
     },

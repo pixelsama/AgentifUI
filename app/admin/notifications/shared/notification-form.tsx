@@ -19,6 +19,8 @@ import type {
 
 import { useEffect, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 interface NotificationFormProps {
   mode: 'create' | 'edit';
   id?: string;
@@ -34,6 +36,8 @@ const PRIORITIES: NotificationPriority[] = [
 const TYPES: NotificationType[] = ['changelog', 'message'];
 
 export function NotificationForm({ mode, id }: NotificationFormProps) {
+  const t = useTranslations('pages.admin.notifications.form');
+  const tActions = useTranslations('pages.admin.notifications.actions');
   const [form, setForm] = useState({
     type: 'message' as NotificationType,
     category: '',
@@ -133,12 +137,10 @@ export function NotificationForm({ mode, id }: NotificationFormProps) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold">
-            {mode === 'create' ? 'New Notification' : 'Edit Notification'}
+            {mode === 'create' ? t('title.new') : t('title.edit')}
           </h1>
           <p className="text-sm text-stone-500">
-            {mode === 'create'
-              ? 'Create and publish a notification to users.'
-              : 'Update notification content, priority, or publish status.'}
+            {mode === 'create' ? t('subtitle.new') : t('subtitle.edit')}
           </p>
         </div>
       </div>
@@ -157,7 +159,7 @@ export function NotificationForm({ mode, id }: NotificationFormProps) {
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Type</label>
+            <label className="text-sm font-medium">{t('type.label')}</label>
             <Select
               value={form.type}
               onValueChange={value =>
@@ -165,7 +167,7 @@ export function NotificationForm({ mode, id }: NotificationFormProps) {
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Type" />
+                <SelectValue placeholder={t('type.placeholder')} />
               </SelectTrigger>
               <SelectContent>
                 {TYPES.map(t => (
@@ -178,16 +180,16 @@ export function NotificationForm({ mode, id }: NotificationFormProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Category</label>
+            <label className="text-sm font-medium">{t('category.label')}</label>
             <Input
-              placeholder="e.g. feature, admin_announcement"
+              placeholder={t('category.placeholder')}
               value={form.category}
               onChange={e => handleChange('category', e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Priority</label>
+            <label className="text-sm font-medium">{t('priority.label')}</label>
             <Select
               value={form.priority}
               onValueChange={value =>
@@ -195,7 +197,7 @@ export function NotificationForm({ mode, id }: NotificationFormProps) {
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Priority" />
+                <SelectValue placeholder={t('priority.placeholder')} />
               </SelectTrigger>
               <SelectContent>
                 {PRIORITIES.map(p => (
@@ -208,23 +210,25 @@ export function NotificationForm({ mode, id }: NotificationFormProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Published</label>
+            <label className="text-sm font-medium">
+              {t('published.label')}
+            </label>
             <div className="flex h-10 items-center gap-2 rounded-md border border-stone-200 px-3 dark:border-stone-700">
               <Switch
                 checked={form.published}
                 onCheckedChange={checked => handleChange('published', checked)}
               />
               <span className="text-sm text-stone-600 dark:text-stone-300">
-                {form.published ? 'Published' : 'Draft'}
+                {form.published ? t('published.on') : t('published.off')}
               </span>
             </div>
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Title</label>
+          <label className="text-sm font-medium">{t('titleField.label')}</label>
           <Input
-            placeholder="Title"
+            placeholder={t('titleField.placeholder')}
             value={form.title}
             onChange={e => handleChange('title', e.target.value)}
             required
@@ -232,9 +236,9 @@ export function NotificationForm({ mode, id }: NotificationFormProps) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Content</label>
+          <label className="text-sm font-medium">{t('content.label')}</label>
           <Textarea
-            placeholder="Content"
+            placeholder={t('content.placeholder')}
             value={form.content}
             onChange={e => handleChange('content', e.target.value)}
             required
@@ -249,10 +253,10 @@ export function NotificationForm({ mode, id }: NotificationFormProps) {
             onClick={() => history.back()}
             disabled={isLoading}
           >
-            Cancel
+            {tActions('cancel')}
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {mode === 'create' ? 'Create' : 'Save changes'}
+            {mode === 'create' ? tActions('create') : tActions('save')}
           </Button>
         </div>
       </form>
