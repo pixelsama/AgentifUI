@@ -31,6 +31,27 @@
       },
       "viewDetails": "View Details"
     },
+    "notifications": {
+      "title": "Notifications",
+      "searchPlaceholder": "Search notifications...",
+      "empty": {
+        "title": "No notifications",
+        "description": "You're all caught up!"
+      },
+      "sort": {
+        "label": "Sort by",
+        "newest": "Newest first",
+        "oldest": "Oldest first",
+        "priorityHigh": "Priority: high to low",
+        "priorityLow": "Priority: low to high"
+      },
+      "filters": {
+        "unreadOnly": "Show unread only"
+      },
+      "actions": {
+        "markAllRead": "Mark all as read"
+      }
+    },
     "time": {
       "notRecorded": "Not recorded",
       "invalidDate": "Invalid date",
