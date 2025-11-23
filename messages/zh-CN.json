@@ -2308,7 +2308,9 @@
         "tooltip": "拖拽调整面板大小，双击重置"
       },
       "notificationBar": {
-        "closeNotification": "关闭通知"
+        "closeNotification": "关闭通知",
+        "viewDetails": "查看详情",
+        "viewAll": "查看全部"
       },
       "suggestedQuestionButton": {
         "ariaLabel": "推荐问题: {question}"

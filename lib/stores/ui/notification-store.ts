@@ -13,13 +13,18 @@ interface NotificationState {
   type: NotificationType;
   /** Display duration in milliseconds */
   duration: number;
+  /** Optional action link for details */
+  actionHref: string | null;
+  /** Optional custom label for detail action */
+  actionLabel: string | null;
   /** Whether notification is currently visible */
   isVisible: boolean;
   /** Show notification with message and optional type/duration */
   showNotification: (
     message: string,
     type?: NotificationType,
-    duration?: number
+    duration?: number,
+    options?: { actionHref?: string; actionLabel?: string }
   ) => void;
   /** Hide current notification */
   hideNotification: () => void;
@@ -35,16 +40,25 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   message: null,
   type: 'info',
   duration: 3000,
+  actionHref: null,
+  actionLabel: null,
   isVisible: false,
 
-  showNotification: (message, type = 'warning', duration = 3000) => {
+  showNotification: (message, type = 'warning', duration = 3000, options) => {
     // Clear existing timer to avoid issues with rapid consecutive triggers
     if (timeoutId) {
       clearTimeout(timeoutId);
       timeoutId = null;
     }
     // Set new notification state and show
-    set({ message, type, duration, isVisible: true });
+    set({
+      message,
+      type,
+      duration,
+      isVisible: true,
+      actionHref: options?.actionHref || null,
+      actionLabel: options?.actionLabel || null,
+    });
     // Set auto-hide timer
     timeoutId = setTimeout(() => {
       get().hideNotification();
@@ -58,6 +72,11 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       timeoutId = null;
     }
     // Hide notification and reset message
-    set({ isVisible: false, message: null });
+    set({
+      isVisible: false,
+      message: null,
+      actionHref: null,
+      actionLabel: null,
+    });
   },
 }));

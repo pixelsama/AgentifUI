@@ -2308,7 +2308,9 @@
         "tooltip": "Drag to resize panels, double-click to reset"
       },
       "notificationBar": {
-        "closeNotification": "Close notification"
+        "closeNotification": "Close notification",
+        "viewDetails": "View details",
+        "viewAll": "View all"
       },
       "suggestedQuestionButton": {
         "ariaLabel": "Suggested question: {question}"

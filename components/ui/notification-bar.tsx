@@ -13,6 +13,7 @@ import {
 import React from 'react';
 
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 const iconMap = {
   success: CheckCircleIcon,
@@ -30,7 +31,15 @@ const colorMap = {
 
 export const NotificationBar: React.FC = () => {
   const t = useTranslations('components.ui.notificationBar');
-  const { message, type, isVisible, hideNotification } = useNotificationStore();
+  const router = useRouter();
+  const {
+    message,
+    type,
+    isVisible,
+    hideNotification,
+    actionHref,
+    actionLabel,
+  } = useNotificationStore();
 
   // If not visible or no message, do not render anything
   if (!isVisible || !message) {
@@ -54,6 +63,28 @@ export const NotificationBar: React.FC = () => {
     >
       <IconComponent className="h-5 w-5 flex-shrink-0" />
       <span className="flex-grow text-sm font-medium">{message}</span>
+      <div className="flex items-center gap-2">
+        {actionHref && (
+          <button
+            onClick={() => {
+              router.push(actionHref);
+              hideNotification();
+            }}
+            className="rounded-md bg-white/20 px-2 py-1 text-xs font-semibold transition-colors hover:bg-white/30"
+          >
+            {actionLabel || t('viewDetails')}
+          </button>
+        )}
+        <button
+          onClick={() => {
+            router.push('/notifications');
+            hideNotification();
+          }}
+          className="rounded-md bg-white/20 px-2 py-1 text-xs font-semibold transition-colors hover:bg-white/30"
+        >
+          {t('viewAll')}
+        </button>
+      </div>
       <button
         onClick={hideNotification}
         className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-white/20"
