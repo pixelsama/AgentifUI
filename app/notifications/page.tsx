@@ -94,19 +94,9 @@ export default function NotificationsPage() {
     void markAllAsRead();
   }, [markAllAsRead]);
 
-  const handleIncludeReadToggle = useCallback(
-    (checked: boolean) => {
-      setIncludeRead(checked);
-      // When turning off includeRead, ensure we re-fetch unread-only
-      void fetchNotifications({
-        search: search.trim() || undefined,
-        sort_by: sortBy,
-        sort_order: sortOrder,
-        include_read: checked,
-      });
-    },
-    [fetchNotifications, search, sortBy, sortOrder]
-  );
+  const handleIncludeReadToggle = useCallback((checked: boolean) => {
+    setIncludeRead(checked);
+  }, []);
 
   const shouldShowEmpty = !isLoading && notifications.length === 0;
 

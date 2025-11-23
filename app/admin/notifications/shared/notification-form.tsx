@@ -35,17 +35,19 @@ const PRIORITIES: NotificationPriority[] = [
 
 const TYPES: NotificationType[] = ['changelog', 'message'];
 
+const INITIAL_FORM_STATE = {
+  type: 'message' as NotificationType,
+  category: '',
+  title: '',
+  content: '',
+  priority: 'medium' as NotificationPriority,
+  published: false,
+};
+
 export function NotificationForm({ mode, id }: NotificationFormProps) {
   const t = useTranslations('pages.admin.notifications.form');
   const tActions = useTranslations('pages.admin.notifications.actions');
-  const [form, setForm] = useState({
-    type: 'message' as NotificationType,
-    category: '',
-    title: '',
-    content: '',
-    priority: 'medium' as NotificationPriority,
-    published: false,
-  });
+  const [form, setForm] = useState(INITIAL_FORM_STATE);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -105,14 +107,7 @@ export function NotificationForm({ mode, id }: NotificationFormProps) {
           throw new Error(body.error || 'Failed to create notification');
         }
         setSuccess('Created successfully');
-        setForm({
-          type: 'message',
-          category: '',
-          title: '',
-          content: '',
-          priority: 'medium',
-          published: false,
-        });
+        setForm(INITIAL_FORM_STATE);
       } else if (mode === 'edit' && id) {
         const res = await fetch(`/api/notifications/${id}`, {
           method: 'PUT',

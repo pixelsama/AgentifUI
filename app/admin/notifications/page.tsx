@@ -14,7 +14,7 @@ import type { Notification } from '@lib/types/notification-center';
 import { cn } from '@lib/utils';
 import { Loader2, Plus, RefreshCw, Trash2 } from 'lucide-react';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -67,7 +67,7 @@ export default function AdminNotificationsPage() {
     return list;
   }, [filteredNotifications, sortBy, sortOrder]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -87,12 +87,11 @@ export default function AdminNotificationsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [sortBy, sortOrder]);
 
   useEffect(() => {
     void fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchData]);
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {

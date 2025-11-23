@@ -148,7 +148,9 @@ export async function getNotificationsWithReadStatus(
 
   if (params.search) {
     const term = `%${params.search}%`;
-    query = query.or(`title.ilike.${term},content.ilike.${term}`);
+    query = query.or(
+      `title.ilike.${term},content.ilike.${term},category.ilike.${term}`
+    );
   }
 
   // Apply pagination
@@ -232,7 +234,9 @@ export async function getAllNotificationsForAdmin(
 
   if (params.search) {
     const term = `%${params.search}%`;
-    query = query.or(`title.ilike.${term},content.ilike.${term}`);
+    query = query.or(
+      `title.ilike.${term},content.ilike.${term},category.ilike.${term}`
+    );
   }
 
   // Apply pagination
