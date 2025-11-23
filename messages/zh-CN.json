@@ -31,27 +31,6 @@
       },
       "viewDetails": "查看详情"
     },
-    "notifications": {
-      "title": "通知中心",
-      "searchPlaceholder": "搜索通知...",
-      "empty": {
-        "title": "暂无通知",
-        "description": "你已处理完所有通知"
-      },
-      "sort": {
-        "label": "排序",
-        "newest": "最新优先",
-        "oldest": "最旧优先",
-        "priorityHigh": "优先级：高到低",
-        "priorityLow": "优先级：低到高"
-      },
-      "filters": {
-        "unreadOnly": "只看未读"
-      },
-      "actions": {
-        "markAllRead": "全部标记已读"
-      }
-    },
     "time": {
       "notRecorded": "未记录",
       "invalidDate": "无效日期",
@@ -174,10 +153,24 @@
       }
     },
     "notifications": {
-      "title": "通知",
+      "title": "通知中心",
+      "searchPlaceholder": "搜索通知...",
       "empty": {
         "title": "暂无通知",
         "description": "暂时没有新的提醒。"
+      },
+      "sort": {
+        "label": "排序",
+        "newest": "最新优先",
+        "oldest": "最旧优先",
+        "priorityHigh": "优先级：高到低",
+        "priorityLow": "优先级：低到高"
+      },
+      "filters": {
+        "unreadOnly": "只看未读"
+      },
+      "actions": {
+        "markAllRead": "全部标记已读"
       }
     },
     "chat": {
