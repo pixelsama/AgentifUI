@@ -8,13 +8,23 @@ RETURNS TABLE(
   category text,
   count bigint
 ) AS $$
+DECLARE
+  current_user_id uuid := auth.uid();
+  effective_user_id uuid;
 BEGIN
+  -- Enforce caller identity even under SECURITY DEFINER
+  IF current_user_id IS NULL THEN
+    RAISE EXCEPTION 'Unauthorized';
+  END IF;
+
+  effective_user_id := current_user_id;
+
   RETURN QUERY
   SELECT 
     COALESCE(n.category, 'uncategorized') as category,
     COUNT(*) as count
   FROM public.notifications n
-  LEFT JOIN public.notification_reads nr ON n.id = nr.notification_id AND nr.user_id = user_uuid
+  LEFT JOIN public.notification_reads nr ON n.id = nr.notification_id AND nr.user_id = effective_user_id
   WHERE 
     n.published = true
     AND nr.id IS NULL  -- Not read yet
@@ -22,9 +32,9 @@ BEGIN
       -- Public notifications (no specific targeting)
       (n.target_roles = '{}' AND n.target_users = '{}') OR
       -- Role-based targeting (user_role[] aligns with profiles.role enum)
-      (n.target_roles && ARRAY[(SELECT role FROM public.profiles WHERE id = user_uuid)]) OR
+      (n.target_roles && ARRAY[(SELECT role FROM public.profiles WHERE id = effective_user_id)]) OR
       -- User-specific targeting  
-      (user_uuid = ANY(n.target_users))
+      (effective_user_id = ANY(n.target_users))
     )
   GROUP BY COALESCE(n.category, 'uncategorized')
   ORDER BY category;

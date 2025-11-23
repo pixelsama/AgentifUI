@@ -183,14 +183,24 @@ RETURNS TABLE(
   message_count bigint,
   total_count bigint
 ) AS $$
+DECLARE
+  current_user_id uuid := auth.uid();
+  effective_user_id uuid;
 BEGIN
+  -- Enforce caller identity even under SECURITY DEFINER
+  IF current_user_id IS NULL THEN
+    RAISE EXCEPTION 'Unauthorized';
+  END IF;
+
+  effective_user_id := current_user_id;
+
   RETURN QUERY
   SELECT 
     COALESCE(SUM(CASE WHEN n.type = 'changelog' THEN 1 ELSE 0 END), 0) as changelog_count,
     COALESCE(SUM(CASE WHEN n.type = 'message' THEN 1 ELSE 0 END), 0) as message_count,
     COALESCE(COUNT(*), 0) as total_count
   FROM public.notifications n
-  LEFT JOIN public.notification_reads nr ON n.id = nr.notification_id AND nr.user_id = user_uuid
+  LEFT JOIN public.notification_reads nr ON n.id = nr.notification_id AND nr.user_id = effective_user_id
   WHERE 
     n.published = true
     AND nr.id IS NULL  -- Not read yet
@@ -198,9 +208,9 @@ BEGIN
       -- Public notifications (no specific targeting)
       (n.target_roles = '{}' AND n.target_users = '{}') OR
       -- Role-based targeting
-      (n.target_roles && ARRAY[(SELECT role FROM public.profiles WHERE id = user_uuid)]) OR
+      (n.target_roles && ARRAY[(SELECT role FROM public.profiles WHERE id = effective_user_id)]) OR
       -- User-specific targeting  
-      (user_uuid = ANY(n.target_users))
+      (effective_user_id = ANY(n.target_users))
     )
     AND (notification_type IS NULL OR n.type = notification_type);
 END;
@@ -211,9 +221,18 @@ CREATE OR REPLACE FUNCTION mark_notifications_read(notification_ids uuid[], user
 RETURNS int AS $$
 DECLARE
   inserted_count int;
+  current_user_id uuid := auth.uid();
+  effective_user_id uuid;
 BEGIN
+  -- Enforce caller identity even under SECURITY DEFINER
+  IF current_user_id IS NULL THEN
+    RAISE EXCEPTION 'Unauthorized';
+  END IF;
+
+  effective_user_id := current_user_id;
+
   INSERT INTO public.notification_reads (notification_id, user_id)
-  SELECT unnest(notification_ids), user_uuid
+  SELECT unnest(notification_ids), effective_user_id
   ON CONFLICT (notification_id, user_id) DO NOTHING;
   
   GET DIAGNOSTICS inserted_count = ROW_COUNT;
