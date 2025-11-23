@@ -2087,7 +2087,10 @@
           "refresh": "Refresh",
           "new": "New",
           "edit": "Edit",
-          "deleteSelected": "Delete selected"
+          "deleteSelected": "Delete selected",
+          "cancel": "Cancel",
+          "create": "Create",
+          "save": "Save changes"
         },
         "form": {
           "title": {

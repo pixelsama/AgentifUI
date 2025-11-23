@@ -2087,7 +2087,10 @@
           "refresh": "刷新",
           "new": "新建",
           "edit": "编辑",
-          "deleteSelected": "删除所选"
+          "deleteSelected": "删除所选",
+          "cancel": "取消",
+          "create": "创建",
+          "save": "保存修改"
         },
         "form": {
           "title": {
