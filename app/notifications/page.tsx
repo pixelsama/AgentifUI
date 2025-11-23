@@ -194,7 +194,7 @@ export default function NotificationsPage() {
                 className="flex items-center gap-1"
               >
                 <Check className="h-4 w-4" />
-                {tList('markAllRead') ?? tPage('actions.markAllRead')}
+                {tPage('actions.markAllRead')}
               </Button>
             </div>
           </div>
